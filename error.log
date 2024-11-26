@@ -1,0 +1,67 @@
+[2m3:38:10 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: C:\Users\PMYLS\Desktop\BMS\src\Login.jsx: Unexpected token, expected "jsxTagEnd" (116:16)
+
+[0m [90m 114 |[31m                   className[33m=[31m[32m"pl-10 w-full py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"[31m
+ [90m 115 |[31m                   onKeyPress[33m=[31m{handleKeyPress} [33m/[31m
+[31m[1m>[22m[31m[90m 116 |[31m                 [33m/[31m[33m>[31m
+ [90m     |[31m                 [31m[1m^[22m[31m
+ [90m 117 |[31m               [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
+ [90m 118 |[31m
+ [90m 119 |[31m               {[90m/* Password Input */[31m}[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mC:/Users/PMYLS/Desktop/BMS/src/Login.jsx[39m:116:16
+[33m  119|                {/* Password Input */}
+  120|                <div className="relative mt-4">
+  121|                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-blue-500">
+     |         ^
+  122|                    <FontAwesomeIcon icon={faLock} />
+  123|                  </span>[39m
+      at constructor (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:362:19)
+      at JSXParserMixin.raise (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:3259:19)
+      at JSXParserMixin.unexpected (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:3279:16)
+      at JSXParserMixin.expect (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:3589:12)
+      at JSXParserMixin.jsxParseOpeningElementAfterName (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6718:10)
+      at JSXParserMixin.jsxParseOpeningElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6709:17)
+      at JSXParserMixin.jsxParseElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6733:33)
+      at JSXParserMixin.jsxParseElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6745:32)
+      at JSXParserMixin.jsxParseElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6745:32)
+      at JSXParserMixin.jsxParseElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6745:32)
+      at JSXParserMixin.jsxParseElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6745:32)
+      at JSXParserMixin.jsxParseElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6745:32)
+      at JSXParserMixin.jsxParseElementAt (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6745:32)
+      at JSXParserMixin.jsxParseElement (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6796:17)
+      at JSXParserMixin.parseExprAtom (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6806:19)
+      at JSXParserMixin.parseExprSubscripts (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10591:23)
+      at JSXParserMixin.parseUpdate (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10576:21)
+      at JSXParserMixin.parseMaybeUnary (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10556:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10410:61)
+      at JSXParserMixin.parseExprOps (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10415:23)
+      at JSXParserMixin.parseMaybeConditional (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10392:23)
+      at JSXParserMixin.parseMaybeAssign (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10355:21)
+      at C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10325:39
+      at JSXParserMixin.allowInAnd (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:11937:12)
+      at JSXParserMixin.parseMaybeAssignAllowIn (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10325:17)
+      at JSXParserMixin.parseParenAndDistinguishExpression (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:11196:28)
+      at JSXParserMixin.parseExprAtom (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10849:23)
+      at JSXParserMixin.parseExprAtom (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:6811:20)
+      at JSXParserMixin.parseExprSubscripts (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10591:23)
+      at JSXParserMixin.parseUpdate (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10576:21)
+      at JSXParserMixin.parseMaybeUnary (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10556:23)
+      at JSXParserMixin.parseMaybeUnaryOrPrivate (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10410:61)
+      at JSXParserMixin.parseExprOps (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10415:23)
+      at JSXParserMixin.parseMaybeConditional (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10392:23)
+      at JSXParserMixin.parseMaybeAssign (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10355:21)
+      at JSXParserMixin.parseExpressionBase (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10309:23)
+      at C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10305:39
+      at JSXParserMixin.allowInAnd (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:11932:16)
+      at JSXParserMixin.parseExpression (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10305:17)
+      at JSXParserMixin.parseReturnStatement (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:12622:28)
+      at JSXParserMixin.parseStatementContent (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:12274:21)
+      at JSXParserMixin.parseStatementLike (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:12243:17)
+      at JSXParserMixin.parseStatementListItem (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:12223:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:12796:61)
+      at JSXParserMixin.parseBlockBody (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:12789:10)
+      at JSXParserMixin.parseBlock (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:12777:10)
+      at JSXParserMixin.parseFunctionBody (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:11620:24)
+      at JSXParserMixin.parseArrowExpression (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:11595:10)
+      at JSXParserMixin.parseParenAndDistinguishExpression (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:11208:12)
+      at JSXParserMixin.parseExprAtom (C:\Users\PMYLS\Desktop\BMS\node_modules\@babel\parser\lib\index.js:10849:23)

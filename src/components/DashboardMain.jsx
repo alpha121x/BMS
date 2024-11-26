@@ -28,7 +28,7 @@ const DashboardMain = () => {
   );
 
   return (
-    <section className="p-8 bg-gray-100 min-h-screen">
+    <section className="p-4 bg-gray-100 min-h-screen">
       {/* Bridges Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-gray-500 mb-4">Bridges</h2>

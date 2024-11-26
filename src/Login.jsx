@@ -112,7 +112,7 @@ const Login = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Username"
                   className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  onKeyPress={handleKeyPress} // Trigger login on Enter key
+                  onKeyPress={handleKeyPress}
                 />
               </div>
 
@@ -127,7 +127,7 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
                   className="pl-10 w-full py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  onKeyPress={handleKeyPress} // Trigger login on Enter key
+                  onKeyPress={handleKeyPress}
                 />
               </div>
 
