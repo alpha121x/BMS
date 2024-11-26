@@ -69,7 +69,7 @@ const Login = () => {
       style={{ backgroundImage: "url('/bg111.png')" }}
     >
       {/* Main Container */}
-      <div className="container mx-20 p-6">
+      <div className="container mx-28 p-6">
         {/* Header */}
         <header className="mb-8">
           <nav className="bg-transparent shadow-none p-4">
