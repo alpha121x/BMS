@@ -3,26 +3,72 @@ import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
 
 const DashboardMain = () => {
   const cardData = [
-    { label: "Total", value: "18,705", icon: <UserIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
-    { label: "Bridge", value: "1,396", icon: <DocumentIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
-    { label: "Culvert", value: "17,262", icon: <DocumentIcon className="w-10 h-10 text-green-500" />, color: "green" },
-    { label: "Underpass", value: "10", icon: <DocumentIcon className="w-10 h-10 text-red-500" />, color: "red" },
+    {
+      label: "Total",
+      value: "18,705",
+      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Bridge",
+      value: "1,396",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Culvert",
+      value: "17,262",
+      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
+      color: "green",
+    },
+    {
+      label: "Underpass",
+      value: "10",
+      icon: <DocumentIcon className="w-10 h-10 text-red-500" />,
+      color: "red",
+    },
   ];
 
   const inspectionData = [
-    { label: "Bridges", value: "1,501", icon: <DocumentIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
-    { label: "Checkings", value: "23,178", icon: <DocumentIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
+    {
+      label: "Bridges",
+      value: "1,501",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Checkings",
+      value: "23,178",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
   ];
+
+  // Helper function to map colors
+  const getBorderClass = (color) => {
+    switch (color) {
+      case "blue":
+        return "border-blue-500 text-blue-500";
+      case "green":
+        return "border-green-500 text-green-500";
+      case "red":
+        return "border-red-500 text-red-500";
+      default:
+        return "border-gray-500 text-gray-500";
+    }
+  };
 
   // Card Component
   const Card = ({ label, value, icon, color }) => (
     <div
-      className={`border-2 border-${color}-500 bg-white p-4 rounded-lg shadow-lg flex items-center gap-4`}
+      className={`border-2 ${getBorderClass(
+        color
+      )} bg-white p-4 rounded-lg shadow-lg flex items-center gap-4`}
     >
       <div>{icon}</div>
       <div>
         <h4 className="text-lg font-semibold text-gray-700">{label}</h4>
-        <p className={`text-${color}-500 text-2xl font-bold`}>{value}</p>
+        <p className="text-2xl font-bold">{value}</p>
       </div>
     </div>
   );
@@ -47,7 +93,9 @@ const DashboardMain = () => {
 
       {/* Inspections Section */}
       <div>
-        <h2 className="text-2xl font-semibold text-gray-500 mb-4">Inspections</h2>
+        <h2 className="text-2xl font-semibold text-gray-500 mb-4">
+          Inspections
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {inspectionData.map((card, index) => (
             <Card
