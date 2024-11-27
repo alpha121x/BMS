@@ -48,13 +48,13 @@ const DashboardMain = () => {
   const getBorderClass = (color) => {
     switch (color) {
       case "blue":
-        return "border-blue-500 text-blue-500";
+        return "border-blue-400 text-blue-500";
       case "green":
-        return "border-green-500 text-green-500";
+        return "border-green-400 text-green-500";
       case "red":
-        return "border-red-500 text-red-500";
+        return "border-red-400 text-red-500";
       default:
-        return "border-gray-500 text-gray-500";
+        return "border-gray-400 text-gray-500";
     }
   };
 
