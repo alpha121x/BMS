@@ -17,7 +17,7 @@ const DashboardMain = () => {
   // Card Component
   const Card = ({ label, value, icon, color }) => (
     <div
-      className={`border-2 border-${color}-500 p-4 rounded-lg shadow-lg flex items-center gap-4`}
+      className={`border-2 border-${color}-500 bg-white p-4 rounded-lg shadow-lg flex items-center gap-4`}
     >
       <div>{icon}</div>
       <div>
