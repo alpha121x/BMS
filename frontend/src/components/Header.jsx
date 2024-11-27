@@ -21,7 +21,6 @@ const Header = () => {
 
   const userToken = JSON.parse(localStorage.getItem("user"));
   const userName = userToken?.username;
-  const roleId = userToken ? userToken.roleId : null; // Extract roleId
 
   const isReportsActive = activeTab.startsWith("/Reports");
 
