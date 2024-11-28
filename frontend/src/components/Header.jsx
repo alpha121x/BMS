@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
 const Header = () => {
   const location = useLocation();
@@ -10,7 +9,11 @@ const Header = () => {
   const activeTab = location.pathname;
   const [isReportsDropdownOpen, setIsReportsDropdownOpen] = useState(false);
   const [isSetupDropdownOpen, setIsSetupDropdownOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false); // State for profile dropdown
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  const reportsRef = useRef(null);
+  const setupRef = useRef(null);
+  const profileRef = useRef(null);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -25,16 +28,36 @@ const Header = () => {
   const isReportsActive = activeTab.startsWith("/Reports");
 
   const toggleReportsDropdown = () => {
-    setIsReportsDropdownOpen(!isReportsDropdownOpen);
-  };
-
-  const toggleProfileDropdown = () => {
-    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+    setIsReportsDropdownOpen((prev) => !prev);
   };
 
   const toggleSetupDropdown = () => {
-    setIsSetupDropdownOpen(!isSetupDropdownOpen);
+    setIsSetupDropdownOpen((prev) => !prev);
   };
+
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen((prev) => !prev);
+  };
+
+  const handleClickOutside = (event) => {
+    // Close dropdowns if clicked outside
+    if (reportsRef.current && !reportsRef.current.contains(event.target)) {
+      setIsReportsDropdownOpen(false);
+    }
+    if (setupRef.current && !setupRef.current.contains(event.target)) {
+      setIsSetupDropdownOpen(false);
+    }
+    if (profileRef.current && !profileRef.current.contains(event.target)) {
+      setIsProfileDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="p-2 rounded-lg shadow-lg">
@@ -62,8 +85,8 @@ const Header = () => {
             Dashboard
           </Link>
 
-
-          <div className="relative">
+          {/* Reports Dropdown */}
+          <div className="relative" ref={reportsRef}>
             <button
               onClick={toggleReportsDropdown}
               className={`py-2 px-4 rounded font-bold transition duration-300 ${
@@ -102,11 +125,10 @@ const Header = () => {
                 </Link>
               </div>
             )}
-
           </div>
 
-
-          <div className="relative">
+          {/* Setup Dropdown */}
+          <div className="relative" ref={setupRef}>
             <button
               onClick={toggleSetupDropdown}
               className={`py-2 px-4 rounded font-bold transition duration-300 ${
@@ -163,15 +185,13 @@ const Header = () => {
                 </Link>
               </div>
             )}
-
           </div>
 
           {/* Profile Dropdown */}
-          <div className="relative inline-block text-left">
-            {/* Profile Link */}
+          <div className="relative inline-block text-left" ref={profileRef}>
             <Link
               to="#"
-              onClick={toggleProfileDropdown} // Toggle dropdown on click
+              onClick={toggleProfileDropdown}
               className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
                 activeTab === "#"
                   ? "bg-blue-500 text-white"
@@ -181,8 +201,6 @@ const Header = () => {
               <FontAwesomeIcon icon={faUser} className="mr-2" />
               {userName}
             </Link>
-
-            {/* Dropdown Menu */}
             {isProfileDropdownOpen && (
               <div className="absolute right-8 z-10 mt-2 w-fit bg-white border border-gray-200 rounded-md shadow-lg transition-all duration-200 ease-in-out transform scale-95">
                 <Link
