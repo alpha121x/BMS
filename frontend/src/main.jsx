@@ -5,6 +5,7 @@ import './index.css';
 import Login from './Login'; // Login Component
 import Dashboard from './Dashboard'; // Dashboard Component
 import Reports from './Reports'; // Reports Component
+import SetupListing from './SetupListing';
 
 // Authentication Checker Component
 const PrivateRoute = ({ children }) => {
@@ -51,6 +52,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           element={
             <PrivateRoute>
               <Reports />
+            </PrivateRoute>
+          }
+        />
+
+          {/* Private Route for Reports */}
+          <Route
+          path="/SetupListing/*"
+          element={
+            <PrivateRoute>
+              <SetupListing />
             </PrivateRoute>
           }
         />

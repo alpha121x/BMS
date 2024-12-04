@@ -23,13 +23,13 @@ const SetupListing = () => {
       <main className="flex-grow p-1">
         <Routes>
           {/* Define routes for each setup listing */}
-          <Route path="DamageRanks" element={<DamageRanks />} />
-          <Route path="Elements" element={<Elements />} />
-          <Route path="DamageTypes" element={<DamageTypes />} />
-          <Route path="RoadClassifications" element={<RoadClassifications />} />
-          <Route path="CarriagewayTypes" element={<CarriagewayTypes />} />
-          <Route path="BridgeAgeFactors" element={<BridgeAgeFactors />} />
-          <Route path="FactorCrossings" element={<FactorCrossings />} />
+          <Route path="/SetupListing/DamageRanks" element={<DamageRanks />} />
+          <Route path="/SetupListing/Elements" element={<Elements />} />
+          <Route path="/SetupListing/DamageTypes" element={<DamageTypes />} />
+          <Route path="/SetupListing/RoadClassifications" element={<RoadClassifications />} />
+          <Route path="/SetupListing/CarriagewayTypes" element={<CarriagewayTypes />} />
+          <Route path="/SetupListing/BridgeAgeFactors" element={<BridgeAgeFactors />} />
+          <Route path="/SetupListing/FactorCrossings" element={<FactorCrossings />} />
 
           {/* Default Route: Redirect to DamageRanks */}
           <Route path="/" element={<DamageRanks />} />

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const DamageRanks = () => {
+const BridgeAgeFactors = () => {
   return (
     <div>
       
@@ -8,4 +8,4 @@ const DamageRanks = () => {
   )
 }
 
-export default DamageRanks
+export default BridgeAgeFactors
