@@ -2,10 +2,10 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import BridgeListing from './Reports/BridgeListing';
-import CategorySummary from './Reports/CategorySummary';
-import DistrictCategory from './Reports/DistrictCategory';
-import BridgeCategory from './Reports/BridgeCategory';
+import BridgeListing from './components/BridgeListing';
+import CategorySummary from './components/CategorySummary';
+import DistrictCategory from './components/DistrictCategory';
+import BridgeCategory from './components/BridgeCategory.jsx';
 import './index.css';
 
 const Reports = () => {

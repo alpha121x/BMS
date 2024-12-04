@@ -26,6 +26,9 @@ const Header = () => {
   const userName = userToken?.username;
 
   const isReportsActive = activeTab.startsWith("/Reports");
+  const isSetupActive = activeTab.startsWith("/Setup");
+
+
 
   const toggleReportsDropdown = () => {
     setIsReportsDropdownOpen((prev) => !prev);
@@ -91,7 +94,7 @@ const Header = () => {
               onClick={toggleReportsDropdown}
               className={`py-2 px-4 rounded font-bold transition duration-300 ${
                 isReportsActive
-                  ? "bg-green-600 text-white"
+                  ? "bg-blue-500 text-white"
                   : "hover:bg-green-100 text-blue-500"
               }`}
             >
@@ -132,8 +135,8 @@ const Header = () => {
             <button
               onClick={toggleSetupDropdown}
               className={`py-2 px-4 rounded font-bold transition duration-300 ${
-                isReportsActive
-                  ? "bg-green-600 text-white"
+                isSetupActive
+                  ? "bg-blue-500 text-white"
                   : "hover:bg-green-100 text-blue-500"
               }`}
             >
@@ -142,43 +145,43 @@ const Header = () => {
             {isSetupDropdownOpen && (
               <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
                 <Link
-                  to="/Reports/Summary"
+                  to="/SetupListing/DamageRanks"
                   className="flex  px-4 py-2 hover:bg-gray-200"
                 >
                   Damage Ranks
                 </Link>
                 <Link
-                  to="/Reports/Detailed"
+                  to="/SetupListing/Elements"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   Elements
                   </Link>
                 <Link
-                  to="/Reports/Export"
+                  to="/SetupListing/DamageTypes"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   Damage Types
                 </Link>
                 <Link
-                  to="/Reports/Export"
+                  to="/SetupListing/RoadClassifications"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   Road Classifications
                 </Link>
                 <Link
-                  to="/Reports/Export"
+                  to="/SetupListing/CarriagewayTypes"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >  
                   Carriageway Types
                 </Link>
                 <Link
-                  to="/Reports/Export"
+                  to="/SetupListing/BridgeAgeFactors"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   Bridge Age Factors
                 </Link>
                 <Link
-                  to="/Reports/Export"
+                  to="/SetupListing/FactorCrossings"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   Factors for Crossings
