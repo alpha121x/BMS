@@ -100,25 +100,25 @@ const Header = () => {
             {isReportsDropdownOpen && (
               <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
                 <Link
-                  to="/Reports/Summary"
+                  to="/Reports/BridgeListing"
                   className="flex  px-4 py-2 hover:bg-gray-200"
                 >
                   Bridge Wise Listing
                 </Link>
                 <Link
-                  to="/Reports/Detailed"
+                  to="/Reports/CategorySummary"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   Category Wise Summary
                 </Link>
                 <Link
-                  to="/Reports/Export"
+                  to="/Reports/DistrictCategory"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   District Wise Category
                 </Link>
                 <Link
-                  to="/Reports/Export"
+                  to="/Reports/BridgeCategory"
                   className="flex px-4 py-2 hover:bg-gray-200"
                 >
                   Bridge Wise Category

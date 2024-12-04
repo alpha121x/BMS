@@ -2,20 +2,31 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './index.css';
-import Login from './Login'; // Import Login Component
-import Dashboard from './Dashboard';
+import Login from './Login'; // Login Component
+import Dashboard from './Dashboard'; // Dashboard Component
+import Reports from './Reports'; // Reports Component
 
 // Authentication Checker Component
 const PrivateRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated');
-  return isAuthenticated === "true" ? children : <Navigate to="/" />;
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === "true";
+  return isAuthenticated ? children : <Navigate to="/" />;
 };
-     {/* 
-      Designed and Developed By: Abbas Ch .
-      React and Node Js Developer
-      abbasshakor0123@gmail.com
-      Date : 11/21/2024
-      */}
+
+// 404 Page Component
+const NotFound = () => (
+  <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+    <h1>404</h1>
+    <p>Page not found.</p>
+    <a href="/">Go Back to Login</a>
+  </div>
+);
+
+/* 
+  Designed and Developed By: Abbas Ch.
+  React and Node.js Developer
+  abbasshakor0123@gmail.com
+  Date: 11/21/2024
+*/
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -24,7 +35,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         {/* Default Route to Login */}
         <Route path="/" element={<Login />} />
 
-        {/* Private Routes (Require Authentication) */}
+        {/* Private Route for Dashboard */}
         <Route
           path="/Dashboard"
           element={
@@ -33,6 +44,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             </PrivateRoute>
           }
         />
+
+        {/* Private Route for Reports */}
+        <Route
+          path="/Reports/*"
+          element={
+            <PrivateRoute>
+              <Reports />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Catch-All for Undefined Routes */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   </React.StrictMode>
