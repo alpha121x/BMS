@@ -37,6 +37,13 @@ const BridgeListing = () => {
       margin: "20px auto",
       maxWidth: "1200px",
     },
+    card: {
+      backgroundColor: "#ffffff",
+      borderRadius: "10px",
+      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+      padding: "20px",
+      marginTop: "20px",
+    },
     header: {
       fontSize: "1.8rem",
       color: "#333",
@@ -90,70 +97,72 @@ const BridgeListing = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.header}>Bridge Listing</h2>
-      <table style={styles.table}>
-        <thead>
-          <tr style={styles.tableHeadRow}>
-            <th style={styles.tableCell}>#</th>
-            <th style={styles.tableCell}>Object ID</th>
-            <th style={styles.tableCell}>Bridge Name</th>
-            <th style={styles.tableCell}>Bridge Code</th>
-            <th style={styles.tableCell}>Road Number</th>
-            <th style={styles.tableCell}>Zone ID</th>
-            <th style={styles.tableCell}>District ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentBridges.map((bridge, index) => (
-            <tr
-              key={bridge.ObjectID}
-              style={
-                index % 2 === 0
-                  ? { ...styles.tableCell }
-                  : { ...styles.tableCell, ...styles.tableRowOdd }
-              }
-            >
-              <td style={styles.tableCell}>
-                {(currentPage - 1) * rowsPerPage + index + 1}
-              </td>
-              <td style={styles.tableCell}>{bridge.ObjectID}</td>
-              <td style={styles.tableCell}>{bridge.BridgeName || "N/A"}</td>
-              <td style={styles.tableCell}>{bridge.BridgeCode || "N/A"}</td>
-              <td style={styles.tableCell}>{bridge.RoadNumber || "N/A"}</td>
-              <td style={styles.tableCell}>{bridge.ZoneID || "N/A"}</td>
-              <td style={styles.tableCell}>{bridge.DistrictID || "N/A"}</td>
+      <div style={styles.card}>
+        <h2 style={styles.header}>Bridge Listing</h2>
+        <table style={styles.table}>
+          <thead>
+            <tr style={styles.tableHeadRow}>
+              <th style={styles.tableCell}>#</th>
+              <th style={styles.tableCell}>Object ID</th>
+              <th style={styles.tableCell}>Bridge Name</th>
+              <th style={styles.tableCell}>Bridge Code</th>
+              <th style={styles.tableCell}>Road Number</th>
+              <th style={styles.tableCell}>Zone ID</th>
+              <th style={styles.tableCell}>District ID</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {currentBridges.map((bridge, index) => (
+              <tr
+                key={bridge.ObjectID}
+                style={
+                  index % 2 === 0
+                    ? { ...styles.tableCell }
+                    : { ...styles.tableCell, ...styles.tableRowOdd }
+                }
+              >
+                <td style={styles.tableCell}>
+                  {(currentPage - 1) * rowsPerPage + index + 1}
+                </td>
+                <td style={styles.tableCell}>{bridge.ObjectID}</td>
+                <td style={styles.tableCell}>{bridge.BridgeName || "N/A"}</td>
+                <td style={styles.tableCell}>{bridge.BridgeCode || "N/A"}</td>
+                <td style={styles.tableCell}>{bridge.RoadNumber || "N/A"}</td>
+                <td style={styles.tableCell}>{bridge.ZoneID || "N/A"}</td>
+                <td style={styles.tableCell}>{bridge.DistrictID || "N/A"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      {/* Pagination */}
-      <div style={styles.paginationContainer}>
-        <button
-          style={
-            currentPage === 1
-              ? { ...styles.paginationButton, ...styles.paginationButtonDisabled }
-              : styles.paginationButton
-          }
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span style={styles.paginationInfo}>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          style={
-            currentPage === totalPages
-              ? { ...styles.paginationButton, ...styles.paginationButtonDisabled }
-              : styles.paginationButton
-          }
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
+        {/* Pagination */}
+        <div style={styles.paginationContainer}>
+          <button
+            style={
+              currentPage === 1
+                ? { ...styles.paginationButton, ...styles.paginationButtonDisabled }
+                : styles.paginationButton
+            }
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          <span style={styles.paginationInfo}>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            style={
+              currentPage === totalPages
+                ? { ...styles.paginationButton, ...styles.paginationButtonDisabled }
+                : styles.paginationButton
+            }
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );
