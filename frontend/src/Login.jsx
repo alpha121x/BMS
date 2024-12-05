@@ -14,9 +14,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    setLoading(true); // Start the loading spinner
-    setError(""); // Clear any existing error messages
-    
+    setLoading(true);
+    setError(""); 
     try {
       const response = await fetch(`${BASE_URL}/api/login`, {
         method: "POST",
@@ -25,53 +24,37 @@ const Login = () => {
         },
         body: JSON.stringify({ username, password }),
       });
-  
-      // Parse the response
+
       const data = await response.json();
-  
-      // Check if the response is not successful
+
       if (!response.ok) {
-        const errorMessage = data.message || "Login failed. Please try again.";
-        setError(errorMessage); // Display error to the user
-        console.error("Login failed:", errorMessage);
+        setError(data.message); 
+        console.error("Login failed:", data.message);
+        setLoading(false); 
         return;
       }
-  
-      // Destructure token and user details from the response
-      const { token, user } = data;
-  
-      // Check if a token is received
-      if (!token) {
-        console.warn("No token received from server.");
-        setError("Authentication failed. No token received.");
-        return;
-      }
-  
-      // Store the JWT token securely in localStorage
-      localStorage.setItem("token", token);
-  
-      // Store user details, if provided
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
+
+      // Store the JWT token
+      if (data.token) {
+        localStorage.setItem("token", data.token);
       } else {
-        console.warn("User details not provided in the response.");
+        console.warn("No token received from server");
       }
-  
-      // Set authentication status
+
+      // Store user details including roleId and districtId if they're included in the response
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        navigate("/Dashboard", {});
+      }
+
       localStorage.setItem("isAuthenticated", "true");
-  
-      // Navigate to the dashboard
-      if (user && token) {
-        navigate("/Dashboard", {}); // Ensure all necessary data is present
-      }
     } catch (error) {
       console.error("Login error:", error);
-      setError("An error occurred while processing your login. Please try again.");
+      setError("An error occurred. Please try again.");
     } finally {
-      setLoading(false); // Stop the loading spinner
+      setLoading(false); 
     }
   };
-  
 
   // Handle the Enter key press event
   const handleKeyPress = (e) => {
