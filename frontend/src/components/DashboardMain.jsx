@@ -1,5 +1,6 @@
 import React from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
+import BridgeListing from "./BridgeListing";
 
 const DashboardMain = () => {
   const cardData = [
@@ -107,6 +108,10 @@ const DashboardMain = () => {
             />
           ))}
         </div>
+      </div>
+
+      <div className="mt-1">
+        <BridgeListing/>
       </div>
     </section>
   );

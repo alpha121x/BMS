@@ -89,6 +89,34 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// API endpoint to fetch bridge data
+app.get("/api/bridges", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        "ObjectID", 
+        "BridgeName", 
+        "RoadNumber", 
+        "StructureTypeID", 
+        "ConstructionYear", 
+        "ZoneID", 
+        "DistrictID", 
+        "TrafficVolume", 
+        "LastMaintenanceDate"
+      FROM public."D_Objects"
+      ORDER BY "ObjectID" ASC;
+    `;
+
+    const result = await pool.query(query);
+
+    // Send the result rows as JSON
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error fetching bridge data:", error);
+    res.status(500).json({ error: "An error occurred while fetching bridge data." });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
