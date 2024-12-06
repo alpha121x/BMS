@@ -110,7 +110,7 @@ const DashboardMain = () => {
         </div>
       </div>
 
-      <div className="mt-1">
+      <div className="mt-2">
         <BridgeListing/>
       </div>
     </section>

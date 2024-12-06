@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { BASE_URL } from "./config.jsx";
+import React, { useEffect, useState } from "react";
+import { Button, Table, Modal } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { BASE_URL } from "./config";
 
 const BridgeListing = () => {
-  const [bridges, setBridges] = useState([]);
+  const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage] = useState(10); // Rows per page
+  const [showModal, setShowModal] = useState(false);
+  const [selectedBridge, setSelectedBridge] = useState(null);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchAllBridges();
@@ -13,157 +19,180 @@ const BridgeListing = () => {
   const fetchAllBridges = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bridges`);
+      if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
-      setBridges(data);
+      setTableData(data);
+      setLoading(false); // Stop loading when data is fetched
     } catch (error) {
-      console.error("Error fetching bridge data:", error);
+      setError(error.message);
+      setLoading(false); // Stop loading on error
     }
   };
 
-  // Calculate paginated data
-  const indexOfLastBridge = currentPage * rowsPerPage;
-  const indexOfFirstBridge = indexOfLastBridge - rowsPerPage;
-  const currentBridges = bridges.slice(indexOfFirstBridge, indexOfLastBridge);
+  const handleViewClick = (bridge) => {
+    setSelectedBridge(bridge);
+    setShowModal(true);
+  };
 
-  const totalPages = Math.ceil(bridges.length / rowsPerPage);
+  const handleClose = () => setShowModal(false);
 
-  // Inline styles
-  const styles = {
-    container: {
-      padding: "20px",
-      backgroundColor: "#f9f9f9",
-      borderRadius: "8px",
-      boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.1)",
-      margin: "20px auto",
-      maxWidth: "1200px",
-    },
-    card: {
-      backgroundColor: "#ffffff",
-      borderRadius: "10px",
-      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
-      padding: "20px",
-      marginTop: "20px",
-    },
-    header: {
-      fontSize: "1.8rem",
-      color: "#333",
-      marginBottom: "20px",
-      textAlign: "center",
-    },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      marginBottom: "20px",
-    },
-    tableHeadRow: {
-      backgroundColor: "#007bff",
-      color: "#fff",
-      textAlign: "left",
-    },
-    tableCell: {
-      padding: "12px 15px",
-      border: "1px solid #ddd",
-    },
-    tableRowOdd: {
-      backgroundColor: "#f3f3f3",
-    },
-    tableRowHover: {
-      backgroundColor: "#e9f5ff",
-    },
-    paginationContainer: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    paginationButton: {
-      backgroundColor: "#007bff",
-      color: "white",
-      padding: "8px 16px",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-      fontSize: "1rem",
-      transition: "background-color 0.3s",
-    },
-    paginationButtonDisabled: {
-      backgroundColor: "#ccc",
-      cursor: "not-allowed",
-    },
-    paginationInfo: {
-      fontSize: "1rem",
-      color: "#555",
-    },
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = tableData.slice(startIndex, startIndex + itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handlePageClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.header}>Bridge Listing</h2>
-        <table style={styles.table}>
+    <div
+      className="card p-2 rounded-lg text-black"
+      style={{
+        background: "#FFFFFF",
+        border: "2px solid #60A5FA",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      }}
+    >
+      <div className="card-body pb-0">
+        <h5
+          className="card-title text-lg font-semibold"
+          style={{ padding: "10px 0 0 0" }}
+        >
+          Bridge Listing
+        </h5>
+        <Table bordered>
           <thead>
-            <tr style={styles.tableHeadRow}>
-              <th style={styles.tableCell}>#</th>
-              <th style={styles.tableCell}>Object ID</th>
-              <th style={styles.tableCell}>Bridge Name</th>
-              <th style={styles.tableCell}>Bridge Code</th>
-              <th style={styles.tableCell}>Road Number</th>
-              <th style={styles.tableCell}>Zone ID</th>
-              <th style={styles.tableCell}>District ID</th>
+            <tr>
+              <th>Object ID</th>
+              <th>Bridge Name</th>
+              <th>Road Number</th>
+              <th>Zone ID</th>
+              <th>District ID</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {currentBridges.map((bridge, index) => (
-              <tr
-                key={bridge.ObjectID}
-                style={
-                  index % 2 === 0
-                    ? { ...styles.tableCell }
-                    : { ...styles.tableCell, ...styles.tableRowOdd }
-                }
-              >
-                <td style={styles.tableCell}>
-                  {(currentPage - 1) * rowsPerPage + index + 1}
+            {currentData.length > 0 ? (
+              currentData.map((bridge, index) => (
+                <tr key={index}>
+                  <td>{bridge.ObjectID || "N/A"}</td>
+                  <td>{bridge.BridgeName || "N/A"}</td>
+                  <td>{bridge.RoadNumber || "N/A"}</td>
+                  <td>{bridge.ZoneID || "N/A"}</td>
+                  <td>{bridge.DistrictID || "N/A"}</td>
+                  <td>
+                    <Button
+                      variant="text-center"
+                      onClick={() => handleViewClick(bridge)}
+                      style={{
+                        backgroundColor: "#60A5FA",
+                        border: "none",
+                        color: "white",
+                      }}
+                    >
+                      View
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="text-center">
+                  No data available
                 </td>
-                <td style={styles.tableCell}>{bridge.ObjectID}</td>
-                <td style={styles.tableCell}>{bridge.BridgeName || "N/A"}</td>
-                <td style={styles.tableCell}>{bridge.BridgeCode || "N/A"}</td>
-                <td style={styles.tableCell}>{bridge.RoadNumber || "N/A"}</td>
-                <td style={styles.tableCell}>{bridge.ZoneID || "N/A"}</td>
-                <td style={styles.tableCell}>{bridge.DistrictID || "N/A"}</td>
               </tr>
-            ))}
+            )}
           </tbody>
-        </table>
+        </Table>
 
         {/* Pagination */}
-        <div style={styles.paginationContainer}>
-          <button
-            style={
-              currentPage === 1
-                ? { ...styles.paginationButton, ...styles.paginationButtonDisabled }
-                : styles.paginationButton
-            }
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        <div className="d-flex justify-content-center align-items-center">
+          <Button
+            onClick={handlePrevPage}
             disabled={currentPage === 1}
+            style={{
+              margin: "0 6px",
+              padding: "4px 8px",
+              backgroundColor: currentPage === 1 ? "#6c757d" : "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "12px",
+              cursor: currentPage === 1 ? "not-allowed" : "pointer",
+            }}
           >
-            Previous
-          </button>
-          <span style={styles.paginationInfo}>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            style={
-              currentPage === totalPages
-                ? { ...styles.paginationButton, ...styles.paginationButtonDisabled }
-                : styles.paginationButton
-            }
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            «
+          </Button>
+          {[...Array(totalPages).keys()].map((page) => (
+            <Button
+              key={page}
+              onClick={() => handlePageClick(page + 1)}
+              style={{
+                margin: "0 6px",
+                padding: "4px 8px",
+                backgroundColor:
+                  page + 1 === currentPage ? "#218838" : "#28a745",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "12px",
+                cursor: "pointer",
+              }}
+            >
+              {page + 1}
+            </Button>
+          ))}
+          <Button
+            onClick={handleNextPage}
             disabled={currentPage === totalPages}
+            style={{
+              margin: "0 6px",
+              padding: "4px 8px",
+              backgroundColor:
+                currentPage === totalPages ? "#6c757d" : "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "12px",
+              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+            }}
           >
-            Next
-          </button>
+            »
+          </Button>
         </div>
       </div>
+      {/* Bridge Details Modal */}
+      <Modal show={showModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Bridge Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            <strong>Name:</strong> {selectedBridge?.name || "N/A"}
+          </p>
+          <p>
+            <strong>Location:</strong> {selectedBridge?.location || "N/A"}
+          </p>
+          <p>
+            <strong>Status:</strong> {selectedBridge?.status || "N/A"}
+          </p>
+          <p>
+            <strong>Last Inspection:</strong>{" "}
+            {selectedBridge?.lastInspection || "N/A"}
+          </p>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
