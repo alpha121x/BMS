@@ -71,12 +71,12 @@ const BridgeListing = () => {
         >
           Bridge Listing
         </h5>
-        <Table bordered>
+        <Table bordered responsive>
           <thead>
             <tr>
               <th>Bridge ID</th>
               <th>Bridge Name</th>
-              <th>Road Number</th>
+              <th>Road Name</th>
               <th>Structure Type</th>
               <th>Construction Type</th>
               <th>District</th>
