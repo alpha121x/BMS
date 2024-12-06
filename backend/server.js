@@ -94,17 +94,20 @@ app.get("/api/bridges", async (req, res) => {
   try {
     const query = `
       SELECT 
-        "ObjectID", 
-        "BridgeName", 
-        "RoadNumber", 
-        "StructureTypeID", 
-        "ConstructionYear", 
-        "ZoneID", 
-        "DistrictID", 
-        "TrafficVolume", 
-        "LastMaintenanceDate"
-      FROM public."D_Objects"
-      ORDER BY "ObjectID" ASC;
+        o."ObjectID", 
+        o."BridgeName", 
+        o."RoadNumber", 
+        st."StructureTypeName" AS "StructureType", 
+        o."ConstructionYear", 
+        z."ZoneName" AS "Zone", 
+        d."DistrictsName" AS "District", 
+        o."TrafficVolume", 
+        o."LastMaintenanceDate"
+      FROM public."D_Objects" o
+      INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
+      INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
+      INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
+      ORDER BY o."ObjectID" ASC;
     `;
 
     const result = await pool.query(query);
@@ -116,6 +119,7 @@ app.get("/api/bridges", async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching bridge data." });
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -64,7 +64,7 @@ const DashboardMain = () => {
     <div
       className={`border-2 ${getBorderClass(
         color
-      )} bg-white p-4 rounded-lg shadow-lg flex items-center gap-4`}
+      )} bg-white p-1 rounded-lg shadow-lg flex items-center gap-4`}
     >
       <div>{icon}</div>
       <div>
@@ -75,10 +75,10 @@ const DashboardMain = () => {
   );
 
   return (
-    <section className="p-4 bg-gray-100 min-h-screen">
+    <section className="p-1 bg-gray-100 min-h-screen">
       {/* Bridges Section */}
-      <div className="mb-4">
-        <h2 className="text-2xl font-semibold text-gray-500 mb-4">Bridges</h2>
+      <div className="mb-2">
+        <h2 className="text-2xl font-semibold text-gray-500 mb-3">Bridges</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {cardData.map((card, index) => (
             <Card
@@ -94,7 +94,7 @@ const DashboardMain = () => {
 
       {/* Inspections Section */}
       <div>
-        <h2 className="text-2xl font-semibold text-gray-500 mb-4">
+        <h2 className="text-2xl font-semibold text-gray-500 mb-3">
           Inspections
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

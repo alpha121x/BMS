@@ -63,11 +63,11 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="p-2 rounded-lg shadow-lg">
+    <header className="p-1 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mx-2">
         <div className="flex items-center">
           <img src="/punjab.png" alt="Logo" className="h-[35px] w-[45px]" />
-          <div className="p-2 rounded">
+          <div className="p-1 rounded">
             <Link to="/Dashboard" className="no-underline">
               <h1 className="text-3xl font-bold uppercase">
                 <span className="text-blue-500">CMW BMS - Dashboard</span>

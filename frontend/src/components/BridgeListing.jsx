@@ -74,12 +74,12 @@ const BridgeListing = () => {
         <Table bordered>
           <thead>
             <tr>
-              <th>Object ID</th>
+              <th>Bridge ID</th>
               <th>Bridge Name</th>
               <th>Road Number</th>
-              <th>Zone ID</th>
-              <th>District ID</th>
-              <th>Action</th>
+              <th>Zone</th>
+              <th>District</th>
+              <th>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -89,8 +89,8 @@ const BridgeListing = () => {
                   <td>{bridge.ObjectID || "N/A"}</td>
                   <td>{bridge.BridgeName || "N/A"}</td>
                   <td>{bridge.RoadNumber || "N/A"}</td>
-                  <td>{bridge.ZoneID || "N/A"}</td>
-                  <td>{bridge.DistrictID || "N/A"}</td>
+                  <td>{bridge.Zone || "N/A"}</td>
+                  <td>{bridge.District || "N/A"}</td>
                   <td>
                     <Button
                       variant="text-center"
