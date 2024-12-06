@@ -220,6 +220,19 @@ const BridgeListing = () => {
           <Modal.Title>Bridge Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+        <p>
+            <strong>Visual Condtion:</strong>{" "}
+            {selectedBridge?.VisualCondition || "N/A"}
+          </p>
+          <p>
+            <strong>Width Of Bridge:</strong> {selectedBridge?.WidthStructure || "N/A"}
+          </p>
+          <p>
+            <strong>Span Length:</strong> {selectedBridge?.SpanLength || "N/A"}
+          </p>
+          <p>
+            <strong>No Of Spans:</strong> {selectedBridge?.Spans || "N/A"}
+          </p>
           <p>
             <strong>Construction Year:</strong>{" "}
             {selectedBridge?.ConstructionYear || "N/A"}
@@ -242,10 +255,6 @@ const BridgeListing = () => {
           <p>
             <strong>Last Maintenance Date:</strong>{" "}
             {selectedBridge?.LastMaintenanceDate || "N/A"}
-          </p>
-          <p>
-            <strong>Traffic Volume:</strong>{" "}
-            {selectedBridge?.TrafficVolume || "N/A"}
           </p>
           <p>
             <strong>Direction:</strong> {selectedBridge?.Direction || "N/A"}

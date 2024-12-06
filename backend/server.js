@@ -107,9 +107,12 @@ app.get("/api/bridges", async (req, res) => {
       cw."CarriagewayTypeName" AS "CarriagewayType",
       rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
       rc."RoadClassificationName" AS "RoadClassification",
+      vc."VisualConditionName" AS "VisualCondition",
       dr."DirectionName" AS "Direction",
-      o."LastMaintenanceDate", 
-      o."TrafficVolume"
+      o."LastMaintenanceDate",
+      o."WidthOfStructureM" AS "WidthStructure",
+      o."SpanLengthM" AS "SpanLength",
+      o."NumberOfSpan" AS "Spans"
     FROM public."D_Objects" o
     INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
     INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
@@ -120,6 +123,7 @@ app.get("/api/bridges", async (req, res) => {
     INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
     INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
     INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
+    INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
     ORDER BY o."ObjectID" ASC;
   `;
   
