@@ -187,6 +187,24 @@ const BridgeListing = () => {
             {selectedBridge?.ConstructionYear || "N/A"}
           </p>
           <p>
+            <strong>Route ID:</strong> {selectedBridge?.RouteID || "N/A"}
+          </p>
+          <p>
+            <strong>Survey ID:</strong> {selectedBridge?.SurveyID || "N/A"}
+          </p>
+          <p>
+            <strong>Road Classification ID:</strong>{" "}
+            {selectedBridge?.RoadClassificationID || "N/A"}
+          </p>
+          <p>
+            <strong>Road Surface Type ID:</strong>{" "}
+            {selectedBridge?.RoadSurfaceTypeID || "N/A"}
+          </p>
+          <p>
+            <strong>Carriageway Type:</strong>{" "}
+            {selectedBridge?.CarriagewayType || "N/A"}
+          </p>
+          <p>
             <strong>Last Maintenance Date:</strong>{" "}
             {selectedBridge?.LastMaintenanceDate || "N/A"}
           </p>
