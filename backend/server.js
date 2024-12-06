@@ -96,19 +96,18 @@ app.get("/api/bridges", async (req, res) => {
     SELECT 
       o."ObjectID", 
       o."BridgeName", 
-      o."RoadNumber", 
-      o."ConstructionTypeID",
       st."StructureTypeName" AS "StructureType", 
       o."ConstructionYear", 
       z."ZoneName" AS "Zone", 
       d."DistrictsName" AS "District",
       r."RoadName" AS "Road",
       c."ConstructionTypeName" AS "ConstructionType", 
-      o."RouteID",
       o."SurveyID", 
       o."RoadClassificationID", 
-      o."RoadSurfaceTypeID", 
       cw."CarriagewayTypeName" AS "CarriagewayType",
+      rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
+      rc."RoadClassificationName" AS "RoadClassification",
+      dr."DirectionName" AS "Direction",
       o."LastMaintenanceDate", 
       o."TrafficVolume"
     FROM public."D_Objects" o
@@ -118,6 +117,9 @@ app.get("/api/bridges", async (req, res) => {
     INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
     INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
     INNER JOIN public."M_CarriagewayType" cw ON o."CarriagewayType" = cw."CarriagewayTypeID"
+    INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
+    INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
+    INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
     ORDER BY o."ObjectID" ASC;
   `;
   

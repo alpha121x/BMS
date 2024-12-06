@@ -74,7 +74,7 @@ const BridgeListing = () => {
         <Table bordered>
           <thead>
             <tr>
-              <th>Object ID</th>
+              <th>Bridge ID</th>
               <th>Bridge Name</th>
               <th>Road Number</th>
               <th>Structure Type</th>
@@ -225,18 +225,15 @@ const BridgeListing = () => {
             {selectedBridge?.ConstructionYear || "N/A"}
           </p>
           <p>
-            <strong>Route ID:</strong> {selectedBridge?.RouteID || "N/A"}
-          </p>
-          <p>
             <strong>Survey ID:</strong> {selectedBridge?.SurveyID || "N/A"}
           </p>
           <p>
-            <strong>Road Classification ID:</strong>{" "}
-            {selectedBridge?.RoadClassificationID || "N/A"}
+            <strong>Road Classification:</strong>{" "}
+            {selectedBridge?.RoadClassification || "N/A"}
           </p>
           <p>
-            <strong>Road Surface Type ID:</strong>{" "}
-            {selectedBridge?.RoadSurfaceTypeID || "N/A"}
+            <strong>Road Surface Type:</strong>{" "}
+            {selectedBridge?.RoadSurfaceType || "N/A"}
           </p>
           <p>
             <strong>Carriageway Type:</strong>{" "}
@@ -249,6 +246,9 @@ const BridgeListing = () => {
           <p>
             <strong>Traffic Volume:</strong>{" "}
             {selectedBridge?.TrafficVolume || "N/A"}
+          </p>
+          <p>
+            <strong>Direction:</strong> {selectedBridge?.Direction || "N/A"}
           </p>
         </Modal.Body>
       </Modal>
