@@ -76,7 +76,6 @@ const BridgeListing = () => {
             <tr>
               <th>Bridge ID</th>
               <th>Bridge Name</th>
-              <th>Road Name</th>
               <th>Structure Type</th>
               <th>Construction Type</th>
               <th>District</th>
@@ -90,7 +89,6 @@ const BridgeListing = () => {
                 <tr key={index}>
                   <td>{bridge.ObjectID || "N/A"}</td>
                   <td>{bridge.BridgeName || "N/A"}</td>
-                  <td>{bridge.Road || "N/A"}</td>
                   <td>{bridge.StructureType || "N/A"}</td>
                   <td>{bridge.ConstructionType || "N/A"}</td>
                   <td>{bridge.District || "N/A"}</td>
@@ -220,12 +218,16 @@ const BridgeListing = () => {
           <Modal.Title>Bridge Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-        <p>
+          <p>
+            <strong>Road Name:</strong> {selectedBridge?.Road || "N/A"}
+          </p>
+          <p>
             <strong>Visual Condtion:</strong>{" "}
             {selectedBridge?.VisualCondition || "N/A"}
           </p>
           <p>
-            <strong>Width Of Bridge:</strong> {selectedBridge?.WidthStructure || "N/A"}
+            <strong>Width Of Bridge:</strong>{" "}
+            {selectedBridge?.WidthStructure || "N/A"}
           </p>
           <p>
             <strong>Span Length:</strong> {selectedBridge?.SpanLength || "N/A"}
