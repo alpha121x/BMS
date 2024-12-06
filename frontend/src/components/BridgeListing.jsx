@@ -74,11 +74,13 @@ const BridgeListing = () => {
         <Table bordered>
           <thead>
             <tr>
-              <th>Bridge ID</th>
+              <th>Object ID</th>
               <th>Bridge Name</th>
               <th>Road Number</th>
-              <th>Zone</th>
+              <th>Structure Type</th>
+              <th>Construction Type</th>
               <th>District</th>
+              <th>Zone</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -88,9 +90,11 @@ const BridgeListing = () => {
                 <tr key={index}>
                   <td>{bridge.ObjectID || "N/A"}</td>
                   <td>{bridge.BridgeName || "N/A"}</td>
-                  <td>{bridge.RoadNumber || "N/A"}</td>
-                  <td>{bridge.Zone || "N/A"}</td>
+                  <td>{bridge.Road || "N/A"}</td>
+                  <td>{bridge.StructureType || "N/A"}</td>
+                  <td>{bridge.ConstructionType || "N/A"}</td>
                   <td>{bridge.District || "N/A"}</td>
+                  <td>{bridge.Zone || "N/A"}</td>
                   <td>
                     <Button
                       variant="text-center"
@@ -108,7 +112,7 @@ const BridgeListing = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center">
+                <td colSpan="10" className="text-center">
                   No data available
                 </td>
               </tr>
@@ -179,17 +183,16 @@ const BridgeListing = () => {
         </Modal.Header>
         <Modal.Body>
           <p>
-            <strong>Name:</strong> {selectedBridge?.name || "N/A"}
+            <strong>Construction Year:</strong>{" "}
+            {selectedBridge?.ConstructionYear || "N/A"}
           </p>
           <p>
-            <strong>Location:</strong> {selectedBridge?.location || "N/A"}
+            <strong>Last Maintenance Date:</strong>{" "}
+            {selectedBridge?.LastMaintenanceDate || "N/A"}
           </p>
           <p>
-            <strong>Status:</strong> {selectedBridge?.status || "N/A"}
-          </p>
-          <p>
-            <strong>Last Inspection:</strong>{" "}
-            {selectedBridge?.lastInspection || "N/A"}
+            <strong>Traffic Volume:</strong>{" "}
+            {selectedBridge?.TrafficVolume || "N/A"}
           </p>
         </Modal.Body>
       </Modal>

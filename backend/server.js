@@ -93,22 +93,26 @@ app.post("/api/login", async (req, res) => {
 app.get("/api/bridges", async (req, res) => {
   try {
     const query = `
-      SELECT 
-        o."ObjectID", 
-        o."BridgeName", 
-        o."RoadNumber", 
-        st."StructureTypeName" AS "StructureType", 
-        o."ConstructionYear", 
-        z."ZoneName" AS "Zone", 
-        d."DistrictsName" AS "District", 
-        o."TrafficVolume", 
-        o."LastMaintenanceDate"
-      FROM public."D_Objects" o
-      INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
-      INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
-      INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
-      ORDER BY o."ObjectID" ASC;
-    `;
+    SELECT 
+      o."ObjectID", 
+      o."BridgeName", 
+      o."RoadNumber", 
+      o."ConstructionTypeID",  -- Fixed typo here
+      st."StructureTypeName" AS "StructureType", 
+      o."ConstructionYear", 
+      z."ZoneName" AS "Zone", 
+      d."DistrictsName" AS "District",
+      r."RoadName" AS "Road",
+      c."ConstructionTypeName" AS "ConstructionType"  -- Fixed typo here
+    FROM public."D_Objects" o
+    INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
+    INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
+    INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
+    INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
+    INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
+    ORDER BY o."ObjectID" ASC;
+  `;
+  
 
     const result = await pool.query(query);
 
@@ -119,6 +123,7 @@ app.get("/api/bridges", async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching bridge data." });
   }
 });
+
 
 
 app.listen(port, () => {
