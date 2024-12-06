@@ -138,7 +138,9 @@ const BridgeListing = () => {
           >
             «
           </Button>
-          {[...Array(totalPages).keys()].map((page) => (
+
+          {/* Show first 3 pages */}
+          {[...Array(Math.min(3, totalPages)).keys()].map((page) => (
             <Button
               key={page}
               onClick={() => handlePageClick(page + 1)}
@@ -157,6 +159,42 @@ const BridgeListing = () => {
               {page + 1}
             </Button>
           ))}
+
+          {/* Show ellipsis if there are pages in between */}
+          {totalPages > 5 &&
+            currentPage > 3 &&
+            currentPage < totalPages - 2 && (
+              <span style={{ margin: "0 6px" }}>...</span>
+            )}
+
+          {/* Show last 3 pages */}
+          {totalPages > 3 &&
+            [...Array(3).keys()].map((page) => {
+              const pageNum = totalPages - 3 + page;
+              return (
+                pageNum > currentPage &&
+                pageNum <= totalPages && (
+                  <Button
+                    key={pageNum}
+                    onClick={() => handlePageClick(pageNum)}
+                    style={{
+                      margin: "0 6px",
+                      padding: "4px 8px",
+                      backgroundColor:
+                        pageNum === currentPage ? "#218838" : "#28a745",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {pageNum}
+                  </Button>
+                )
+              );
+            })}
+
           <Button
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
