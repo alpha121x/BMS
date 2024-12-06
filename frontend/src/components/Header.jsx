@@ -28,8 +28,6 @@ const Header = () => {
   const isReportsActive = activeTab.startsWith("/Reports");
   const isSetupActive = activeTab.startsWith("/Setup");
 
-
-
   const toggleReportsDropdown = () => {
     setIsReportsDropdownOpen((prev) => !prev);
   };
@@ -104,25 +102,25 @@ const Header = () => {
               <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
                 <Link
                   to="/Reports/BridgeListing"
-                  className="flex  px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Bridge Wise Listing
                 </Link>
                 <Link
                   to="/Reports/CategorySummary"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Category Wise Summary
                 </Link>
                 <Link
                   to="/Reports/DistrictCategory"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   District Wise Category
                 </Link>
                 <Link
                   to="/Reports/BridgeCategory"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Bridge Wise Category
                 </Link>
@@ -146,43 +144,43 @@ const Header = () => {
               <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
                 <Link
                   to="/SetupListing/DamageRanks"
-                  className="flex  px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Damage Ranks
                 </Link>
                 <Link
                   to="/SetupListing/Elements"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Elements
-                  </Link>
+                </Link>
                 <Link
                   to="/SetupListing/DamageTypes"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Damage Types
                 </Link>
                 <Link
                   to="/SetupListing/RoadClassifications"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Road Classifications
                 </Link>
                 <Link
                   to="/SetupListing/CarriagewayTypes"
-                  className="flex px-4 py-2 hover:bg-gray-200"
-                >  
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
                   Carriageway Types
                 </Link>
                 <Link
                   to="/SetupListing/BridgeAgeFactors"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Bridge Age Factors
                 </Link>
                 <Link
                   to="/SetupListing/FactorCrossings"
-                  className="flex px-4 py-2 hover:bg-gray-200"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
                 >
                   Factors for Crossings
                 </Link>
