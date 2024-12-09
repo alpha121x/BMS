@@ -16,7 +16,6 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
 
   const itemsPerPage = 10;
 
- 
   useEffect(() => {
     if (selectedDistrict && selectedZone) {
       fetchAllBridges(selectedDistrict, selectedZone);
@@ -27,7 +26,9 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   const fetchAllBridges = async (selectedDistrict, selectedZone) => {
     setLoading(true); // Show loader while fetching data
     try {
-      const response = await fetch(`${BASE_URL}/api/bridges?district=${selectedDistrict}&zone=${selectedZone}`);
+      const response = await fetch(
+        `${BASE_URL}/api/bridges?district=${selectedDistrict}&zone=${selectedZone}`
+      );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
       setTableData(data);
@@ -47,12 +48,22 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   // Function to filter the data
   const filterData = (bridge) => {
     return (
-      (bridge.ObjectID && bridge.ObjectID.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.BridgeName && bridge.BridgeName.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.StructureType && bridge.StructureType.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.ConstructionType && bridge.ConstructionType.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.District && bridge.District.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.Zone && bridge.Zone.toLowerCase().includes(filterText.toLowerCase()))
+      (bridge.ObjectID &&
+        bridge.ObjectID.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.BridgeName &&
+        bridge.BridgeName.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.StructureType &&
+        bridge.StructureType.toLowerCase().includes(
+          filterText.toLowerCase()
+        )) ||
+      (bridge.ConstructionType &&
+        bridge.ConstructionType.toLowerCase().includes(
+          filterText.toLowerCase()
+        )) ||
+      (bridge.District &&
+        bridge.District.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.Zone &&
+        bridge.Zone.toLowerCase().includes(filterText.toLowerCase()))
     );
   };
 
@@ -100,7 +111,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   // Render pagination buttons
   const renderPaginationButtons = () => {
     const buttons = [];
-  
+
     // Previous Button
     buttons.push(
       <Button
@@ -112,7 +123,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
         «
       </Button>
     );
-  
+
     // Always show the first page
     buttons.push(
       <Button
@@ -126,18 +137,18 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
         1
       </Button>
     );
-  
+
     // Page Buttons (Dynamic - Show current and 3 pages before and after it)
     const pageRange = 3;
     let startPage = Math.max(currentPage - pageRange, 2); // Ensure that we always show at least 1 page before the current page
     let endPage = Math.min(currentPage + pageRange, totalPages - 1); // Ensure we don't go beyond the last page
-  
+
     // If there are fewer than 7 total pages, show all the pages
     if (totalPages <= 7) {
       startPage = 2;
       endPage = totalPages - 1;
     }
-  
+
     // Add the pages in the range from startPage to endPage
     for (let page = startPage; page <= endPage; page++) {
       buttons.push(
@@ -153,7 +164,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
         </Button>
       );
     }
-  
+
     // Always show the last page
     if (totalPages > 1) {
       buttons.push(
@@ -169,7 +180,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
         </Button>
       );
     }
-  
+
     // Next Button
     buttons.push(
       <Button
@@ -181,11 +192,9 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
         »
       </Button>
     );
-  
+
     return buttons;
   };
-  
-  
 
   // Button styles for pagination
   const buttonStyles = {
@@ -234,7 +243,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
               borderRadius: "50%",
               width: "80px",
               height: "80px",
-              animation: "spin 1s linear infinite",
+              animation: "spin 1s linear infinite", // This should match the @keyframes spin
               margin: "auto",
               position: "absolute",
               top: "50%",
