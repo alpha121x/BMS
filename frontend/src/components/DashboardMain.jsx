@@ -4,12 +4,16 @@ import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
+import PieChartComponent from './PieChartComponent';
+
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
   const [startDate, setStartDate] = useState(""); // Default: Today’s date
   const [districtId, setDistrictId] = useState(null);
   const [selectedZone, setSelectedZone] = useState("%");
+
+  const [infrastructureData, setInfrastructureData] = useState([12, 15, 8]);
 
   // Data for cards
   const cardData = [
@@ -201,7 +205,7 @@ const DashboardMain = () => {
           </div>
         </div>
 
-        {/* Right Graph Card */}
+        {/* Right Pie Chart Card */}
         <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
           <div
             className="card p-2 rounded-lg text-black"
@@ -213,8 +217,10 @@ const DashboardMain = () => {
             }}
           >
             <div className="card-body pb-0">
-              <h2 className="text-xl font-semibold mb-4">Right Graph</h2>
-              <GraphComponent />
+              <h2 className="text-xl font-semibold mb-4">
+                Infrastructure Distribution
+              </h2>
+              <PieChartComponent data={infrastructureData} />
             </div>
           </div>
         </div>
