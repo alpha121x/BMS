@@ -45,7 +45,8 @@ const DashboardMain = () => {
     },
   ];
 
-  // Helper function to map colors
+  const allCards = [...cardData, ...inspectionData]; // Combine both arrays
+
   const getBorderClass = (color) => {
     switch (color) {
       case "blue":
@@ -64,7 +65,7 @@ const DashboardMain = () => {
     <div
       className={`border-2 ${getBorderClass(
         color
-      )} bg-white p-1 rounded-lg shadow-lg flex items-center gap-4`}
+      )} bg-white p-2 rounded-lg shadow-lg flex items-center gap-4`}
     >
       <div>{icon}</div>
       <div>
@@ -75,43 +76,32 @@ const DashboardMain = () => {
   );
 
   return (
-    <section className="p-1 bg-gray-100 min-h-screen">
-      {/* Bridges Section */}
-      <div className="mb-2">
-        <h2 className="text-2xl font-semibold text-gray-500 mb-3">Bridges</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {cardData.map((card, index) => (
+    <section className="p-4 bg-gray-100 min-h-screen">
+      {/* Heading */}
+      <h2 className="text-2xl font-semibold text-gray-500 mb-2">
+        Dashboard Overview
+      </h2>
+
+      {/* Combined Cards Section */}
+      <div className="grid grid-cols-12 gap-4">
+        {allCards.map((card, index) => (
+          <div
+            key={index}
+            className="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2"
+          >
             <Card
-              key={index}
               label={card.label}
               value={card.value}
               icon={card.icon}
               color={card.color}
             />
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
-      {/* Inspections Section */}
-      <div>
-        <h2 className="text-2xl font-semibold text-gray-500 mb-3">
-          Inspections
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {inspectionData.map((card, index) => (
-            <Card
-              key={index}
-              label={card.label}
-              value={card.value}
-              icon={card.icon}
-              color={card.color}
-            />
-          ))}
-        </div>
-      </div>
-
+      {/* Bridge Listing */}
       <div className="mt-2">
-        <BridgeListing/>
+        <BridgeListing />
       </div>
     </section>
   );
