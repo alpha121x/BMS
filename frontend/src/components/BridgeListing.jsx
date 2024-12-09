@@ -100,7 +100,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   // Render pagination buttons
   const renderPaginationButtons = () => {
     const buttons = [];
-    
+  
     // Previous Button
     buttons.push(
       <Button
@@ -113,8 +113,33 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
       </Button>
     );
   
-    // Page Buttons (Dynamic)
-    for (let page = 1; page <= Math.min(totalPages, 5); page++) {
+    // Always show the first page
+    buttons.push(
+      <Button
+        key="1"
+        onClick={() => handlePageChange(1)}
+        style={{
+          ...buttonStyles,
+          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA", // Active color for first page
+        }}
+      >
+        1
+      </Button>
+    );
+  
+    // Page Buttons (Dynamic - Show current and 3 pages before and after it)
+    const pageRange = 3;
+    let startPage = Math.max(currentPage - pageRange, 2); // Ensure that we always show at least 1 page before the current page
+    let endPage = Math.min(currentPage + pageRange, totalPages - 1); // Ensure we don't go beyond the last page
+  
+    // If there are fewer than 7 total pages, show all the pages
+    if (totalPages <= 7) {
+      startPage = 2;
+      endPage = totalPages - 1;
+    }
+  
+    // Add the pages in the range from startPage to endPage
+    for (let page = startPage; page <= endPage; page++) {
       buttons.push(
         <Button
           key={page}
@@ -128,7 +153,23 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
         </Button>
       );
     }
-
+  
+    // Always show the last page
+    if (totalPages > 1) {
+      buttons.push(
+        <Button
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+          style={{
+            ...buttonStyles,
+            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA", // Active color for last page
+          }}
+        >
+          {totalPages}
+        </Button>
+      );
+    }
+  
     // Next Button
     buttons.push(
       <Button
@@ -143,6 +184,8 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   
     return buttons;
   };
+  
+  
 
   // Button styles for pagination
   const buttonStyles = {
