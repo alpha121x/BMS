@@ -10,15 +10,45 @@ const DashboardMain = () => {
 
   // Data for cards
   const cardData = [
-    { label: "Total", value: "18,705", icon: <UserIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
-    { label: "Bridge", value: "1,396", icon: <DocumentIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
-    { label: "Culvert", value: "17,262", icon: <DocumentIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
-    { label: "Underpass", value: "10", icon: <DocumentIcon className="w-10 h-10 text-blue-500" />, color: "blue" },
+    {
+      label: "Total",
+      value: "18,705",
+      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Bridge",
+      value: "1,396",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Culvert",
+      value: "17,262",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Underpass",
+      value: "10",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
   ];
 
   const inspectionData = [
-    { label: "Bridges", value: "1,501", icon: <DocumentIcon className="w-10 h-10 text-green-500" />, color: "green" },
-    { label: "Checkings", value: "23,178", icon: <DocumentIcon className="w-10 h-10 text-green-500" />, color: "green" },
+    {
+      label: "Bridges",
+      value: "1,501",
+      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
+      color: "green",
+    },
+    {
+      label: "Checkings",
+      value: "23,178",
+      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
+      color: "green",
+    },
   ];
 
   const allCards = [...cardData, ...inspectionData];
@@ -26,15 +56,22 @@ const DashboardMain = () => {
   // Helper to assign border classes based on card color
   const getBorderClass = (color) => {
     switch (color) {
-      case "blue": return "border-blue-400 text-blue-500";
-      case "green": return "border-green-400 text-green-500";
-      default: return "border-gray-400 text-gray-500";
+      case "blue":
+        return "border-blue-400 text-blue-500";
+      case "green":
+        return "border-green-400 text-green-500";
+      default:
+        return "border-gray-400 text-gray-500";
     }
   };
 
   // Card Component
   const Card = ({ label, value, icon, color }) => (
-    <div className={`border-2 ${getBorderClass(color)} bg-white py-1 px-1.5 rounded-lg shadow-lg flex items-center gap-4`}>
+    <div
+      className={`border-2 ${getBorderClass(
+        color
+      )} bg-white py-1 px-1.5 rounded-lg shadow-lg flex items-center gap-4`}
+    >
       <div>{icon}</div>
       <div>
         <h4 className="text-lg font-semibold text-gray-700">{label}</h4>
@@ -47,17 +84,32 @@ const DashboardMain = () => {
     <section className="p-2 bg-gray-100 min-h-screen">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-2xl font-semibold text-gray-500 mb-1">Dashboard Overview</h2>
+        <h2 className="text-2xl font-semibold text-gray-500 mb-1">
+          Dashboard Overview
+        </h2>
 
-        {/* Button to toggle Offcanvas */}
         <button
-          className="btn btn-primary"
+          className="btn btn-primary flex items-center gap-2"
           type="button"
           data-bs-toggle="offcanvas"
           data-bs-target="#offcanvasRight"
           aria-controls="offcanvasRight"
         >
-          Filters
+          {/* Filter Icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-5.414 5.414A2 2 0 0014 13.414V20a1 1 0 01-1.447.894l-4-2A1 1 0 018 17.618v-4.204a2 2 0 00-.586-1.414L3.293 6.707A1 1 0 013 6V4z"
+            />
+          </svg>
         </button>
       </div>
 
@@ -69,7 +121,9 @@ const DashboardMain = () => {
         aria-labelledby="offcanvasRightLabel"
       >
         <div className="offcanvas-header">
-          <h5 id="offcanvasRightLabel" className="text-xl font-bold">Filters</h5>
+          <h5 id="offcanvasRightLabel" className="text-xl font-bold">
+            Filters
+          </h5>
           <button
             type="button"
             className="btn-close text-reset"
@@ -91,8 +145,16 @@ const DashboardMain = () => {
       {/* Cards Section */}
       <div className="grid grid-cols-12 gap-4">
         {allCards.map((card, index) => (
-          <div key={index} className="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2">
-            <Card label={card.label} value={card.value} icon={card.icon} color={card.color} />
+          <div
+            key={index}
+            className="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2"
+          >
+            <Card
+              label={card.label}
+              value={card.value}
+              icon={card.icon}
+              color={card.color}
+            />
           </div>
         ))}
       </div>
@@ -100,7 +162,10 @@ const DashboardMain = () => {
       {/* Bridge Listing Section */}
       <div className="mt-2">
         {/* Pass filters dynamically to BridgeListing */}
-        <BridgeListing selectedDistrict={selectedDistrict} startDate={startDate} />
+        <BridgeListing
+          selectedDistrict={selectedDistrict}
+          startDate={startDate}
+        />
       </div>
     </section>
   );
