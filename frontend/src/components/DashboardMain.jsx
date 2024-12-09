@@ -5,7 +5,6 @@ import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
 
-
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
   const [startDate, setStartDate] = useState(""); // Default: Today’s date
@@ -166,19 +165,58 @@ const DashboardMain = () => {
 
       {/* Map, Graphs, and Bridge Listing */}
       <div className="grid grid-cols-12 gap-4 mt-6">
-        {/* Left Graph */}
+        {/* Left Graph Card */}
         <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
-          <GraphComponent />
+          <div
+            className="card p-2 rounded-lg text-black"
+            style={{
+              background: "#FFFFFF",
+              border: "2px solid #60A5FA",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              position: "relative",
+            }}
+          >
+            <div className="card-body pb-0">
+              <h2 className="text-xl font-semibold mb-4">Left Graph</h2>
+              <GraphComponent />
+            </div>
+          </div>
         </div>
 
-        {/* Map */}
+        {/* Map Card */}
         <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
-          <Map />
+          <div
+            className="card p-2 rounded-lg text-black"
+            style={{
+              background: "#FFFFFF",
+              border: "2px solid #60A5FA",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              position: "relative",
+            }}
+          >
+            <div className="card-body pb-0">
+              <h2 className="text-xl font-semibold mb-4">Map</h2>
+              <Map />
+            </div>
+          </div>
         </div>
 
-        {/* Right Graph */}
+        {/* Right Graph Card */}
         <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
-          <GraphComponent />
+          <div
+            className="card p-2 rounded-lg text-black"
+            style={{
+              background: "#FFFFFF",
+              border: "2px solid #60A5FA",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              position: "relative",
+            }}
+          >
+            <div className="card-body pb-0">
+              <h2 className="text-xl font-semibold mb-4">Right Graph</h2>
+              <GraphComponent />
+            </div>
+          </div>
         </div>
       </div>
 
