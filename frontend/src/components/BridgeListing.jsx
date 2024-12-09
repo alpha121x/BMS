@@ -47,7 +47,96 @@ const BridgeListing = () => {
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    
+    // Previous Button
+    buttons.push(
+      <Button
+        onClick={handlePrevPage}
+        disabled={currentPage === 1}
+        key="prev"
+        style={buttonStyles}
+      >
+        «
+      </Button>
+    );
+
+    // First Pages
+    for (let page = 1; page <= Math.min(3, totalPages); page++) {
+      buttons.push(
+        <Button
+          key={page}
+          onClick={() => handlePageChange(page)}
+          style={{
+            ...buttonStyles,
+            backgroundColor: currentPage === page ? "#218838" : "#28a745",
+          }}
+        >
+          {page}
+        </Button>
+      );
+    }
+
+    // Ellipsis if there are pages in between
+    if (totalPages > 5 && currentPage > 3 && currentPage < totalPages - 2) {
+      buttons.push(<span key="ellipsis">...</span>);
+    }
+
+    // Last Pages
+    for (let page = totalPages - 2; page <= totalPages; page++) {
+      if (page > currentPage) {
+        buttons.push(
+          <Button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            style={{
+              ...buttonStyles,
+              backgroundColor: currentPage === page ? "#218838" : "#28a745",
+            }}
+          >
+            {page}
+          </Button>
+        );
+      }
+    }
+
+    // Next Button
+    buttons.push(
+      <Button
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+        key="next"
+        style={buttonStyles}
+      >
+        »
+      </Button>
+    );
+
+    return buttons;
+  };
+
+  const buttonStyles = {
+    margin: "0 6px",
+    padding: "4px 8px",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "12px",
+    cursor: "pointer",
+  };
 
   return (
     <div
@@ -133,29 +222,8 @@ const BridgeListing = () => {
         </Table>
 
         {/* Pagination */}
-        <div className="d-flex justify-content-center">
-          <Button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            «
-          </Button>
-          {[...Array(totalPages).keys()].map((page) => (
-            <Button
-              key={page}
-              onClick={() => handlePageChange(page + 1)}
-              variant={currentPage === page + 1 ? "primary" : "light"}
-              className="mx-1"
-            >
-              {page + 1}
-            </Button>
-          ))}
-          <Button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            »
-          </Button>
+        <div className="d-flex justify-content-center align-items-center">
+          {renderPaginationButtons()}
         </div>
       </div>
 

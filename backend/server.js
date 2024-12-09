@@ -156,33 +156,33 @@ ORDER BY o."ObjectID" ASC;
     res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error fetching bridge data:", error.message);
-    res.status(500).json({ error: "An error occurred while fetching bridge data." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching bridge data." });
   }
 });
 
+// API route to get Zones data
+app.get('/api/zones', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT "ZoneID", "ZoneName" FROM public."M_Zones"');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
-// app.get("/api/bridges2", async (req, res) => {
-//   try {
-//     const query = `
-//     SELECT
-//       o."ObjectID",
-//       array_agg(ep."PhotoPath") AS "Photos"
-//     FROM public."D_Objects" o
-//     INNER JOIN public."D_ExteriorPhotos" ep
-//       ON o."ObjectID" = ep."ObjectID"
-//     GROUP BY o."ObjectID"
-//     ORDER BY o."ObjectID" ASC;
-//     `;
-
-//     const result = await pool.query(query);
-
-//     // Send the result rows as JSON
-//     res.status(200).json(result.rows);
-//   } catch (error) {
-//     console.error("Error fetching bridge data:", error);
-//     res.status(500).json({ error: "An error occurred while fetching bridge data." });
-//   }
-// });
+// API route to get Districts
+app.get('/api/districts', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT "DistrictsID", "DistrictsName" FROM public."M_Districts"');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

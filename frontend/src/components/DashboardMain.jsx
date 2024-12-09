@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import BridgeListing from "./BridgeListing";
+import FilterComponent from "./FilterComponent";
 
 const DashboardMain = () => {
+  // State for district, start date, and district ID
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [districtId, setDistrictId] = useState(null);
+
   const cardData = [
     {
       label: "Total",
@@ -75,10 +81,20 @@ const DashboardMain = () => {
 
   return (
     <section className="p-4 bg-gray-100 min-h-screen">
-      {/* Heading */}
-      <h2 className="text-2xl font-semibold text-gray-500 mb-2">
-        Dashboard Overview
-      </h2>
+      <div className="flex justify-between items-center mb-2">
+        {/* Heading */}
+        <h2 className="text-2xl font-semibold text-gray-500 mb-1">
+          Dashboard Overview
+        </h2>
+
+        {/* Filter Component */}
+        <FilterComponent
+          setSelectedDistrict={setSelectedDistrict}
+          setStartDate={setStartDate}
+          districtId={districtId} // Pass districtId from parent
+          setDistrictId={setDistrictId} // Pass setter for districtId
+        />
+      </div>
 
       {/* Combined Cards Section */}
       <div className="grid grid-cols-12 gap-4">
