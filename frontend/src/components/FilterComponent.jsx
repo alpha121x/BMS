@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { BASE_URL } from "./config";
 
-const FilterComponent = ({ setSelectedDistrict, setStartDate }) => {
+const FilterComponent = ({
+  isOpen,           // Controlled state from parent
+  setIsOpen,        // State updater function from parent
+  setSelectedDistrict,
+  setStartDate,
+}) => {
   const [districts, setDistricts] = useState([]);
   const [zones, setZones] = useState([]);
   const [districtId, setDistrictId] = useState("");
   const [startDate, setStartDateState] = useState("");
-  const [isOpen, setIsOpen] = useState(false); // Off-canvas toggle state
 
   // Fetch districts and zones
   useEffect(() => {
@@ -49,15 +53,7 @@ const FilterComponent = ({ setSelectedDistrict, setStartDate }) => {
   };
 
   return (
-    <div>
-      {/* Off-Canvas Trigger */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md"
-      >
-        Open Filters
-      </button>
-
+    <>
       {/* Off-Canvas Sidebar */}
       <div
         className={`fixed top-0 right-0 h-full bg-white shadow-lg transform ${
@@ -147,7 +143,7 @@ const FilterComponent = ({ setSelectedDistrict, setStartDate }) => {
           onClick={() => setIsOpen(false)}
         ></div>
       )}
-    </div>
+    </>
   );
 };
 
