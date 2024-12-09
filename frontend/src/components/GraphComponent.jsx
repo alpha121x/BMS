@@ -6,15 +6,15 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 // Register chart components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const GraphComponent = () => {
-  const data = {
-    labels: ['January', 'February', 'March', 'April', 'May'],
+const GraphComponent = ({ data }) => {
+  const chartData = {
+    labels: ['Underpasses', 'Bridges', 'Culverts'], // Categories for the infrastructure graph
     datasets: [
       {
-        label: 'Sample Data',
-        data: [65, 59, 80, 81, 56],
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        label: 'Infrastructure Count',
+        data: data, // Data passed as props, representing the count of each infrastructure type
+        backgroundColor: 'rgba(75, 192, 192, 0.2)', // Light color for bars
+        borderColor: 'rgba(75, 192, 192, 1)', // Darker color for the borders
         borderWidth: 1,
       },
     ],
@@ -25,12 +25,17 @@ const GraphComponent = () => {
     plugins: {
       title: {
         display: true,
-        text: 'Sample Graph',
+        text: 'Infrastructure Count', // Title of the graph
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true, // Ensure the Y-axis starts at 0
       },
     },
   };
 
-  return <Bar data={data} options={options} />;
+  return <Bar data={chartData} options={options} />;
 };
 
 export default GraphComponent;
