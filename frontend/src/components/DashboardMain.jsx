@@ -69,7 +69,7 @@ const DashboardMain = () => {
     <div
       className={`border-2 ${getBorderClass(
         color
-      )} bg-white p-2 rounded-lg shadow-lg flex items-center gap-4`}
+      )} bg-white py-1 px-1.5 rounded-lg shadow-lg flex items-center gap-4`}
     >
       <div>{icon}</div>
       <div>
@@ -78,6 +78,7 @@ const DashboardMain = () => {
       </div>
     </div>
   );
+  
 
   return (
     <section className="p-2 bg-gray-100 min-h-screen">
