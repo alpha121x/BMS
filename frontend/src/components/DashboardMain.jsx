@@ -80,7 +80,7 @@ const DashboardMain = () => {
   );
 
   return (
-    <section className="p-4 bg-gray-100 min-h-screen">
+    <section className="p-2 bg-gray-100 min-h-screen">
       <div className="flex justify-between items-center mb-2">
         {/* Heading */}
         <h2 className="text-2xl font-semibold text-gray-500 mb-1">
