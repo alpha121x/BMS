@@ -7,6 +7,7 @@ const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
   const [startDate, setStartDate] = useState(""); // Default: Today’s date
   const [districtId, setDistrictId] = useState(null);
+  const [selectedZone, setSelectedZone] = useState(""); // Add state for selectedZone
 
   // Data for cards
   const cardData = [
@@ -138,6 +139,7 @@ const DashboardMain = () => {
             setStartDate={setStartDate}
             districtId={districtId}
             setDistrictId={setDistrictId}
+            setSelectedZone={setSelectedZone} // Passing setSelectedZone to FilterComponent
           />
         </div>
       </div>
@@ -165,6 +167,7 @@ const DashboardMain = () => {
         <BridgeListing
           selectedDistrict={selectedDistrict}
           startDate={startDate}
+          selectedZone={selectedZone}
         />
       </div>
     </section>

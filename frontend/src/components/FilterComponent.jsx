@@ -3,11 +3,13 @@ import { BASE_URL } from "./config";
 
 const FilterComponent = ({
   setSelectedDistrict,
+  setSelectedZone,
   setStartDate,
 }) => {
   const [districts, setDistricts] = useState([]);
   const [zones, setZones] = useState([]);
   const [districtId, setDistrictId] = useState("");
+  const [zoneId, setZoneId] = useState(""); // Added state for zone
   const [startDate, setStartDateState] = useState("");
 
   // Fetch districts and zones
@@ -43,12 +45,31 @@ const FilterComponent = ({
   }, [startDate]);
 
   // Handlers for inputs
-  const handleDateChange = (e) => setStartDate(e.target.value);
-  const handleZoneChange = (e) => setSelectedDistrict(e.target.value);
-  const handleDistrictChange = (e) => {
-    setDistrictId(e.target.value);
-    setSelectedDistrict(e.target.value);
+  const handleDateChange = (e) => {
+    console.log("Selected Date:", e.target.value);  // Log selected date
+    setStartDate(e.target.value);
   };
+
+  // Handle zone change
+  const handleZoneChange = (e) => {
+    console.log("Selected Zone:", e.target.value);  // Log selected zone
+    setZoneId(e.target.value);
+    setSelectedZone(e.target.value);  // Set the selected zone
+  };
+
+  // Handle district change
+  const handleDistrictChange = (e) => {
+    console.log("Selected District:", e.target.value);  // Log selected district
+    setDistrictId(e.target.value);
+    setSelectedDistrict(e.target.value);  // Set the selected district
+  };
+
+  // Log the selected values for debugging
+  useEffect(() => {
+    console.log("Selected District:", districtId);
+    console.log("Selected Zone:", zoneId);
+    console.log("Selected Date:", startDate);
+  }, [districtId, zoneId, startDate]);
 
   return (
     <div className="p-4">
@@ -60,6 +81,7 @@ const FilterComponent = ({
         <select
           id="zone-filter"
           className="w-full border rounded-md p-2 bg-gray-100"
+          value={zoneId} // Added value to control the zone selection
           onChange={handleZoneChange}
         >
           <option value="%">--All Zones--</option>
