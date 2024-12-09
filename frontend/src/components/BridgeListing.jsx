@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
+import BridgeDetailsModal from "./BridgesDetailsModal";
 
 const BridgeListing = () => {
   const [tableData, setTableData] = useState([]);
@@ -10,6 +11,7 @@ const BridgeListing = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedBridge, setSelectedBridge] = useState(null);
+
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -22,10 +24,10 @@ const BridgeListing = () => {
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
       setTableData(data);
-      setLoading(false); // Stop loading when data is fetched
+      setLoading(false);
     } catch (error) {
       setError(error.message);
-      setLoading(false); // Stop loading on error
+      setLoading(false);
     }
   };
 
@@ -34,26 +36,21 @@ const BridgeListing = () => {
     setShowModal(true);
   };
 
-  const handleClose = () => setShowModal(false);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  const handleClose = () => {
+    setShowModal(false);
+    setSelectedBridge(null);
+  };
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = tableData.slice(startIndex, startIndex + itemsPerPage);
+  const currentData = tableData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handlePageClick = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="text-danger">Error: {error}</p>;
 
   return (
     <div
@@ -65,10 +62,7 @@ const BridgeListing = () => {
       }}
     >
       <div className="card-body pb-0">
-        <h6
-          className="card-title text-lg font-semibold"
-          style={{ padding: "10px 0 0 0" }}
-        >
+        <h6 className="card-title text-lg font-semibold pb-2">
           Bridge Listing
         </h6>
         <Table bordered responsive>
@@ -95,7 +89,6 @@ const BridgeListing = () => {
                   <td>{bridge.Zone || "N/A"}</td>
                   <td>
                     <Button
-                      variant="text-center"
                       onClick={() => handleViewClick(bridge)}
                       style={{
                         backgroundColor: "#60A5FA",
@@ -110,7 +103,7 @@ const BridgeListing = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="10" className="text-center">
+                <td colSpan="7" className="text-center">
                   No data available
                 </td>
               </tr>
@@ -119,206 +112,38 @@ const BridgeListing = () => {
         </Table>
 
         {/* Pagination */}
-        <div className="d-flex justify-content-center align-items-center">
+        <div className="d-flex justify-content-center">
           <Button
-            onClick={handlePrevPage}
+            onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            style={{
-              margin: "0 6px",
-              padding: "4px 8px",
-              backgroundColor: currentPage === 1 ? "#6c757d" : "#28a745",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              fontSize: "12px",
-              cursor: currentPage === 1 ? "not-allowed" : "pointer",
-            }}
           >
             «
           </Button>
-
-          {/* Show first 3 pages */}
-          {[...Array(Math.min(3, totalPages)).keys()].map((page) => (
+          {[...Array(totalPages).keys()].map((page) => (
             <Button
               key={page}
-              onClick={() => handlePageClick(page + 1)}
-              style={{
-                margin: "0 6px",
-                padding: "4px 8px",
-                backgroundColor:
-                  page + 1 === currentPage ? "#218838" : "#28a745",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                fontSize: "12px",
-                cursor: "pointer",
-              }}
+              onClick={() => handlePageChange(page + 1)}
+              variant={currentPage === page + 1 ? "primary" : "light"}
+              className="mx-1"
             >
               {page + 1}
             </Button>
           ))}
-
-          {/* Show ellipsis if there are pages in between */}
-          {totalPages > 5 &&
-            currentPage > 3 &&
-            currentPage < totalPages - 2 && (
-              <span style={{ margin: "0 6px" }}>...</span>
-            )}
-
-          {/* Show last 3 pages */}
-          {totalPages > 3 &&
-            [...Array(3).keys()].map((page) => {
-              const pageNum = totalPages - 3 + page;
-              return (
-                pageNum > currentPage &&
-                pageNum <= totalPages && (
-                  <Button
-                    key={pageNum}
-                    onClick={() => handlePageClick(pageNum)}
-                    style={{
-                      margin: "0 6px",
-                      padding: "4px 8px",
-                      backgroundColor:
-                        pageNum === currentPage ? "#218838" : "#28a745",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {pageNum}
-                  </Button>
-                )
-              );
-            })}
-
           <Button
-            onClick={handleNextPage}
+            onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            style={{
-              margin: "0 6px",
-              padding: "4px 8px",
-              backgroundColor:
-                currentPage === totalPages ? "#6c757d" : "#28a745",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              fontSize: "12px",
-              cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-            }}
           >
             »
           </Button>
         </div>
       </div>
+
       {/* Bridge Details Modal */}
-      <Modal show={showModal} onHide={handleClose}>
+      <Modal show={showModal} onHide={handleClose} size="lg" centered>
         <Modal.Header closeButton>
           <Modal.Title>Bridge Details</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <table className="w-full border-collapse border border-gray-200 text-sm">
-            <tbody>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Road Name
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.Road || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Visual Condition
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.VisualCondition || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Width Of Bridge
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.WidthStructure || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Span Length
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.SpanLength || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  No Of Spans
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.Spans || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Construction Year
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.ConstructionYear || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Survey ID
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.SurveyID || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Road Classification
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.RoadClassification || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Road Surface Type
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.RoadSurfaceType || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Carriageway Type
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.CarriagewayType || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Last Maintenance Date
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.LastMaintenanceDate || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Direction
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedBridge?.Direction || "N/A"}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </Modal.Body>
+        <BridgeDetailsModal selectedBridge={selectedBridge} />
       </Modal>
     </div>
   );

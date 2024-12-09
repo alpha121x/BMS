@@ -93,52 +93,96 @@ app.post("/api/login", async (req, res) => {
 app.get("/api/bridges", async (req, res) => {
   try {
     const query = `
-    SELECT 
-      o."ObjectID", 
-      o."BridgeName", 
-      st."StructureTypeName" AS "StructureType", 
-      o."ConstructionYear", 
-      z."ZoneName" AS "Zone", 
-      d."DistrictsName" AS "District",
-      r."RoadName" AS "Road",
-      c."ConstructionTypeName" AS "ConstructionType", 
-      o."SurveyID", 
-      o."RoadClassificationID", 
-      cw."CarriagewayTypeName" AS "CarriagewayType",
-      rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
-      rc."RoadClassificationName" AS "RoadClassification",
-      vc."VisualConditionName" AS "VisualCondition",
-      dr."DirectionName" AS "Direction",
-      o."LastMaintenanceDate",
-      o."WidthOfStructureM" AS "WidthStructure",
-      o."SpanLengthM" AS "SpanLength",
-      o."NumberOfSpan" AS "Spans"
-    FROM public."D_Objects" o
-    INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
-    INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
-    INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
-    INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
-    INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
-    INNER JOIN public."M_CarriagewayType" cw ON o."CarriagewayType" = cw."CarriagewayTypeID"
-    INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
-    INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
-    INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
-    INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
-    ORDER BY o."ObjectID" ASC;
-  `;
-  
+SELECT 
+  o."ObjectID", 
+  o."BridgeName", 
+  st."StructureTypeName" AS "StructureType", 
+  o."ConstructionYear", 
+  z."ZoneName" AS "Zone", 
+  d."DistrictsName" AS "District",
+  r."RoadName" AS "Road",
+  c."ConstructionTypeName" AS "ConstructionType", 
+  o."SurveyID", 
+  o."RoadClassificationID", 
+  cw."CarriagewayTypeName" AS "CarriagewayType",
+  rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
+  rc."RoadClassificationName" AS "RoadClassification",
+  vc."VisualConditionName" AS "VisualCondition",
+  dr."DirectionName" AS "Direction",
+  o."LastMaintenanceDate",
+  o."WidthOfStructureM" AS "WidthStructure",
+  o."SpanLengthM" AS "SpanLength",
+  o."NumberOfSpan" AS "Spans",
+  COALESCE(array_agg(DISTINCT ep."PhotoPath") FILTER (WHERE ep."PhotoPath" IS NOT NULL), '{}') AS "Photos"
+FROM public."D_Objects" o
+INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
+INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
+INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
+INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
+INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
+INNER JOIN public."M_CarriagewayType" cw ON o."CarriagewayType" = cw."CarriagewayTypeID"
+INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
+INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
+INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
+INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
+LEFT JOIN public."D_ExteriorPhotos" ep ON o."ObjectID" = ep."ObjectID"
+GROUP BY 
+  o."ObjectID", 
+  o."BridgeName", 
+  o."ConstructionYear", 
+  z."ZoneName", 
+  d."DistrictsName", 
+  r."RoadName", 
+  c."ConstructionTypeName", 
+  st."StructureTypeName", 
+  cw."CarriagewayTypeName", 
+  rs."RoadSurfaceTypeName", 
+  rc."RoadClassificationName", 
+  vc."VisualConditionName", 
+  dr."DirectionName", 
+  o."SurveyID",
+  o."RoadClassificationID", 
+  o."LastMaintenanceDate", 
+  o."WidthOfStructureM", 
+  o."SpanLengthM", 
+  o."NumberOfSpan"
+ORDER BY o."ObjectID" ASC;
+
+    `;
 
     const result = await pool.query(query);
 
     // Send the result rows as JSON
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("Error fetching bridge data:", error);
+    console.error("Error fetching bridge data:", error.message);
     res.status(500).json({ error: "An error occurred while fetching bridge data." });
   }
 });
 
 
+// app.get("/api/bridges2", async (req, res) => {
+//   try {
+//     const query = `
+//     SELECT
+//       o."ObjectID",
+//       array_agg(ep."PhotoPath") AS "Photos"
+//     FROM public."D_Objects" o
+//     INNER JOIN public."D_ExteriorPhotos" ep
+//       ON o."ObjectID" = ep."ObjectID"
+//     GROUP BY o."ObjectID"
+//     ORDER BY o."ObjectID" ASC;
+//     `;
+
+//     const result = await pool.query(query);
+
+//     // Send the result rows as JSON
+//     res.status(200).json(result.rows);
+//   } catch (error) {
+//     console.error("Error fetching bridge data:", error);
+//     res.status(500).json({ error: "An error occurred while fetching bridge data." });
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
