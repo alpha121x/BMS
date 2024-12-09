@@ -78,7 +78,6 @@ const DashboardMain = () => {
       </div>
     </div>
   );
-  
 
   return (
     <section className="p-2 bg-gray-100 min-h-screen">

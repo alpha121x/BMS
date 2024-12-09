@@ -82,7 +82,7 @@ const BridgeListing = () => {
           onClick={() => handlePageChange(page)}
           style={{
             ...buttonStyles,
-            backgroundColor: currentPage === page ? "#218838" : "#28a745",
+            backgroundColor: currentPage === page ? "#60A5FA" : "#60A5FA",
           }}
         >
           {page}
@@ -104,7 +104,7 @@ const BridgeListing = () => {
             onClick={() => handlePageChange(page)}
             style={{
               ...buttonStyles,
-              backgroundColor: currentPage === page ? "#218838" : "#28a745",
+              backgroundColor: currentPage === page ? "#60A5FA" : "#60A5FA",
             }}
           >
             {page}
