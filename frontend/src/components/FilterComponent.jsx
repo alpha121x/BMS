@@ -4,7 +4,7 @@ import { BASE_URL } from "./config";
 const FilterComponent = ({ setSelectedDistrict, setStartDate }) => {
   const [districts, setDistricts] = useState([]);
   const [zones, setZones] = useState([]);
-  const [districtId, setDistrictId] = useState(""); // Add this line to define districtId state
+  const [districtId, setDistrictId] = useState(""); // Local state for district selection
   const [startDate, setStartDateState] = useState("");
 
   // Fetch districts and zones on component mount
@@ -51,7 +51,7 @@ const FilterComponent = ({ setSelectedDistrict, setStartDate }) => {
   // Handle zone selection change
   const handleZoneChange = (e) => {
     const selectedZone = e.target.value;
-    setSelectedDistrict(selectedZone);
+    setSelectedDistrict(selectedZone); // You can pass the selected zone to the parent component
   };
 
   // Handle district selection change
@@ -100,12 +100,12 @@ const FilterComponent = ({ setSelectedDistrict, setStartDate }) => {
             id="district-filter"
             className="shadow bg-blue-400 appearance-none border-2 border-blue-400 rounded w-auto px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
             value={districtId}
-            onChange={(e) => setSelectedDistrict(e.target.value)}
+            onChange={handleDistrictChange} // This is necessary to update the local state and pass the district to the parent
           >
             <option value="%">--All Districts--</option>
             {districts.map((district) => (
-              <option key={district.gid} value={district.gid}>
-                {district.distt_name}
+              <option key={district.DistrictsID} value={district.DistrictsID}>
+                {district.DistrictsName} {/* Use DistrictsName for the display */}
               </option>
             ))}
           </select>
