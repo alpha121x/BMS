@@ -6,11 +6,13 @@ import BridgeDetailsModal from "./BridgesDetailsModal";
 
 const BridgeListing = () => {
   const [tableData, setTableData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedBridge, setSelectedBridge] = useState(null);
+  const [filterText, setFilterText] = useState("");
 
   const itemsPerPage = 10;
 
@@ -31,6 +33,30 @@ const BridgeListing = () => {
     }
   };
 
+  const handleFilterChange = (e) => {
+    setFilterText(e.target.value);
+  };
+
+  const filterData = (bridge) => {
+    return (
+      (bridge.ObjectID && bridge.ObjectID.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.BridgeName && bridge.BridgeName.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.StructureType && bridge.StructureType.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.ConstructionType && bridge.ConstructionType.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.District && bridge.District.toLowerCase().includes(filterText.toLowerCase())) ||
+      (bridge.Zone && bridge.Zone.toLowerCase().includes(filterText.toLowerCase()))
+    );
+  };
+
+  useEffect(() => {
+    if (filterText) {
+      const filtered = tableData.filter(filterData);
+      setFilteredData(filtered);
+    } else {
+      setFilteredData(tableData);
+    }
+  }, [filterText, tableData]);
+
   const handleViewClick = (bridge) => {
     setSelectedBridge(bridge);
     setShowModal(true);
@@ -41,8 +67,8 @@ const BridgeListing = () => {
     setSelectedBridge(null);
   };
 
-  const totalPages = Math.ceil(tableData.length / itemsPerPage);
-  const currentData = tableData.slice(
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const currentData = filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -74,8 +100,8 @@ const BridgeListing = () => {
       </Button>
     );
   
-    // First Pages
-    for (let page = 1; page <= Math.min(3, totalPages); page++) {
+    // Page Buttons (Dynamic)
+    for (let page = 1; page <= Math.min(totalPages, 5); page++) {
       buttons.push(
         <Button
           key={page}
@@ -89,30 +115,7 @@ const BridgeListing = () => {
         </Button>
       );
     }
-  
-    // Ellipsis if there are pages in between
-    if (totalPages > 5 && currentPage > 3 && currentPage < totalPages - 2) {
-      buttons.push(<span key="ellipsis">...</span>);
-    }
-  
-    // Last Pages
-    for (let page = totalPages - 2; page <= totalPages; page++) {
-      if (page > currentPage) {
-        buttons.push(
-          <Button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            style={{
-              ...buttonStyles,
-              backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA", // Darker shade for active button
-            }}
-          >
-            {page}
-          </Button>
-        );
-      }
-    }
-  
+
     // Next Button
     buttons.push(
       <Button
@@ -127,7 +130,7 @@ const BridgeListing = () => {
   
     return buttons;
   };
-  
+
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",
@@ -137,7 +140,7 @@ const BridgeListing = () => {
     fontSize: "12px",
     cursor: "pointer",
   };
-  
+
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -152,6 +155,17 @@ const BridgeListing = () => {
         <h6 className="card-title text-lg font-semibold pb-2">
           Bridge Listing
         </h6>
+
+        {/* Filter Input */}
+        <div className="mb-3">
+          <input
+            type="text"
+            value={filterText}
+            onChange={handleFilterChange}
+            className="form-control mb-2"
+            placeholder="Filter by Bridge ID, District, Zone, Structure Type"
+          />
+        </div>
 
         {/* Custom Loader */}
         {loading && (
