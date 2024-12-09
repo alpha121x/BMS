@@ -73,7 +73,7 @@ const BridgeListing = () => {
         «
       </Button>
     );
-
+  
     // First Pages
     for (let page = 1; page <= Math.min(3, totalPages); page++) {
       buttons.push(
@@ -82,19 +82,19 @@ const BridgeListing = () => {
           onClick={() => handlePageChange(page)}
           style={{
             ...buttonStyles,
-            backgroundColor: currentPage === page ? "#60A5FA" : "#60A5FA",
+            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA", // Darker shade for active button
           }}
         >
           {page}
         </Button>
       );
     }
-
+  
     // Ellipsis if there are pages in between
     if (totalPages > 5 && currentPage > 3 && currentPage < totalPages - 2) {
       buttons.push(<span key="ellipsis">...</span>);
     }
-
+  
     // Last Pages
     for (let page = totalPages - 2; page <= totalPages; page++) {
       if (page > currentPage) {
@@ -104,7 +104,7 @@ const BridgeListing = () => {
             onClick={() => handlePageChange(page)}
             style={{
               ...buttonStyles,
-              backgroundColor: currentPage === page ? "#60A5FA" : "#60A5FA",
+              backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA", // Darker shade for active button
             }}
           >
             {page}
@@ -112,7 +112,7 @@ const BridgeListing = () => {
         );
       }
     }
-
+  
     // Next Button
     buttons.push(
       <Button
@@ -124,10 +124,10 @@ const BridgeListing = () => {
         »
       </Button>
     );
-
+  
     return buttons;
   };
-
+  
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",
@@ -137,7 +137,7 @@ const BridgeListing = () => {
     fontSize: "12px",
     cursor: "pointer",
   };
-
+  
   return (
     <div
       className="card p-2 rounded-lg text-black"
