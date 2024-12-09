@@ -7,7 +7,7 @@ const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
   const [startDate, setStartDate] = useState(""); // Default: Today’s date
   const [districtId, setDistrictId] = useState(null);
-  const [selectedZone, setSelectedZone] = useState(""); // Add state for selectedZone
+  const [selectedZone, setSelectedZone] = useState("%");
 
   // Data for cards
   const cardData = [

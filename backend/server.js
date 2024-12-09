@@ -92,81 +92,85 @@ app.post("/api/login", async (req, res) => {
 // API endpoint to fetch bridge data with filtering by ZoneID and DistrictID
 app.get("/api/bridges", async (req, res) => {
   const { district, zone } = req.query; // Receive 'district' and 'zone' from the query parameters
+  
+  // Default to '%' (wildcard) for district and zone if they are not provided
+  const zoneParam = zone || '%';
+  const districtParam = district || '%';
+
+  let query = `
+    SELECT 
+      o."ObjectID", 
+      o."BridgeName", 
+      st."StructureTypeName" AS "StructureType", 
+      o."ConstructionYear", 
+      z."ZoneName" AS "Zone", 
+      d."DistrictsName" AS "District",
+      r."RoadName" AS "Road",
+      c."ConstructionTypeName" AS "ConstructionType", 
+      o."SurveyID", 
+      o."RoadClassificationID", 
+      cw."CarriagewayTypeName" AS "CarriagewayType",
+      rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
+      rc."RoadClassificationName" AS "RoadClassification",
+      vc."VisualConditionName" AS "VisualCondition",
+      dr."DirectionName" AS "Direction",
+      o."LastMaintenanceDate",
+      o."WidthOfStructureM" AS "WidthStructure",
+      o."SpanLengthM" AS "SpanLength",
+      o."NumberOfSpan" AS "Spans",
+      COALESCE(array_agg(DISTINCT ep."PhotoPath") FILTER (WHERE ep."PhotoPath" IS NOT NULL), '{}') AS "Photos"
+    FROM public."D_Objects" o
+    INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
+    INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
+    INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
+    INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
+    INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
+    INNER JOIN public."M_CarriagewayType" cw ON o."CarriagewayType" = cw."CarriagewayTypeID"
+    INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
+    INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
+    INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
+    INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
+    LEFT JOIN public."D_ExteriorPhotos" ep ON o."ObjectID" = ep."ObjectID"
+    WHERE 1=1
+  `;
+
+  // Add condition for ZoneID if provided
+  if (zone) {
+    query += ` AND o."ZoneID"::character varying ilike $1`; // Using $1 for the zone parameter
+  }
+
+  // Add condition for DistrictID if provided
+  if (district) {
+    query += ` AND o."DistrictID"::character varying ilike $2`; // Using $2 for the district parameter
+  }
+
+  query += `
+    GROUP BY 
+      o."ObjectID", 
+      o."BridgeName", 
+      o."ConstructionYear", 
+      z."ZoneName", 
+      d."DistrictsName", 
+      r."RoadName", 
+      c."ConstructionTypeName", 
+      st."StructureTypeName", 
+      cw."CarriagewayTypeName", 
+      rs."RoadSurfaceTypeName", 
+      rc."RoadClassificationName", 
+      vc."VisualConditionName", 
+      dr."DirectionName", 
+      o."SurveyID",
+      o."RoadClassificationID", 
+      o."LastMaintenanceDate", 
+      o."WidthOfStructureM", 
+      o."SpanLengthM", 
+      o."NumberOfSpan"
+    ORDER BY o."ObjectID" ASC;
+  `;
 
   try {
-    let query = `
-      SELECT 
-        o."ObjectID", 
-        o."BridgeName", 
-        st."StructureTypeName" AS "StructureType", 
-        o."ConstructionYear", 
-        z."ZoneName" AS "Zone", 
-        d."DistrictsName" AS "District",
-        r."RoadName" AS "Road",
-        c."ConstructionTypeName" AS "ConstructionType", 
-        o."SurveyID", 
-        o."RoadClassificationID", 
-        cw."CarriagewayTypeName" AS "CarriagewayType",
-        rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
-        rc."RoadClassificationName" AS "RoadClassification",
-        vc."VisualConditionName" AS "VisualCondition",
-        dr."DirectionName" AS "Direction",
-        o."LastMaintenanceDate",
-        o."WidthOfStructureM" AS "WidthStructure",
-        o."SpanLengthM" AS "SpanLength",
-        o."NumberOfSpan" AS "Spans",
-        COALESCE(array_agg(DISTINCT ep."PhotoPath") FILTER (WHERE ep."PhotoPath" IS NOT NULL), '{}') AS "Photos"
-      FROM public."D_Objects" o
-      INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
-      INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
-      INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
-      INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
-      INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
-      INNER JOIN public."M_CarriagewayType" cw ON o."CarriagewayType" = cw."CarriagewayTypeID"
-      INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
-      INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
-      INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
-      INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
-      LEFT JOIN public."D_ExteriorPhotos" ep ON o."ObjectID" = ep."ObjectID"
-      WHERE 1=1
-    `;
-
-    // Add condition for ZoneID if provided
-    if (zone) {
-      query += ` AND o."ZoneID" = $1`; // Assuming $1 is ZoneID
-    }
-
-    // Add condition for DistrictID if provided
-    if (district) {
-      query += ` AND o."DistrictID" = $2`; // Assuming $2 is DistrictID
-    }
-
-    query += `
-      GROUP BY 
-        o."ObjectID", 
-        o."BridgeName", 
-        o."ConstructionYear", 
-        z."ZoneName", 
-        d."DistrictsName", 
-        r."RoadName", 
-        c."ConstructionTypeName", 
-        st."StructureTypeName", 
-        cw."CarriagewayTypeName", 
-        rs."RoadSurfaceTypeName", 
-        rc."RoadClassificationName", 
-        vc."VisualConditionName", 
-        dr."DirectionName", 
-        o."SurveyID",
-        o."RoadClassificationID", 
-        o."LastMaintenanceDate", 
-        o."WidthOfStructureM", 
-        o."SpanLengthM", 
-        o."NumberOfSpan"
-      ORDER BY o."ObjectID" ASC;
-    `;
-
     // Query execution with parameters
-    const result = await pool.query(query, [zone, district]);
+    const result = await pool.query(query, [zoneParam, districtParam]);
 
     // Send the result rows as JSON
     res.status(200).json(result.rows);
@@ -175,6 +179,7 @@ app.get("/api/bridges", async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching bridge data." });
   }
 });
+
 
 // API route to get Zones data
 app.get('/api/zones', async (req, res) => {

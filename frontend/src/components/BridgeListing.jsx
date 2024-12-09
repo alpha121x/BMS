@@ -16,18 +16,18 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
 
   const itemsPerPage = 10;
 
-  // Trigger fetch when selectedDistrict or selectedZone changes
+ 
   useEffect(() => {
     if (selectedDistrict && selectedZone) {
       fetchAllBridges(selectedDistrict, selectedZone);
     }
-  }, [selectedDistrict, selectedZone]); // Trigger re-fetch when either selectedDistrict or selectedZone changes
+  }, [selectedDistrict, selectedZone]);
 
   // Function to fetch bridge data
-  const fetchAllBridges = async (district, zone) => {
+  const fetchAllBridges = async (selectedDistrict, selectedZone) => {
     setLoading(true); // Show loader while fetching data
     try {
-      const response = await fetch(`${BASE_URL}/api/bridges?district=${district}&zone=${zone}`);
+      const response = await fetch(`${BASE_URL}/api/bridges?district=${selectedDistrict}&zone=${selectedZone}`);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
       setTableData(data);
