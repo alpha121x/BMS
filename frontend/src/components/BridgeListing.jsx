@@ -65,12 +65,12 @@ const BridgeListing = () => {
       }}
     >
       <div className="card-body pb-0">
-        <h5
+        <h6
           className="card-title text-lg font-semibold"
           style={{ padding: "10px 0 0 0" }}
         >
           Bridge Listing
-        </h5>
+        </h6>
         <Table bordered responsive>
           <thead>
             <tr>
@@ -218,49 +218,106 @@ const BridgeListing = () => {
           <Modal.Title>Bridge Details</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>
-            <strong>Road Name:</strong> {selectedBridge?.Road || "N/A"}
-          </p>
-          <p>
-            <strong>Visual Condtion:</strong>{" "}
-            {selectedBridge?.VisualCondition || "N/A"}
-          </p>
-          <p>
-            <strong>Width Of Bridge:</strong>{" "}
-            {selectedBridge?.WidthStructure || "N/A"}
-          </p>
-          <p>
-            <strong>Span Length:</strong> {selectedBridge?.SpanLength || "N/A"}
-          </p>
-          <p>
-            <strong>No Of Spans:</strong> {selectedBridge?.Spans || "N/A"}
-          </p>
-          <p>
-            <strong>Construction Year:</strong>{" "}
-            {selectedBridge?.ConstructionYear || "N/A"}
-          </p>
-          <p>
-            <strong>Survey ID:</strong> {selectedBridge?.SurveyID || "N/A"}
-          </p>
-          <p>
-            <strong>Road Classification:</strong>{" "}
-            {selectedBridge?.RoadClassification || "N/A"}
-          </p>
-          <p>
-            <strong>Road Surface Type:</strong>{" "}
-            {selectedBridge?.RoadSurfaceType || "N/A"}
-          </p>
-          <p>
-            <strong>Carriageway Type:</strong>{" "}
-            {selectedBridge?.CarriagewayType || "N/A"}
-          </p>
-          <p>
-            <strong>Last Maintenance Date:</strong>{" "}
-            {selectedBridge?.LastMaintenanceDate || "N/A"}
-          </p>
-          <p>
-            <strong>Direction:</strong> {selectedBridge?.Direction || "N/A"}
-          </p>
+          <table className="w-full border-collapse border border-gray-200 text-sm">
+            <tbody>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Road Name
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.Road || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Visual Condition
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.VisualCondition || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Width Of Bridge
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.WidthStructure || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Span Length
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.SpanLength || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  No Of Spans
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.Spans || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Construction Year
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.ConstructionYear || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Survey ID
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.SurveyID || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Road Classification
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.RoadClassification || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Road Surface Type
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.RoadSurfaceType || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Carriageway Type
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.CarriagewayType || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Last Maintenance Date
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.LastMaintenanceDate || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Direction
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedBridge?.Direction || "N/A"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </Modal.Body>
       </Modal>
     </div>
