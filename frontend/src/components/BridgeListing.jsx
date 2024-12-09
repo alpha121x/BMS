@@ -49,9 +49,6 @@ const BridgeListing = () => {
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p className="text-danger">Error: {error}</p>;
-
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -59,12 +56,36 @@ const BridgeListing = () => {
         background: "#FFFFFF",
         border: "2px solid #60A5FA",
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        position: "relative",
       }}
     >
       <div className="card-body pb-0">
         <h6 className="card-title text-lg font-semibold pb-2">
           Bridge Listing
         </h6>
+
+        {/* Custom Loader */}
+        {loading && (
+          <div
+            className="loader"
+            style={{
+              border: "8px solid #f3f3f3",
+              borderTop: "8px solid #3498db",
+              borderRadius: "50%",
+              width: "80px",
+              height: "80px",
+              animation: "spin 1s linear infinite",
+              margin: "auto",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: "999",
+            }}
+          />
+        )}
+
+        {/* Table */}
         <Table bordered responsive>
           <thead>
             <tr>
