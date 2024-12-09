@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import BridgeDetailsModal from "./BridgesDetailsModal";
 
-const BridgeListing = () => {
+const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   const [tableData, setTableData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,16 +16,22 @@ const BridgeListing = () => {
 
   const itemsPerPage = 10;
 
+  // Trigger fetch when selectedDistrict or selectedZone changes
   useEffect(() => {
-    fetchAllBridges();
-  }, []);
+    if (selectedDistrict && selectedZone) {
+      fetchAllBridges(selectedDistrict, selectedZone);
+    }
+  }, [selectedDistrict, selectedZone]); // Trigger re-fetch when either selectedDistrict or selectedZone changes
 
-  const fetchAllBridges = async () => {
+  // Function to fetch bridge data
+  const fetchAllBridges = async (district, zone) => {
+    setLoading(true); // Show loader while fetching data
     try {
-      const response = await fetch(`${BASE_URL}/api/bridges`);
+      const response = await fetch(`${BASE_URL}/api/bridges?district=${district}&zone=${zone}`);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
       setTableData(data);
+      setFilteredData(data); // Initially set filtered data to all data
       setLoading(false);
     } catch (error) {
       setError(error.message);
@@ -33,10 +39,12 @@ const BridgeListing = () => {
     }
   };
 
+  // Handle filter input change
   const handleFilterChange = (e) => {
     setFilterText(e.target.value);
   };
 
+  // Function to filter the data
   const filterData = (bridge) => {
     return (
       (bridge.ObjectID && bridge.ObjectID.toLowerCase().includes(filterText.toLowerCase())) ||
@@ -48,6 +56,7 @@ const BridgeListing = () => {
     );
   };
 
+  // Filter table data when filterText changes
   useEffect(() => {
     if (filterText) {
       const filtered = tableData.filter(filterData);
@@ -57,11 +66,13 @@ const BridgeListing = () => {
     }
   }, [filterText, tableData]);
 
+  // Handle view button click to show modal
   const handleViewClick = (bridge) => {
     setSelectedBridge(bridge);
     setShowModal(true);
   };
 
+  // Close modal
   const handleClose = () => {
     setShowModal(false);
     setSelectedBridge(null);
@@ -73,6 +84,7 @@ const BridgeListing = () => {
     currentPage * itemsPerPage
   );
 
+  // Handle pagination
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -85,6 +97,7 @@ const BridgeListing = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
+  // Render pagination buttons
   const renderPaginationButtons = () => {
     const buttons = [];
     
@@ -131,6 +144,7 @@ const BridgeListing = () => {
     return buttons;
   };
 
+  // Button styles for pagination
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",
