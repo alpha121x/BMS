@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
+import Map from "./Map";
+import GraphComponent from "./GraphComponent";
+
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
@@ -159,6 +162,24 @@ const DashboardMain = () => {
             />
           </div>
         ))}
+      </div>
+
+      {/* Map, Graphs, and Bridge Listing */}
+      <div className="grid grid-cols-12 gap-4 mt-6">
+        {/* Left Graph */}
+        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
+          <GraphComponent />
+        </div>
+
+        {/* Map */}
+        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
+          <Map />
+        </div>
+
+        {/* Right Graph */}
+        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
+          <GraphComponent />
+        </div>
       </div>
 
       {/* Bridge Listing Section */}
