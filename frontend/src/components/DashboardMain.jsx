@@ -19,14 +19,14 @@ const DashboardMain = () => {
     {
       label: "Culvert",
       value: "17,262",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
     {
       label: "Underpass",
       value: "10",
-      icon: <DocumentIcon className="w-10 h-10 text-red-500" />,
-      color: "red",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
   ];
 
@@ -34,18 +34,18 @@ const DashboardMain = () => {
     {
       label: "Bridges",
       value: "1,501",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
-      color: "blue",
+      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
+      color: "green",
     },
     {
       label: "Checkings",
       value: "23,178",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
-      color: "blue",
+      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
+      color: "green",
     },
   ];
 
-  const allCards = [...cardData, ...inspectionData]; // Combine both arrays
+  const allCards = [...cardData, ...inspectionData];
 
   const getBorderClass = (color) => {
     switch (color) {
@@ -53,8 +53,6 @@ const DashboardMain = () => {
         return "border-blue-400 text-blue-500";
       case "green":
         return "border-green-400 text-green-500";
-      case "red":
-        return "border-red-400 text-red-500";
       default:
         return "border-gray-400 text-gray-500";
     }
