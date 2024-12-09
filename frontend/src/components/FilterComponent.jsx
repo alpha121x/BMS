@@ -46,30 +46,23 @@ const FilterComponent = ({
 
   // Handlers for inputs
   const handleDateChange = (e) => {
-    console.log("Selected Date:", e.target.value);  // Log selected date
+    // console.log("Selected Date:", e.target.value);  // Log selected date
     setStartDate(e.target.value);
   };
 
   // Handle zone change
   const handleZoneChange = (e) => {
-    console.log("Selected Zone:", e.target.value);  // Log selected zone
+    // console.log("Selected Zone:", e.target.value);  // Log selected zone
     setZoneId(e.target.value);
     setSelectedZone(e.target.value);  // Set the selected zone
   };
 
   // Handle district change
   const handleDistrictChange = (e) => {
-    console.log("Selected District:", e.target.value);  // Log selected district
+    // console.log("Selected District:", e.target.value);  // Log selected district
     setDistrictId(e.target.value);
     setSelectedDistrict(e.target.value);  // Set the selected district
   };
-
-  // Log the selected values for debugging
-  useEffect(() => {
-    console.log("Selected District:", districtId);
-    console.log("Selected Zone:", zoneId);
-    console.log("Selected Date:", startDate);
-  }, [districtId, zoneId, startDate]);
 
   return (
     <div className="p-4">
