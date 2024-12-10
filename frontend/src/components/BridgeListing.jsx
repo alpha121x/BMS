@@ -6,13 +6,11 @@ import BridgeDetailsModal from "./BridgesDetailsModal";
 
 const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   const [tableData, setTableData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedBridge, setSelectedBridge] = useState(null);
-  const [filterText, setFilterText] = useState("");
 
   const itemsPerPage = 10;
 
@@ -24,7 +22,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
 
   // Function to fetch bridge data
   const fetchAllBridges = async (selectedDistrict, selectedZone) => {
-    setLoading(true); // Show loader while fetching data
+    setLoading(true);
     try {
       const response = await fetch(
         `${BASE_URL}/api/bridges?district=${selectedDistrict}&zone=${selectedZone}`
@@ -32,50 +30,12 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
       setTableData(data);
-      setFilteredData(data); // Initially set filtered data to all data
       setLoading(false);
     } catch (error) {
       setError(error.message);
       setLoading(false);
     }
   };
-
-  // Handle filter input change
-  const handleFilterChange = (e) => {
-    setFilterText(e.target.value);
-  };
-
-  // Function to filter the data
-  const filterData = (bridge) => {
-    return (
-      (bridge.ObjectID &&
-        bridge.ObjectID.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.BridgeName &&
-        bridge.BridgeName.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.StructureType &&
-        bridge.StructureType.toLowerCase().includes(
-          filterText.toLowerCase()
-        )) ||
-      (bridge.ConstructionType &&
-        bridge.ConstructionType.toLowerCase().includes(
-          filterText.toLowerCase()
-        )) ||
-      (bridge.District &&
-        bridge.District.toLowerCase().includes(filterText.toLowerCase())) ||
-      (bridge.Zone &&
-        bridge.Zone.toLowerCase().includes(filterText.toLowerCase()))
-    );
-  };
-
-  // Filter table data when filterText changes
-  useEffect(() => {
-    if (filterText) {
-      const filtered = tableData.filter(filterData);
-      setFilteredData(filtered);
-    } else {
-      setFilteredData(tableData);
-    }
-  }, [filterText, tableData]);
 
   // Handle view button click to show modal
   const handleViewClick = (bridge) => {
@@ -89,8 +49,8 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
     setSelectedBridge(null);
   };
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const currentData = filteredData.slice(
+  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+  const currentData = tableData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -222,17 +182,6 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
           Bridge Listing
         </h6>
 
-        {/* Filter Input */}
-        <div className="mb-3">
-          <input
-            type="text"
-            value={filterText}
-            onChange={handleFilterChange}
-            className="form-control mb-2"
-            placeholder="Filter by Bridge ID, District, Zone, Structure Type"
-          />
-        </div>
-
         {/* Custom Loader */}
         {loading && (
           <div
@@ -243,7 +192,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
               borderRadius: "50%",
               width: "80px",
               height: "80px",
-              animation: "spin 1s linear infinite", // This should match the @keyframes spin
+              animation: "spin 1s linear infinite",
               margin: "auto",
               position: "absolute",
               top: "50%",
