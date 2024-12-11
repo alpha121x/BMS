@@ -23,19 +23,19 @@ const DashboardMain = () => {
     },
     {
       label: "Bridge",
-      value: "1,396",
+      value: "1,433",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Culvert",
-      value: "17,262",
+      value: "17,302",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Underpass",
-      value: "10",
+      value: "14",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
@@ -50,7 +50,7 @@ const DashboardMain = () => {
     },
     {
       label: "Checkings",
-      value: "23,178",
+      value: "23,573",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
     },
