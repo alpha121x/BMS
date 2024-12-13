@@ -4,6 +4,7 @@ import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
+import CheckingsGraph from "./CheckingsGraph";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
@@ -216,7 +217,7 @@ const DashboardMain = () => {
           >
             <div className="card-body pb-0">
               <h2 className="text-xl font-semibold mb-4">Infrastructure Graph</h2>
-              <GraphComponent data={infrastructureData} />
+              <CheckingsGraph />
             </div>
           </div>
         </div>
