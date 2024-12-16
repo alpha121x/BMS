@@ -144,7 +144,7 @@ const DashboardMain = () => {
             setStartDate={setStartDate}
             districtId={districtId}
             setDistrictId={setDistrictId}
-            setSelectedZone={setSelectedZone} // Passing setSelectedZone to FilterComponent
+            setSelectedZone={setSelectedZone}
           />
         </div>
       </div>
@@ -225,7 +225,6 @@ const DashboardMain = () => {
 
       {/* Bridge Listing Section */}
       <div className="mt-2">
-        {/* Pass filters dynamically to BridgeListing */}
         <BridgeListing
           selectedDistrict={selectedDistrict}
           startDate={startDate}
