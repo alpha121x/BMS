@@ -68,7 +68,7 @@ const Header = () => {
           <div className="p-1 rounded">
             <Link to="/Dashboard" className="no-underline">
               <h1 className="text-3xl font-bold uppercase">
-                <span className="text-blue-500">CMW BMS - Dashboard</span>
+                <span className="text-blue-500">C&W BMS - Dashboard</span>
               </h1>
             </Link>
           </div>
