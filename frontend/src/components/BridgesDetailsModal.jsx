@@ -18,9 +18,9 @@ const customIcon = new L.Icon({
 
 const BridgeDetailsModal = ({ selectedBridge }) => {
   const photos = selectedBridge?.Photos || [];
-  const latitude = selectedBridge?.Latitude || 31.1704; // Default Punjab
-  const longitude = selectedBridge?.Longitude || 72.7097;
-  console.log("Latitude:", latitude, "Longitude:", longitude);
+  const latitude = selectedBridge?.Longitude;
+  const longitude = selectedBridge?.Latitude;
+  // console.log("Latitude:", latitude, "Longitude:", longitude);
 
   return (
     <Modal.Body>
