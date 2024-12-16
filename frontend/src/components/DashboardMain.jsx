@@ -18,13 +18,13 @@ const DashboardMain = () => {
   // Data for cards
   const cardData = [
     {
-      label: "Total",
-      value: "18,705",
+      label: "Total Structures",
+      value: "18,805",
       icon: <UserIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Bridge",
+      label: "Bridges",
       value: "1,433",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
@@ -45,13 +45,13 @@ const DashboardMain = () => {
 
   const inspectionData = [
     {
-      label: "Bridges",
-      value: "1,501",
+      label: "Bridges Inspected",
+      value: "1,511",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
     },
     {
-      label: "Checkings",
+      label: "Total Checkings",
       value: "23,573",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
@@ -77,12 +77,12 @@ const DashboardMain = () => {
     <div
       className={`border-2 ${getBorderClass(
         color
-      )} bg-white py-1 px-1.5 rounded-lg shadow-lg flex items-center gap-4`}
+      )} bg-white py-1 px-1 rounded-lg shadow-lg flex items-center gap-4`}
     >
       <div>{icon}</div>
       <div>
-        <h4 className="text-lg font-semibold text-gray-700">{label}</h4>
-        <p className="text-2xl font-bold">{value}</p>
+        <h4 className="text-sm font-bold text-gray-700">{label}</h4>
+        <p className="text-lg font-bold">{value}</p>
       </div>
     </div>
   );
