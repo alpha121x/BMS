@@ -92,11 +92,23 @@ app.post("/api/login", async (req, res) => {
 // API endpoint to fetch bridge data with filtering by ZoneID and DistrictID
 app.get("/api/bridges", async (req, res) => {
   const { district, zone } = req.query; // Receive 'district' and 'zone' from the query parameters
-  
-  // Default to '%' (wildcard) for district and zone if they are not provided
-  const zoneParam = zone || '%';
-  const districtParam = district || '%';
 
+  let queryParams = [];
+  let whereClauses = [];
+
+  // Add condition for ZoneID if provided
+  if (zone) {
+    queryParams.push(zone);
+    whereClauses.push(`o."ZoneID"::text ILIKE $${queryParams.length}`);
+  }
+
+  // Add condition for DistrictID if provided
+  if (district) {
+    queryParams.push(district);
+    whereClauses.push(`o."DistrictID"::text ILIKE $${queryParams.length}`);
+  }
+
+  // Base query
   let query = `
     SELECT 
       o."ObjectID", 
@@ -118,6 +130,8 @@ app.get("/api/bridges", async (req, res) => {
       o."WidthOfStructureM" AS "WidthStructure",
       o."SpanLengthM" AS "SpanLength",
       o."NumberOfSpan" AS "Spans",
+      o."XCentroID" AS "Latitude",
+      o."YCentroID" AS "Longitude",
       COALESCE(array_agg(DISTINCT ep."PhotoPath") FILTER (WHERE ep."PhotoPath" IS NOT NULL), '{}') AS "Photos"
     FROM public."D_Objects" o
     INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
@@ -131,17 +145,11 @@ app.get("/api/bridges", async (req, res) => {
     INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
     INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
     LEFT JOIN public."D_ExteriorPhotos" ep ON o."ObjectID" = ep."ObjectID"
-    WHERE 1=1
   `;
 
-  // Add condition for ZoneID if provided
-  if (zone) {
-    query += ` AND o."ZoneID"::character varying ilike $1`; // Using $1 for the zone parameter
-  }
-
-  // Add condition for DistrictID if provided
-  if (district) {
-    query += ` AND o."DistrictID"::character varying ilike $2`; // Using $2 for the district parameter
+  // Add WHERE clause if filters exist
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
   }
 
   query += `
@@ -164,13 +172,15 @@ app.get("/api/bridges", async (req, res) => {
       o."LastMaintenanceDate", 
       o."WidthOfStructureM", 
       o."SpanLengthM", 
-      o."NumberOfSpan"
+      o."NumberOfSpan",
+      o."XCentroID",
+      o."YCentroID"
     ORDER BY o."ObjectID" ASC;
   `;
 
   try {
     // Query execution with parameters
-    const result = await pool.query(query, [zoneParam, districtParam]);
+    const result = await pool.query(query, queryParams);
 
     // Send the result rows as JSON
     res.status(200).json(result.rows);
@@ -179,6 +189,7 @@ app.get("/api/bridges", async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching bridge data." });
   }
 });
+
 
 
 // API route to get Zones data
