@@ -11,7 +11,7 @@ const Map = () => {
     <MapContainer
       center={center}
       zoom={10} // Adjust zoom level as needed
-      style={{ height: '188px', width: '100%' }}
+      style={{ width: '100%', height: '370px' }} // Ensure it takes the full height of its container
     >
       {/* TileLayer for OpenStreetMap */}
       <TileLayer

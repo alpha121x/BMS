@@ -4,7 +4,6 @@ import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
-import CheckingsGraph from "./CheckingsGraph";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
@@ -12,7 +11,9 @@ const DashboardMain = () => {
   const [districtId, setDistrictId] = useState(null);
   const [selectedZone, setSelectedZone] = useState("%");
 
-  const [infrastructureData, setInfrastructureData] = useState([12, 15, 8]);
+  const [infrastructureData, setInfrastructureData] = useState([
+    14, 1433, 17302,
+  ]);
 
   // Data for cards
   const cardData = [
@@ -166,28 +167,10 @@ const DashboardMain = () => {
         ))}
       </div>
 
-      {/* Map, Graphs, and Bridge Listing */}
+      {/* Map and Pie Chart Layout */}
       <div className="grid grid-cols-12 gap-4 mt-6">
-        {/* Left Graph Card */}
-        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
-          <div
-            className="card p-2 rounded-lg text-black"
-            style={{
-              background: "#FFFFFF",
-              border: "2px solid #60A5FA",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-              position: "relative",
-            }}
-          >
-            <div className="card-body pb-0">
-              <h2 className="text-xl font-semibold mb-4">Infrastructure Graph</h2>
-              <GraphComponent data={infrastructureData}  />
-            </div>
-          </div>
-        </div>
-
-        {/* Map Card */}
-        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
+        {/* Map Card (70% width on large screens, full width on smaller screens) */}
+      <div className="col-span-12 lg:col-span-8" style={{ height: '380px' }}>
           <div
             className="card p-2 rounded-lg text-black"
             style={{
@@ -204,8 +187,8 @@ const DashboardMain = () => {
           </div>
         </div>
 
-        {/* Right Graph Card */}
-        <div className="col-span-12 sm:col-span-6 md:col-span-4 lg:col-span-4">
+        {/* Pie Chart Card (30% width on large screens, full width on smaller screens) */}
+        <div className="col-span-12 lg:col-span-4">
           <div
             className="card p-2 rounded-lg text-black"
             style={{
@@ -216,8 +199,10 @@ const DashboardMain = () => {
             }}
           >
             <div className="card-body pb-0">
-              <h2 className="text-xl font-semibold mb-4">Infrastructure Graph</h2>
-              <CheckingsGraph />
+              <h2 className="text-xl font-semibold mb-4">
+                Infrastructure Pie Chart
+              </h2>
+              <GraphComponent data={infrastructureData} />
             </div>
           </div>
         </div>

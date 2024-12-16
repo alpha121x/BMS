@@ -1,47 +1,35 @@
 import React from "react";
-import { Bar } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
+  ArcElement, // For Pie chart elements
   Tooltip,
   Legend,
 } from "chart.js";
 
 // Register chart components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 const GraphComponent = ({ data }) => {
   const chartData = {
-    labels: ["Underpasses", "Bridges", "Culverts"], // X-axis labels
+    labels: ["Underpasses", "Bridges", "Culverts"], // Labels for the pie chart
     datasets: [
       {
         label: "Infrastructure Count",
         data: data, // Data passed as props
-        backgroundColor: "rgba(59, 130, 246, 0.7)", // Blue color for bars with transparency
-        borderColor: "rgba(37, 99, 235, 1)", // Darker blue border
-        borderWidth: 1, // Bar border thickness
-        borderRadius: 5, // Slight rounded edges
+        backgroundColor: ["rgba(59, 130, 246, 0.7)", "rgba(34, 197, 94, 0.7)", "rgba(234, 179, 8, 0.7)"], // Different colors for the pie slices
+        borderColor: ["rgba(37, 99, 235, 1)", "rgba(22, 163, 74, 1)", "rgba(234, 179, 8, 1)"], // Darker borders for each slice
+        borderWidth: 1, // Border width for pie slices
       },
     ],
   };
 
   const options = {
     responsive: true,
-    indexAxis: "x", // Ensures bars are vertical
     plugins: {
       title: {
         display: true,
-        text: "Infrastructure Count Graph",
+        text: "Infrastructure Count Pie Chart",
         font: {
           size: 18,
           weight: "bold",
@@ -52,21 +40,9 @@ const GraphComponent = ({ data }) => {
         position: "top",
       },
     },
-    scales: {
-      y: {
-        beginAtZero: true, // Y-axis starts from 0
-      },
-      x: {
-        ticks: {
-          font: {
-            size: 12,
-          },
-        },
-      },
-    },
   };
 
-  return <Bar data={chartData} options={options} />;
+  return <Pie data={chartData} options={options} />;
 };
 
 export default GraphComponent;
