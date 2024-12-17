@@ -235,19 +235,6 @@ const CheckingTable = () => {
           {renderPaginationButtons()}
         </div>
       </div>
-
-      <Modal show={showModal} onHide={handleClose} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Checking Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedRow ? (
-            <pre>{JSON.stringify(selectedRow, null, 2)}</pre>
-          ) : (
-            "No Details Available"
-          )}
-        </Modal.Body>
-      </Modal>
     </div>
   );
 };
