@@ -112,7 +112,7 @@ const DashboardMain = () => {
   );
 
   return (
-    <section className="p-2 bg-gray-100 min-h-screen">
+    <section className="bg-gray-100 min-h-screen">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-2xl font-semibold text-gray-500 mb-1">
@@ -175,7 +175,7 @@ const DashboardMain = () => {
       </div>
 
       {/* Cards Section */}
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-12 gap-2">
         {allCards.map((card, index) => (
           <div
             key={index}
@@ -192,7 +192,7 @@ const DashboardMain = () => {
       </div>
 
       {/* Map and Pie Chart Layout */}
-      <div className="grid grid-cols-12 gap-4 mt-6">
+      <div className="grid grid-cols-12 gap-2 mt-6">
         {/* Map Card (70% width on large screens, full width on smaller screens) */}
         <div className="col-span-12 lg:col-span-8" style={{ height: "380px" }}>
           <div
