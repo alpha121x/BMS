@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
+import CheckingDetailsModal from "./CheckingDetailsModal";
 
 const CheckingTable = () => {
   const [tableData, setTableData] = useState([]);
@@ -243,54 +244,12 @@ const CheckingTable = () => {
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Details for {selectedRow?.CheckingID || "N/A"}
+            Checking Details {selectedRow?.CheckingID || "N/A"}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          {/* Table Structure */}
-          <table className="w-100 border-collapse border text-sm mb-3">
-            <tbody>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Span Index
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedRow?.SpanIndex || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Damage Kind
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedRow?.DamageKindName || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Damage Level
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedRow?.DamageLevel || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Remarks
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedRow?.Remarks || "N/A"}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
+        {/* Passing selectedRow as a prop to CheckingDetailsModal */}
+        <CheckingDetailsModal selectedRow={selectedRow} />
       </Modal>
     </div>
   );
