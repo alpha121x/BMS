@@ -249,22 +249,6 @@ const CheckingTable = () => {
             <tbody>
               <tr>
                 <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Checking ID
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedRow?.CheckingID || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
-                  Bridge Name
-                </th>
-                <td className="border border-gray-200 px-4 py-2">
-                  {selectedRow?.BridgeName || "N/A"}
-                </td>
-              </tr>
-              <tr>
-                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
                   Span Index
                 </th>
                 <td className="border border-gray-200 px-4 py-2">
