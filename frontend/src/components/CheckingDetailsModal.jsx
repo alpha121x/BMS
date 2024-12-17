@@ -2,6 +2,39 @@ import React from "react";
 import { Modal, Carousel } from "react-bootstrap";
 
 const CheckingDetailsModal = ({ selectedRow }) => {
+  // Dummy photos for testing
+  const dummyPhotos = [
+    "uploads/bus_2024_01_14_12_39_49.jpg",
+    "uploads/bus_2024_01_14_12_40_06.jpg",
+    "uploads/bus_2024_01_14_12_40_38.jpg",
+    "uploads/bus_2024_01_14_12_43_56.jpg",
+    "uploads/bus_2024_01_14_12_45_26.jpg",
+    "uploads/bus_2024_01_16_11_56_43.jpg"
+  ];
+
+
+//   bus_2024_01_14_12_39_49.jpg
+// bus_2024_01_14_12_40_06.jpg
+// bus_2024_01_14_12_40_38.jpg
+// bus_2024_01_14_12_43_26.jpg
+// bus_2024_01_14_12_43_56.jpg
+// bus_2024_01_14_12_44_12.jpg
+// bus_2024_01_14_12_44_40.jpg
+// bus_2024_01_14_12_45_03.jpg
+// bus_2024_01_14_12_45_26.jpg
+// bus_2024_01_14_12_46_27.jpg
+// bus_2024_01_14_12_47_28.jpg
+// bus_2024_01_14_12_47_45.jpg
+// bus_2024_01_15_12_44_58.jpg
+// bus_2024_01_15_12_49_34.jpg
+// bus_2024_01_15_12_52_09.jpg
+// bus_2024_01_16_11_56_43.jpg
+// bus_2024_01_16_11_58_26.jpg
+// bus_2024_01_16_11_59_35.jpg
+// bus_2024_01_16_12_01_36.jpg
+
+  // Use dummy photos for testing, regardless of selectedRow.photos
+  const photosToDisplay = dummyPhotos;
 
   return (
     <Modal.Body>
@@ -44,15 +77,15 @@ const CheckingDetailsModal = ({ selectedRow }) => {
       </table>
 
       {/* Photos Carousel */}
-      {selectedRow?.photos && selectedRow.photos.length > 0 ? (
+      {photosToDisplay && photosToDisplay.length > 0 ? (
         <div className="mb-3">
           <h5>Checking Photos</h5>
           <Carousel>
-            {selectedRow.photos.map((photo, index) => (
+            {photosToDisplay.map((photo, index) => (
               <Carousel.Item key={index}>
                 <img
                   className="d-block w-100"
-                  src={`${photo}`}  // Prepend base URL to image filename
+                  src={`/${photo}`}  // Directly reference the public folder
                   alt={`Photo ${index + 1}`}
                   style={{ maxHeight: "300px", objectFit: "cover" }}
                 />
