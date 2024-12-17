@@ -196,14 +196,13 @@ const CheckingTable = () => {
           <thead>
             <tr>
               <th>Checking ID</th>
-              <th>Object ID</th>
+              <th>Bridge ID</th>
               <th>Work Kind</th>
               <th>Material</th>
               <th>Span Index</th>
               <th>Damage Kind</th>
               <th>Damage Level</th>
               <th>Remarks</th>
-              <th>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -218,18 +217,6 @@ const CheckingTable = () => {
                   <td>{row.DamageKindID || "N/A"}</td>
                   <td>{row.DamageLevelID || "N/A"}</td>
                   <td>{row.Remarks || "N/A"}</td>
-                  <td>
-                    <Button
-                      onClick={() => handleViewClick(row)}
-                      style={{
-                        backgroundColor: "#60A5FA",
-                        border: "none",
-                        color: "white",
-                      }}
-                    >
-                      View
-                    </Button>
-                  </td>
                 </tr>
               ))
             ) : (
