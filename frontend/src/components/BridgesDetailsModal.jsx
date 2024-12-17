@@ -15,6 +15,18 @@ const customIcon = new L.Icon({
   popupAnchor: [1, -34],
 });
 
+const dummyPhotos = [
+  "uploads/bus_2024_01_14_12_39_49.jpg",
+  "uploads/bus_2024_01_14_12_40_06.jpg",
+  "uploads/bus_2024_01_14_12_40_38.jpg",
+  "uploads/bus_2024_01_14_12_43_56.jpg",
+  "uploads/bus_2024_01_14_12_45_26.jpg",
+  "uploads/bus_2024_01_16_11_56_43.jpg"
+];
+
+const photosToDisplay = dummyPhotos;
+
+
 
 const BridgeDetailsModal = ({ selectedBridge }) => {
   const photos = selectedBridge?.Photos || [];
@@ -159,21 +171,25 @@ const BridgeDetailsModal = ({ selectedBridge }) => {
           )}
         </tbody>
       </table>
-
-      {/* Photo Carousel */}
-      {photos.length > 0 && (
-        <Carousel>
-          {photos.map((photo, index) => (
-            <Carousel.Item key={index}>
-              <img
-                className="d-block w-100"
-                src={photo}
-                alt={`Bridge Photo ${index + 1}`}
-                style={{ maxHeight: "300px", objectFit: "cover" }}
-              />
-            </Carousel.Item>
-          ))}
-        </Carousel>
+  {/* Photos Carousel */}
+      {photosToDisplay && photosToDisplay.length > 0 ? (
+        <div className="mb-3">
+          <h5>Checking Photos</h5>
+          <Carousel>
+            {photosToDisplay.map((photo, index) => (
+              <Carousel.Item key={index}>
+                <img
+                  className="d-block w-100"
+                  src={`/${photo}`}  // Directly reference the public folder
+                  alt={`Photo ${index + 1}`}
+                  style={{ maxHeight: "300px", objectFit: "cover" }}
+                />
+              </Carousel.Item>
+            ))}
+          </Carousel>
+        </div>
+      ) : (
+        <p>No photos available</p> // Message when no photos are available
       )}
     </Modal.Body>
   );

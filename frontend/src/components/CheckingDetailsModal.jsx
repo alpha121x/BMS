@@ -13,26 +13,6 @@ const CheckingDetailsModal = ({ selectedRow }) => {
   ];
 
 
-//   bus_2024_01_14_12_39_49.jpg
-// bus_2024_01_14_12_40_06.jpg
-// bus_2024_01_14_12_40_38.jpg
-// bus_2024_01_14_12_43_26.jpg
-// bus_2024_01_14_12_43_56.jpg
-// bus_2024_01_14_12_44_12.jpg
-// bus_2024_01_14_12_44_40.jpg
-// bus_2024_01_14_12_45_03.jpg
-// bus_2024_01_14_12_45_26.jpg
-// bus_2024_01_14_12_46_27.jpg
-// bus_2024_01_14_12_47_28.jpg
-// bus_2024_01_14_12_47_45.jpg
-// bus_2024_01_15_12_44_58.jpg
-// bus_2024_01_15_12_49_34.jpg
-// bus_2024_01_15_12_52_09.jpg
-// bus_2024_01_16_11_56_43.jpg
-// bus_2024_01_16_11_58_26.jpg
-// bus_2024_01_16_11_59_35.jpg
-// bus_2024_01_16_12_01_36.jpg
-
   // Use dummy photos for testing, regardless of selectedRow.photos
   const photosToDisplay = dummyPhotos;
 
