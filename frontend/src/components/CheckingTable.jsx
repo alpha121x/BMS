@@ -23,12 +23,11 @@ const CheckingTable = () => {
     try {
       const response = await fetch(`${BASE_URL}/api/checkings`);
       if (!response.ok) throw new Error("Failed to fetch data");
-  
+
       const result = await response.json();
-    //   console.log("Fetched Data:", result);
-  
+
       if (Array.isArray(result.data)) {
-        setTableData(result.data); // Access 'data' property
+        setTableData(result.data);
       } else {
         throw new Error("Invalid data format");
       }
@@ -38,8 +37,6 @@ const CheckingTable = () => {
       setLoading(false);
     }
   };
-  
-  
 
   const handleViewClick = (row) => {
     setSelectedRow(row);
@@ -136,8 +133,7 @@ const CheckingTable = () => {
           onClick={() => handlePageChange(totalPages)}
           style={{
             ...buttonStyles,
-            backgroundColor:
-              currentPage === totalPages ? "#3B82F6" : "#60A5FA",
+            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
           }}
         >
           {totalPages}
@@ -170,7 +166,9 @@ const CheckingTable = () => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">Checking Table</h6>
+        <h6 className="card-title text-lg font-semibold pb-2">
+          Checking Table
+        </h6>
 
         {loading && (
           <div
@@ -197,13 +195,10 @@ const CheckingTable = () => {
             <tr>
               <th>Checking ID</th>
               <th>Bridge Name</th>
-              <th>Span Index</th>
               <th>Work Kind</th>
               <th>Material</th>
               <th>Parts</th>
-              <th>Damage Kind</th>
-              <th>Damage Level</th>
-              <th>Remarks</th>
+              <th>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -212,18 +207,23 @@ const CheckingTable = () => {
                 <tr key={index}>
                   <td>{row.CheckingID || "N/A"}</td>
                   <td>{row.BridgeName || "N/A"}</td>
-                  <td>{row.SpanIndex || "N/A"}</td>
                   <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
-                  <td>{row.DamageKindName || "N/A"}</td>
-                  <td>{row.DamageLevel || "N/A"}</td>
-                  <td>{row.Remarks || "N/A"}</td>
+                  <td>
+                    <Button
+                      variant="info"
+                      size="sm"
+                      onClick={() => handleViewClick(row)} // Triggers modal on click
+                    >
+                      View
+                    </Button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="9" className="text-center">
+                <td colSpan="7" className="text-center">
                   No data available
                 </td>
               </tr>
@@ -235,6 +235,76 @@ const CheckingTable = () => {
           {renderPaginationButtons()}
         </div>
       </div>
+
+      {/* Modal for viewing more details */}
+      <Modal show={showModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Details for {selectedRow?.CheckingID || "N/A"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {/* Table Structure */}
+          <table className="w-100 border-collapse border text-sm mb-3">
+            <tbody>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Checking ID
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedRow?.CheckingID || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Bridge Name
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedRow?.BridgeName || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Span Index
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedRow?.SpanIndex || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Damage Kind
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedRow?.DamageKindName || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Damage Level
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedRow?.DamageLevel || "N/A"}
+                </td>
+              </tr>
+              <tr>
+                <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+                  Remarks
+                </th>
+                <td className="border border-gray-200 px-4 py-2">
+                  {selectedRow?.Remarks || "N/A"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
