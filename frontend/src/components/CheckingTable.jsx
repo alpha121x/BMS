@@ -212,9 +212,12 @@ const CheckingTable = () => {
                   <td>{row.PartsName || "N/A"}</td>
                   <td>
                     <Button
-                      variant="info"
-                      size="sm"
-                      onClick={() => handleViewClick(row)} // Triggers modal on click
+                      onClick={() => handleViewClick(row)}
+                      style={{
+                        backgroundColor: "#60A5FA",
+                        border: "none",
+                        color: "white",
+                      }}
                     >
                       View
                     </Button>
