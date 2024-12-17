@@ -223,9 +223,6 @@ app.get("/api/checkings", async (req, res) => {
   }
 });
 
-
-
-
 // API route to get Zones data
 app.get('/api/zones', async (req, res) => {
   try {

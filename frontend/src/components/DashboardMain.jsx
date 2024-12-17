@@ -4,6 +4,7 @@ import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
+import CheckingTable from "./CheckingTable";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%"); // Default: All districts
@@ -215,6 +216,11 @@ const DashboardMain = () => {
           startDate={startDate}
           selectedZone={selectedZone}
         />
+      </div>
+
+      {/* Checking Listing Section */}
+      <div className="mt-2">
+        <CheckingTable />
       </div>
     </section>
   );
