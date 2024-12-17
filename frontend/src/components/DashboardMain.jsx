@@ -46,7 +46,7 @@ const DashboardMain = () => {
 
   const inspectionData = [
     {
-      label: "Bridges Inspected",
+      label: "Bridges Checked",
       value: "1,511",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",

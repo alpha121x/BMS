@@ -168,7 +168,7 @@ const CheckingTable = () => {
     >
       <div className="card-body pb-0">
         <h6 className="card-title text-lg font-semibold pb-2">
-          Checking Table
+          Bridges Checked
         </h6>
 
         {loading && (
