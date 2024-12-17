@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
@@ -15,6 +15,29 @@ const DashboardMain = () => {
   const [infrastructureData, setInfrastructureData] = useState([
     14, 1433, 17302,
   ]);
+
+  // State for back-to-top button visibility
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Show back-to-top button based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Data for cards
   const cardData = [
@@ -171,7 +194,7 @@ const DashboardMain = () => {
       {/* Map and Pie Chart Layout */}
       <div className="grid grid-cols-12 gap-4 mt-6">
         {/* Map Card (70% width on large screens, full width on smaller screens) */}
-      <div className="col-span-12 lg:col-span-8" style={{ height: '380px' }}>
+        <div className="col-span-12 lg:col-span-8" style={{ height: "380px" }}>
           <div
             className="card p-2 rounded-lg text-black"
             style={{
@@ -222,6 +245,17 @@ const DashboardMain = () => {
       <div className="mt-2">
         <CheckingTable />
       </div>
+
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-5 right-5 bg-blue-500 text-white rounded-full p-3 shadow-lg hover:bg-blue-600 focus:outline-none w-12 h-12 flex items-center justify-center"
+        >
+          ↑
+        </button>
+      )}
+
     </section>
   );
 };
