@@ -39,7 +39,7 @@ app.post("/api/login", async (req, res) => {
     // Query to fetch user details from tbl_users_web
     const query = `
     SELECT id, username, password, phone_num, email, role_id, is_active
-    FROM public.tbl_users_web
+    FROM public.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
 `;
@@ -187,6 +187,64 @@ app.get("/api/bridges", async (req, res) => {
   } catch (error) {
     console.error("Error fetching bridge data:", error.message);
     res.status(500).json({ error: "An error occurred while fetching bridge data." });
+  }
+});
+
+// API endpoint to fetch checkings data with filtering by ZoneID and DistrictID
+app.get("/api/checkings", async (req, res) => {
+  const { district, zone } = req.query; // Receive 'district' and 'zone' from the query parameters
+
+  let queryParams = []; // Holds parameter values
+  let whereClauses = []; // Holds dynamic WHERE conditions
+
+  // Add condition for ZoneID if provided
+  if (zone) {
+    queryParams.push(zone);
+    whereClauses.push(`o."ZoneID"::text ILIKE $${queryParams.length}`);
+  }
+
+  // Add condition for DistrictID if provided
+  if (district) {
+    queryParams.push(district);
+    whereClauses.push(`o."DistrictID"::text ILIKE $${queryParams.length}`);
+  }
+
+  // Base query
+  let query = `
+    SELECT 
+      o."CheckingID", 
+      o."ObjectID", 
+      o."WorkKindID", 
+      o."PartsID", 
+      o."MaterialID", 
+      o."SpanIndex", 
+      o."DamageKindID", 
+      o."DamageLevelID", 
+      o."Remarks"
+    FROM public."D_Checkings" o
+  `;
+
+  // Add WHERE clause if filters exist
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
+
+  query += `
+    ORDER BY o."CheckingID" ASC;
+  `;
+
+  try {
+    // Execute the query with parameters
+    const result = await pool.query(query, queryParams);
+
+    // Return the rows as JSON
+    res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching checkings data:", error.message);
+    res.status(500).json({ error: "An error occurred while fetching checkings data." });
   }
 });
 
