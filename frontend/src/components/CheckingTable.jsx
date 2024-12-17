@@ -196,10 +196,11 @@ const CheckingTable = () => {
           <thead>
             <tr>
               <th>Checking ID</th>
-              <th>Bridge ID</th>
+              <th>Bridge Name</th>
+              <th>Span Index</th>
               <th>Work Kind</th>
               <th>Material</th>
-              <th>Span Index</th>
+              <th>Parts</th>
               <th>Damage Kind</th>
               <th>Damage Level</th>
               <th>Remarks</th>
@@ -210,12 +211,13 @@ const CheckingTable = () => {
               currentData.map((row, index) => (
                 <tr key={index}>
                   <td>{row.CheckingID || "N/A"}</td>
-                  <td>{row.ObjectID || "N/A"}</td>
-                  <td>{row.WorkKindID || "N/A"}</td>
-                  <td>{row.MaterialID || "N/A"}</td>
+                  <td>{row.BridgeName || "N/A"}</td>
                   <td>{row.SpanIndex || "N/A"}</td>
-                  <td>{row.DamageKindID || "N/A"}</td>
-                  <td>{row.DamageLevelID || "N/A"}</td>
+                  <td>{row.WorkKindName || "N/A"}</td>
+                  <td>{row.MaterialName || "N/A"}</td>
+                  <td>{row.PartsName || "N/A"}</td>
+                  <td>{row.DamageKindName || "N/A"}</td>
+                  <td>{row.DamageLevel || "N/A"}</td>
                   <td>{row.Remarks || "N/A"}</td>
                 </tr>
               ))

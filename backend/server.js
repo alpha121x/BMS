@@ -190,29 +190,35 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
-// API endpoint to fetch checkings data without filtering
+// API endpoint to fetch checkings data with additional details
 app.get("/api/checkings", async (req, res) => {
-  // Base query (fetches all data)
+  // Base query (fetches all data with joins to get additional information)
   let query = `
     SELECT 
       o."CheckingID", 
-      o."ObjectID", 
-      o."WorkKindID", 
-      o."PartsID", 
-      o."MaterialID", 
-      o."SpanIndex", 
-      o."DamageKindID", 
-      o."DamageLevelID", 
-      o."Remarks"
+      o."SpanIndex",  
+      o."Remarks",
+      wk."WorkKindName", 
+      p."PartsName", 
+      m."MaterialName", 
+      dk."DamageKindName", 
+      b."BridgeName", 
+      dl."DamageLevel"
     FROM public."D_Checkings" o
+    LEFT JOIN public."M_WorkKinds" wk ON o."WorkKindID" = wk."WorkKindID"
+    LEFT JOIN public."D_Objects" b ON o."ObjectID" = b."ObjectID"
+    LEFT JOIN public."M_Parts" p ON o."PartsID" = p."PartsID"
+    LEFT JOIN public."M_Materials" m ON o."MaterialID" = m."MaterialID"
+    LEFT JOIN public."M_DamageKinds" dk ON o."DamageKindID" = dk."DamageKindID"
+    LEFT JOIN public."M_DamageLevels" dl ON o."DamageLevelID" = dl."DamageLevelID"
     ORDER BY o."CheckingID" ASC;
   `;
 
   try {
-    // Execute the query without parameters
+    // Execute the query with joins to get the additional information
     const result = await pool.query(query);
 
-    // Return the rows as JSON
+    // Return the rows as JSON with detailed data
     res.status(200).json({
       success: true,
       data: result.rows,
@@ -222,6 +228,7 @@ app.get("/api/checkings", async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching checkings data." });
   }
 });
+
 
 // API route to get Zones data
 app.get('/api/zones', async (req, res) => {
