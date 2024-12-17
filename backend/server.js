@@ -186,7 +186,9 @@ app.get("/api/bridges", async (req, res) => {
     res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error fetching bridge data:", error.message);
-    res.status(500).json({ error: "An error occurred while fetching bridge data." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching bridge data." });
   }
 });
 
@@ -194,24 +196,39 @@ app.get("/api/bridges", async (req, res) => {
 app.get("/api/checkings", async (req, res) => {
   // Base query (fetches all data with joins to get additional information)
   let query = `
-    SELECT 
-      o."CheckingID", 
-      o."SpanIndex",  
-      o."Remarks",
-      wk."WorkKindName", 
-      p."PartsName", 
-      m."MaterialName", 
-      dk."DamageKindName", 
-      b."BridgeName", 
-      dl."DamageLevel"
-    FROM public."D_Checkings" o
-    LEFT JOIN public."M_WorkKinds" wk ON o."WorkKindID" = wk."WorkKindID"
-    LEFT JOIN public."D_Objects" b ON o."ObjectID" = b."ObjectID"
-    LEFT JOIN public."M_Parts" p ON o."PartsID" = p."PartsID"
-    LEFT JOIN public."M_Materials" m ON o."MaterialID" = m."MaterialID"
-    LEFT JOIN public."M_DamageKinds" dk ON o."DamageKindID" = dk."DamageKindID"
-    LEFT JOIN public."M_DamageLevels" dl ON o."DamageLevelID" = dl."DamageLevelID"
-    ORDER BY o."CheckingID" ASC;
+  SELECT 
+    o."CheckingID", 
+    o."SpanIndex",  
+    o."Remarks",
+    wk."WorkKindName", 
+    p."PartsName", 
+    m."MaterialName", 
+    dk."DamageKindName", 
+    b."BridgeName", 
+    dl."DamageLevel",
+    -- Aggregate photo URLs into an array for each CheckingID
+    array_agg(cp."PhotoPath") AS Photos
+FROM public."D_Checkings" o
+LEFT JOIN public."M_WorkKinds" wk ON o."WorkKindID" = wk."WorkKindID"
+LEFT JOIN public."D_Objects" b ON o."ObjectID" = b."ObjectID"
+LEFT JOIN public."M_Parts" p ON o."PartsID" = p."PartsID"
+LEFT JOIN public."M_Materials" m ON o."MaterialID" = m."MaterialID"
+LEFT JOIN public."M_DamageKinds" dk ON o."DamageKindID" = dk."DamageKindID"
+LEFT JOIN public."M_DamageLevels" dl ON o."DamageLevelID" = dl."DamageLevelID"
+-- Join with D_CheckingPhotos table to get photos related to CheckingID
+LEFT JOIN public."D_CheckingPhotos" cp ON o."CheckingID" = cp."CheckingID"
+GROUP BY 
+    o."CheckingID", 
+    o."SpanIndex",  
+    o."Remarks", 
+    wk."WorkKindName", 
+    p."PartsName", 
+    m."MaterialName", 
+    dk."DamageKindName", 
+    b."BridgeName", 
+    dl."DamageLevel"
+ORDER BY o."CheckingID" ASC;
+
   `;
 
   try {
@@ -225,30 +242,35 @@ app.get("/api/checkings", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching checkings data:", error.message);
-    res.status(500).json({ error: "An error occurred while fetching checkings data." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching checkings data." });
   }
 });
 
-
 // API route to get Zones data
-app.get('/api/zones', async (req, res) => {
+app.get("/api/zones", async (req, res) => {
   try {
-    const result = await pool.query('SELECT "ZoneID", "ZoneName" FROM public."M_Zones"');
+    const result = await pool.query(
+      'SELECT "ZoneID", "ZoneName" FROM public."M_Zones"'
+    );
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 // API route to get Districts
-app.get('/api/districts', async (req, res) => {
+app.get("/api/districts", async (req, res) => {
   try {
-    const result = await pool.query('SELECT "DistrictsID", "DistrictsName" FROM public."M_Districts"');
+    const result = await pool.query(
+      'SELECT "DistrictsID", "DistrictsName" FROM public."M_Districts"'
+    );
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
