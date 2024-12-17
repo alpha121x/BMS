@@ -2,8 +2,6 @@ import React from "react";
 import { Modal, Carousel } from "react-bootstrap";
 
 const CheckingDetailsModal = ({ selectedRow }) => {
-  // Log selectedRow.Photos for debugging purposes
-  console.log(selectedRow?.Photos);
 
   return (
     <Modal.Body>
@@ -46,15 +44,15 @@ const CheckingDetailsModal = ({ selectedRow }) => {
       </table>
 
       {/* Photos Carousel */}
-      {selectedRow?.Photos && selectedRow.Photos.length > 0 ? (
+      {selectedRow?.photos && selectedRow.photos.length > 0 ? (
         <div className="mb-3">
-          <h5>Photos</h5>
+          <h5>Checking Photos</h5>
           <Carousel>
-            {selectedRow.Photos.map((photo, index) => (
+            {selectedRow.photos.map((photo, index) => (
               <Carousel.Item key={index}>
                 <img
                   className="d-block w-100"
-                  src={photo || 'https://via.placeholder.com/150'} // Placeholder if no photo URL
+                  src={`${photo}`}  // Prepend base URL to image filename
                   alt={`Photo ${index + 1}`}
                   style={{ maxHeight: "300px", objectFit: "cover" }}
                 />
