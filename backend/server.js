@@ -1,10 +1,10 @@
 const express = require("express");
-const jwt = require("jsonwebtoken"); // Correctly import jsonwebtoken for JWT handling
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
 
-const JWT_SECRET = "123456789"; // Replace with an environment variable for production
+const JWT_SECRET = "123456789";
 
 const app = express();
 const port = process.env.PORT || 8081;

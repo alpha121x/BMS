@@ -76,7 +76,7 @@ const DashboardMain = () => {
     },
     {
       label: "Total Checkings",
-      value: "23,573",
+      value: "23,578",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
     },
