@@ -190,26 +190,9 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
-// API endpoint to fetch checkings data with filtering by ZoneID and DistrictID
+// API endpoint to fetch checkings data without filtering
 app.get("/api/checkings", async (req, res) => {
-  const { district, zone } = req.query; // Receive 'district' and 'zone' from the query parameters
-
-  let queryParams = []; // Holds parameter values
-  let whereClauses = []; // Holds dynamic WHERE conditions
-
-  // Add condition for ZoneID if provided
-  if (zone) {
-    queryParams.push(zone);
-    whereClauses.push(`o."ZoneID"::text ILIKE $${queryParams.length}`);
-  }
-
-  // Add condition for DistrictID if provided
-  if (district) {
-    queryParams.push(district);
-    whereClauses.push(`o."DistrictID"::text ILIKE $${queryParams.length}`);
-  }
-
-  // Base query
+  // Base query (fetches all data)
   let query = `
     SELECT 
       o."CheckingID", 
@@ -222,20 +205,12 @@ app.get("/api/checkings", async (req, res) => {
       o."DamageLevelID", 
       o."Remarks"
     FROM public."D_Checkings" o
-  `;
-
-  // Add WHERE clause if filters exist
-  if (whereClauses.length > 0) {
-    query += ` WHERE ${whereClauses.join(" AND ")}`;
-  }
-
-  query += `
     ORDER BY o."CheckingID" ASC;
   `;
 
   try {
-    // Execute the query with parameters
-    const result = await pool.query(query, queryParams);
+    // Execute the query without parameters
+    const result = await pool.query(query);
 
     // Return the rows as JSON
     res.status(200).json({
@@ -247,6 +222,7 @@ app.get("/api/checkings", async (req, res) => {
     res.status(500).json({ error: "An error occurred while fetching checkings data." });
   }
 });
+
 
 
 
