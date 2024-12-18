@@ -194,7 +194,7 @@ const CheckingTable = () => {
         <Table bordered responsive>
           <thead>
             <tr>
-              <th>Checking ID</th>
+              {/* <th>Checking ID</th> */}
               <th>Bridge Name</th>
               <th>Work Kind</th>
               <th>Material</th>
@@ -206,7 +206,7 @@ const CheckingTable = () => {
             {currentData.length > 0 ? (
               currentData.map((row, index) => (
                 <tr key={index}>
-                  <td>{row.CheckingID || "N/A"}</td>
+                  {/* <td>{row.CheckingID || "N/A"}</td> */}
                   <td>{row.BridgeName || "N/A"}</td>
                   <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
@@ -244,7 +244,7 @@ const CheckingTable = () => {
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Checking Details {selectedRow?.CheckingID || "N/A"}
+            Checking Details
           </Modal.Title>
         </Modal.Header>
 
