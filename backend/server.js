@@ -248,6 +248,35 @@ ORDER BY o."CheckingID" ASC;
   }
 });
 
+// API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
+app.get("/api/bridgecordinates", async (req, res) => {
+  try {
+    // SQL query to get the required data (ObjectID, BridgeName, XCentroID, YCentroID)
+    const query = `
+      SELECT 
+        "ObjectID", 
+        "BridgeName", 
+        "XCentroID", 
+        "YCentroID"
+      FROM public."D_Objects"
+      LIMIT 1000; -- Limit the number of rows to 1000 for performance reasons
+      ;
+    `;
+
+    const result = await pool.query(query);
+
+    // Check if any data is returned
+    if (result.rows.length > 0) {
+      res.json(result.rows); // Send the result as JSON
+    } else {
+      res.status(404).json({ message: "No bridge data found" });
+    }
+  } catch (error) {
+    console.error("Error fetching bridge data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // API route to get Zones data
 app.get("/api/zones", async (req, res) => {
   try {
