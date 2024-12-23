@@ -206,10 +206,7 @@ const DashboardMain = () => {
           >
             <div className="card-body pb-0">
               <h2 className="text-xl font-semibold mb-4">Map</h2>
-              <Map
-              selectedDistrict={selectedDistrict}
-              selectedZone={selectedZone}
-              />
+              <Map />
             </div>
           </div>
         </div>
