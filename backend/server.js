@@ -249,31 +249,59 @@ ORDER BY o."CheckingID" ASC;
 });
 
 // API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
-app.get("/api/bridgecordinates", async (req, res) => {
-  try {
-    // SQL query to get the required data (ObjectID, BridgeName, XCentroID, YCentroID)
-    const query = `
-      SELECT 
-        "ObjectID", 
-        "BridgeName", 
-        "XCentroID", 
-        "YCentroID"
-      FROM public."D_Objects" LIMIT 1000;
-    `;
+app.get("/api/bridgecoordinates", async (req, res) => {
+  const { district = "%", zone = "%" } = req.query; // Default to '%' for wildcard matching
 
-    const result = await pool.query(query);
+  // Initialize query parameters and WHERE clauses
+  const queryParams = [];
+  const whereClauses = [];
+
+  // Add condition for ZoneID if provided
+  if (zone !== "%") {
+    queryParams.push(zone);
+    whereClauses.push(`"ZoneID"::text ILIKE $${queryParams.length}`);
+  }
+
+  // Add condition for DistrictID if provided
+  if (district !== "%") {
+    queryParams.push(district);
+    whereClauses.push(`"DistrictID"::text ILIKE $${queryParams.length}`);
+  }
+
+  // Base SQL query
+  let query = `
+    SELECT 
+      "ObjectID", 
+      "BridgeName", 
+      "XCentroID", 
+      "YCentroID"
+    FROM public."D_Objects"
+  `;
+
+  // Add WHERE clause if filters exist
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
+
+  // Limit the results
+  query += ` LIMIT 1000;`;
+
+  try {
+    // Query execution with parameters
+    const result = await pool.query(query, queryParams);
 
     // Check if any data is returned
     if (result.rows.length > 0) {
-      res.json(result.rows); // Send the result as JSON
+      res.status(200).json(result.rows); // Send the result as JSON
     } else {
       res.status(404).json({ message: "No bridge data found" });
     }
   } catch (error) {
-    console.error("Error fetching bridge data:", error);
+    console.error("Error fetching bridge coordinates:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // API route to get Zones data
 app.get("/api/zones", async (req, res) => {

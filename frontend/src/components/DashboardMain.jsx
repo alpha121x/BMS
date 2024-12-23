@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
@@ -8,7 +8,7 @@ import CheckingTable from "./CheckingTable";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [startDate, setStartDate] = useState(""); 
+  const [startDate, setStartDate] = useState("");
   const [districtId, setDistrictId] = useState(null);
   const [selectedZone, setSelectedZone] = useState("%");
 
@@ -206,7 +206,10 @@ const DashboardMain = () => {
           >
             <div className="card-body pb-0">
               <h2 className="text-xl font-semibold mb-4">Map</h2>
-              <Map />
+              <Map
+                selectedDistrict={selectedDistrict}
+                selectedZone={selectedZone}
+              />
             </div>
           </div>
         </div>
@@ -255,7 +258,6 @@ const DashboardMain = () => {
           ↑
         </button>
       )}
-
     </section>
   );
 };
