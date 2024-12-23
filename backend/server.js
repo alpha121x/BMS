@@ -258,9 +258,7 @@ app.get("/api/bridgecordinates", async (req, res) => {
         "BridgeName", 
         "XCentroID", 
         "YCentroID"
-      FROM public."D_Objects"
-      LIMIT 1000; -- Limit the number of rows to 1000 for performance reasons
-      ;
+      FROM public."D_Objects" LIMIT 1000;
     `;
 
     const result = await pool.query(query);

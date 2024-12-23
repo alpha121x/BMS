@@ -3,12 +3,16 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix for default marker icons
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+// Create a custom smaller icon
+const smallIcon = new L.Icon({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconSize: [10, 19],    // Size of the icon [width, height]
+  iconAnchor: [7, 24],   // Point of the icon which will correspond to marker's location
+  popupAnchor: [1, -24], // Point from which the popup should open relative to the iconAnchor
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  shadowSize: [19, 19],  // Size of the shadow
+  shadowAnchor: [7, 24], // The same for the shadow
 });
 
 const Map = () => {
@@ -35,7 +39,6 @@ const Map = () => {
     fetchBridges();
   }, []);
 
-  // Coordinates for Lahore, Pakistan
   const center = [31.5497, 74.3436];
 
   return (
@@ -59,8 +62,8 @@ const Map = () => {
         {bridges.map((bridge) => (
           <Marker
             key={bridge.ObjectID}
-            // Note the order: [YCentroID, XCentroID] for [latitude, longitude]
             position={[bridge.YCentroID, bridge.XCentroID]}
+            icon={smallIcon}
           >
             <Popup>
               <strong>{bridge.BridgeName}</strong>
