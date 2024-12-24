@@ -26,7 +26,7 @@ const Map = ({ selectedDistrict, selectedZone }) => {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bridgecoordinates?district=${selectedDistrict}&zone=${selectedZone}&southWestLat=${_southWest.lat}&southWestLng=${_southWest.lng}&northEastLat=${_northEast.lat}&northEastLng=${_northEast.lng}`
+        `${BASE_URL}/api/bridgecoordinates?southWestLat=${_southWest.lat}&southWestLng=${_southWest.lng}&northEastLat=${_northEast.lat}&northEastLng=${_northEast.lng}`
       );
 
       if (!response.ok) {
