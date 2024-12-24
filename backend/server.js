@@ -250,7 +250,14 @@ ORDER BY o."CheckingID" ASC;
 
 // API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
 app.get("/api/bridgecoordinates", async (req, res) => {
-  const { district = "%", zone = "%" } = req.query; // Default to '%' for wildcard matching
+  const { 
+    district = "%", 
+    zone = "%", 
+    southWestLat, 
+    southWestLng, 
+    northEastLat, 
+    northEastLng 
+  } = req.query; // Default district and zone to '%' for wildcard matching
 
   // Initialize query parameters and WHERE clauses
   const queryParams = [];
@@ -266,6 +273,15 @@ app.get("/api/bridgecoordinates", async (req, res) => {
   if (district !== "%") {
     queryParams.push(district);
     whereClauses.push(`"DistrictID"::text ILIKE $${queryParams.length}`);
+  }
+
+  // Add conditions for bounding box if all coordinates are provided
+  if (southWestLat && southWestLng && northEastLat && northEastLng) {
+    queryParams.push(parseFloat(southWestLat), parseFloat(northEastLat));
+    whereClauses.push(`"YCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
+
+    queryParams.push(parseFloat(southWestLng), parseFloat(northEastLng));
+    whereClauses.push(`"XCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
   }
 
   // Base SQL query

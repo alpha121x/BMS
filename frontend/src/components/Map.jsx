@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { BASE_URL } from "./config";
@@ -8,51 +8,62 @@ import { BASE_URL } from "./config";
 const smallIcon = new L.Icon({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconSize: [10, 19], // Size of the icon [width, height]
-  iconAnchor: [7, 24], // Point of the icon which will correspond to marker's location
-  popupAnchor: [1, -24], // Point from which the popup should open relative to the iconAnchor
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  shadowSize: [19, 19], // Size of the shadow
-  shadowAnchor: [7, 24], // The same for the shadow
+  iconSize: [10, 19], // Adjust size for a smaller icon
+  iconAnchor: [5, 19], // Anchor point for the icon
+  popupAnchor: [1, -19], // Position of the popup relative to the icon
 });
+
 
 const Map = ({ selectedDistrict, selectedZone }) => {
   const [bridges, setBridges] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchBridges = async () => {
-      setLoading(true);
-      setError(null); // Reset the error state before fetching
+  const fetchBridgesByExtent = async (bounds) => {
+    const { _southWest, _northEast } = bounds;
 
-      try {
-        const response = await fetch(
-          `${BASE_URL}/api/bridgecoordinates?district=${selectedDistrict}&zone=${selectedZone}`
-        );
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        // console.log("Bridge data:", data);
+    setLoading(true);
+    setError(null);
 
-        if (Array.isArray(data) && data.length > 0) {
-          setBridges(data);
-        } else {
-          setError("No bridge data found for the selected district and zone.");
-        }
-      } catch (error) {
-        console.error("Error fetching bridge data:", error);
-        setError("Failed to fetch bridge data. Please try again.");
-      } finally {
-        setLoading(false);
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/bridgecoordinates?district=${selectedDistrict}&zone=${selectedZone}&southWestLat=${_southWest.lat}&southWestLng=${_southWest.lng}&northEastLat=${_northEast.lat}&northEastLng=${_northEast.lng}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
 
-    fetchBridges();
-  }, [selectedDistrict, selectedZone]);
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setBridges(data);
+      } else {
+        setError("No bridge data found for the current map view.");
+      }
+    } catch (error) {
+      console.error("Error fetching bridge data:", error);
+      setError("Failed to fetch bridge data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const MapEventHandler = () => {
+    const map = useMapEvents({
+      moveend: () => {
+        const bounds = map.getBounds();
+        fetchBridgesByExtent(bounds);
+      },
+    });
+
+    // Initial fetch based on default bounds
+    useEffect(() => {
+      const initialBounds = map.getBounds();
+      fetchBridgesByExtent(initialBounds);
+    }, [map]);
+
+    return null;
+  };
 
   const center = [31.5497, 74.3436]; // Default map center coordinates
 
@@ -75,6 +86,7 @@ const Map = ({ selectedDistrict, selectedZone }) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
+        <MapEventHandler />
 
         {bridges.map((bridge) => (
           <Marker
