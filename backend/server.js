@@ -300,7 +300,7 @@ app.get("/api/bridgecoordinates", async (req, res) => {
   }
 
   // Limit the results
-  query += ` LIMIT 1000;`;
+  // query += ` LIMIT 1000;`;
 
   try {
     // Query execution with parameters
