@@ -36,7 +36,7 @@ const Map = ({ selectedDistrict, selectedZone }) => {
         }
         
         const data = await response.json();
-        console.log("Bridge data:", data);
+        // console.log("Bridge data:", data);
 
         if (Array.isArray(data) && data.length > 0) {
           setBridges(data);
