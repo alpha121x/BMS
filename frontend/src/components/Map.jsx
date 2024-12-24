@@ -8,11 +8,10 @@ import { BASE_URL } from "./config";
 const smallIcon = new L.Icon({
   iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
   iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconSize: [10, 19], // Adjust size for a smaller icon
-  iconAnchor: [5, 19], // Anchor point for the icon
-  popupAnchor: [1, -19], // Position of the popup relative to the icon
+  iconSize: [10, 19],
+  iconAnchor: [5, 19],
+  popupAnchor: [1, -19],
 });
-
 
 const Map = ({ selectedDistrict, selectedZone }) => {
   const [bridges, setBridges] = useState([]);
@@ -56,16 +55,22 @@ const Map = ({ selectedDistrict, selectedZone }) => {
       },
     });
 
-    // Initial fetch based on default bounds
-    useEffect(() => {
-      const initialBounds = map.getBounds();
-      fetchBridgesByExtent(initialBounds);
-    }, [map]);
-
     return null;
   };
 
   const center = [31.5497, 74.3436]; // Default map center coordinates
+
+  useEffect(() => {
+    // Fetch data for the initial map bounds on mount
+    const initialFetch = async () => {
+      const mapBounds = {
+        _southWest: { lat: center[0] - 0.1, lng: center[1] - 0.1 },
+        _northEast: { lat: center[0] + 0.1, lng: center[1] + 0.1 },
+      };
+      await fetchBridgesByExtent(mapBounds);
+    };
+    initialFetch();
+  }, [selectedDistrict, selectedZone]);
 
   return (
     <div className="w-full h-96 relative">
