@@ -4,50 +4,46 @@ import { faUser, faLock, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import logo from "/uu_logo.png"; 
 import bmslogo from "/bms.png"; 
-import { BASE_URL } from './components/config.jsx';
+import { BASE_URL } from './components/config';
 
-const Login = () => {
+const LoginEvaluation = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLoginEvaluation = async () => {
     setLoading(true);
     setError(""); 
     try {
-      const response = await fetch(`${BASE_URL}/api/login`, {
+      const response = await fetch(`${BASE_URL}/api/loginEvaluation`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         setError(data.message); 
         console.error("Login failed:", data.message);
         setLoading(false); 
         return;
       }
-
-      // Store the JWT token
+  
+      // Store the JWT token and user data
       if (data.token) {
         localStorage.setItem("token", data.token);
-      } else {
-        console.warn("No token received from server");
+        localStorage.setItem("isAuthenticated", "true");
       }
-
-      // Store user details including roleId and districtId if they're included in the response
+  
       if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/Evaluation", {});
+        localStorage.setItem("userEvaluation", JSON.stringify(data.user));
+        navigate("/Evaluation");
       }
-
-      localStorage.setItem("isAuthenticated", "true");
     } catch (error) {
       console.error("Login error:", error);
       setError("An error occurred. Please try again.");
@@ -55,7 +51,7 @@ const Login = () => {
       setLoading(false); 
     }
   };
-
+  
   // Handle the Enter key press event
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -133,7 +129,7 @@ const Login = () => {
 
               {/* Login Button */}
               <button
-                onClick={handleLogin}
+                onClick={handleLoginEvaluation}
                 className="w-full py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition flex items-center justify-center"
                 disabled={loading} 
               >
@@ -154,4 +150,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginEvaluation;
