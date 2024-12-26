@@ -2,15 +2,23 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './index.css';
-import Login from './Login'; // Login Component
+import LoginEvaluation from './LoginEvaluation'; // Login Component for Evaluation
+import Login from './Login'; // Main Login Component
 import Dashboard from './Dashboard'; // Dashboard Component
 import Reports from './Reports'; // Reports Component
-import SetupListing from './SetupListing';
+import SetupListing from './SetupListing'; // SetupListing Component
+import EvaluationModule from './Evaluation'; // Evaluation Module Component
 
-// Authentication Checker Component
+// Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === "true";
   return isAuthenticated ? children : <Navigate to="/" />;
+};
+
+// Always redirect to the login page for Evaluation Module
+const PrivateEvaluationRoute = ({ children }) => {
+  // Here we always redirect to the login page for the evaluation module
+  return <Navigate to="/loginEvaluation" />;
 };
 
 // 404 Page Component
@@ -56,13 +64,26 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }
         />
 
-          {/* Private Route for Reports */}
-          <Route
+        {/* Private Route for SetupListing */}
+        <Route
           path="/SetupListing/*"
           element={
             <PrivateRoute>
               <SetupListing />
             </PrivateRoute>
+          }
+        />
+
+        {/* Login Route for Evaluation Module */}
+        <Route path="/loginEvaluation" element={<LoginEvaluation />} />
+
+        {/* Private Route for Evaluation Module - Always Redirects to Login */}
+        <Route
+          path="/EvaluationModule/*"
+          element={
+            <PrivateEvaluationRoute>
+              <EvaluationModule />
+            </PrivateEvaluationRoute>
           }
         />
 
