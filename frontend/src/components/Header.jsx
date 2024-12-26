@@ -189,14 +189,14 @@ const Header = () => {
           </div>
 
           <Link
-            to="/EvaluationModule"
+            to="/Evaluation"
             className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
-              activeTab === "/EvaluationModule"
+              activeTab === "/Evaluation"
                 ? "bg-blue-500 text-white"
                 : "hover:bg-green-100 text-blue-500"
             }`}
           >
-            EvaluationModule
+            Evaluation Module
           </Link>
 
           {/* Profile Dropdown */}

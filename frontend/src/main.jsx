@@ -79,7 +79,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
         {/* Private Route for Evaluation Module - Always Redirects to Login */}
         <Route
-          path="/EvaluationModule/*"
+          path="/Evaluation/*"
           element={
             <PrivateEvaluationRoute>
               <EvaluationModule />
