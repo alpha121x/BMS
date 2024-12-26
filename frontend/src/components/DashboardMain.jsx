@@ -213,7 +213,7 @@ const DashboardMain = () => {
           >
             <div className="card-body pb-0">
               <h2 className="text-xl font-semibold mb-4">
-                Infrastructure Pie Chart
+                Birdges Chart
               </h2>
               <GraphComponent data={infrastructureData} />
             </div>
