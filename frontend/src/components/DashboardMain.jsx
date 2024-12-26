@@ -12,9 +12,7 @@ const DashboardMain = () => {
   const [districtId, setDistrictId] = useState(null);
   const [selectedZone, setSelectedZone] = useState("%");
 
-  const [infrastructureData, setInfrastructureData] = useState([
-    14, 1433, 17302,
-  ]);
+  const [infrastructureData, setInfrastructureData] = useState([14, 1433, 17302]);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -193,25 +191,13 @@ const DashboardMain = () => {
 
       {/* Map and Pie Chart Layout */}
       <div className="grid grid-cols-12 gap-2 mt-6">
-        {/* Map Card (70% width on large screens, full width on smaller screens) */}
+        {/* Map Container (occupying full width on large screens) */}
         <div className="col-span-12 lg:col-span-9">
-          <div
-            className="card p-2 rounded-lg text-black"
-            style={{
-              background: "#FFFFFF",
-              border: "2px solid #60A5FA",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-              position: "relative",
-            }}
-          >
-            <div className="card-body pb-0">
-              <h2 className="text-xl font-semibold mb-4">Map</h2>
-              <Map
-                selectedDistrict={selectedDistrict}
-                selectedZone={selectedZone}
-              />
-            </div>
-          </div>
+          {/* Directly render the Map component */}
+          <Map
+            selectedDistrict={selectedDistrict}
+            selectedZone={selectedZone}
+          />
         </div>
 
         {/* Pie Chart Card (30% width on large screens, full width on smaller screens) */}
