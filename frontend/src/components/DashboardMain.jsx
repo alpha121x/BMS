@@ -194,7 +194,7 @@ const DashboardMain = () => {
       {/* Map and Pie Chart Layout */}
       <div className="grid grid-cols-12 gap-2 mt-6">
         {/* Map Card (70% width on large screens, full width on smaller screens) */}
-        <div className="col-span-12 lg:col-span-8" style={{ height: "380px" }}>
+        <div className="col-span-12 lg:col-span-9">
           <div
             className="card p-2 rounded-lg text-black"
             style={{
@@ -215,7 +215,7 @@ const DashboardMain = () => {
         </div>
 
         {/* Pie Chart Card (30% width on large screens, full width on smaller screens) */}
-        <div className="col-span-12 lg:col-span-4">
+        <div className="col-span-12 lg:col-span-3">
           <div
             className="card p-2 rounded-lg text-black"
             style={{
