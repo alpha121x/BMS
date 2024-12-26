@@ -55,7 +55,7 @@ const EsriMap = () => {
 
         // Wait for the view to be ready
         view.when(() => {
-          console.log("Map and view are ready");
+          // console.log("Map and view are ready");
         });
       })
       .catch((err) => {
@@ -70,7 +70,7 @@ const EsriMap = () => {
   }, []);
 
   return (
-    <div className="bg-white border-2 border-green-500 p-2 rounded-lg shadow-md">
+    <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
       <div className="align-items-center">
         <div
           ref={mapRef}
