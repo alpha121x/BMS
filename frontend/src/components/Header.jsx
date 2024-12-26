@@ -188,6 +188,17 @@ const Header = () => {
             )}
           </div>
 
+          <Link
+            to="/EvaluationModule"
+            className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
+              activeTab === "/EvaluationModule"
+                ? "bg-blue-500 text-white"
+                : "hover:bg-green-100 text-blue-500"
+            }`}
+          >
+            EvaluationModule
+          </Link>
+
           {/* Profile Dropdown */}
           <div className="relative inline-block text-left" ref={profileRef}>
             <Link
