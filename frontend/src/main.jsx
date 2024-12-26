@@ -7,7 +7,7 @@ import Login from './Login'; // Main Login Component
 import Dashboard from './Dashboard'; // Dashboard Component
 import Reports from './Reports'; // Reports Component
 import SetupListing from './SetupListing'; // SetupListing Component
-import EvaluationModule from './Evaluation'; // Evaluation Module Component
+import Evaluation from './Evaluation'; // Evaluation Module Component
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -82,7 +82,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           path="/Evaluation/*"
           element={
             <PrivateEvaluationRoute>
-              <EvaluationModule />
+              <Evaluation />
             </PrivateEvaluationRoute>
           }
         />

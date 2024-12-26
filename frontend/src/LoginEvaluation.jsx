@@ -44,7 +44,7 @@ const Login = () => {
       // Store user details including roleId and districtId if they're included in the response
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/EvaluationModule", {});
+        navigate("/Evaluation", {});
       }
 
       localStorage.setItem("isAuthenticated", "true");
