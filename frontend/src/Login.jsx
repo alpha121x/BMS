@@ -96,7 +96,7 @@ const Login = () => {
           {/* Right Column - Login Form */}
           <div className="lg:w-1/3">
             <div className="text-center lg:text-left mb-4">
-              <h4 className="text-xl font-bold text-gray-700">Login</h4>
+              <h4 className="text-xl font-bold text-gray-700">BMS Dashboard Login</h4>
               <p>Enter username and password to login</p>
             </div>
             {/* Login Fields */}
