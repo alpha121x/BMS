@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { loadModules } from "esri-loader";
 
 const EsriMap = () => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
+  const [legendVisible, setLegendVisible] = useState(false); // State to control the visibility of the legend
 
   useEffect(() => {
     loadModules([
@@ -11,9 +12,10 @@ const EsriMap = () => {
       "esri/views/MapView",
       "esri/layers/MapImageLayer",
       "esri/widgets/LayerList",
-      "esri/widgets/Home"
+      "esri/widgets/Home",
+      "esri/widgets/Legend" // Importing the Legend widget
     ], { css: true })
-      .then(([Map, MapView, MapImageLayer, LayerList, Home]) => {
+      .then(([Map, MapView, MapImageLayer, LayerList, Home, Legend]) => {
         const map = new Map({
           basemap: "gray-vector"
         });
@@ -52,6 +54,24 @@ const EsriMap = () => {
           view: view
         });
         view.ui.add(homeBtn, "top-left");
+
+        // Add Legend widget but initially hide it
+        const legend = new Legend({
+          view: view,
+          visible: false // Set the initial visibility to false
+        });
+        view.ui.add(legend, "bottom-right");
+
+        // Event listener to show the legend when the road layer is clicked
+        roadLayer.watch("visible", (newVisibility) => {
+          if (newVisibility) {
+            setLegendVisible(true); // Show the legend when the road layer is visible
+            legend.visible = true;
+          } else {
+            setLegendVisible(false); // Hide the legend when the road layer is not visible
+            legend.visible = false;
+          }
+        });
 
         // Wait for the view to be ready
         view.when(() => {
