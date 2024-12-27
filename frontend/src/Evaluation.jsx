@@ -1,8 +1,8 @@
 import React from "react";
-import Header from "./components/Header";
-import DashboardMain from "./components/DashboardMain";
+import HeaderEvaluation from "./components/HeaderEvaluation";
 import Footer from "./components/Footer";
 import "./index.css";
+import EvaluationMain from "./components/EvaluationMain.";
 
 const Evaluation = () => {
   /* 
@@ -15,11 +15,11 @@ const Evaluation = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="mb-1">
-        <Header />
+        <HeaderEvaluation />
       </div>
 
       <main className="flex-grow p-1">
-        <DashboardMain />
+        <EvaluationMain />
       </main>
 
       <Footer className="mt-1" />
