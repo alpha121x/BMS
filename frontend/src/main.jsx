@@ -17,7 +17,7 @@ const PrivateRoute = ({ children }) => {
 
 // Always redirect to the login page for Evaluation Module
 const PrivateEvaluationRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const isAuthenticated = localStorage.getItem("isEvaluationAuthenticated") === "true";
   // If authenticated, allow access to Evaluation, otherwise redirect to loginEvaluation
   return isAuthenticated ? children : <Navigate to="/loginEvaluation" />;
 };

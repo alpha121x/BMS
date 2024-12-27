@@ -19,6 +19,7 @@ const Header = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.setItem("isAuthenticated", "false");
+    localStorage.setItem("isEvaluationAuthenticated", "false");
     navigate("/");
   };
 
