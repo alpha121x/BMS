@@ -17,7 +17,7 @@ const EditForm = () => {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
       setBridgeData(parsedData);
-      console.log("Parsed Bridge Data:", parsedData);
+    //   console.log("Parsed Bridge Data:", parsedData);
     }
   }, [serializedData]);
 
@@ -32,6 +32,7 @@ const EditForm = () => {
     e.preventDefault();
     console.log("Updated Bridge Data:", bridgeData);
     alert("Changes saved!");
+    window.location.href = "/Evaluation";
   };
 
   const handlePhotoClick = (photo) => {
