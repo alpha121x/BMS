@@ -40,12 +40,16 @@ const CheckingTable = () => {
   };
 
   const handleEditClick = (row) => {
-    // Open the edit page in a new tab with the selected row data
-    const editUrl = `/edit-bridge?id=${row.id}`;
-    window.open(editUrl, "_blank");  // Open in a new tab
+    // Serialize the row object into a URL-safe string
+    const serializedRow = encodeURIComponent(JSON.stringify(row));
+  
+    // Construct the edit URL with serialized data
+    const editUrl = `/EditBridge?data=${serializedRow}`;
+  
+    // Open the new tab with the serialized data
+    window.open(editUrl, "_blank");
   };
   
-
   const handleViewClick = (row) => {
     setSelectedRow(row);
     setShowModal(true);

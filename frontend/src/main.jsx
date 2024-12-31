@@ -8,6 +8,7 @@ import Dashboard from './Dashboard'; // Dashboard Component
 import Reports from './Reports'; // Reports Component
 import SetupListing from './SetupListing'; // SetupListing Component
 import Evaluation from './Evaluation'; // Evaluation Module Component
+import EditBridge from './EditBridge'; // Evaluation Module Component
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -86,6 +87,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <PrivateEvaluationRoute>
               <Evaluation />
             </PrivateEvaluationRoute>
+          }
+        />
+
+         {/* Private Route for EditBridge */}
+         <Route
+          path="/EditBridge"
+          element={
+            <PrivateRoute>
+              <EditBridge />
+            </PrivateRoute>
           }
         />
 
