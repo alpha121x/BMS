@@ -7,6 +7,16 @@ const EditForm = () => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
+  // Dummy photos for testing
+  const dummyPhotos = [
+    "uploads/bus_2024_01_14_12_39_49.jpg",
+    "uploads/bus_2024_01_14_12_40_06.jpg",
+    "uploads/bus_2024_01_14_12_40_38.jpg",
+    "uploads/bus_2024_01_14_12_43_56.jpg",
+    "uploads/bus_2024_01_14_12_45_26.jpg",
+    "uploads/bus_2024_01_16_11_56_43.jpg"
+  ];
+
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
@@ -17,7 +27,7 @@ const EditForm = () => {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
       setBridgeData(parsedData);
-    //   console.log("Parsed Bridge Data:", parsedData);
+      console.log("Parsed Bridge Data:", parsedData);
     }
   }, [serializedData]);
 
@@ -146,7 +156,8 @@ const EditForm = () => {
             <Form.Group controlId="formPhotos">
               <Form.Label>Photos</Form.Label>
               <div className="d-flex flex-wrap">
-                {bridgeData.photos?.map((photo, index) => (
+                {/* Displaying dummy photos */}
+                {dummyPhotos.map((photo, index) => (
                   <div key={index} className="m-2">
                     <img
                       src={`/${photo}`}
