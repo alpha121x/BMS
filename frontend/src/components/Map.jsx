@@ -1,25 +1,31 @@
 import React, { useEffect, useRef, useState } from "react";
 import { loadModules } from "esri-loader";
 
-const EsriMap = () => {
+const EzriMap = () => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
-  const [legendVisible, setLegendVisible] = useState(false); // State to control the visibility of the legend
 
   useEffect(() => {
-    loadModules([
-      "esri/Map",
-      "esri/views/MapView",
-      "esri/layers/MapImageLayer",
-      "esri/widgets/LayerList",
-      "esri/widgets/Home",
-      "esri/widgets/Legend" // Importing the Legend widget
-    ], { css: true })
-      .then(([Map, MapView, MapImageLayer, LayerList, Home, Legend]) => {
+    const initializeMap = async () => {
+      try {
+        const [Map, MapView, MapImageLayer, LayerList, Home, Legend] = await loadModules(
+          [
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/MapImageLayer",
+            "esri/widgets/LayerList",
+            "esri/widgets/Home",
+            "esri/widgets/Legend"
+          ],
+          { css: true }
+        );
+
+        // Create Map
         const map = new Map({
           basemap: "gray-vector"
         });
 
+        // Create MapView
         const view = new MapView({
           container: mapRef.current,
           map: map,
@@ -33,7 +39,7 @@ const EsriMap = () => {
 
         viewRef.current = view;
 
-        // Add the road network layer
+        // Add Road Layer
         const roadLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
           title: "Road Network",
@@ -43,44 +49,43 @@ const EsriMap = () => {
 
         map.add(roadLayer);
 
-        // Add LayerList widget
-        const layerList = new LayerList({
-          view: view
-        });
-        view.ui.add(layerList, "top-right");
+        // Add LayerList Widget
+        view.ui.add(
+          new LayerList({
+            view: view
+          }),
+          "top-right"
+        );
 
-        // Add Home widget
-        const homeBtn = new Home({
-          view: view
-        });
-        view.ui.add(homeBtn, "top-left");
+        // Add Home Widget
+        view.ui.add(
+          new Home({
+            view: view
+          }),
+          "top-left"
+        );
 
-        // Add Legend widget but initially hide it
+        // Add Legend Widget
         const legend = new Legend({
           view: view,
-          visible: false // Set the initial visibility to false
+          visible: false // Initially hidden
         });
         view.ui.add(legend, "bottom-right");
 
-        // Event listener to show the legend when the road layer is clicked
-        roadLayer.watch("visible", (newVisibility) => {
-          if (newVisibility) {
-            setLegendVisible(true); // Show the legend when the road layer is visible
-            legend.visible = true;
-          } else {
-            setLegendVisible(false); // Hide the legend when the road layer is not visible
-            legend.visible = false;
-          }
+        // Watch Layer Visibility for Legend Control
+        roadLayer.watch("visible", (isVisible) => {
+          legend.visible = isVisible;
         });
 
-        // Wait for the view to be ready
-        view.when(() => {
-          // console.log("Map and view are ready");
-        });
-      })
-      .catch((err) => {
-        console.error("Error loading ESRI modules:", err);
-      });
+        // Ensure MapView readiness
+        await view.when();
+        console.log("EzriMap is ready.");
+      } catch (error) {
+        console.error("Error initializing EzriMap:", error);
+      }
+    };
+
+    initializeMap();
 
     return () => {
       if (viewRef.current) {
@@ -91,15 +96,13 @@ const EsriMap = () => {
 
   return (
     <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
-      <div className="align-items-center">
-        <div
-          ref={mapRef}
-          className="map-container"
-          style={{ height: "400px" }}
-        />
-      </div>
+      <div
+        ref={mapRef}
+        className="map-container"
+        style={{ height: "400px" }}
+      />
     </div>
   );
 };
 
-export default EsriMap;
+export default EzriMap;
