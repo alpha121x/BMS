@@ -46,9 +46,10 @@ const CheckingTable = () => {
     // Construct the edit URL with serialized data
     const editUrl = `/EditBridge?data=${serializedRow}`;
   
-    // Open the new tab with the serialized data
-    window.open(editUrl, "_blank");
+    // Navigate to the edit URL in the same tab
+    window.location.href = editUrl;
   };
+  
   
   const handleViewClick = (row) => {
     setSelectedRow(row);
