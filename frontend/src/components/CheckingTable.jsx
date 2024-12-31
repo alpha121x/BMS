@@ -39,6 +39,13 @@ const CheckingTable = () => {
     }
   };
 
+  const handleEditClick = (row) => {
+    // Open the edit page in a new tab with the selected row data
+    const editUrl = `/edit-bridge?id=${row.id}`;
+    window.open(editUrl, "_blank");  // Open in a new tab
+  };
+  
+
   const handleViewClick = (row) => {
     setSelectedRow(row);
     setShowModal(true);
@@ -222,6 +229,17 @@ const CheckingTable = () => {
                     >
                       View
                     </Button>
+                    {" "}
+                    <Button
+                      onClick={() => handleEditClick(row)} // New handler
+                      style={{
+                        backgroundColor: "#4CAF50",
+                        border: "none",
+                        color: "white",
+                      }}
+                    >
+                      Edit
+                    </Button>
                   </td>
                 </tr>
               ))
@@ -243,9 +261,7 @@ const CheckingTable = () => {
       {/* Modal for viewing more details */}
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>
-            Checking Details
-          </Modal.Title>
+          <Modal.Title>Checking Details</Modal.Title>
         </Modal.Header>
 
         {/* Passing selectedRow as a prop to CheckingDetailsModal */}
