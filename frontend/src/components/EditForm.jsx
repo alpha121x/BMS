@@ -167,9 +167,13 @@ const EditForm = () => {
               </div>
             </Form.Group>
 
+          {/* Save Button */}
+          <div className="d-flex justify-content-center mt-4">
             <Button type="submit" variant="primary" size="sm">
               Save Changes
             </Button>
+          </div>
+
           </Form>
         </div>
       </div>
