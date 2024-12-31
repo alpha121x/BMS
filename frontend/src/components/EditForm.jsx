@@ -17,6 +17,7 @@ const EditForm = () => {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
       setBridgeData(parsedData);
+      console.log("Parsed Bridge Data:", parsedData);
     }
   }, [serializedData]);
 
@@ -54,87 +55,142 @@ const EditForm = () => {
   }
 
   return (
-    <div className="container">
-      <h2>Edit Bridge</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="formBridgeName">
-          <Form.Label>Bridge Name</Form.Label>
-          <Form.Control
-            type="text"
-            value={bridgeData.BridgeName || ""}
-            onChange={(e) => handleInputChange("BridgeName", e.target.value)}
-          />
-        </Form.Group>
+    <div className="container d-flex justify-content-center align-items-center min-vh-100">
+      <div
+        className="card p-2 rounded-lg text-black"
+        style={{
+          background: "#FFFFFF",
+          border: "2px solid #60A5FA",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          position: "relative",
+          maxWidth: "800px", // Ensure the card fits within the screen size
+          width: "100%",
+        }}
+      >
+        <div className="card-body pb-0">
+          <h6 className="card-title text-lg font-semibold pb-2">Edit Bridge</h6>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="formBridgeName">
+              <Form.Label>Bridge Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.BridgeName || ""}
+                onChange={(e) => handleInputChange("BridgeName", e.target.value)}
+              />
+            </Form.Group>
 
-        <Form.Group controlId="formWorkKind">
-          <Form.Label>Work Kind</Form.Label>
-          <Form.Control
-            type="text"
-            value={bridgeData.WorkKindName || ""}
-            onChange={(e) => handleInputChange("WorkKindName", e.target.value)}
-          />
-        </Form.Group>
+            <Form.Group controlId="formWorkKind">
+              <Form.Label>Work Kind</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.WorkKindName || ""}
+                onChange={(e) => handleInputChange("WorkKindName", e.target.value)}
+              />
+            </Form.Group>
 
-        <Form.Group controlId="formMaterial">
-          <Form.Label>Material</Form.Label>
-          <Form.Control
-            type="text"
-            value={bridgeData.MaterialName || ""}
-            onChange={(e) => handleInputChange("MaterialName", e.target.value)}
-          />
-        </Form.Group>
+            <Form.Group controlId="formDamageKind">
+              <Form.Label>Damage Kind</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.DamageKindName || ""}
+                onChange={(e) => handleInputChange("DamageKindName", e.target.value)}
+              />
+            </Form.Group>
 
-        <Form.Group controlId="formParts">
-          <Form.Label>Parts</Form.Label>
-          <Form.Control
-            type="text"
-            value={bridgeData.PartsName || ""}
-            onChange={(e) => handleInputChange("PartsName", e.target.value)}
-          />
-        </Form.Group>
+            <Form.Group controlId="formDamageLevel">
+              <Form.Label>Damage Level</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.DamageLevel || ""}
+                onChange={(e) => handleInputChange("DamageLevel", e.target.value)}
+              />
+            </Form.Group>
 
-        <Form.Group controlId="formPhotos">
-          <Form.Label>Photos</Form.Label>
-          <div className="d-flex flex-wrap">
-            {bridgeData.photos?.map((photo, index) => (
-              <div key={index} className="m-2">
-                <img
-                  src={`/${photo}`}
-                  alt={`Photo ${index + 1}`}
-                  className="img-thumbnail"
-                  style={{ width: "100px", height: "100px", cursor: "pointer" }}
-                  onClick={() => handlePhotoClick(photo)}
-                />
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="mt-1 w-100"
-                  onClick={() => handlePhotoRemove(photo)}
-                >
-                  Remove
-                </Button>
+            <Form.Group controlId="formSpanIndex">
+              <Form.Label>Span Index</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.SpanIndex || ""}
+                onChange={(e) => handleInputChange("SpanIndex", e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formMaterial">
+              <Form.Label>Material</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.MaterialName || ""}
+                onChange={(e) => handleInputChange("MaterialName", e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formParts">
+              <Form.Label>Parts</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.PartsName || ""}
+                onChange={(e) => handleInputChange("PartsName", e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formRemarks">
+              <Form.Label>Remarks</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.Remarks || ""}
+                onChange={(e) => handleInputChange("Remarks", e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formPhotos">
+              <Form.Label>Photos</Form.Label>
+              <div className="d-flex flex-wrap">
+                {bridgeData.photos?.map((photo, index) => (
+                  <div key={index} className="m-2">
+                    <img
+                      src={`/${photo}`}
+                      alt={`Photo ${index + 1}`}
+                      className="img-thumbnail"
+                      style={{ width: "100px", height: "100px", cursor: "pointer" }}
+                      onClick={() => handlePhotoClick(photo)}
+                    />
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      className="mt-1 w-100"
+                      onClick={() => handlePhotoRemove(photo)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </Form.Group>
+            </Form.Group>
 
-        <Button type="submit" variant="primary" className="mt-3">
-          Save Changes
-        </Button>
-      </Form>
+            <Button type="submit" variant="primary" size="sm">
+              Save Changes
+            </Button>
+          </Form>
+        </div>
+      </div>
 
       {/* Photo Modal */}
-      <Modal show={showPhotoModal} onHide={() => setShowPhotoModal(false)} centered>
+      <Modal
+        show={showPhotoModal}
+        onHide={() => setShowPhotoModal(false)}
+        centered
+        dialogClassName="modal-dialog-scrollable"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Photo Preview</Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-center">
           {selectedPhoto && (
             <img
-              src={`/${selectedPhoto}`}
+              src={`/uploads/${selectedPhoto}`}
               alt="Selected Photo"
               className="img-fluid"
-              style={{ maxHeight: "400px" }}
+              style={{ maxHeight: "400px", objectFit: "contain" }}
             />
           )}
         </Modal.Body>
