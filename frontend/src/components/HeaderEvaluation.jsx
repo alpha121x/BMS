@@ -47,7 +47,7 @@ const Header = () => {
         <div className="flex items-center">
           <img src="/punjab.png" alt="Logo" className="h-[35px] w-[45px]" />
           <div className="p-1 rounded">
-            <Link to="/Dashboard" className="no-underline">
+            <Link to="/Evaluation" className="no-underline">
               <h1 className="text-3xl font-bold uppercase">
                 <span className="text-blue-500">C&W BMS- Evluation Module</span>
               </h1>
