@@ -180,7 +180,7 @@ const CheckingTable = () => {
     >
       <div className="card-body pb-0">
         <h6 className="card-title text-lg font-semibold pb-2">
-          Bridges Checked
+          Bridges Inspections
         </h6>
 
         {loading && (

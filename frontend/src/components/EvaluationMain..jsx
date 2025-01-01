@@ -65,13 +65,13 @@ const EvaluationMain = () => {
 
   const inspectionData = [
     {
-      label: "Bridges Checked",
+      label: "Bridges Inspected",
       value: "1,511",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
     },
     {
-      label: "Total Checkings",
+      label: "Total Inspections",
       value: "23,578",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
@@ -130,6 +130,7 @@ const EvaluationMain = () => {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
+            
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
