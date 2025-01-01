@@ -189,7 +189,7 @@ const EvaluationMain = () => {
 
       {/* Checking Listing Section */}
       <div className="mt-2 flex justify-center">
-        <div className="w-full sm:w-3/4 md:w-2/3 lg:w-75">
+        <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
           <CheckingTable />
         </div>
       </div>
