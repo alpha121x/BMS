@@ -74,7 +74,7 @@ const EditForm = () => {
           border: "2px solid #60A5FA",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
-          maxWidth: "800px", // Ensure the card fits within the screen size
+          maxWidth: "800px",
           width: "100%",
         }}
       >
