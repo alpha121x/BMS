@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
@@ -14,20 +14,21 @@ const EditForm = () => {
     "uploads/bus_2024_01_14_12_40_38.jpg",
     "uploads/bus_2024_01_14_12_43_56.jpg",
     "uploads/bus_2024_01_14_12_45_26.jpg",
-    "uploads/bus_2024_01_16_11_56_43.jpg"
+    "uploads/bus_2024_01_16_11_56_43.jpg",
   ];
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
   const serializedData = queryParams.get("data");
+  const [newPhoto, setNewPhoto] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (serializedData) {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
       setBridgeData(parsedData);
-      console.log("Parsed Bridge Data:", parsedData);
+      // console.log("Parsed Bridge Data:", parsedData);
     }
   }, [serializedData]);
 
@@ -37,6 +38,25 @@ const EditForm = () => {
       [field]: value,
     }));
   };
+
+  const handleNewPhotoAdd = (file) => {
+    const formData = new FormData();
+    formData.append('photo', file);
+  
+    // Replace with your API call
+    fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Photo uploaded successfully:', data);
+      })
+      .catch(error => {
+        console.error('Error uploading photo:', error);
+      });
+  };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -50,10 +70,10 @@ const EditForm = () => {
     setShowPhotoModal(true);
   };
 
-  const handlePhotoRemove = (photo) => {
+  const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
       ...prevData,
-      photos: prevData.photos.filter((p) => p !== photo),
+      photos: prevData.photos.filter((photo) => photo !== photoToRemove),
     }));
   };
 
@@ -86,7 +106,9 @@ const EditForm = () => {
               <Form.Control
                 type="text"
                 value={bridgeData.BridgeName || ""}
-                onChange={(e) => handleInputChange("BridgeName", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("BridgeName", e.target.value)
+                }
               />
             </Form.Group>
 
@@ -95,7 +117,9 @@ const EditForm = () => {
               <Form.Control
                 type="text"
                 value={bridgeData.WorkKindName || ""}
-                onChange={(e) => handleInputChange("WorkKindName", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("WorkKindName", e.target.value)
+                }
               />
             </Form.Group>
 
@@ -104,7 +128,9 @@ const EditForm = () => {
               <Form.Control
                 type="text"
                 value={bridgeData.DamageKindName || ""}
-                onChange={(e) => handleInputChange("DamageKindName", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("DamageKindName", e.target.value)
+                }
               />
             </Form.Group>
 
@@ -113,7 +139,9 @@ const EditForm = () => {
               <Form.Control
                 type="text"
                 value={bridgeData.DamageLevel || ""}
-                onChange={(e) => handleInputChange("DamageLevel", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("DamageLevel", e.target.value)
+                }
               />
             </Form.Group>
 
@@ -131,7 +159,9 @@ const EditForm = () => {
               <Form.Control
                 type="text"
                 value={bridgeData.MaterialName || ""}
-                onChange={(e) => handleInputChange("MaterialName", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("MaterialName", e.target.value)
+                }
               />
             </Form.Group>
 
@@ -153,6 +183,15 @@ const EditForm = () => {
               />
             </Form.Group>
 
+            {/* Add New Photo */}
+            <Form.Group controlId="formNewPhoto">
+              <Form.Label>Add New Photo</Form.Label>
+              <Form.Control
+                type="file"
+                onChange={(e) => handleNewPhotoAdd(e.target.files[0])} // Automatically handle file upload on selection
+              />
+            </Form.Group>
+
             <Form.Group controlId="formPhotos">
               <Form.Label>Photos</Form.Label>
               <div className="d-flex flex-wrap">
@@ -163,7 +202,11 @@ const EditForm = () => {
                       src={`/${photo}`}
                       alt={`Photo ${index + 1}`}
                       className="img-thumbnail"
-                      style={{ width: "100px", height: "100px", cursor: "pointer" }}
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        cursor: "pointer",
+                      }}
                       onClick={() => handlePhotoClick(photo)}
                     />
                     <Button
@@ -179,13 +222,12 @@ const EditForm = () => {
               </div>
             </Form.Group>
 
-          {/* Save Button */}
-          <div className="d-flex justify-content-center mt-4">
-            <Button type="submit" variant="primary" size="sm">
-              Save Changes
-            </Button>
-          </div>
-
+            {/* Save Button */}
+            <div className="d-flex justify-content-center mt-4">
+              <Button type="submit" variant="primary" size="sm">
+                Save Changes
+              </Button>
+            </div>
           </Form>
         </div>
       </div>
@@ -203,7 +245,7 @@ const EditForm = () => {
         <Modal.Body className="text-center">
           {selectedPhoto && (
             <img
-              src={`/uploads/${selectedPhoto}`}
+              src={`/${selectedPhoto}`}
               alt="Selected Photo"
               className="img-fluid"
               style={{ maxHeight: "400px", objectFit: "contain" }}
