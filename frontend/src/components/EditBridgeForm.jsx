@@ -74,7 +74,9 @@ const EditBridgeForm = () => {
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
       ...prevData,
-      photos: (prevData.photos || []).filter((photo) => photo !== photoToRemove),
+      photos: (prevData.photos || []).filter(
+        (photo) => photo !== photoToRemove
+      ),
     }));
   };
 
@@ -161,14 +163,18 @@ const EditBridgeForm = () => {
                       src={`/${photo}`}
                       alt="Bridge"
                       className="img-fluid rounded"
-                      style={{ cursor: "pointer" }}
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        cursor: "pointer",
+                      }}
                       onClick={() => handlePhotoClick(photo)}
                     />
                     <Button
                       variant="danger"
                       size="sm"
                       onClick={() => handlePhotoRemove(photo)}
-                      className="mt-1 w-100"
+                      className="mt-1 w-fit-content"
                     >
                       Remove
                     </Button>
@@ -176,10 +182,12 @@ const EditBridgeForm = () => {
                 ))}
               </Row>
             </div>
-            {/* Submit Button */}
-            <Button type="submit" variant="primary" className="mt-3">
-              Save Changes
-            </Button>
+            {/* Save Button */}
+            <div className="d-flex justify-content-center mt-4">
+              <Button type="submit" variant="primary" size="sm">
+                Save Changes
+              </Button>
+            </div>
           </Form>
         </div>
       </div>
