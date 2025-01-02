@@ -2,17 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import BridgeDetailsModal from "./BridgesDetailsModal";
+import { useNavigate } from "react-router-dom";  // Import useNavigate from react-router-dom
 
 const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedBridge, setSelectedBridge] = useState(null);
 
   const itemsPerPage = 10;
+  const navigate = useNavigate();  // Initialize navigate hook
 
   useEffect(() => {
     if (selectedDistrict && selectedZone) {
@@ -37,18 +36,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     }
   };
 
-  // Handle view button click to show modal
-  const handleViewClick = (bridge) => {
-    setSelectedBridge(bridge);
-    setShowModal(true);
-  };
-
-  // Close modal
-  const handleClose = () => {
-    setShowModal(false);
-    setSelectedBridge(null);
-  };
-
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
   const currentData = tableData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -68,11 +55,9 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  // Render pagination buttons
   const renderPaginationButtons = () => {
     const buttons = [];
 
-    // Previous Button
     buttons.push(
       <Button
         onClick={handlePrevPage}
@@ -84,32 +69,28 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       </Button>
     );
 
-    // Always show the first page
     buttons.push(
       <Button
         key="1"
         onClick={() => handlePageChange(1)}
         style={{
           ...buttonStyles,
-          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA", // Active color for first page
+          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA",
         }}
       >
         1
       </Button>
     );
 
-    // Page Buttons (Dynamic - Show current and 3 pages before and after it)
     const pageRange = 3;
-    let startPage = Math.max(currentPage - pageRange, 2); // Ensure that we always show at least 1 page before the current page
-    let endPage = Math.min(currentPage + pageRange, totalPages - 1); // Ensure we don't go beyond the last page
+    let startPage = Math.max(currentPage - pageRange, 2);
+    let endPage = Math.min(currentPage + pageRange, totalPages - 1);
 
-    // If there are fewer than 7 total pages, show all the pages
     if (totalPages <= 7) {
       startPage = 2;
       endPage = totalPages - 1;
     }
 
-    // Add the pages in the range from startPage to endPage
     for (let page = startPage; page <= endPage; page++) {
       buttons.push(
         <Button
@@ -117,7 +98,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
           onClick={() => handlePageChange(page)}
           style={{
             ...buttonStyles,
-            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA", // Darker shade for active button
+            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA",
           }}
         >
           {page}
@@ -125,7 +106,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       );
     }
 
-    // Always show the last page
     if (totalPages > 1) {
       buttons.push(
         <Button
@@ -133,7 +113,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
           onClick={() => handlePageChange(totalPages)}
           style={{
             ...buttonStyles,
-            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA", // Active color for last page
+            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
           }}
         >
           {totalPages}
@@ -141,7 +121,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       );
     }
 
-    // Next Button
     buttons.push(
       <Button
         onClick={handleNextPage}
@@ -156,7 +135,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     return buttons;
   };
 
-  // Button styles for pagination
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",
@@ -165,6 +143,11 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     borderRadius: "4px",
     fontSize: "12px",
     cursor: "pointer",
+  };
+
+  // Handle row click to navigate to the BridgeDetailsPage
+  const handleRowClick = (bridge) => {
+    navigate(`/BridgeInfo/${bridge.ObjectID}`, { state: { bridge } });
   };
 
   return (
@@ -182,7 +165,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
           Bridge List
         </h6>
 
-        {/* Custom Loader */}
         {loading && (
           <div
             className="loader"
@@ -203,7 +185,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
           />
         )}
 
-        {/* Table */}
         <Table bordered responsive>
           <thead>
             <tr>
@@ -213,36 +194,27 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
               <th>Construction Type</th>
               <th>District</th>
               <th>Zone</th>
-              <th>Details</th>
             </tr>
           </thead>
           <tbody>
             {currentData.length > 0 ? (
               currentData.map((bridge, index) => (
-                <tr key={index}>
+                <tr
+                  key={index}
+                  onClick={() => handleRowClick(bridge)}  // Add onClick handler
+                  style={{ cursor: "pointer" }}  // Change cursor to pointer
+                >
                   <td>{bridge.ObjectID || "N/A"}</td>
                   <td>{bridge.BridgeName || "N/A"}</td>
                   <td>{bridge.StructureType || "N/A"}</td>
                   <td>{bridge.ConstructionType || "N/A"}</td>
                   <td>{bridge.District || "N/A"}</td>
                   <td>{bridge.Zone || "N/A"}</td>
-                  <td>
-                    <Button
-                      onClick={() => handleViewClick(bridge)}
-                      style={{
-                        backgroundColor: "#60A5FA",
-                        border: "none",
-                        color: "white",
-                      }}
-                    >
-                      View
-                    </Button>
-                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center">
+                <td colSpan="6" className="text-center">
                   No data available
                 </td>
               </tr>
@@ -250,19 +222,10 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
           </tbody>
         </Table>
 
-        {/* Pagination */}
         <div className="d-flex justify-content-center align-items-center">
           {renderPaginationButtons()}
         </div>
       </div>
-
-      {/* Bridge Details Modal */}
-      <Modal show={showModal} onHide={handleClose} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Bridge Details</Modal.Title>
-        </Modal.Header>
-        <BridgeDetailsModal selectedBridge={selectedBridge} />
-      </Modal>
     </div>
   );
 };
