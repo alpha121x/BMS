@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
-import Map from "./Map";
-import GraphComponent from "./GraphComponent";
 import CheckingTable from "./CheckingTable";
 
 const EvaluationMain = () => {
@@ -188,12 +186,14 @@ const EvaluationMain = () => {
       </div>
 
       {/* Bridge Listing Section */}
-      <div className="mt-2">
-        <BridgeListing
-          selectedDistrict={selectedDistrict}
-          startDate={startDate}
-          selectedZone={selectedZone}
-        />
+      <div className="mt-2 flex justify-center">
+        <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+          <BridgeListing
+            selectedDistrict={selectedDistrict}
+            startDate={startDate}
+            selectedZone={selectedZone}
+          />
+        </div>
       </div>
 
       {/* Checking Listing Section */}

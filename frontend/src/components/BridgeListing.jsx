@@ -43,6 +43,17 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
     setShowModal(true);
   };
 
+  const handleEditClick = (row) => {
+    // Serialize the row object into a URL-safe string
+    const serializedRow = encodeURIComponent(JSON.stringify(row));
+  
+    // Construct the edit URL with serialized data
+    const editUrl = `/EditBridge?data=${serializedRow}`;
+  
+    // Navigate to the edit URL in the same tab
+    window.location.href = editUrl;
+  };
+
   // Close modal
   const handleClose = () => {
     setShowModal(false);
@@ -207,7 +218,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
         <Table bordered responsive>
           <thead>
             <tr>
-              <th>Bridge ID</th>
+              {/* <th>Bridge ID</th> */}
               <th>Bridge Name</th>
               <th>Structure Type</th>
               <th>Construction Type</th>
@@ -220,7 +231,7 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
             {currentData.length > 0 ? (
               currentData.map((bridge, index) => (
                 <tr key={index}>
-                  <td>{bridge.ObjectID || "N/A"}</td>
+                  {/* <td>{bridge.ObjectID || "N/A"}</td> */}
                   <td>{bridge.BridgeName || "N/A"}</td>
                   <td>{bridge.StructureType || "N/A"}</td>
                   <td>{bridge.ConstructionType || "N/A"}</td>
@@ -236,6 +247,16 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
                       }}
                     >
                       View
+                    </Button>{" "}
+                    <Button
+                      onClick={() => handleEditClick(bridge)} // New handler
+                      style={{
+                        backgroundColor: "#4CAF50",
+                        border: "none",
+                        color: "white",
+                      }}
+                    >
+                      Edit
                     </Button>
                   </td>
                 </tr>

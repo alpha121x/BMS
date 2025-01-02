@@ -38,6 +38,14 @@ const BridgeDetailsModal = ({ selectedBridge }) => {
     <Modal.Body>
       <table className="w-100 border-collapse border text-sm mb-3">
         <tbody>
+        <tr>
+            <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+              Bridge ID
+            </th>
+            <td className="border border-gray-200 px-4 py-2">
+              {selectedBridge?.ObjectID || "N/A"}
+            </td>
+          </tr>
           <tr>
             <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
               Road Name
