@@ -198,7 +198,7 @@ const EvaluationMain = () => {
                 setShowBridgesList(true);
                 setShowBridgeInspectionList(false);
               }}
-              className="btn btn-warning w-full text-center p-3 cursor-pointer"
+              className="bg-blue-300 w-full text-center p-3 cursor-pointer"
             >
               Bridges List
             </div>
@@ -209,7 +209,7 @@ const EvaluationMain = () => {
                 setShowBridgeInspectionList(true);
                 setShowBridgesList(false);
               }}
-              className="btn btn-warning w-full text-center p-3 cursor-pointer"
+              className="bg-blue-300 w-full text-center p-3 cursor-pointer"
             >
               Bridges Inspections List
             </div>
