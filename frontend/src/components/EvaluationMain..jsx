@@ -13,6 +13,10 @@ const EvaluationMain = () => {
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
 
+  // State for managing table visibility
+  const [showBridgesList, setShowBridgesList] = useState(false);
+  const [showBridgeInspectionList, setShowBridgeInspectionList] = useState(false);
+
   // Show back-to-top button based on scroll position
   useEffect(() => {
     const handleScroll = () => {
@@ -168,6 +172,28 @@ const EvaluationMain = () => {
         </div>
       </div>
 
+      {/* Buttons to toggle visibility of tables */}
+      <div className="flex justify-center space-x-4 mb-4">
+        <button
+          onClick={() => {
+            setShowBridgesList(true);
+            setShowBridgeInspectionList(false);
+          }}
+          className="btn btn-primary"
+        >
+          Bridges List
+        </button>
+        <button
+          onClick={() => {
+            setShowBridgeInspectionList(true);
+            setShowBridgesList(false);
+          }}
+          className="btn btn-primary"
+        >
+          Bridges Inspections List
+        </button>
+      </div>
+
       {/* Cards Section */}
       <div className="grid grid-cols-12 gap-2">
         {allCards.map((card, index) => (
@@ -186,22 +212,26 @@ const EvaluationMain = () => {
       </div>
 
       {/* Bridge Listing Section */}
-      <div className="mt-2 flex justify-center">
-        <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-          <BridgeListing
-            selectedDistrict={selectedDistrict}
-            startDate={startDate}
-            selectedZone={selectedZone}
-          />
+      {showBridgesList && (
+        <div className="mt-2 flex justify-center">
+          <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+            <BridgeListing
+              selectedDistrict={selectedDistrict}
+              startDate={startDate}
+              selectedZone={selectedZone}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Checking Listing Section */}
-      <div className="mt-2 flex justify-center">
-        <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-          <CheckingTable />
+      {showBridgeInspectionList && (
+        <div className="mt-2 flex justify-center">
+          <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+            <CheckingTable />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Back to Top Button */}
       {showBackToTop && (
