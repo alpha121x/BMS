@@ -19,18 +19,16 @@ const InspectionList = ({ bridgeId }) => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId]); // Now use bridgeId as a dependency
+  }, [bridgeId]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      // Ensure the bridgeId is provided before making the request
       if (!bridgeId) {
         throw new Error("bridgeId is required");
       }
 
-      // Update the API URL to include the bridgeId parameter
       const response = await fetch(`${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`);
 
       if (!response.ok) throw new Error("Failed to fetch data");
@@ -50,13 +48,8 @@ const InspectionList = ({ bridgeId }) => {
   };
 
   const handleEditClick = (row) => {
-    // Serialize the row object into a URL-safe string
     const serializedRow = encodeURIComponent(JSON.stringify(row));
-
-    // Construct the edit URL with serialized data
     const editUrl = `/EditInspection?data=${serializedRow}`;
-
-    // Navigate to the edit URL in the same tab
     window.location.href = editUrl;
   };
 
@@ -188,9 +181,7 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">
-          Latest Bridge Inspections
-        </h6>
+        <h6 className="card-title text-lg font-semibold pb-2">Inspections List</h6>
 
         {loading && (
           <div
@@ -251,7 +242,7 @@ const InspectionList = ({ bridgeId }) => {
                     </Button>
                     {" "}
                     <Button
-                      onClick={() => handleEditClick(row)} // New handler
+                      onClick={() => handleEditClick(row)}
                       style={{
                         backgroundColor: "#4CAF50",
                         border: "none",
@@ -273,18 +264,21 @@ const InspectionList = ({ bridgeId }) => {
           </tbody>
         </Table>
 
-        <div className="d-flex justify-content-center align-items-center">
-          {renderPaginationButtons()}
+        {/* Show the count of rows */}
+        <div className="d-flex justify-content-between">
+          <div className="text-sm text-gray-500">
+            Showing {currentData.length} of {tableData.length} inspections
+          </div>
+          <div className="d-flex justify-content-center align-items-center">
+            {renderPaginationButtons()}
+          </div>
         </div>
       </div>
 
-      {/* Modal for viewing more details */}
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Checking Details</Modal.Title>
         </Modal.Header>
-
-        {/* Passing selectedRow as a prop to CheckingDetailsModal */}
         <CheckingDetailsModal selectedRow={selectedRow} />
       </Modal>
     </div>
