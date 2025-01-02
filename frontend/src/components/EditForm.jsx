@@ -112,6 +112,17 @@ const EditForm = () => {
               />
             </Form.Group>
 
+            <Form.Group controlId="formBridgeId">
+              <Form.Label>Bridge ID</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.ObjectID || ""}
+                onChange={(e) =>
+                  handleInputChange("ObjectID", e.target.value)
+                }
+              />
+            </Form.Group>
+
             <Form.Group controlId="formWorkKind">
               <Form.Label>Work Kind</Form.Label>
               <Form.Control
