@@ -26,6 +26,7 @@ const EditBridgeForm = () => {
     if (serializedData) {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
+      // console.log("Parsed Data:", parsedData);
       setBridgeData({ ...parsedData, photos: dummyPhotos }); // Add dummy photos for testing
     }
   }, [serializedData]);
@@ -119,64 +120,82 @@ const EditBridgeForm = () => {
           <h6 className="card-title text-lg font-semibold pb-2">Edit Bridge Info</h6>
           <Form onSubmit={handleSubmit}>
             <Row>
-              {[
-                { label: "Bridge ID", field: "ObjectID" },
-                { label: "Road Name", field: "Road" },
-                { label: "Visual Condition", field: "VisualCondition" },
-                { label: "Width Of Bridge", field: "WidthStructure" },
-                { label: "Span Length", field: "SpanLength" },
-                { label: "No Of Spans", field: "Spans" },
+              {[{ label: "Bridge ID", field: "ObjectID" },
+                { label: "Bridge Name", field: "BridgeName" },
+                { label: "Structure Type", field: "StructureType" },
                 { label: "Construction Year", field: "ConstructionYear" },
+                { label: "Zone", field: "Zone" },
+                { label: "District", field: "District" },
+                { label: "Road", field: "Road" },
+                { label: "Construction Type", field: "ConstructionType" },
                 { label: "Survey ID", field: "SurveyID" },
-                { label: "Road Classification", field: "RoadClassification" },
-                { label: "Road Surface Type", field: "RoadSurfaceType" },
+                { label: "Road Classification ID", field: "RoadClassificationID" },
                 { label: "Carriageway Type", field: "CarriagewayType" },
-                { label: "Last Maintenance Date", field: "LastMaintenanceDate", type: "date" },
+                { label: "Road Surface Type", field: "RoadSurfaceType" },
+                { label: "Road Classification", field: "RoadClassification" },
+                { label: "Visual Condition", field: "VisualCondition" },
                 { label: "Direction", field: "Direction" },
-              ].map(({ label, field, type = "text" }) => (
-                <Col md={6} key={field}>
-                  <Form.Group controlId={field} className="mb-3">
-                    <Form.Label>{label}</Form.Label>
-                    <Form.Control
-                      type={type}
-                      value={bridgeData?.[field] || ""}
-                      onChange={(e) => handleInputChange(field, e.target.value)}
-                      placeholder={`Enter ${label}`}
-                    />
-                  </Form.Group>
-                </Col>
-              ))}
-            </Row>
-
-            {/* Photo Section */}
-            <div className="mb-3">
-              <h6>Photos</h6>
-              <Row>
-                {bridgeData.photos?.map((photo) => (
-                  <Col xs={6} md={4} key={photo} className="mb-2">
-                    <img
-                      src={`/${photo}`}
-                      alt="Bridge"
-                      className="img-fluid rounded"
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handlePhotoClick(photo)}
-                    />
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handlePhotoRemove(photo)}
-                      className="mt-1 w-fit-content"
-                    >
-                      Remove
-                    </Button>
+                { label: "Last Maintenance Date", field: "LastMaintenanceDate", type: "date" },
+                { label: "Width Structure", field: "WidthStructure" },
+                { label: "Span Length", field: "SpanLength" },
+                { label: "Spans", field: "Spans" },
+                { label: "Latitude", field: "Latitude" },
+                { label: "Longitude", field: "Longitude" }]
+                .map(({ label, field }, index) => (
+                  <Col key={index} md={6}>
+                    <Form.Group controlId={`form${field}`}>
+                      <Form.Label>{label}</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={bridgeData[field] || ""}
+                        onChange={(e) => handleInputChange(field, e.target.value)}
+                      />
+                    </Form.Group>
                   </Col>
                 ))}
-              </Row>
-            </div>
+
+              <Col md={12}>
+                <Form.Group controlId="formNewPhoto">
+                  <Form.Label>Add New Photo</Form.Label>
+                  <Form.Control
+                    type="file"
+                    onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={12}>
+                <Form.Group controlId="formPhotos">
+                  <Form.Label>Photos</Form.Label>
+                  <div className="d-flex flex-wrap">
+                    {/* Displaying dummy photos */}
+                    {dummyPhotos.map((photo, index) => (
+                      <div key={index} className="m-2">
+                        <img
+                          src={`/${photo}`}
+                          alt={`Photo ${index + 1}`}
+                          className="img-thumbnail"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handlePhotoClick(photo)}
+                        />
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="mt-1 w-100"
+                          onClick={() => handlePhotoRemove(photo)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </Form.Group>
+              </Col>
+            </Row>
 
             {/* Save Button */}
             <div className="d-flex justify-content-center mt-4">
