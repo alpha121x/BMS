@@ -46,7 +46,7 @@ const CheckingTable = () => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
   
     // Construct the edit URL with serialized data
-    const editUrl = `/EditBridge?data=${serializedRow}`;
+    const editUrl = `/EditInspection?data=${serializedRow}`;
   
     // Navigate to the edit URL in the same tab
     window.location.href = editUrl;

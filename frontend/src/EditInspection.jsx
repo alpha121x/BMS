@@ -4,7 +4,7 @@ import Footer from "./components/Footer";
 import "./index.css";
 import EditForm from "./components/EditForm";
 
-const EditBridge = () => {
+const EditInspection = () => {
   /* 
   Designed and Developed By: Abbas Ch.
   React and Node.js Developer
@@ -27,4 +27,4 @@ const EditBridge = () => {
   );
 };
 
-export default EditBridge;
+export default EditInspection;
