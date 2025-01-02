@@ -41,12 +41,12 @@ const InventoryInfo = ({ inventoryData }) => {
       >
         <div className="card-body pb-0">
           <div className="d-flex justify-content-between align-items-center">
-            <h6 className="card-title text-lg font-semibold pb-2">Inventory Info</h6>
+            <h5 className="card-title text-lg font-semibold pb-2">Inventory Info</h5>
             <Button
               variant="primary"
-              onClick={() => handleEditClick(inventoryData)}  // Pass inventoryData to the edit handler
+              onClick={() => handleEditClick(inventoryData)}
             >
-              Edit
+              Edit Bridge
             </Button>
           </div>
           <Form>
