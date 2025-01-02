@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table, Modal } from "react-bootstrap";
+import { Button, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import { useNavigate } from "react-router-dom";  // Import useNavigate from react-router-dom
@@ -161,9 +161,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">
-          Bridge List
-        </h6>
+        <h6 className="card-title text-lg font-semibold pb-2">Bridge List</h6>
 
         {loading && (
           <div
@@ -201,8 +199,9 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
               currentData.map((bridge, index) => (
                 <tr
                   key={index}
-                  onClick={() => handleRowClick(bridge)}  // Add onClick handler
-                  style={{ cursor: "pointer" }}  // Change cursor to pointer
+                  onClick={() => handleRowClick(bridge)} // Add onClick handler
+                  style={{ cursor: "pointer" }} // Change cursor to pointer
+                  className="hover-row" // Add hover class
                 >
                   <td>{bridge.ObjectID || "N/A"}</td>
                   <td>{bridge.BridgeName || "N/A"}</td>
