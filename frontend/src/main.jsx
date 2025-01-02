@@ -10,6 +10,7 @@ import SetupListing from './SetupListing'; // SetupListing Component
 import Evaluation from './Evaluation'; // Evaluation Module Component
 import EditInspection from './EditInspection';
 import EditBridge from './EditIBridge';
+import BridgeInfo from './components/BridgeInfo';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -107,6 +108,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           element={
             <PrivateRoute>
               <EditBridge />
+            </PrivateRoute>
+          }
+        />
+
+         {/* Private Route for BridgeInfo */}
+         <Route
+          path="/BridgeInfo"
+          element={
+            <PrivateRoute>
+              <BridgeInfo />
             </PrivateRoute>
           }
         />
