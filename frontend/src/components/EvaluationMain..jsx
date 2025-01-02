@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import BridgeListing from "./BridgeListing";
+import BridgesList from "./BridgesList";
 import FilterComponent from "./FilterComponent";
-import CheckingTable from "./CheckingTable";
 
 const EvaluationMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -12,11 +11,6 @@ const EvaluationMain = () => {
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
-
-  // State for managing table visibility
-  const [showBridgesList, setShowBridgesList] = useState(false);
-  const [showBridgeInspectionList, setShowBridgeInspectionList] =
-    useState(false);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -133,6 +127,7 @@ const EvaluationMain = () => {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
+            
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -190,54 +185,16 @@ const EvaluationMain = () => {
         ))}
       </div>
 
-      <div className="flex justify-center mt-2">
-        <div className="w-3/4 bg-blue-400 shadow-lg p-2 rounded-lg flex">
-          <div className="flex-1 flex justify-center items-center">
-            <div
-              onClick={() => {
-                setShowBridgesList(true);
-                setShowBridgeInspectionList(false);
-              }}
-              className="bg-blue-300 w-full text-center p-2 cursor-pointer"
-            >
-              Bridges List
-            </div>
-          </div>
-          <div className="flex-1 flex justify-center items-center">
-            <div
-              onClick={() => {
-                setShowBridgeInspectionList(true);
-                setShowBridgesList(false);
-              }}
-              className="bg-blue-300 w-full text-center p-2 cursor-pointer"
-            >
-              Bridges Inspections List
-            </div>
-          </div>
+      {/* Checking Listing Section */}
+      <div className="mt-2 flex justify-center">
+        <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+          <BridgesList
+          selectedDistrict={selectedDistrict}
+          startDate={startDate}
+          selectedZone={selectedZone}
+           />
         </div>
       </div>
-
-      {/* Bridge Listing Section */}
-      {showBridgesList && (
-        <div className="mt-2 flex justify-center">
-          <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-            <BridgeListing
-              selectedDistrict={selectedDistrict}
-              startDate={startDate}
-              selectedZone={selectedZone}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Checking Listing Section */}
-      {showBridgeInspectionList && (
-        <div className="mt-2 flex justify-center">
-          <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-            <CheckingTable />
-          </div>
-        </div>
-      )}
 
       {/* Back to Top Button */}
       {showBackToTop && (
