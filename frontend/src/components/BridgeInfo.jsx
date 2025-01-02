@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import FilterComponent from "./FilterComponent";
-import CheckingTable from "./CheckingTable";
 import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfo";
 import { useLocation } from "react-router-dom";
+import InspectionList from "./InspectionList";
 
 const BridgeInfo = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -23,6 +23,7 @@ const BridgeInfo = () => {
     if (serializedBridgeData) {
       // Decode and parse the bridge data into an object
       setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
+      // console.log("Bridge Data:", bridgeData);
     }
   }, [location]);
   
@@ -234,7 +235,7 @@ const BridgeInfo = () => {
                 <div
                   onClick={() => {
                     setShowBridgeInspectionList(true);
-                    setShowBridgesList(false);
+                    setShowInventoryInfo(false);
                   }}
                   className={`${
                     showBridgeInspectionList
@@ -261,7 +262,8 @@ const BridgeInfo = () => {
           {showBridgeInspectionList && (
             <div className="mt-2 flex justify-center">
               <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-                <CheckingTable />
+                <InspectionList
+                bridgeId={bridgeData.ObjectID} />
               </div>
             </div>
           )}

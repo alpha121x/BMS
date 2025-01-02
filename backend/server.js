@@ -309,6 +309,73 @@ ORDER BY o."CheckingID" ASC;
   }
 });
 
+// API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID)
+app.get("/api/get-inspections", async (req, res) => {
+  const { bridgeId } = req.query; // Fetch the bridgeId from the query parameters
+
+  if (!bridgeId) {
+    return res.status(400).json({ error: "Bridge ID (ObjectID) is required." });
+  }
+
+  // Query to fetch inspections and related checkings data where ObjectID matches the bridgeId
+  let query = `
+  SELECT 
+    o."ObjectID", 
+    o."CheckingID", 
+    o."SpanIndex",  
+    o."Remarks",
+    wk."WorkKindName", 
+    p."PartsName", 
+    m."MaterialName", 
+    dk."DamageKindName", 
+    b."BridgeName", 
+    dl."DamageLevel",
+    -- Aggregate photo URLs into an array for each CheckingID
+    array_agg(cp."PhotoPath") AS Photos
+  FROM public."D_Checkings" o
+  LEFT JOIN public."M_WorkKinds" wk ON o."WorkKindID" = wk."WorkKindID"
+  LEFT JOIN public."D_Objects" b ON o."ObjectID" = b."ObjectID"
+  LEFT JOIN public."M_Parts" p ON o."PartsID" = p."PartsID"
+  LEFT JOIN public."M_Materials" m ON o."MaterialID" = m."MaterialID"
+  LEFT JOIN public."M_DamageKinds" dk ON o."DamageKindID" = dk."DamageKindID"
+  LEFT JOIN public."M_DamageLevels" dl ON o."DamageLevelID" = dl."DamageLevelID"
+  -- Join with D_CheckingPhotos table to get photos related to CheckingID
+  LEFT JOIN public."D_CheckingPhotos" cp ON o."CheckingID" = cp."CheckingID"
+  WHERE o."ObjectID" = $1  -- Add condition to filter by ObjectID (bridgeId)
+  GROUP BY 
+    o."ObjectID", 
+    o."CheckingID", 
+    o."SpanIndex",  
+    o."Remarks", 
+    wk."WorkKindName", 
+    p."PartsName", 
+    m."MaterialName", 
+    dk."DamageKindName", 
+    b."BridgeName", 
+    dl."DamageLevel"
+  ORDER BY o."CheckingID" ASC;
+`;
+
+
+
+  try {
+    // Execute the query with the bridgeId parameter
+    const result = await pool.query(query, [bridgeId]);
+
+    // Return the rows as JSON with detailed data
+    res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching inspections data:", error.message);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching inspections data." });
+  }
+});
+
+
 // API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
 app.get("/api/bridgecoordinates", async (req, res) => {
   const { 
