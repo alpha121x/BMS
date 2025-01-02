@@ -181,7 +181,12 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">Inspections List</h6>
+      <h6 className="card-title text-lg font-semibold pb-2" style={{ fontSize: "1.25rem" }}>
+  Inspections List
+  <br />
+  <span style={{ fontSize: "0.875rem" }}>Total Inspections: {tableData.length}</span>
+</h6>
+
 
         {loading && (
           <div
