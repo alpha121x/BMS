@@ -41,22 +41,21 @@ const EditForm = () => {
 
   const handleNewPhotoAdd = (file) => {
     const formData = new FormData();
-    formData.append('photo', file);
-  
+    formData.append("photo", file);
+
     // Replace with your API call
-    fetch('/api/upload', {
-      method: 'POST',
+    fetch("/api/upload", {
+      method: "POST",
       body: formData,
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Photo uploaded successfully:', data);
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Photo uploaded successfully:", data);
       })
-      .catch(error => {
-        console.error('Error uploading photo:', error);
+      .catch((error) => {
+        console.error("Error uploading photo:", error);
       });
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -101,6 +100,15 @@ const EditForm = () => {
         <div className="card-body pb-0">
           <h6 className="card-title text-lg font-semibold pb-2">Edit Bridge</h6>
           <Form onSubmit={handleSubmit}>
+            <Form.Group controlId="formBridgeId">
+              <Form.Label>Bridge ID</Form.Label>
+              <Form.Control
+                type="text"
+                value={bridgeData.ObjectID || ""}
+                onChange={(e) => handleInputChange("ObjectID", e.target.value)}
+              />
+            </Form.Group>
+
             <Form.Group controlId="formBridgeName">
               <Form.Label>Bridge Name</Form.Label>
               <Form.Control
@@ -108,17 +116,6 @@ const EditForm = () => {
                 value={bridgeData.BridgeName || ""}
                 onChange={(e) =>
                   handleInputChange("BridgeName", e.target.value)
-                }
-              />
-            </Form.Group>
-
-            <Form.Group controlId="formBridgeId">
-              <Form.Label>Bridge ID</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.ObjectID || ""}
-                onChange={(e) =>
-                  handleInputChange("ObjectID", e.target.value)
                 }
               />
             </Form.Group>
