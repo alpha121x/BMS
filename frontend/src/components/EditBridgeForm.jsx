@@ -116,11 +116,9 @@ const EditBridgeForm = () => {
         }}
       >
         <div className="card-body pb-0">
-          <h6 className="card-title text-lg font-semibold pb-2">
-            Edit Bridge Info
-          </h6>
+          <h6 className="card-title text-lg font-semibold pb-2">Edit Bridge Info</h6>
           <Form onSubmit={handleSubmit}>
-            <div className="row">
+            <Row>
               {[
                 { label: "Bridge ID", field: "ObjectID" },
                 { label: "Road Name", field: "Road" },
@@ -133,14 +131,10 @@ const EditBridgeForm = () => {
                 { label: "Road Classification", field: "RoadClassification" },
                 { label: "Road Surface Type", field: "RoadSurfaceType" },
                 { label: "Carriageway Type", field: "CarriagewayType" },
-                {
-                  label: "Last Maintenance Date",
-                  field: "LastMaintenanceDate",
-                  type: "date",
-                },
+                { label: "Last Maintenance Date", field: "LastMaintenanceDate", type: "date" },
                 { label: "Direction", field: "Direction" },
               ].map(({ label, field, type = "text" }) => (
-                <div className="col-md-6" key={field}>
+                <Col md={6} key={field}>
                   <Form.Group controlId={field} className="mb-3">
                     <Form.Label>{label}</Form.Label>
                     <Form.Control
@@ -150,9 +144,10 @@ const EditBridgeForm = () => {
                       placeholder={`Enter ${label}`}
                     />
                   </Form.Group>
-                </div>
+                </Col>
               ))}
-            </div>
+            </Row>
+
             {/* Photo Section */}
             <div className="mb-3">
               <h6>Photos</h6>
@@ -182,6 +177,7 @@ const EditBridgeForm = () => {
                 ))}
               </Row>
             </div>
+
             {/* Save Button */}
             <div className="d-flex justify-content-center mt-4">
               <Button type="submit" variant="primary" size="sm">
