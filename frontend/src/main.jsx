@@ -103,7 +103,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
           {/* Private Route for EditBridge */}
           <Route
-          path="/EditInspection"
+          path="/EditBridge"
           element={
             <PrivateRoute>
               <EditBridge />

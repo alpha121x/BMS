@@ -46,6 +46,8 @@ const BridgeListing = ({ selectedDistrict, selectedZone }) => {
   const handleEditClick = (row) => {
     // Serialize the row object into a URL-safe string
     const serializedRow = encodeURIComponent(JSON.stringify(row));
+    console.log("Serialized Row:", row);
+    // return;
   
     // Construct the edit URL with serialized data
     const editUrl = `/EditBridge?data=${serializedRow}`;
