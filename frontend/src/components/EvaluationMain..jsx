@@ -130,7 +130,6 @@ const EvaluationMain = () => {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -186,6 +185,15 @@ const EvaluationMain = () => {
             />
           </div>
         ))}
+      </div>
+
+      {/* Bridge Listing Section */}
+      <div className="mt-2">
+        <BridgeListing
+          selectedDistrict={selectedDistrict}
+          startDate={startDate}
+          selectedZone={selectedZone}
+        />
       </div>
 
       {/* Checking Listing Section */}
