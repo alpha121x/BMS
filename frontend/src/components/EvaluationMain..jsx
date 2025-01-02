@@ -190,15 +190,15 @@ const EvaluationMain = () => {
         ))}
       </div>
 
-      <div className="flex justify-center mt-4">
-        <div className="w-3/4 bg-blue-400 shadow-lg p-4 rounded-lg flex">
+      <div className="flex justify-center mt-2">
+        <div className="w-3/4 bg-blue-400 shadow-lg p-2 rounded-lg flex">
           <div className="flex-1 flex justify-center items-center">
             <div
               onClick={() => {
                 setShowBridgesList(true);
                 setShowBridgeInspectionList(false);
               }}
-              className="bg-blue-300 w-full text-center p-3 cursor-pointer"
+              className="bg-blue-300 w-full text-center p-2 cursor-pointer"
             >
               Bridges List
             </div>
@@ -209,7 +209,7 @@ const EvaluationMain = () => {
                 setShowBridgeInspectionList(true);
                 setShowBridgesList(false);
               }}
-              className="bg-blue-300 w-full text-center p-3 cursor-pointer"
+              className="bg-blue-300 w-full text-center p-2 cursor-pointer"
             >
               Bridges Inspections List
             </div>
