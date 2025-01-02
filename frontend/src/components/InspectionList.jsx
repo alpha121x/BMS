@@ -220,6 +220,10 @@ const InspectionList = ({ bridgeId }) => {
               <th>Material</th>
               <th>Damage</th>
               <th>Level</th>
+              <th>Inspector</th>
+              <th>Inspection Date</th>
+              <th>Status</th>
+              <th>Manage</th>
             </tr>
           </thead>
           <tbody>
@@ -231,6 +235,9 @@ const InspectionList = ({ bridgeId }) => {
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.DamageKindName || "N/A"}</td>
                   <td>{row.DamageLevel || "N/A"}</td>
+                  <td>{row.Inspector || "N/A"}</td>
+                  <td>{row.InspectationDate || "N/A"}</td>
+                  <td>{row.ApprovedFlag === 0 ? "Unapproved" : row.ApprovedFlag || "N/A"}</td>
                   <td>
                     <Button
                       onClick={() => handleViewClick(row)}

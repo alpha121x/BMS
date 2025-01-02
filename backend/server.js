@@ -323,6 +323,7 @@ app.get("/api/get-inspections", async (req, res) => {
     o."ObjectID", 
     o."CheckingID", 
     o."SpanIndex",  
+    o."ApprovedFlag",
     o."Remarks",
     wk."WorkKindName", 
     p."PartsName", 
@@ -345,7 +346,8 @@ app.get("/api/get-inspections", async (req, res) => {
   GROUP BY 
     o."ObjectID", 
     o."CheckingID", 
-    o."SpanIndex",  
+    o."SpanIndex", 
+    o."ApprovedFlag",  
     o."Remarks", 
     wk."WorkKindName", 
     p."PartsName", 
