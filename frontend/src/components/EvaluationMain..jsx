@@ -191,26 +191,28 @@ const EvaluationMain = () => {
       </div>
 
       <div className="flex justify-center mt-4">
-        <div className="w-50 bg-blue-400 shadow-lg p-4 rounded-lg">
-          <div className="flex justify-between space-x-4">
-            <button
+        <div className="w-3/4 bg-blue-400 shadow-lg p-4 rounded-lg flex">
+          <div className="flex-1 flex justify-center items-center">
+            <div
               onClick={() => {
                 setShowBridgesList(true);
                 setShowBridgeInspectionList(false);
               }}
-              className="btn btn-warning w-full sm:w-auto"
+              className="btn btn-warning w-full text-center p-3 cursor-pointer"
             >
               Bridges List
-            </button>
-            <button
+            </div>
+          </div>
+          <div className="flex-1 flex justify-center items-center">
+            <div
               onClick={() => {
                 setShowBridgeInspectionList(true);
                 setShowBridgesList(false);
               }}
-              className="btn btn-warning w-full sm:w-auto"
+              className="btn btn-warning w-full text-center p-3 cursor-pointer"
             >
               Bridges Inspections List
-            </button>
+            </div>
           </div>
         </div>
       </div>
