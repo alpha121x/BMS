@@ -2,7 +2,7 @@ import React from "react";
 import HeaderEvaluation from "./components/HeaderEvaluation";
 import Footer from "./components/Footer";
 import "./index.css";
-import EditForm from "./components/EditForm";
+import EditBridgeForm from "./components/EditBridgeForm";
 
 const EditBridge = () => {
   /* 
@@ -19,7 +19,7 @@ const EditBridge = () => {
       </div>
 
       <main className="flex-grow p-1">
-        <EditForm />
+        <EditBridgeForm />
       </main>
 
       <Footer className="mt-1" />

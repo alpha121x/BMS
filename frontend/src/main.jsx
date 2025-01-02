@@ -9,6 +9,7 @@ import Reports from './Reports'; // Reports Component
 import SetupListing from './SetupListing'; // SetupListing Component
 import Evaluation from './Evaluation'; // Evaluation Module Component
 import EditInspection from './EditInspection';
+import EditBridge from './EditIBridge';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -105,7 +106,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           path="/EditInspection"
           element={
             <PrivateRoute>
-              <EditInspection />
+              <EditBridge />
             </PrivateRoute>
           }
         />
