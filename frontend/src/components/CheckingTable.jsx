@@ -27,6 +27,8 @@ const CheckingTable = () => {
 
       const result = await response.json();
 
+      // console.log("Checking Data:", result.data);
+
       if (Array.isArray(result.data)) {
         setTableData(result.data);
       } else {

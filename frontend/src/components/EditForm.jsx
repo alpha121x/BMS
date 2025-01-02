@@ -28,7 +28,7 @@ const EditForm = () => {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
       setBridgeData(parsedData);
-      // console.log("Parsed Bridge Data:", parsedData);
+      console.log("Parsed Bridge Data:", parsedData);
     }
   }, [serializedData]);
 
@@ -188,7 +188,7 @@ const EditForm = () => {
               <Form.Label>Add New Photo</Form.Label>
               <Form.Control
                 type="file"
-                onChange={(e) => handleNewPhotoAdd(e.target.files[0])} // Automatically handle file upload on selection
+                onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
               />
             </Form.Group>
 

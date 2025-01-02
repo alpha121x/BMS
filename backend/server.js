@@ -256,6 +256,7 @@ app.get("/api/checkings", async (req, res) => {
   // Base query (fetches all data with joins to get additional information)
   let query = `
   SELECT 
+    o."ObjectID", 
     o."CheckingID", 
     o."SpanIndex",  
     o."Remarks",
@@ -278,6 +279,7 @@ LEFT JOIN public."M_DamageLevels" dl ON o."DamageLevelID" = dl."DamageLevelID"
 LEFT JOIN public."D_CheckingPhotos" cp ON o."CheckingID" = cp."CheckingID"
 GROUP BY 
     o."CheckingID", 
+    o."ObjectID", 
     o."SpanIndex",  
     o."Remarks", 
     wk."WorkKindName", 
