@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import { Button, Row, Col, Form, Modal } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
 const EditForm = () => {
@@ -28,7 +28,7 @@ const EditForm = () => {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
       setBridgeData(parsedData);
-      console.log("Parsed Bridge Data:", parsedData);
+      // console.log("Parsed Bridge Data:", parsedData);
     }
   }, [serializedData]);
 
@@ -98,137 +98,166 @@ const EditForm = () => {
         }}
       >
         <div className="card-body pb-0">
-          <h6 className="card-title text-lg font-semibold pb-2">Edit Bridge</h6>
+          <h6 className="card-title text-lg font-semibold pb-2">Edit Inspection</h6>
           <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formBridgeId">
-              <Form.Label>Bridge ID</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.ObjectID || ""}
-                readOnly
-              />
-            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group controlId="formBridgeId">
+                  <Form.Label>Bridge ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.ObjectID || ""}
+                    readOnly
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formBridgeName">
-              <Form.Label>Bridge Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.BridgeName || ""}
-                onChange={(e) =>
-                  handleInputChange("BridgeName", e.target.value)
-                }
-              />
-            </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formBridgeName">
+                  <Form.Label>Bridge Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.BridgeName || ""}
+                    onChange={(e) =>
+                      handleInputChange("BridgeName", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formWorkKind">
-              <Form.Label>Work Kind</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.WorkKindName || ""}
-                onChange={(e) =>
-                  handleInputChange("WorkKindName", e.target.value)
-                }
-              />
-            </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formWorkKind">
+                  <Form.Label>Work Kind</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.WorkKindName || ""}
+                    onChange={(e) =>
+                      handleInputChange("WorkKindName", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formDamageKind">
-              <Form.Label>Damage Kind</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.DamageKindName || ""}
-                onChange={(e) =>
-                  handleInputChange("DamageKindName", e.target.value)
-                }
-              />
-            </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formDamageKind">
+                  <Form.Label>Damage Kind</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.DamageKindName || ""}
+                    onChange={(e) =>
+                      handleInputChange("DamageKindName", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formDamageLevel">
-              <Form.Label>Damage Level</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.DamageLevel || ""}
-                onChange={(e) =>
-                  handleInputChange("DamageLevel", e.target.value)
-                }
-              />
-            </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formDamageLevel">
+                  <Form.Label>Damage Level</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.DamageLevel || ""}
+                    onChange={(e) =>
+                      handleInputChange("DamageLevel", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formSpanIndex">
-              <Form.Label>Span Index</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.SpanIndex || ""}
-                onChange={(e) => handleInputChange("SpanIndex", e.target.value)}
-              />
-            </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formSpanIndex">
+                  <Form.Label>Span Index</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.SpanIndex || ""}
+                    onChange={(e) =>
+                      handleInputChange("SpanIndex", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formMaterial">
-              <Form.Label>Material</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.MaterialName || ""}
-                onChange={(e) =>
-                  handleInputChange("MaterialName", e.target.value)
-                }
-              />
-            </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formMaterial">
+                  <Form.Label>Material</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.MaterialName || ""}
+                    onChange={(e) =>
+                      handleInputChange("MaterialName", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formParts">
-              <Form.Label>Parts</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.PartsName || ""}
-                onChange={(e) => handleInputChange("PartsName", e.target.value)}
-              />
-            </Form.Group>
+              <Col md={6}>
+                <Form.Group controlId="formParts">
+                  <Form.Label>Parts</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.PartsName || ""}
+                    onChange={(e) =>
+                      handleInputChange("PartsName", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formRemarks">
-              <Form.Label>Remarks</Form.Label>
-              <Form.Control
-                type="text"
-                value={bridgeData.Remarks || ""}
-                onChange={(e) => handleInputChange("Remarks", e.target.value)}
-              />
-            </Form.Group>
+              <Col md={12}>
+                <Form.Group controlId="formRemarks">
+                  <Form.Label>Remarks</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.Remarks || ""}
+                    onChange={(e) =>
+                      handleInputChange("Remarks", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
-            {/* Add New Photo */}
-            <Form.Group controlId="formNewPhoto">
-              <Form.Label>Add New Photo</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
-              />
-            </Form.Group>
+              <Col md={12}>
+                <Form.Group controlId="formNewPhoto">
+                  <Form.Label>Add New Photo</Form.Label>
+                  <Form.Control
+                    type="file"
+                    onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
+                  />
+                </Form.Group>
+              </Col>
 
-            <Form.Group controlId="formPhotos">
-              <Form.Label>Photos</Form.Label>
-              <div className="d-flex flex-wrap">
-                {/* Displaying dummy photos */}
-                {dummyPhotos.map((photo, index) => (
-                  <div key={index} className="m-2">
-                    <img
-                      src={`/${photo}`}
-                      alt={`Photo ${index + 1}`}
-                      className="img-thumbnail"
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handlePhotoClick(photo)}
-                    />
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      className="mt-1 w-100"
-                      onClick={() => handlePhotoRemove(photo)}
-                    >
-                      Remove
-                    </Button>
+              <Col md={12}>
+                <Form.Group controlId="formPhotos">
+                  <Form.Label>Photos</Form.Label>
+                  <div className="d-flex flex-wrap">
+                    {/* Displaying dummy photos */}
+                    {dummyPhotos.map((photo, index) => (
+                      <div key={index} className="m-2">
+                        <img
+                          src={`/${photo}`}
+                          alt={`Photo ${index + 1}`}
+                          className="img-thumbnail"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handlePhotoClick(photo)}
+                        />
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="mt-1 w-100"
+                          onClick={() => handlePhotoRemove(photo)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </Form.Group>
+                </Form.Group>
+              </Col>
+            </Row>
 
             {/* Save Button */}
             <div className="d-flex justify-content-center mt-4">
