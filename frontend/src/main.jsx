@@ -90,8 +90,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }
         />
 
-         {/* Private Route for EditBridge */}
+         {/* Private Route for EditInspection */}
          <Route
+          path="/EditInspection"
+          element={
+            <PrivateRoute>
+              <EditInspection />
+            </PrivateRoute>
+          }
+        />
+
+          {/* Private Route for EditBridge */}
+          <Route
           path="/EditInspection"
           element={
             <PrivateRoute>
