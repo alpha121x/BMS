@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Row, Col, Form, Modal } from "react-bootstrap";
+import { Row, Col, Form, Modal, Button } from "react-bootstrap";
 
 const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -15,6 +15,17 @@ const InventoryInfo = ({ inventoryData }) => {
     "uploads/bus_2024_01_16_11_56_43.jpg",
   ];
 
+  const handleEditClick = (row) => {
+    // Serialize the row object into a URL-safe string
+    const serializedRow = encodeURIComponent(JSON.stringify(row));
+
+    // Construct the edit URL with serialized data
+    const editUrl = `/EditBridge?data=${serializedRow}`;
+
+    // Navigate to the edit URL in the same tab
+    window.location.href = editUrl;
+  };
+
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
       <div
@@ -29,7 +40,15 @@ const InventoryInfo = ({ inventoryData }) => {
         }}
       >
         <div className="card-body pb-0">
-          <h6 className="card-title text-lg font-semibold pb-2">Inventory Info</h6>
+          <div className="d-flex justify-content-between align-items-center">
+            <h6 className="card-title text-lg font-semibold pb-2">Inventory Info</h6>
+            <Button
+              variant="primary"
+              onClick={() => handleEditClick(inventoryData)}  // Pass inventoryData to the edit handler
+            >
+              Edit
+            </Button>
+          </div>
           <Form>
             <Row>
               {[{ label: "Bridge ID", field: "ObjectID" },
@@ -52,8 +71,7 @@ const InventoryInfo = ({ inventoryData }) => {
                 { label: "Span Length", field: "SpanLength" },
                 { label: "Spans", field: "Spans" },
                 { label: "Latitude", field: "Latitude" },
-                { label: "Longitude", field: "Longitude" }]
-                .map(({ label, field }, index) => (
+                { label: "Longitude", field: "Longitude" }].map(({ label, field }, index) => (
                   <Col key={index} md={6}>
                     <Form.Group controlId={`form${field}`}>
                       <Form.Label>{label}</Form.Label>
