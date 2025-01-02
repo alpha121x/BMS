@@ -215,21 +215,22 @@ const InspectionList = ({ bridgeId }) => {
         <Table bordered responsive>
           <thead>
             <tr>
-              <th>Bridge Name</th>
-              <th>Work Kind</th>
-              <th>Material</th>
               <th>Parts</th>
-              <th>Details</th>
+              <th>Span</th>
+              <th>Material</th>
+              <th>Damage</th>
+              <th>Level</th>
             </tr>
           </thead>
           <tbody>
             {currentData.length > 0 ? (
               currentData.map((row, index) => (
                 <tr key={index}>
-                  <td>{row.BridgeName || "N/A"}</td>
-                  <td>{row.WorkKindName || "N/A"}</td>
-                  <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
+                  <td>{row.SpanIndex || "N/A"}</td>
+                  <td>{row.MaterialName || "N/A"}</td>
+                  <td>{row.DamageKindName || "N/A"}</td>
+                  <td>{row.DamageLevel || "N/A"}</td>
                   <td>
                     <Button
                       onClick={() => handleViewClick(row)}
