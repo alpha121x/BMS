@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
 
-const InspectionList = ({bridgeId}) => {
+const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,17 +13,26 @@ const InspectionList = ({bridgeId}) => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const itemsPerPage = 10;
-//   console.log("Bridge ID:", bridgeId);
 
+  // Fetch data when bridgeId changes
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (bridgeId) {
+      fetchData();
+    }
+  }, [bridgeId]); // Now use bridgeId as a dependency
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${BASE_URL}/api/checkings`);
+      // Ensure the bridgeId is provided before making the request
+      if (!bridgeId) {
+        throw new Error("bridgeId is required");
+      }
+
+      // Update the API URL to include the bridgeId parameter
+      const response = await fetch(`${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`);
+
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
@@ -43,15 +52,14 @@ const InspectionList = ({bridgeId}) => {
   const handleEditClick = (row) => {
     // Serialize the row object into a URL-safe string
     const serializedRow = encodeURIComponent(JSON.stringify(row));
-  
+
     // Construct the edit URL with serialized data
     const editUrl = `/EditInspection?data=${serializedRow}`;
-  
+
     // Navigate to the edit URL in the same tab
     window.location.href = editUrl;
   };
-  
-  
+
   const handleViewClick = (row) => {
     setSelectedRow(row);
     setShowModal(true);
@@ -181,7 +189,7 @@ const InspectionList = ({bridgeId}) => {
     >
       <div className="card-body pb-0">
         <h6 className="card-title text-lg font-semibold pb-2">
-         Latest Bridge Inspections
+          Latest Bridge Inspections
         </h6>
 
         {loading && (
