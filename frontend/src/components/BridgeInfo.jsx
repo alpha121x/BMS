@@ -31,9 +31,8 @@ const BridgeInfo = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   // State for managing table visibility
-  const [showInventoryInfo, setShowInventoryInfo] = useState(false);
   const [showBridgeInspectionList, setShowBridgeInspectionList] =
-    useState(false);
+    useState(false);  // Default to false to show InventoryInfo first
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -218,12 +217,9 @@ const BridgeInfo = () => {
             <div className="w-3/4 bg-blue-400 shadow-lg p-2 rounded-lg flex">
               <div className="flex-1 flex justify-center items-center">
                 <div
-                  onClick={() => {
-                    setShowInventoryInfo(true);
-                    setShowBridgeInspectionList(false);
-                  }}
+                  onClick={() => setShowBridgeInspectionList(false)}
                   className={`${
-                    showInventoryInfo
+                    !showBridgeInspectionList
                       ? "bg-blue-700 text-white"
                       : "bg-blue-300 text-black"
                   } w-full text-center p-2 cursor-pointer`}
@@ -233,10 +229,7 @@ const BridgeInfo = () => {
               </div>
               <div className="flex-1 flex justify-center items-center">
                 <div
-                  onClick={() => {
-                    setShowBridgeInspectionList(true);
-                    setShowInventoryInfo(false);
-                  }}
+                  onClick={() => setShowBridgeInspectionList(true)}
                   className={`${
                     showBridgeInspectionList
                       ? "bg-blue-700 text-white"
@@ -249,21 +242,20 @@ const BridgeInfo = () => {
             </div>
           </div>
 
-          {/* InventoryInfo Section */}
-          {showInventoryInfo && (
-            <div className="mt-2 flex justify-center">
-              <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+          {/* InventoryInfo Section (Always visible) */}
+          <div className="mt-2 flex justify-center">
+            <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+              {!showBridgeInspectionList && bridgeData && (
                 <InventoryInfo inventoryData={bridgeData} />
-              </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Checking Listing Section */}
           {showBridgeInspectionList && (
             <div className="mt-2 flex justify-center">
               <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-                <InspectionList
-                bridgeId={bridgeData.ObjectID} />
+                <InspectionList bridgeId={bridgeData?.ObjectID} />
               </div>
             </div>
           )}
