@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import { useNavigate } from "react-router-dom";  // Import useNavigate from react-router-dom
+import { useNavigate } from "react-router-dom";
 
 const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [tableData, setTableData] = useState([]);
@@ -11,7 +11,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 10;
-  const navigate = useNavigate();  // Initialize navigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (selectedDistrict && selectedZone) {
@@ -19,19 +19,18 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     }
   }, [selectedDistrict, selectedZone]);
 
-  // Function to fetch bridge data
-  const fetchAllBridges = async (selectedDistrict, selectedZone) => {
+  const fetchAllBridges = async (district, zone) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bridges?district=${selectedDistrict}&zone=${selectedZone}`
+        `${BASE_URL}/api/bridges?district=${district}&zone=${zone}`
       );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
       setTableData(data);
-      setLoading(false);
     } catch (error) {
       setError(error.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -42,25 +41,27 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     currentPage * itemsPerPage
   );
 
-  // Handle pagination
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
+  const handleRowClick = (bridge) => {
+    // Serialize the bridge data object into a URL-safe string
+    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+  
+    // Construct the URL with serialized data as a query parameter
+    const editUrl = `/BridgeInfo?bridgeData=${serializedBridgeData}`;
+  
+    // Navigate to the edit URL, passing the data through query parameters
+    window.location.href = editUrl;
+};
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
 
   const renderPaginationButtons = () => {
     const buttons = [];
+    const pageRange = 3;
 
     buttons.push(
       <Button
-        onClick={handlePrevPage}
+        onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
         key="prev"
         style={buttonStyles}
@@ -69,61 +70,32 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       </Button>
     );
 
-    buttons.push(
-      <Button
-        key="1"
-        onClick={() => handlePageChange(1)}
-        style={{
-          ...buttonStyles,
-          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA",
-        }}
-      >
-        1
-      </Button>
-    );
-
-    const pageRange = 3;
-    let startPage = Math.max(currentPage - pageRange, 2);
-    let endPage = Math.min(currentPage + pageRange, totalPages - 1);
-
-    if (totalPages <= 7) {
-      startPage = 2;
-      endPage = totalPages - 1;
-    }
-
-    for (let page = startPage; page <= endPage; page++) {
-      buttons.push(
-        <Button
-          key={page}
-          onClick={() => handlePageChange(page)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {page}
-        </Button>
-      );
-    }
-
-    if (totalPages > 1) {
-      buttons.push(
-        <Button
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {totalPages}
-        </Button>
-      );
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - pageRange && i <= currentPage + pageRange)
+      ) {
+        buttons.push(
+          <Button
+            key={i}
+            onClick={() => handlePageChange(i)}
+            style={{
+              ...buttonStyles,
+              backgroundColor: currentPage === i ? "#3B82F6" : "#60A5FA",
+            }}
+          >
+            {i}
+          </Button>
+        );
+      } else if (buttons[buttons.length - 1].key !== "ellipsis") {
+        buttons.push(<span key="ellipsis">...</span>);
+      }
     }
 
     buttons.push(
       <Button
-        onClick={handleNextPage}
+        onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         key="next"
         style={buttonStyles}
@@ -145,11 +117,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     cursor: "pointer",
   };
 
-  // Handle row click to navigate to the BridgeDetailsPage
-  const handleRowClick = (bridge) => {
-    navigate(`/BridgeInfo/${bridge.ObjectID}`, { state: { bridge } });
-  };
-
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -165,7 +132,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
 
         {loading && (
           <div
-            className="loader"
             style={{
               border: "8px solid #f3f3f3",
               borderTop: "8px solid #3498db",
@@ -178,52 +144,62 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              zIndex: "999",
+              zIndex: 999,
             }}
           />
         )}
 
-        <Table bordered responsive>
-          <thead>
-            <tr>
-              <th>Bridge ID</th>
-              <th>Bridge Name</th>
-              <th>Structure Type</th>
-              <th>Construction Type</th>
-              <th>District</th>
-              <th>Zone</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((bridge, index) => (
-                <tr
-                  key={index}
-                  onClick={() => handleRowClick(bridge)} // Add onClick handler
-                  style={{ cursor: "pointer" }} // Change cursor to pointer
-                  className="hover-row" // Add hover class
-                >
-                  <td>{bridge.ObjectID || "N/A"}</td>
-                  <td>{bridge.BridgeName || "N/A"}</td>
-                  <td>{bridge.StructureType || "N/A"}</td>
-                  <td>{bridge.ConstructionType || "N/A"}</td>
-                  <td>{bridge.District || "N/A"}</td>
-                  <td>{bridge.Zone || "N/A"}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="text-center">
-                  No data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+        {error && (
+          <div className="text-danger text-center">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
 
-        <div className="d-flex justify-content-center align-items-center">
-          {renderPaginationButtons()}
-        </div>
+        {!loading && !error && (
+          <>
+            <Table bordered responsive>
+              <thead>
+                <tr>
+                  <th>Bridge ID</th>
+                  <th>Bridge Name</th>
+                  <th>Structure Type</th>
+                  <th>Construction Type</th>
+                  <th>District</th>
+                  <th>Zone</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((bridge, index) => (
+                    <tr
+                      key={index}
+                      onClick={() => handleRowClick(bridge)}
+                      style={{ cursor: "pointer" }}
+                      className="hover-row"
+                    >
+                      <td>{bridge.ObjectID || "N/A"}</td>
+                      <td>{bridge.BridgeName || "N/A"}</td>
+                      <td>{bridge.StructureType || "N/A"}</td>
+                      <td>{bridge.ConstructionType || "N/A"}</td>
+                      <td>{bridge.District || "N/A"}</td>
+                      <td>{bridge.Zone || "N/A"}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center">
+                      No data available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+
+            <div className="d-flex justify-content-center align-items-center">
+              {renderPaginationButtons()}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

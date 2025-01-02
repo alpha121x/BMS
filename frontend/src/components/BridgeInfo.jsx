@@ -1,22 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import BridgeListing from "./BridgeListing";
 import FilterComponent from "./FilterComponent";
 import CheckingTable from "./CheckingTable";
 import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
+import InventoryInfo from "./InventoryInfo";
+import { useLocation } from "react-router-dom";
 
 const BridgeInfo = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
   const [startDate, setStartDate] = useState("");
   const [districtId, setDistrictId] = useState(null);
   const [selectedZone, setSelectedZone] = useState("%");
+  const location = useLocation();
+  const [bridgeData, setBridgeData] = useState(null);
 
+  useEffect(() => {
+    // Retrieve the serialized bridgeData from query parameters
+    const urlParams = new URLSearchParams(location.search);
+    const serializedBridgeData = urlParams.get("bridgeData");
+
+    if (serializedBridgeData) {
+      // Decode and parse the bridge data into an object
+      setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
+    }
+  }, [location]);
+  
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   // State for managing table visibility
-  const [showBridgesList, setShowBridgesList] = useState(false);
+  const [showInventoryInfo, setShowInventoryInfo] = useState(false);
   const [showBridgeInspectionList, setShowBridgeInspectionList] =
     useState(false);
 
@@ -204,11 +218,11 @@ const BridgeInfo = () => {
               <div className="flex-1 flex justify-center items-center">
                 <div
                   onClick={() => {
-                    setShowBridgesList(true);
+                    setShowInventoryInfo(true);
                     setShowBridgeInspectionList(false);
                   }}
                   className={`${
-                    showBridgesList
+                    showInventoryInfo
                       ? "bg-blue-700 text-white"
                       : "bg-blue-300 text-black"
                   } w-full text-center p-2 cursor-pointer`}
@@ -234,15 +248,11 @@ const BridgeInfo = () => {
             </div>
           </div>
 
-          {/* Bridge Listing Section */}
-          {showBridgesList && (
+          {/* InventoryInfo Section */}
+          {showInventoryInfo && (
             <div className="mt-2 flex justify-center">
               <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-                <BridgeListing
-                  selectedDistrict={selectedDistrict}
-                  startDate={startDate}
-                  selectedZone={selectedZone}
-                />
+                <InventoryInfo bridgeData={bridgeData} />
               </div>
             </div>
           )}
