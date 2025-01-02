@@ -104,6 +104,7 @@ const EditForm = () => {
               <Form.Label>Bridge ID</Form.Label>
               <Form.Control
                 type="text"
+                readOnly
                 value={bridgeData.ObjectID || ""}
                 onChange={(e) => handleInputChange("ObjectID", e.target.value)}
               />
