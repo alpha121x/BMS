@@ -11,7 +11,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
 
-
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -28,7 +27,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
-  
+
       // Set table data and extract the total count
       setTableData(data);
       if (data.length > 0) {
@@ -43,8 +42,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       setLoading(false);
     }
   };
-  
-  
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
   const currentData = tableData.slice(
@@ -132,8 +129,13 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       <div className="w-full mx-auto mt-2">
         <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            Bridges List <br />
-            Total Bridges: {bridgeCount || 0}
+            <div className="text-2xl font-bold">Bridges List</div>{" "}
+            {/* Larger and bolder */}
+            <div className="text-sm font-medium mt-1 text-gray-700">
+              {" "}
+              {/* Smaller and lighter */}
+              Total Bridges: {bridgeCount || 0}
+            </div>
           </div>
         </div>
       </div>
