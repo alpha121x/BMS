@@ -180,12 +180,12 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
             <Table bordered responsive className="custom-table">
               <thead>
                 <tr>
-                  <th>Bridge ID</th>
                   <th>Bridge Name</th>
                   <th>Structure Type</th>
                   <th>Construction Type</th>
                   <th>District</th>
                   <th>Zone</th>
+                  <th>Photo</th>
                 </tr>
               </thead>
               <tbody>
@@ -196,12 +196,26 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                       onClick={() => handleRowClick(bridge)}
                       className="hover-row"
                     >
-                      <td>{bridge.ObjectID || "N/A"}</td>
                       <td>{bridge.BridgeName || "N/A"}</td>
                       <td>{bridge.StructureType || "N/A"}</td>
                       <td>{bridge.ConstructionType || "N/A"}</td>
                       <td>{bridge.District || "N/A"}</td>
                       <td>{bridge.Zone || "N/A"}</td>
+                      <td>
+                          {bridge.photo ? (
+                            <img
+                              src={bridge.photo}
+                              alt="Bridge"
+                              className="w-16 h-16 object-cover rounded-md"
+                            />
+                          ) : (
+                            <img
+                              src="/download.jpeg" // Path to your alternate image
+                              alt="No image available"
+                              className="w-30 h-10 object-cover rounded-md"
+                            />
+                          )}
+                        </td>
                     </tr>
                   ))
                 ) : (
