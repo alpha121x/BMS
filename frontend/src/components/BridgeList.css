@@ -1,0 +1,38 @@
+.custom-table {
+    border-collapse: separate;
+    border-spacing: 0 10px; /* Add spacing between rows */
+    background-color: #f9f9f9;
+  }
+  
+  .custom-table th,
+  .custom-table td {
+    padding: 15px; /* Increase cell spacing */
+    text-align: left;
+    vertical-align: middle;
+    border: 1px solid #ddd;
+  }
+  
+  .custom-table thead th {
+    background-color: #007bff; /* Header background color */
+    color: white; /* Header text color */
+    font-weight: bold;
+  }
+  
+  .custom-table tbody tr {
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  .custom-table tbody tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+    transform: scale(1.02); /* Slightly enlarge the row */
+    cursor: pointer;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .hover-row {
+    border-radius: 8px; /* Rounded edges for hover effect */
+  }
+  

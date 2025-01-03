@@ -3,6 +3,7 @@ import { Button, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import { useNavigate } from "react-router-dom";
+import "./BridgeList.css";
 
 const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [tableData, setTableData] = useState([]);
@@ -46,14 +47,13 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const handleRowClick = (bridge) => {
     // Serialize the bridge data object into a URL-safe string
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-  
+
     // Construct the URL with serialized data as a query parameter
     const editUrl = `/BridgeInfo?bridgeData=${serializedBridgeData}`;
-  
+
     // Navigate to the edit URL, passing the data through query parameters
     window.location.href = editUrl;
-};
-
+  };
 
   const renderPaginationButtons = () => {
     const buttons = [];
@@ -157,7 +157,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
 
         {!loading && !error && (
           <>
-            <Table bordered responsive>
+            <Table bordered responsive className="custom-table">
               <thead>
                 <tr>
                   <th>Bridge ID</th>
@@ -166,6 +166,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                   <th>Construction Type</th>
                   <th>District</th>
                   <th>Zone</th>
+                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -174,7 +175,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                     <tr
                       key={index}
                       onClick={() => handleRowClick(bridge)}
-                      style={{ cursor: "pointer" }}
                       className="hover-row"
                     >
                       <td>{bridge.ObjectID || "N/A"}</td>
