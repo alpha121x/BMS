@@ -6,6 +6,9 @@ const EditBridgeForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedSpan, setSelectedSpan] = useState("");
+  const [photos, setPhotos] = useState({});
+  const [showUploadOptions, setShowUploadOptions] = useState(false); // Define the state
 
   // Dummy photos for testing
   const dummyPhotos = [
@@ -25,38 +28,30 @@ const EditBridgeForm = () => {
     if (serializedData) {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
-      // console.log("Parsed Data:", parsedData);
       setBridgeData({ ...parsedData, photos: dummyPhotos }); // Add dummy photos for testing
     }
   }, [serializedData]);
+
+  // This will hold the number of spans (e.g., 5 if `bridgeData.Spans` is 5)
+  const spanCount = bridgeData?.Spans || 0;
+
+  // Generate an array of span values based on `spanCount`
+  const spanIndexes = Array.from(
+    { length: spanCount },
+    (_, index) => index + 1
+  );
+
+  // Handling the selection change
+  const handleSpanSelect = (e) => {
+    setSelectedSpan(e.target.value);
+    setShowUploadOptions(true); // Show upload options when a span is selected
+  };
 
   const handleInputChange = (field, value) => {
     setBridgeData((prevData) => ({
       ...prevData,
       [field]: value,
     }));
-  };
-
-  const handleNewPhotoAdd = (file) => {
-    const formData = new FormData();
-    formData.append("photo", file);
-
-    // Replace with your API call
-    fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setBridgeData((prevData) => ({
-          ...prevData,
-          photos: [...(prevData.photos || []), data.filePath],
-        }));
-        console.log("Photo uploaded successfully:", data);
-      })
-      .catch((error) => {
-        console.error("Error uploading photo:", error);
-      });
   };
 
   const handleSubmit = (e) => {
@@ -78,6 +73,16 @@ const EditBridgeForm = () => {
         (photo) => photo !== photoToRemove
       ),
     }));
+  };
+
+  // Handle the photo upload for the selected span
+  const handleNewPhotoAdd = (e, span, photoIndex) => {
+    const newPhotos = { ...photos };
+    if (!newPhotos[span]) newPhotos[span] = [];
+
+    newPhotos[span][photoIndex] = e.target.files[0]; // Store photo for the selected span
+
+    setPhotos(newPhotos);
   };
 
   if (!bridgeData) {
@@ -116,10 +121,13 @@ const EditBridgeForm = () => {
         }}
       >
         <div className="card-body pb-0">
-          <h6 className="card-title text-lg font-semibold pb-2">Edit Bridge Info</h6>
+          <h6 className="card-title text-lg font-semibold pb-2">
+            Edit Bridge Info
+          </h6>
           <Form onSubmit={handleSubmit}>
             <Row>
-              {[{ label: "Bridge ID", field: "ObjectID" },
+              {[ 
+                { label: "Bridge ID", field: "ObjectID" },
                 { label: "Bridge Name", field: "BridgeName" },
                 { label: "Structure Type", field: "StructureType" },
                 { label: "Construction Year", field: "ConstructionYear" },
@@ -139,29 +147,63 @@ const EditBridgeForm = () => {
                 { label: "Span Length", field: "SpanLength" },
                 { label: "Spans", field: "Spans" },
                 { label: "Latitude", field: "Latitude" },
-                { label: "Longitude", field: "Longitude" }]
-                .map(({ label, field }, index) => (
-                  <Col key={index} md={6}>
-                    <Form.Group controlId={`form${field}`}>
-                      <Form.Label>{label}</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={bridgeData[field] || ""}
-                        onChange={(e) => handleInputChange(field, e.target.value)}
-                      />
-                    </Form.Group>
-                  </Col>
-                ))}
+                { label: "Longitude", field: "Longitude" },
+              ].map(({ label, field }, index) => (
+                <Col key={index} md={6}>
+                  <Form.Group controlId={`form${field}`}>
+                    <Form.Label>{label}</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={bridgeData[field] || ""}
+                      onChange={(e) => handleInputChange(field, e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+              ))}
 
-              <Col md={12}>
-                <Form.Group controlId="formNewPhoto">
-                  <Form.Label>Add New Photo</Form.Label>
-                  <Form.Control
-                    type="file"
-                    onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
-                  />
-                </Form.Group>
-              </Col>
+              {/* Span Select Dropdown */}
+              <div className="form-group">
+                <label>Select Span</label>
+                <select
+                  className="form-control"
+                  value={selectedSpan}
+                  onChange={handleSpanSelect}
+                >
+                  <option value="">-- Select Span --</option>
+                  {spanIndexes.map((span, index) => (
+                    <option key={index} value={span}>
+                      Span {span}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Show photo upload options if a span is selected */}
+              {showUploadOptions && selectedSpan && (
+                <>
+                  {/* Display selected span */}
+                  <Col md={12}>
+                    <Form.Label>
+                      Upload Photos for Span {selectedSpan}
+                    </Form.Label>
+                  </Col>
+
+                  {/* Photo Upload Inputs (5 inputs for 5 photos) */}
+                  {Array.from({ length: 5 }).map((_, photoIndex) => (
+                    <Col md={12} key={photoIndex}>
+                      <Form.Group controlId={`formPhoto${photoIndex + 1}`}>
+                        <Form.Label>Photo {photoIndex + 1}</Form.Label>
+                        <Form.Control
+                          type="file"
+                          onChange={(e) =>
+                            handleNewPhotoAdd(e, selectedSpan, photoIndex)
+                          }
+                        />
+                      </Form.Group>
+                    </Col>
+                  ))}
+                </>
+              )}
 
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
