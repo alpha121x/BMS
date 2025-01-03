@@ -11,6 +11,8 @@ import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfo";
 import { useLocation } from "react-router-dom";
 import InspectionList from "./InspectionList";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 const BridgeInfo = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -19,6 +21,7 @@ const BridgeInfo = () => {
   const [selectedZone, setSelectedZone] = useState("%");
   const location = useLocation();
   const [bridgeData, setBridgeData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Retrieve the serialized bridgeData from query parameters
@@ -57,6 +60,11 @@ const BridgeInfo = () => {
   // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleBackClick = () => {
+    // Navigate to the previous page or a specific route
+    navigate("/Evaluation"); // Adjust the route as needed
   };
 
   const handleEditClick = () => {
@@ -227,6 +235,19 @@ const BridgeInfo = () => {
           </div>
 
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
+            {/* Back Button */}
+            <div className="flex justify-start mb-4">
+              <button
+                onClick={handleBackClick} // Ensure to define this function for navigation
+                className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-md flex items-center gap-2"
+              >
+                <ArrowLeftIcon className="h-5 w-5" />{" "}
+                {/* Replace with appropriate icon if needed */}
+                Back
+              </button>
+            </div>
+
+            {/* Bridge Information Card */}
             <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
               <div className="flex-1">
                 <div className="text-lg font-semibold">
@@ -234,11 +255,11 @@ const BridgeInfo = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
-                    <span className="text-gray">Latest inspection Date:</span>
+                    <span className="text-gray">Latest Inspection Date:</span>
                     <span className="ml-2">{"N/A"}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-gray">Latest inspection Status:</span>
+                    <span className="text-gray">Latest Inspection Status:</span>
                     <span className="ml-2 bg-white text-red-500 px-2 py-1 rounded-md text-sm">
                       {bridgeData?.ApprovedFlag || "UnApproved"}
                     </span>
