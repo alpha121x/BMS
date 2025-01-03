@@ -150,8 +150,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">Bridge List</h6>
-
         {loading && (
           <div
             style={{
