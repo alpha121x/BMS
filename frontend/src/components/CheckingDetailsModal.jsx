@@ -9,7 +9,6 @@ const CheckingDetailsModal = ({ selectedRow }) => {
     "uploads/bus_2024_01_14_12_40_38.jpg",
     "uploads/bus_2024_01_14_12_43_56.jpg",
     "uploads/bus_2024_01_14_12_45_26.jpg",
-    "uploads/bus_2024_01_16_11_56_43.jpg"
   ];
 
 
