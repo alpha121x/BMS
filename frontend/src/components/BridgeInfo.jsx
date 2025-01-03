@@ -213,20 +213,20 @@ const BridgeInfo = () => {
           </div>
 
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
-            <div className="bg-[#4C8C2B] text-white p-4 rounded-md shadow-md flex items-center justify-between">
+            <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
               <div className="flex-1">
                 <div className="text-lg font-semibold">
-                  {bridgeData?.BridgeName || "Bridge Name"}
+                Bridge Name: {" "}{bridgeData?.BridgeName || "Bridge Name"}
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
-                    <span className="text-gray-200">
+                    <span className="text-gray">
                       Latest inspection Date:
                     </span>
                     <span className="ml-2">{"N/A"}</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="text-gray-200">
+                    <span className="text-gray">
                       Latest inspection Status:
                     </span>
                     <span className="ml-2 bg-white text-red-500 px-2 py-1 rounded-md text-sm">
