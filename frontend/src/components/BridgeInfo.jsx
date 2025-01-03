@@ -236,13 +236,13 @@ const BridgeInfo = () => {
 
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
             {/* Bridge Information Card */}
-            <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
+            <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
               <div className="flex-1">
                 {/* Back Button */}
-                <div className="flex justify-start mb-4">
+                <div className="flex justify-start">
                   <button
                     onClick={handleBackClick} // Ensure to define this function for navigation
-                    className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-md flex items-center gap-2"
+                    className="bg-inherit hover:bg-blue-500 text-black py-2 rounded-md flex items-center gap-2"
                   >
                     <ArrowLeftIcon className="h-5 w-5" />{" "}
                     {/* Replace with appropriate icon if needed */}
