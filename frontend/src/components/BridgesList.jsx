@@ -196,7 +196,12 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                         className="hover-row"
                       >
                         <td>{bridge.District || "N/A"}</td>
-                        <td>{bridge.Road || "N/A"}</td>
+                        <td
+                          className="truncate-text"
+                          title={bridge.Road || "N/A"}
+                        >
+                          {bridge.Road || "N/A"}
+                        </td>
                         <td>{bridge.StructureType || "N/A"}</td>
                         <td>{bridge.BridgeName || "N/A"}</td>
                         <td>
@@ -210,7 +215,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                             <img
                               src="/download.jpeg" // Path to your alternate image
                               alt="No image available"
-                              className="w-30 h-16 object-cover rounded-md"
+                              className="w-30 h-10 object-cover rounded-md"
                             />
                           )}
                         </td>

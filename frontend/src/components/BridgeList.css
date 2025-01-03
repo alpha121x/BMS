@@ -4,9 +4,15 @@
     background-color: #f9f9f9;
   }
   
-  .custom-table th,
+  .custom-table th {
+    padding: 10px; /* Increase cell spacing */
+    text-align: left;
+    vertical-align: middle;
+    border: 1px solid #ddd;
+  }
+
   .custom-table td {
-    padding: 15px; /* Increase cell spacing */
+    padding: 10px; /* Increase cell spacing */
     text-align: left;
     vertical-align: middle;
     border: 1px solid #ddd;
@@ -34,5 +40,12 @@
   
   .hover-row {
     border-radius: 8px; /* Rounded edges for hover effect */
+  }
+  
+  .truncate-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Adjust the max-width as per your requirements */
   }
   
