@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import { useNavigate } from "react-router-dom";
 import "./BridgeList.css";
 
 const BridgesList = ({ selectedDistrict, selectedZone }) => {
@@ -12,7 +11,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const itemsPerPage = 10;
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (selectedDistrict && selectedZone) {
