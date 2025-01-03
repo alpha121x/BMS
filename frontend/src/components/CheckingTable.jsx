@@ -194,11 +194,11 @@ const CheckingTable = () => {
         <Table bordered responsive>
           <thead>
             <tr>
-              {/* <th>Checking ID</th> */}
               <th>Bridge Name</th>
               <th>Work Kind</th>
               <th>Material</th>
               <th>Parts</th>
+              <th>Status</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -211,6 +211,7 @@ const CheckingTable = () => {
                   <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
+                  <td>{row.ApprovedFlag === 0 ? "Unapproved" : row.ApprovedFlag || "N/A"}</td>
                   <td>
                     <Button
                       onClick={() => handleViewClick(row)}
