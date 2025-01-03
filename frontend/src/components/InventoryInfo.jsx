@@ -40,18 +40,13 @@ const InventoryInfo = ({ inventoryData }) => {
         }}
       >
         <div className="card-body pb-0">
-          <div className="d-flex justify-content-between align-items-center">
-            <h5 className="card-title text-lg font-semibold pb-2">Inventory Info</h5>
-            <Button
-              variant="primary"
-              onClick={() => handleEditClick(inventoryData)}
-            >
-              Edit Bridge
-            </Button>
-          </div>
+          <h5 className="card-title text-lg font-semibold pb-2">
+            Inventory Info
+          </h5>
           <Form>
             <Row>
-              {[{ label: "Bridge ID", field: "ObjectID" },
+              {[
+                { label: "Bridge ID", field: "ObjectID" },
                 { label: "Bridge Name", field: "BridgeName" },
                 { label: "Structure Type", field: "StructureType" },
                 { label: "Construction Year", field: "ConstructionYear" },
@@ -60,29 +55,37 @@ const InventoryInfo = ({ inventoryData }) => {
                 { label: "Road", field: "Road" },
                 { label: "Construction Type", field: "ConstructionType" },
                 { label: "Survey ID", field: "SurveyID" },
-                { label: "Road Classification ID", field: "RoadClassificationID" },
+                {
+                  label: "Road Classification ID",
+                  field: "RoadClassificationID",
+                },
                 { label: "Carriageway Type", field: "CarriagewayType" },
                 { label: "Road Surface Type", field: "RoadSurfaceType" },
                 { label: "Road Classification", field: "RoadClassification" },
                 { label: "Visual Condition", field: "VisualCondition" },
                 { label: "Direction", field: "Direction" },
-                { label: "Last Maintenance Date", field: "LastMaintenanceDate", type: "date" },
+                {
+                  label: "Last Maintenance Date",
+                  field: "LastMaintenanceDate",
+                  type: "date",
+                },
                 { label: "Width Structure", field: "WidthStructure" },
                 { label: "Span Length", field: "SpanLength" },
                 { label: "Spans", field: "Spans" },
                 { label: "Latitude", field: "Latitude" },
-                { label: "Longitude", field: "Longitude" }].map(({ label, field }, index) => (
-                  <Col key={index} md={6}>
-                    <Form.Group controlId={`form${field}`}>
-                      <Form.Label>{label}</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={inventoryData ? inventoryData[field] || "" : ""}
-                        readOnly
-                      />
-                    </Form.Group>
-                  </Col>
-                ))}
+                { label: "Longitude", field: "Longitude" },
+              ].map(({ label, field }, index) => (
+                <Col key={index} md={6}>
+                  <Form.Group controlId={`form${field}`}>
+                    <Form.Label>{label}</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={inventoryData ? inventoryData[field] || "" : ""}
+                      readOnly
+                    />
+                  </Form.Group>
+                </Col>
+              ))}
 
               <Col md={12}>
                 <Form.Group controlId="formPhotos">

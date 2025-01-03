@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { UserIcon, DocumentIcon, TrashIcon, PencilIcon  } from "@heroicons/react/24/outline";
+import {
+  UserIcon,
+  DocumentIcon,
+  TrashIcon,
+  PencilIcon,
+} from "@heroicons/react/24/outline";
 import FilterComponent from "./FilterComponent";
 import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
@@ -52,6 +57,15 @@ const BridgeInfo = () => {
   // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleEditClick = () => {
+    // Serialize the bridgeData object into a URL-safe string
+    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridgeData));
+    // Construct the edit URL with serialized data
+    const editUrl = `/EditBridge?data=${serializedBridgeData}`;
+    // Navigate to the edit URL in the same tab
+    window.location.href = editUrl;
   };
 
   // Data for cards
@@ -232,7 +246,10 @@ const BridgeInfo = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
+                <button
+                  onClick={handleEditClick}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                >
                   <PencilIcon className="h-5 w-5" />
                   Edit
                 </button>
