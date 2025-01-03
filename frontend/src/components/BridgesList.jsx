@@ -9,6 +9,8 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [bridgeCount, setBridgeCount] = useState(0);
+
 
   const itemsPerPage = 10;
 
@@ -26,13 +28,23 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
+  
+      // Set table data and extract the total count
       setTableData(data);
+      if (data.length > 0) {
+        const lastBridgeId = data[data.length - 1]?.ObjectID || "N/A";
+        setBridgeCount(lastBridgeId); // Assuming this is the correct total count
+      } else {
+        setBridgeCount(0); // Default to 0 if no data
+      }
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+  
+  
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
   const currentData = tableData.slice(
@@ -120,7 +132,8 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       <div className="w-full mx-auto mt-2">
         <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            Bridge List: {tableData.length || 0}
+            Bridges List <br />
+            Total Bridges: {bridgeCount || 0}
           </div>
         </div>
       </div>

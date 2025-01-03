@@ -235,21 +235,20 @@ const BridgeInfo = () => {
           </div>
 
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
-            {/* Back Button */}
-            <div className="flex justify-start mb-4">
-              <button
-                onClick={handleBackClick} // Ensure to define this function for navigation
-                className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-md flex items-center gap-2"
-              >
-                <ArrowLeftIcon className="h-5 w-5" />{" "}
-                {/* Replace with appropriate icon if needed */}
-                Back
-              </button>
-            </div>
-
             {/* Bridge Information Card */}
             <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
               <div className="flex-1">
+                {/* Back Button */}
+                <div className="flex justify-start mb-4">
+                  <button
+                    onClick={handleBackClick} // Ensure to define this function for navigation
+                    className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded-md flex items-center gap-2"
+                  >
+                    <ArrowLeftIcon className="h-5 w-5" />{" "}
+                    {/* Replace with appropriate icon if needed */}
+                    Bridges List
+                  </button>
+                </div>
                 <div className="text-lg font-semibold">
                   Bridge Name: {bridgeData?.BridgeName || "Bridge Name"}
                 </div>
