@@ -38,19 +38,7 @@ const CheckingTable = () => {
       setLoading(false);
     }
   };
-
-  const handleEditClick = (row) => {
-    // Serialize the row object into a URL-safe string
-    const serializedRow = encodeURIComponent(JSON.stringify(row));
-  
-    // Construct the edit URL with serialized data
-    const editUrl = `/EditBridge?data=${serializedRow}`;
-  
-    // Navigate to the edit URL in the same tab
-    window.location.href = editUrl;
-  };
-  
-  
+ 
   const handleViewClick = (row) => {
     setSelectedRow(row);
     setShowModal(true);
@@ -233,17 +221,6 @@ const CheckingTable = () => {
                       }}
                     >
                       View
-                    </Button>
-                    {" "}
-                    <Button
-                      onClick={() => handleEditClick(row)} // New handler
-                      style={{
-                        backgroundColor: "#4CAF50",
-                        border: "none",
-                        color: "white",
-                      }}
-                    >
-                      Edit
                     </Button>
                   </td>
                 </tr>
