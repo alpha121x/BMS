@@ -166,7 +166,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                   <th>Construction Type</th>
                   <th>District</th>
                   <th>Zone</th>
-                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>
