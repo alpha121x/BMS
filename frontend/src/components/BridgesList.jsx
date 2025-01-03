@@ -11,6 +11,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
 
+
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -126,7 +127,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
 
   return (
     <>
-      <div className="w-full mx-auto mt-2">
+    <div className="w-full mx-auto mt-2">
         <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
             <div className="text-2xl font-bold">Bridges List</div>{" "}
@@ -139,107 +140,89 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
           </div>
         </div>
       </div>
-      <div
-        className="card p-2 rounded-lg text-black"
-        style={{
-          background: "#FFFFFF",
-          border: "2px solid #60A5FA",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-          position: "relative",
-        }}
-      >
-        <div className="card-body pb-0">
-          {loading && (
-            <div
-              style={{
-                border: "8px solid #f3f3f3",
-                borderTop: "8px solid #3498db",
-                borderRadius: "50%",
-                width: "80px",
-                height: "80px",
-                animation: "spin 1s linear infinite",
-                margin: "auto",
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                zIndex: 999,
-              }}
-            />
-          )}
+    <div
+      className="card p-2 rounded-lg text-black"
+      style={{
+        background: "#FFFFFF",
+        border: "2px solid #60A5FA",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        position: "relative",
+      }}
+    >
+      <div className="card-body pb-0">
+        <h6 className="card-title text-lg font-semibold pb-2">Bridge List</h6>
 
-          {error && (
-            <div className="text-danger text-center">
-              <strong>Error:</strong> {error}
-            </div>
-          )}
+        {loading && (
+          <div
+            style={{
+              border: "8px solid #f3f3f3",
+              borderTop: "8px solid #3498db",
+              borderRadius: "50%",
+              width: "80px",
+              height: "80px",
+              animation: "spin 1s linear infinite",
+              margin: "auto",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              zIndex: 999,
+            }}
+          />
+        )}
 
-          {!loading && !error && (
-            <>
-              <Table bordered responsive className="custom-table">
-                <thead>
-                  <tr>
-                    <th>District</th>
-                    <th>Road Name</th>
-                    <th>Structure Type</th>
-                    <th>Bridge Name</th>
-                    <th>Photo</th>
-                    <th>Latest Inspection Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentData.length > 0 ? (
-                    currentData.map((bridge, index) => (
-                      <tr
-                        key={index}
-                        onClick={() => handleRowClick(bridge)}
-                        className="hover-row"
-                      >
-                        <td>{bridge.District || "N/A"}</td>
-                        <td
-                          className="truncate-text"
-                          title={bridge.Road || "N/A"}
-                        >
-                          {bridge.Road || "N/A"}
-                        </td>
-                        <td>{bridge.StructureType || "N/A"}</td>
-                        <td>{bridge.BridgeName || "N/A"}</td>
-                        <td>
-                          {bridge.photo ? (
-                            <img
-                              src={bridge.photo}
-                              alt="Bridge"
-                              className="w-16 h-16 object-cover rounded-md"
-                            />
-                          ) : (
-                            <img
-                              src="/download.jpeg" // Path to your alternate image
-                              alt="No image available"
-                              className="w-30 h-10 object-cover rounded-md"
-                            />
-                          )}
-                        </td>
+        {error && (
+          <div className="text-danger text-center">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
 
-                        <td>{bridge.LatestInspectionStatus || "N/A"}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="text-center">
-                        No data available
-                      </td>
+        {!loading && !error && (
+          <>
+            <Table bordered responsive className="custom-table">
+              <thead>
+                <tr>
+                  <th>Bridge ID</th>
+                  <th>Bridge Name</th>
+                  <th>Structure Type</th>
+                  <th>Construction Type</th>
+                  <th>District</th>
+                  <th>Zone</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentData.length > 0 ? (
+                  currentData.map((bridge, index) => (
+                    <tr
+                      key={index}
+                      onClick={() => handleRowClick(bridge)}
+                      className="hover-row"
+                    >
+                      <td>{bridge.ObjectID || "N/A"}</td>
+                      <td>{bridge.BridgeName || "N/A"}</td>
+                      <td>{bridge.StructureType || "N/A"}</td>
+                      <td>{bridge.ConstructionType || "N/A"}</td>
+                      <td>{bridge.District || "N/A"}</td>
+                      <td>{bridge.Zone || "N/A"}</td>
                     </tr>
-                  )}
-                </tbody>
-              </Table>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center">
+                      No data available
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
 
-              <div className="d-flex justify-content-center align-items-center">
-                {renderPaginationButtons()}
-              </div>
-            </>
-          )}
-        </div>
+            <div className="d-flex justify-content-center align-items-center">
+              {renderPaginationButtons()}
+            </div>
+          </>
+        )}
       </div>
+    </div>
     </>
   );
 };
