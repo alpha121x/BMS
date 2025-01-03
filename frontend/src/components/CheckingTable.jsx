@@ -27,8 +27,6 @@ const CheckingTable = () => {
 
       const result = await response.json();
 
-      // console.log("Checking Data:", result.data);
-
       if (Array.isArray(result.data)) {
         setTableData(result.data);
       } else {
@@ -46,7 +44,7 @@ const CheckingTable = () => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
   
     // Construct the edit URL with serialized data
-    const editUrl = `/EditInspection?data=${serializedRow}`;
+    const editUrl = `/EditBridge?data=${serializedRow}`;
   
     // Navigate to the edit URL in the same tab
     window.location.href = editUrl;
@@ -182,7 +180,7 @@ const CheckingTable = () => {
     >
       <div className="card-body pb-0">
         <h6 className="card-title text-lg font-semibold pb-2">
-          Bridges Inspections
+          Bridges Checked
         </h6>
 
         {loading && (
