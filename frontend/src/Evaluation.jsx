@@ -2,7 +2,7 @@ import React from "react";
 import HeaderEvaluation from "./components/HeaderEvaluation";
 import Footer from "./components/Footer";
 import "./index.css";
-import EvaluationMain from "./components/EvaluationMain.";
+import EvaluationMain from "./components/EvaluationMain";
 
 const Evaluation = () => {
   /* 

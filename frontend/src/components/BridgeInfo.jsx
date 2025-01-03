@@ -26,13 +26,13 @@ const BridgeInfo = () => {
       // console.log("Bridge Data:", bridgeData);
     }
   }, [location]);
-  
+
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   // State for managing table visibility
   const [showBridgeInspectionList, setShowBridgeInspectionList] =
-    useState(false);  // Default to false to show InventoryInfo first
+    useState(false); // Default to false to show InventoryInfo first
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -212,6 +212,33 @@ const BridgeInfo = () => {
             ))}
           </div>
 
+          <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
+            <div className="bg-[#4C8C2B] text-white p-4 rounded-md shadow-md flex items-center justify-between">
+              <div className="flex-1">
+                <div className="text-lg font-semibold">{"Bridge Name"}</div>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <span className="text-gray-200">
+                      Latest inspection Date:
+                    </span>
+                    <span className="ml-2">{"N/A"}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-gray-200">
+                      Latest inspection Status:
+                    </span>
+                    <span className="ml-2 bg-white text-red-500 px-2 py-1 rounded-md text-sm">
+                      {"UnApproved"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
+                Delete
+              </button>
+            </div>
+          </div>
+
           {/* Active Button Section */}
           <div className="flex justify-center mt-2">
             <div className="w-3/4 bg-blue-400 shadow-lg p-2 rounded-lg flex">
@@ -254,7 +281,7 @@ const BridgeInfo = () => {
           {/* Checking Listing Section */}
           {showBridgeInspectionList && (
             <div className="mt-2 flex justify-center">
-              <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+              <div className="w-full sm:w-3/4 md:w-3/4 lg:w-3/4">
                 <InspectionList bridgeId={bridgeData?.ObjectID} />
               </div>
             </div>
