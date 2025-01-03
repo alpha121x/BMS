@@ -179,12 +179,13 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
               <Table bordered responsive className="custom-table">
                 <thead>
                   <tr>
-                    <th>Bridge ID</th>
-                    <th>Bridge Name</th>
-                    <th>Structure Type</th>
-                    <th>Construction Type</th>
                     <th>District</th>
-                    <th>Zone</th>
+                    <th>Road Name</th>
+                    <th>Structure Type</th>
+                    <th>Bridge Name</th>
+                    <th>Photo</th>
+                    <th>Latest Inspection Status</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -195,12 +196,12 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                         onClick={() => handleRowClick(bridge)}
                         className="hover-row"
                       >
-                        <td>{bridge.ObjectID || "N/A"}</td>
-                        <td>{bridge.BridgeName || "N/A"}</td>
-                        <td>{bridge.StructureType || "N/A"}</td>
-                        <td>{bridge.ConstructionType || "N/A"}</td>
                         <td>{bridge.District || "N/A"}</td>
-                        <td>{bridge.Zone || "N/A"}</td>
+                        <td>{bridge.Road || "N/A"}</td>
+                        <td>{bridge.StructureType || "N/A"}</td>
+                        <td>{bridge.BridgeName || "N/A"}</td>
+                        <td>{bridge.photo || "N/A"}</td>
+                        <td>{bridge.LatestInspectionStatus || "N/A"}</td>
                       </tr>
                     ))
                   ) : (
