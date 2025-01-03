@@ -185,7 +185,6 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                     <th>Bridge Name</th>
                     <th>Photo</th>
                     <th>Latest Inspection Status</th>
-
                   </tr>
                 </thead>
                 <tbody>
@@ -200,7 +199,22 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                         <td>{bridge.Road || "N/A"}</td>
                         <td>{bridge.StructureType || "N/A"}</td>
                         <td>{bridge.BridgeName || "N/A"}</td>
-                        <td>{bridge.photo || "N/A"}</td>
+                        <td>
+                          {bridge.photo ? (
+                            <img
+                              src={bridge.photo}
+                              alt="Bridge"
+                              className="w-16 h-16 object-cover rounded-md"
+                            />
+                          ) : (
+                            <img
+                              src="/download.jpeg" // Path to your alternate image
+                              alt="No image available"
+                              className="w-30 h-16 object-cover rounded-md"
+                            />
+                          )}
+                        </td>
+
                         <td>{bridge.LatestInspectionStatus || "N/A"}</td>
                       </tr>
                     ))
