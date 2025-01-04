@@ -7,8 +7,8 @@ const EditBridgeForm = () => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedSpan, setSelectedSpan] = useState("");
-  const [photos, setPhotos] = useState({});
-  const [showUploadOptions, setShowUploadOptions] = useState(false); // Define the state
+  const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
+  const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
 
   // Dummy photos for testing
   const dummyPhotos = [
@@ -58,6 +58,7 @@ const EditBridgeForm = () => {
     e.preventDefault();
     console.log("Updated Bridge Data:", bridgeData);
     alert("Changes saved!");
+    return;
     window.location.href = "/Evaluation";
   };
 
@@ -67,23 +68,39 @@ const EditBridgeForm = () => {
   };
 
   const handlePhotoRemove = (photoToRemove) => {
-    setBridgeData((prevData) => ({
-      ...prevData,
-      photos: (prevData.photos || []).filter(
-        (photo) => photo !== photoToRemove
-      ),
-    }));
+    setSpanPhotos((prevData) => {
+      const newSpanPhotos = { ...prevData };
+      Object.keys(newSpanPhotos).forEach((span) => {
+        newSpanPhotos[span] = newSpanPhotos[span].filter(
+          (photo) => photo !== photoToRemove
+        );
+      });
+      return newSpanPhotos;
+    });
   };
 
   // Handle the photo upload for the selected span
   const handleNewPhotoAdd = (e, span, photoIndex) => {
-    const newPhotos = { ...photos };
-    if (!newPhotos[span]) newPhotos[span] = [];
+    const newSpanPhotos = { ...spanPhotos };
 
-    newPhotos[span][photoIndex] = e.target.files[0]; // Store photo for the selected span
+    // If no photos exist for this span, initialize it
+    if (!newSpanPhotos[span]) newSpanPhotos[span] = [];
 
-    setPhotos(newPhotos);
+    // Ensure we don't exceed 5 photos per span
+    if (newSpanPhotos[span].length < 5) {
+      newSpanPhotos[span][photoIndex] = e.target.files[0]; // Store photo for the selected span
+      setSpanPhotos(newSpanPhotos);
+    } else {
+      alert("You can only upload up to 5 photos per span.");
+    }
   };
+
+  // Include spanPhotos for each span inside the bridgeData object
+  const updatedBridgeData = { 
+    ...bridgeData, 
+    spanPhotos: spanPhotos // Store the spanPhotos for each span here
+  };
+
 
   if (!bridgeData) {
     return (
