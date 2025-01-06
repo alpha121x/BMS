@@ -232,9 +232,17 @@ const EditBridgeForm = () => {
                         <Form.Control
                           type="file"
                           onChange={(e) =>
-                            handleNewPhotoAdd(e, selectedSpan, photoIndex)
+                            handleSpanPhotoAdd(e, selectedSpan, photoIndex)
                           }
                         />
+                         <Button
+                          variant="danger"
+                          size="sm"
+                          className="mt-1 w-100"
+                          onClick={() => handleSpanPhotoAdd(photo)}
+                        >
+                          Remove
+                        </Button>
                       </Form.Group>
                     </Col>
                   ))}
