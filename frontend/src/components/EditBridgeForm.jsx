@@ -10,14 +10,7 @@ const EditBridgeForm = () => {
   const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
   const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
 
-  // Dummy photos for testing
-  const dummyPhotos = [
-    "uploads/bus_2024_01_14_12_39_49.jpg",
-    "uploads/bus_2024_01_14_12_40_06.jpg",
-    "uploads/bus_2024_01_14_12_40_38.jpg",
-    "uploads/bus_2024_01_14_12_43_56.jpg",
-    "uploads/bus_2024_01_14_12_45_26.jpg",
-  ];
+  const photosToDisplay = bridgeData?.Photos || [];
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -28,7 +21,7 @@ const EditBridgeForm = () => {
     if (serializedData) {
       // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
-      setBridgeData({ ...parsedData, photos: dummyPhotos }); // Add dummy photos for testing
+      setBridgeData(parsedData);
     }
   }, [serializedData]);
 
@@ -227,7 +220,7 @@ const EditBridgeForm = () => {
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
                     {/* Displaying dummy photos */}
-                    {dummyPhotos.map((photo, index) => (
+                    {photosToDisplay.map((photo, index) => (
                       <div key={index} className="m-2">
                         <img
                           src={`/${photo}`}
