@@ -25,7 +25,7 @@ const EditBridgeForm = () => {
     }
   }, [serializedData]);
 
-  // This will hold the number of spans (e.g., 5 if `bridgeData.Spans` is 5)
+  // This will hold the number of spans for the bridge
   const spanCount = bridgeData?.Spans || 0;
 
   // Generate an array of span values based on `spanCount`
@@ -49,11 +49,12 @@ const EditBridgeForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Updated Bridge Data:", bridgeData);
+    setBridgeData(updatedBridgeData); // Save updated data back to state
+    console.log("Updated Bridge Data:", updatedBridgeData);
     alert("Changes saved!");
-    // return;
     window.location.href = "/Evaluation";
   };
+  
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
