@@ -107,8 +107,6 @@ const EditBridgeForm = () => {
       ...prevData,
       Photos: [...(prevData.Photos || []), photoUrl],
     }));
-
-    console.log("Photo added successfully:", photoUrl);
   };
 
   // Handle the photo upload for the selected span
@@ -124,7 +122,7 @@ const EditBridgeForm = () => {
   
       // Create a new filename using span name, photo index, and timestamp
       const timestamp = new Date().toISOString().replace(/[^\w]/g, '_'); // Creating a timestamp-safe string
-      const newFileName = `${span}_photo_${photoIndex}_${timestamp}.jpg`;
+      const newFileName = `Span${span}_photo_${photoIndex}_${timestamp}.jpg`;
   
       // You can store the file name or the file object based on your needs
       newSpanPhotos[span][photoIndex] = {
