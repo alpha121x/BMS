@@ -66,23 +66,32 @@ const EditBridgeForm = () => {
     setShowPhotoModal(true);
   };
 
-  const handleSpanPhotoRemove = (span, fileName, index) => {
-    // Update state to remove the photo based on fileName
+  const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
+    console.log("Removing photo:", photoToRemove);
     setSpanPhotos((prevData) => {
-      const updatedSpanPhotos = { ...prevData };
+      // Create a shallow copy of the previous state
+      const newSpanPhotos = { ...prevData };
 
-      // Ensure the span exists and has photos
-      if (updatedSpanPhotos[span]) {
-        // Filter out the photo by its fileName
-        const updatedPhotos = updatedSpanPhotos[span].filter(
-          (photo) => photo.fileName !== fileName
+      // Ensure the span exists in the new data before trying to filter
+      if (newSpanPhotos[span]) {
+        // Filter out the photo from the selected span using fileName
+        newSpanPhotos[span] = newSpanPhotos[span].filter(
+          (photo) => photo.fileName !== photoToRemove.fileName // Compare using fileName
         );
-        // If the photos array is updated, return the new state object
-        updatedSpanPhotos[span] = updatedPhotos;
       }
 
-      return updatedSpanPhotos; // Return the updated state
+      // Return the updated state object
+      console.log("Photo removed successfully:", photoToRemove);
+      return newSpanPhotos;
     });
+
+    // Reset the corresponding file input field if needed
+    const inputElement = document.getElementById(
+      `photoInput-${span}-${photoIndex}`
+    );
+    if (inputElement) {
+      inputElement.value = ""; // Reset the file input
+    }
   };
 
   const handlePhotoRemove = (photoToRemove) => {
@@ -113,21 +122,27 @@ const EditBridgeForm = () => {
     // Get the files selected by the user
     const selectedFiles = Array.from(e.target.files);
 
-    selectedFiles.forEach((file, index) => {
-      // Generate a sequential file name based on the number of existing files for the span
-      const newFileName = `Span${span}_Image_${
-        newSpanPhotos[span].length + index + 1
-      }.jpg`; // Sequential naming
+    // Ensure we don't exceed 5 photos per span
+    if (newSpanPhotos[span].length + selectedFiles.length <= 5) {
+      selectedFiles.forEach((file, index) => {
+        // Generate a unique file name
+        const timestamp = new Date().toISOString().replace(/[^\w]/g, "_");
+        const newFileName = `Span${span}_photo_${
+          newSpanPhotos[span].length + index + 1
+        }_${timestamp}.jpg`;
 
-      // Add file to the newSpanPhotos object
-      newSpanPhotos[span].push({
-        file: file,
-        fileName: newFileName,
+        // Add file to the newSpanPhotos object
+        newSpanPhotos[span].push({
+          file: file,
+          fileName: newFileName,
+        });
       });
-    });
 
-    // Update the state with the new photos
-    setSpanPhotos(newSpanPhotos);
+      // Update the state with the new photos
+      setSpanPhotos(newSpanPhotos);
+    } else {
+      alert("You can only upload up to 5 photos per span.");
+    }
   };
 
   if (!bridgeData) {

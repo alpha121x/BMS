@@ -6,67 +6,14 @@ const EditInspectionForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [selectedSpan, setSelectedSpan] = useState("");
-  const [showUploadOptions, setShowUploadOptions] = useState(false);
-  const [spanPhotos, setSpanPhotos] = useState({});
-  // Ensure that 'bridgeData' contains a 'photos' field that holds an array of photo URLs
-  const photos = bridgeData?.photos || []; // Use 'photos' from the data or an empty array if not available
+
+    // Ensure that 'bridgeData' contains a 'photos' field that holds an array of photo URLs
+    const photos = bridgeData?.photos || []; // Use 'photos' from the data or an empty array if not available
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
   const serializedData = queryParams.get("data");
-
-  const handleSpanPhotoAdd = (e, selectedSpan) => {
-    // Get the selected files and generate a new file name for each photo
-    const newPhotos = Array.from(e.target.files).map((file, index) => {
-      // Generate a unique file name for each photo based on the span and index
-      const fileIndex = (prevPhotos[selectedSpan] || []).length + index + 1;
-      const newFileName = `Span${selectedSpan}_Image_${fileIndex}.jpg`; // Sequential naming
-  
-      return {
-        fileName: newFileName, // Assign the new file name
-        file,
-      };
-    });
-  
-    setSpanPhotos((prevPhotos) => {
-      const updatedPhotos = {
-        ...prevPhotos,
-        [selectedSpan]: [...(prevPhotos[selectedSpan] || []), ...newPhotos],
-      };
-  
-      // Update bridgeData with new photos for the selected span
-      setBridgeData((prevData) => ({
-        ...prevData,
-        spanPhotos: updatedPhotos, // Sync spanPhotos with bridgeData
-      }));
-  
-      return updatedPhotos;
-    });
-  };
-  
-
-  const handleSpanPhotoRemove = (selectedSpan, photoName, index) => {
-    const updatedPhotos = spanPhotos[selectedSpan].filter(
-      (photo, idx) => idx !== index
-    );
-
-    setSpanPhotos((prevPhotos) => {
-      const updatedPhotos = {
-        ...prevPhotos,
-        [selectedSpan]: updatedPhotos,
-      };
-
-      // Update bridgeData with removed photo from the selected span
-      setBridgeData((prevData) => ({
-        ...prevData,
-        spanPhotos: updatedPhotos, // Sync spanPhotos with bridgeData
-      }));
-
-      return updatedPhotos;
-    });
-  };
 
   useEffect(() => {
     if (serializedData) {
@@ -75,21 +22,6 @@ const EditInspectionForm = () => {
       setBridgeData(parsedData);
     }
   }, [serializedData]);
-
-  // This will hold the number of spans for the bridge
-  const spanCount = bridgeData?.SpanIndex || 0;
-
-  // Generate an array of span values based on `spanCount`
-  const spanIndexes = Array.from(
-    { length: spanCount },
-    (_, index) => index + 1
-  );
-
-  // Handling the selection change
-  const handleSpanSelect = (e) => {
-    setSelectedSpan(e.target.value);
-    setShowUploadOptions(true); // Show upload options when a span is selected
-  };
 
   const handleInputChange = (field, value) => {
     setBridgeData((prevData) => ({
@@ -101,22 +33,20 @@ const EditInspectionForm = () => {
   const handleNewPhotoAdd = (file) => {
     // Create a URL for the newly added photo (assuming the file is an image)
     const photoUrl = URL.createObjectURL(file);
-
+  
     // Update the photos array to include the new photo
     setBridgeData((prevData) => ({
       ...prevData,
       photos: [...(prevData.photos || []), photoUrl],
     }));
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     console.log("Updated Bridge Data:", bridgeData);
     alert("Changes saved!");
-
-    // Save bridgeData including photos (if needed)
-    // window.location.href = "/Evaluation"; // Redirect if needed
+    // window.location.href = "/Evaluation";
   };
 
   const handlePhotoClick = (photo) => {
@@ -179,9 +109,7 @@ const EditInspectionForm = () => {
         }}
       >
         <div className="card-body pb-0">
-          <h6 className="card-title text-lg font-semibold pb-2">
-            Edit Inspection
-          </h6>
+          <h6 className="card-title text-lg font-semibold pb-2">Edit Inspection</h6>
           <Form onSubmit={handleSubmit}>
             <Row>
               {formFields.map(({ label, field, readOnly }, index) => (
@@ -197,90 +125,6 @@ const EditInspectionForm = () => {
                   </Form.Group>
                 </Col>
               ))}
-
-              {/* Span Select Dropdown */}
-              <div className="form-group">
-                <label>Select Span</label>
-                <select
-                  className="form-control"
-                  value={selectedSpan}
-                  onChange={handleSpanSelect}
-                >
-                  <option value="">-- Select Span --</option>
-                  {spanIndexes.map((span, index) => (
-                    <option key={index} value={span}>
-                      Span{span}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Show photo upload options if a span is selected */}
-              {showUploadOptions && selectedSpan && (
-                <>
-                  {/* Display selected span */}
-                  <Col md={12}>
-                    <Form.Label>
-                      Upload Photos for Span {selectedSpan}
-                    </Form.Label>
-                  </Col>
-
-                  {/* Single Photo Upload Input */}
-                  <Col md={12}>
-                    <Form.Group controlId="formPhotos">
-                      <Form.Label>Upload Photos</Form.Label>
-                      <Form.Control
-                        type="file"
-                        multiple // Allow multiple files
-                        onChange={(e) => handleSpanPhotoAdd(e, selectedSpan)}
-                      />
-                    </Form.Group>
-                  </Col>
-
-                  {/* Display Uploaded Photos */}
-                  <Col md={8}>
-                    <Form.Group controlId="formPhotos">
-                      <Form.Label>Span Photos</Form.Label>
-                      <div className="d-flex flex-wrap">
-                        {/* Display uploaded photos for the selected span */}
-                        {spanPhotos[selectedSpan] &&
-                          spanPhotos[selectedSpan].map((photo, index) => (
-                            <div key={photo.fileName} className="m-2">
-                              {" "}
-                              {/* Use photo.fileName as key */}
-                              <img
-                                src={`/${photo.fileName}`} // Adjust the path if needed
-                                alt={`Photo ${index + 1}`}
-                                className="img-thumbnail"
-                                style={{
-                                  width: "100px",
-                                  height: "100px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
-                              />
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                className="mt-1 w-100"
-                                onClick={
-                                  () =>
-                                    handleSpanPhotoRemove(
-                                      selectedSpan,
-                                      photo.fileName,
-                                      index
-                                    ) // Use photo.fileName to remove photo
-                                }
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          ))}
-                      </div>
-                    </Form.Group>
-                  </Col>
-                </>
-              )}
 
               <Col md={12}>
                 <Form.Group controlId="formNewPhoto">
