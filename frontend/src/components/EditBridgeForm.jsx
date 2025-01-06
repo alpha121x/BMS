@@ -58,7 +58,7 @@ const EditBridgeForm = () => {
     e.preventDefault();
     console.log("Updated Bridge Data:", bridgeData);
     alert("Changes saved!");
-    return;
+    // return;
     window.location.href = "/Evaluation";
   };
 

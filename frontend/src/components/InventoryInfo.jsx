@@ -2,17 +2,12 @@ import React, { useState } from "react";
 import { Row, Col, Form, Modal, Button } from "react-bootstrap";
 
 const InventoryInfo = ({ inventoryData }) => {
+  console.log(inventoryData);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Dummy photos for testing
-  const dummyPhotos = [
-    "uploads/bus_2024_01_14_12_39_49.jpg",
-    "uploads/bus_2024_01_14_12_40_06.jpg",
-    "uploads/bus_2024_01_14_12_40_38.jpg",
-    "uploads/bus_2024_01_14_12_43_56.jpg",
-    "uploads/bus_2024_01_14_12_45_26.jpg",
-  ];
+  // Ensure that 'inventoryData' contains a 'photos' field that holds an array of photo URLs
+  const photos = inventoryData?.Photos || []; // Use 'photos' from the data or an empty array if not available
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
@@ -79,25 +74,29 @@ const InventoryInfo = ({ inventoryData }) => {
                 <Form.Group controlId="formPhotos">
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
-                    {/* Displaying dummy photos */}
-                    {dummyPhotos.map((photo, index) => (
-                      <div key={index} className="m-2">
-                        <img
-                          src={`/${photo}`}
-                          alt={`Photo ${index + 1}`}
-                          className="img-thumbnail"
-                          style={{
-                            width: "100px",
-                            height: "100px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            setSelectedPhoto(photo);
-                            setShowPhotoModal(true);
-                          }}
-                        />
-                      </div>
-                    ))}
+                    {/* Displaying photos from inventoryData */}
+                    {photos.length > 0 ? (
+                      photos.map((photo, index) => (
+                        <div key={index} className="m-2">
+                          <img
+                            src={`/${photo}`}
+                            alt={`Photo ${index + 1}`}
+                            className="img-thumbnail"
+                            style={{
+                              width: "100px",
+                              height: "100px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              setSelectedPhoto(photo);
+                              setShowPhotoModal(true);
+                            }}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <span>No photos available</span>
+                    )}
                   </div>
                 </Form.Group>
               </Col>
