@@ -69,19 +69,19 @@ const EditBridgeForm = () => {
   const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
     setSpanPhotos((prevData) => {
       const newSpanPhotos = { ...prevData };
-  
+
       // Ensure the span exists in the new data before trying to filter
       if (newSpanPhotos[span]) {
-        // Filter out the photoToRemove from the selected span using file name (or other property)
+        // Filter out the photoToRemove from the selected span using fileName
         newSpanPhotos[span] = newSpanPhotos[span].filter(
           (photo) => photo.fileName !== photoToRemove.fileName // Compare using fileName
         );
       }
-  
+
       return newSpanPhotos;
     });
-  
-    // Reset the corresponding file input field
+
+    // Reset the corresponding file input field if needed
     const inputElement = document.getElementById(
       `photoInput-${span}-${photoIndex}`
     );
@@ -89,7 +89,6 @@ const EditBridgeForm = () => {
       inputElement.value = ""; // Reset the file input
     }
   };
-  
 
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
@@ -110,32 +109,37 @@ const EditBridgeForm = () => {
   };
 
   // Handle the photo upload for the selected span
-  const handleSpanPhotoAdd = (e, span, photoIndex) => {
+  const handleSpanPhotoAdd = (e, span) => {
     const newSpanPhotos = { ...spanPhotos };
-  
+
     // If no photos exist for this span, initialize it
     if (!newSpanPhotos[span]) newSpanPhotos[span] = [];
-  
+
+    // Get the files selected by the user
+    const selectedFiles = Array.from(e.target.files);
+
     // Ensure we don't exceed 5 photos per span
-    if (newSpanPhotos[span].length < 5) {
-      const file = e.target.files[0];
-  
-      // Create a new filename using span name, photo index, and timestamp
-      const timestamp = new Date().toISOString().replace(/[^\w]/g, '_'); // Creating a timestamp-safe string
-      const newFileName = `Span${span}_photo_${photoIndex}_${timestamp}.jpg`;
-  
-      // You can store the file name or the file object based on your needs
-      newSpanPhotos[span][photoIndex] = {
-        file: file,
-        fileName: newFileName,
-      };
-  
+    if (newSpanPhotos[span].length + selectedFiles.length <= 5) {
+      selectedFiles.forEach((file, index) => {
+        // Generate a unique file name
+        const timestamp = new Date().toISOString().replace(/[^\w]/g, "_");
+        const newFileName = `Span${span}_photo_${
+          newSpanPhotos[span].length + index + 1
+        }_${timestamp}.jpg`;
+
+        // Add file to the newSpanPhotos object
+        newSpanPhotos[span].push({
+          file: file,
+          fileName: newFileName,
+        });
+      });
+
+      // Update the state with the new photos
       setSpanPhotos(newSpanPhotos);
     } else {
       alert("You can only upload up to 5 photos per span.");
     }
   };
-  
 
   if (!bridgeData) {
     return (
@@ -247,38 +251,57 @@ const EditBridgeForm = () => {
                     </Form.Label>
                   </Col>
 
-                  {/* Photo Upload Inputs (5 inputs for 5 photos) */}
-                  {Array.from({ length: 5 }).map((_, photoIndex) => (
-                    <Col md={12} key={photoIndex}>
-                      <Form.Group>
-                        <Form.Label>Photo {photoIndex + 1}</Form.Label>
-                        <Form.Control
-                          id={`photoInput-${selectedSpan}-${photoIndex}`} // Unique ID for each input
-                          type="file"
-                          onChange={(e) =>
-                            handleSpanPhotoAdd(e, selectedSpan, photoIndex)
-                          }
-                        />
+                  {/* Single Photo Upload Input */}
+                  <Col md={12}>
+                    <Form.Group controlId="formPhotos">
+                      <Form.Label>Upload Photos</Form.Label>
+                      <Form.Control
+                        type="file"
+                        multiple // Allow multiple files
+                        onChange={(e) => handleSpanPhotoAdd(e, selectedSpan)}
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  {/* Display Uploaded Photos */}
+                  <Col md={12}>
+                    <Form.Group controlId="formPhotos">
+                      <Form.Label>Span Photos</Form.Label>
+                      <div className="d-flex flex-wrap">
+                        {/* Display uploaded photos for the selected span */}
                         {spanPhotos[selectedSpan] &&
-                          spanPhotos[selectedSpan][photoIndex] && (
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              className="mt-1 w-20"
-                              onClick={() =>
-                                handleSpanPhotoRemove(
-                                  selectedSpan,
-                                  spanPhotos[selectedSpan][photoIndex],
-                                  photoIndex
-                                )
-                              }
-                            >
-                              Remove
-                            </Button>
-                          )}
-                      </Form.Group>
-                    </Col>
-                  ))}
+                          spanPhotos[selectedSpan].map((photo, index) => (
+                            <div key={index} className="m-2">
+                              <img
+                                src={`/${photo.fileName}`} // Adjust the path if needed
+                                alt={`Photo ${index + 1}`}
+                                className="img-thumbnail"
+                                style={{
+                                  width: "100px",
+                                  height: "100px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
+                              />
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                className="mt-1 w-100"
+                                onClick={() =>
+                                  handleSpanPhotoRemove(
+                                    selectedSpan,
+                                    photo.fileName,
+                                    index
+                                  )
+                                } // Use unique filename to remove photo
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                    </Form.Group>
+                  </Col>
                 </>
               )}
 
