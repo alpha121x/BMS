@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import CheckingDetailsModal from "./CheckingDetailsModal";
+import InspectionModal from "./InspectionModal";
 
 const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
@@ -29,7 +29,9 @@ const InspectionList = ({ bridgeId }) => {
         throw new Error("bridgeId is required");
       }
 
-      const response = await fetch(`${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`);
+      const response = await fetch(
+        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
+      );
 
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -181,12 +183,16 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-      <h6 className="card-title text-lg font-semibold pb-2" style={{ fontSize: "1.25rem" }}>
-  Inspections List
-  <br />
-  <span style={{ fontSize: "0.875rem" }}>Total Inspections: {tableData.length}</span>
-</h6>
-
+        <h6
+          className="card-title text-lg font-semibold pb-2"
+          style={{ fontSize: "1.25rem" }}
+        >
+          Inspections List
+          <br />
+          <span style={{ fontSize: "0.875rem" }}>
+            Total Inspections: {tableData.length}
+          </span>
+        </h6>
 
         {loading && (
           <div
@@ -233,7 +239,11 @@ const InspectionList = ({ bridgeId }) => {
                   <td>{row.DamageLevel || "N/A"}</td>
                   <td>{row.Inspector || "N/A"}</td>
                   <td>{row.InspectationDate || "N/A"}</td>
-                  <td>{row.ApprovedFlag === 0 ? "Unapproved" : row.ApprovedFlag || "N/A"}</td>
+                  <td>
+                    {row.ApprovedFlag === 0
+                      ? "Unapproved"
+                      : row.ApprovedFlag || "N/A"}
+                  </td>
                   <td>
                     <Button
                       onClick={() => handleViewClick(row)}
@@ -244,8 +254,7 @@ const InspectionList = ({ bridgeId }) => {
                       }}
                     >
                       View
-                    </Button>
-                    {" "}
+                    </Button>{" "}
                     <Button
                       onClick={() => handleEditClick(row)}
                       style={{
@@ -282,9 +291,9 @@ const InspectionList = ({ bridgeId }) => {
 
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Checking Details</Modal.Title>
+          <Modal.Title>Inspection Details</Modal.Title>
         </Modal.Header>
-        <CheckingDetailsModal selectedRow={selectedRow} />
+        <InspectionModal selectedRow={selectedRow} />
       </Modal>
     </div>
   );
