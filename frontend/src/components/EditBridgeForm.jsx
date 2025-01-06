@@ -66,29 +66,27 @@ const EditBridgeForm = () => {
     setShowPhotoModal(true);
   };
 
-  const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
+  const handleSpanPhotoRemove = (span, fileName, index) => {
+    // Update state to remove the photo based on fileName
     setSpanPhotos((prevData) => {
-      const newSpanPhotos = { ...prevData };
-
-      // Ensure the span exists in the new data before trying to filter
-      if (newSpanPhotos[span]) {
-        // Filter out the photoToRemove from the selected span using fileName
-        newSpanPhotos[span] = newSpanPhotos[span].filter(
-          (photo) => photo.fileName !== photoToRemove.fileName // Compare using fileName
+      const updatedSpanPhotos = { ...prevData };
+  
+      // Ensure the span exists and has photos
+      if (updatedSpanPhotos[span]) {
+        // Filter out the photo by its fileName
+        const updatedPhotos = updatedSpanPhotos[span].filter(
+          (photo) => photo.fileName !== fileName
         );
+  
+        // If the photos array is updated, return the new state object
+        updatedSpanPhotos[span] = updatedPhotos;
       }
-
-      return newSpanPhotos;
+  
+      return updatedSpanPhotos; // Return the updated state
     });
-
-    // Reset the corresponding file input field if needed
-    const inputElement = document.getElementById(
-      `photoInput-${span}-${photoIndex}`
-    );
-    if (inputElement) {
-      inputElement.value = ""; // Reset the file input
-    }
   };
+  
+  
 
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
@@ -264,14 +262,16 @@ const EditBridgeForm = () => {
                   </Col>
 
                   {/* Display Uploaded Photos */}
-                  <Col md={12}>
+                  <Col md={8}>
                     <Form.Group controlId="formPhotos">
                       <Form.Label>Span Photos</Form.Label>
                       <div className="d-flex flex-wrap">
                         {/* Display uploaded photos for the selected span */}
                         {spanPhotos[selectedSpan] &&
                           spanPhotos[selectedSpan].map((photo, index) => (
-                            <div key={index} className="m-2">
+                            <div key={photo.fileName} className="m-2">
+                              {" "}
+                              {/* Use photo.fileName as key */}
                               <img
                                 src={`/${photo.fileName}`} // Adjust the path if needed
                                 alt={`Photo ${index + 1}`}
@@ -287,13 +287,14 @@ const EditBridgeForm = () => {
                                 variant="danger"
                                 size="sm"
                                 className="mt-1 w-100"
-                                onClick={() =>
-                                  handleSpanPhotoRemove(
-                                    selectedSpan,
-                                    photo.fileName,
-                                    index
-                                  )
-                                } // Use unique filename to remove photo
+                                onClick={
+                                  () =>
+                                    handleSpanPhotoRemove(
+                                      selectedSpan,
+                                      photo.fileName,
+                                      index
+                                    ) // Use photo.fileName to remove photo
+                                }
                               >
                                 Remove
                               </Button>
