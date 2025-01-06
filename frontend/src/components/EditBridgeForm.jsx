@@ -67,21 +67,20 @@ const EditBridgeForm = () => {
   };
 
   const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
-    console.log("Removing photo:", photoToRemove);
+    // Create a copy of the current spanPhotos state
     setSpanPhotos((prevData) => {
-      // Create a shallow copy of the previous state
+      // Copy the existing spanPhotos
       const newSpanPhotos = { ...prevData };
 
-      // Ensure the span exists in the new data before trying to filter
+      // Check if there are photos for this span
       if (newSpanPhotos[span]) {
-        // Filter out the photo from the selected span using fileName
+        // Filter out the photo to remove based on the `fileName` property
         newSpanPhotos[span] = newSpanPhotos[span].filter(
-          (photo) => photo.fileName !== photoToRemove.fileName // Compare using fileName
+          (photo) => photo.fileName !== photoToRemove
         );
       }
 
-      // Return the updated state object
-      console.log("Photo removed successfully:", photoToRemove);
+      // Return the updated state
       return newSpanPhotos;
     });
 
@@ -115,29 +114,30 @@ const EditBridgeForm = () => {
   // Handle the photo upload for the selected span
   const handleSpanPhotoAdd = (e, span) => {
     const newSpanPhotos = { ...spanPhotos };
-  
+
     // If no photos exist for this span, initialize it
     if (!newSpanPhotos[span]) newSpanPhotos[span] = [];
-  
+
     // Get the files selected by the user
     const selectedFiles = Array.from(e.target.files);
-  
+
     selectedFiles.forEach((file, index) => {
       // Generate a unique file name
       const timestamp = new Date().toISOString().replace(/[^\w]/g, "_");
-      const newFileName = `Span${span}_photo_${newSpanPhotos[span].length + index + 1}_${timestamp}.jpg`;
-  
+      const newFileName = `Span${span}_photo_${
+        newSpanPhotos[span].length + index + 1
+      }_${timestamp}.jpg`;
+
       // Add file to the newSpanPhotos object
       newSpanPhotos[span].push({
         file: file,
         fileName: newFileName,
       });
     });
-  
+
     // Update the state with the new photos
     setSpanPhotos(newSpanPhotos);
   };
-  
 
   if (!bridgeData) {
     return (
