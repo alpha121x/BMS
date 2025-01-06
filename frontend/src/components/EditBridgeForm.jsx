@@ -66,16 +66,28 @@ const EditBridgeForm = () => {
     setShowPhotoModal(true);
   };
 
-  const handleSpanPhotoRemove = (photoToRemove) => {
+  const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
     setSpanPhotos((prevData) => {
       const newSpanPhotos = { ...prevData };
-      Object.keys(newSpanPhotos).forEach((span) => {
+
+      // Ensure the span exists in the new data before trying to filter
+      if (newSpanPhotos[span]) {
+        // Filter out the photoToRemove from the selected span
         newSpanPhotos[span] = newSpanPhotos[span].filter(
           (photo) => photo !== photoToRemove
         );
-      });
+      }
+
       return newSpanPhotos;
     });
+
+    // Reset the corresponding file input field
+    const inputElement = document.getElementById(
+      `photoInput-${span}-${photoIndex}`
+    );
+    if (inputElement) {
+      inputElement.value = ""; // Reset the file input
+    }
   };
 
   const handlePhotoRemove = (photoToRemove) => {
@@ -88,13 +100,13 @@ const EditBridgeForm = () => {
   const handleNewPhotoAdd = (file) => {
     // Create a URL for the newly added photo (assuming the file is an image)
     const photoUrl = URL.createObjectURL(file);
-  
+
     // Update the photos array to include the new photo
     setBridgeData((prevData) => ({
       ...prevData,
       Photos: [...(prevData.Photos || []), photoUrl],
     }));
-  
+
     console.log("Photo added successfully:", photoUrl);
   };
 
@@ -230,19 +242,29 @@ const EditBridgeForm = () => {
                       <Form.Group controlId={`formPhoto${photoIndex + 1}`}>
                         <Form.Label>Photo {photoIndex + 1}</Form.Label>
                         <Form.Control
+                          id={`photoInput-${selectedSpan}-${photoIndex}`} // Unique ID for each input
                           type="file"
                           onChange={(e) =>
                             handleSpanPhotoAdd(e, selectedSpan, photoIndex)
                           }
                         />
-                         <Button
-                          variant="danger"
-                          size="sm"
-                          className="mt-1 w-100"
-                          onClick={() => handleSpanPhotoAdd(photo)}
-                        >
-                          Remove
-                        </Button>
+                        {spanPhotos[selectedSpan] &&
+                          spanPhotos[selectedSpan][photoIndex] && (
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              className="mt-1 w-20"
+                              onClick={() =>
+                                handleSpanPhotoRemove(
+                                  selectedSpan,
+                                  spanPhotos[selectedSpan][photoIndex],
+                                  photoIndex
+                                )
+                              }
+                            >
+                              Remove
+                            </Button>
+                          )}
                       </Form.Group>
                     </Col>
                   ))}
