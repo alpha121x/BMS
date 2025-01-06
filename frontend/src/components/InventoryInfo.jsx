@@ -14,17 +14,6 @@ const InventoryInfo = ({ inventoryData }) => {
     "uploads/bus_2024_01_14_12_45_26.jpg",
   ];
 
-  const handleEditClick = (row) => {
-    // Serialize the row object into a URL-safe string
-    const serializedRow = encodeURIComponent(JSON.stringify(row));
-
-    // Construct the edit URL with serialized data
-    const editUrl = `/EditBridge?data=${serializedRow}`;
-
-    // Navigate to the edit URL in the same tab
-    window.location.href = editUrl;
-  };
-
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
       <div

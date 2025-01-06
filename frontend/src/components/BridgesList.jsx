@@ -27,6 +27,7 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
+      // console.log(data);
 
       // Set table data and extract the total count
       setTableData(data);
