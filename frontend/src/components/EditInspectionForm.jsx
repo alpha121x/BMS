@@ -9,30 +9,6 @@ const EditInspectionForm = () => {
   const [selectedSpan, setSelectedSpan] = useState("");
   const [showUploadOptions, setShowUploadOptions] = useState(false);
   const [spanPhotos, setSpanPhotos] = useState({});
-
-  const handleSpanPhotoAdd = (e, selectedSpan) => {
-    const newPhotos = Array.from(e.target.files).map((file) => ({
-      fileName: file.name,
-      file,
-    }));
-
-    setSpanPhotos((prevPhotos) => ({
-      ...prevPhotos,
-      [selectedSpan]: [...(prevPhotos[selectedSpan] || []), ...newPhotos],
-    }));
-  };
-
-  const handleSpanPhotoRemove = (selectedSpan, photoName, index) => {
-    const updatedPhotos = spanPhotos[selectedSpan].filter(
-      (photo, idx) => idx !== index
-    );
-
-    setSpanPhotos((prevPhotos) => ({
-      ...prevPhotos,
-      [selectedSpan]: updatedPhotos,
-    }));
-  };
-
   // Ensure that 'bridgeData' contains a 'photos' field that holds an array of photo URLs
   const photos = bridgeData?.photos || []; // Use 'photos' from the data or an empty array if not available
 
@@ -40,6 +16,57 @@ const EditInspectionForm = () => {
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
   const serializedData = queryParams.get("data");
+
+  const handleSpanPhotoAdd = (e, selectedSpan) => {
+    // Get the selected files and generate a new file name for each photo
+    const newPhotos = Array.from(e.target.files).map((file, index) => {
+      // Generate a unique file name for each photo based on the span and index
+      const fileIndex = (prevPhotos[selectedSpan] || []).length + index + 1;
+      const newFileName = `Span${selectedSpan}_Image_${fileIndex}.jpg`; // Sequential naming
+  
+      return {
+        fileName: newFileName, // Assign the new file name
+        file,
+      };
+    });
+  
+    setSpanPhotos((prevPhotos) => {
+      const updatedPhotos = {
+        ...prevPhotos,
+        [selectedSpan]: [...(prevPhotos[selectedSpan] || []), ...newPhotos],
+      };
+  
+      // Update bridgeData with new photos for the selected span
+      setBridgeData((prevData) => ({
+        ...prevData,
+        spanPhotos: updatedPhotos, // Sync spanPhotos with bridgeData
+      }));
+  
+      return updatedPhotos;
+    });
+  };
+  
+
+  const handleSpanPhotoRemove = (selectedSpan, photoName, index) => {
+    const updatedPhotos = spanPhotos[selectedSpan].filter(
+      (photo, idx) => idx !== index
+    );
+
+    setSpanPhotos((prevPhotos) => {
+      const updatedPhotos = {
+        ...prevPhotos,
+        [selectedSpan]: updatedPhotos,
+      };
+
+      // Update bridgeData with removed photo from the selected span
+      setBridgeData((prevData) => ({
+        ...prevData,
+        spanPhotos: updatedPhotos, // Sync spanPhotos with bridgeData
+      }));
+
+      return updatedPhotos;
+    });
+  };
 
   useEffect(() => {
     if (serializedData) {
@@ -84,9 +111,12 @@ const EditInspectionForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     console.log("Updated Bridge Data:", bridgeData);
     alert("Changes saved!");
-    // window.location.href = "/Evaluation";
+
+    // Save bridgeData including photos (if needed)
+    // window.location.href = "/Evaluation"; // Redirect if needed
   };
 
   const handlePhotoClick = (photo) => {

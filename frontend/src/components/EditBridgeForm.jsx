@@ -70,7 +70,7 @@ const EditBridgeForm = () => {
     // Update state to remove the photo based on fileName
     setSpanPhotos((prevData) => {
       const updatedSpanPhotos = { ...prevData };
-  
+
       // Ensure the span exists and has photos
       if (updatedSpanPhotos[span]) {
         // Filter out the photo by its fileName
@@ -80,12 +80,10 @@ const EditBridgeForm = () => {
         // If the photos array is updated, return the new state object
         updatedSpanPhotos[span] = updatedPhotos;
       }
-  
+
       return updatedSpanPhotos; // Return the updated state
     });
   };
-  
-  
 
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
@@ -115,27 +113,21 @@ const EditBridgeForm = () => {
     // Get the files selected by the user
     const selectedFiles = Array.from(e.target.files);
 
-    // Ensure we don't exceed 5 photos per span
-    if (newSpanPhotos[span].length + selectedFiles.length <= 5) {
-      selectedFiles.forEach((file, index) => {
-        // Generate a unique file name
-        const timestamp = new Date().toISOString().replace(/[^\w]/g, "_");
-        const newFileName = `Span${span}_photo_${
-          newSpanPhotos[span].length + index + 1
-        }_${timestamp}.jpg`;
+    selectedFiles.forEach((file, index) => {
+      // Generate a sequential file name based on the number of existing files for the span
+      const newFileName = `Span${span}_Image_${
+        newSpanPhotos[span].length + index + 1
+      }.jpg`; // Sequential naming
 
-        // Add file to the newSpanPhotos object
-        newSpanPhotos[span].push({
-          file: file,
-          fileName: newFileName,
-        });
+      // Add file to the newSpanPhotos object
+      newSpanPhotos[span].push({
+        file: file,
+        fileName: newFileName,
       });
+    });
 
-      // Update the state with the new photos
-      setSpanPhotos(newSpanPhotos);
-    } else {
-      alert("You can only upload up to 5 photos per span.");
-    }
+    // Update the state with the new photos
+    setSpanPhotos(newSpanPhotos);
   };
 
   if (!bridgeData) {
