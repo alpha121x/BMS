@@ -7,8 +7,8 @@ const EditInspectionForm = () => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-    // Ensure that 'bridgeData' contains a 'photos' field that holds an array of photo URLs
-    const photos = bridgeData?.photos || []; // Use 'photos' from the data or an empty array if not available
+  // Ensure that 'bridgeData' contains a 'photos' field that holds an array of photo URLs
+  const photos = bridgeData?.photos || []; // Use 'photos' from the data or an empty array if not available
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -33,14 +33,13 @@ const EditInspectionForm = () => {
   const handleNewPhotoAdd = (file) => {
     // Create a URL for the newly added photo (assuming the file is an image)
     const photoUrl = URL.createObjectURL(file);
-  
+
     // Update the photos array to include the new photo
     setBridgeData((prevData) => ({
       ...prevData,
       photos: [...(prevData.photos || []), photoUrl],
     }));
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -109,7 +108,9 @@ const EditInspectionForm = () => {
         }}
       >
         <div className="card-body pb-0">
-          <h6 className="card-title text-lg font-semibold pb-2">Edit Inspection</h6>
+          <h6 className="card-title text-lg font-semibold pb-2">
+            Edit Inspection
+          </h6>
           <Form onSubmit={handleSubmit}>
             <Row>
               {formFields.map(({ label, field, readOnly }, index) => (
