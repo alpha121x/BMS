@@ -31,22 +31,18 @@ const EditInspectionForm = () => {
   };
 
   const handleNewPhotoAdd = (file) => {
-    const formData = new FormData();
-    formData.append("photo", file);
-
-    // Replace with your API call
-    fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Photo uploaded successfully:", data);
-      })
-      .catch((error) => {
-        console.error("Error uploading photo:", error);
-      });
+    // Create a URL for the newly added photo (assuming the file is an image)
+    const photoUrl = URL.createObjectURL(file);
+  
+    // Update the photos array to include the new photo
+    setBridgeData((prevData) => ({
+      ...prevData,
+      photos: [...(prevData.photos || []), photoUrl],
+    }));
+  
+    console.log("Photo added successfully:", photoUrl);
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();

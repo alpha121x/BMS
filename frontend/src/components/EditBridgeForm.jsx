@@ -46,6 +46,12 @@ const EditBridgeForm = () => {
       [field]: value,
     }));
   };
+  
+   // Include spanPhotos for each span inside the bridgeData object
+   const updatedBridgeData = { 
+    ...bridgeData, 
+    spanPhotos: spanPhotos // Store the spanPhotos for each span here
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -89,11 +95,7 @@ const EditBridgeForm = () => {
     }
   };
 
-  // Include spanPhotos for each span inside the bridgeData object
-  const updatedBridgeData = { 
-    ...bridgeData, 
-    spanPhotos: spanPhotos // Store the spanPhotos for each span here
-  };
+ 
 
 
   if (!bridgeData) {
