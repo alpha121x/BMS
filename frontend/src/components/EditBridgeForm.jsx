@@ -58,8 +58,7 @@ const EditBridgeForm = () => {
     setBridgeData(updatedBridgeData); // Save updated data back to state
     console.log("Updated Bridge Data:", updatedBridgeData);
     alert("Changes saved!");
-    return;
-    window.location.href = "/Evaluation";
+    // window.location.href = "/Evaluation";
   };
 
   const handlePhotoClick = (photo) => {
@@ -86,8 +85,21 @@ const EditBridgeForm = () => {
     }));
   };
 
+  const handleNewPhotoAdd = (file) => {
+    // Create a URL for the newly added photo (assuming the file is an image)
+    const photoUrl = URL.createObjectURL(file);
+  
+    // Update the photos array to include the new photo
+    setBridgeData((prevData) => ({
+      ...prevData,
+      Photos: [...(prevData.Photos || []), photoUrl],
+    }));
+  
+    console.log("Photo added successfully:", photoUrl);
+  };
+
   // Handle the photo upload for the selected span
-  const handleNewPhotoAdd = (e, span, photoIndex) => {
+  const handleSpanPhotoAdd = (e, span, photoIndex) => {
     const newSpanPhotos = { ...spanPhotos };
 
     // If no photos exist for this span, initialize it
@@ -228,6 +240,16 @@ const EditBridgeForm = () => {
                   ))}
                 </>
               )}
+
+              <Col md={12}>
+                <Form.Group controlId="formNewPhoto">
+                  <Form.Label>Add New Photo</Form.Label>
+                  <Form.Control
+                    type="file"
+                    onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
+                  />
+                </Form.Group>
+              </Col>
 
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
