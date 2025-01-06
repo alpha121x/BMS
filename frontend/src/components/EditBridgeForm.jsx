@@ -69,18 +69,18 @@ const EditBridgeForm = () => {
   const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
     setSpanPhotos((prevData) => {
       const newSpanPhotos = { ...prevData };
-
+  
       // Ensure the span exists in the new data before trying to filter
       if (newSpanPhotos[span]) {
-        // Filter out the photoToRemove from the selected span
+        // Filter out the photoToRemove from the selected span using file name (or other property)
         newSpanPhotos[span] = newSpanPhotos[span].filter(
-          (photo) => photo !== photoToRemove
+          (photo) => photo.fileName !== photoToRemove.fileName // Compare using fileName
         );
       }
-
+  
       return newSpanPhotos;
     });
-
+  
     // Reset the corresponding file input field
     const inputElement = document.getElementById(
       `photoInput-${span}-${photoIndex}`
@@ -89,6 +89,7 @@ const EditBridgeForm = () => {
       inputElement.value = ""; // Reset the file input
     }
   };
+  
 
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
@@ -113,18 +114,30 @@ const EditBridgeForm = () => {
   // Handle the photo upload for the selected span
   const handleSpanPhotoAdd = (e, span, photoIndex) => {
     const newSpanPhotos = { ...spanPhotos };
-
+  
     // If no photos exist for this span, initialize it
     if (!newSpanPhotos[span]) newSpanPhotos[span] = [];
-
+  
     // Ensure we don't exceed 5 photos per span
     if (newSpanPhotos[span].length < 5) {
-      newSpanPhotos[span][photoIndex] = e.target.files[0]; // Store photo for the selected span
+      const file = e.target.files[0];
+  
+      // Create a new filename using span name, photo index, and timestamp
+      const timestamp = new Date().toISOString().replace(/[^\w]/g, '_'); // Creating a timestamp-safe string
+      const newFileName = `${span}_photo_${photoIndex}_${timestamp}.jpg`;
+  
+      // You can store the file name or the file object based on your needs
+      newSpanPhotos[span][photoIndex] = {
+        file: file,
+        fileName: newFileName,
+      };
+  
       setSpanPhotos(newSpanPhotos);
     } else {
       alert("You can only upload up to 5 photos per span.");
     }
   };
+  
 
   if (!bridgeData) {
     return (
@@ -220,7 +233,7 @@ const EditBridgeForm = () => {
                   <option value="">-- Select Span --</option>
                   {spanIndexes.map((span, index) => (
                     <option key={index} value={span}>
-                      Span {span}
+                      Span{span}
                     </option>
                   ))}
                 </select>
@@ -239,7 +252,7 @@ const EditBridgeForm = () => {
                   {/* Photo Upload Inputs (5 inputs for 5 photos) */}
                   {Array.from({ length: 5 }).map((_, photoIndex) => (
                     <Col md={12} key={photoIndex}>
-                      <Form.Group controlId={`formPhoto${photoIndex + 1}`}>
+                      <Form.Group>
                         <Form.Label>Photo {photoIndex + 1}</Form.Label>
                         <Form.Control
                           id={`photoInput-${selectedSpan}-${photoIndex}`} // Unique ID for each input
