@@ -46,11 +46,11 @@ const EditBridgeForm = () => {
       [field]: value,
     }));
   };
-  
-   // Include spanPhotos for each span inside the bridgeData object
-   const updatedBridgeData = { 
-    ...bridgeData, 
-    spanPhotos: spanPhotos // Store the spanPhotos for each span here
+
+  // Include spanPhotos for each span inside the bridgeData object
+  const updatedBridgeData = {
+    ...bridgeData,
+    spanPhotos: spanPhotos, // Store the spanPhotos for each span here
   };
 
   const handleSubmit = (e) => {
@@ -58,16 +58,16 @@ const EditBridgeForm = () => {
     setBridgeData(updatedBridgeData); // Save updated data back to state
     console.log("Updated Bridge Data:", updatedBridgeData);
     alert("Changes saved!");
+    return;
     window.location.href = "/Evaluation";
   };
-  
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
     setShowPhotoModal(true);
   };
 
-  const handlePhotoRemove = (photoToRemove) => {
+  const handleSpanPhotoRemove = (photoToRemove) => {
     setSpanPhotos((prevData) => {
       const newSpanPhotos = { ...prevData };
       Object.keys(newSpanPhotos).forEach((span) => {
@@ -77,6 +77,13 @@ const EditBridgeForm = () => {
       });
       return newSpanPhotos;
     });
+  };
+
+  const handlePhotoRemove = (photoToRemove) => {
+    setBridgeData((prevData) => ({
+      ...prevData,
+      Photos: prevData.Photos.filter((photo) => photo !== photoToRemove),
+    }));
   };
 
   // Handle the photo upload for the selected span
@@ -94,9 +101,6 @@ const EditBridgeForm = () => {
       alert("You can only upload up to 5 photos per span.");
     }
   };
-
- 
-
 
   if (!bridgeData) {
     return (
@@ -139,7 +143,7 @@ const EditBridgeForm = () => {
           </h6>
           <Form onSubmit={handleSubmit}>
             <Row>
-              {[ 
+              {[
                 { label: "Bridge ID", field: "ObjectID" },
                 { label: "Bridge Name", field: "BridgeName" },
                 { label: "Structure Type", field: "StructureType" },
@@ -149,13 +153,20 @@ const EditBridgeForm = () => {
                 { label: "Road", field: "Road" },
                 { label: "Construction Type", field: "ConstructionType" },
                 { label: "Survey ID", field: "SurveyID" },
-                { label: "Road Classification ID", field: "RoadClassificationID" },
+                {
+                  label: "Road Classification ID",
+                  field: "RoadClassificationID",
+                },
                 { label: "Carriageway Type", field: "CarriagewayType" },
                 { label: "Road Surface Type", field: "RoadSurfaceType" },
                 { label: "Road Classification", field: "RoadClassification" },
                 { label: "Visual Condition", field: "VisualCondition" },
                 { label: "Direction", field: "Direction" },
-                { label: "Last Maintenance Date", field: "LastMaintenanceDate", type: "date" },
+                {
+                  label: "Last Maintenance Date",
+                  field: "LastMaintenanceDate",
+                  type: "date",
+                },
                 { label: "Width Structure", field: "WidthStructure" },
                 { label: "Span Length", field: "SpanLength" },
                 { label: "Spans", field: "Spans" },
