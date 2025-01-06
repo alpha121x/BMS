@@ -7,14 +7,8 @@ const EditInspectionForm = () => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Dummy photos for testing
-  const dummyPhotos = [
-    "uploads/bus_2024_01_14_12_39_49.jpg",
-    "uploads/bus_2024_01_14_12_40_06.jpg",
-    "uploads/bus_2024_01_14_12_40_38.jpg",
-    "uploads/bus_2024_01_14_12_43_56.jpg",
-    "uploads/bus_2024_01_14_12_45_26.jpg",
-  ];
+    // Ensure that 'inventoryData' contains a 'photos' field that holds an array of photo URLs
+    const photos = bridgeData?.photos || []; // Use 'photos' from the data or an empty array if not available
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -153,7 +147,7 @@ const EditInspectionForm = () => {
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
                     {/* Displaying dummy photos */}
-                    {dummyPhotos.map((photo, index) => (
+                    {photos.map((photo, index) => (
                       <div key={index} className="m-2">
                         <img
                           src={`/${photo}`}
