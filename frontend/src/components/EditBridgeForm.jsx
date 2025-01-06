@@ -77,7 +77,6 @@ const EditBridgeForm = () => {
         const updatedPhotos = updatedSpanPhotos[span].filter(
           (photo) => photo.fileName !== fileName
         );
-  
         // If the photos array is updated, return the new state object
         updatedSpanPhotos[span] = updatedPhotos;
       }
