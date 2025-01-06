@@ -2,18 +2,9 @@ import React from "react";
 import { Modal, Carousel } from "react-bootstrap";
 
 const InspectionModal = ({ selectedRow }) => {
-  // Dummy photos for testing
-  const dummyPhotos = [
-    "uploads/bus_2024_01_14_12_39_49.jpg",
-    "uploads/bus_2024_01_14_12_40_06.jpg",
-    "uploads/bus_2024_01_14_12_40_38.jpg",
-    "uploads/bus_2024_01_14_12_43_56.jpg",
-    "uploads/bus_2024_01_14_12_45_26.jpg",
-  ];
-
-
-  // Use dummy photos for testing, regardless of selectedRow.photos
-  const photosToDisplay = dummyPhotos;
+    console.log(selectedRow);
+  // Assuming selectedRow.photos contains the actual photo URLs
+  const photosToDisplay = selectedRow?.photos || [];
 
   return (
     <Modal.Body>
@@ -56,7 +47,7 @@ const InspectionModal = ({ selectedRow }) => {
       </table>
 
       {/* Photos Carousel */}
-      {photosToDisplay && photosToDisplay.length > 0 ? (
+      {photosToDisplay.length > 0 ? (
         <div className="mb-3">
           <h5>Inspection Photos</h5>
           <Carousel>
@@ -64,7 +55,7 @@ const InspectionModal = ({ selectedRow }) => {
               <Carousel.Item key={index}>
                 <img
                   className="d-block w-100"
-                  src={`/${photo}`}  // Directly reference the public folder
+                  src={`/${photo}`}  // Assuming the photos are accessible in the public folder
                   alt={`Photo ${index + 1}`}
                   style={{ maxHeight: "300px", objectFit: "cover" }}
                 />
