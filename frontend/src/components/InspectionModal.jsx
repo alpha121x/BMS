@@ -2,7 +2,6 @@ import React from "react";
 import { Modal, Carousel } from "react-bootstrap";
 
 const InspectionModal = ({ selectedRow }) => {
-    console.log(selectedRow);
   // Assuming selectedRow.photos contains the actual photo URLs
   const photosToDisplay = selectedRow?.photos || [];
 

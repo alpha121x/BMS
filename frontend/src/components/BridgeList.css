@@ -30,7 +30,7 @@
   
   .custom-table tbody tr:hover {
     background-color: #f1f1f1; /* Highlight row on hover */
-    transform: scale(1.02); /* Slightly enlarge the row */
+    transform: scale(1.01); /* Slightly enlarge the row */
     cursor: pointer;
   }
   
