@@ -38,8 +38,8 @@ app.post("/api/login", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, phone_num, email, id, is_active
-    FROM bms.tbl_users
+    SELECT id, username, password, phone_num, email, role_id, is_active
+    FROM public.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
 `;
@@ -96,8 +96,8 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, phone_num, email, id, is_active
-    FROM bms.tbl_users
+    SELECT id, username, password, phone_num, email, role_id, is_active
+    FROM public.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
 `;
@@ -150,88 +150,106 @@ app.post("/api/loginEvaluation", async (req, res) => {
 
 // API endpoint to fetch bridge data with filtering by ZoneID and DistrictID
 app.get("/api/bridges", async (req, res) => {
-  const { district, zone } = req.query;
+  const { district, zone } = req.query; // Receive 'district' and 'zone' from the query parameters
 
-  const queryParams = [];
-  const whereClauses = [];
+  let queryParams = [];
+  let whereClauses = [];
 
-  // Add condition for zone if provided
+  // Add condition for ZoneID if provided
   if (zone) {
     queryParams.push(zone);
-    whereClauses.push(`"zone_id"::text ILIKE $${queryParams.length}`);
+    whereClauses.push(`o."ZoneID"::text ILIKE $${queryParams.length}`);
   }
 
-  // Add condition for district if provided
+  // Add condition for DistrictID if provided
   if (district) {
     queryParams.push(district);
-    whereClauses.push(`"district_id"::text ILIKE $${queryParams.length}`);
+    whereClauses.push(`o."DistrictID"::text ILIKE $${queryParams.length}`);
   }
 
   // Base query
   let query = `
     SELECT 
-      "uu_bms_id",
-      "structure_type", 
-      "road_no",  
-      "road_name", 
-      "road_name_cwd", 
-      "route_id", 
-      "survey_id", 
-      "structure_no", 
-      "surveyor_name", 
-      "zone", 
-      "district", 
-      "road_classification", 
-      "road_surface_type", 
-      "carriageway_type",  
-      "direction", 
-      "visual_condition", 
-      "construction_type", 
-      "no_of_span", 
-      "span_length_m", 
-      "structure_width_m", 
-      "construction_year", 
-      "last_maintenance_date", 
-      "data_source", 
-      "date_time", 
-      "remarks", 
-      "surveyed_by", 
-      "is_surveyed", 
-      "image_1", 
-      "image_2", 
-      "image_3", 
-      "image_4", 
-      "image_5", 
-      "x_centroid", 
-      "y_centroid", 
-      "geom", 
-      "is_active", 
-      "images_spans", 
-      "image_1_old", 
-      "image_2_old", 
-      "image_3_old", 
-      "image_4_old", 
-      "image_5_old"
-    FROM bms.tbl_bms_master_data
+      o."ObjectID", 
+      o."BridgeName", 
+      st."StructureTypeName" AS "StructureType", 
+      o."ConstructionYear", 
+      z."ZoneName" AS "Zone", 
+      d."DistrictsName" AS "District",
+      r."RoadName" AS "Road",
+      c."ConstructionTypeName" AS "ConstructionType", 
+      o."SurveyID", 
+      o."RoadClassificationID", 
+      cw."CarriagewayTypeName" AS "CarriagewayType",
+      rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
+      rc."RoadClassificationName" AS "RoadClassification",
+      vc."VisualConditionName" AS "VisualCondition",
+      dr."DirectionName" AS "Direction",
+      o."LastMaintenanceDate",
+      o."WidthOfStructureM" AS "WidthStructure",
+      o."SpanLengthM" AS "SpanLength",
+      o."NumberOfSpan" AS "Spans",
+      o."XCentroID" AS "Latitude",
+      o."YCentroID" AS "Longitude",
+      COALESCE(array_agg(DISTINCT ep."PhotoPath") FILTER (WHERE ep."PhotoPath" IS NOT NULL), '{}') AS "Photos"
+    FROM public."D_Objects" o
+    INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
+    INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
+    INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
+    INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
+    INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
+    INNER JOIN public."M_CarriagewayType" cw ON o."CarriagewayType" = cw."CarriagewayTypeID"
+    INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
+    INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
+    INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
+    INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
+    LEFT JOIN public."D_ExteriorPhotos" ep ON o."ObjectID" = ep."ObjectID"
   `;
 
-  // Add WHERE clause if there are filters
-  if (whereClauses.length) {
+  // Add WHERE clause if filters exist
+  if (whereClauses.length > 0) {
     query += ` WHERE ${whereClauses.join(" AND ")}`;
   }
 
-  query += ` ORDER BY "uu_bms_id" ASC;`;
+  query += `
+    GROUP BY 
+      o."ObjectID", 
+      o."BridgeName", 
+      o."ConstructionYear", 
+      z."ZoneName", 
+      d."DistrictsName", 
+      r."RoadName", 
+      c."ConstructionTypeName", 
+      st."StructureTypeName", 
+      cw."CarriagewayTypeName", 
+      rs."RoadSurfaceTypeName", 
+      rc."RoadClassificationName", 
+      vc."VisualConditionName", 
+      dr."DirectionName", 
+      o."SurveyID",
+      o."RoadClassificationID", 
+      o."LastMaintenanceDate", 
+      o."WidthOfStructureM", 
+      o."SpanLengthM", 
+      o."NumberOfSpan",
+      o."XCentroID",
+      o."YCentroID"
+    ORDER BY o."ObjectID" ASC;
+  `;
 
   try {
+    // Query execution with parameters
     const result = await pool.query(query, queryParams);
+
+    // Send the result rows as JSON
     res.status(200).json(result.rows);
   } catch (error) {
     console.error("Error fetching bridge data:", error.message);
-    res.status(500).json({ error: "An error occurred while fetching bridge data." });
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching bridge data." });
   }
 });
-
-
 
 // API endpoint to fetch checkings data with additional details
 app.get("/api/checkings", async (req, res) => {
@@ -361,81 +379,81 @@ app.get("/api/get-inspections", async (req, res) => {
 
 
 // API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
-// app.get("/api/bridgecoordinates", async (req, res) => {
-//   const { 
-//     district = "%", 
-//     zone = "%", 
-//     southWestLat, 
-//     southWestLng, 
-//     northEastLat, 
-//     northEastLng 
-//   } = req.query; // Default district and zone to '%' for wildcard matching
+app.get("/api/bridgecoordinates", async (req, res) => {
+  const { 
+    district = "%", 
+    zone = "%", 
+    southWestLat, 
+    southWestLng, 
+    northEastLat, 
+    northEastLng 
+  } = req.query; // Default district and zone to '%' for wildcard matching
 
-//   // Initialize query parameters and WHERE clauses
-//   const queryParams = [];
-//   const whereClauses = [];
+  // Initialize query parameters and WHERE clauses
+  const queryParams = [];
+  const whereClauses = [];
 
-//   // Add condition for ZoneID if provided
-//   if (zone !== "%") {
-//     queryParams.push(zone);
-//     whereClauses.push(`"ZoneID"::text ILIKE $${queryParams.length}`);
-//   }
+  // Add condition for ZoneID if provided
+  if (zone !== "%") {
+    queryParams.push(zone);
+    whereClauses.push(`"ZoneID"::text ILIKE $${queryParams.length}`);
+  }
 
-//   // Add condition for DistrictID if provided
-//   if (district !== "%") {
-//     queryParams.push(district);
-//     whereClauses.push(`"DistrictID"::text ILIKE $${queryParams.length}`);
-//   }
+  // Add condition for DistrictID if provided
+  if (district !== "%") {
+    queryParams.push(district);
+    whereClauses.push(`"DistrictID"::text ILIKE $${queryParams.length}`);
+  }
 
-//   // Add conditions for bounding box if all coordinates are provided
-//   if (southWestLat && southWestLng && northEastLat && northEastLng) {
-//     queryParams.push(parseFloat(southWestLat), parseFloat(northEastLat));
-//     whereClauses.push(`"YCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
+  // Add conditions for bounding box if all coordinates are provided
+  if (southWestLat && southWestLng && northEastLat && northEastLng) {
+    queryParams.push(parseFloat(southWestLat), parseFloat(northEastLat));
+    whereClauses.push(`"YCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
 
-//     queryParams.push(parseFloat(southWestLng), parseFloat(northEastLng));
-//     whereClauses.push(`"XCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
-//   }
+    queryParams.push(parseFloat(southWestLng), parseFloat(northEastLng));
+    whereClauses.push(`"XCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
+  }
 
-//   // Base SQL query
-//   let query = `
-//     SELECT 
-//       "ObjectID", 
-//       "BridgeName", 
-//       "XCentroID", 
-//       "YCentroID"
-//     FROM public."D_Objects"
-//   `;
+  // Base SQL query
+  let query = `
+    SELECT 
+      "ObjectID", 
+      "BridgeName", 
+      "XCentroID", 
+      "YCentroID"
+    FROM public."D_Objects"
+  `;
 
-//   // Add WHERE clause if filters exist
-//   if (whereClauses.length > 0) {
-//     query += ` WHERE ${whereClauses.join(" AND ")}`;
-//   }
+  // Add WHERE clause if filters exist
+  if (whereClauses.length > 0) {
+    query += ` WHERE ${whereClauses.join(" AND ")}`;
+  }
 
-//   // Limit the results
-//   // query += ` LIMIT 1000;`;
+  // Limit the results
+  // query += ` LIMIT 1000;`;
 
-//   try {
-//     // Query execution with parameters
-//     const result = await pool.query(query, queryParams);
+  try {
+    // Query execution with parameters
+    const result = await pool.query(query, queryParams);
 
-//     // Check if any data is returned
-//     if (result.rows.length > 0) {
-//       res.status(200).json(result.rows); // Send the result as JSON
-//     } else {
-//       res.status(404).json({ message: "No bridge data found" });
-//     }
-//   } catch (error) {
-//     console.error("Error fetching bridge coordinates:", error.message);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
+    // Check if any data is returned
+    if (result.rows.length > 0) {
+      res.status(200).json(result.rows); // Send the result as JSON
+    } else {
+      res.status(404).json({ message: "No bridge data found" });
+    }
+  } catch (error) {
+    console.error("Error fetching bridge coordinates:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 
 // API route to get Zones data
 app.get("/api/zones", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT "id", "zone" FROM bms.tbl_zones'
+      'SELECT "ZoneID", "ZoneName" FROM public."M_Zones"'
     );
     res.json(result.rows);
   } catch (err) {
@@ -448,7 +466,7 @@ app.get("/api/zones", async (req, res) => {
 app.get("/api/districts", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT "id", "district" FROM bms.tbl_districts'
+      'SELECT "DistrictsID", "DistrictsName" FROM public."M_Districts"'
     );
     res.json(result.rows);
   } catch (err) {
