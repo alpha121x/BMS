@@ -9,29 +9,34 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
 
   const itemsPerPage = 10;
 
   useEffect(() => {
     if (selectedDistrict && selectedZone) {
-      fetchAllBridges(selectedDistrict, selectedZone, currentPage, itemsPerPage);
+      fetchAllBridges(selectedDistrict, selectedZone);
     }
-  }, [selectedDistrict, selectedZone, currentPage]);
+  }, [selectedDistrict, selectedZone]);
 
-  const fetchAllBridges = async (district, zone, page, limit) => {
+  const fetchAllBridges = async (district, zone) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bridges?district=${district}&zone=${zone}&page=${page}&limit=${limit}`
+        `${BASE_URL}/api/bridges?district=${district}&zone=${zone}`
       );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
-      
-      setTableData(data.records);
-      setTotalPages(data.totalPages);
-      setBridgeCount(data.totalCount);
+      // console.log(data);
+
+      // Set table data and extract the total count
+      setTableData(data);
+      if (data.length > 0) {
+        const lastBridgeId = data[data.length - 1]?.ObjectID || "N/A";
+        setBridgeCount(lastBridgeId); // Assuming this is the correct total count
+      } else {
+        setBridgeCount(0); // Default to 0 if no data
+      }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -39,10 +44,23 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
     }
   };
 
-  const handlePageChange = (pageNumber) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-    }
+  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+  const currentData = tableData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+
+  const handleRowClick = (bridge) => {
+    // Serialize the bridge data object into a URL-safe string
+    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+
+    // Construct the URL with serialized data as a query parameter
+    const editUrl = `/BridgeInfo?bridgeData=${serializedBridgeData}`;
+
+    // Navigate to the edit URL, passing the data through query parameters
+    window.location.href = editUrl;
   };
 
   const renderPaginationButtons = () => {
@@ -112,8 +130,11 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
       <div className="w-full mx-auto mt-2">
         <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Bridges List</div>
+            <div className="text-2xl font-bold">Bridges List</div>{" "}
+            {/* Larger and bolder */}
             <div className="text-sm font-medium mt-1 text-gray-700">
+              {" "}
+              {/* Smaller and lighter */}
               Total Bridges: {bridgeCount || 0}
             </div>
           </div>
@@ -168,8 +189,8 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tableData.length > 0 ? (
-                    tableData.map((bridge, index) => (
+                  {currentData.length > 0 ? (
+                    currentData.map((bridge, index) => (
                       <tr
                         key={index}
                         onClick={() => handleRowClick(bridge)}
@@ -193,12 +214,13 @@ const BridgesList = ({ selectedDistrict, selectedZone }) => {
                             />
                           ) : (
                             <img
-                              src="/download.jpeg"
+                              src="/download.jpeg" // Path to your alternate image
                               alt="No image available"
                               className="w-30 h-10 object-cover rounded-md"
                             />
                           )}
                         </td>
+
                         <td>{bridge.LatestInspectionStatus || "N/A"}</td>
                       </tr>
                     ))
