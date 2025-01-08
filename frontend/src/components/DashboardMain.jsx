@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import BridgesList from "./BridgesList";
+import { UserIcon, HomeIcon, DocumentTextIcon, WrenchIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
 import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
@@ -39,6 +38,7 @@ const DashboardMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+
   // Data for Structure cards
   const structureCards = [
     {
@@ -50,29 +50,29 @@ const DashboardMain = () => {
     {
       label: "Culvert Type",
       value: "1,433",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <WrenchIcon className="w-10 h-10 text-blue-500" />, // Wrench for construction/maintenance
       color: "blue",
     },
     {
       label: "PC Bridge",
       value: "17,302",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />, // Building Office Icon, representing large structures like bridges
       color: "blue",
     },
     {
       label: "Arch",
       value: "14",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />, // Document icon to represent an architectural design
       color: "blue",
     },
     {
       label: "Underpass",
       value: "8",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <HomeIcon className="w-10 h-10 text-blue-500" />, // Home icon representing an underpass construction type
       color: "blue",
     },
   ];
-
+  
   // Data for Evaluation cards
   const inspectedCards = [
     {
@@ -84,28 +84,29 @@ const DashboardMain = () => {
     {
       label: "Culvert Type",
       value: "1,433",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <WrenchIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "PC Bridge",
       value: "17,302",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Arch",
       value: "14",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Underpass",
       value: "8",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      icon: <HomeIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
   ];
+  
 
   // Card Component
   const Card = ({ label, value, icon, color }) => (
@@ -196,7 +197,7 @@ const DashboardMain = () => {
       {/* Evaluation Section */}
       <div className="mb-2">
         <h3 className="text-xl font-semibold text-gray-700">Inspected</h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
           ))}
