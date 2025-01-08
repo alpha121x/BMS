@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { UserIcon, HomeIcon, DocumentTextIcon, WrenchIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
+import {
+  UserIcon,
+  HomeIcon,
+  DocumentTextIcon,
+  WrenchIcon,
+  BuildingOfficeIcon,
+} from "@heroicons/react/24/outline";
 import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
@@ -38,7 +44,6 @@ const DashboardMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-
   // Data for Structure cards
   const structureCards = [
     {
@@ -72,7 +77,7 @@ const DashboardMain = () => {
       color: "blue",
     },
   ];
-  
+
   // Data for Evaluation cards
   const inspectedCards = [
     {
@@ -106,34 +111,34 @@ const DashboardMain = () => {
       color: "blue",
     },
   ];
-  
 
   // Helper to assign border classes based on card color
-const getBorderClass = (color) => {
-  const colorClasses = {
-    blue: "border-blue-400 text-blue-500",
-    green: "border-green-400 text-green-500",
-    yellow: "border-yellow-400 text-yellow-500",
-    red: "border-red-400 text-red-500",
-    purple: "border-purple-400 text-purple-500",
-    indigo: "border-indigo-400 text-indigo-500",
+  const getBorderClass = (color) => {
+    const colorClasses = {
+      blue: "border-blue-400 text-blue-500",
+      green: "border-green-400 text-green-500",
+      yellow: "border-yellow-400 text-yellow-500",
+      red: "border-red-400 text-red-500",
+      purple: "border-purple-400 text-purple-500",
+      indigo: "border-indigo-400 text-indigo-500",
+    };
+    return colorClasses[color] || "border-gray-400 text-gray-500"; // Default to gray
   };
-  return colorClasses[color] || "border-gray-400 text-gray-500"; // Default to gray
-};
 
-// Card Component with dynamic border color
-const Card = ({ label, value, icon, color }) => (
-  <div
-    className={`bg-white py-1 px-4 rounded-lg shadow-lg flex items-center gap-4 border-2 ${getBorderClass(color)}`}
-  >
-    <div>{icon}</div>
-    <div>
-      <h4 className="text-sm font-bold text-gray-700">{label}</h4>
-      <p className="text-lg font-bold">{value}</p>
+  // Card Component with dynamic border color
+  const Card = ({ label, value, icon, color }) => (
+    <div
+      className={`bg-white py-1 px-4 rounded-lg shadow-lg flex items-center gap-4 border-2 ${getBorderClass(
+        color
+      )}`}
+    >
+      <div>{icon}</div>
+      <div>
+        <h4 className="text-sm font-bold text-gray-700">{label}</h4>
+        <p className="text-lg font-bold">{value}</p>
+      </div>
     </div>
-  </div>
-);
-
+  );
 
   return (
     <section className="bg-gray-100 min-h-screen">
