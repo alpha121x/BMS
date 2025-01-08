@@ -37,8 +37,8 @@ const DashboardMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Data for cards
-  const cardData = [
+  // Data for Structure cards
+  const structureData = [
     {
       label: "Total Structures",
       value: "18,805",
@@ -65,7 +65,8 @@ const DashboardMain = () => {
     },
   ];
 
-  const inspectionData = [
+  // Data for Evaluation cards
+  const evaluationData = [
     {
       label: "Bridges Checked",
       value: "1,511",
@@ -78,9 +79,19 @@ const DashboardMain = () => {
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
     },
+    {
+      label: "Inspections Pending",
+      value: "1,200",
+      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
+      color: "green",
+    },
+    {
+      label: "Defects Found",
+      value: "567",
+      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
+      color: "green",
+    },
   ];
-
-  const allCards = [...cardData, ...inspectionData];
 
   // Helper to assign border classes based on card color
   const getBorderClass = (color) => {
@@ -172,35 +183,51 @@ const DashboardMain = () => {
         </div>
       </div>
 
-      {/* Cards Section */}
-      <div className="grid grid-cols-12 gap-2">
-        {allCards.map((card, index) => (
-          <div
-            key={index}
-            className="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2"
-          >
-            <Card
-              label={card.label}
-              value={card.value}
-              icon={card.icon}
-              color={card.color}
-            />
-          </div>
-        ))}
+      {/* Structure Section */}
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-600 mb-2">Structure</h3>
+        <div className="grid grid-cols-12 gap-2">
+          {structureData.map((card, index) => (
+            <div
+              key={index}
+              className="col-span-12 sm:col-span-6 md:col-span-3"
+            >
+              <Card
+                label={card.label}
+                value={card.value}
+                icon={card.icon}
+                color={card.color}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Evaluation Section */}
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-600 mb-2">Evaluation</h3>
+        <div className="grid grid-cols-12 gap-2">
+          {evaluationData.map((card, index) => (
+            <div
+              key={index}
+              className="col-span-12 sm:col-span-6 md:col-span-3"
+            >
+              <Card
+                label={card.label}
+                value={card.value}
+                icon={card.icon}
+                color={card.color}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Map and Pie Chart Layout */}
       <div className="grid grid-cols-12 gap-2 mt-6">
-        {/* Map Container (occupying full width on large screens) */}
         <div className="col-span-12 lg:col-span-9">
-          {/* Directly render the Map component */}
-          <Map
-            selectedDistrict={selectedDistrict}
-            selectedZone={selectedZone}
-          />
+          <Map selectedDistrict={selectedDistrict} selectedZone={selectedZone} />
         </div>
-
-        {/* Pie Chart Card (30% width on large screens, full width on smaller screens) */}
         <div className="col-span-12 lg:col-span-3">
           <div
             className="card p-2 rounded-lg text-black"
@@ -212,27 +239,24 @@ const DashboardMain = () => {
             }}
           >
             <div className="card-body pb-0">
-              <h2 className="text-xl font-semibold mb-4">
-                Birdges Chart
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">Bridges Chart</h2>
               <GraphComponent data={infrastructureData} />
             </div>
           </div>
         </div>
       </div>
 
-     {/* Bridges */}
-     <div className="mt-2 flex justify-center">
+      {/* Bridges List */}
+      <div className="mt-2 flex justify-center">
         <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
           <BridgesListDashboard
-          selectedDistrict={selectedDistrict}
-          startDate={startDate}
-          selectedZone={selectedZone}
-           />
+            selectedDistrict={selectedDistrict}
+            startDate={startDate}
+            selectedZone={selectedZone}
+          />
         </div>
       </div>
 
-     
       {/* Back to Top Button */}
       {showBackToTop && (
         <button
