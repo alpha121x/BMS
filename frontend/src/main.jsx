@@ -11,6 +11,7 @@ import Evaluation from './Evaluation'; // Evaluation Module Component
 import EditInspection from './EditInspection';
 import EditBridge from './EditIBridge';
 import BridgeInfo from './components/BridgeInfo';
+import BridgeInfoDashboard from './components/BridgeinfoDaashboard';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -118,6 +119,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           element={
             <PrivateRoute>
               <BridgeInfo />
+            </PrivateRoute>
+          }
+        />
+
+           {/* Private Route for BridgeInfo */}
+           <Route
+          path="/BridgeInfoDashboard"
+          element={
+            <PrivateRoute>
+              <BridgeInfoDashboard />
             </PrivateRoute>
           }
         />

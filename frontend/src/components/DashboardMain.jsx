@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
-import BridgeListing from "./BridgeListing";
+import BridgesList from "./BridgesList";
 import FilterComponent from "./FilterComponent";
 import Map from "./Map";
 import GraphComponent from "./GraphComponent";
-import CheckingTable from "./CheckingTable";
+import BridgesListDashboard from "./BirdgesListDashboard";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -223,18 +223,14 @@ const DashboardMain = () => {
 
       {/* Bridge Listing Section */}
       <div className="mt-2">
-        <BridgeListing
+        <BridgesListDashboard
           selectedDistrict={selectedDistrict}
           startDate={startDate}
           selectedZone={selectedZone}
         />
       </div>
 
-      {/* Checking Listing Section */}
-      <div className="mt-2">
-        <CheckingTable />
-      </div>
-
+     
       {/* Back to Top Button */}
       {showBackToTop && (
         <button
