@@ -185,7 +185,7 @@ const EvaluationMain = () => {
         ))}
       </div>
 
-      {/* Checking Listing Section */}
+      {/* Bridges */}
       <div className="mt-2 flex justify-center">
         <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
           <BridgesList

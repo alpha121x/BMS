@@ -10,7 +10,6 @@ const BridgesListDashboard = ({ selectedDistrict, selectedZone }) => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
-
   const itemsPerPage = 10;
 
   useEffect(() => {
