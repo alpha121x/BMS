@@ -74,58 +74,43 @@ const DashboardMain = () => {
   ];
 
   // Data for Evaluation cards
-  const evaluationCards = [
+  const inspectedCards = [
     {
-      label: "Inspections Completed",
-      value: "1,511",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
+      label: "Total",
+      value: "18,805",
+      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
     {
-      label: "Pending Inspections",
-      value: "120",
-      icon: <DocumentIcon className="w-10 h-10 text-yellow-500" />,
-      color: "yellow",
+      label: "Culvert Type",
+      value: "1,433",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
     {
-      label: "Critical Structures",
-      value: "15",
-      icon: <DocumentIcon className="w-10 h-10 text-red-500" />,
-      color: "red",
+      label: "PC Bridge",
+      value: "17,302",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
     {
-      label: "Maintenance Scheduled",
-      value: "30",
-      icon: <DocumentIcon className="w-10 h-10 text-purple-500" />,
-      color: "purple",
+      label: "Arch",
+      value: "14",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
     {
-      label: "Reports Generated",
-      value: "200",
-      icon: <DocumentIcon className="w-10 h-10 text-indigo-500" />,
-      color: "indigo",
+      label: "Underpass",
+      value: "8",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
   ];
-
-  // Helper to assign border classes based on card color
-  const getBorderClass = (color) => {
-    const colorClasses = {
-      blue: "border-blue-400 text-blue-500",
-      green: "border-green-400 text-green-500",
-      yellow: "border-yellow-400 text-yellow-500",
-      red: "border-red-400 text-red-500",
-      purple: "border-purple-400 text-purple-500",
-      indigo: "border-indigo-400 text-indigo-500",
-    };
-    return colorClasses[color] || "border-gray-400 text-gray-500";
-  };
 
   // Card Component
   const Card = ({ label, value, icon, color }) => (
     <div
-      className={`border-2 ${getBorderClass(
-        color
-      )} bg-white py-1 px-1 rounded-lg shadow-lg flex items-center gap-4`}
+      className={`bg-white py-1 px-4 rounded-lg shadow-lg flex items-center gap-4`}
     >
       <div>{icon}</div>
       <div>
@@ -200,9 +185,7 @@ const DashboardMain = () => {
 
       {/* Structure Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Structures
-        </h3>
+        <h3 className="text-xl font-semibold text-gray-700">Structures</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {structureCards.map((card, index) => (
             <Card key={index} {...card} />
@@ -212,11 +195,9 @@ const DashboardMain = () => {
 
       {/* Evaluation Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Evaluation
-        </h3>
+        <h3 className="text-xl font-semibold text-gray-700">Inspected</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-          {evaluationCards.map((card, index) => (
+          {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
           ))}
         </div>
