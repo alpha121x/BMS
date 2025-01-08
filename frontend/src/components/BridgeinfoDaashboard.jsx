@@ -4,7 +4,7 @@ import {
   DocumentIcon,
 } from "@heroicons/react/24/outline";
 import FilterComponent from "./FilterComponent";
-import HeaderEvaluation from "./HeaderEvaluation";
+import Header from "./Header";
 import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfo";
 import { useLocation } from "react-router-dom";
@@ -140,7 +140,7 @@ const BridgeInfoDashboard = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="mb-1">
-        <HeaderEvaluation />
+        <Header />
       </div>
 
       <main className="flex-grow p-1">
