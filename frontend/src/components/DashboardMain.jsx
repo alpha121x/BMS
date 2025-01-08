@@ -13,7 +13,6 @@ import BridgesListDashboard from "./BirdgesListDashboard";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [districtId, setDistrictId] = useState(null);
   const [selectedZone, setSelectedZone] = useState("%");
 
   const [infrastructureData, setInfrastructureData] = useState([
@@ -194,8 +193,6 @@ const DashboardMain = () => {
         <div className="offcanvas-body">
           <FilterComponent
             setSelectedDistrict={setSelectedDistrict}
-            districtId={districtId}
-            setDistrictId={setDistrictId}
             setSelectedZone={setSelectedZone}
           />
         </div>
