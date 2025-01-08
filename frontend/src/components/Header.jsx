@@ -7,8 +7,6 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = location.pathname;
-  const [isReportsDropdownOpen, setIsReportsDropdownOpen] = useState(false);
-  const [isSetupDropdownOpen, setIsSetupDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const reportsRef = useRef(null);
