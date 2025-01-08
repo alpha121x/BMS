@@ -4,7 +4,6 @@ import { BASE_URL } from "./config";
 const FilterComponent = ({
   setSelectedDistrict,
   setSelectedZone,
-  setStartDate,
   setBridgeMinLength,
   setBridgeMaxLength,
   setSpanMinLength,
@@ -28,7 +27,6 @@ const FilterComponent = ({
 
   const [districtId, setDistrictId] = useState("");
   const [zoneId, setZoneId] = useState("");
-  const [startDate, setStartDateState] = useState("");
   const [minBridgeLength, setMinBridgeLength] = useState("");
   const [maxBridgeLength, setMaxBridgeLength] = useState("");
   const [minSpanLength, setMinSpanLength] = useState("");
@@ -55,11 +53,15 @@ const FilterComponent = ({
         setZones(zoneData);
 
         // Fetch additional filters
-        const structureTypeResponse = await fetch(`${BASE_URL}/api/structure-types`);
+        const structureTypeResponse = await fetch(
+          `${BASE_URL}/api/structure-types`
+        );
         const structureTypeData = await structureTypeResponse.json();
         setStructureTypes(structureTypeData);
 
-        const constructionTypeResponse = await fetch(`${BASE_URL}/api/construction-types`);
+        const constructionTypeResponse = await fetch(
+          `${BASE_URL}/api/construction-types`
+        );
         const constructionTypeData = await constructionTypeResponse.json();
         setConstructionTypes(constructionTypeData);
 
@@ -67,11 +69,15 @@ const FilterComponent = ({
         const categoryData = await categoryResponse.json();
         setCategories(categoryData);
 
-        const evaluationStatusResponse = await fetch(`${BASE_URL}/api/evaluation-statuses`);
+        const evaluationStatusResponse = await fetch(
+          `${BASE_URL}/api/evaluation-statuses`
+        );
         const evaluationStatusData = await evaluationStatusResponse.json();
         setEvaluationStatuses(evaluationStatusData);
 
-        const inspectionStatusResponse = await fetch(`${BASE_URL}/api/inspection-statuses`);
+        const inspectionStatusResponse = await fetch(
+          `${BASE_URL}/api/inspection-statuses`
+        );
         const inspectionStatusData = await inspectionStatusResponse.json();
         setInspectionStatuses(inspectionStatusData);
       } catch (error) {
@@ -85,25 +91,14 @@ const FilterComponent = ({
   // Handle handlers for various inputs
   const handleChange = (setter) => (e) => setter(e.target.value);
 
-  // Default date to current day
-  useEffect(() => {
-    if (!startDate) {
-      const today = new Date();
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      };
-      setStartDateState(formatDate(today));
-    }
-  }, [startDate]);
-
   return (
     <div className="p-4">
       {/* Zone Filter */}
       <div className="mb-4">
-        <label htmlFor="zone-filter" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="zone-filter"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Select Zone
         </label>
         <select
@@ -114,8 +109,8 @@ const FilterComponent = ({
         >
           <option value="%">--All Zones--</option>
           {zones.map((zone) => (
-            <option key={zone.id} value={zone.id}>
-              {zone.zone}
+            <option key={zone.ZoneID} value={zone.ZoneID}>
+              {zone.ZoneName}
             </option>
           ))}
         </select>
@@ -123,7 +118,10 @@ const FilterComponent = ({
 
       {/* District Filter */}
       <div className="mb-4">
-        <label htmlFor="district-filter" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="district-filter"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Select District
         </label>
         <select
@@ -134,8 +132,8 @@ const FilterComponent = ({
         >
           <option value="%">--All Districts--</option>
           {districts.map((district) => (
-            <option key={district.id} value={district.id}>
-              {district.district}
+            <option key={district.DistrictsID} value={district.DistrictsID}>
+              {district.DistrictsName}
             </option>
           ))}
         </select>
@@ -143,7 +141,10 @@ const FilterComponent = ({
 
       {/* Bridge Min Length Filter */}
       <div className="mb-4">
-        <label htmlFor="bridge-min-length" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="bridge-min-length"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Bridge Min Length
         </label>
         <input
@@ -157,7 +158,10 @@ const FilterComponent = ({
 
       {/* Bridge Max Length Filter */}
       <div className="mb-4">
-        <label htmlFor="bridge-max-length" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="bridge-max-length"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Bridge Max Length
         </label>
         <input
@@ -171,7 +175,10 @@ const FilterComponent = ({
 
       {/* Span Min Length Filter */}
       <div className="mb-4">
-        <label htmlFor="span-min-length" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="span-min-length"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Span Min Length
         </label>
         <input
@@ -185,7 +192,10 @@ const FilterComponent = ({
 
       {/* Span Max Length Filter */}
       <div className="mb-4">
-        <label htmlFor="span-max-length" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="span-max-length"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Span Max Length
         </label>
         <input
@@ -199,7 +209,10 @@ const FilterComponent = ({
 
       {/* Structure Type Filter */}
       <div className="mb-4">
-        <label htmlFor="structure-type" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="structure-type"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Structure Type
         </label>
         <select
@@ -219,7 +232,10 @@ const FilterComponent = ({
 
       {/* Construction Type Filter */}
       <div className="mb-4">
-        <label htmlFor="construction-type" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="construction-type"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Construction Type
         </label>
         <select
@@ -239,7 +255,10 @@ const FilterComponent = ({
 
       {/* Category Filter */}
       <div className="mb-4">
-        <label htmlFor="category" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="category"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Category
         </label>
         <select
@@ -259,7 +278,10 @@ const FilterComponent = ({
 
       {/* No of Span Filter */}
       <div className="mb-4">
-        <label htmlFor="no-of-span" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="no-of-span"
+          className="block text-gray-700 font-medium mb-1"
+        >
           No of Span
         </label>
         <input
@@ -273,7 +295,10 @@ const FilterComponent = ({
 
       {/* Evaluation Status Filter */}
       <div className="mb-4">
-        <label htmlFor="evaluation-status" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="evaluation-status"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Evaluation Status
         </label>
         <select
@@ -293,7 +318,10 @@ const FilterComponent = ({
 
       {/* Inspection Status Filter */}
       <div className="mb-4">
-        <label htmlFor="inspection-status" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="inspection-status"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Inspection Status
         </label>
         <select
@@ -313,7 +341,10 @@ const FilterComponent = ({
 
       {/* Min Year Filter */}
       <div className="mb-4">
-        <label htmlFor="min-year" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="min-year"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Min Year
         </label>
         <input
@@ -327,7 +358,10 @@ const FilterComponent = ({
 
       {/* Max Year Filter */}
       <div className="mb-4">
-        <label htmlFor="max-year" className="block text-gray-700 font-medium mb-1">
+        <label
+          htmlFor="max-year"
+          className="block text-gray-700 font-medium mb-1"
+        >
           Max Year
         </label>
         <input
