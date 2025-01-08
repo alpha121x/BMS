@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   UserIcon,
   DocumentIcon,
-  TrashIcon,
-  PencilIcon,
 } from "@heroicons/react/24/outline";
 import FilterComponent from "./FilterComponent";
 import HeaderEvaluation from "./HeaderEvaluation";
@@ -64,16 +62,7 @@ const BridgeInfoDashboard = () => {
 
   const handleBackClick = () => {
     // Navigate to the previous page or a specific route
-    navigate("/Evaluation"); // Adjust the route as needed
-  };
-
-  const handleEditClick = () => {
-    // Serialize the bridgeData object into a URL-safe string
-    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridgeData));
-    // Construct the edit URL with serialized data
-    const editUrl = `/EditBridge?data=${serializedBridgeData}`;
-    // Navigate to the edit URL in the same tab
-    window.location.href = editUrl;
+    navigate("/Dashboard"); // Adjust the route as needed
   };
 
   // Data for cards
@@ -245,7 +234,6 @@ const BridgeInfoDashboard = () => {
                     className="bg-inherit hover:bg-blue-500 text-black py-2 rounded-md flex items-center gap-2"
                   >
                     <ArrowLeftIcon className="h-5 w-5" />{" "}
-                    {/* Replace with appropriate icon if needed */}
                     Bridges List
                   </button>
                 </div>
@@ -265,19 +253,6 @@ const BridgeInfoDashboard = () => {
                   </div>
                 </div>
               </div>
-              {/* <div className="flex gap-2">
-                <button
-                  onClick={handleEditClick}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
-                >
-                  <PencilIcon className="h-5 w-5" />
-                  Edit
-                </button>
-                <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
-                  <TrashIcon className="h-5 w-5" />
-                  Delete
-                </button>
-              </div> */}
             </div>
           </div>
 
