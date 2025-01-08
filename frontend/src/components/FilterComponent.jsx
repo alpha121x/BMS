@@ -4,13 +4,11 @@ import { BASE_URL } from "./config";
 const FilterComponent = ({
   setSelectedDistrict,
   setSelectedZone,
-  setStartDate,
 }) => {
   const [districts, setDistricts] = useState([]);
   const [zones, setZones] = useState([]);
   const [districtId, setDistrictId] = useState("");
   const [zoneId, setZoneId] = useState(""); // Added state for zone
-  const [startDate, setStartDateState] = useState("");
 
   // Fetch districts and zones
   useEffect(() => {
@@ -29,26 +27,6 @@ const FilterComponent = ({
     };
     fetchDistrictsAndZones();
   }, []);
-
-  // Default date to current day
-  useEffect(() => {
-    if (!startDate) {
-      const today = new Date();
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      };
-      setStartDateState(formatDate(today));
-    }
-  }, [startDate]);
-
-  // Handlers for inputs
-  const handleDateChange = (e) => {
-    // console.log("Selected Date:", e.target.value);  // Log selected date
-    setStartDate(e.target.value);
-  };
 
   // Handle zone change
   const handleZoneChange = (e) => {
@@ -104,20 +82,6 @@ const FilterComponent = ({
             </option>
           ))}
         </select>
-      </div>
-
-      {/* Date Filter */}
-      <div className="mb-4">
-        <label htmlFor="date-filter" className="block text-gray-700 font-medium mb-1">
-          Select Date
-        </label>
-        <input
-          id="date-filter"
-          type="date"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={startDate || ""}
-          onChange={handleDateChange}
-        />
       </div>
     </div>
   );
