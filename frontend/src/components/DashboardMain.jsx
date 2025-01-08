@@ -53,26 +53,26 @@ const DashboardMain = () => {
       color: "blue",
     },
     {
-      label: "Culvert Type",
-      value: "1,433",
+      label: "Culvert",
+      value: "17,452",
       icon: <WrenchIcon className="w-10 h-10 text-blue-500" />, // Wrench for construction/maintenance
       color: "blue",
     },
     {
       label: "PC Bridge",
-      value: "17,302",
+      value: "470",
       icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />, // Building Office Icon, representing large structures like bridges
       color: "blue",
     },
     {
       label: "Arch",
-      value: "14",
+      value: "31",
       icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />, // Document icon to represent an architectural design
       color: "blue",
     },
     {
       label: "Underpass",
-      value: "8",
+      value: "752",
       icon: <HomeIcon className="w-10 h-10 text-blue-500" />, // Home icon representing an underpass construction type
       color: "blue",
     },
@@ -82,31 +82,31 @@ const DashboardMain = () => {
   const inspectedCards = [
     {
       label: "Total",
-      value: "18,805",
+      value: "1,501",
       icon: <UserIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Culvert Type",
-      value: "1,433",
+      label: "Culvert",
+      value: "1,102",
       icon: <WrenchIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "PC Bridge",
-      value: "17,302",
+      value: "347",
       icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Arch",
-      value: "14",
+      value: "20",
       icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Underpass",
-      value: "8",
+      value: "32",
       icon: <HomeIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
