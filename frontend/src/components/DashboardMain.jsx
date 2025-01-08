@@ -42,31 +42,31 @@ const DashboardMain = () => {
   // Data for Structure cards
   const structureCards = [
     {
-      label: "Total Structures",
+      label: "Total",
       value: "18,805",
       icon: <UserIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Bridges",
+      label: "Culvert Type",
       value: "1,433",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Culverts",
+      label: "PC Bridge",
       value: "17,302",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Underpasses",
+      label: "Arch",
       value: "14",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Tunnels",
+      label: "Underpass",
       value: "8",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
@@ -199,7 +199,7 @@ const DashboardMain = () => {
       </div>
 
       {/* Structure Section */}
-      <div className="mb-4">
+      <div className="mb-2">
         <h3 className="text-xl font-semibold text-gray-700">
           Structures
         </h3>
@@ -211,7 +211,7 @@ const DashboardMain = () => {
       </div>
 
       {/* Evaluation Section */}
-      <div className="mb-4">
+      <div className="mb-2">
         <h3 className="text-xl font-semibold text-gray-700">
           Evaluation
         </h3>
