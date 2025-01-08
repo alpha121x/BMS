@@ -7,6 +7,8 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = location.pathname;
+  const [isReportsDropdownOpen, setIsReportsDropdownOpen] = useState(false);
+  const [isSetupDropdownOpen, setIsSetupDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const reportsRef = useRef(null);
@@ -23,6 +25,17 @@ const Header = () => {
 
   const userToken = JSON.parse(localStorage.getItem("user"));
   const userName = userToken?.username;
+
+  const isReportsActive = activeTab.startsWith("/Reports");
+  const isSetupActive = activeTab.startsWith("/Setup");
+
+  const toggleReportsDropdown = () => {
+    setIsReportsDropdownOpen((prev) => !prev);
+  };
+
+  const toggleSetupDropdown = () => {
+    setIsSetupDropdownOpen((prev) => !prev);
+  };
 
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen((prev) => !prev);
@@ -73,6 +86,109 @@ const Header = () => {
           >
             Dashboard
           </Link>
+
+          {/* Reports Dropdown */}
+          <div className="relative" ref={reportsRef}>
+            <button
+              onClick={toggleReportsDropdown}
+              className={`py-2 px-4 rounded font-bold transition duration-300 ${
+                isReportsActive
+                  ? "bg-blue-500 text-white"
+                  : "hover:bg-green-100 text-blue-500"
+              }`}
+            >
+              Reports
+            </button>
+            {isReportsDropdownOpen && (
+              <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
+                <Link
+                  to="/Reports/BridgeListing"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Bridge Wise Listing
+                </Link>
+                <Link
+                  to="/Reports/CategorySummary"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Category Wise Summary
+                </Link>
+                <Link
+                  to="/Reports/DistrictCategory"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  District Wise Category
+                </Link>
+                <Link
+                  to="/Reports/BridgeCategory"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Bridge Wise Category
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Setup Dropdown */}
+          <div className="relative" ref={setupRef}>
+            <button
+              onClick={toggleSetupDropdown}
+              className={`py-2 px-4 rounded font-bold transition duration-300 ${
+                isSetupActive
+                  ? "bg-blue-500 text-white"
+                  : "hover:bg-green-100 text-blue-500"
+              }`}
+            >
+              Setup Listing
+            </button>
+            {isSetupDropdownOpen && (
+              <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
+                <Link
+                  to="/SetupListing/DamageRanks"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Damage Ranks
+                </Link>
+                <Link
+                  to="/SetupListing/Elements"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Elements
+                </Link>
+                <Link
+                  to="/SetupListing/DamageTypes"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Damage Types
+                </Link>
+                <Link
+                  to="/SetupListing/RoadClassifications"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Road Classifications
+                </Link>
+                <Link
+                  to="/SetupListing/CarriagewayTypes"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Carriageway Types
+                </Link>
+                <Link
+                  to="/SetupListing/BridgeAgeFactors"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Bridge Age Factors
+                </Link>
+                <Link
+                  to="/SetupListing/FactorCrossings"
+                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
+                >
+                  Factors for Crossings
+                </Link>
+              </div>
+            )}
+          </div>
+
 
           {/* Profile Dropdown */}
           <div className="relative inline-block text-left" ref={profileRef}>
