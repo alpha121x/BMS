@@ -448,6 +448,45 @@ app.get("/api/bridgecoordinates", async (req, res) => {
   }
 });
 
+app.get("/api/structure_type", async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, structure_type FROM bms.tbl_structure_types'
+    );
+    res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
+
+app.get("/api/construction_type", async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, construction_type FROM bms.tbl_construction_types'
+    );
+    res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
+
+
 
 // API route to get Zones data
 app.get("/api/zones", async (req, res) => {
