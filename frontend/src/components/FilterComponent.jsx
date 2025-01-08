@@ -4,46 +4,18 @@ import { BASE_URL } from "./config";
 const FilterComponent = ({
   setSelectedDistrict,
   setSelectedZone,
-  setBridgeMinLength,
-  setBridgeMaxLength,
-  setSpanMinLength,
-  setSpanMaxLength,
-  setStructureType,
-  setConstructionType,
-  setCategory,
-  setNoOfSpan,
-  setEvaluationStatus,
-  setInspectionStatus,
-  setMinYear,
-  setMaxYear,
+  setStartDate,
 }) => {
   const [districts, setDistricts] = useState([]);
   const [zones, setZones] = useState([]);
-  const [structureTypes, setStructureTypes] = useState([]);
-  const [constructionTypes, setConstructionTypes] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [evaluationStatuses, setEvaluationStatuses] = useState([]);
-  const [inspectionStatuses, setInspectionStatuses] = useState([]);
-
   const [districtId, setDistrictId] = useState("");
-  const [zoneId, setZoneId] = useState("");
-  const [minBridgeLength, setMinBridgeLength] = useState("");
-  const [maxBridgeLength, setMaxBridgeLength] = useState("");
-  const [minSpanLength, setMinSpanLength] = useState("");
-  const [maxSpanLength, setMaxSpanLength] = useState("");
-  const [structureType, setStructureTypeState] = useState("");
-  const [constructionType, setConstructionTypeState] = useState("");
-  const [category, setCategoryState] = useState("");
-  const [noOfSpan, setNoOfSpanState] = useState("");
-  const [evaluationStatus, setEvaluationStatusState] = useState("");
-  const [inspectionStatus, setInspectionStatusState] = useState("");
-  const [minYear, setMinYearState] = useState("");
-  const [maxYear, setMaxYearState] = useState("");
+  const [zoneId, setZoneId] = useState(""); // Added state for zone
+  const [startDate, setStartDateState] = useState("");
 
+  // Fetch districts and zones
   useEffect(() => {
-    const fetchFilters = async () => {
+    const fetchDistrictsAndZones = async () => {
       try {
-        // Fetching districts and zones
         const districtResponse = await fetch(`${BASE_URL}/api/districts`);
         const districtData = await districtResponse.json();
         setDistricts(districtData);
@@ -51,66 +23,64 @@ const FilterComponent = ({
         const zoneResponse = await fetch(`${BASE_URL}/api/zones`);
         const zoneData = await zoneResponse.json();
         setZones(zoneData);
-
-        // Fetch additional filters
-        const structureTypeResponse = await fetch(
-          `${BASE_URL}/api/structure-types`
-        );
-        const structureTypeData = await structureTypeResponse.json();
-        setStructureTypes(structureTypeData);
-
-        const constructionTypeResponse = await fetch(
-          `${BASE_URL}/api/construction-types`
-        );
-        const constructionTypeData = await constructionTypeResponse.json();
-        setConstructionTypes(constructionTypeData);
-
-        const categoryResponse = await fetch(`${BASE_URL}/api/categories`);
-        const categoryData = await categoryResponse.json();
-        setCategories(categoryData);
-
-        const evaluationStatusResponse = await fetch(
-          `${BASE_URL}/api/evaluation-statuses`
-        );
-        const evaluationStatusData = await evaluationStatusResponse.json();
-        setEvaluationStatuses(evaluationStatusData);
-
-        const inspectionStatusResponse = await fetch(
-          `${BASE_URL}/api/inspection-statuses`
-        );
-        const inspectionStatusData = await inspectionStatusResponse.json();
-        setInspectionStatuses(inspectionStatusData);
       } catch (error) {
-        console.error("Error fetching filters:", error);
+        console.error("Error fetching districts and zones:", error);
       }
     };
-
-    fetchFilters();
+    fetchDistrictsAndZones();
   }, []);
 
-  // Handle handlers for various inputs
-  const handleChange = (setter) => (e) => setter(e.target.value);
+  // Default date to current day
+  useEffect(() => {
+    if (!startDate) {
+      const today = new Date();
+      const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+      setStartDateState(formatDate(today));
+    }
+  }, [startDate]);
+
+  // Handlers for inputs
+  const handleDateChange = (e) => {
+    // console.log("Selected Date:", e.target.value);  // Log selected date
+    setStartDate(e.target.value);
+  };
+
+  // Handle zone change
+  const handleZoneChange = (e) => {
+    // console.log("Selected Zone:", e.target.value);  // Log selected zone
+    setZoneId(e.target.value);
+    setSelectedZone(e.target.value);  // Set the selected zone
+  };
+
+  // Handle district change
+  const handleDistrictChange = (e) => {
+    // console.log("Selected District:", e.target.value);  // Log selected district
+    setDistrictId(e.target.value);
+    setSelectedDistrict(e.target.value);  // Set the selected district
+  };
 
   return (
     <div className="p-4">
       {/* Zone Filter */}
       <div className="mb-4">
-        <label
-          htmlFor="zone-filter"
-          className="block text-gray-700 font-medium mb-1"
-        >
+        <label htmlFor="zone-filter" className="block text-gray-700 font-medium mb-1">
           Select Zone
         </label>
         <select
           id="zone-filter"
           className="w-full border rounded-md p-2 bg-gray-100"
-          value={zoneId}
-          onChange={handleChange(setZoneId)}
+          value={zoneId} // Added value to control the zone selection
+          onChange={handleZoneChange}
         >
           <option value="%">--All Zones--</option>
           {zones.map((zone) => (
-            <option key={zone.ZoneID} value={zone.ZoneID}>
-              {zone.ZoneName}
+            <option key={zone.id} value={zone.id}>
+              {zone.zone}
             </option>
           ))}
         </select>
@@ -118,258 +88,35 @@ const FilterComponent = ({
 
       {/* District Filter */}
       <div className="mb-4">
-        <label
-          htmlFor="district-filter"
-          className="block text-gray-700 font-medium mb-1"
-        >
+        <label htmlFor="district-filter" className="block text-gray-700 font-medium mb-1">
           Select District
         </label>
         <select
           id="district-filter"
           className="w-full border rounded-md p-2 bg-gray-100"
           value={districtId}
-          onChange={handleChange(setDistrictId)}
+          onChange={handleDistrictChange}
         >
           <option value="%">--All Districts--</option>
           {districts.map((district) => (
-            <option key={district.DistrictsID} value={district.DistrictsID}>
-              {district.DistrictsName}
+            <option key={district.id} value={district.id}>
+              {district.district}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Bridge Min Length Filter */}
+      {/* Date Filter */}
       <div className="mb-4">
-        <label
-          htmlFor="bridge-min-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Bridge Min Length
+        <label htmlFor="date-filter" className="block text-gray-700 font-medium mb-1">
+          Select Date
         </label>
         <input
-          id="bridge-min-length"
-          type="number"
+          id="date-filter"
+          type="date"
           className="w-full border rounded-md p-2 bg-gray-100"
-          value={minBridgeLength}
-          onChange={handleChange(setMinBridgeLength)}
-        />
-      </div>
-
-      {/* Bridge Max Length Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="bridge-max-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Bridge Max Length
-        </label>
-        <input
-          id="bridge-max-length"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={maxBridgeLength}
-          onChange={handleChange(setMaxBridgeLength)}
-        />
-      </div>
-
-      {/* Span Min Length Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="span-min-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Span Min Length
-        </label>
-        <input
-          id="span-min-length"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={minSpanLength}
-          onChange={handleChange(setMinSpanLength)}
-        />
-      </div>
-
-      {/* Span Max Length Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="span-max-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Span Max Length
-        </label>
-        <input
-          id="span-max-length"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={maxSpanLength}
-          onChange={handleChange(setMaxSpanLength)}
-        />
-      </div>
-
-      {/* Structure Type Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="structure-type"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Structure Type
-        </label>
-        <select
-          id="structure-type"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={structureType}
-          onChange={handleChange(setStructureTypeState)}
-        >
-          <option value="%">--All Structure Types--</option>
-          {structureTypes.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Construction Type Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="construction-type"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Construction Type
-        </label>
-        <select
-          id="construction-type"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={constructionType}
-          onChange={handleChange(setConstructionTypeState)}
-        >
-          <option value="%">--All Construction Types--</option>
-          {constructionTypes.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Category Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="category"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Category
-        </label>
-        <select
-          id="category"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={category}
-          onChange={handleChange(setCategoryState)}
-        >
-          <option value="%">--All Categories--</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* No of Span Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="no-of-span"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          No of Span
-        </label>
-        <input
-          id="no-of-span"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={noOfSpan}
-          onChange={handleChange(setNoOfSpanState)}
-        />
-      </div>
-
-      {/* Evaluation Status Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="evaluation-status"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Evaluation Status
-        </label>
-        <select
-          id="evaluation-status"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={evaluationStatus}
-          onChange={handleChange(setEvaluationStatusState)}
-        >
-          <option value="%">--All Evaluation Statuses--</option>
-          {evaluationStatuses.map((status) => (
-            <option key={status.id} value={status.id}>
-              {status.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Inspection Status Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="inspection-status"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Inspection Status
-        </label>
-        <select
-          id="inspection-status"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={inspectionStatus}
-          onChange={handleChange(setInspectionStatusState)}
-        >
-          <option value="%">--All Inspection Statuses--</option>
-          {inspectionStatuses.map((status) => (
-            <option key={status.id} value={status.id}>
-              {status.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Min Year Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="min-year"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Min Year
-        </label>
-        <input
-          id="min-year"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={minYear}
-          onChange={handleChange(setMinYearState)}
-        />
-      </div>
-
-      {/* Max Year Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="max-year"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Max Year
-        </label>
-        <input
-          id="max-year"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={maxYear}
-          onChange={handleChange(setMaxYearState)}
+          value={startDate || ""}
+          onChange={handleDateChange}
         />
       </div>
     </div>
