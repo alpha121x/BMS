@@ -6,11 +6,11 @@ import {
 import FilterComponent from "./FilterComponent";
 import Header from "./Header";
 import Footer from "./Footer";
-import InventoryInfo from "./InventoryInfo";
+import InventoryInfoDashboard from "./InventoryInfoDashboard";
 import { useLocation } from "react-router-dom";
-import InspectionList from "./InspectionList";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import InspectionListDashboard from "./InspectionListDashboard";
 
 const BridgeInfoDashboard = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -148,7 +148,7 @@ const BridgeInfoDashboard = () => {
           {/* Header Section */}
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-2xl font-semibold text-gray-500 mb-1">
-              Evaluation Module
+              Dashboard Overview
             </h2>
 
             <button
@@ -290,7 +290,7 @@ const BridgeInfoDashboard = () => {
           <div className="mt-2 flex justify-center">
             <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
               {!showBridgeInspectionList && bridgeData && (
-                <InventoryInfo inventoryData={bridgeData} />
+                <InventoryInfoDashboard inventoryData={bridgeData} />
               )}
             </div>
           </div>
@@ -299,7 +299,7 @@ const BridgeInfoDashboard = () => {
           {showBridgeInspectionList && (
             <div className="mt-2 flex justify-center">
               <div className="w-full sm:w-3/4 md:w-3/4 lg:w-3/4">
-                <InspectionList bridgeId={bridgeData?.ObjectID} />
+                <InspectionListDashboard bridgeId={bridgeData?.ObjectID} />
               </div>
             </div>
           )}
