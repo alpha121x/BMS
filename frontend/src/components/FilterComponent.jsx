@@ -79,8 +79,8 @@ const FilterComponent = ({
         >
           <option value="%">--All Zones--</option>
           {zones.map((zone) => (
-            <option key={zone.id} value={zone.id}>
-              {zone.zone}
+            <option key={zone.ZoneID} value={zone.ZoneID}>
+              {zone.ZoneName}
             </option>
           ))}
         </select>
@@ -99,8 +99,8 @@ const FilterComponent = ({
         >
           <option value="%">--All Districts--</option>
           {districts.map((district) => (
-            <option key={district.id} value={district.id}>
-              {district.district}
+            <option key={district.DistrictsID} value={district.DistrictsID}>
+              {district.DistrictsName}
             </option>
           ))}
         </select>
