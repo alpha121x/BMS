@@ -143,7 +143,7 @@ const DashboardMain = () => {
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-500 mb-1">
           Dashboard Overview
         </h2>
