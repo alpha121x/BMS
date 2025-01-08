@@ -14,6 +14,18 @@ import BridgesListDashboard from "./BirdgesListDashboard";
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
   const [selectedZone, setSelectedZone] = useState("%");
+  const [minBridgeLength, setMinBridgeLength] = useState('');
+  const [maxBridgeLength, setMaxBridgeLength] = useState('');
+  const [minSpanLength, setMinSpanLength] = useState('');
+  const [maxSpanLength, setMaxSpanLength] = useState('');
+  const [structureType, setStructureType] = useState('');
+  const [constructionType, setConstructionType] = useState('');
+  const [category, setCategory] = useState('');
+  const [noOfSpan, setNoOfSpan] = useState('');
+  const [evaluationStatus, setEvaluationStatus] = useState('');
+  const [inspectionStatus, setInspectionStatus] = useState('');
+  const [minYear, setMinYear] = useState('');
+  const [maxYear, setMaxYear] = useState('');
 
   const [infrastructureData, setInfrastructureData] = useState([
     14, 1433, 17302,
@@ -192,8 +204,20 @@ const DashboardMain = () => {
 
         <div className="offcanvas-body">
           <FilterComponent
-            setSelectedDistrict={setSelectedDistrict}
-            setSelectedZone={setSelectedZone}
+             setSelectedDistrict={setSelectedDistrict}
+             setSelectedZone={setSelectedZone}
+             setMinBridgeLength={setMinBridgeLength}
+             setMaxBridgeLength={setMaxBridgeLength}
+             setMinSpanLength={setMinSpanLength}
+             setMaxSpanLength={setMaxSpanLength}
+             setStructureType={setStructureType}
+             setConstructionType={setConstructionType}
+             setCategory={setCategory}
+             setNoOfSpan={setNoOfSpan}
+             setEvaluationStatus={setEvaluationStatus}
+             setInspectionStatus={setInspectionStatus}
+             setMinYear={setMinYear}
+             setMaxYear={setMaxYear}
           />
         </div>
       </div>
