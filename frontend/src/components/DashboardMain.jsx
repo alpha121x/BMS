@@ -12,7 +12,9 @@ const DashboardMain = () => {
   const [districtId, setDistrictId] = useState(null);
   const [selectedZone, setSelectedZone] = useState("%");
 
-  const [infrastructureData, setInfrastructureData] = useState([14, 1433, 17302]);
+  const [infrastructureData, setInfrastructureData] = useState([
+    14, 1433, 17302,
+  ]);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -38,7 +40,7 @@ const DashboardMain = () => {
   };
 
   // Data for Structure cards
-  const structureData = [
+  const structureCards = [
     {
       label: "Total Structures",
       value: "18,805",
@@ -52,57 +54,70 @@ const DashboardMain = () => {
       color: "blue",
     },
     {
-      label: "Culvert",
+      label: "Culverts",
       value: "17,302",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Underpass",
+      label: "Underpasses",
       value: "14",
+      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Tunnels",
+      value: "8",
       icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
   ];
 
   // Data for Evaluation cards
-  const evaluationData = [
+  const evaluationCards = [
     {
-      label: "Bridges Checked",
+      label: "Inspections Completed",
       value: "1,511",
       icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
       color: "green",
     },
     {
-      label: "Total Checkings",
-      value: "23,578",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
+      label: "Pending Inspections",
+      value: "120",
+      icon: <DocumentIcon className="w-10 h-10 text-yellow-500" />,
+      color: "yellow",
     },
     {
-      label: "Inspections Pending",
-      value: "1,200",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
+      label: "Critical Structures",
+      value: "15",
+      icon: <DocumentIcon className="w-10 h-10 text-red-500" />,
+      color: "red",
     },
     {
-      label: "Defects Found",
-      value: "567",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
+      label: "Maintenance Scheduled",
+      value: "30",
+      icon: <DocumentIcon className="w-10 h-10 text-purple-500" />,
+      color: "purple",
+    },
+    {
+      label: "Reports Generated",
+      value: "200",
+      icon: <DocumentIcon className="w-10 h-10 text-indigo-500" />,
+      color: "indigo",
     },
   ];
 
   // Helper to assign border classes based on card color
   const getBorderClass = (color) => {
-    switch (color) {
-      case "blue":
-        return "border-blue-400 text-blue-500";
-      case "green":
-        return "border-green-400 text-green-500";
-      default:
-        return "border-gray-400 text-gray-500";
-    }
+    const colorClasses = {
+      blue: "border-blue-400 text-blue-500",
+      green: "border-green-400 text-green-500",
+      yellow: "border-yellow-400 text-yellow-500",
+      red: "border-red-400 text-red-500",
+      purple: "border-purple-400 text-purple-500",
+      indigo: "border-indigo-400 text-indigo-500",
+    };
+    return colorClasses[color] || "border-gray-400 text-gray-500";
   };
 
   // Card Component
@@ -185,40 +200,24 @@ const DashboardMain = () => {
 
       {/* Structure Section */}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-600 mb-2">Structure</h3>
-        <div className="grid grid-cols-12 gap-2">
-          {structureData.map((card, index) => (
-            <div
-              key={index}
-              className="col-span-12 sm:col-span-6 md:col-span-3"
-            >
-              <Card
-                label={card.label}
-                value={card.value}
-                icon={card.icon}
-                color={card.color}
-              />
-            </div>
+        <h3 className="text-xl font-semibold text-gray-700">
+          Structures
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {structureCards.map((card, index) => (
+            <Card key={index} {...card} />
           ))}
         </div>
       </div>
 
       {/* Evaluation Section */}
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-600 mb-2">Evaluation</h3>
-        <div className="grid grid-cols-12 gap-2">
-          {evaluationData.map((card, index) => (
-            <div
-              key={index}
-              className="col-span-12 sm:col-span-6 md:col-span-3"
-            >
-              <Card
-                label={card.label}
-                value={card.value}
-                icon={card.icon}
-                color={card.color}
-              />
-            </div>
+        <h3 className="text-xl font-semibold text-gray-700">
+          Evaluation
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {evaluationCards.map((card, index) => (
+            <Card key={index} {...card} />
           ))}
         </div>
       </div>
@@ -226,7 +225,10 @@ const DashboardMain = () => {
       {/* Map and Pie Chart Layout */}
       <div className="grid grid-cols-12 gap-2 mt-6">
         <div className="col-span-12 lg:col-span-9">
-          <Map selectedDistrict={selectedDistrict} selectedZone={selectedZone} />
+          <Map
+            selectedDistrict={selectedDistrict}
+            selectedZone={selectedZone}
+          />
         </div>
         <div className="col-span-12 lg:col-span-3">
           <div
