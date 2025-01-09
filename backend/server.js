@@ -38,8 +38,8 @@ app.post("/api/login", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, phone_num, email, role_id, is_active
-    FROM public.tbl_users
+    SELECT id, username, password, phone_num, email, id, is_active
+    FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
 `;
@@ -96,8 +96,8 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, phone_num, email, role_id, is_active
-    FROM public.tbl_users
+    SELECT id, username, password, phone_num, email, id, is_active
+    FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
 `;
@@ -147,102 +147,42 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
-// API endpoint to fetch bridge data with filtering by ZoneID and DistrictID
-app.get("/api/bridges", async (req, res) => {
-  const { district, zone } = req.query; // Receive 'district' and 'zone' from the query parameters
-
-  let queryParams = [];
-  let whereClauses = [];
-
-  // Add condition for ZoneID if provided
-  if (zone) {
-    queryParams.push(zone);
-    whereClauses.push(`"ZoneID"::text ILIKE $${queryParams.length}`);
-  }
-
-  // Add condition for DistrictID if provided
-  if (district) {
-    queryParams.push(district);
-    whereClauses.push(`"DistrictID"::text ILIKE $${queryParams.length}`);
-  }
-
-  // Base query with the new column names
-  let query = `
-    SELECT 
-      "ObjectID", 
-      "bridge_name", 
-      "BridgeCode", 
-      "RoadNumber", 
-      "StructureTypeID", 
-      "RouteID", 
-      "SurveyID", 
-      "PmsChainageStart", 
-      "PmsChainageEnd", 
-      "SurveyChainageStart", 
-      "SurveyChainageEnd", 
-      "PmsSectionID", 
-      "StructureNO", 
-      "ZoneID", 
-      "DistrictID", 
-      "RoadClassificationID", 
-      "RoadSurfaceTypeID", 
-      "CarriagewayType", 
-      "DirectionID", 
-      "ConstructionTypeID", 
-      "NumberOfSpan", 
-      "SpanLengthM", 
-      "WidthOfStructureM", 
-      "ConstructionYear", 
-      "LastMaintenanceDate", 
-      "DataSource", 
-      "Date", 
-      "XCentroID", 
-      "YCentroID", 
-      "CwdRoadCode", 
-      "ManageOrganizationID", 
-      "ManageStaffID", 
-      "IsDrawingsExist", 
-      "DrawingRemarks", 
-      "TrafficVolume", 
-      "LargeVehicleTrafficVolume", 
-      "StrVisualCondition", 
-      "VisualConditionID", 
-      "InspectionEquipmentID", 
-      "InspectionEquipmentRemarks", 
-      "BridgeUnderSituationID", 
-      "BridgeUnderSituationRemarks", 
-      "TestOrganizationID", 
-      "TestStaffID", 
-      "ApprovedOrganizationID", 
-      "ApprovedUserID", 
-      "Remarks", 
-      "DeleteFlag", 
-      "InYMD", 
-      "UpYMD", 
-      "LengthOfStructureM"
-    FROM bms.tbl_bridges
-  `;
-
-  // Add WHERE clause if filters exist
-  if (whereClauses.length > 0) {
-    query += ` WHERE ${whereClauses.join(" AND ")}`;
-  }
-
-  query += `
-    ORDER BY "ObjectID" ASC;
-  `;
-
+// Define the API endpoint to get data from `bms.tbl_bms_master_data`
+app.get('/api/bridges', async (req, res) => {
   try {
-    // Query execution with parameters
-    const result = await pool.query(query, queryParams);
+    // Extract pagination parameters from the query string
+    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
+    const limit = parseInt(req.query.limit) || 0; // Default to no limit (0) if not provided
+    const offset = (page - 1) * limit;
 
-    // Send the result rows as JSON
-    res.status(200).json(result.rows);
+    // Build the query based on pagination
+    let query = `
+      SELECT 
+        uu_bms_id,structure_type_id, structure_type, 
+        road_name, road_name_cwd, route_id, survey_id, structure_no, surveyor_name, 
+        district_id, district, road_classification, road_surface_type, carriageway_type, 
+        direction, visual_condition, construction_type_id, construction_type, 
+        no_of_span, span_length_m, structure_width_m, construction_year, 
+        last_maintenance_date, remarks, is_surveyed, image_1, image_2, image_3, 
+        image_4, image_5, x_centroid, y_centroid, images_spans
+      FROM bms.tbl_bms_master_data`;
+
+    // Add LIMIT and OFFSET if a limit is provided
+    if (limit > 0) {
+      query += ` LIMIT ${limit} OFFSET ${offset}`;
+    }
+
+    // Execute the query
+    const result = await pool.query(query);
+
+    // Return the result rows as an array
+    const dataArray = result.rows;
+
+    // Send the array as the response
+    res.json(dataArray);
   } catch (error) {
-    console.error("Error fetching bridge data:", error.message);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching bridge data." });
+    console.error('Error fetching data:', error);
+    res.status(500).json({ success: false, message: 'Error fetching data from the database' });
   }
 });
 
@@ -315,7 +255,6 @@ app.get("/api/get-inspections", async (req, res) => {
   }
 });
 
-
 // API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
 app.get("/api/bridgecoordinates", async (req, res) => {
   const { 
@@ -386,7 +325,7 @@ app.get("/api/bridgecoordinates", async (req, res) => {
   }
 });
 
-app.get("/api/structure_type", async (req, res) => {
+app.get("/api/structure-types", async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT id, structure_type FROM bms.tbl_structure_types'
@@ -405,7 +344,7 @@ app.get("/api/structure_type", async (req, res) => {
 });
 
 
-app.get("/api/construction_type", async (req, res) => {
+app.get("/api/construction-types", async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT id, construction_type FROM bms.tbl_construction_types'

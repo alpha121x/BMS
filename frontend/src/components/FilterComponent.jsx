@@ -24,10 +24,10 @@ const FilterComponent = ({
   const [inspectionStatuses, setInspectionStatuses] = useState([]);
 
   const [districtId, setDistrictId] = useState("");
-  const [minBridgeLength, setMinBridgeLength] = useState("");
-  const [maxBridgeLength, setMaxBridgeLength] = useState("");
-  const [minSpanLength, setMinSpanLength] = useState("");
-  const [maxSpanLength, setMaxSpanLength] = useState("");
+  const [minBridgeLength, setMinBridgeLengthState] = useState("");
+  const [maxBridgeLength, setMaxBridgeLengthState] = useState("");
+  const [minSpanLength, setMinSpanLengthState] = useState("");
+  const [maxSpanLength, setMaxSpanLengthState] = useState("");
   const [structureType, setStructureTypeState] = useState("");
   const [constructionType, setConstructionTypeState] = useState("");
   const [category, setCategoryState] = useState("");
@@ -40,39 +40,91 @@ const FilterComponent = ({
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        // Fetching districts and zones
+        // Fetching districts
         const districtResponse = await fetch(`${BASE_URL}/api/districts`);
         const districtData = await districtResponse.json();
-        setDistricts(districtData);
+        setDistricts(
+          districtData.map((district) => ({
+            id: district.id,
+            district: district.district || district.name, // Handle different property names
+          }))
+        );
 
-        // Fetch additional filters
+        // Fetching structure types
         const structureTypeResponse = await fetch(
           `${BASE_URL}/api/structure-types`
         );
-        const structureTypeData = await structureTypeResponse.json();
-        setStructureTypes(structureTypeData);
+        const structureTypesData = await structureTypeResponse.json();
 
+        // Check if the response contains a valid 'data' array
+        if (Array.isArray(structureTypesData.data)) {
+          setStructureTypes(
+            structureTypesData.data.map((type) => ({
+              id: type.id,
+              name: type.structure_type || type.name, // Normalize the property name
+            }))
+          );
+        } else {
+          console.error(
+            'Expected "data" to be an array, but got:',
+            structureTypesData.data
+          );
+        }
+
+        // Fetching construction types
         const constructionTypeResponse = await fetch(
           `${BASE_URL}/api/construction-types`
         );
         const constructionTypeData = await constructionTypeResponse.json();
-        setConstructionTypes(constructionTypeData);
 
+        // Check if the response contains a valid 'data' array
+        if (Array.isArray(constructionTypeData.data)) {
+          setConstructionTypes(
+            constructionTypeData.data.map((type) => ({
+              id: type.id,
+              name: type.construction_type || type.name, // Normalize the property name
+            }))
+          );
+        } else {
+          console.error(
+            'Expected "data" to be an array, but got:',
+            constructionTypeData.data
+          );
+        }
+
+        // Fetching categories
         const categoryResponse = await fetch(`${BASE_URL}/api/categories`);
         const categoryData = await categoryResponse.json();
-        setCategories(categoryData);
+        setCategories(
+          categoryData.map((cat) => ({
+            id: cat.id,
+            name: cat.category || cat.name, // Normalize the property name
+          }))
+        );
 
+        // Fetching evaluation statuses
         const evaluationStatusResponse = await fetch(
           `${BASE_URL}/api/evaluation-statuses`
         );
         const evaluationStatusData = await evaluationStatusResponse.json();
-        setEvaluationStatuses(evaluationStatusData);
+        setEvaluationStatuses(
+          evaluationStatusData.map((status) => ({
+            id: status.id,
+            name: status.evaluation_status || status.name, // Normalize the property name
+          }))
+        );
 
+        // Fetching inspection statuses
         const inspectionStatusResponse = await fetch(
           `${BASE_URL}/api/inspection-statuses`
         );
         const inspectionStatusData = await inspectionStatusResponse.json();
-        setInspectionStatuses(inspectionStatusData);
+        setInspectionStatuses(
+          inspectionStatusData.map((status) => ({
+            id: status.id,
+            name: status.inspection_status || status.name, // Normalize the property name
+          }))
+        );
       } catch (error) {
         console.error("Error fetching filters:", error);
       }
@@ -86,7 +138,6 @@ const FilterComponent = ({
 
   return (
     <div className="p-4">
-      
       {/* District Filter */}
       <div className="mb-4">
         <label
@@ -102,80 +153,12 @@ const FilterComponent = ({
           onChange={handleChange(setDistrictId)}
         >
           <option value="%">--All Districts--</option>
-          {districts.map((district) => (
-            <option key={district.DistrictsID} value={district.DistrictsID}>
-              {district.DistrictsName}
+          {districts.map((district, index) => (
+            <option key={district.id || index} value={district.id}>
+              {district.district}
             </option>
           ))}
         </select>
-      </div>
-
-      {/* Bridge Min Length Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="bridge-min-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Bridge Min Length
-        </label>
-        <input
-          id="bridge-min-length"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={minBridgeLength}
-          onChange={handleChange(setMinBridgeLength)}
-        />
-      </div>
-
-      {/* Bridge Max Length Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="bridge-max-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Bridge Max Length
-        </label>
-        <input
-          id="bridge-max-length"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={maxBridgeLength}
-          onChange={handleChange(setMaxBridgeLength)}
-        />
-      </div>
-
-      {/* Span Min Length Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="span-min-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Span Min Length
-        </label>
-        <input
-          id="span-min-length"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={minSpanLength}
-          onChange={handleChange(setMinSpanLength)}
-        />
-      </div>
-
-      {/* Span Max Length Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="span-max-length"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Span Max Length
-        </label>
-        <input
-          id="span-max-length"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={maxSpanLength}
-          onChange={handleChange(setMaxSpanLength)}
-        />
       </div>
 
       {/* Structure Type Filter */}
@@ -193,8 +176,8 @@ const FilterComponent = ({
           onChange={handleChange(setStructureTypeState)}
         >
           <option value="%">--All Structure Types--</option>
-          {structureTypes.map((type) => (
-            <option key={type.id} value={type.id}>
+          {structureTypes.map((type, index) => (
+            <option key={type.id || index} value={type.id}>
               {type.name}
             </option>
           ))}
@@ -227,41 +210,24 @@ const FilterComponent = ({
       {/* Category Filter */}
       <div className="mb-4">
         <label
-          htmlFor="category"
+          htmlFor="category-filter"
           className="block text-gray-700 font-medium mb-1"
         >
           Category
         </label>
         <select
-          id="category"
+          id="category-filter"
           className="w-full border rounded-md p-2 bg-gray-100"
           value={category}
           onChange={handleChange(setCategoryState)}
         >
           <option value="%">--All Categories--</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
             </option>
           ))}
         </select>
-      </div>
-
-      {/* No of Span Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="no-of-span"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          No. of Span
-        </label>
-        <input
-          id="no-of-span"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={noOfSpan}
-          onChange={handleChange(setNoOfSpanState)}
-        />
       </div>
 
       {/* Evaluation Status Filter */}
@@ -310,38 +276,106 @@ const FilterComponent = ({
         </select>
       </div>
 
-      {/* Min Year Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="min-year"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Min Year
-        </label>
-        <input
-          id="min-year"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={minYear}
-          onChange={handleChange(setMinYearState)}
-        />
+      {/* Min and Max Year Filters */}
+      <div className="flex mb-4 space-x-4">
+        <div className="flex-1">
+          <label
+            htmlFor="min-year"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Min Year
+          </label>
+          <input
+            id="min-year"
+            type="number"
+            className="w-full border rounded-md p-2 bg-gray-100"
+            value={minYear}
+            onChange={handleChange(setMinYearState)}
+          />
+        </div>
+        <div className="flex-1">
+          <label
+            htmlFor="max-year"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Max Year
+          </label>
+          <input
+            id="max-year"
+            type="number"
+            className="w-full border rounded-md p-2 bg-gray-100"
+            value={maxYear}
+            onChange={handleChange(setMaxYearState)}
+          />
+        </div>
       </div>
 
-      {/* Max Year Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="max-year"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Max Year
-        </label>
-        <input
-          id="max-year"
-          type="number"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={maxYear}
-          onChange={handleChange(setMaxYearState)}
-        />
+      {/* Min and Max Bridge Length Filters */}
+      <div className="flex mb-4 space-x-4">
+        <div className="flex-1">
+          <label
+            htmlFor="min-bridge-length"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Min Bridge Length
+          </label>
+          <input
+            id="min-bridge-length"
+            type="number"
+            className="w-full border rounded-md p-2 bg-gray-100"
+            value={minBridgeLength}
+            onChange={handleChange(setMinBridgeLengthState)}
+          />
+        </div>
+        <div className="flex-1">
+          <label
+            htmlFor="max-bridge-length"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Max Bridge Length
+          </label>
+          <input
+            id="max-bridge-length"
+            type="number"
+            className="w-full border rounded-md p-2 bg-gray-100"
+            value={maxBridgeLength}
+            onChange={handleChange(setMaxBridgeLengthState)}
+          />
+        </div>
+      </div>
+
+      {/* Min and Max Span Length Filters */}
+      <div className="flex mb-4 space-x-4">
+        <div className="flex-1">
+          <label
+            htmlFor="min-span-length"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Min Span Length
+          </label>
+          <input
+            id="min-span-length"
+            type="number"
+            className="w-full border rounded-md p-2 bg-gray-100"
+            value={minSpanLength}
+            onChange={handleChange(setMinSpanLengthState)}
+          />
+        </div>
+        <div className="flex-1">
+          <label
+            htmlFor="max-span-length"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Max Span Length
+          </label>
+          <input
+            id="max-span-length"
+            type="number"
+            className="w-full border rounded-md p-2 bg-gray-100"
+            value={maxSpanLength}
+            onChange={handleChange(setMaxSpanLengthState)}
+          />
+        </div>
       </div>
 
       {/* Apply Button */}

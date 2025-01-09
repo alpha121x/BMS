@@ -31,7 +31,7 @@ const BridgesListDashboard = ({ selectedDistrict}) => {
       // Set table data and extract the total count
       setTableData(data);
       if (data.length > 0) {
-        const lastBridgeId = data[data.length - 1]?.ObjectID || "N/A";
+        const lastBridgeId = data[data.length - 1]?.Objectid || "N/A";
         setBridgeCount(lastBridgeId); // Assuming this is the correct total count
       } else {
         setBridgeCount(0); // Default to 0 if no data
