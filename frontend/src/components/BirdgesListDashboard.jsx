@@ -49,6 +49,8 @@ const BridgesListDashboard = () => {
 
   const handleRowClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+    // console.log("Bridge data: ", bridge);
+    // return;
     const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
     window.location.href = editUrl;
   };

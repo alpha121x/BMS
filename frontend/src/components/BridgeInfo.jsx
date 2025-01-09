@@ -15,10 +15,6 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 const BridgeInfo = () => {
-  const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [startDate, setStartDate] = useState("");
-  const [districtId, setDistrictId] = useState(null);
-  const [selectedZone, setSelectedZone] = useState("%");
   const location = useLocation();
   const [bridgeData, setBridgeData] = useState(null);
   const navigate = useNavigate();

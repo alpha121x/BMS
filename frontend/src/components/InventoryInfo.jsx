@@ -2,11 +2,18 @@ import React, { useState } from "react";
 import { Row, Col, Form, Modal, Button } from "react-bootstrap";
 
 const InventoryInfo = ({ inventoryData }) => {
+  console.log("Inventory Data: ", inventoryData);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Ensure that 'inventoryData' contains a 'photos' field that holds an array of photo URLs
-  const photos = inventoryData?.Photos || []; // Use 'photos' from the data or an empty array if not available
+  // Extract photos from inventoryData
+  const photos = [
+    inventoryData?.image_1,
+    inventoryData?.image_2,
+    inventoryData?.image_3,
+    inventoryData?.image_4,
+    inventoryData?.image_5,
+  ].filter(Boolean); // Remove null or undefined values
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
@@ -28,34 +35,28 @@ const InventoryInfo = ({ inventoryData }) => {
           <Form>
             <Row>
               {[
-                { label: "Bridge ID", field: "ObjectID" },
-                { label: "Bridge Name", field: "BridgeName" },
-                { label: "Structure Type", field: "StructureType" },
-                { label: "Construction Year", field: "ConstructionYear" },
-                { label: "Zone", field: "Zone" },
-                { label: "District", field: "District" },
-                { label: "Road", field: "Road" },
-                { label: "Construction Type", field: "ConstructionType" },
-                { label: "Survey ID", field: "SurveyID" },
-                {
-                  label: "Road Classification ID",
-                  field: "RoadClassificationID",
-                },
-                { label: "Carriageway Type", field: "CarriagewayType" },
-                { label: "Road Surface Type", field: "RoadSurfaceType" },
-                { label: "Road Classification", field: "RoadClassification" },
-                { label: "Visual Condition", field: "VisualCondition" },
-                { label: "Direction", field: "Direction" },
+                { label: "Bridge ID", field: "uu_bms_id" },
+                { label: "Structure Type", field: "structure_type" },
+                { label: "Construction Year", field: "construction_year" },
+                { label: "District", field: "district" },
+                { label: "Road", field: "road_name" },
+                { label: "Construction Type", field: "construction_type" },
+                { label: "Survey ID", field: "survey_id" },
+                { label: "Road Classification", field: "road_classification" },
+                { label: "Carriageway Type", field: "carriageway_type" },
+                { label: "Road Surface Type", field: "road_surface_type" },
+                { label: "Visual Condition", field: "visual_condition" },
+                { label: "Direction", field: "direction" },
                 {
                   label: "Last Maintenance Date",
-                  field: "LastMaintenanceDate",
+                  field: "last_maintenance_date",
                   type: "date",
                 },
-                { label: "Width Structure", field: "WidthStructure" },
-                { label: "Span Length", field: "SpanLength" },
-                { label: "Spans", field: "Spans" },
-                { label: "Latitude", field: "Latitude" },
-                { label: "Longitude", field: "Longitude" },
+                { label: "Structure Width (m)", field: "structure_width_m" },
+                { label: "Span Length (m)", field: "span_length_m" },
+                { label: "Number of Spans", field: "no_of_span" },
+                { label: "Latitude", field: "x_centroid" },
+                { label: "Longitude", field: "y_centroid" },
               ].map(({ label, field }, index) => (
                 <Col key={index} md={6}>
                   <Form.Group controlId={`form${field}`}>
@@ -73,7 +74,6 @@ const InventoryInfo = ({ inventoryData }) => {
                 <Form.Group controlId="formPhotos">
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
-                    {/* Displaying photos from inventoryData */}
                     {photos.length > 0 ? (
                       photos.map((photo, index) => (
                         <div key={index} className="m-2">
@@ -104,7 +104,6 @@ const InventoryInfo = ({ inventoryData }) => {
         </div>
       </div>
 
-      {/* Photo Modal */}
       <Modal
         show={showPhotoModal}
         onHide={() => setShowPhotoModal(false)}
