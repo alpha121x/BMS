@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
 
-const BridgesListDashboard = ({ selectedDistrict}) => {
+const BridgesListDashboard = ({ selectedDistrict }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,13 +26,11 @@ const BridgesListDashboard = ({ selectedDistrict}) => {
       );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
-      // console.log(data);
 
       // Set table data and extract the total count
       setTableData(data);
       if (data.length > 0) {
-        const lastBridgeId = data[data.length - 1]?.Objectid || "N/A";
-        setBridgeCount(lastBridgeId); // Assuming this is the correct total count
+        setBridgeCount(data.length); // Use actual length of the fetched data
       } else {
         setBridgeCount(0); // Default to 0 if no data
       }
@@ -52,13 +50,8 @@ const BridgesListDashboard = ({ selectedDistrict}) => {
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleRowClick = (bridge) => {
-    // Serialize the bridge data object into a URL-safe string
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-
-    // Construct the URL with serialized data as a query parameter
     const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
-
-    // Navigate to the edit URL, passing the data through query parameters
     window.location.href = editUrl;
   };
 
@@ -129,11 +122,8 @@ const BridgesListDashboard = ({ selectedDistrict}) => {
       <div className="w-full mx-auto mt-2">
         <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Bridges List</div>{" "}
-            {/* Larger and bolder */}
+            <div className="text-2xl font-bold">Bridges List</div>
             <div className="text-sm font-medium mt-1 text-gray-700">
-              {" "}
-              {/* Smaller and lighter */}
               Total Bridges: {bridgeCount || 0}
             </div>
           </div>
@@ -195,19 +185,16 @@ const BridgesListDashboard = ({ selectedDistrict}) => {
                         onClick={() => handleRowClick(bridge)}
                         className="hover-row"
                       >
-                        <td>{bridge.District || "N/A"}</td>
-                        <td
-                          className="truncate-text"
-                          title={bridge.Road || "N/A"}
-                        >
-                          {bridge.Road || "N/A"}
+                        <td>{bridge.district || "N/A"}</td>
+                        <td className="truncate-text" title={bridge.road_name || "N/A"}>
+                          {bridge.road_name || "N/A"}
                         </td>
-                        <td>{bridge.StructureType || "N/A"}</td>
-                        <td>{bridge.BridgeName || "N/A"}</td>
+                        <td>{bridge.structure_type || "N/A"}</td>
+                        <td>{bridge.structure_no || "N/A"}</td>
                         <td>
-                          {bridge.photo ? (
+                          {bridge.image_1 ? (
                             <img
-                              src={bridge.photo}
+                              src={bridge.image_1}
                               alt="Bridge"
                               className="w-16 h-16 object-cover rounded-md"
                             />
@@ -219,8 +206,7 @@ const BridgesListDashboard = ({ selectedDistrict}) => {
                             />
                           )}
                         </td>
-
-                        <td>{bridge.LatestInspectionStatus || "N/A"}</td>
+                        <td>{bridge.visual_condition || "N/A"}</td>
                       </tr>
                     ))
                   ) : (
