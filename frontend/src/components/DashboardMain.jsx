@@ -243,9 +243,7 @@ const DashboardMain = () => {
       {/* Map and Pie Chart Layout */}
       <div className="grid grid-cols-12 gap-2 mt-6">
         <div className="col-span-12 lg:col-span-9">
-          <Map
-            selectedDistrict={selectedDistrict}
-          />
+          <Map/>
         </div>
         <div className="col-span-12 lg:col-span-3">
           <div
@@ -268,9 +266,7 @@ const DashboardMain = () => {
       {/* Bridges List */}
       <div className="mt-2 flex justify-center">
         <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
-          <BridgesListDashboard
-            selectedDistrict={selectedDistrict}
-          />
+          <BridgesListDashboard />
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
 
-const BridgesListDashboard = ({ selectedDistrict }) => {
+const BridgesListDashboard = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,16 +13,14 @@ const BridgesListDashboard = ({ selectedDistrict }) => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    if (selectedDistrict) {
-      fetchAllBridges(selectedDistrict);
-    }
-  }, [selectedDistrict]);
+      fetchAllBridges();
+  }, []);
 
-  const fetchAllBridges = async (district) => {
+  const fetchAllBridges = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bridges?district=${district}`
+        `${BASE_URL}/api/bridges`
       );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();

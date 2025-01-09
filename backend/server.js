@@ -186,7 +186,6 @@ app.get('/api/bridges', async (req, res) => {
   }
 });
 
-
 // API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID)
 app.get("/api/get-inspections", async (req, res) => {
   const { bridgeId } = req.query; // Fetch the bridgeId from the query parameters
