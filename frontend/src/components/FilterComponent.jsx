@@ -3,7 +3,6 @@ import { BASE_URL } from "./config";
 
 const FilterComponent = ({
   setSelectedDistrict,
-  setSelectedZone,
   setBridgeMinLength,
   setBridgeMaxLength,
   setSpanMinLength,
@@ -18,7 +17,6 @@ const FilterComponent = ({
   setMaxYear,
 }) => {
   const [districts, setDistricts] = useState([]);
-  const [zones, setZones] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
   const [constructionTypes, setConstructionTypes] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -26,7 +24,6 @@ const FilterComponent = ({
   const [inspectionStatuses, setInspectionStatuses] = useState([]);
 
   const [districtId, setDistrictId] = useState("");
-  const [zoneId, setZoneId] = useState("");
   const [minBridgeLength, setMinBridgeLength] = useState("");
   const [maxBridgeLength, setMaxBridgeLength] = useState("");
   const [minSpanLength, setMinSpanLength] = useState("");
@@ -47,10 +44,6 @@ const FilterComponent = ({
         const districtResponse = await fetch(`${BASE_URL}/api/districts`);
         const districtData = await districtResponse.json();
         setDistricts(districtData);
-
-        const zoneResponse = await fetch(`${BASE_URL}/api/zones`);
-        const zoneData = await zoneResponse.json();
-        setZones(zoneData);
 
         // Fetch additional filters
         const structureTypeResponse = await fetch(
@@ -93,29 +86,7 @@ const FilterComponent = ({
 
   return (
     <div className="p-4">
-      {/* Zone Filter */}
-      <div className="mb-4">
-        <label
-          htmlFor="zone-filter"
-          className="block text-gray-700 font-medium mb-1"
-        >
-          Select Zone
-        </label>
-        <select
-          id="zone-filter"
-          className="w-full border rounded-md p-2 bg-gray-100"
-          value={zoneId}
-          onChange={handleChange(setZoneId)}
-        >
-          <option value="%">--All Zones--</option>
-          {zones.map((zone) => (
-            <option key={zone.ZoneID} value={zone.ZoneID}>
-              {zone.ZoneName}
-            </option>
-          ))}
-        </select>
-      </div>
-
+      
       {/* District Filter */}
       <div className="mb-4">
         <label
@@ -379,7 +350,6 @@ const FilterComponent = ({
           className="bg-blue-500 text-white py-2 px-4 rounded-md"
           onClick={() => {
             setSelectedDistrict(districtId);
-            setSelectedZone(zoneId);
             setBridgeMinLength(minBridgeLength);
             setBridgeMaxLength(maxBridgeLength);
             setSpanMinLength(minSpanLength);

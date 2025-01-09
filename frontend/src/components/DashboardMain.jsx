@@ -13,7 +13,6 @@ import BridgesListDashboard from "./BirdgesListDashboard";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [selectedZone, setSelectedZone] = useState("%");
   const [minBridgeLength, setMinBridgeLength] = useState('');
   const [maxBridgeLength, setMaxBridgeLength] = useState('');
   const [minSpanLength, setMinSpanLength] = useState('');
@@ -205,7 +204,6 @@ const DashboardMain = () => {
         <div className="offcanvas-body">
           <FilterComponent
              setSelectedDistrict={setSelectedDistrict}
-             setSelectedZone={setSelectedZone}
              setMinBridgeLength={setMinBridgeLength}
              setMaxBridgeLength={setMaxBridgeLength}
              setMinSpanLength={setMinSpanLength}
@@ -247,7 +245,6 @@ const DashboardMain = () => {
         <div className="col-span-12 lg:col-span-9">
           <Map
             selectedDistrict={selectedDistrict}
-            selectedZone={selectedZone}
           />
         </div>
         <div className="col-span-12 lg:col-span-3">
@@ -273,7 +270,6 @@ const DashboardMain = () => {
         <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
           <BridgesListDashboard
             selectedDistrict={selectedDistrict}
-            selectedZone={selectedZone}
           />
         </div>
       </div>

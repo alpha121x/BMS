@@ -147,7 +147,6 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
-
 // API endpoint to fetch bridge data with filtering by ZoneID and DistrictID
 app.get("/api/bridges", async (req, res) => {
   const { district, zone } = req.query; // Receive 'district' and 'zone' from the query parameters
@@ -158,52 +157,70 @@ app.get("/api/bridges", async (req, res) => {
   // Add condition for ZoneID if provided
   if (zone) {
     queryParams.push(zone);
-    whereClauses.push(`o."ZoneID"::text ILIKE $${queryParams.length}`);
+    whereClauses.push(`"ZoneID"::text ILIKE $${queryParams.length}`);
   }
 
   // Add condition for DistrictID if provided
   if (district) {
     queryParams.push(district);
-    whereClauses.push(`o."DistrictID"::text ILIKE $${queryParams.length}`);
+    whereClauses.push(`"DistrictID"::text ILIKE $${queryParams.length}`);
   }
 
-  // Base query
+  // Base query with the new column names
   let query = `
     SELECT 
-      o."ObjectID", 
-      o."BridgeName", 
-      st."StructureTypeName" AS "StructureType", 
-      o."ConstructionYear", 
-      z."ZoneName" AS "Zone", 
-      d."DistrictsName" AS "District",
-      r."RoadName" AS "Road",
-      c."ConstructionTypeName" AS "ConstructionType", 
-      o."SurveyID", 
-      o."RoadClassificationID", 
-      cw."CarriagewayTypeName" AS "CarriagewayType",
-      rs."RoadSurfaceTypeName" AS "RoadSurfaceType",
-      rc."RoadClassificationName" AS "RoadClassification",
-      vc."VisualConditionName" AS "VisualCondition",
-      dr."DirectionName" AS "Direction",
-      o."LastMaintenanceDate",
-      o."WidthOfStructureM" AS "WidthStructure",
-      o."SpanLengthM" AS "SpanLength",
-      o."NumberOfSpan" AS "Spans",
-      o."XCentroID" AS "Latitude",
-      o."YCentroID" AS "Longitude",
-      COALESCE(array_agg(DISTINCT ep."PhotoPath") FILTER (WHERE ep."PhotoPath" IS NOT NULL), '{}') AS "Photos"
-    FROM public."D_Objects" o
-    INNER JOIN public."M_StructureTypes" st ON o."StructureTypeID" = st."StructureTypeID"
-    INNER JOIN public."M_Zones" z ON o."ZoneID" = z."ZoneID"
-    INNER JOIN public."M_Districts" d ON o."DistrictID" = d."DistrictsID"
-    INNER JOIN public."M_Roads" r ON o."RoadNumber" = r."RoadNumber"
-    INNER JOIN public."M_ConstructionTypes" c ON o."ConstructionTypeID" = c."ConstructionTypeID"
-    INNER JOIN public."M_CarriagewayType" cw ON o."CarriagewayType" = cw."CarriagewayTypeID"
-    INNER JOIN public."M_RoadSurfaceTypes" rs ON o."RoadSurfaceTypeID" = rs."RoadSurfaceTypeID"
-    INNER JOIN public."M_RoadClassifications" rc ON o."RoadClassificationID" = rc."RoadClassificationID"
-    INNER JOIN public."M_Directions" dr ON o."DirectionID" = dr."DirectionID"
-    INNER JOIN public."M_VisualConditions" vc ON o."VisualConditionID" = vc."VisualConditionID"
-    LEFT JOIN public."D_ExteriorPhotos" ep ON o."ObjectID" = ep."ObjectID"
+      "ObjectID", 
+      "bridge_name", 
+      "BridgeCode", 
+      "RoadNumber", 
+      "StructureTypeID", 
+      "RouteID", 
+      "SurveyID", 
+      "PmsChainageStart", 
+      "PmsChainageEnd", 
+      "SurveyChainageStart", 
+      "SurveyChainageEnd", 
+      "PmsSectionID", 
+      "StructureNO", 
+      "ZoneID", 
+      "DistrictID", 
+      "RoadClassificationID", 
+      "RoadSurfaceTypeID", 
+      "CarriagewayType", 
+      "DirectionID", 
+      "ConstructionTypeID", 
+      "NumberOfSpan", 
+      "SpanLengthM", 
+      "WidthOfStructureM", 
+      "ConstructionYear", 
+      "LastMaintenanceDate", 
+      "DataSource", 
+      "Date", 
+      "XCentroID", 
+      "YCentroID", 
+      "CwdRoadCode", 
+      "ManageOrganizationID", 
+      "ManageStaffID", 
+      "IsDrawingsExist", 
+      "DrawingRemarks", 
+      "TrafficVolume", 
+      "LargeVehicleTrafficVolume", 
+      "StrVisualCondition", 
+      "VisualConditionID", 
+      "InspectionEquipmentID", 
+      "InspectionEquipmentRemarks", 
+      "BridgeUnderSituationID", 
+      "BridgeUnderSituationRemarks", 
+      "TestOrganizationID", 
+      "TestStaffID", 
+      "ApprovedOrganizationID", 
+      "ApprovedUserID", 
+      "Remarks", 
+      "DeleteFlag", 
+      "InYMD", 
+      "UpYMD", 
+      "LengthOfStructureM"
+    FROM bms.tbl_bridges
   `;
 
   // Add WHERE clause if filters exist
@@ -212,29 +229,7 @@ app.get("/api/bridges", async (req, res) => {
   }
 
   query += `
-    GROUP BY 
-      o."ObjectID", 
-      o."BridgeName", 
-      o."ConstructionYear", 
-      z."ZoneName", 
-      d."DistrictsName", 
-      r."RoadName", 
-      c."ConstructionTypeName", 
-      st."StructureTypeName", 
-      cw."CarriagewayTypeName", 
-      rs."RoadSurfaceTypeName", 
-      rc."RoadClassificationName", 
-      vc."VisualConditionName", 
-      dr."DirectionName", 
-      o."SurveyID",
-      o."RoadClassificationID", 
-      o."LastMaintenanceDate", 
-      o."WidthOfStructureM", 
-      o."SpanLengthM", 
-      o."NumberOfSpan",
-      o."XCentroID",
-      o."YCentroID"
-    ORDER BY o."ObjectID" ASC;
+    ORDER BY "ObjectID" ASC;
   `;
 
   try {
@@ -251,63 +246,6 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
-// API endpoint to fetch checkings data with additional details
-app.get("/api/checkings", async (req, res) => {
-  // Base query (fetches all data with joins to get additional information)
-  let query = `
-  SELECT 
-    o."ObjectID", 
-    o."CheckingID", 
-    o."SpanIndex",  
-    o."Remarks",
-    wk."WorkKindName", 
-    p."PartsName", 
-    m."MaterialName", 
-    dk."DamageKindName", 
-    b."BridgeName", 
-    dl."DamageLevel",
-    -- Aggregate photo URLs into an array for each CheckingID
-    array_agg(cp."PhotoPath") AS Photos
-FROM public."D_Checkings" o
-LEFT JOIN public."M_WorkKinds" wk ON o."WorkKindID" = wk."WorkKindID"
-LEFT JOIN public."D_Objects" b ON o."ObjectID" = b."ObjectID"
-LEFT JOIN public."M_Parts" p ON o."PartsID" = p."PartsID"
-LEFT JOIN public."M_Materials" m ON o."MaterialID" = m."MaterialID"
-LEFT JOIN public."M_DamageKinds" dk ON o."DamageKindID" = dk."DamageKindID"
-LEFT JOIN public."M_DamageLevels" dl ON o."DamageLevelID" = dl."DamageLevelID"
--- Join with D_CheckingPhotos table to get photos related to CheckingID
-LEFT JOIN public."D_CheckingPhotos" cp ON o."CheckingID" = cp."CheckingID"
-GROUP BY 
-    o."CheckingID", 
-    o."ObjectID", 
-    o."SpanIndex",  
-    o."Remarks", 
-    wk."WorkKindName", 
-    p."PartsName", 
-    m."MaterialName", 
-    dk."DamageKindName", 
-    b."BridgeName", 
-    dl."DamageLevel"
-ORDER BY o."CheckingID" ASC;
-
-  `;
-
-  try {
-    // Execute the query with joins to get the additional information
-    const result = await pool.query(query);
-
-    // Return the rows as JSON with detailed data
-    res.status(200).json({
-      success: true,
-      data: result.rows,
-    });
-  } catch (error) {
-    console.error("Error fetching checkings data:", error.message);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching checkings data." });
-  }
-});
 
 // API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID)
 app.get("/api/get-inspections", async (req, res) => {
@@ -485,27 +423,11 @@ app.get("/api/construction_type", async (req, res) => {
   }
 });
 
-
-
-
-// API route to get Zones data
-app.get("/api/zones", async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT "ZoneID", "ZoneName" FROM public."M_Zones"'
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
 // API route to get Districts
 app.get("/api/districts", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT "DistrictsID", "DistrictsName" FROM public."M_Districts"'
+      'SELECT id,district FROM bms.tbl_districts'
     );
     res.json(result.rows);
   } catch (err) {
