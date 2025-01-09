@@ -150,15 +150,10 @@ app.post("/api/loginEvaluation", async (req, res) => {
 // Define the API endpoint to get data from `bms.tbl_bms_master_data`
 app.get('/api/bridges', async (req, res) => {
   try {
-    // Extract pagination parameters from the query string
-    const page = parseInt(req.query.page) || 1; // Default to page 1 if not provided
-    const limit = parseInt(req.query.limit) || 0; // Default to no limit (0) if not provided
-    const offset = (page - 1) * limit;
-
-    // Build the query based on pagination
-    let query = `
+    // Query to fetch all data from the table without pagination
+    const query = `
       SELECT 
-        uu_bms_id,structure_type_id, structure_type, 
+        uu_bms_id, structure_type_id, structure_type, 
         road_name, road_name_cwd, route_id, survey_id, structure_no, surveyor_name, 
         district_id, district, road_classification, road_surface_type, carriageway_type, 
         direction, visual_condition, construction_type_id, construction_type, 
@@ -166,11 +161,6 @@ app.get('/api/bridges', async (req, res) => {
         last_maintenance_date, remarks, is_surveyed, image_1, image_2, image_3, 
         image_4, image_5, x_centroid, y_centroid, images_spans
       FROM bms.tbl_bms_master_data`;
-
-    // Add LIMIT and OFFSET if a limit is provided
-    if (limit > 0) {
-      query += ` LIMIT ${limit} OFFSET ${offset}`;
-    }
 
     // Execute the query
     const result = await pool.query(query);
@@ -185,6 +175,7 @@ app.get('/api/bridges', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error fetching data from the database' });
   }
 });
+
 
 // API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID)
 app.get("/api/get-inspections", async (req, res) => {
