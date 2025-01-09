@@ -23,6 +23,7 @@ const BridgeInfo = () => {
     // Retrieve the serialized bridgeData from query parameters
     const urlParams = new URLSearchParams(location.search);
     const serializedBridgeData = urlParams.get("bridgeData");
+    console.log("Serialized Bridge Data:", serializedBridgeData);
 
     if (serializedBridgeData) {
       // Decode and parse the bridge data into an object

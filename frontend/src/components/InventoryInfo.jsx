@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Row, Col, Form, Modal, Button } from "react-bootstrap";
 
 const InventoryInfo = ({ inventoryData }) => {
-  console.log("Inventory Data: ", inventoryData);
+  // console.log("Inventory Data: ", inventoryData);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
