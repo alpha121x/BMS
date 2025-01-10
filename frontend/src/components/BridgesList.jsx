@@ -13,15 +13,13 @@ const BridgesList = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-      fetchAllBridges();
+    fetchAllBridges();
   }, []);
 
   const fetchAllBridges = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/bridges`
-      );
+      const response = await fetch(`${BASE_URL}/api/bridges`);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
 
@@ -186,15 +184,21 @@ const BridgesList = () => {
                         className="hover-row"
                       >
                         <td>{bridge.district || "N/A"}</td>
-                        <td className="truncate-text" title={bridge.road_name || "N/A"}>
+                        <td
+                          className="truncate-text"
+                          title={bridge.road_name || "N/A"}
+                        >
                           {bridge.road_name || "N/A"}
                         </td>
                         <td>{bridge.structure_type || "N/A"}</td>
-                        <td>{bridge.pms_sec_id || "N/A"},{bridge.structure_no || "N/A"}</td>
                         <td>
-                          {bridge.image_1 ? (
+                          {bridge.pms_sec_id || "N/A"},
+                          {bridge.structure_no || "N/A"}
+                        </td>
+                        <td>
+                          {bridge.photos && bridge.photos.length > 0 ? (
                             <img
-                              src={bridge.image_1}
+                              src={bridge.photos[0]} // Display the first image from the photos array
                               alt="Bridge"
                               className="w-16 h-16 object-cover rounded-md"
                             />

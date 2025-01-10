@@ -150,26 +150,27 @@ app.post("/api/loginEvaluation", async (req, res) => {
 // Define the API endpoint to get data from `bms.tbl_bms_master_data`
 app.get("/api/bridges", async (req, res) => {
   try {
-    // Query to fetch all data from the table without pagination
+    // Query to fetch all data from the table and aggregate images into a 'photos' array directly
     const query = `
       SELECT 
-        uu_bms_id, pms_sec_id,structure_no, structure_type_id, structure_type, 
+        uu_bms_id, pms_sec_id, structure_no, structure_type_id, structure_type, 
         road_name, road_name_cwd, route_id, survey_id, structure_no, surveyor_name, 
         district_id, district, road_classification, road_surface_type, carriageway_type, 
         direction, visual_condition, construction_type_id, construction_type, 
         no_of_span, span_length_m, structure_width_m, construction_year, 
-        last_maintenance_date, remarks, is_surveyed, image_1, image_2, image_3, 
-        image_4, image_5, x_centroid, y_centroid, images_spans
-      FROM bms.tbl_bms_master_data ORDER BY uu_bms_id`;
+        last_maintenance_date, remarks, is_surveyed, 
+        x_centroid, y_centroid, images_spans,
+        ARRAY[
+          image_1, image_2, image_3, image_4, image_5
+        ] AS photos
+      FROM bms.tbl_bms_master_data 
+      ORDER BY uu_bms_id LIMIT 10`;
 
     // Execute the query
     const result = await pool.query(query);
 
-    // Return the result rows as an array
-    const dataArray = result.rows;
-
-    // Send the array as the response
-    res.json(dataArray);
+    // Send the result as the response
+    res.json(result.rows);
   } catch (error) {
     console.error("Error fetching data:", error);
     res
@@ -180,6 +181,7 @@ app.get("/api/bridges", async (req, res) => {
       });
   }
 });
+
 
 // API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID)
 app.get("/api/get-inspections", async (req, res) => {

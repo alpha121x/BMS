@@ -27,7 +27,7 @@ const BridgeInfo = () => {
     if (serializedBridgeData) {
       // Decode and parse the bridge data into an object
       setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
-      console.log("Bridge Data:", bridgeData);
+      // console.log("Bridge Data:", bridgeData);
     }
   }, [location]);
 
