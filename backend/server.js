@@ -153,7 +153,7 @@ app.get('/api/bridges', async (req, res) => {
     // Query to fetch all data from the table without pagination
     const query = `
       SELECT 
-        uu_bms_id, structure_type_id, structure_type, 
+        uu_bms_id, pms_sec_id,structure_no, structure_type_id, structure_type, 
         road_name, road_name_cwd, route_id, survey_id, structure_no, surveyor_name, 
         district_id, district, road_classification, road_surface_type, carriageway_type, 
         direction, visual_condition, construction_type_id, construction_type, 

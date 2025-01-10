@@ -14,9 +14,6 @@ import InspectionListDashboard from "./InspectionListDashboard";
 
 const BridgeInfoDashboard = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [startDate, setStartDate] = useState("");
-  const [districtId, setDistrictId] = useState(null);
-  const [selectedZone, setSelectedZone] = useState("%");
   const location = useLocation();
   const [bridgeData, setBridgeData] = useState(null);
   const navigate = useNavigate();
@@ -25,16 +22,16 @@ const BridgeInfoDashboard = () => {
     // Retrieve the serialized bridgeData from query parameters
     const urlParams = new URLSearchParams(location.search);
     const serializedBridgeData = urlParams.get("bridgeData");
-
     if (serializedBridgeData) {
       // Decode and parse the bridge data into an object
       setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
-      // console.log("Bridge Data:", bridgeData);
     }
   }, [location]);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
+  // console.log("Bridge Data:", bridgeData);
+
 
   // State for managing table visibility
   const [showBridgeInspectionList, setShowBridgeInspectionList] =
@@ -143,86 +140,8 @@ const BridgeInfoDashboard = () => {
         <Header />
       </div>
 
-      <main className="flex-grow p-1">
+      <main className="flex-grow">
         <section className="bg-gray-100 min-h-screen">
-          {/* Header Section */}
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-2xl font-semibold text-gray-500 mb-1">
-              Dashboard Overview
-            </h2>
-
-            <button
-              className="btn btn-primary flex items-center gap-2"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasRight"
-              aria-controls="offcanvasRight"
-            >
-              {/* Filter Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-5.414 5.414A2 2 0 0014 13.414V20a1 1 0 01-1.447.894l-4-2A1 1 0 018 17.618v-4.204a2 2 0 00-.586-1.414L3.293 6.707A1 1 0 013 6V4z"
-                />
-              </svg>
-            </button>
-          </div>
-
-          {/* Offcanvas Sidebar for Filters */}
-          <div
-            className="offcanvas offcanvas-end"
-            tabIndex="-1"
-            id="offcanvasRight"
-            aria-labelledby="offcanvasRightLabel"
-          >
-            <div className="offcanvas-header">
-              <h5 id="offcanvasRightLabel" className="text-xl font-bold">
-                Filters
-              </h5>
-              <button
-                type="button"
-                className="btn-close text-reset"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-              ></button>
-            </div>
-
-            <div className="offcanvas-body">
-              <FilterComponent
-                setSelectedDistrict={setSelectedDistrict}
-                setStartDate={setStartDate}
-                districtId={districtId}
-                setDistrictId={setDistrictId}
-                setSelectedZone={setSelectedZone}
-              />
-            </div>
-          </div>
-
-          {/* Cards Section */}
-          <div className="grid grid-cols-12 gap-2">
-            {allCards.map((card, index) => (
-              <div
-                key={index}
-                className="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2"
-              >
-                <Card
-                  label={card.label}
-                  value={card.value}
-                  icon={card.icon}
-                  color={card.color}
-                />
-              </div>
-            ))}
-          </div>
-
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
             {/* Bridge Information Card */}
             <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
@@ -238,17 +157,17 @@ const BridgeInfoDashboard = () => {
                   </button>
                 </div>
                 <div className="text-lg font-semibold">
-                  Bridge Name: {bridgeData?.BridgeName || "Bridge Name"}
+                  Bridge Name: {bridgeData?.pms_sec_id || "Bridge Name"},{bridgeData?.structure_no}
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
                     <span className="text-gray">Latest Inspection Date:</span>
-                    <span className="ml-2">{"N/A"}</span>
+                    <span className="ml-2">{bridgeData?.last_inspection_date || "N/A"}</span>
                   </div>
                   <div className="flex items-center">
                     <span className="text-gray">Latest Inspection Status:</span>
                     <span className="ml-2 bg-white text-red-500 px-2 py-1 rounded-md text-sm">
-                      {bridgeData?.ApprovedFlag || "UnApproved"}
+                      {bridgeData?.last_inspection_status || "UnApproved"}
                     </span>
                   </div>
                 </div>
@@ -299,7 +218,7 @@ const BridgeInfoDashboard = () => {
           {showBridgeInspectionList && (
             <div className="mt-2 flex justify-center">
               <div className="w-full sm:w-3/4 md:w-3/4 lg:w-3/4">
-                <InspectionListDashboard bridgeId={bridgeData?.ObjectID} />
+                <InspectionListDashboard bridgeId={bridgeData?.uu_bms_id} />
               </div>
             </div>
           )}

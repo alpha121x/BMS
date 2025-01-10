@@ -1,12 +1,25 @@
 import React, { useState } from "react";
-import { Row, Col, Form, Modal, Button } from "react-bootstrap";
+import { Row, Col, Form, Modal } from "react-bootstrap";
 
 const InventoryInfoDashboard = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Ensure that 'inventoryData' contains a 'photos' field that holds an array of photo URLs
-  const photos = inventoryData?.Photos || []; // Use 'photos' from the data or an empty array if not available
+  // Extract image fields dynamically
+  const imageFields = Object.keys(inventoryData).filter((key) =>
+    key.startsWith("image_")
+  );
+  const photos = imageFields.map((key) => inventoryData[key]);
+
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
+  const closeModal = () => {
+    setShowPhotoModal(false);
+    setSelectedPhoto(null);
+  };
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
@@ -26,36 +39,30 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
             Inventory Info
           </h5>
           <Form>
-            <Row>
+          <Row>
               {[
-                { label: "Bridge ID", field: "ObjectID" },
-                { label: "Bridge Name", field: "BridgeName" },
-                { label: "Structure Type", field: "StructureType" },
+                { label: "Bridge ID", field: "uu_bms_id" },
+                { label: "Bridge Name", field: "bridge_name" },
+                { label: "Structure Type", field: "structure_type" },
                 { label: "Construction Year", field: "ConstructionYear" },
-                { label: "Zone", field: "Zone" },
-                { label: "District", field: "District" },
-                { label: "Road", field: "Road" },
-                { label: "Construction Type", field: "ConstructionType" },
-                { label: "Survey ID", field: "SurveyID" },
-                {
-                  label: "Road Classification ID",
-                  field: "RoadClassificationID",
-                },
-                { label: "Carriageway Type", field: "CarriagewayType" },
-                { label: "Road Surface Type", field: "RoadSurfaceType" },
-                { label: "Road Classification", field: "RoadClassification" },
-                { label: "Visual Condition", field: "VisualCondition" },
-                { label: "Direction", field: "Direction" },
-                {
-                  label: "Last Maintenance Date",
-                  field: "LastMaintenanceDate",
-                  type: "date",
-                },
-                { label: "Width Structure", field: "WidthStructure" },
-                { label: "Span Length", field: "SpanLength" },
-                { label: "Spans", field: "Spans" },
-                { label: "Latitude", field: "Latitude" },
-                { label: "Longitude", field: "Longitude" },
+                { label: "District", field: "district" },
+                { label: "Road Name", field: "road_name" },
+                { label: "Road Name CWD", field: "road_name_cwd" },
+                { label: "Construction Type", field: "construction_type" },
+                { label: "Survey ID", field: "survey_id" },
+                { label: "Surveyor Name", field: "surveyor_name" },
+                { label: "Road Classification", field: "road_classification" },
+                { label: "Carriageway Type", field: "carriageway_type" },
+                { label: "Road Surface Type", field: "road_surface_type" },
+                { label: "Visual Condition", field: "visual_condition" },
+                { label: "Direction", field: "direction" },
+                { label: "Last Maintenance Date", field: "last_maintenance_date", type: "date" },
+                { label: "Width Structure", field: "structure_width_m" },
+                { label: "Span Length", field: "span_length_m" },
+                { label: "No of Spans", field: "no_of_span" },
+                { label: "Latitude", field: "y_centroid" },
+                { label: "Longitude", field: "x_centroid" },
+                { label: "Remarks", field: "remarks" },
               ].map(({ label, field }, index) => (
                 <Col key={index} md={6}>
                   <Form.Group controlId={`form${field}`}>
@@ -68,17 +75,16 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                   </Form.Group>
                 </Col>
               ))}
-
+              {/* Display photos */}
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
-                    {/* Displaying photos from inventoryData */}
                     {photos.length > 0 ? (
                       photos.map((photo, index) => (
                         <div key={index} className="m-2">
                           <img
-                            src={`/${photo}`}
+                            src={photo}
                             alt={`Photo ${index + 1}`}
                             className="img-thumbnail"
                             style={{
@@ -86,10 +92,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                               height: "100px",
                               cursor: "pointer",
                             }}
-                            onClick={() => {
-                              setSelectedPhoto(photo);
-                              setShowPhotoModal(true);
-                            }}
+                            onClick={() => handlePhotoClick(photo)}
                           />
                         </div>
                       ))
@@ -107,7 +110,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
       {/* Photo Modal */}
       <Modal
         show={showPhotoModal}
-        onHide={() => setShowPhotoModal(false)}
+        onHide={closeModal}
         centered
         dialogClassName="modal-dialog-scrollable"
       >
@@ -117,7 +120,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
         <Modal.Body className="text-center">
           {selectedPhoto && (
             <img
-              src={`/${selectedPhoto}`}
+              src={selectedPhoto}
               alt="Selected Photo"
               className="img-fluid"
               style={{ maxHeight: "400px", objectFit: "contain" }}

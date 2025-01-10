@@ -190,7 +190,7 @@ const BridgesListDashboard = () => {
                           {bridge.road_name || "N/A"}
                         </td>
                         <td>{bridge.structure_type || "N/A"}</td>
-                        <td>{bridge.structure_no || "N/A"}</td>
+                        <td>{bridge.pms_sec_id || "N/A"},{bridge.structure_no || "N/A"}</td>
                         <td>
                           {bridge.image_1 ? (
                             <img
