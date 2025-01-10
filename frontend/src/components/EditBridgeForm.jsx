@@ -10,7 +10,7 @@ const EditBridgeForm = () => {
   const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
   const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
 
-  const photosToDisplay = bridgeData?.photos || [];
+  const photos = bridgeData?.photos || [];
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -321,10 +321,10 @@ const EditBridgeForm = () => {
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
                     {/* Displaying dummy photos */}
-                    {photosToDisplay.map((photo, index) => (
+                    {photos.map((photo, index) => (
                       <div key={index} className="m-2">
                         <img
-                          src={`/${photo}`}
+                          src={`${photo}`}
                           alt={`Photo ${index + 1}`}
                           className="img-thumbnail"
                           style={{
