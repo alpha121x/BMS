@@ -10,7 +10,7 @@ const EditBridgeForm = () => {
   const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
   const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
 
-  const photosToDisplay = bridgeData?.Photos || [];
+  const photosToDisplay = bridgeData?.photos || [];
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -25,8 +25,10 @@ const EditBridgeForm = () => {
     }
   }, [serializedData]);
 
+  console.log(bridgeData);
+
   // This will hold the number of spans for the bridge
-  const spanCount = bridgeData?.Spans || 0;
+  const spanCount = bridgeData?.no_of_span || 0;
 
   // Generate an array of span values based on `spanCount`
   const spanIndexes = Array.from(
@@ -181,28 +183,32 @@ const EditBridgeForm = () => {
           <Form onSubmit={handleSubmit}>
             <Row>
               {[
-                 { label: "Bridge ID", field: "uu_bms_id" },
-                 { label: "Structure Type", field: "structure_type" },
-                 { label: "Construction Year", field: "construction_year" },
-                 { label: "District", field: "district" },
-                 { label: "Road", field: "road_name" },
-                 { label: "Construction Type", field: "construction_type" },
-                 { label: "Survey ID", field: "survey_id" },
-                 { label: "Road Classification", field: "road_classification" },
-                 { label: "Carriageway Type", field: "carriageway_type" },
-                 { label: "Road Surface Type", field: "road_surface_type" },
-                 { label: "Visual Condition", field: "visual_condition" },
-                 { label: "Direction", field: "direction" },
-                 {
-                   label: "Last Maintenance Date",
-                   field: "last_maintenance_date",
-                   type: "date",
-                 },
-                 { label: "Structure Width (m)", field: "structure_width_m" },
-                 { label: "Span Length (m)", field: "span_length_m" },
-                 { label: "Number of Spans", field: "no_of_span" },
-                 { label: "Latitude", field: "x_centroid" },
-                 { label: "Longitude", field: "y_centroid" },
+               { label: "Bridge ID", field: "uu_bms_id" },
+               { label: "Bridge Name", field: "pms_sec_id,structure_no" },
+               { label: "Structure Type", field: "structure_type" },
+               { label: "Construction Year", field: "construction_year" },
+               { label: "District", field: "district" },
+               { label: "Road Name", field: "road_name" },
+               { label: "Road Name CWD", field: "road_name_cwd" },
+               { label: "Construction Type", field: "construction_type" },
+               { label: "Survey ID", field: "survey_id" },
+               { label: "Surveyor Name", field: "surveyor_name" },
+               { label: "Road Classification", field: "road_classification" },
+               { label: "Carriageway Type", field: "carriageway_type" },
+               { label: "Road Surface Type", field: "road_surface_type" },
+               { label: "Visual Condition", field: "visual_condition" },
+               { label: "Direction", field: "direction" },
+               {
+                 label: "Last Maintenance Date",
+                 field: "last_maintenance_date",
+                 type: "date",
+               },
+               { label: "Width Structure", field: "structure_width_m" },
+               { label: "Span Length", field: "span_length_m" },
+               { label: "No of Spans", field: "no_of_span" },
+               { label: "Latitude", field: "y_centroid" },
+               { label: "Longitude", field: "x_centroid" },
+               { label: "Remarks", field: "remarks" },
               ].map(({ label, field }, index) => (
                 <Col key={index} md={6}>
                   <Form.Group controlId={`form${field}`}>
