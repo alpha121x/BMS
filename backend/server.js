@@ -148,7 +148,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
 });
 
 // Define the API endpoint to get data from `bms.tbl_bms_master_data`
-app.get('/api/bridges', async (req, res) => {
+app.get("/api/bridges", async (req, res) => {
   try {
     // Query to fetch all data from the table without pagination
     const query = `
@@ -160,7 +160,7 @@ app.get('/api/bridges', async (req, res) => {
         no_of_span, span_length_m, structure_width_m, construction_year, 
         last_maintenance_date, remarks, is_surveyed, image_1, image_2, image_3, 
         image_4, image_5, x_centroid, y_centroid, images_spans
-      FROM bms.tbl_bms_master_data`;
+      FROM bms.tbl_bms_master_data ORDER BY uu_bms_id`;
 
     // Execute the query
     const result = await pool.query(query);
@@ -171,11 +171,15 @@ app.get('/api/bridges', async (req, res) => {
     // Send the array as the response
     res.json(dataArray);
   } catch (error) {
-    console.error('Error fetching data:', error);
-    res.status(500).json({ success: false, message: 'Error fetching data from the database' });
+    console.error("Error fetching data:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching data from the database",
+      });
   }
 });
-
 
 // API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID)
 app.get("/api/get-inspections", async (req, res) => {
@@ -197,19 +201,16 @@ app.get("/api/get-inspections", async (req, res) => {
     p."PartsName", 
     m."MaterialName", 
     dk."DamageKindName", 
-    b."BridgeName", 
-    dl."DamageLevel",
-    -- Aggregate photo URLs into an array for each CheckingID
-    array_agg(cp."PhotoPath") AS Photos
-  FROM public."D_Checkings" o
-  LEFT JOIN public."M_WorkKinds" wk ON o."WorkKindID" = wk."WorkKindID"
-  LEFT JOIN public."D_Objects" b ON o."ObjectID" = b."ObjectID"
-  LEFT JOIN public."M_Parts" p ON o."PartsID" = p."PartsID"
-  LEFT JOIN public."M_Materials" m ON o."MaterialID" = m."MaterialID"
-  LEFT JOIN public."M_DamageKinds" dk ON o."DamageKindID" = dk."DamageKindID"
-  LEFT JOIN public."M_DamageLevels" dl ON o."DamageLevelID" = dl."DamageLevelID"
-  -- Join with D_CheckingPhotos table to get photos related to CheckingID
-  LEFT JOIN public."D_CheckingPhotos" cp ON o."CheckingID" = cp."CheckingID"
+    b."pms_sec_id",
+    b."structure_no", 
+    dl."DamageLevel"
+  FROM bms."tbl_checkings" o
+  LEFT JOIN bms."tbl_work_kinds" wk ON o."WorkKindID" = wk."WorkKindID"
+  LEFT JOIN bms."tbl_bms_master_data" b ON o."ObjectID" = b."uu_bms_id"
+  LEFT JOIN bms."tbl_parts" p ON o."PartsID" = p."PartsID"
+  LEFT JOIN bms."tbl_materials" m ON o."MaterialID" = m."MaterialID"
+  LEFT JOIN bms."tbl_damage_kinds" dk ON o."DamageKindID" = dk."DamageKindID"
+  LEFT JOIN bms."tbl_damage_levels" dl ON o."DamageLevelID" = dl."DamageLevelID"
   WHERE o."ObjectID" = $1  -- Add condition to filter by ObjectID (bridgeId)
   GROUP BY 
     o."ObjectID", 
@@ -221,11 +222,11 @@ app.get("/api/get-inspections", async (req, res) => {
     p."PartsName", 
     m."MaterialName", 
     dk."DamageKindName", 
-    b."BridgeName", 
+    b."pms_sec_id",
+    b."structure_no", 
     dl."DamageLevel"
   ORDER BY o."CheckingID" ASC;
 `;
-
 
 
   try {
@@ -247,13 +248,13 @@ app.get("/api/get-inspections", async (req, res) => {
 
 // API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
 app.get("/api/bridgecoordinates", async (req, res) => {
-  const { 
-    district = "%", 
-    zone = "%", 
-    southWestLat, 
-    southWestLng, 
-    northEastLat, 
-    northEastLng 
+  const {
+    district = "%",
+    zone = "%",
+    southWestLat,
+    southWestLng,
+    northEastLat,
+    northEastLng,
   } = req.query; // Default district and zone to '%' for wildcard matching
 
   // Initialize query parameters and WHERE clauses
@@ -275,10 +276,18 @@ app.get("/api/bridgecoordinates", async (req, res) => {
   // Add conditions for bounding box if all coordinates are provided
   if (southWestLat && southWestLng && northEastLat && northEastLng) {
     queryParams.push(parseFloat(southWestLat), parseFloat(northEastLat));
-    whereClauses.push(`"YCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
+    whereClauses.push(
+      `"YCentroID" BETWEEN $${queryParams.length - 1} AND $${
+        queryParams.length
+      }`
+    );
 
     queryParams.push(parseFloat(southWestLng), parseFloat(northEastLng));
-    whereClauses.push(`"XCentroID" BETWEEN $${queryParams.length - 1} AND $${queryParams.length}`);
+    whereClauses.push(
+      `"XCentroID" BETWEEN $${queryParams.length - 1} AND $${
+        queryParams.length
+      }`
+    );
   }
 
   // Base SQL query
@@ -318,7 +327,7 @@ app.get("/api/bridgecoordinates", async (req, res) => {
 app.get("/api/structure-types", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, structure_type FROM bms.tbl_structure_types'
+      "SELECT id, structure_type FROM bms.tbl_structure_types"
     );
     res.status(200).json({
       success: true,
@@ -333,11 +342,10 @@ app.get("/api/structure-types", async (req, res) => {
   }
 });
 
-
 app.get("/api/construction-types", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, construction_type FROM bms.tbl_construction_types'
+      "SELECT id, construction_type FROM bms.tbl_construction_types"
     );
     res.status(200).json({
       success: true,
@@ -356,7 +364,7 @@ app.get("/api/construction-types", async (req, res) => {
 app.get("/api/districts", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id,district FROM bms.tbl_districts'
+      "SELECT id,district FROM bms.tbl_districts"
     );
     res.json(result.rows);
   } catch (err) {
