@@ -230,6 +230,12 @@ const InspectionListDashboard = ({ bridgeId }) => {
           />
         )}
 
+        {error && (
+          <div className="alert alert-danger text-center" style={{ marginTop: "20px" }}>
+            {error}
+          </div>
+        )}
+
         <Table bordered responsive>
           <thead>
             <tr>
