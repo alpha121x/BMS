@@ -3,7 +3,6 @@ import {
   UserIcon,
   DocumentIcon,
 } from "@heroicons/react/24/outline";
-import FilterComponent from "./FilterComponent";
 import Header from "./Header";
 import Footer from "./Footer";
 import InventoryInfoDashboard from "./InventoryInfoDashboard";
@@ -13,7 +12,6 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import InspectionListDashboard from "./InspectionListDashboard";
 
 const BridgeInfoDashboard = () => {
-  const [selectedDistrict, setSelectedDistrict] = useState("%");
   const location = useLocation();
   const [bridgeData, setBridgeData] = useState(null);
   const navigate = useNavigate();
