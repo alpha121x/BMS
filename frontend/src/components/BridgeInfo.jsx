@@ -168,7 +168,7 @@ const BridgeInfo = () => {
           {showBridgeInspectionList && (
             <div className="mt-2 flex justify-center">
               <div className="w-full sm:w-3/4 md:w-3/4 lg:w-3/4">
-                <InspectionList bridgeId={bridgeData?.ObjectID} />
+                <InspectionList bridgeId={bridgeData?.uu_bms_id} />
               </div>
             </div>
           )}
