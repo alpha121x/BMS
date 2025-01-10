@@ -95,13 +95,15 @@ const EditBridgeForm = () => {
     }
   };
 
+  // Function to handle the removal of a photo
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
       ...prevData,
-      Photos: prevData.Photos.filter((photo) => photo !== photoToRemove),
+      photos: prevData.photos.filter((photo) => photo !== photoToRemove),
     }));
   };
 
+  // Function to handle the addition of a new photo
   const handleNewPhotoAdd = (file) => {
     // Create a URL for the newly added photo (assuming the file is an image)
     const photoUrl = URL.createObjectURL(file);
@@ -109,7 +111,7 @@ const EditBridgeForm = () => {
     // Update the photos array to include the new photo
     setBridgeData((prevData) => ({
       ...prevData,
-      Photos: [...(prevData.Photos || []), photoUrl],
+      photos: [...(prevData.photos || []), photoUrl],
     }));
   };
 
@@ -183,32 +185,32 @@ const EditBridgeForm = () => {
           <Form onSubmit={handleSubmit}>
             <Row>
               {[
-               { label: "Bridge ID", field: "uu_bms_id" },
-               { label: "Bridge Name", field: "pms_sec_id,structure_no" },
-               { label: "Structure Type", field: "structure_type" },
-               { label: "Construction Year", field: "construction_year" },
-               { label: "District", field: "district" },
-               { label: "Road Name", field: "road_name" },
-               { label: "Road Name CWD", field: "road_name_cwd" },
-               { label: "Construction Type", field: "construction_type" },
-               { label: "Survey ID", field: "survey_id" },
-               { label: "Surveyor Name", field: "surveyor_name" },
-               { label: "Road Classification", field: "road_classification" },
-               { label: "Carriageway Type", field: "carriageway_type" },
-               { label: "Road Surface Type", field: "road_surface_type" },
-               { label: "Visual Condition", field: "visual_condition" },
-               { label: "Direction", field: "direction" },
-               {
-                 label: "Last Maintenance Date",
-                 field: "last_maintenance_date",
-                 type: "date",
-               },
-               { label: "Width Structure", field: "structure_width_m" },
-               { label: "Span Length", field: "span_length_m" },
-               { label: "No of Spans", field: "no_of_span" },
-               { label: "Latitude", field: "y_centroid" },
-               { label: "Longitude", field: "x_centroid" },
-               { label: "Remarks", field: "remarks" },
+                { label: "Bridge ID", field: "uu_bms_id" },
+                { label: "Bridge Name", field: "pms_sec_id,structure_no" },
+                { label: "Structure Type", field: "structure_type" },
+                { label: "Construction Year", field: "construction_year" },
+                { label: "District", field: "district" },
+                { label: "Road Name", field: "road_name" },
+                { label: "Road Name CWD", field: "road_name_cwd" },
+                { label: "Construction Type", field: "construction_type" },
+                { label: "Survey ID", field: "survey_id" },
+                { label: "Surveyor Name", field: "surveyor_name" },
+                { label: "Road Classification", field: "road_classification" },
+                { label: "Carriageway Type", field: "carriageway_type" },
+                { label: "Road Surface Type", field: "road_surface_type" },
+                { label: "Visual Condition", field: "visual_condition" },
+                { label: "Direction", field: "direction" },
+                {
+                  label: "Last Maintenance Date",
+                  field: "last_maintenance_date",
+                  type: "date",
+                },
+                { label: "Width Structure", field: "structure_width_m" },
+                { label: "Span Length", field: "span_length_m" },
+                { label: "No of Spans", field: "no_of_span" },
+                { label: "Latitude", field: "y_centroid" },
+                { label: "Longitude", field: "x_centroid" },
+                { label: "Remarks", field: "remarks" },
               ].map(({ label, field }, index) => (
                 <Col key={index} md={6}>
                   <Form.Group controlId={`form${field}`}>
