@@ -50,12 +50,6 @@ const InspectionListDashboard = ({ bridgeId }) => {
     }
   };
 
-  const handleEditClick = (row) => {
-    const serializedRow = encodeURIComponent(JSON.stringify(row));
-    const editUrl = `/EditInspection?data=${serializedRow}`;
-    window.location.href = editUrl;
-  };
-
   const handleViewClick = (row) => {
     setSelectedRow(row);
     setShowModal(true);
@@ -276,16 +270,6 @@ const InspectionListDashboard = ({ bridgeId }) => {
                       }}
                     >
                       View
-                    </Button>{" "}
-                    <Button
-                      onClick={() => handleEditClick(row)}
-                      style={{
-                        backgroundColor: "#4CAF50",
-                        border: "none",
-                        color: "white",
-                      }}
-                    >
-                      Edit
                     </Button>
                   </td>
                 </tr>
