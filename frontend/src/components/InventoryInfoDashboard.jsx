@@ -39,12 +39,12 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
             Inventory Info
           </h5>
           <Form>
-          <Row>
+            <Row>
               {[
                 { label: "Bridge ID", field: "uu_bms_id" },
-                { label: "Bridge Name", field: "bridge_name" },
+                { label: "Bridge Name", field: "pms_sec_id,structure_no" },
                 { label: "Structure Type", field: "structure_type" },
-                { label: "Construction Year", field: "ConstructionYear" },
+                { label: "Construction Year", field: "construction_year" },
                 { label: "District", field: "district" },
                 { label: "Road Name", field: "road_name" },
                 { label: "Road Name CWD", field: "road_name_cwd" },
@@ -63,18 +63,30 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                 { label: "Latitude", field: "y_centroid" },
                 { label: "Longitude", field: "x_centroid" },
                 { label: "Remarks", field: "remarks" },
-              ].map(({ label, field }, index) => (
-                <Col key={index} md={6}>
-                  <Form.Group controlId={`form${field}`}>
-                    <Form.Label>{label}</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={inventoryData ? inventoryData[field] || "" : ""}
-                      readOnly
-                    />
-                  </Form.Group>
-                </Col>
-              ))}
+              ].map(({ label, field }, index) => {
+                let value = "";
+                if (field.includes(",")) {
+                  const fields = field.split(",");
+                  value = fields
+                    .map((f) => inventoryData[f.trim()] || "")
+                    .join(", ");
+                } else {
+                  value = inventoryData ? inventoryData[field] || "" : "";
+                }
+
+                return (
+                  <Col key={index} md={6}>
+                    <Form.Group controlId={`form${field}`}>
+                      <Form.Label>{label}</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={value}
+                        readOnly
+                      />
+                    </Form.Group>
+                  </Col>
+                );
+              })}
               {/* Display photos */}
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
