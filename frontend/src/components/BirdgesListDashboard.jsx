@@ -192,9 +192,9 @@ const BridgesListDashboard = () => {
                         <td>{bridge.structure_type || "N/A"}</td>
                         <td>{bridge.pms_sec_id || "N/A"},{bridge.structure_no || "N/A"}</td>
                         <td>
-                          {bridge.image_1 ? (
+                          {bridge.photos && bridge.photos.length > 0 ? (
                             <img
-                              src={bridge.image_1}
+                              src={bridge.photos[0]} // Display the first image from the photos array
                               alt="Bridge"
                               className="w-16 h-16 object-cover rounded-md"
                             />
