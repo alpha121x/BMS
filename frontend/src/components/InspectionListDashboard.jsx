@@ -11,15 +11,15 @@ const InspectionListDashboard = ({ bridgeId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [inspectionType, setInspectionType] = useState("new");
 
   const itemsPerPage = 10;
 
-  // Fetch data when bridgeId changes
   useEffect(() => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId]);
+  }, [bridgeId, inspectionType]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -29,8 +29,9 @@ const InspectionListDashboard = ({ bridgeId }) => {
         throw new Error("bridgeId is required");
       }
 
+      const typeQuery = inspectionType === "new" ? "new" : "old";
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}&type=${typeQuery}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch data");
@@ -47,6 +48,12 @@ const InspectionListDashboard = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditClick = (row) => {
+    const serializedRow = encodeURIComponent(JSON.stringify(row));
+    const editUrl = `/EditInspection?data=${serializedRow}`;
+    window.location.href = editUrl;
   };
 
   const handleViewClick = (row) => {
@@ -181,12 +188,33 @@ const InspectionListDashboard = ({ bridgeId }) => {
           className="card-title text-lg font-semibold pb-2"
           style={{ fontSize: "1.25rem" }}
         >
-          Inspections List
+          Inspection List Dashboard
           <br />
           <span style={{ fontSize: "0.875rem" }}>
             Total Inspections: {tableData.length}
           </span>
         </h6>
+
+        <div className="d-flex mb-3">
+          <Button
+            onClick={() => setInspectionType("new")}
+            style={{
+              ...buttonStyles,
+              backgroundColor: inspectionType === "new" ? "#3B82F6" : "#60A5FA",
+            }}
+          >
+            New Inspections
+          </Button>
+          <Button
+            onClick={() => setInspectionType("old")}
+            style={{
+              ...buttonStyles,
+              backgroundColor: inspectionType === "old" ? "#3B82F6" : "#60A5FA",
+            }}
+          >
+            Old Inspections
+          </Button>
+        </div>
 
         {loading && (
           <div
@@ -248,36 +276,42 @@ const InspectionListDashboard = ({ bridgeId }) => {
                       }}
                     >
                       View
+                    </Button>{" "}
+                    <Button
+                      onClick={() => handleEditClick(row)}
+                      style={{
+                        backgroundColor: "#4CAF50",
+                        border: "none",
+                        color: "white",
+                      }}
+                    >
+                      Edit
                     </Button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center">
-                  No data available
+                <td colSpan="9" className="text-center">
+                  No data available.
                 </td>
               </tr>
             )}
           </tbody>
         </Table>
 
-        {/* Show the count of rows */}
-        <div className="d-flex justify-content-between">
-          <div className="text-sm text-gray-500">
-            Showing {currentData.length} of {tableData.length} inspections
-          </div>
-          <div className="d-flex justify-content-center align-items-center">
-            {renderPaginationButtons()}
-          </div>
+        <div className="pagination d-flex justify-content-center mt-3">
+          {renderPaginationButtons()}
         </div>
       </div>
 
-      <Modal show={showModal} onHide={handleClose}>
+      <Modal show={showModal} onHide={handleClose} centered size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Inspection Details</Modal.Title>
         </Modal.Header>
-        <InspectionModal selectedRow={selectedRow} />
+        <Modal.Body>
+          <InspectionModal row={selectedRow} />
+        </Modal.Body>
       </Modal>
     </div>
   );
