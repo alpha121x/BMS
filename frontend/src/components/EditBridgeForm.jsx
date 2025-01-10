@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Form} from "react-bootstrap";
+import { Button, Row, Col, Form } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
 const EditBridgeForm = () => {
@@ -7,7 +7,13 @@ const EditBridgeForm = () => {
   const [selectedSpan, setSelectedSpan] = useState("");
   const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
   const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
-
+  const [images, setImages] = useState({
+    image1: [],
+    image2: [],
+    image3: [],
+    image4: [],
+    image5: [],
+  });
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -21,6 +27,29 @@ const EditBridgeForm = () => {
       setBridgeData(parsedData);
     }
   }, [serializedData]);
+
+  // Handling photo uploads for the images (image1, image2, etc.)
+  const handleImageAdd = (e, imageKey) => {
+    const selectedFiles = Array.from(e.target.files);
+    const newImages = { ...images };
+
+    // Add new image(s) for the corresponding image key (image1, image2, etc.)
+    selectedFiles.forEach((file) => {
+      const photoUrl = URL.createObjectURL(file); // Create a URL for the uploaded file
+      newImages[imageKey] = newImages[imageKey]
+        ? [...newImages[imageKey], photoUrl]
+        : [photoUrl];
+    });
+
+    setImages(newImages);
+  };
+
+  // Remove a specific image from the list
+  const handleImageRemove = (imageKey, imageIndex) => {
+    const newImages = { ...images };
+    newImages[imageKey].splice(imageIndex, 1);
+    setImages(newImages);
+  };
 
   console.log(bridgeData);
 
@@ -60,11 +89,6 @@ const EditBridgeForm = () => {
     // window.location.href = "/Evaluation";
   };
 
-  const handlePhotoClick = (photo) => {
-    setSelectedPhoto(photo);
-    setShowPhotoModal(true);
-  };
-
   const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
     // Create a copy of the current spanPhotos state
     setSpanPhotos((prevData) => {
@@ -90,24 +114,6 @@ const EditBridgeForm = () => {
     if (inputElement) {
       inputElement.value = ""; // Reset the file input
     }
-  };
-
-  const handlePhotoRemove = (photoToRemove) => {
-    setBridgeData((prevData) => ({
-      ...prevData,
-      Photos: prevData.Photos.filter((photo) => photo !== photoToRemove),
-    }));
-  };
-
-  const handleNewPhotoAdd = (file) => {
-    // Create a URL for the newly added photo (assuming the file is an image)
-    const photoUrl = URL.createObjectURL(file);
-
-    // Update the photos array to include the new photo
-    setBridgeData((prevData) => ({
-      ...prevData,
-      Photos: [...(prevData.Photos || []), photoUrl],
-    }));
   };
 
   // Handle the photo upload for the selected span
@@ -181,7 +187,7 @@ const EditBridgeForm = () => {
             <Row>
               {[
                 { label: "Bridge ID", field: "uu_bms_id" },
-                { label: "Bridge Name", field: "pms_sec_id,structure_no" },
+                { label: "Bridge Name", field: "" },
                 { label: "Structure Type", field: "structure_type" },
                 { label: "Construction Year", field: "construction_year" },
                 { label: "District", field: "district" },
@@ -195,7 +201,11 @@ const EditBridgeForm = () => {
                 { label: "Road Surface Type", field: "road_surface_type" },
                 { label: "Visual Condition", field: "visual_condition" },
                 { label: "Direction", field: "direction" },
-                { label: "Last Maintenance Date", field: "last_maintenance_date", type: "date" },
+                {
+                  label: "Last Maintenance Date",
+                  field: "last_maintenance_date",
+                  type: "date",
+                },
                 { label: "Width Structure", field: "structure_width_m" },
                 { label: "Span Length", field: "span_length_m" },
                 { label: "No of Spans", field: "no_of_span" },
@@ -274,7 +284,6 @@ const EditBridgeForm = () => {
                                   height: "100px",
                                   cursor: "pointer",
                                 }}
-                                onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
                               />
                               <Button
                                 variant="danger"
@@ -298,6 +307,49 @@ const EditBridgeForm = () => {
                   </Col>
                 </>
               )}
+
+              <Col md={6}>
+                <Form.Group controlId="formBridgeImage">
+                  <Form.Label>Upload Image</Form.Label>
+                  <Form.Control
+                    type="file"
+                    multiple
+                    onChange={(e) => handleImageAdd(e, "image1")} // Add to image1 as an example
+                  />
+                </Form.Group>
+              </Col>
+
+              {/* Display Images and Remove Button */}
+              {Object.keys(images).map((imageKey) => (
+                <Col key={imageKey} md={12}>
+                  <div className="d-flex flex-wrap mt-3">
+                    {images[imageKey].map((photo, photoIndex) => (
+                      <div key={photoIndex} className="m-2">
+                        <img
+                          src={photo} // Display the image
+                          alt={`image-${imageKey}-${photoIndex}`}
+                          className="img-thumbnail"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            cursor: "pointer",
+                          }}
+                        />
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="mt-1 w-100"
+                          onClick={() =>
+                            handleImageRemove(imageKey, photoIndex)
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </Col>
+              ))}
             </Row>
 
             {/* Save Button */}
