@@ -5,11 +5,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Extract image fields dynamically
-  const imageFields = Object.keys(inventoryData).filter((key) =>
-    key.startsWith("image_")
-  );
-  const photos = imageFields.map((key) => inventoryData[key]);
+  const photos = inventoryData?.photos || []; // Defaults to empty array if no photos
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
@@ -56,7 +52,11 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                 { label: "Road Surface Type", field: "road_surface_type" },
                 { label: "Visual Condition", field: "visual_condition" },
                 { label: "Direction", field: "direction" },
-                { label: "Last Maintenance Date", field: "last_maintenance_date", type: "date" },
+                {
+                  label: "Last Maintenance Date",
+                  field: "last_maintenance_date",
+                  type: "date",
+                },
                 { label: "Width Structure", field: "structure_width_m" },
                 { label: "Span Length", field: "span_length_m" },
                 { label: "No of Spans", field: "no_of_span" },
@@ -78,16 +78,12 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                   <Col key={index} md={6}>
                     <Form.Group controlId={`form${field}`}>
                       <Form.Label>{label}</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={value}
-                        readOnly
-                      />
+                      <Form.Control type="text" value={value} readOnly />
                     </Form.Group>
                   </Col>
                 );
               })}
-              {/* Display photos */}
+              {/* Display Photos */}
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
                   <Form.Label>Photos</Form.Label>
@@ -104,7 +100,10 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                               height: "100px",
                               cursor: "pointer",
                             }}
-                            onClick={() => handlePhotoClick(photo)}
+                            onClick={() => {
+                              setSelectedPhoto(photo);
+                              setShowPhotoModal(true);
+                            }}
                           />
                         </div>
                       ))

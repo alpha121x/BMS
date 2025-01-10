@@ -2,18 +2,11 @@ import React, { useState } from "react";
 import { Row, Col, Form, Modal, Button } from "react-bootstrap";
 
 const InventoryInfo = ({ inventoryData }) => {
-  // console.log("Inventory Data: ", inventoryData);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Extract photos from inventoryData
-  const photos = [
-    inventoryData?.image_1,
-    inventoryData?.image_2,
-    inventoryData?.image_3,
-    inventoryData?.image_4,
-    inventoryData?.image_5,
-  ].filter(Boolean); // Remove null or undefined values
+  // Access the photos array directly from inventoryData
+  const photos = inventoryData?.photos || []; // Defaults to empty array if no photos
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
@@ -70,6 +63,7 @@ const InventoryInfo = ({ inventoryData }) => {
                 </Col>
               ))}
 
+              {/* Display Photos */}
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
                   <Form.Label>Photos</Form.Label>
@@ -78,7 +72,7 @@ const InventoryInfo = ({ inventoryData }) => {
                       photos.map((photo, index) => (
                         <div key={index} className="m-2">
                           <img
-                            src={`/${photo}`}
+                            src={photo}
                             alt={`Photo ${index + 1}`}
                             className="img-thumbnail"
                             style={{
@@ -104,6 +98,7 @@ const InventoryInfo = ({ inventoryData }) => {
         </div>
       </div>
 
+      {/* Photo Modal */}
       <Modal
         show={showPhotoModal}
         onHide={() => setShowPhotoModal(false)}
@@ -116,7 +111,7 @@ const InventoryInfo = ({ inventoryData }) => {
         <Modal.Body className="text-center">
           {selectedPhoto && (
             <img
-              src={`/${selectedPhoto}`}
+              src={selectedPhoto}
               alt="Selected Photo"
               className="img-fluid"
               style={{ maxHeight: "400px", objectFit: "contain" }}
