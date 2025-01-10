@@ -183,57 +183,101 @@ app.get("/api/bridges", async (req, res) => {
 });
 
 
-// API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID)
+// API endpoint to fetch inspections and related checkings data based on bridgeId (ObjectID) and type (new or old)
 app.get("/api/get-inspections", async (req, res) => {
-  const { bridgeId } = req.query; // Fetch the bridgeId from the query parameters
+  const { bridgeId, type } = req.query; // Fetch bridgeId and type from the query parameters
 
   if (!bridgeId) {
     return res.status(400).json({ error: "Bridge ID (ObjectID) is required." });
   }
 
-  // Query to fetch inspections and related checkings data where ObjectID matches the bridgeId
-  let query = `
-  SELECT 
-    o."ObjectID", 
-    o."CheckingID", 
-    o."SpanIndex",  
-    o."ApprovedFlag",
-    o."Remarks",
-    wk."WorkKindName", 
-    p."PartsName", 
-    m."MaterialName", 
-    dk."DamageKindName", 
-    b."pms_sec_id",
-    b."structure_no", 
-    dl."DamageLevel"
-  FROM bms."tbl_checkings" o
-  LEFT JOIN bms."tbl_work_kinds" wk ON o."WorkKindID" = wk."WorkKindID"
-  LEFT JOIN bms."tbl_bms_master_data" b ON o."ObjectID" = b."uu_bms_id"
-  LEFT JOIN bms."tbl_parts" p ON o."PartsID" = p."PartsID"
-  LEFT JOIN bms."tbl_materials" m ON o."MaterialID" = m."MaterialID"
-  LEFT JOIN bms."tbl_damage_kinds" dk ON o."DamageKindID" = dk."DamageKindID"
-  LEFT JOIN bms."tbl_damage_levels" dl ON o."DamageLevelID" = dl."DamageLevelID"
-  WHERE o."ObjectID" = $1  -- Add condition to filter by ObjectID (bridgeId)
-  GROUP BY 
-    o."ObjectID", 
-    o."CheckingID", 
-    o."SpanIndex", 
-    o."ApprovedFlag",  
-    o."Remarks", 
-    wk."WorkKindName", 
-    p."PartsName", 
-    m."MaterialName", 
-    dk."DamageKindName", 
-    b."pms_sec_id",
-    b."structure_no", 
-    dl."DamageLevel"
-  ORDER BY o."CheckingID" ASC;
-`;
+  let query = "";
+  let params = [bridgeId];
 
+  // Determine which query to execute based on the `type` parameter
+  if (type === "new") {
+    query = `
+    SELECT 
+      o."ObjectID", 
+      o."CheckingID", 
+      o."SpanIndex",  
+      o."ApprovedFlag",
+      o."Remarks",
+      wk."WorkKindName", 
+      p."PartsName", 
+      m."MaterialName", 
+      dk."DamageKindName", 
+      b."pms_sec_id",
+      b."structure_no", 
+      dl."DamageLevel"
+    FROM bms."tbl_checkings" o
+    LEFT JOIN bms."tbl_work_kinds" wk ON o."WorkKindID" = wk."WorkKindID"
+    LEFT JOIN bms."tbl_bms_master_data" b ON o."ObjectID" = b."uu_bms_id"
+    LEFT JOIN bms."tbl_parts" p ON o."PartsID" = p."PartsID"
+    LEFT JOIN bms."tbl_materials" m ON o."MaterialID" = m."MaterialID"
+    LEFT JOIN bms."tbl_damage_kinds" dk ON o."DamageKindID" = dk."DamageKindID"
+    LEFT JOIN bms."tbl_damage_levels" dl ON o."DamageLevelID" = dl."DamageLevelID"
+    WHERE o."ObjectID" = $1
+    GROUP BY 
+      o."ObjectID", 
+      o."CheckingID", 
+      o."SpanIndex", 
+      o."ApprovedFlag",  
+      o."Remarks", 
+      wk."WorkKindName", 
+      p."PartsName", 
+      m."MaterialName", 
+      dk."DamageKindName", 
+      b."pms_sec_id",
+      b."structure_no", 
+      dl."DamageLevel"
+    ORDER BY o."CheckingID" ASC;
+    `;
+  } else if (type === "old") {
+    query = `
+    SELECT 
+      o."ObjectID", 
+      o."CheckingID", 
+      o."SpanIndex",  
+      o."ApprovedFlag",
+      o."Remarks",
+      wk."WorkKindName", 
+      p."PartsName", 
+      m."MaterialName", 
+      dk."DamageKindName", 
+      b."pms_sec_id",
+      b."structure_no", 
+      dl."DamageLevel"
+    FROM bms."tbl_checkings" o
+    LEFT JOIN bms."tbl_work_kinds" wk ON o."WorkKindID" = wk."WorkKindID"
+    LEFT JOIN bms."tbl_bms_master_data" b ON o."ObjectID" = b."uu_bms_id"
+    LEFT JOIN bms."tbl_parts" p ON o."PartsID" = p."PartsID"
+    LEFT JOIN bms."tbl_materials" m ON o."MaterialID" = m."MaterialID"
+    LEFT JOIN bms."tbl_damage_kinds" dk ON o."DamageKindID" = dk."DamageKindID"
+    LEFT JOIN bms."tbl_damage_levels" dl ON o."DamageLevelID" = dl."DamageLevelID"
+    WHERE o."ObjectID" = $1
+    GROUP BY 
+      o."ObjectID", 
+      o."CheckingID", 
+      o."SpanIndex", 
+      o."ApprovedFlag",  
+      o."Remarks", 
+      wk."WorkKindName", 
+      p."PartsName", 
+      m."MaterialName", 
+      dk."DamageKindName", 
+      b."pms_sec_id",
+      b."structure_no", 
+      dl."DamageLevel"
+    ORDER BY o."CheckingID" ASC;
+    `;
+  } else {
+    return res.status(400).json({ error: "Invalid type. Must be 'new' or 'old'." });
+  }
 
   try {
-    // Execute the query with the bridgeId parameter
-    const result = await pool.query(query, [bridgeId]);
+    // Execute the appropriate query with the bridgeId parameter
+    const result = await pool.query(query, params);
 
     // Return the rows as JSON with detailed data
     res.status(200).json({
@@ -247,6 +291,7 @@ app.get("/api/get-inspections", async (req, res) => {
       .json({ error: "An error occurred while fetching inspections data." });
   }
 });
+
 
 // API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
 app.get("/api/bridgecoordinates", async (req, res) => {
