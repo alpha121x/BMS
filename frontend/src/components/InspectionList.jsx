@@ -11,15 +11,15 @@ const InspectionList = ({ bridgeId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [inspectionType, setInspectionType] = useState("new"); // "new" or "old"
 
   const itemsPerPage = 10;
 
-  // Fetch data when bridgeId changes
   useEffect(() => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId]);
+  }, [bridgeId, inspectionType]); // Refetch when inspectionType changes
 
   const fetchData = async () => {
     setLoading(true);
@@ -29,8 +29,9 @@ const InspectionList = ({ bridgeId }) => {
         throw new Error("bridgeId is required");
       }
 
+      const typeQuery = inspectionType === "new" ? "new" : "old";
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}&type=${typeQuery}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch data");
@@ -194,6 +195,28 @@ const InspectionList = ({ bridgeId }) => {
           </span>
         </h6>
 
+        {/* Toggle buttons for old and new inspections */}
+        <div className="d-flex mb-3">
+          <Button
+            onClick={() => setInspectionType("new")}
+            style={{
+              ...buttonStyles,
+              backgroundColor: inspectionType === "new" ? "#3B82F6" : "#60A5FA",
+            }}
+          >
+            New Inspections
+          </Button>
+          <Button
+            onClick={() => setInspectionType("old")}
+            style={{
+              ...buttonStyles,
+              backgroundColor: inspectionType === "old" ? "#3B82F6" : "#60A5FA",
+            }}
+          >
+            Old Inspections
+          </Button>
+        </div>
+
         {loading && (
           <div
             className="loader"
@@ -270,7 +293,7 @@ const InspectionList = ({ bridgeId }) => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center">
+                <td colSpan="9" className="text-center">
                   No data available
                 </td>
               </tr>
@@ -278,7 +301,6 @@ const InspectionList = ({ bridgeId }) => {
           </tbody>
         </Table>
 
-        {/* Show the count of rows */}
         <div className="d-flex justify-content-between">
           <div className="text-sm text-gray-500">
             Showing {currentData.length} of {tableData.length} inspections
