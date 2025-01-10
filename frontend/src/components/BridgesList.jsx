@@ -49,7 +49,7 @@ const BridgesList = () => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
     // console.log("Bridge data: ", bridge);
     // return;
-    const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
+    const editUrl = `/BridgeInfo?bridgeData=${serializedBridgeData}`;
     window.location.href = editUrl;
   };
 

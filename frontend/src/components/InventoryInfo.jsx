@@ -1,12 +1,21 @@
 import React, { useState } from "react";
-import { Row, Col, Form, Modal, Button } from "react-bootstrap";
+import { Row, Col, Form, Modal } from "react-bootstrap";
 
 const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
-  // Access the photos array directly from inventoryData
   const photos = inventoryData?.photos || []; // Defaults to empty array if no photos
+
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
+  const closeModal = () => {
+    setShowPhotoModal(false);
+    setSelectedPhoto(null);
+  };
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
@@ -29,12 +38,15 @@ const InventoryInfo = ({ inventoryData }) => {
             <Row>
               {[
                 { label: "Bridge ID", field: "uu_bms_id" },
+                { label: "Bridge Name", field: "pms_sec_id,structure_no" },
                 { label: "Structure Type", field: "structure_type" },
                 { label: "Construction Year", field: "construction_year" },
                 { label: "District", field: "district" },
-                { label: "Road", field: "road_name" },
+                { label: "Road Name", field: "road_name" },
+                { label: "Road Name CWD", field: "road_name_cwd" },
                 { label: "Construction Type", field: "construction_type" },
                 { label: "Survey ID", field: "survey_id" },
+                { label: "Surveyor Name", field: "surveyor_name" },
                 { label: "Road Classification", field: "road_classification" },
                 { label: "Carriageway Type", field: "carriageway_type" },
                 { label: "Road Surface Type", field: "road_surface_type" },
@@ -45,24 +57,32 @@ const InventoryInfo = ({ inventoryData }) => {
                   field: "last_maintenance_date",
                   type: "date",
                 },
-                { label: "Structure Width (m)", field: "structure_width_m" },
-                { label: "Span Length (m)", field: "span_length_m" },
-                { label: "Number of Spans", field: "no_of_span" },
-                { label: "Latitude", field: "x_centroid" },
-                { label: "Longitude", field: "y_centroid" },
-              ].map(({ label, field }, index) => (
-                <Col key={index} md={6}>
-                  <Form.Group controlId={`form${field}`}>
-                    <Form.Label>{label}</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={inventoryData ? inventoryData[field] || "" : ""}
-                      readOnly
-                    />
-                  </Form.Group>
-                </Col>
-              ))}
+                { label: "Width Structure", field: "structure_width_m" },
+                { label: "Span Length", field: "span_length_m" },
+                { label: "No of Spans", field: "no_of_span" },
+                { label: "Latitude", field: "y_centroid" },
+                { label: "Longitude", field: "x_centroid" },
+                { label: "Remarks", field: "remarks" },
+              ].map(({ label, field }, index) => {
+                let value = "";
+                if (field.includes(",")) {
+                  const fields = field.split(",");
+                  value = fields
+                    .map((f) => inventoryData[f.trim()] || "")
+                    .join(", ");
+                } else {
+                  value = inventoryData ? inventoryData[field] || "" : "";
+                }
 
+                return (
+                  <Col key={index} md={6}>
+                    <Form.Group controlId={`form${field}`}>
+                      <Form.Label>{label}</Form.Label>
+                      <Form.Control type="text" value={value} readOnly />
+                    </Form.Group>
+                  </Col>
+                );
+              })}
               {/* Display Photos */}
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
@@ -101,7 +121,7 @@ const InventoryInfo = ({ inventoryData }) => {
       {/* Photo Modal */}
       <Modal
         show={showPhotoModal}
-        onHide={() => setShowPhotoModal(false)}
+        onHide={closeModal}
         centered
         dialogClassName="modal-dialog-scrollable"
       >

@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Form } from "react-bootstrap";
+import { Button, Row, Col, Form, Modal } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
 const EditBridgeForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedSpan, setSelectedSpan] = useState("");
   const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
   const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
-  const [images, setImages] = useState({
-    image1: [],
-    image2: [],
-    image3: [],
-    image4: [],
-    image5: [],
-  });
+
+  const photosToDisplay = bridgeData?.Photos || [];
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -28,33 +25,8 @@ const EditBridgeForm = () => {
     }
   }, [serializedData]);
 
-  // Handling photo uploads for the images (image1, image2, etc.)
-  const handleImageAdd = (e, imageKey) => {
-    const selectedFiles = Array.from(e.target.files);
-    const newImages = { ...images };
-
-    // Add new image(s) for the corresponding image key (image1, image2, etc.)
-    selectedFiles.forEach((file) => {
-      const photoUrl = URL.createObjectURL(file); // Create a URL for the uploaded file
-      newImages[imageKey] = newImages[imageKey]
-        ? [...newImages[imageKey], photoUrl]
-        : [photoUrl];
-    });
-
-    setImages(newImages);
-  };
-
-  // Remove a specific image from the list
-  const handleImageRemove = (imageKey, imageIndex) => {
-    const newImages = { ...images };
-    newImages[imageKey].splice(imageIndex, 1);
-    setImages(newImages);
-  };
-
-  console.log(bridgeData);
-
   // This will hold the number of spans for the bridge
-  const spanCount = bridgeData?.no_of_span || 0;
+  const spanCount = bridgeData?.Spans || 0;
 
   // Generate an array of span values based on `spanCount`
   const spanIndexes = Array.from(
@@ -89,6 +61,11 @@ const EditBridgeForm = () => {
     // window.location.href = "/Evaluation";
   };
 
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
   const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
     // Create a copy of the current spanPhotos state
     setSpanPhotos((prevData) => {
@@ -114,6 +91,24 @@ const EditBridgeForm = () => {
     if (inputElement) {
       inputElement.value = ""; // Reset the file input
     }
+  };
+
+  const handlePhotoRemove = (photoToRemove) => {
+    setBridgeData((prevData) => ({
+      ...prevData,
+      Photos: prevData.Photos.filter((photo) => photo !== photoToRemove),
+    }));
+  };
+
+  const handleNewPhotoAdd = (file) => {
+    // Create a URL for the newly added photo (assuming the file is an image)
+    const photoUrl = URL.createObjectURL(file);
+
+    // Update the photos array to include the new photo
+    setBridgeData((prevData) => ({
+      ...prevData,
+      Photos: [...(prevData.Photos || []), photoUrl],
+    }));
   };
 
   // Handle the photo upload for the selected span
@@ -186,32 +181,28 @@ const EditBridgeForm = () => {
           <Form onSubmit={handleSubmit}>
             <Row>
               {[
-                { label: "Bridge ID", field: "uu_bms_id" },
-                { label: "Bridge Name", field: "" },
-                { label: "Structure Type", field: "structure_type" },
-                { label: "Construction Year", field: "construction_year" },
-                { label: "District", field: "district" },
-                { label: "Road Name", field: "road_name" },
-                { label: "Road Name CWD", field: "road_name_cwd" },
-                { label: "Construction Type", field: "construction_type" },
-                { label: "Survey ID", field: "survey_id" },
-                { label: "Surveyor Name", field: "surveyor_name" },
-                { label: "Road Classification", field: "road_classification" },
-                { label: "Carriageway Type", field: "carriageway_type" },
-                { label: "Road Surface Type", field: "road_surface_type" },
-                { label: "Visual Condition", field: "visual_condition" },
-                { label: "Direction", field: "direction" },
-                {
-                  label: "Last Maintenance Date",
-                  field: "last_maintenance_date",
-                  type: "date",
-                },
-                { label: "Width Structure", field: "structure_width_m" },
-                { label: "Span Length", field: "span_length_m" },
-                { label: "No of Spans", field: "no_of_span" },
-                { label: "Latitude", field: "y_centroid" },
-                { label: "Longitude", field: "x_centroid" },
-                { label: "Remarks", field: "remarks" },
+                 { label: "Bridge ID", field: "uu_bms_id" },
+                 { label: "Structure Type", field: "structure_type" },
+                 { label: "Construction Year", field: "construction_year" },
+                 { label: "District", field: "district" },
+                 { label: "Road", field: "road_name" },
+                 { label: "Construction Type", field: "construction_type" },
+                 { label: "Survey ID", field: "survey_id" },
+                 { label: "Road Classification", field: "road_classification" },
+                 { label: "Carriageway Type", field: "carriageway_type" },
+                 { label: "Road Surface Type", field: "road_surface_type" },
+                 { label: "Visual Condition", field: "visual_condition" },
+                 { label: "Direction", field: "direction" },
+                 {
+                   label: "Last Maintenance Date",
+                   field: "last_maintenance_date",
+                   type: "date",
+                 },
+                 { label: "Structure Width (m)", field: "structure_width_m" },
+                 { label: "Span Length (m)", field: "span_length_m" },
+                 { label: "Number of Spans", field: "no_of_span" },
+                 { label: "Latitude", field: "x_centroid" },
+                 { label: "Longitude", field: "y_centroid" },
               ].map(({ label, field }, index) => (
                 <Col key={index} md={6}>
                   <Form.Group controlId={`form${field}`}>
@@ -284,6 +275,7 @@ const EditBridgeForm = () => {
                                   height: "100px",
                                   cursor: "pointer",
                                 }}
+                                onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
                               />
                               <Button
                                 variant="danger"
@@ -308,48 +300,47 @@ const EditBridgeForm = () => {
                 </>
               )}
 
-              <Col md={6}>
-                <Form.Group controlId="formBridgeImage">
-                  <Form.Label>Upload Image</Form.Label>
+              <Col md={12}>
+                <Form.Group controlId="formNewPhoto">
+                  <Form.Label>Add New Photo</Form.Label>
                   <Form.Control
                     type="file"
-                    multiple
-                    onChange={(e) => handleImageAdd(e, "image1")} // Add to image1 as an example
+                    onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
                   />
                 </Form.Group>
               </Col>
 
-              {/* Display Images and Remove Button */}
-              {Object.keys(images).map((imageKey) => (
-                <Col key={imageKey} md={12}>
-                  <div className="d-flex flex-wrap mt-3">
-                    {images[imageKey].map((photo, photoIndex) => (
-                      <div key={photoIndex} className="m-2">
+              <Col md={12}>
+                <Form.Group controlId="formPhotos">
+                  <Form.Label>Photos</Form.Label>
+                  <div className="d-flex flex-wrap">
+                    {/* Displaying dummy photos */}
+                    {photosToDisplay.map((photo, index) => (
+                      <div key={index} className="m-2">
                         <img
-                          src={photo} // Display the image
-                          alt={`image-${imageKey}-${photoIndex}`}
+                          src={`/${photo}`}
+                          alt={`Photo ${index + 1}`}
                           className="img-thumbnail"
                           style={{
                             width: "100px",
                             height: "100px",
                             cursor: "pointer",
                           }}
+                          onClick={() => handlePhotoClick(photo)}
                         />
                         <Button
                           variant="danger"
                           size="sm"
                           className="mt-1 w-100"
-                          onClick={() =>
-                            handleImageRemove(imageKey, photoIndex)
-                          }
+                          onClick={() => handlePhotoRemove(photo)}
                         >
                           Remove
                         </Button>
                       </div>
                     ))}
                   </div>
-                </Col>
-              ))}
+                </Form.Group>
+              </Col>
             </Row>
 
             {/* Save Button */}
@@ -361,6 +352,28 @@ const EditBridgeForm = () => {
           </Form>
         </div>
       </div>
+
+      {/* Photo Modal */}
+      <Modal
+        show={showPhotoModal}
+        onHide={() => setShowPhotoModal(false)}
+        centered
+        dialogClassName="modal-dialog-scrollable"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Photo Preview</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          {selectedPhoto && (
+            <img
+              src={`/${selectedPhoto}`}
+              alt="Selected Photo"
+              className="img-fluid"
+              style={{ maxHeight: "400px", objectFit: "contain" }}
+            />
+          )}
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
