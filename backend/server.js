@@ -164,7 +164,7 @@ app.get("/api/bridges", async (req, res) => {
           image_1, image_2, image_3, image_4, image_5
         ] AS photos
       FROM bms.tbl_bms_master_data 
-      ORDER BY uu_bms_id LIMIT 10`;
+      ORDER BY uu_bms_id`;
 
     // Execute the query
     const result = await pool.query(query);
@@ -288,84 +288,6 @@ ORDER BY o."CheckingID" ASC;
     res
       .status(500)
       .json({ error: "An error occurred while fetching inspections data." });
-  }
-});
-
-// API endpoint to fetch ObjectID, BridgeName, and coordinates (XCentroID, YCentroID)
-app.get("/api/bridgecoordinates", async (req, res) => {
-  const {
-    district = "%",
-    zone = "%",
-    southWestLat,
-    southWestLng,
-    northEastLat,
-    northEastLng,
-  } = req.query; // Default district and zone to '%' for wildcard matching
-
-  // Initialize query parameters and WHERE clauses
-  const queryParams = [];
-  const whereClauses = [];
-
-  // Add condition for ZoneID if provided
-  if (zone !== "%") {
-    queryParams.push(zone);
-    whereClauses.push(`"ZoneID"::text ILIKE $${queryParams.length}`);
-  }
-
-  // Add condition for DistrictID if provided
-  if (district !== "%") {
-    queryParams.push(district);
-    whereClauses.push(`"DistrictID"::text ILIKE $${queryParams.length}`);
-  }
-
-  // Add conditions for bounding box if all coordinates are provided
-  if (southWestLat && southWestLng && northEastLat && northEastLng) {
-    queryParams.push(parseFloat(southWestLat), parseFloat(northEastLat));
-    whereClauses.push(
-      `"YCentroID" BETWEEN $${queryParams.length - 1} AND $${
-        queryParams.length
-      }`
-    );
-
-    queryParams.push(parseFloat(southWestLng), parseFloat(northEastLng));
-    whereClauses.push(
-      `"XCentroID" BETWEEN $${queryParams.length - 1} AND $${
-        queryParams.length
-      }`
-    );
-  }
-
-  // Base SQL query
-  let query = `
-    SELECT 
-      "ObjectID", 
-      "BridgeName", 
-      "XCentroID", 
-      "YCentroID"
-    FROM public."D_Objects"
-  `;
-
-  // Add WHERE clause if filters exist
-  if (whereClauses.length > 0) {
-    query += ` WHERE ${whereClauses.join(" AND ")}`;
-  }
-
-  // Limit the results
-  // query += ` LIMIT 1000;`;
-
-  try {
-    // Query execution with parameters
-    const result = await pool.query(query, queryParams);
-
-    // Check if any data is returned
-    if (result.rows.length > 0) {
-      res.status(200).json(result.rows); // Send the result as JSON
-    } else {
-      res.status(404).json({ message: "No bridge data found" });
-    }
-  } catch (error) {
-    console.error("Error fetching bridge coordinates:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
