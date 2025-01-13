@@ -336,14 +336,6 @@ const EditBridgeForm = () => {
                           }}
                           onClick={() => handlePhotoClick(photo)}
                         />
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          className="mt-1 w-100"
-                          onClick={() => handlePhotoRemove(photo)}
-                        >
-                          Remove
-                        </Button>
                       </div>
                     ))}
                   </div>
@@ -374,7 +366,7 @@ const EditBridgeForm = () => {
         <Modal.Body className="text-center">
           {selectedPhoto && (
             <img
-              src={`/${selectedPhoto}`}
+              src={`${selectedPhoto}`}
               alt="Selected Photo"
               className="img-fluid"
               style={{ maxHeight: "400px", objectFit: "contain" }}
