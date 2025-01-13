@@ -192,8 +192,7 @@ const BridgesList = () => {
                         </td>
                         <td>{bridge.structure_type || "N/A"}</td>
                         <td>
-                          {bridge.pms_sec_id || "N/A"},
-                          {bridge.structure_no || "N/A"}
+                            {bridge.bridge_name}
                         </td>
                         <td>
                           {bridge.photos && bridge.photos.length > 0 ? (

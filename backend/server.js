@@ -153,18 +153,42 @@ app.get("/api/bridges", async (req, res) => {
     // Query to fetch all data from the table and aggregate images into a 'photos' array directly
     const query = `
       SELECT 
-        uu_bms_id, pms_sec_id, structure_no, structure_type_id, structure_type, 
-        road_name, road_name_cwd, route_id, survey_id, structure_no, surveyor_name, 
-        district_id, district, road_classification, road_surface_type, carriageway_type, 
-        direction, visual_condition, construction_type_id, construction_type, 
-        no_of_span, span_length_m, structure_width_m, construction_year, 
-        last_maintenance_date, remarks, is_surveyed, 
-        x_centroid, y_centroid, images_spans,
-        ARRAY[
-          image_1, image_2, image_3, image_4, image_5
-        ] AS photos
-      FROM bms.tbl_bms_master_data 
-      ORDER BY uu_bms_id`;
+    uu_bms_id, 
+    pms_sec_id, 
+    structure_no, 
+    structure_type_id, 
+    structure_type, 
+    road_name, 
+    road_name_cwd, 
+    route_id, 
+    survey_id, 
+    structure_no, 
+    surveyor_name, 
+    district_id, 
+    district, 
+    road_classification, 
+    road_surface_type, 
+    carriageway_type, 
+    direction, 
+    visual_condition, 
+    construction_type_id, 
+    construction_type, 
+    no_of_span, 
+    span_length_m, 
+    structure_width_m, 
+    construction_year, 
+    last_maintenance_date, 
+    remarks, 
+    is_surveyed, 
+    x_centroid, 
+    y_centroid, 
+    images_spans,
+    CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+    ARRAY[
+        image_1, image_2, image_3, image_4, image_5
+    ] AS photos
+FROM bms.tbl_bms_master_data 
+ORDER BY uu_bms_id`;
 
     // Execute the query
     const result = await pool.query(query);
