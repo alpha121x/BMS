@@ -11,7 +11,7 @@ const InspectionListDashboard = ({ bridgeId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [inspectionType, setInspectionType] = useState("new");
+  const [inspectionType, setInspectionType] = useState("new"); // "new" or "old"
 
   const itemsPerPage = 10;
 
@@ -19,7 +19,7 @@ const InspectionListDashboard = ({ bridgeId }) => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId, inspectionType]);
+  }, [bridgeId, inspectionType]); // Refetch when inspectionType changes
 
   const fetchData = async () => {
     setLoading(true);
@@ -182,13 +182,14 @@ const InspectionListDashboard = ({ bridgeId }) => {
           className="card-title text-lg font-semibold pb-2"
           style={{ fontSize: "1.25rem" }}
         >
-          Inspection List Dashboard
+          Inspections List
           <br />
           <span style={{ fontSize: "0.875rem" }}>
             Total Inspections: {tableData.length}
           </span>
         </h6>
 
+        {/* Toggle buttons for old and new inspections */}
         <div className="d-flex mb-3">
           <Button
             onClick={() => setInspectionType("new")}
@@ -228,12 +229,6 @@ const InspectionListDashboard = ({ bridgeId }) => {
               zIndex: "999",
             }}
           />
-        )}
-
-        {error && (
-          <div className="alert alert-danger text-center" style={{ marginTop: "20px" }}>
-            {error}
-          </div>
         )}
 
         <Table bordered responsive>
@@ -283,25 +278,28 @@ const InspectionListDashboard = ({ bridgeId }) => {
             ) : (
               <tr>
                 <td colSpan="9" className="text-center">
-                  No data available.
+                  No data available
                 </td>
               </tr>
             )}
           </tbody>
         </Table>
 
-        <div className="pagination d-flex justify-content-center mt-3">
-          {renderPaginationButtons()}
+        <div className="d-flex justify-content-between">
+          <div className="text-sm text-gray-500">
+            Showing {currentData.length} of {tableData.length} inspections
+          </div>
+          <div className="d-flex justify-content-center align-items-center">
+            {renderPaginationButtons()}
+          </div>
         </div>
       </div>
 
-      <Modal show={showModal} onHide={handleClose} centered size="lg">
+      <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Inspection Details</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <InspectionModal row={selectedRow} />
-        </Modal.Body>
+        <InspectionModal selectedRow={selectedRow} />
       </Modal>
     </div>
   );
