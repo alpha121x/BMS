@@ -87,6 +87,17 @@ const Header = () => {
             Dashboard
           </Link>
 
+          <Link
+            to="/BridgeWiseScore"
+            className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
+              activeTab === "/BridgeWiseScore"
+                ? "bg-blue-500 text-white"
+                : "hover:bg-green-100 text-blue-500"
+            }`}
+          >
+            Bridge Wise Score
+          </Link>
+
           {/* Reports Dropdown */}
           <div className="relative" ref={reportsRef}>
             <button

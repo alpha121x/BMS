@@ -8,7 +8,7 @@ const EditInspectionForm = () => {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
   // Ensure that 'bridgeData' contains a 'photos' field that holds an array of photo URLs
-  const photos = bridgeData?.photos || []; // Use 'photos' from the data or an empty array if not available
+  const photos = bridgeData?.PhotoPaths || []; // Use 'photos' from the data or an empty array if not available
 
   // Get the query parameter 'data' from the URL
   const { search } = useLocation();
@@ -37,7 +37,7 @@ const EditInspectionForm = () => {
     // Update the photos array to include the new photo
     setBridgeData((prevData) => ({
       ...prevData,
-      photos: [...(prevData.photos || []), photoUrl],
+      PhotoPaths: [...(prevData.PhotoPaths || []), photoUrl],
     }));
   };
 
@@ -56,7 +56,7 @@ const EditInspectionForm = () => {
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
       ...prevData,
-      photos: prevData.photos.filter((photo) => photo !== photoToRemove),
+      PhotoPaths: prevData.PhotoPaths.filter((photo) => photo !== photoToRemove),
     }));
   };
 
@@ -323,7 +323,7 @@ const EditInspectionForm = () => {
                     {photos.map((photo, index) => (
                       <div key={index} className="m-2">
                         <img
-                          src={`/${photo}`}
+                          src={`${photo}`}
                           alt={`Photo ${index + 1}`}
                           className="img-thumbnail"
                           style={{
@@ -371,7 +371,7 @@ const EditInspectionForm = () => {
         <Modal.Body className="text-center">
           {selectedPhoto && (
             <img
-              src={`/${selectedPhoto}`}
+              src={`${selectedPhoto}`}
               alt="Selected Photo"
               className="img-fluid"
               style={{ maxHeight: "400px", objectFit: "contain" }}

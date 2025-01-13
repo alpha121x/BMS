@@ -2,7 +2,7 @@ import React from "react";
 import { Modal, Carousel } from "react-bootstrap";
 
 const InspectionModal = ({ selectedRow }) => {
-  const photosToDisplay = selectedRow?.photos || [];
+  const photosToDisplay = selectedRow?.PhotoPaths || [];
 
   return (
     <Modal.Body>
@@ -53,7 +53,7 @@ const InspectionModal = ({ selectedRow }) => {
               <Carousel.Item key={index}>
                 <img
                   className="d-block w-100"
-                  src={`/${photo}`}  // Assuming the photos are accessible in the public folder
+                  src={`${photo}`}  // Assuming the photos are accessible in the public folder
                   alt={`Photo ${index + 1}`}
                   style={{ maxHeight: "300px", objectFit: "cover" }}
                 />
