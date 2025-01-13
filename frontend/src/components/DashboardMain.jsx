@@ -57,19 +57,19 @@ const DashboardMain = () => {
   const structureCards = [
     {
       label: "Total",
-      value: "18,805",
+      value: "42,830",
       icon: <UserIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Culvert",
-      value: "17,452",
+      value: "37,307",
       icon: <WrenchIcon className="w-10 h-10 text-blue-500" />, // Wrench for construction/maintenance
       color: "blue",
     },
     {
       label: "PC Bridge",
-      value: "470",
+      value: "5,515",
       icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />, // Building Office Icon, representing large structures like bridges
       color: "blue",
     },
@@ -81,7 +81,7 @@ const DashboardMain = () => {
     },
     {
       label: "Underpass",
-      value: "752",
+      value: "8",
       icon: <HomeIcon className="w-10 h-10 text-blue-500" />, // Home icon representing an underpass construction type
       color: "blue",
     },
@@ -91,7 +91,7 @@ const DashboardMain = () => {
   const inspectedCards = [
     {
       label: "Total",
-      value: "1,501",
+      value: "1,511",
       icon: <UserIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
