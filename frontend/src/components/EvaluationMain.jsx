@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { UserIcon, DocumentIcon } from "@heroicons/react/24/outline";
+import {
+  UserIcon,
+  HomeIcon,
+  DocumentTextIcon,
+  WrenchIcon,
+  BuildingOfficeIcon,
+} from "@heroicons/react/24/outline";
 import BridgesList from "./BridgesList";
 import FilterComponent from "./FilterComponent";
 
@@ -32,69 +38,93 @@ const EvaluationMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Data for cards
-  const cardData = [
+  // Data for Structure cards
+  const structureCards = [
     {
-      label: "Total Structures",
+      label: "Total",
       value: "18,805",
       icon: <UserIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
-      label: "Bridges",
-      value: "1,433",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      label: "Culvert",
+      value: "17,452",
+      icon: <WrenchIcon className="w-10 h-10 text-blue-500" />, // Wrench for construction/maintenance
       color: "blue",
     },
     {
-      label: "Culvert",
-      value: "17,302",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      label: "PC Bridge",
+      value: "470",
+      icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />, // Building Office Icon, representing large structures like bridges
+      color: "blue",
+    },
+    {
+      label: "Arch",
+      value: "31",
+      icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />, // Document icon to represent an architectural design
       color: "blue",
     },
     {
       label: "Underpass",
-      value: "14",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
+      value: "752",
+      icon: <HomeIcon className="w-10 h-10 text-blue-500" />, // Home icon representing an underpass construction type
       color: "blue",
     },
   ];
 
-  const inspectionData = [
+  // Data for Evaluation cards
+  const inspectedCards = [
     {
-      label: "Bridges Inspected",
-      value: "1,511",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
+      label: "Total",
+      value: "1,501",
+      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
     {
-      label: "Total Inspections",
-      value: "23,578",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
+      label: "Culvert",
+      value: "1,102",
+      icon: <WrenchIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "PC Bridge",
+      value: "347",
+      icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Arch",
+      value: "20",
+      icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
+    },
+    {
+      label: "Underpass",
+      value: "32",
+      icon: <HomeIcon className="w-10 h-10 text-blue-500" />,
+      color: "blue",
     },
   ];
 
-  const allCards = [...cardData, ...inspectionData];
-
   // Helper to assign border classes based on card color
   const getBorderClass = (color) => {
-    switch (color) {
-      case "blue":
-        return "border-blue-400 text-blue-500";
-      case "green":
-        return "border-green-400 text-green-500";
-      default:
-        return "border-gray-400 text-gray-500";
-    }
+    const colorClasses = {
+      blue: "border-blue-400 text-blue-500",
+      green: "border-green-400 text-green-500",
+      yellow: "border-yellow-400 text-yellow-500",
+      red: "border-red-400 text-red-500",
+      purple: "border-purple-400 text-purple-500",
+      indigo: "border-indigo-400 text-indigo-500",
+    };
+    return colorClasses[color] || "border-gray-400 text-gray-500"; // Default to gray
   };
 
-  // Card Component
+  // Card Component with dynamic border color
   const Card = ({ label, value, icon, color }) => (
     <div
-      className={`border-2 ${getBorderClass(
+      className={`bg-white py-1 px-4 rounded-lg shadow-lg flex items-center gap-4 border-2 ${getBorderClass(
         color
-      )} bg-white py-1 px-1 rounded-lg shadow-lg flex items-center gap-4`}
+      )}`}
     >
       <div>{icon}</div>
       <div>
@@ -127,7 +157,6 @@ const EvaluationMain = () => {
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -168,31 +197,34 @@ const EvaluationMain = () => {
         </div>
       </div>
 
-      {/* Cards Section */}
-      <div className="grid grid-cols-12 gap-2">
-        {allCards.map((card, index) => (
-          <div
-            key={index}
-            className="col-span-12 sm:col-span-6 md:col-span-3 lg:col-span-2"
-          >
-            <Card
-              label={card.label}
-              value={card.value}
-              icon={card.icon}
-              color={card.color}
-            />
-          </div>
-        ))}
+     {/* Structure Section */}
+     <div className="mb-2">
+        <h3 className="text-xl font-semibold text-gray-700">Structures</h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {structureCards.map((card, index) => (
+            <Card key={index} {...card} />
+          ))}
+        </div>
+      </div>
+
+      {/* Evaluation Section */}
+      <div className="mb-2">
+        <h3 className="text-xl font-semibold text-gray-700">Inspected</h3>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {inspectedCards.map((card, index) => (
+            <Card key={index} {...card} />
+          ))}
+        </div>
       </div>
 
       {/* Bridges */}
       <div className="mt-2 flex justify-center">
         <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
           <BridgesList
-          selectedDistrict={selectedDistrict}
-          startDate={startDate}
-          selectedZone={selectedZone}
-           />
+            selectedDistrict={selectedDistrict}
+            startDate={startDate}
+            selectedZone={selectedZone}
+          />
         </div>
       </div>
 
