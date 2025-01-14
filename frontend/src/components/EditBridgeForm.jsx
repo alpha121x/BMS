@@ -117,10 +117,31 @@ const EditBridgeForm = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        const newImageUrl = data.imageUrl; // Modify according to your server's response
+        // Get the existing photos array from bridgeData or initialize it as an empty array
+        const existingPhotos = bridgeData.photos || [];
+
+        // If there are existing photos, extract the directory path from the first one
+        let directoryPath = "";
+        if (existingPhotos.length > 0) {
+          const existingImageUrl = existingPhotos[0];
+          // Extract the directory path up to the last '/' or '\' (to handle both slashes)
+          const lastSlashIndex = Math.max(
+            existingImageUrl.lastIndexOf("/"),
+            existingImageUrl.lastIndexOf("\\")
+          );
+          directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1);
+        }
+
+        // Construct the new image name based on the uploaded file's name
+        const newImageName = file.name;
+
+        // Create the full URL for the new photo (with directory path and new file name)
+        const photoUrl = `${directoryPath}${newImageName}`;
+
+        // Update the bridgeData with the new photo URL
         setBridgeData((prevData) => ({
           ...prevData,
-          photos: [...(prevData.photos || []), newImageUrl],
+          photos: [...(prevData.photos || []), photoUrl], // Add the new photo URL to the array
         }));
       })
       .catch((error) => {
