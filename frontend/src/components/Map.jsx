@@ -37,12 +37,42 @@ const Map = () => {
 
         viewRef.current = view;
 
-        // Road Layer
+        // Define Popup Template for Road Layer
+        const popupTemplate = {
+          title: "{road_name}",
+          content: `
+            <div>
+              <p><strong>Road:</strong> {road_name}</p>
+              <p><strong>District:</strong> {district}</p>
+              <p><strong>Inventory Score:</strong> {inventory_score}</p>
+              <p><strong>Inspection Score:</strong> {inspection_score}</p>
+              <p><strong>Budget Cost:</strong> {budget_cost}</p>
+              <div>
+                <img src="{image1}" alt="Image 1" style="width:100px;" />
+                <img src="{image2}" alt="Image 2" style="width:100px;" />
+                <img src="{image3}" alt="Image 3" style="width:100px;" />
+              </div>
+              <div>
+                <button onclick="showInventoryInfo()">Inventory Information</button>
+                <button onclick="showInspectionInfo()">Inspection Information</button>
+              </div>
+            </div>
+          `
+        };
+
+        // Road Layer with Popup Template
         const roadLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
           title: "BMS",
           opacity: 0.8,
-          listMode: "show"
+          listMode: "show",
+          sublayers: [
+            {
+              id: 0,
+              title: "Roads",
+              popupTemplate: popupTemplate
+            }
+          ]
         });
 
         map.add(roadLayer);
@@ -93,3 +123,12 @@ const Map = () => {
 };
 
 export default Map;
+
+// Placeholder functions for button actions
+function showInventoryInfo() {
+  alert("Inventory Information button clicked!");
+}
+
+function showInspectionInfo() {
+  alert("Inspection Information button clicked!");
+}
