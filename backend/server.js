@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
@@ -10,6 +10,10 @@ const JWT_SECRET = "123456789";
 
 const app = express();
 const port = process.env.PORT || 8081;
+
+// Use built-in middleware for parsing JSON and URL-encoded data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Middleware
 app.use(cors());
@@ -323,7 +327,6 @@ app.get("/api/get-inspections", async (req, res) => {
   }
 });
 
-
 app.get("/api/structure-types", async (req, res) => {
   try {
     const result = await pool.query(
@@ -373,41 +376,37 @@ app.get("/api/districts", async (req, res) => {
   }
 });
 
-
-// Set up multer to store uploaded files in the 'uploads' folder inside the 'backend' folder
+// Set up multer to store uploaded files in a dynamically specified directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Define the folder where the files will be uploaded
-    cb(null, path.join(__dirname, 'uploads')); // Saves files in 'backend/uploads'
+    const directoryPath = req.body.directoryPath;
+
+    if (!directoryPath) {
+      return cb(new Error('No directory path specified.'));
+    }
+
+    const fullPath = path.join(__dirname, directoryPath);
+    fs.mkdirSync(fullPath, { recursive: true });
+
+    cb(null, fullPath);
   },
   filename: (req, file, cb) => {
-    // Define the filename for the uploaded image (use the original file name)
-    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to avoid name conflicts
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
-// Initialize multer with storage settings
 const upload = multer({ storage });
 
-// Handle file upload route
 app.post('/api/upload', upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
 
-  // Define the image URL (relative to the backend static path)
-  const imageUrl = `/uploads/${req.file.filename}`;
+  const directoryPath = req.body.directoryPath;
+  const imageUrl = path.join(directoryPath, req.file.filename).replace(/\\/g, '/');
 
-  // Return both imageUrl and filename in the response
-  res.json({
-    imageUrl: imageUrl,
-    filename: req.file.filename
-  });
+  res.json({ imageUrl, filename: req.file.filename });
 });
-
-// Serve static files (e.g., images) from the 'uploads' folder
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -103,34 +103,49 @@ const EditBridgeForm = () => {
       photos: prevData.photos.filter((photo) => photo !== photoToRemove),
     }));
   };
+
   // Function to handle the addition of a new photo
   const handleNewPhotoAdd = (file) => {
-    const uploadUrl = `${BASE_URL}/api/upload`; // Use the backend upload URL
+    // Get the existing photos array from bridgeData or initialize it as an empty array
+    const existingPhotos = bridgeData.photos || [];
 
+    // Initialize the directory path to be used for the new photo
+    let directoryPath = "";
+
+    // If there are existing photos, extract the directory path from the first one
+    if (existingPhotos.length > 0) {
+      const existingImageUrl = existingPhotos[0];
+      // Extract the directory path up to the last '/' or '\' (to handle both slashes)
+      const lastSlashIndex = Math.max(
+        existingImageUrl.lastIndexOf("/"),
+        existingImageUrl.lastIndexOf("\\")
+      );
+      directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1);
+      // console.log(directoryPath);
+    } else {
+      // If no existing photos, set a default directory path
+      directoryPath = "/uploads/"; // You can adjust this as needed
+    }
+
+    // Now, upload the file
+    const uploadUrl = `${BASE_URL}/api/upload`; // Use the backend upload URL
     const formData = new FormData();
+
+    // Append the file and directory path to the form data
     formData.append("file", file);
+    formData.append("directoryPath", directoryPath); // Send the directory path to the backend
 
     fetch(uploadUrl, {
       method: "POST",
       body: formData,
     })
-      .then((response) => response.json())
-      .then((data) => {
-        // Get the existing photos array from bridgeData or initialize it as an empty array
-        const existingPhotos = bridgeData.photos || [];
-
-        // If there are existing photos, extract the directory path from the first one
-        let directoryPath = "";
-        if (existingPhotos.length > 0) {
-          const existingImageUrl = existingPhotos[0];
-          // Extract the directory path up to the last '/' or '\' (to handle both slashes)
-          const lastSlashIndex = Math.max(
-            existingImageUrl.lastIndexOf("/"),
-            existingImageUrl.lastIndexOf("\\")
-          );
-          directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1);
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to upload the photo");
         }
-
+        return response.json();
+      })
+      .then((data) => {
         // Get the file name from the API response (assumed 'filename' is returned from the backend)
         const newImageName = data.filename;
 
@@ -145,6 +160,7 @@ const EditBridgeForm = () => {
       })
       .catch((error) => {
         console.error("Error uploading photo:", error);
+        alert(`Error uploading photo: ${error.message}`); // Show an alert with the error message
       });
   };
 
