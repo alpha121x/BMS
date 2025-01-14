@@ -8,24 +8,22 @@ const EzriMap = () => {
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, LayerList, Home, Legend] = await loadModules(
+        const [Map, MapView, MapImageLayer, LayerList] = await loadModules(
           [
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/MapImageLayer",
-            "esri/widgets/LayerList",
-            "esri/widgets/Home",
-            "esri/widgets/Legend"
+            "esri/widgets/LayerList"
           ],
           { css: true }
         );
 
-        // Create Map
+        // Initialize Map
         const map = new Map({
           basemap: "gray-vector"
         });
 
-        // Create MapView
+        // Initialize MapView
         const view = new MapView({
           container: mapRef.current,
           map: map,
@@ -39,45 +37,34 @@ const EzriMap = () => {
 
         viewRef.current = view;
 
-        // Add Road Layer
+        // Road Layer
         const roadLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
           title: "Road Network",
           opacity: 0.8,
-          listMode: "hide-children"
+          listMode: "show" // Ensure all layers are displayed properly
         });
 
         map.add(roadLayer);
 
-        // Add LayerList Widget
-        view.ui.add(
-          new LayerList({
-            view: view
-          }),
-          "top-right"
-        );
-
-        // Add Home Widget
-        view.ui.add(
-          new Home({
-            view: view
-          }),
-          "top-left"
-        );
-
-        // Add Legend Widget
-        const legend = new Legend({
+        // Layer List Widget
+        const layerList = new LayerList({
           view: view,
-          visible: false // Initially hidden
+          listItemCreatedFunction: (event) => {
+            // Customize Layer List items
+            const item = event.item;
+            if (item.layer === roadLayer) {
+              item.panel = {
+                content: "legend",
+                open: true
+              };
+            }
+          }
         });
-        view.ui.add(legend, "bottom-right");
 
-        // Watch Layer Visibility for Legend Control
-        roadLayer.watch("visible", (isVisible) => {
-          legend.visible = isVisible;
-        });
+        // Add Layer List to the view
+        view.ui.add(layerList, "top-right");
 
-        // Ensure MapView readiness
         await view.when();
         console.log("EzriMap is ready.");
       } catch (error) {
