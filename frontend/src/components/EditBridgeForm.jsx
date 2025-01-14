@@ -105,8 +105,26 @@ const EditBridgeForm = () => {
 
   // Function to handle the addition of a new photo
   const handleNewPhotoAdd = (file) => {
-    // Create a URL for the newly added photo (assuming the file is an image)
-    const photoUrl = URL.createObjectURL(file);
+    // Get the current photos array (assuming you have at least one existing photo URL)
+    const existingPhotos = bridgeData.photos || [];
+
+    // If there are existing photos, extract the directory path from the first one
+    let directoryPath = "";
+    if (existingPhotos.length > 0) {
+      const existingImageUrl = existingPhotos[0];
+      // Extract the directory path up to the last '/' or '\' (to handle both slashes)
+      const lastSlashIndex = Math.max(
+        existingImageUrl.lastIndexOf("/"),
+        existingImageUrl.lastIndexOf("\\")
+      );
+      directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1);
+    }
+
+    // Create a new image name based on the uploaded file name
+    const newImageName = file.name;
+
+    // Construct the full URL for the new photo
+    const photoUrl = `${directoryPath}${newImageName}`;
 
     // Update the photos array to include the new photo
     setBridgeData((prevData) => ({
