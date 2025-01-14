@@ -1,74 +1,75 @@
 import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 
-const Map = () => {
+const EzriMapWithPopup = () => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
 
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, LayerList] = await loadModules(
+        const [Map, MapView, MapImageLayer, FeatureLayer] = await loadModules(
           [
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/MapImageLayer",
-            "esri/widgets/LayerList"
+            "esri/layers/FeatureLayer"
           ],
           { css: true }
         );
 
-        // Initialize Map
         const map = new Map({
           basemap: "gray-vector"
         });
 
-        // Initialize MapView
         const view = new MapView({
           container: mapRef.current,
           map: map,
           center: [74.3436, 31.5497],
-          zoom: 11,
-          constraints: {
-            minZoom: 9,
-            maxZoom: 18
-          }
+          zoom: 11
         });
 
         viewRef.current = view;
 
-        // Road Layer
+        // Add the layer with popup enabled
         const roadLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "BMS",
-          opacity: 0.8,
-          listMode: "show"
+          sublayers: [
+            {
+              id: 0, // BRIDGES LOCATIONS layer ID
+              title: "Bridges Locations",
+              popupTemplate: {
+                title: "{road_name}", // Adjust this field to match your data
+                content: `
+                  <div>
+                    <p><strong>Road:</strong> {road_name}</p>
+                    <p><strong>District:</strong> {district}</p>
+                    <p><strong>Inventory Score:</strong> {inventory_score}</p>
+                    <p><strong>Inspection Score:</strong> {inspection_score}</p>
+                    <p><strong>Budget Cost:</strong> {budget_cost}</p>
+                    <div>
+                      <img src="{image1}" style="width:100px;" />
+                      <img src="{image2}" style="width:100px;" />
+                      <img src="{image3}" style="width:100px;" />
+                    </div>
+                    <div>
+                      <button onclick="showInventoryInfo()">Inventory Information</button>
+                      <button onclick="showInspectionInfo()">Inspection Information</button>
+                    </div>
+                  </div>
+                `
+              }
+            }
+          ],
+          opacity: 0.8
         });
 
         map.add(roadLayer);
 
-        // Layer List Widget
-        const layerList = new LayerList({
-          view: view,
-          listItemCreatedFunction: (event) => {
-            // Customize Layer List items
-            const item = event.item;
-            if (item.layer === roadLayer) {
-              item.panel = {
-                content: "legend",
-                open: true
-              };
-            }
-          }
-        });
-
-        // Add Layer List to the view
-        view.ui.add(layerList, "top-right");
-
         await view.when();
-        console.log("EzriMap is ready.");
+        console.log("Map is ready.");
       } catch (error) {
-        console.error("Error initializing EzriMap:", error);
+        console.error("Error initializing map:", error);
       }
     };
 
@@ -82,14 +83,17 @@ const Map = () => {
   }, []);
 
   return (
-    <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
-      <div
-        ref={mapRef}
-        className="map-container"
-        style={{ height: "400px" }}
-      />
-    </div>
+    <div className="map-container" ref={mapRef} style={{ height: "400px" }}></div>
   );
 };
 
-export default Map;
+export default EzriMapWithPopup;
+
+// Placeholder functions for button actions
+function showInventoryInfo() {
+  alert("Inventory Information button clicked!");
+}
+
+function showInspectionInfo() {
+  alert("Inspection Information button clicked!");
+}
