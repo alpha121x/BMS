@@ -395,9 +395,14 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     return res.status(400).send('No file uploaded.');
   }
 
-  // Return the URL of the uploaded image (relative to the backend public folder)
+  // Define the image URL (relative to the backend static path)
   const imageUrl = `/uploads/${req.file.filename}`;
-  res.json({ imageUrl });
+
+  // Return both imageUrl and filename in the response
+  res.json({
+    imageUrl: imageUrl,
+    filename: req.file.filename
+  });
 });
 
 // Serve static files (e.g., images) from the 'uploads' folder
