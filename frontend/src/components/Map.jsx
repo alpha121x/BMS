@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 
-const EzriMap = () => {
+const Map = () => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
 
@@ -42,7 +42,7 @@ const EzriMap = () => {
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
           title: "BMS",
           opacity: 0.8,
-          listMode: "show" // Ensure all layers are displayed properly
+          listMode: "show"
         });
 
         map.add(roadLayer);
@@ -92,4 +92,4 @@ const EzriMap = () => {
   );
 };
 
-export default EzriMap;
+export default Map;
