@@ -94,7 +94,7 @@ const BridgeInfo = () => {
                   </button>
                 </div>
                 <div className="text-lg font-semibold">
-                  Bridge Name: {bridgeData?.BridgeName || "Bridge Name"}
+                  Bridge Name: {bridgeData?.bridge_name || "Bridge Name"}
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>

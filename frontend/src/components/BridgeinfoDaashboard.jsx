@@ -60,77 +60,6 @@ const BridgeInfoDashboard = () => {
     navigate("/Dashboard"); // Adjust the route as needed
   };
 
-  // Data for cards
-  const cardData = [
-    {
-      label: "Total Structures",
-      value: "18,805",
-      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
-      color: "blue",
-    },
-    {
-      label: "Bridges",
-      value: "1,433",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
-      color: "blue",
-    },
-    {
-      label: "Culvert",
-      value: "17,302",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
-      color: "blue",
-    },
-    {
-      label: "Underpass",
-      value: "14",
-      icon: <DocumentIcon className="w-10 h-10 text-blue-500" />,
-      color: "blue",
-    },
-  ];
-
-  const inspectionData = [
-    {
-      label: "Bridges Inspected",
-      value: "1,511",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
-    },
-    {
-      label: "Total Inspections",
-      value: "23,578",
-      icon: <DocumentIcon className="w-10 h-10 text-green-500" />,
-      color: "green",
-    },
-  ];
-
-  const allCards = [...cardData, ...inspectionData];
-
-  // Helper to assign border classes based on card color
-  const getBorderClass = (color) => {
-    switch (color) {
-      case "blue":
-        return "border-blue-400 text-blue-500";
-      case "green":
-        return "border-green-400 text-green-500";
-      default:
-        return "border-gray-400 text-gray-500";
-    }
-  };
-
-  // Card Component
-  const Card = ({ label, value, icon, color }) => (
-    <div
-      className={`border-2 ${getBorderClass(
-        color
-      )} bg-white py-1 px-1 rounded-lg shadow-lg flex items-center gap-4`}
-    >
-      <div>{icon}</div>
-      <div>
-        <h4 className="text-sm font-bold text-gray-700">{label}</h4>
-        <p className="text-lg font-bold">{value}</p>
-      </div>
-    </div>
-  );
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -155,7 +84,7 @@ const BridgeInfoDashboard = () => {
                   </button>
                 </div>
                 <div className="text-lg font-semibold">
-                  Bridge Name: {bridgeData?.pms_sec_id || "Bridge Name"},{bridgeData?.structure_no}
+                  Bridge Name: {bridgeData?.bridge_name}
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>

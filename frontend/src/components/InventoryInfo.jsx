@@ -38,7 +38,7 @@ const InventoryInfo = ({ inventoryData }) => {
             <Row>
               {[
                 { label: "Bridge ID", field: "uu_bms_id" },
-                { label: "Bridge Name", field: "pms_sec_id,structure_no" },
+                { label: "Bridge Name", field: "bridge_name" },
                 { label: "Structure Type", field: "structure_type" },
                 { label: "Construction Year", field: "construction_year" },
                 { label: "District", field: "district" },
