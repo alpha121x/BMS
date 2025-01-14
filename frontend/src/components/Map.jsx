@@ -40,7 +40,7 @@ const EzriMap = () => {
         // Road Layer
         const roadLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Road Network",
+          title: "BMS",
           opacity: 0.8,
           listMode: "show" // Ensure all layers are displayed properly
         });
