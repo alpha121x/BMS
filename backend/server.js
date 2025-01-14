@@ -1,5 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const multer = require('multer');
+const path = require('path');
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
@@ -370,6 +372,37 @@ app.get("/api/districts", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
+// Set up multer to store uploaded files in the 'uploads' folder inside the 'backend' folder
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Define the folder where the files will be uploaded
+    cb(null, path.join(__dirname, 'uploads')); // Saves files in 'backend/uploads'
+  },
+  filename: (req, file, cb) => {
+    // Define the filename for the uploaded image (use the original file name)
+    cb(null, Date.now() + path.extname(file.originalname)); // Append timestamp to avoid name conflicts
+  },
+});
+
+// Initialize multer with storage settings
+const upload = multer({ storage });
+
+// Handle file upload route
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
+  // Return the URL of the uploaded image (relative to the backend public folder)
+  const imageUrl = `/uploads/${req.file.filename}`;
+  res.json({ imageUrl });
+});
+
+// Serve static files (e.g., images) from the 'uploads' folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Row, Col, Form, Modal } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
+import { BASE_URL } from "./config";
 
 const EditBridgeForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
@@ -25,7 +26,7 @@ const EditBridgeForm = () => {
     }
   }, [serializedData]);
 
-  console.log(bridgeData);
+  // console.log(bridgeData);
 
   // This will hold the number of spans for the bridge
   const spanCount = bridgeData?.no_of_span || 0;
@@ -105,32 +106,26 @@ const EditBridgeForm = () => {
 
   // Function to handle the addition of a new photo
   const handleNewPhotoAdd = (file) => {
-    // Get the current photos array (assuming you have at least one existing photo URL)
-    const existingPhotos = bridgeData.photos || [];
+    const uploadUrl = `${BASE_URL}/api/upload`; // Use the backend upload URL
 
-    // If there are existing photos, extract the directory path from the first one
-    let directoryPath = "";
-    if (existingPhotos.length > 0) {
-      const existingImageUrl = existingPhotos[0];
-      // Extract the directory path up to the last '/' or '\' (to handle both slashes)
-      const lastSlashIndex = Math.max(
-        existingImageUrl.lastIndexOf("/"),
-        existingImageUrl.lastIndexOf("\\")
-      );
-      directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1);
-    }
+    const formData = new FormData();
+    formData.append("file", file);
 
-    // Create a new image name based on the uploaded file name
-    const newImageName = file.name;
-
-    // Construct the full URL for the new photo
-    const photoUrl = `${directoryPath}${newImageName}`;
-
-    // Update the photos array to include the new photo
-    setBridgeData((prevData) => ({
-      ...prevData,
-      photos: [...(prevData.photos || []), photoUrl],
-    }));
+    fetch(uploadUrl, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const newImageUrl = data.imageUrl; // Modify according to your server's response
+        setBridgeData((prevData) => ({
+          ...prevData,
+          photos: [...(prevData.photos || []), newImageUrl],
+        }));
+      })
+      .catch((error) => {
+        console.error("Error uploading photo:", error);
+      });
   };
 
   // Handle the photo upload for the selected span
@@ -340,11 +335,10 @@ const EditBridgeForm = () => {
                 <Form.Group controlId="formPhotos">
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
-                    {/* Displaying dummy photos */}
                     {photos.map((photo, index) => (
                       <div key={index} className="m-2">
                         <img
-                          src={`${photo}`}
+                          src={`http://localhost:8081${photo}`}
                           alt={`Photo ${index + 1}`}
                           className="img-thumbnail"
                           style={{
