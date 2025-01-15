@@ -56,11 +56,44 @@ const EditBridgeForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setBridgeData(updatedBridgeData); // Save updated data back to state
-    console.log("Updated Bridge Data:", updatedBridgeData);
-    alert("Changes saved!");
-    // window.location.href = "/Evaluation";
+  
+    // Prepare the updated data to be sent to the backend
+    const updatedBridgeData = {
+      ...bridgeData,
+      // Any additional data transformations can be done here if needed
+    };
+
+    console.log(updatedBridgeData);
+    return;
+  
+    // Define the API endpoint for submitting the updated data
+    const updateUrl = `${BASE_URL}/api/updateBridgeData`;
+  
+    fetch(updateUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedBridgeData), // Send the updated bridge data as JSON
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to submit the data");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Data submitted successfully:", data);
+        alert("Changes saved successfully!");
+        // Optionally redirect or perform other actions after successful submission
+        // window.location.href = "/Evaluation";
+      })
+      .catch((error) => {
+        console.error("Error submitting data:", error);
+        alert(`Error submitting data: ${error.message}`); // Show an alert with the error message
+      });
   };
+  
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
@@ -123,41 +156,18 @@ const EditBridgeForm = () => {
       directoryPath = "/uploads/";
     }
 
-    // Now, upload the file
-    const uploadUrl = `${BASE_URL}/api/upload`; // Use the backend upload URL
-    const formData = new FormData();
+    // Generate a unique file name based on the current timestamp
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
+    const uniqueFileName = `overview_photo_${timestamp}.jpg`;
 
-    // Append the file and directory path to the form data
-    formData.append("file", file);
-    formData.append("directoryPath", directoryPath); // Send the directory path to the backend
+    // Construct the full URL for the new photo by appending the file name to the directory path
+    const photoUrl = `${directoryPath}${uniqueFileName}`;
 
-    fetch(uploadUrl, {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to upload the photo");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // Get the file name from the API response (assumed 'filename' is returned from the backend)
-        const newImageName = data.filename;
-
-        // Construct the full URL for the new photo by appending the file name to the directory path
-        const photoUrl = `${directoryPath}${newImageName}`;
-
-        // Update the bridgeData with the new photo URL
-        setBridgeData((prevData) => ({
-          ...prevData,
-          photos: [...(prevData.photos || []), photoUrl], // Add the new photo URL to the array
-        }));
-      })
-      .catch((error) => {
-        console.error("Error uploading photo:", error);
-        alert(`Error uploading photo: ${error.message}`); // Show an alert with the error message
-      });
+    // Update the bridgeData with the new photo URL
+    setBridgeData((prevData) => ({
+      ...prevData,
+      photos: [...(prevData.photos || []), photoUrl], // Add the new photo URL to the array
+    }));
   };
 
   // Handle the photo upload for the selected span
