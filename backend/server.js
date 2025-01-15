@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
+const fs = require('fs');
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
