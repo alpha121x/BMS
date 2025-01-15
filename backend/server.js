@@ -386,27 +386,38 @@ const storage = multer.diskStorage({
     }
 
     const fullPath = path.join(__dirname, directoryPath);
-    fs.mkdirSync(fullPath, { recursive: true });
-
-    cb(null, fullPath);
+    // Ensure the directory exists, create it if not
+    try {
+      fs.mkdirSync(fullPath, { recursive: true }); // Creating the directory if not exists
+      cb(null, fullPath); // Proceed with file upload
+    } catch (err) {
+      cb(new Error('Failed to create directory.'));
+    }
   },
   filename: (req, file, cb) => {
+    // Use the original file extension and prepend timestamp to avoid naming conflicts
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
+// Initialize multer upload middleware
 const upload = multer({ storage });
 
+// Route to handle file uploads
 app.post('/api/upload', upload.single('file'), (req, res) => {
+  // Check if file is uploaded
   if (!req.file) {
-    return res.status(400).send('No file uploaded.');
+    return res.status(400).json({ message: 'No file uploaded.' });
   }
 
+  // Extract directory path from request body and file path
   const directoryPath = req.body.directoryPath;
-  const imageUrl = path.join(directoryPath, req.file.filename).replace(/\\/g, '/');
+  const imageUrl = path.join(directoryPath, req.file.filename).replace(/\\/g, '/'); // Standardize file path
 
-  res.json({ imageUrl, filename: req.file.filename });
+  // If directory path exists and file uploaded successfully
+  return res.json({ message: 'File uploaded successfully.' });
 });
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

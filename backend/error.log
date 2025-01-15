@@ -1,0 +1,11 @@
+Error: No directory path specified.
+    at DiskStorage.destination [as getDestination] (C:\Users\PMYLS\Desktop\BMS\backend\server.js:385:17)
+    at DiskStorage._handleFile (C:\Users\PMYLS\Desktop\BMS\backend\node_modules\multer\storage\disk.js:31:8)
+    at C:\Users\PMYLS\Desktop\BMS\backend\node_modules\multer\lib\make-middleware.js:137:17
+    at allowAll (C:\Users\PMYLS\Desktop\BMS\backend\node_modules\multer\index.js:8:3)
+    at wrappedFileFilter (C:\Users\PMYLS\Desktop\BMS\backend\node_modules\multer\index.js:44:7)
+    at Multipart.<anonymous> (C:\Users\PMYLS\Desktop\BMS\backend\node_modules\multer\lib\make-middleware.js:107:7)
+    at Multipart.emit (node:events:514:28)
+    at HeaderParser.cb (C:\Users\PMYLS\Desktop\BMS\backend\node_modules\busboy\lib\types\multipart.js:358:14)
+    at HeaderParser.push (C:\Users\PMYLS\Desktop\BMS\backend\node_modules\busboy\lib\types\multipart.js:162:20)
+    at SBMH.ssCb [as _cb] (C:\Users\PMYLS\Desktop\BMS\backend\node_modules\busboy\lib\types\multipart.js:394:37)
