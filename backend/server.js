@@ -410,10 +410,6 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     return res.status(400).json({ message: 'No file uploaded.' });
   }
 
-  // Extract directory path from request body and file path
-  const directoryPath = req.body.directoryPath;
-  const imageUrl = path.join(directoryPath, req.file.filename).replace(/\\/g, '/'); // Standardize file path
-
   // If directory path exists and file uploaded successfully
   return res.json({ message: 'File uploaded successfully.' });
 });

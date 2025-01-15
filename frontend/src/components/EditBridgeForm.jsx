@@ -64,6 +64,9 @@ const EditBridgeForm = () => {
     // return;
   
     const photosToUpload = bridgeData.photos || [];
+
+    // console.log(photosToUpload);
+    // return;
   
     // Create an array of promises for uploading photos
     const uploadPromises = photosToUpload.map((photoUrl) => {
