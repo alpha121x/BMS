@@ -113,7 +113,6 @@ const EditBridgeForm = () => {
     // If there are existing photos, extract the directory path from the first one
     if (existingPhotos.length > 0) {
       const existingImageUrl = existingPhotos[0];
-      // Extract the directory path up to the last '/' or '\' (to handle both slashes)
       const lastSlashIndex = Math.max(
         existingImageUrl.lastIndexOf("/"),
         existingImageUrl.lastIndexOf("\\")
