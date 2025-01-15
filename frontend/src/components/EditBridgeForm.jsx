@@ -26,6 +26,8 @@ const EditBridgeForm = () => {
     }
   }, [serializedData]);
 
+  // console.log(bridgeData);
+
   // This will hold the number of spans for the bridge
   const spanCount = bridgeData?.no_of_span || 0;
 
@@ -56,44 +58,11 @@ const EditBridgeForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-  
-    // Prepare the updated data to be sent to the backend
-    const updatedBridgeData = {
-      ...bridgeData,
-      // Any additional data transformations can be done here if needed
-    };
-
-    console.log(updatedBridgeData);
-    return;
-  
-    // Define the API endpoint for submitting the updated data
-    const updateUrl = `${BASE_URL}/api/updateBridgeData`;
-  
-    fetch(updateUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedBridgeData), // Send the updated bridge data as JSON
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to submit the data");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Data submitted successfully:", data);
-        alert("Changes saved successfully!");
-        // Optionally redirect or perform other actions after successful submission
-        // window.location.href = "/Evaluation";
-      })
-      .catch((error) => {
-        console.error("Error submitting data:", error);
-        alert(`Error submitting data: ${error.message}`); // Show an alert with the error message
-      });
+    setBridgeData(updatedBridgeData); // Save updated data back to state
+    console.log("Updated Bridge Data:", updatedBridgeData);
+    alert("Changes saved!");
+    // window.location.href = "/Evaluation";
   };
-  
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
@@ -146,6 +115,7 @@ const EditBridgeForm = () => {
     // If there are existing photos, extract the directory path from the first one
     if (existingPhotos.length > 0) {
       const existingImageUrl = existingPhotos[0];
+      // Extract the directory path up to the last '/' or '\' (to handle both slashes)
       const lastSlashIndex = Math.max(
         existingImageUrl.lastIndexOf("/"),
         existingImageUrl.lastIndexOf("\\")
@@ -156,18 +126,41 @@ const EditBridgeForm = () => {
       directoryPath = "/uploads/";
     }
 
-    // Generate a unique file name based on the current timestamp
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, "");
-    const uniqueFileName = `overview_photo_${timestamp}.jpg`;
+    // Now, upload the file
+    const uploadUrl = `${BASE_URL}/api/upload`; // Use the backend upload URL
+    const formData = new FormData();
 
-    // Construct the full URL for the new photo by appending the file name to the directory path
-    const photoUrl = `${directoryPath}${uniqueFileName}`;
+    // Append the file and directory path to the form data
+    formData.append("file", file);
+    formData.append("directoryPath", directoryPath); // Send the directory path to the backend
 
-    // Update the bridgeData with the new photo URL
-    setBridgeData((prevData) => ({
-      ...prevData,
-      photos: [...(prevData.photos || []), photoUrl], // Add the new photo URL to the array
-    }));
+    fetch(uploadUrl, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to upload the photo");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Get the file name from the API response (assumed 'filename' is returned from the backend)
+        const newImageName = data.filename;
+
+        // Construct the full URL for the new photo by appending the file name to the directory path
+        const photoUrl = `${directoryPath}${newImageName}`;
+
+        // Update the bridgeData with the new photo URL
+        setBridgeData((prevData) => ({
+          ...prevData,
+          photos: [...(prevData.photos || []), photoUrl], // Add the new photo URL to the array
+        }));
+      })
+      .catch((error) => {
+        console.error("Error uploading photo:", error);
+        alert(`Error uploading photo: ${error.message}`); // Show an alert with the error message
+      });
   };
 
   // Handle the photo upload for the selected span
