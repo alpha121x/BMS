@@ -305,6 +305,7 @@ const EditBridgeForm = () => {
                       <Form.Label>Upload Photos</Form.Label>
                       <Form.Control
                         type="file"
+                        accept="image/*"
                         multiple // Allow multiple files
                         onChange={(e) => handleSpanPhotoAdd(e, selectedSpan)}
                       />
@@ -361,6 +362,7 @@ const EditBridgeForm = () => {
                   <Form.Label>Add New Photo</Form.Label>
                   <Form.Control
                     type="file"
+                    accept="image/*"
                     onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
                   />
                 </Form.Group>
