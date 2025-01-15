@@ -121,10 +121,9 @@ const EditBridgeForm = () => {
         existingImageUrl.lastIndexOf("\\")
       );
       directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1);
-      // console.log(directoryPath);
     } else {
       // If no existing photos, set a default directory path
-      directoryPath = "/uploads/"; // You can adjust this as needed
+      directoryPath = "/uploads/";
     }
 
     // Now, upload the file
