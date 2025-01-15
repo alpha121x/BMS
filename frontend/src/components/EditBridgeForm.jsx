@@ -26,8 +26,6 @@ const EditBridgeForm = () => {
     }
   }, [serializedData]);
 
-  // console.log(bridgeData);
-
   // This will hold the number of spans for the bridge
   const spanCount = bridgeData?.no_of_span || 0;
 
