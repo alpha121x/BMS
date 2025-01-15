@@ -59,22 +59,15 @@ const EditBridgeForm = () => {
   // Handle form submit and upload all photos
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // console.log(updatedBridgeData);
-    // return;
   
     const photosToUpload = bridgeData.photos || [];
-
-    // console.log(photosToUpload);
-    // return;
   
-    // Create an array of promises for uploading photos
-    const uploadPromises = photosToUpload.map((photoUrl) => {
-      const photoFile = bridgeData.photos.find((photo) => photo.includes(photoUrl)).file;
-      
+    const uploadPromises = photosToUpload.map((photoData) => {
+      const { file, directoryPath } = photoData; // Extract file and directory path
+  
       const formData = new FormData();
-      formData.append("file", photoFile);  // Append the file for upload
-      formData.append("directoryPath", photoUrl);  // Send the directory path
+      formData.append("file", file);  // Append the file for upload
+      formData.append("directoryPath", directoryPath);  // Send the directory path
   
       return fetch(`${BASE_URL}/api/upload`, {
         method: "POST",
@@ -87,19 +80,17 @@ const EditBridgeForm = () => {
           return response.json();
         })
         .then((data) => {
-          const newImageName = data.filename;
-          const photoUrl = `${photoUrl}${newImageName}`;  // Combine directory path with the new filename
-          return photoUrl;  // Return the final photo URL after upload
+          const uploadedPhotoUrl = data.imageUrl;  // Full URL returned by the backend
+          return uploadedPhotoUrl;  // Return the final uploaded photo URL
         });
     });
   
-    // Wait for all photos to be uploaded
     Promise.all(uploadPromises)
       .then((uploadedPhotos) => {
         // Update bridgeData with the uploaded photo URLs
         const updatedBridgeData = {
           ...bridgeData,
-          photos: uploadedPhotos,  // Update the photos array with the final uploaded URLs
+          photos: uploadedPhotos,  // Replace old photos with the new uploaded URLs
         };
   
         // Now submit the updated bridgeData
@@ -172,34 +163,32 @@ const EditBridgeForm = () => {
 
   // Function to handle the addition of a new photo
   const handleNewPhotoAdd = (file) => {
-    // Get the current photos array (assuming you have at least one existing photo URL)
     const existingPhotos = bridgeData.photos || [];
-  
-    // If there are existing photos, extract the directory path from the first one
+
     let directoryPath = "";
     if (existingPhotos.length > 0) {
       const existingImageUrl = existingPhotos[0];
-      // Extract the directory path up to the last '/' or '\' (to handle both slashes)
+      // Extract only the directory path (without filename)
       const lastSlashIndex = Math.max(
         existingImageUrl.lastIndexOf("/"),
         existingImageUrl.lastIndexOf("\\")
       );
-      directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1);
+      directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1); // Get only directory path
     }
-  
-    // Create a new image name based on the uploaded file name
-    const newImageName = file.name;
-  
-    // Construct the full URL for the new photo
-    const photoUrl = `${directoryPath}${newImageName}`;
-  
+
+    // Now you don't need to create the full URL, you can just store the directory path for future uploads
+    const newPhoto = {
+      file, // File to be uploaded
+      directoryPath, // Directory path where the photo will go
+    };
+
     // Update the photos array to include the new photo
     setBridgeData((prevData) => ({
       ...prevData,
-      photos: [...(prevData.photos || []), photoUrl],
+      photos: [...(prevData.photos || []), newPhoto], // Store file with directoryPath
     }));
   };
-  
+
   // Handle the photo upload for the selected span
   const handleSpanPhotoAdd = (e, span) => {
     const newSpanPhotos = { ...spanPhotos };

@@ -375,43 +375,47 @@ app.get("/api/districts", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 // Set up multer to store uploaded files in a dynamically specified directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    // Get the directory path from the request body
     const directoryPath = req.body.directoryPath;
 
     if (!directoryPath) {
       return cb(new Error('No directory path specified.'));
     }
 
+    // Make sure the directory exists, or create it
     const fullPath = path.join(__dirname, directoryPath);
-    // Ensure the directory exists, create it if not
-    try {
-      fs.mkdirSync(fullPath, { recursive: true }); // Creating the directory if not exists
-      cb(null, fullPath); // Proceed with file upload
-    } catch (err) {
-      cb(new Error('Failed to create directory.'));
-    }
+    fs.mkdirSync(fullPath, { recursive: true });
+
+    // Store the file in the specified directory
+    cb(null, fullPath);
   },
   filename: (req, file, cb) => {
-    // Use the original file extension and prepend timestamp to avoid naming conflicts
+    // Create a unique filename using current timestamp and file extension
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
-// Initialize multer upload middleware
+// Set up multer upload middleware
 const upload = multer({ storage });
 
-// Route to handle file uploads
+// Route to handle file upload
 app.post('/api/upload', upload.single('file'), (req, res) => {
-  // Check if file is uploaded
   if (!req.file) {
-    return res.status(400).json({ message: 'No file uploaded.' });
+    return res.status(400).send('No file uploaded.');
   }
 
-  // If directory path exists and file uploaded successfully
-  return res.json({ message: 'File uploaded successfully.' });
+  // Get the directory path from the body and generate the image URL
+  const directoryPath = req.body.directoryPath;
+  const uploadedFileUrl = path.join(directoryPath, req.file.filename).replace(/\\/g, '/');
+
+  // Send back the image URL and filename
+  res.json({
+    imageUrl: `${BASE_URL}/${uploadedFileUrl}`,  // Return the full URL of the uploaded image
+    filename: req.file.filename,  // Send back the filename to the frontend
+  });
 });
 
 
