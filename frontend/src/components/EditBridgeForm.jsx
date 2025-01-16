@@ -65,8 +65,8 @@ const handleSubmit = (e) => {
   // Get the photos array to upload, which contains file and directoryPath
   const photosToUpload = bridgeData.photos || [];
 
-  console.log(photosToUpload);
-  return;
+  // console.log(photosToUpload);
+  // return;
 
   // Create an array of promises for uploading photos
   const uploadPromises = photosToUpload.map((photoData) => {

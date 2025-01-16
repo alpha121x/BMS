@@ -376,6 +376,8 @@ app.get("/api/districts", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+
 // Set up multer to store uploaded files in a dynamically specified directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
