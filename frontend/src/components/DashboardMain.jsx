@@ -75,7 +75,7 @@ const DashboardMain = () => {
     },
     {
       label: "Arch",
-      value: "31",
+      value: "27",
       icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />, // Document icon to represent an architectural design
       color: "blue",
     },
@@ -109,13 +109,13 @@ const DashboardMain = () => {
     },
     {
       label: "Arch",
-      value: "20",
+      value: "4",
       icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Underpass",
-      value: "32",
+      value: "1",
       icon: <HomeIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
