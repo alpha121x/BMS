@@ -376,8 +376,6 @@ app.get("/api/districts", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
 // Set up multer to store uploaded files in a dynamically specified directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -416,7 +414,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
 
   // Send back the image URL and filename
   res.json({
-    imageUrl: `${BASE_URL}/${uploadedFileUrl}`,  // Return the full URL of the uploaded image
+    imageUrl: `${uploadedFileUrl}`,  // Return the full URL of the uploaded image
     filename: req.file.filename,  // Send back the filename to the frontend
   });
 });
