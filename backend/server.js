@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
-const fs = require('fs');
+const fs = require("fs");
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
@@ -376,26 +376,21 @@ app.get("/api/districts", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-// Set up multer to store uploaded files in a dynamically specified directory
+// Set up multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Get the directory path from the request body
-    const directoryPath = req.body.directoryPath;
+    // Specify the 'uploads' directory
+    const uploadsDir = path.join(__dirname, "uploads");
 
-    if (!directoryPath) {
-      return cb(new Error('No directory path specified.'));
-    }
+    // Make sure the 'uploads' directory exists or create it
+    fs.mkdirSync(uploadsDir, { recursive: true });
 
-    // Make sure the directory exists, or create it
-    const fullPath = path.join(__dirname, directoryPath);
-    fs.mkdirSync(fullPath, { recursive: true });
-
-    // Store the file in the specified directory
-    cb(null, fullPath);
+    // Use 'uploads' as the destination
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
-    // Create a unique filename using current timestamp and file extension
-    cb(null, Date.now() + path.extname(file.originalname));
+    // Use the original file name
+    cb(null, file.originalname);
   },
 });
 
@@ -403,19 +398,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Route to handle file upload
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post("/api/upload", upload.single("file"), (req, res) => {
   if (!req.file) {
-    return res.status(400).send('No file uploaded.');
+    return res.status(400).send("No file uploaded.");
   }
 
-  // Get the directory path from the body and generate the image URL
-  const directoryPath = req.body.directoryPath;
-  const uploadedFileUrl = path.join(directoryPath, req.file.filename).replace(/\\/g, '/');
+  // Get the uploaded file URL
+  const uploadedFileUrl = path
+    .join("uploads", req.file.filename)
+    .replace(/\\/g, "/");
 
   // Send back the image URL and filename
   res.json({
-    imageUrl: `${uploadedFileUrl}`,  // Return the full URL of the uploaded image
-    filename: req.file.filename,  // Send back the filename to the frontend
+    imageUrl: `${uploadedFileUrl}`, // Return the full URL of the uploaded image
+    filename: req.file.filename, // Send back the filename to the frontend
   });
 });
 
