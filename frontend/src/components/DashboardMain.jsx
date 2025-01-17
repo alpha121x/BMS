@@ -116,41 +116,45 @@ const DashboardMain = () => {
     },
   ];
 
-  // Helper to assign border classes based on card color
-  const getBorderClass = (color) => {
-    const colorClasses = {
-      blue: "border-blue-400 text-blue-500",
-      green: "border-green-400 text-green-500",
-      yellow: "border-yellow-400 text-yellow-500",
-      red: "border-red-400 text-red-500",
-      purple: "border-purple-400 text-purple-500",
-      indigo: "border-indigo-400 text-indigo-500",
-    };
-    return colorClasses[color] || "border-gray-400 text-gray-500"; // Default to gray
-  };
-
   // Card Component with dynamic border color
-  const Card = ({ label, value, icon, color }) => (
-    <div
-      className={`bg-white py-1 px-4 rounded-lg shadow-lg flex items-center gap-4 border-2 ${getBorderClass(
-        color
-      )}`}
+  const Card = ({ label, value, icon, iconSize = 32 }) => (
+    <div 
+      className="rounded-lg shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
+      style={{ 
+        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(96, 165, 250, 0.8))', // Light blue gradient
+        border: `2px solid #3B82F6`, // Blue border for contrast
+        borderRadius: '9px' // Rounded corners
+      }}
     >
-      <div>{icon}</div>
-      <div>
-        <h4 className="text-sm font-bold text-gray-700">{label}</h4>
-        <p className="text-lg font-bold">{value}</p>
+      <div className="flex items-center flex-grow text-white">
+        <div 
+          className="p-2 rounded-full mr-3 flex items-center justify-center"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.1)', // Slightly lighter background for the icon
+            width: `${iconSize + 16}px`,
+            height: `${iconSize + 16}px`,
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' // Add shadow for depth
+          }}
+        >
+          {React.cloneElement(icon, { size: iconSize, color: '#fff' })} {/* White icon color */}
+        </div>
+        <h3 className="text-xl font-semibold flex-grow text-white">
+          {label}
+        </h3>
+      </div>
+  
+      <div className="text-3xl font-bold ml-2 text-white">
+        {value}
       </div>
     </div>
   );
+  
 
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Header Section */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-500 mb-1">
-          Summary
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-500 mb-1">Summary</h2>
 
         <button
           className="btn btn-primary flex items-center gap-2"
