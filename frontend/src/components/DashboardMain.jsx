@@ -241,27 +241,9 @@ const DashboardMain = () => {
       </div>
 
       {/* Map and Pie Chart Layout */}
-      <div className="grid grid-cols-12 gap-2 mt-6">
-        <div className="col-span-12 lg:col-span-9">
+      <div className="">
           <Map/>
         </div>
-        <div className="col-span-12 lg:col-span-3">
-          <div
-            className="card p-2 rounded-lg text-black"
-            style={{
-              background: "#FFFFFF",
-              border: "2px solid #60A5FA",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-              position: "relative",
-            }}
-          >
-            <div className="card-body pb-0">
-              <h2 className="text-xl font-semibold mb-4">Bridges Chart</h2>
-              <GraphComponent data={infrastructureData} />
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Bridges List */}
       <div className="mt-2 flex justify-center">

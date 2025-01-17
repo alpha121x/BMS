@@ -116,7 +116,7 @@ const Map = () => {
       <div
         ref={mapRef}
         className="map-container"
-        style={{ height: "400px" }}
+        style={{ height: "500px" }}
       />
     </div>
   );
