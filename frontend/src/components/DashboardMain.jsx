@@ -240,7 +240,7 @@ const DashboardMain = () => {
         </div>
       </div>
 
-      {/* Map and Pie Chart Layout */}
+      {/* Map */}
       <div className="">
         <Map />
       </div>
