@@ -117,16 +117,31 @@ const BridgesList = () => {
 
   return (
     <>
-      <div className="w-full mx-auto mt-2">
-        <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
-          <div className="text-lg font-semibold">
+     <div className="w-full mx-auto mt-2">
+    <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
+        <div className="text-lg font-semibold">
             <div className="text-2xl font-bold">Bridges List</div>
             <div className="text-sm font-medium mt-1 text-gray-700">
-              Total Bridges: {bridgeCount || 0}
+                Total Bridges: {bridgeCount || 0}
             </div>
-          </div>
         </div>
-      </div>
+        <div className="flex space-x-2">
+            <button 
+                className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+                onClick={handleDownloadCSV}
+            >
+                Download CSV
+            </button>
+            <button 
+                className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+                onClick={handleDownloadExcel}
+            >
+                Download Excel
+            </button>
+        </div>
+    </div>
+</div>
+
       <div
         className="card p-2 rounded-lg text-black"
         style={{

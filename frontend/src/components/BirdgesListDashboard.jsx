@@ -13,15 +13,13 @@ const BridgesListDashboard = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-      fetchAllBridges();
+    fetchAllBridges();
   }, []);
 
   const fetchAllBridges = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/bridges`
-      );
+      const response = await fetch(`${BASE_URL}/api/bridges`);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
       const data = await response.json();
 
@@ -107,6 +105,10 @@ const BridgesListDashboard = () => {
     return buttons;
   };
 
+  const handleDownloadCSV = () => {};
+
+  const handleDownloadExcel = () => {};
+
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",
@@ -127,8 +129,23 @@ const BridgesListDashboard = () => {
               Total Bridges: {bridgeCount || 0}
             </div>
           </div>
+          <div className="flex space-x-2">
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+              onClick={handleDownloadCSV}
+            >
+              Download CSV
+            </button>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+              onClick={handleDownloadExcel}
+            >
+              Download Excel
+            </button>
+          </div>
         </div>
       </div>
+
       <div
         className="card p-2 rounded-lg text-black"
         style={{
@@ -186,11 +203,17 @@ const BridgesListDashboard = () => {
                         className="hover-row"
                       >
                         <td>{bridge.district || "N/A"}</td>
-                        <td className="truncate-text" title={bridge.road_name || "N/A"}>
+                        <td
+                          className="truncate-text"
+                          title={bridge.road_name || "N/A"}
+                        >
                           {bridge.road_name || "N/A"}
                         </td>
                         <td>{bridge.structure_type || "N/A"}</td>
-                        <td>{bridge.pms_sec_id || "N/A"},{bridge.structure_no || "N/A"}</td>
+                        <td>
+                          {bridge.pms_sec_id || "N/A"},
+                          {bridge.structure_no || "N/A"}
+                        </td>
                         <td>
                           {bridge.photos && bridge.photos.length > 0 ? (
                             <img
