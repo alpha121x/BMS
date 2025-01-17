@@ -4,8 +4,27 @@ import { Row, Col, Form, Modal } from "react-bootstrap";
 const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedSpan, setSelectedSpan] = useState("");
+  const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
 
   const photos = inventoryData?.photos || []; // Defaults to empty array if no photos
+
+  const spanphotos = inventoryData?.images_spans || []; // Defaults to empty array if no photos
+
+  // This will hold the number of spans for the bridge
+  const spanCount = inventoryData?.no_of_span || 0;
+
+  // Generate an array of span values based on `spanCount`
+  const spanIndexes = Array.from(
+    { length: spanCount },
+    (_, index) => index + 1
+  );
+
+  // Handling the selection change
+  const handleSpanSelect = (e) => {
+    setSelectedSpan(e.target.value);
+    setShowUploadOptions(true); // Show upload options when a span is selected
+  };
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
@@ -83,6 +102,65 @@ const InventoryInfo = ({ inventoryData }) => {
                   </Col>
                 );
               })}
+
+              {/* Span Select Dropdown */}
+              <div className="form-group">
+                <label>Select Span</label>
+                <select
+                  className="form-control"
+                  value={selectedSpan}
+                  onChange={handleSpanSelect}
+                >
+                  <option value="">-- Select Span --</option>
+                  {spanIndexes.map((span, index) => (
+                    <option key={index} value={span}>
+                      Span {span}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Show photo upload options if a span is selected */}
+              {showUploadOptions && selectedSpan && (
+                <>
+                  {/* Display selected span */}
+                  <Col md={12}>
+                    <Form.Label>Photos for Span {selectedSpan}</Form.Label>
+                  </Col>
+
+                  {/* Display Span Photos */}
+                  <Col md={8}>
+                    <Form.Group controlId="formSpanPhotos">
+                      <div className="d-flex flex-wrap">
+                        {/* Check if photos are available for the selected span */}
+                        {spanphotos[selectedSpan] &&
+                        spanphotos[selectedSpan].length > 0 ? (
+                          // Display photos if available
+                          spanphotos[selectedSpan].map((photo, index) => (
+                            <div key={photo.fileName} className="m-2">
+                              <img
+                                src={`${photo.fileName}`} // Adjust the path if needed
+                                alt={`Span Photo ${index + 1}`}
+                                className="img-thumbnail"
+                                style={{
+                                  width: "100px",
+                                  height: "100px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
+                              />
+                            </div>
+                          ))
+                        ) : (
+                          // Display message if no photos are available
+                          <p>No photos available for this span.</p>
+                        )}
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </>
+              )}
+
               {/* Display Photos */}
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
