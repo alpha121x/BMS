@@ -132,11 +132,12 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                   <Col md={8}>
                     <Form.Group controlId="formSpanPhotos">
                       <div className="d-flex flex-wrap">
-                        {/* Display span photos for the selected span */}
+                        {/* Check if photos are available for the selected span */}
                         {spanphotos[selectedSpan] &&
+                        spanphotos[selectedSpan].length > 0 ? (
+                          // Display photos if available
                           spanphotos[selectedSpan].map((photo, index) => (
                             <div key={photo.fileName} className="m-2">
-                              {/* Use photo.fileName as key */}
                               <img
                                 src={`${photo.fileName}`} // Adjust the path if needed
                                 alt={`Span Photo ${index + 1}`}
@@ -149,7 +150,11 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                                 onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
                               />
                             </div>
-                          ))}
+                          ))
+                        ) : (
+                          // Display message if no photos are available
+                          <p>No photos available for this span.</p>
+                        )}
                       </div>
                     </Form.Group>
                   </Col>
