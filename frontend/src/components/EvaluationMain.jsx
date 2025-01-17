@@ -76,7 +76,7 @@ const EvaluationMain = () => {
   const inspectedCards = [
     {
       label: "Total",
-      value: "1,501",
+      value: "1,511",
       icon: <UserIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
@@ -94,13 +94,13 @@ const EvaluationMain = () => {
     },
     {
       label: "Arch",
-      value: "20",
+      value: "4",
       icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
     {
       label: "Underpass",
-      value: "32",
+      value: "1",
       icon: <HomeIcon className="w-10 h-10 text-blue-500" />,
       color: "blue",
     },
