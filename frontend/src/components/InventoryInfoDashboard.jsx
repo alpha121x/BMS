@@ -9,6 +9,8 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
 
   const photos = inventoryData?.photos || []; // Defaults to empty array if no photos
 
+  const spanphotos = inventoryData?.images_spans || []; // Defaults to empty array if no photos
+
   // This will hold the number of spans for the bridge
   const spanCount = inventoryData?.no_of_span || 0;
 
@@ -112,7 +114,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                   <option value="">-- Select Span --</option>
                   {spanIndexes.map((span, index) => (
                     <option key={index} value={span}>
-                      Span{span}
+                      Span {span}
                     </option>
                   ))}
                 </select>
@@ -123,25 +125,21 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                 <>
                   {/* Display selected span */}
                   <Col md={12}>
-                    <Form.Label>
-                      Upload Photos for Span {selectedSpan}
-                    </Form.Label>
+                    <Form.Label>Photos for Span {selectedSpan}</Form.Label>
                   </Col>
 
-                  {/* Display Uploaded Photos */}
+                  {/* Display Span Photos */}
                   <Col md={8}>
-                    <Form.Group controlId="formPhotos">
-                      <Form.Label>Span Photos</Form.Label>
+                    <Form.Group controlId="formSpanPhotos">
                       <div className="d-flex flex-wrap">
-                        {/* Display uploaded photos for the selected span */}
-                        {spanPhotos[selectedSpan] &&
-                          spanPhotos[selectedSpan].map((photo, index) => (
+                        {/* Display span photos for the selected span */}
+                        {spanphotos[selectedSpan] &&
+                          spanphotos[selectedSpan].map((photo, index) => (
                             <div key={photo.fileName} className="m-2">
-                              {" "}
                               {/* Use photo.fileName as key */}
                               <img
                                 src={`${photo.fileName}`} // Adjust the path if needed
-                                alt={`Photo ${index + 1}`}
+                                alt={`Span Photo ${index + 1}`}
                                 className="img-thumbnail"
                                 style={{
                                   width: "100px",
@@ -150,21 +148,6 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                                 }}
                                 onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
                               />
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                className="mt-1 w-100"
-                                onClick={
-                                  () =>
-                                    handleSpanPhotoRemove(
-                                      selectedSpan,
-                                      photo.fileName,
-                                      index
-                                    ) // Use photo.fileName to remove photo
-                                }
-                              >
-                                Remove
-                              </Button>
                             </div>
                           ))}
                       </div>

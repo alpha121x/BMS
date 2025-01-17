@@ -57,82 +57,81 @@ const EditBridgeForm = () => {
   };
 
   // Handle form submit and upload all photos
-const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  console.log(updatedBridgeData);
+    console.log(updatedBridgeData);
 
-  // Get the photos array to upload, which contains file and directoryPath
-  const photosToUpload = bridgeData.photos || [];
+    // Get the photos array to upload, which contains file and directoryPath
+    const photosToUpload = bridgeData.photos || [];
 
-  // console.log(photosToUpload);
-  // return;
+    // console.log(photosToUpload);
+    // return;
 
-  // Create an array of promises for uploading photos
-  const uploadPromises = photosToUpload.map((photoData) => {
-    const { file, directoryPath } = photoData; // Extract file and directory path
+    // Create an array of promises for uploading photos
+    const uploadPromises = photosToUpload.map((photoData) => {
+      const { file, directoryPath } = photoData; // Extract file and directory path
 
-    // Only upload if the file is present
-    if (!file) {
-      return Promise.reject("No file found for upload.");
-    }
+      // Only upload if the file is present
+      if (!file) {
+        return Promise.reject("No file found for upload.");
+      }
 
-    const formData = new FormData();
-    formData.append("file", file);  // Append the file for upload
-    formData.append("directoryPath", directoryPath);  // Send the directory path
+      const formData = new FormData();
+      formData.append("file", file); // Append the file for upload
+      formData.append("directoryPath", directoryPath); // Send the directory path
 
-    return fetch(`${BASE_URL}/api/upload`, {
-      method: "POST",
-      body: formData,
-    })
+      return fetch(`${BASE_URL}/api/upload`, {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to upload the photo");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          const uploadedPhotoUrl = data.imageUrl; // Full URL returned by the backend
+          return uploadedPhotoUrl; // Return the final uploaded photo URL
+        });
+    });
+
+    // Wait for all photos to be uploaded
+    Promise.all(uploadPromises)
+      .then((uploadedPhotos) => {
+        // Update bridgeData with the uploaded photo URLs
+        const updatedBridgeData = {
+          ...bridgeData,
+          photos: uploadedPhotos, // Replace old photos with the new uploaded URLs
+        };
+
+        // Now submit the updated bridgeData
+        const updateUrl = `${BASE_URL}/api/updateBridgeData`;
+
+        return fetch(updateUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedBridgeData), // Send the updated data including photo URLs
+        });
+      })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Failed to upload the photo");
+          throw new Error("Failed to submit the data");
         }
         return response.json();
       })
       .then((data) => {
-        const uploadedPhotoUrl = data.imageUrl;  // Full URL returned by the backend
-        return uploadedPhotoUrl;  // Return the final uploaded photo URL
+        console.log("Data submitted successfully:", data);
+        alert("Changes saved successfully!");
+      })
+      .catch((error) => {
+        console.error("Error submitting data:", error);
+        alert(`Error submitting data: ${error.message}`);
       });
-  });
-
-  // Wait for all photos to be uploaded
-  Promise.all(uploadPromises)
-    .then((uploadedPhotos) => {
-      // Update bridgeData with the uploaded photo URLs
-      const updatedBridgeData = {
-        ...bridgeData,
-        photos: uploadedPhotos,  // Replace old photos with the new uploaded URLs
-      };
-
-      // Now submit the updated bridgeData
-      const updateUrl = `${BASE_URL}/api/updateBridgeData`;
-
-      return fetch(updateUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedBridgeData),  // Send the updated data including photo URLs
-      });
-    })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to submit the data");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      console.log("Data submitted successfully:", data);
-      alert("Changes saved successfully!");
-    })
-    .catch((error) => {
-      console.error("Error submitting data:", error);
-      alert(`Error submitting data: ${error.message}`);
-    });
-};
-
+  };
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
