@@ -360,7 +360,7 @@ const handleSubmit = (e) => {
                               {" "}
                               {/* Use photo.fileName as key */}
                               <img
-                                src={`/${photo.fileName}`} // Adjust the path if needed
+                                src={`${photo.fileName}`} // Adjust the path if needed
                                 alt={`Photo ${index + 1}`}
                                 className="img-thumbnail"
                                 style={{

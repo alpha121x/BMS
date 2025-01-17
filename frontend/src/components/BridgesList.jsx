@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table } from "react-bootstrap";
+import { Button,  Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
@@ -10,26 +10,28 @@ const BridgesList = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetchAllBridges();
-  }, []);
+    fetchAllBridges(currentPage, itemsPerPage);
+  }, [currentPage]);
 
-  const fetchAllBridges = async () => {
+  const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
     try {
-      const response = await fetch(`${BASE_URL}/api/bridges`);
+      const set = (page - 1) * limit;
+
+      const response = await fetch(
+        `${BASE_URL}/api/bridges?set=${set}&limit=${limit}`
+      );
       if (!response.ok) throw new Error("Failed to fetch bridge data");
+
       const data = await response.json();
 
-      // Set table data and extract the total count
-      setTableData(data);
-      if (data.length > 0) {
-        setBridgeCount(data.length); // Use actual length of the fetched data
-      } else {
-        setBridgeCount(0); // Default to 0 if no data
-      }
+      setTableData(data.bridges); // Assuming the response contains a 'bridges' array
+      setBridgeCount(data.totalCount); // Assuming the response includes a 'totalCount'
+      setTotalPages(Math.ceil(data.totalCount / limit));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -37,28 +39,16 @@ const BridgesList = () => {
     }
   };
 
-  const totalPages = Math.ceil(tableData.length / itemsPerPage);
-  const currentData = tableData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
 
   const handleRowClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-    // console.log("Bridge data: ", bridge);
-    // return;
     const editUrl = `/BridgeInfo?bridgeData=${serializedBridgeData}`;
     window.location.href = editUrl;
-  };
-
-  const handleDownloadCSV = () => {
-    // Logic for downloading CSV
-  };
-
-  const handleDownloadExcel = () => {
-    // Logic for downloading Excel
   };
 
   const renderPaginationButtons = () => {
@@ -111,6 +101,14 @@ const BridgesList = () => {
     );
 
     return buttons;
+  };
+
+  const handleDownloadCSV = () => {
+    // Logic for downloading CSV
+  };
+
+  const handleDownloadExcel = () => {
+    // Logic for downloading Excel
   };
 
   const buttonStyles = {
@@ -199,8 +197,8 @@ const BridgesList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentData.length > 0 ? (
-                    currentData.map((bridge, index) => (
+                  {tableData.length > 0 ? (
+                    tableData.map((bridge, index) => (
                       <tr
                         key={index}
                         onClick={() => handleRowClick(bridge)}
@@ -214,7 +212,10 @@ const BridgesList = () => {
                           {bridge.road_name || "N/A"}
                         </td>
                         <td>{bridge.structure_type || "N/A"}</td>
-                        <td>{bridge.bridge_name}</td>
+                        <td>
+                          {bridge.pms_sec_id || "N/A"},
+                          {bridge.structure_no || "N/A"}
+                        </td>
                         <td>
                           {bridge.photos && bridge.photos.length > 0 ? (
                             <img

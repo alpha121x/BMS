@@ -4,8 +4,25 @@ import { Row, Col, Form, Modal } from "react-bootstrap";
 const InventoryInfoDashboard = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedSpan, setSelectedSpan] = useState("");
+  const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
 
   const photos = inventoryData?.photos || []; // Defaults to empty array if no photos
+
+  // This will hold the number of spans for the bridge
+  const spanCount = inventoryData?.no_of_span || 0;
+
+  // Generate an array of span values based on `spanCount`
+  const spanIndexes = Array.from(
+    { length: spanCount },
+    (_, index) => index + 1
+  );
+
+  // Handling the selection change
+  const handleSpanSelect = (e) => {
+    setSelectedSpan(e.target.value);
+    setShowUploadOptions(true); // Show upload options when a span is selected
+  };
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
@@ -83,10 +100,83 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                   </Col>
                 );
               })}
+
+              {/* Span Select Dropdown */}
+              <div className="form-group">
+                <label>Select Span</label>
+                <select
+                  className="form-control"
+                  value={selectedSpan}
+                  onChange={handleSpanSelect}
+                >
+                  <option value="">-- Select Span --</option>
+                  {spanIndexes.map((span, index) => (
+                    <option key={index} value={span}>
+                      Span{span}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Show photo upload options if a span is selected */}
+              {showUploadOptions && selectedSpan && (
+                <>
+                  {/* Display selected span */}
+                  <Col md={12}>
+                    <Form.Label>
+                      Upload Photos for Span {selectedSpan}
+                    </Form.Label>
+                  </Col>
+
+                  {/* Display Uploaded Photos */}
+                  <Col md={8}>
+                    <Form.Group controlId="formPhotos">
+                      <Form.Label>Span Photos</Form.Label>
+                      <div className="d-flex flex-wrap">
+                        {/* Display uploaded photos for the selected span */}
+                        {spanPhotos[selectedSpan] &&
+                          spanPhotos[selectedSpan].map((photo, index) => (
+                            <div key={photo.fileName} className="m-2">
+                              {" "}
+                              {/* Use photo.fileName as key */}
+                              <img
+                                src={`${photo.fileName}`} // Adjust the path if needed
+                                alt={`Photo ${index + 1}`}
+                                className="img-thumbnail"
+                                style={{
+                                  width: "100px",
+                                  height: "100px",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
+                              />
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                className="mt-1 w-100"
+                                onClick={
+                                  () =>
+                                    handleSpanPhotoRemove(
+                                      selectedSpan,
+                                      photo.fileName,
+                                      index
+                                    ) // Use photo.fileName to remove photo
+                                }
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          ))}
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </>
+              )}
+
               {/* Display Photos */}
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
-                  <Form.Label>Photos</Form.Label>
+                  <Form.Label>Overview Photos</Form.Label>
                   <div className="d-flex flex-wrap">
                     {photos.length > 0 ? (
                       photos.map((photo, index) => (
