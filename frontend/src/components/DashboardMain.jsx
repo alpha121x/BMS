@@ -25,10 +25,6 @@ const DashboardMain = () => {
   const [minYear, setMinYear] = useState("");
   const [maxYear, setMaxYear] = useState("");
 
-  const [infrastructureData, setInfrastructureData] = useState([
-    14, 1433, 17302,
-  ]);
-
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
 

@@ -231,7 +231,7 @@ const BridgesListDashboard = () => {
                             />
                           )}
                         </td>
-                        <td>{bridge.visual_condition || "N/A"}</td>
+                        <td></td>
                       </tr>
                     ))
                   ) : (
