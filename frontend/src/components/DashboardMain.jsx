@@ -13,18 +13,18 @@ import BridgesListDashboard from "./BirdgesListDashboard";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [minBridgeLength, setMinBridgeLength] = useState('');
-  const [maxBridgeLength, setMaxBridgeLength] = useState('');
-  const [minSpanLength, setMinSpanLength] = useState('');
-  const [maxSpanLength, setMaxSpanLength] = useState('');
-  const [structureType, setStructureType] = useState('');
-  const [constructionType, setConstructionType] = useState('');
-  const [category, setCategory] = useState('');
-  const [noOfSpan, setNoOfSpan] = useState('');
-  const [evaluationStatus, setEvaluationStatus] = useState('');
-  const [inspectionStatus, setInspectionStatus] = useState('');
-  const [minYear, setMinYear] = useState('');
-  const [maxYear, setMaxYear] = useState('');
+  const [minBridgeLength, setMinBridgeLength] = useState("");
+  const [maxBridgeLength, setMaxBridgeLength] = useState("");
+  const [minSpanLength, setMinSpanLength] = useState("");
+  const [maxSpanLength, setMaxSpanLength] = useState("");
+  const [structureType, setStructureType] = useState("");
+  const [constructionType, setConstructionType] = useState("");
+  const [category, setCategory] = useState("");
+  const [noOfSpan, setNoOfSpan] = useState("");
+  const [evaluationStatus, setEvaluationStatus] = useState("");
+  const [inspectionStatus, setInspectionStatus] = useState("");
+  const [minYear, setMinYear] = useState("");
+  const [maxYear, setMaxYear] = useState("");
 
   const [infrastructureData, setInfrastructureData] = useState([
     14, 1433, 17302,
@@ -154,7 +154,7 @@ const DashboardMain = () => {
       {/* Header Section */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-500 mb-1">
-          Dashboard Overview
+          Summary
         </h2>
 
         <button
@@ -203,19 +203,19 @@ const DashboardMain = () => {
 
         <div className="offcanvas-body">
           <FilterComponent
-             setSelectedDistrict={setSelectedDistrict}
-             setMinBridgeLength={setMinBridgeLength}
-             setMaxBridgeLength={setMaxBridgeLength}
-             setMinSpanLength={setMinSpanLength}
-             setMaxSpanLength={setMaxSpanLength}
-             setStructureType={setStructureType}
-             setConstructionType={setConstructionType}
-             setCategory={setCategory}
-             setNoOfSpan={setNoOfSpan}
-             setEvaluationStatus={setEvaluationStatus}
-             setInspectionStatus={setInspectionStatus}
-             setMinYear={setMinYear}
-             setMaxYear={setMaxYear}
+            setSelectedDistrict={setSelectedDistrict}
+            setMinBridgeLength={setMinBridgeLength}
+            setMaxBridgeLength={setMaxBridgeLength}
+            setMinSpanLength={setMinSpanLength}
+            setMaxSpanLength={setMaxSpanLength}
+            setStructureType={setStructureType}
+            setConstructionType={setConstructionType}
+            setCategory={setCategory}
+            setNoOfSpan={setNoOfSpan}
+            setEvaluationStatus={setEvaluationStatus}
+            setInspectionStatus={setInspectionStatus}
+            setMinYear={setMinYear}
+            setMaxYear={setMaxYear}
           />
         </div>
       </div>
@@ -242,8 +242,8 @@ const DashboardMain = () => {
 
       {/* Map and Pie Chart Layout */}
       <div className="">
-          <Map/>
-        </div>
+        <Map />
+      </div>
 
       {/* Bridges List */}
       <div className="mt-2 flex justify-center">
