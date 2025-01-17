@@ -2,7 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
-const fs = require('fs');
+const fs = require("fs");
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
@@ -154,54 +154,66 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
-// Define the API endpoint to get data from `bms.tbl_bms_master_data`
 app.get("/api/bridges", async (req, res) => {
   try {
-    // Query to fetch all data from the table and aggregate images into a 'photos' array directly
+    // Extract 'set' (offset) and 'limit' from query parameters, default to 0 and 10 if not provided
+    const { set = 0, limit = 10 } = req.query;
+
+    // Query to fetch paginated data from the table and aggregate images into a 'photos' array directly
     const query = `
       SELECT 
-    uu_bms_id, 
-    pms_sec_id, 
-    structure_no, 
-    structure_type_id, 
-    structure_type, 
-    road_name, 
-    road_name_cwd, 
-    route_id, 
-    survey_id, 
-    structure_no, 
-    surveyor_name, 
-    district_id, 
-    district, 
-    road_classification, 
-    road_surface_type, 
-    carriageway_type, 
-    direction, 
-    visual_condition, 
-    construction_type_id, 
-    construction_type, 
-    no_of_span, 
-    span_length_m, 
-    structure_width_m, 
-    construction_year, 
-    last_maintenance_date, 
-    remarks, 
-    is_surveyed, 
-    x_centroid, 
-    y_centroid, 
-    images_spans,
-    CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
-    ARRAY[
-        image_1, image_2, image_3, image_4, image_5
-    ] AS photos
-FROM bms.tbl_bms_master_data 
-ORDER BY uu_bms_id`;
+        uu_bms_id, 
+        pms_sec_id, 
+        structure_no, 
+        structure_type_id, 
+        structure_type, 
+        road_name, 
+        road_name_cwd, 
+        route_id, 
+        survey_id, 
+        structure_no, 
+        surveyor_name, 
+        district_id, 
+        district, 
+        road_classification, 
+        road_surface_type, 
+        carriageway_type, 
+        direction, 
+        visual_condition, 
+        construction_type_id, 
+        construction_type, 
+        no_of_span, 
+        span_length_m, 
+        structure_width_m, 
+        construction_year, 
+        last_maintenance_date, 
+        remarks, 
+        is_surveyed, 
+        x_centroid, 
+        y_centroid, 
+        images_spans,
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
+      FROM bms.tbl_bms_master_data
+      ORDER BY uu_bms_id
+      OFFSET $1 LIMIT $2
+    `;
 
-    // Execute the query
-    const result = await pool.query(query);
+    // Execute the query with the provided set (offset) and limit
+    const result = await pool.query(query, [set, limit]);
 
-    // Send the result as the response
-    res.json(result.rows);
+    // Get the total count of records for pagination purposes
+    const countQuery = `
+      SELECT COUNT(*) AS totalCount
+      FROM bms.tbl_bms_master_data
+    `;
+    const countResult = await pool.query(countQuery);
+
+    // Send the result as the response including totalCount for pagination
+    res.json({
+      bridges: result.rows,
+      totalCount: parseInt(countResult.rows[0].totalcount, 10),
+    });
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({
@@ -383,7 +395,7 @@ const storage = multer.diskStorage({
     const directoryPath = req.body.directoryPath;
 
     if (!directoryPath) {
-      return cb(new Error('No directory path specified.'));
+      return cb(new Error("No directory path specified."));
     }
 
     // Make sure the directory exists, or create it
@@ -403,22 +415,23 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Route to handle file upload
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post("/api/upload", upload.single("file"), (req, res) => {
   if (!req.file) {
-    return res.status(400).send('No file uploaded.');
+    return res.status(400).send("No file uploaded.");
   }
 
   // Get the directory path from the body and generate the image URL
   const directoryPath = req.body.directoryPath;
-  const uploadedFileUrl = path.join(directoryPath, req.file.filename).replace(/\\/g, '/');
+  const uploadedFileUrl = path
+    .join(directoryPath, req.file.filename)
+    .replace(/\\/g, "/");
 
   // Send back the image URL and filename
   res.json({
-    imageUrl: `${uploadedFileUrl}`,  // Return the full URL of the uploaded image
-    filename: req.file.filename,  // Send back the filename to the frontend
+    imageUrl: `${uploadedFileUrl}`, // Return the full URL of the uploaded image
+    filename: req.file.filename, // Send back the filename to the frontend
   });
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
