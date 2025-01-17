@@ -103,9 +103,9 @@ const BridgeInfo = () => {
                   </div>
                   <div className="flex items-center">
                     <span className="text-gray">Latest Inspection Status:</span>
-                    <span className="ml-2 bg-white text-red-500 px-2 py-1 rounded-md text-sm">
+                    {/* <span className="ml-2 bg-white text-red-500 px-2 py-1 rounded-md text-sm">
                       {bridgeData?.ApprovedFlag || "UnApproved"}
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </div>
