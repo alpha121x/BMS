@@ -121,7 +121,7 @@ const DashboardMain = () => {
     <div 
       className="rounded-lg shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
       style={{ 
-        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(96, 165, 250, 0.8))', // Light blue gradient
+        background: 'linear-gradient(135deg, rgba(59, 100, 246, 0.8), rgba(96, 165, 250, 0.8))', // Light blue gradient
         border: `2px solid #3B82F6`, // Blue border for contrast
         borderRadius: '9px' // Rounded corners
       }}
@@ -130,7 +130,7 @@ const DashboardMain = () => {
         <div 
           className="p-2 rounded-full mr-3 flex items-center justify-center"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.1)', // Slightly lighter background for the icon
+            backgroundColor: 'rgb(123, 179, 247)', // Slightly lighter background for the icon
             width: `${iconSize + 16}px`,
             height: `${iconSize + 16}px`,
             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' // Add shadow for depth
@@ -142,6 +142,7 @@ const DashboardMain = () => {
           {label}
         </h3>
       </div>
+      
   
       <div className="text-3xl font-bold ml-2 text-white">
         {value}
