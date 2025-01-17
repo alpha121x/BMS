@@ -3,6 +3,8 @@ import { Button,  Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
+import * as XLSX from "xlsx"; // Excel library
+import Papa from "papaparse"; // Import papaparse
 
 const BridgesList = () => {
   const [tableData, setTableData] = useState([]);
@@ -103,13 +105,37 @@ const BridgesList = () => {
     return buttons;
   };
 
+  // CSV download function
   const handleDownloadCSV = () => {
-    // Logic for downloading CSV
+    try {
+      // Convert tableData to CSV format using papaparse
+      const csv = Papa.unparse(tableData);
+  
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'bridges_data.csv';
+      link.click();
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+    }
   };
 
+  // Excel download function
   const handleDownloadExcel = () => {
-    // Logic for downloading Excel
+    try {
+      // Create a new workbook and add the data
+      const ws = XLSX.utils.json_to_sheet(tableData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
+
+      // Generate and download the Excel file
+      XLSX.writeFile(wb, "bridges_data.xlsx");
+    } catch (error) {
+      console.error("Error generating Excel file:", error);
+    }
   };
+
 
   const buttonStyles = {
     margin: "0 6px",
