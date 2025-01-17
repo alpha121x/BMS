@@ -6,7 +6,21 @@ import "./BridgeList.css";
 import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
 
-const BridgesListDashboard = () => {
+const BridgesListDashboard = ({
+  district,
+  structureType,
+  constructionType,
+  category,
+  noOfSpan,
+  evaluationStatus,
+  inspectionStatus,
+  minBridgeLength,
+  maxBridgeLength,
+  minSpanLength,
+  maxSpanLength,
+  minYear,
+  maxYear
+}) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,20 +31,42 @@ const BridgesListDashboard = () => {
 
   useEffect(() => {
     fetchAllBridges(currentPage, itemsPerPage);
-  }, [currentPage]);
+  }, [currentPage, district, structureType, constructionType, category, noOfSpan, evaluationStatus, inspectionStatus, minBridgeLength, maxBridgeLength, minSpanLength, maxSpanLength, minYear, maxYear]);
 
-  const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
+  const fetchAllBridges = async (
+    page = 1, 
+    limit = itemsPerPage
+  ) => {
     setLoading(true);
     try {
       const set = (page - 1) * limit;
-
-      const response = await fetch(
-        `${BASE_URL}/api/bridges?set=${set}&limit=${limit}`
-      );
+  
+      // Construct the URL with filters
+      const url = new URL(`${BASE_URL}/api/bridges`);
+      const params = {
+        set,
+        limit,
+        district: district || "%",
+        structureType,
+        constructionType,
+        category,
+        noOfSpan,
+        evaluationStatus,
+        inspectionStatus,
+        minBridgeLength,
+        maxBridgeLength,
+        minSpanLength,
+        maxSpanLength,
+        minYear,
+        maxYear,
+      };
+      url.search = new URLSearchParams(params).toString(); // Add query parameters
+  
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
-
+  
       const data = await response.json();
-
+  
       setTableData(data.bridges); // Assuming the response contains a 'bridges' array
       setBridgeCount(data.totalCount); // Assuming the response includes a 'totalCount'
       setTotalPages(Math.ceil(data.totalCount / limit));
