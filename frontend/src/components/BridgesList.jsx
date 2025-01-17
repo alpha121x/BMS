@@ -53,6 +53,14 @@ const BridgesList = () => {
     window.location.href = editUrl;
   };
 
+  const handleDownloadCSV = () => {
+    // Logic for downloading CSV
+  };
+
+  const handleDownloadExcel = () => {
+    // Logic for downloading Excel
+  };
+
   const renderPaginationButtons = () => {
     const buttons = [];
     const pageRange = 3;
