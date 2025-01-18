@@ -283,7 +283,6 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
-
 app.get("/api/get-inspections", async (req, res) => {
   const { bridgeId, type } = req.query; // Fetch bridgeId and type from the query parameters
 
