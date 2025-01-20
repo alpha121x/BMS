@@ -292,10 +292,6 @@ app.get("/api/bridgesNew", async (req, res) => {
       query += " AND construction_type_id = $3";
       queryParams.push(constructionType);
     }
-    if (noOfSpan) {
-      query += " AND no_of_span = $4";
-      queryParams.push(noOfSpan);
-    }
     if (minBridgeLength) {
       query += " AND structure_width_m >= $5";
       queryParams.push(minBridgeLength);
