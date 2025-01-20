@@ -233,7 +233,6 @@ app.get("/api/bridgesNew", async (req, res) => {
       district,
       structureType,
       constructionType,
-      noOfSpan,
       minBridgeLength,
       maxBridgeLength,
       minSpanLength,
