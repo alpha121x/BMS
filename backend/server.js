@@ -45,7 +45,7 @@ app.post("/api/login", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, phone_num, email, id, is_active
+    SELECT id, username, password, role, phone_num, email, id, is_active
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
@@ -71,7 +71,7 @@ app.post("/api/login", async (req, res) => {
       {
         userId: user.id,
         username: user.username,
-        roleId: user.role_id,
+        role: user.role,
         phoneNum: user.phone_num,
         email: user.email,
       },
@@ -87,7 +87,7 @@ app.post("/api/login", async (req, res) => {
         username: user.username,
         email: user.email,
         phoneNum: user.phone_num,
-        roleId: user.role_id,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -103,7 +103,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, phone_num, email, id, is_active
+    SELECT id, username, password, phone_num, role, email, id, is_active
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
@@ -129,7 +129,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
       {
         userId: user.id,
         username: user.username,
-        roleId: user.role_id,
+        role: user.role,
         phoneNum: user.phone_num,
         email: user.email,
       },
@@ -145,7 +145,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
         username: user.username,
         email: user.email,
         phoneNum: user.phone_num,
-        roleId: user.role_id,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -483,11 +483,11 @@ app.get("/api/get-inspections", async (req, res) => {
       LEFT JOIN bms."tbl_damage_levels" dl ON o."DamageLevelID" = dl."DamageLevelID"
       LEFT JOIN (
         SELECT 
-          "checkingid", 
+          "CheckingID", 
           ARRAY_AGG("photopath") AS photos
         FROM bms."tbl_checking_photos"
-        GROUP BY "checkingid"
-      ) ph ON o."CheckingID" = ph."checkingid"
+        GROUP BY "CheckingID"
+      ) ph ON o."CheckingID" = ph."CheckingID"
       WHERE o."ObjectID" = $1
       GROUP BY 
         o."ObjectID", 
