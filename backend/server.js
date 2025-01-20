@@ -546,6 +546,24 @@ app.get("/api/structure-types", async (req, res) => {
   }
 });
 
+app.get("/api/carriageway-types", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, carriageway_type FROM bms.tbl_carriageway_types"
+    );
+    res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+    });
+  }
+});
+
 app.get("/api/construction-types", async (req, res) => {
   try {
     const result = await pool.query(
