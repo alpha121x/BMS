@@ -60,7 +60,7 @@ const BridgesListDashboard = ({
         maxYear,
       };
 
-      console.log(params);
+      // console.log(params);
       url.search = new URLSearchParams(params).toString(); // Add query parameters
   
       const response = await fetch(url);
@@ -165,7 +165,7 @@ const handleDownloadCSV = async () => {
     const queryString = new URLSearchParams(params).toString();
 
     // Fetch the data from the API with the dynamically created query string
-    const response = await fetch(`/api/bridgesdownload?${queryString}`, {
+    const response = await fetch(`${BASE_URL}/api/bridgesdownload?${queryString}`, {
       method: 'GET',
     });
 
@@ -211,7 +211,7 @@ const handleDownloadExcel = async () => {
     const queryString = new URLSearchParams(params).toString();
 
     // Fetch the data from the API with the dynamically created query string
-    const response = await fetch(`/api/bridgesdownload?${queryString}`, {
+    const response = await fetch(`${BASE_URL}/api/bridgesdownload?${queryString}`, {
       method: 'GET',
     });
 
