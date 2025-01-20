@@ -142,36 +142,97 @@ const BridgesListDashboard = ({
     return buttons;
   };
 
-  // CSV download function
-  const handleDownloadCSV = () => {
-    try {
-      // Convert tableData to CSV format using papaparse
-      const csv = Papa.unparse(tableData);
-  
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'bridges_data.csv';
-      link.click();
-    } catch (error) {
-      console.error('Error generating CSV:', error);
-    }
-  };
+// CSV download function
+const handleDownloadCSV = async () => {
+  try {
+    // Define the params object dynamically
+    const params = {
+      district: district || "%",
+      structureType,
+      constructionType,
+      category,
+      evaluationStatus,
+      inspectionStatus,
+      minBridgeLength,
+      maxBridgeLength,
+      minSpanLength,
+      maxSpanLength,
+      minYear,
+      maxYear,
+    };
 
-  // Excel download function
-  const handleDownloadExcel = () => {
-    try {
-      // Create a new workbook and add the data
-      const ws = XLSX.utils.json_to_sheet(tableData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
+    // Prepare the query string from params
+    const queryString = new URLSearchParams(params).toString();
 
-      // Generate and download the Excel file
-      XLSX.writeFile(wb, "bridges_data.xlsx");
-    } catch (error) {
-      console.error("Error generating Excel file:", error);
+    // Fetch the data from the API with the dynamically created query string
+    const response = await fetch(`/api/bridgesdownload?${queryString}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
     }
-  };
+
+    const data = await response.json();
+
+    // Assuming `data.bridges` contains the bridge records
+    const csv = Papa.unparse(data.bridges);
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'bridges_data.csv';
+    link.click();
+  } catch (error) {
+    console.error('Error generating CSV:', error);
+  }
+};
+
+// Excel download function
+const handleDownloadExcel = async () => {
+  try {
+    // Define the params object dynamically
+    const params = {
+      district: district || "%",
+      structureType,
+      constructionType,
+      category,
+      evaluationStatus,
+      inspectionStatus,
+      minBridgeLength,
+      maxBridgeLength,
+      minSpanLength,
+      maxSpanLength,
+      minYear,
+      maxYear,
+    };
+
+    // Prepare the query string from params
+    const queryString = new URLSearchParams(params).toString();
+
+    // Fetch the data from the API with the dynamically created query string
+    const response = await fetch(`/api/bridgesdownload?${queryString}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    const data = await response.json();
+
+    // Assuming `data.bridges` contains the bridge records
+    const ws = XLSX.utils.json_to_sheet(data.bridges);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
+
+    // Generate and download the Excel file
+    XLSX.writeFile(wb, "bridges_data.xlsx");
+  } catch (error) {
+    console.error("Error generating Excel file:", error);
+  }
+};
+
 
   const buttonStyles = {
     margin: "0 6px",
