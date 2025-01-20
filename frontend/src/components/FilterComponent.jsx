@@ -30,7 +30,6 @@ const FilterComponent = ({
   const [structureType, setStructureTypeState] = useState("");
   const [constructionType, setConstructionTypeState] = useState("");
   const [category, setCategoryState] = useState("");
-  const [noOfSpan, setNoOfSpanState] = useState("");
   const [evaluationStatus, setEvaluationStatusState] = useState("");
   const [inspectionStatus, setInspectionStatusState] = useState("");
   const [minYear, setMinYearState] = useState("");
