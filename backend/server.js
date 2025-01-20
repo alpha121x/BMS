@@ -341,7 +341,7 @@ app.get("/api/bridges", async (req, res) => {
 
     // Explicitly cast district parameter to text
     if (district !== '%') {
-      query += ` AND district LIKE $${paramIndex}::VARCHAR`;
+      query += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
     }
