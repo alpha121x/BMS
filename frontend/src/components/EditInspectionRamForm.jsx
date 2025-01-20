@@ -56,7 +56,9 @@ const EditInspectionForm = () => {
   const handlePhotoRemove = (photoToRemove) => {
     setBridgeData((prevData) => ({
       ...prevData,
-      PhotoPaths: prevData.PhotoPaths.filter((photo) => photo !== photoToRemove),
+      PhotoPaths: prevData.PhotoPaths.filter(
+        (photo) => photo !== photoToRemove
+      ),
     }));
   };
 
@@ -186,6 +188,9 @@ const EditInspectionForm = () => {
     { label: "Material", field: "MaterialName" },
     { label: "Parts", field: "PartsName" },
     { label: "Remarks", field: "Remarks" },
+    { label: "Consultant Remarks", field: "ConsultantRemarks" },
+    { label: "Rams Remarks", field: "RamsRemarks" },
+    { label: "Evaluator Remarks", field: "EvaluatorRemarks" },
   ];
 
   return (
@@ -203,7 +208,7 @@ const EditInspectionForm = () => {
       >
         <div className="card-body pb-0">
           <h6 className="card-title text-lg font-semibold pb-2">
-            Edit Inspection
+          Edit Inspection{" "}{userRole}
           </h6>
           <Form onSubmit={handleSubmit}>
             <Row>
