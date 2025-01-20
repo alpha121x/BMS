@@ -60,6 +60,8 @@ const BridgesListDashboard = ({
         minYear,
         maxYear,
       };
+
+      console.log(params);
       url.search = new URLSearchParams(params).toString(); // Add query parameters
   
       const response = await fetch(url);
