@@ -19,7 +19,6 @@ const DashboardMain = () => {
   const [structureType, setStructureType] = useState("");
   const [constructionType, setConstructionType] = useState("");
   const [category, setCategory] = useState("");
-  const [noOfSpan, setNoOfSpan] = useState("");
   const [evaluationStatus, setEvaluationStatus] = useState("");
   const [inspectionStatus, setInspectionStatus] = useState("");
   const [minYear, setMinYear] = useState("");
@@ -207,7 +206,6 @@ const DashboardMain = () => {
             setStructureType={setStructureType}
             setConstructionType={setConstructionType}
             setCategory={setCategory}
-            setNoOfSpan={setNoOfSpan}
             setEvaluationStatus={setEvaluationStatus}
             setInspectionStatus={setInspectionStatus}
             setMinYear={setMinYear}
@@ -249,7 +247,6 @@ const DashboardMain = () => {
             structureType={structureType}
             constructionType={constructionType}
             category={category}
-            noOfSpan={noOfSpan}
             evaluationStatus={evaluationStatus}
             inspectionStatus={inspectionStatus}
             minBridgeLength={minBridgeLength}

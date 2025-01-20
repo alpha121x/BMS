@@ -3,14 +3,13 @@ import { BASE_URL } from "./config";
 
 const FilterComponent = ({
   setSelectedDistrict,
-  setBridgeMinLength,
-  setBridgeMaxLength,
-  setSpanMinLength,
-  setSpanMaxLength,
+  setMinBridgeLength, // Changed to match passed prop
+  setMaxBridgeLength, // Changed to match passed prop
+  setMinSpanLength, // Changed to match passed prop
+  setMaxSpanLength, // Changed to match passed prop
   setStructureType,
   setConstructionType,
   setCategory,
-  setNoOfSpan,
   setEvaluationStatus,
   setInspectionStatus,
   setMinYear,
@@ -381,22 +380,21 @@ const FilterComponent = ({
       {/* Apply Button */}
       <div className="text-right">
         <button
-          className="bg-blue-500 text-white py-2 px-4 rounded-md"
           onClick={() => {
             setSelectedDistrict(districtId);
-            setBridgeMinLength(minBridgeLength);
-            setBridgeMaxLength(maxBridgeLength);
-            setSpanMinLength(minSpanLength);
-            setSpanMaxLength(maxSpanLength);
+            setMinBridgeLength(minBridgeLength);
+            setMaxBridgeLength(maxBridgeLength);
+            setMinSpanLength(minSpanLength);
+            setMaxSpanLength(maxSpanLength);
             setStructureType(structureType);
             setConstructionType(constructionType);
             setCategory(category);
-            setNoOfSpan(noOfSpan);
             setEvaluationStatus(evaluationStatus);
             setInspectionStatus(inspectionStatus);
             setMinYear(minYear);
             setMaxYear(maxYear);
           }}
+          className="bg-blue-500 text-white rounded-md px-4 py-2"
         >
           Apply Filters
         </button>
