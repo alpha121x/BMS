@@ -230,7 +230,7 @@ app.get("/api/bridgesNew", async (req, res) => {
     const {
       set = 0,
       limit = 10,
-      district,
+      district = '%',
       structureType,
       constructionType,
       minBridgeLength,
@@ -279,45 +279,56 @@ app.get("/api/bridgesNew", async (req, res) => {
     `;
 
     const queryParams = [];
+    let paramIndex = 1;
 
-    if (district) {
-      query += " AND district_id = $1";
+    // Explicitly cast district parameter to text
+    if (district !== '%') {
+      query += ` AND district LIKE $${paramIndex}::VARCHAR`;
       queryParams.push(district);
+      paramIndex++;
     }
     if (structureType) {
-      query += " AND structure_type_id = $2";
+      query += ` AND structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
+      paramIndex++;
     }
     if (constructionType) {
-      query += " AND construction_type_id = $3";
+      query += ` AND construction_type_id = $${paramIndex}`;
       queryParams.push(constructionType);
+      paramIndex++;
     }
     if (minBridgeLength) {
-      query += " AND structure_width_m >= $5";
+      query += ` AND structure_width_m >= $${paramIndex}`;
       queryParams.push(minBridgeLength);
+      paramIndex++;
     }
     if (maxBridgeLength) {
-      query += " AND structure_width_m <= $6";
+      query += ` AND structure_width_m <= $${paramIndex}`;
       queryParams.push(maxBridgeLength);
+      paramIndex++;
     }
     if (minSpanLength) {
-      query += " AND span_length_m >= $7";
+      query += ` AND span_length_m >= $${paramIndex}`;
       queryParams.push(minSpanLength);
+      paramIndex++;
     }
     if (maxSpanLength) {
-      query += " AND span_length_m <= $8";
+      query += ` AND span_length_m <= $${paramIndex}`;
       queryParams.push(maxSpanLength);
+      paramIndex++;
     }
     if (minYear) {
-      query += " AND construction_year >= $9";
+      query += ` AND construction_year >= $${paramIndex}`;
       queryParams.push(minYear);
+      paramIndex++;
     }
     if (maxYear) {
-      query += " AND construction_year <= $10";
+      query += ` AND construction_year <= $${paramIndex}`;
       queryParams.push(maxYear);
+      paramIndex++;
     }
 
-    query += " ORDER BY uu_bms_id OFFSET $11 LIMIT $12";
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
@@ -341,6 +352,8 @@ app.get("/api/bridgesNew", async (req, res) => {
     });
   }
 });
+
+
 
 
 app.get("/api/get-inspections", async (req, res) => {

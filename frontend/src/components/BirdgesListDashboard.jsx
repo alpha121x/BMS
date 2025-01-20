@@ -42,7 +42,7 @@ const BridgesListDashboard = ({
       const set = (page - 1) * limit;
   
       // Construct the URL with filters
-      const url = new URL(`${BASE_URL}/api/bridges`);
+      const url = new URL(`${BASE_URL}/api/bridgesNew`);
       const params = {
         set,
         limit,
@@ -50,7 +50,6 @@ const BridgesListDashboard = ({
         structureType,
         constructionType,
         category,
-        noOfSpan,
         evaluationStatus,
         inspectionStatus,
         minBridgeLength,
