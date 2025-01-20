@@ -155,7 +155,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
 });
 
 // Define the API endpoint to get data from `bms.tbl_bms_master_data`
-app.get("/api/bridges", async (req, res) => {
+app.get("/api/bridgesdownload", async (req, res) => {
   try {
     // Extract 'set' (offset) and 'limit' from query parameters, default to 0 and 10 if not provided
     const { set = 0, limit = 10 } = req.query;
@@ -225,7 +225,7 @@ app.get("/api/bridges", async (req, res) => {
 });
 
 
-app.get("/api/bridgesNew", async (req, res) => {
+app.get("/api/bridges", async (req, res) => {
   try {
     const {
       set = 0,
@@ -352,9 +352,6 @@ app.get("/api/bridgesNew", async (req, res) => {
     });
   }
 });
-
-
-
 
 app.get("/api/get-inspections", async (req, res) => {
   const { bridgeId, type } = req.query; // Fetch bridgeId and type from the query parameters
@@ -521,6 +518,7 @@ app.get("/api/districts", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 // Set up multer to store uploaded files in a dynamically specified directory
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
