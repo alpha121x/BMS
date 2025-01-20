@@ -154,9 +154,79 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
+// Define the API endpoint to get data from `bms.tbl_bms_master_data`
 app.get("/api/bridges", async (req, res) => {
   try {
-    // Destructure query parameters with default values
+    // Extract 'set' (offset) and 'limit' from query parameters, default to 0 and 10 if not provided
+    const { set = 0, limit = 10 } = req.query;
+
+    // Query to fetch paginated data from the table and aggregate images into a 'photos' array directly
+    const query = `
+      SELECT 
+        uu_bms_id, 
+        pms_sec_id, 
+        structure_no, 
+        structure_type_id, 
+        structure_type, 
+        road_name, 
+        road_name_cwd, 
+        route_id, 
+        survey_id, 
+        structure_no, 
+        surveyor_name, 
+        district_id, 
+        district, 
+        road_classification, 
+        road_surface_type, 
+        carriageway_type, 
+        direction, 
+        visual_condition, 
+        construction_type_id, 
+        construction_type, 
+        no_of_span, 
+        span_length_m, 
+        structure_width_m, 
+        construction_year, 
+        last_maintenance_date, 
+        remarks, 
+        is_surveyed, 
+        x_centroid, 
+        y_centroid, 
+        images_spans,
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
+      FROM bms.tbl_bms_master_data
+      ORDER BY uu_bms_id
+      OFFSET $1 LIMIT $2
+    `;
+
+    // Execute the query with the provided set (offset) and limit
+    const result = await pool.query(query, [set, limit]);
+
+    // Get the total count of records for pagination purposes
+    const countQuery = `
+      SELECT COUNT(*) AS totalCount
+      FROM bms.tbl_bms_master_data
+    `;
+    const countResult = await pool.query(countQuery);
+
+    // Send the result as the response including totalCount for pagination
+    res.json({
+      bridges: result.rows,
+      totalCount: parseInt(countResult.rows[0].totalcount, 10),
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
+
+app.get("/api/bridgesNew", async (req, res) => {
+  try {
     const {
       set = 0,
       limit = 10,
@@ -172,7 +242,6 @@ app.get("/api/bridges", async (req, res) => {
       maxYear,
     } = req.query;
 
-    // Build a dynamic query with filtering conditions
     let query = `
       SELECT 
         uu_bms_id, 
@@ -212,7 +281,6 @@ app.get("/api/bridges", async (req, res) => {
 
     const queryParams = [];
 
-    // Apply filters based on query parameters
     if (district) {
       query += " AND district_id = $1";
       queryParams.push(district);
@@ -226,49 +294,45 @@ app.get("/api/bridges", async (req, res) => {
       queryParams.push(constructionType);
     }
     if (noOfSpan) {
-      query += " AND no_of_span = $5";
+      query += " AND no_of_span = $4";
       queryParams.push(noOfSpan);
     }
     if (minBridgeLength) {
-      query += " AND structure_width_m >= $8";
+      query += " AND structure_width_m >= $5";
       queryParams.push(minBridgeLength);
     }
     if (maxBridgeLength) {
-      query += " AND structure_width_m <= $9";
+      query += " AND structure_width_m <= $6";
       queryParams.push(maxBridgeLength);
     }
     if (minSpanLength) {
-      query += " AND span_length_m >= $10";
+      query += " AND span_length_m >= $7";
       queryParams.push(minSpanLength);
     }
     if (maxSpanLength) {
-      query += " AND span_length_m <= $11";
+      query += " AND span_length_m <= $8";
       queryParams.push(maxSpanLength);
     }
     if (minYear) {
-      query += " AND construction_year >= $12";
+      query += " AND construction_year >= $9";
       queryParams.push(minYear);
     }
     if (maxYear) {
-      query += " AND construction_year <= $13";
+      query += " AND construction_year <= $10";
       queryParams.push(maxYear);
     }
 
-    // Add pagination
-    query += " ORDER BY uu_bms_id OFFSET $14 LIMIT $15";
+    query += " ORDER BY uu_bms_id OFFSET $11 LIMIT $12";
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
-    // Execute the query
     const result = await pool.query(query, queryParams);
 
-    // Get the total count of records for pagination
     const countQuery = `
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data
     `;
     const countResult = await pool.query(countQuery);
 
-    // Send the response with data and total count
     res.json({
       success: true,
       bridges: result.rows,
@@ -282,6 +346,7 @@ app.get("/api/bridges", async (req, res) => {
     });
   }
 });
+
 
 app.get("/api/get-inspections", async (req, res) => {
   const { bridgeId, type } = req.query; // Fetch bridgeId and type from the query parameters
