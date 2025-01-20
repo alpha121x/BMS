@@ -5,18 +5,6 @@ import { BASE_URL } from "./config";
 
 const EditBridgeForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
-  const [dropdownData, setDropdownData] = useState({
-    districts: [],
-    structureTypes: [],
-    constructionTypes: [],
-    carriagewayTypes: [],
-  });
-  const [selectedValues, setSelectedValues] = useState({
-    district: "",
-    structureType: "",
-    constructionType: "",
-    carriagewayType: "",
-  });
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedSpan, setSelectedSpan] = useState("");
@@ -32,68 +20,11 @@ const EditBridgeForm = () => {
 
   useEffect(() => {
     if (serializedData) {
+      // Decode and parse the serialized data
       const parsedData = JSON.parse(decodeURIComponent(serializedData));
       setBridgeData(parsedData);
-
-      // Set initial selected values if they exist in parsedData
-      setSelectedValues({
-        district: parsedData.district_id || "",
-        structureType: parsedData.structure_type_id || "",
-        constructionType: parsedData.construction_type_id || "",
-        carriagewayType: parsedData.carriageway_type_id || "",
-      });
     }
-    fetchDropdownData();
   }, [serializedData]);
-
-  const fetchDropdownData = async () => {
-    try {
-      const responses = await Promise.all([
-        fetch(`${BASE_URL}/api/districts`),
-        fetch(`${BASE_URL}/api/structure-types`),
-        fetch(`${BASE_URL}/api/construction-types`),
-        fetch(`${BASE_URL}/api/carriageway-types`),
-      ]);
-
-      const [
-        districtsResponse,
-        structureTypesResponse,
-        constructionTypesResponse,
-        carriagewayTypesResponse,
-      ] = await Promise.all(responses.map((r) => r.json()));
-
-      // Ensure each response is an array, if not, convert from object
-      const processData = (data) => {
-        if (!Array.isArray(data)) {
-          return Object.entries(data).map(([id, name]) => ({ id, name }));
-        }
-        return data;
-      };
-
-      setDropdownData({
-        districts: processData(districtsResponse),
-        structureTypes: processData(structureTypesResponse),
-        constructionTypes: processData(constructionTypesResponse),
-        carriagewayTypes: processData(carriagewayTypesResponse),
-      });
-    } catch (error) {
-      console.error("Error fetching dropdown data:", error);
-    }
-  };
-
-  const handleDropdownChange = (field, value) => {
-    setSelectedValues((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-    // Also update bridgeData with the new value
-    const idField = `${field}_id`;
-    setBridgeData((prev) => ({
-      ...prev,
-      [idField]: value,
-    }));
-  };
 
   // console.log(bridgeData);
 
@@ -336,26 +267,34 @@ const EditBridgeForm = () => {
           </h6>
           <Form onSubmit={handleSubmit}>
             <Row>
-            {[
+              {[
                 { label: "Bridge ID", field: "uu_bms_id" },
                 { label: "Bridge Name", field: "bridge_name" },
+                { label: "Structure Type", field: "structure_type" },
                 { label: "Construction Year", field: "construction_year" },
+                { label: "District", field: "district" },
                 { label: "Road Name", field: "road_name" },
                 { label: "Road Name CWD", field: "road_name_cwd" },
+                { label: "Construction Type", field: "construction_type" },
                 { label: "Survey ID", field: "survey_id" },
                 { label: "Surveyor Name", field: "surveyor_name" },
                 { label: "Road Classification", field: "road_classification" },
+                { label: "Carriageway Type", field: "carriageway_type" },
                 { label: "Road Surface Type", field: "road_surface_type" },
                 { label: "Visual Condition", field: "visual_condition" },
                 { label: "Direction", field: "direction" },
-                { label: "Last Maintenance Date", field: "last_maintenance_date", type: "date" },
+                {
+                  label: "Last Maintenance Date",
+                  field: "last_maintenance_date",
+                  type: "date",
+                },
                 { label: "Width Structure", field: "structure_width_m" },
                 { label: "Span Length", field: "span_length_m" },
                 { label: "No of Spans", field: "no_of_span" },
                 { label: "Latitude", field: "y_centroid" },
                 { label: "Longitude", field: "x_centroid" },
                 { label: "Remarks", field: "remarks" },
-              ].map(({ label, field, type }, index) => (
+              ].map(({ label, field }, index) => (
                 <Col key={index} md={6}>
                   <Form.Group controlId={`form${field}`}>
                     <Form.Label>{label}</Form.Label>
@@ -367,79 +306,6 @@ const EditBridgeForm = () => {
                   </Form.Group>
                 </Col>
               ))}
-
-              {/* District Dropdown */}
-              <Col md={6}>
-                <Form.Group controlId="formDistrict">
-                  <Form.Label>District</Form.Label>
-                  <Form.Control
-                    as="select"
-                    value={selectedValues.district}
-                    onChange={(e) => handleDropdownChange('district', e.target.value)}
-                  >
-                    <option value="">-- Select District --</option>
-                    {dropdownData.districts.map((district) => (
-                      <option key={district.id} value={district.id}>
-                        {district.district}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group controlId="formStructureType">
-                  <Form.Label>Structure Type</Form.Label>
-                  <Form.Control
-                    as="select"
-                    value={selectedValues.structureType}
-                    onChange={(e) => handleDropdownChange('structureType', e.target.value)}
-                  >
-                    <option value="">-- Select Structure Type --</option>
-                    {dropdownData.structureTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.structure_type}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group controlId="formConstructionType">
-                  <Form.Label>Construction Type</Form.Label>
-                  <Form.Control
-                    as="select"
-                    value={selectedValues.constructionType}
-                    onChange={(e) => handleDropdownChange('constructionType', e.target.value)}
-                  >
-                    <option value="">-- Select Construction Type --</option>
-                    {dropdownData.constructionTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.construction_type}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group controlId="formCarriagewayType">
-                  <Form.Label>Carriageway Type</Form.Label>
-                  <Form.Control
-                    as="select"
-                    value={selectedValues.carriagewayType}
-                    onChange={(e) => handleDropdownChange('carriagewayType', e.target.value)}
-                  >
-                    <option value="">-- Select Carriageway Type --</option>
-                    {dropdownData.carriagewayTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.carriageway_type}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Form.Group>
-              </Col>
 
               {/* Span Select Dropdown */}
               <div className="form-group">
