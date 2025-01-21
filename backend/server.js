@@ -336,53 +336,77 @@ app.get("/api/bridges", async (req, res) => {
       WHERE 1=1
     `;
 
+    let countQuery = `
+      SELECT COUNT(*) AS totalCount
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1
+    `;
+
     const queryParams = [];
+    const countParams = [];
     let paramIndex = 1;
 
-    // Explicitly cast district parameter to text
     if (district !== '%') {
       query += ` AND district_id = $${paramIndex}`;
+      countQuery += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
+      countParams.push(district);
       paramIndex++;
     }
     if (structureType) {
       query += ` AND structure_type_id = $${paramIndex}`;
+      countQuery += ` AND structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
+      countParams.push(structureType);
       paramIndex++;
     }
     if (constructionType) {
       query += ` AND construction_type_id = $${paramIndex}`;
+      countQuery += ` AND construction_type_id = $${paramIndex}`;
       queryParams.push(constructionType);
+      countParams.push(constructionType);
       paramIndex++;
     }
     if (minBridgeLength) {
       query += ` AND structure_width_m >= $${paramIndex}`;
+      countQuery += ` AND structure_width_m >= $${paramIndex}`;
       queryParams.push(minBridgeLength);
+      countParams.push(minBridgeLength);
       paramIndex++;
     }
     if (maxBridgeLength) {
       query += ` AND structure_width_m <= $${paramIndex}`;
+      countQuery += ` AND structure_width_m <= $${paramIndex}`;
       queryParams.push(maxBridgeLength);
+      countParams.push(maxBridgeLength);
       paramIndex++;
     }
     if (minSpanLength) {
       query += ` AND span_length_m >= $${paramIndex}`;
+      countQuery += ` AND span_length_m >= $${paramIndex}`;
       queryParams.push(minSpanLength);
+      countParams.push(minSpanLength);
       paramIndex++;
     }
     if (maxSpanLength) {
       query += ` AND span_length_m <= $${paramIndex}`;
+      countQuery += ` AND span_length_m <= $${paramIndex}`;
       queryParams.push(maxSpanLength);
+      countParams.push(maxSpanLength);
       paramIndex++;
     }
     if (minYear) {
       query += ` AND construction_year >= $${paramIndex}`;
+      countQuery += ` AND construction_year >= $${paramIndex}`;
       queryParams.push(minYear);
+      countParams.push(minYear);
       paramIndex++;
     }
     if (maxYear) {
       query += ` AND construction_year <= $${paramIndex}`;
+      countQuery += ` AND construction_year <= $${paramIndex}`;
       queryParams.push(maxYear);
+      countParams.push(maxYear);
       paramIndex++;
     }
 
@@ -390,12 +414,7 @@ app.get("/api/bridges", async (req, res) => {
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
-
-    const countQuery = `
-      SELECT COUNT(*) AS totalCount
-      FROM bms.tbl_bms_master_data
-    `;
-    const countResult = await pool.query(countQuery);
+    const countResult = await pool.query(countQuery, countParams);
 
     res.json({
       success: true,
@@ -410,6 +429,7 @@ app.get("/api/bridges", async (req, res) => {
     });
   }
 });
+
 
 app.get("/api/get-inspections", async (req, res) => {
   const { bridgeId, type } = req.query; // Fetch bridgeId and type from the query parameters
