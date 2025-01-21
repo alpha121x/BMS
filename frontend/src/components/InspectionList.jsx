@@ -173,6 +173,16 @@ const InspectionList = ({ bridgeId }) => {
     return buttons;
   };
 
+  // Group the inspection data by SpanIndex
+  const groupedData = currentData.reduce((acc, row) => {
+    const key = row.SpanIndex || "N/A";
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(row);
+    return acc;
+  }, {});
+
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -237,69 +247,80 @@ const InspectionList = ({ bridgeId }) => {
           />
         )}
 
-        <Table bordered responsive>
-          <thead>
-            <tr>
-              <th>Parts</th>
-              <th>Span</th>
-              <th>Material</th>
-              <th>Damage</th>
-              <th>Level</th>
-              <th>Inspector</th>
-              <th>Inspection Date</th>
-              <th>Status</th>
-              <th>Manage</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((row, index) => (
-                <tr key={index}>
-                  <td>{row.PartsName || "N/A"}</td>
-                  <td>{row.SpanIndex || "N/A"}</td>
-                  <td>{row.MaterialName || "N/A"}</td>
-                  <td>{row.DamageKindName || "N/A"}</td>
-                  <td>{row.DamageLevel || "N/A"}</td>
-                  <td>{row.Inspector || "N/A"}</td>
-                  <td>{row.InspectationDate || "N/A"}</td>
-                  <td>
-                    {row.ApprovedFlag === 0
-                      ? "Unapproved"
-                      : row.ApprovedFlag || "N/A"}
-                  </td>
-                  <td>
-                    <Button
-                      onClick={() => handleViewClick(row)}
-                      style={{
-                        backgroundColor: "#60A5FA",
-                        border: "none",
-                        color: "white",
-                      }}
-                    >
-                      View
-                    </Button>{" "}
-                    <Button
-                      onClick={() => handleEditClick(row)}
-                      style={{
-                        backgroundColor: "#4CAF50",
-                        border: "none",
-                        color: "white",
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="text-center">
-                  No data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+        <div className="inspection-cards-container">
+          {Object.keys(groupedData).map((spanIndex) => (
+            <div
+              key={spanIndex}
+              className="card"
+              style={{ marginBottom: "20px" }}
+            >
+              <div
+                className="card-header"
+                style={{ backgroundColor: "#f5f5f5", padding: "10px" }}
+              >
+                <h5>{`Span Index: ${spanIndex}`}</h5>
+              </div>
+              <div className="card-body">
+                {groupedData[spanIndex].map((row, index) => (
+                  <div
+                    key={index}
+                    className="inspection-item"
+                    style={{ marginBottom: "10px" }}
+                  >
+                    <div>
+                      <strong>Parts:</strong> {row.PartsName || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Material:</strong> {row.MaterialName || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Damage:</strong> {row.DamageKindName || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Level:</strong> {row.DamageLevel || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Inspector:</strong> {row.Inspector || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Inspection Date:</strong>{" "}
+                      {row.InspectationDate || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Status:</strong>{" "}
+                      {row.ApprovedFlag === 0
+                        ? "Unapproved"
+                        : row.ApprovedFlag || "N/A"}
+                    </div>
+                    <div style={{ marginTop: "10px" }}>
+                      <Button
+                        onClick={() => handleViewClick(row)}
+                        style={{
+                          backgroundColor: "#60A5FA",
+                          border: "none",
+                          color: "white",
+                          marginRight: "10px",
+                        }}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        onClick={() => handleEditClick(row)}
+                        style={{
+                          backgroundColor: "#4CAF50",
+                          border: "none",
+                          color: "white",
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
 
         <div className="d-flex justify-content-between">
           <div className="text-sm text-gray-500">

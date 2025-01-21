@@ -7,7 +7,8 @@ import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfo";
 import { useLocation } from "react-router-dom";
-import InspectionList from "./InspectionListnew";
+import InspectionListNew from "./InspectionListnew";
+import InspectionList from "./InspectionList";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
