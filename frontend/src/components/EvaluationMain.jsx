@@ -38,40 +38,6 @@ const EvaluationMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Data for Structure cards
-  const structureCards = [
-    {
-      label: "Total",
-      value: "18,805",
-      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
-      color: "blue",
-    },
-    {
-      label: "Culvert",
-      value: "17,452",
-      icon: <WrenchIcon className="w-10 h-10 text-blue-500" />, // Wrench for construction/maintenance
-      color: "blue",
-    },
-    {
-      label: "PC Bridge",
-      value: "470",
-      icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />, // Building Office Icon, representing large structures like bridges
-      color: "blue",
-    },
-    {
-      label: "Arch",
-      value: "31",
-      icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />, // Document icon to represent an architectural design
-      color: "blue",
-    },
-    {
-      label: "Underpass",
-      value: "752",
-      icon: <HomeIcon className="w-10 h-10 text-blue-500" />, // Home icon representing an underpass construction type
-      color: "blue",
-    },
-  ];
-
   // Data for Evaluation cards
   const inspectedCards = [
     {
