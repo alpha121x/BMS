@@ -211,7 +211,7 @@ app.get("/api/bridgesdownload", async (req, res) => {
 
     // Filter by district
     if (district !== '%') {
-      query += ` AND district LIKE $${paramIndex}::VARCHAR`;
+      query += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
     }
