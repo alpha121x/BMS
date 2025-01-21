@@ -1,8 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  UserIcon,
-  DocumentIcon,
-} from "@heroicons/react/24/outline";
 import Header from "./Header";
 import Footer from "./Footer";
 import InventoryInfoDashboard from "./InventoryInfoDashboard";

@@ -215,7 +215,7 @@ const EvaluationMain = () => {
 
       {/* Bridges */}
       <div className="mt-2 flex justify-center">
-        <div className="w-full sm:w-3/4 md:w-75 lg:w-75">
+        <div className="w-full p-4">
           <BridgesList
             selectedDistrict={selectedDistrict}
             startDate={startDate}
