@@ -16,7 +16,7 @@ const EditInspection = () => {
     switch (userRole) {
       case "evaluator":
         return <EditEvaluatorForm />;
-      case "RAMS":
+      case "rams":
         return <EditRAMSForm />;
       case "consultant":
         return <EditConsultantForm />;
