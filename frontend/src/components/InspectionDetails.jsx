@@ -39,16 +39,6 @@ const InspectionDetails = () => {
     window.location.href = editUrl;
   };
 
-  const buttonStyles = {
-    margin: "0 6px",
-    padding: "4px 8px",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "12px",
-    cursor: "pointer",
-  };
-
   // Show back-to-top button based on scroll position
   useEffect(() => {
     const handleScroll = () => {
