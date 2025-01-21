@@ -30,7 +30,14 @@ const InspectionDetails = () => {
     window.location.href = "/Evaluation"; // Adjust the route as needed
   };
 
-  const handleEditClick = () => {};
+  const handleEditClick = () => {
+    // Serialize the bridgeData object into a URL-safe string
+    const serializedBridgeData = encodeURIComponent(JSON.stringify(inspectionData));
+    // Construct the edit URL with serialized data
+    const editUrl = `/EditInspection?data=${serializedBridgeData}`;
+    // Navigate to the edit URL in the same tab
+    window.location.href = editUrl;
+  };
 
   const buttonStyles = {
     margin: "0 6px",
@@ -77,31 +84,40 @@ const InspectionDetails = () => {
                 {/* Back Button */}
                 <div className="flex justify-start">
                   <button
-                    onClick={handleBackClick}
+                    onClick={handleBackClick} // Ensure to define this function for navigation
                     className="bg-inherit hover:bg-blue-500 text-black py-2 rounded-md flex items-center gap-2"
                   >
-                    <ArrowLeftIcon className="h-5 w-5" /> Inspection List
+                    <ArrowLeftIcon className="h-5 w-5" />{" "}
+                    {/* Replace with appropriate icon if needed */}
+                    Bridges List
                   </button>
                 </div>
                 <div className="text-lg font-semibold">
-                  Bridge Name: {inspectionData?.BridgeName || "N/A"}
+                  Bridge Name: {inspectionData?.BridgeName || "Bridge Name"}
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
                     <span className="text-gray">Latest Inspection Date:</span>
-                    <span className="ml-2">
-                      {inspectionData?.inspectionDate || "N/A"}
-                    </span>
+                    <span className="ml-2">{"N/A"}</span>
                   </div>
                   <div className="flex items-center">
                     <span className="text-gray">Latest Inspection Status:</span>
-                    <span className="ml-2">
-                      {inspectionData?.inspectionStatus || "N/A"}
-                    </span>
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2"></div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleEditClick}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                >
+                  <PencilIcon className="h-5 w-5" />
+                  Edit
+                </button>
+                {/* <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center gap-2">
+                  <TrashIcon className="h-5 w-5" />
+                  Delete
+                </button> */}
+              </div>
             </div>
             <div
               className="card p-2 rounded-lg text-black"
