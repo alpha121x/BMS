@@ -273,111 +273,142 @@ const InspectionList = ({ bridgeId }) => {
                     >
                       {/* Work Kind Label */}
                       <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
-                        Work Kind: {workKind}{" "} <Button
-                          onClick={() => handleEditClick(workKind)} // Pass workKind or appropriate data
-                          style={{
-                            backgroundColor: "#4CAF50",
-                            border: "none",
-                            color: "white",
-                          }}
-                        >
-                          Edit
-                        </Button>
+                        Work Kind: {workKind}{" "}
                       </div>
-                      {groupedData[spanIndex][workKind].map((row, index) => (
+                      {Object.keys(groupedData[spanIndex]).map((workKind) => (
                         <div
-                          key={index}
-                          className="inspection-item"
+                          key={workKind}
                           style={{
-                            marginBottom: "8px", // Reduced margin between items
-                            borderBottom: "1px solid #ddd",
-                            paddingBottom: "8px", // Reduced padding at the bottom of each item
+                            marginBottom: "10px", // Reduced margin
+                            border: "1px solid #ddd",
+                            padding: "8px", // Reduced padding
+                            borderRadius: "8px",
                           }}
                         >
-                          {/* Displaying 3 details per row using flexbox */}
+                          {/* Work Kind Label without header style */}
                           <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginBottom: "6px", // Reduced margin between rows
-                            }}
+                            style={{ marginBottom: "8px", fontWeight: "bold" }}
                           >
-                            <div style={{ flex: 1 }}>
-                              <strong>Parts:</strong> {row.PartsName || "N/A"}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <strong>Material:</strong>{" "}
-                              {row.MaterialName || "N/A"}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <strong>Damage:</strong>{" "}
-                              {row.DamageKindName || "N/A"}
-                            </div>
+                            Work Kind: {workKind}
                           </div>
 
-                          {/* Second row of details */}
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginTop: "6px", // Reduced margin
-                            }}
-                          >
-                            <div style={{ flex: 1 }}>
-                              <strong>Level:</strong> {row.DamageLevel || "N/A"}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <strong>Inspector:</strong>{" "}
-                              {row.Inspector || "N/A"}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <strong>Inspection Date:</strong>{" "}
-                              {row.InspectationDate || "N/A"}
-                            </div>
-                          </div>
-
-                          {/* Third row of details */}
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginTop: "6px", // Reduced margin
-                            }}
-                          >
-                            <div style={{ flex: 1 }}>
-                              <strong>Status:</strong>{" "}
-                              {row.ApprovedFlag === 0
-                                ? "Unapproved"
-                                : row.ApprovedFlag || "N/A"}
-                            </div>
-                          </div>
-
-                          {/* Photos Section */}
-                          {row.PhotoPaths && row.PhotoPaths.length > 0 && (
-                            <div style={{ marginTop: "8px" }}>
-                              <strong>Photos:</strong>
+                          {groupedData[spanIndex][workKind].map(
+                            (row, index) => (
                               <div
+                                key={index}
+                                className="inspection-item"
                                 style={{
-                                  display: "flex",
-                                  gap: "6px", // Reduced gap between photos
-                                  marginTop: "6px", // Reduced margin
+                                  marginBottom: "8px", // Reduced margin between items
+                                  borderBottom: "1px solid #ddd",
+                                  paddingBottom: "8px", // Reduced padding at the bottom of each item
                                 }}
                               >
-                                {row.PhotoPaths.map((photo, photoIndex) => (
-                                  <img
-                                    key={photoIndex}
-                                    src={photo}
-                                    alt={`Photo ${photoIndex + 1}`}
+                                {/* Displaying 3 details per row using flexbox */}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    marginBottom: "6px", // Reduced margin between rows
+                                  }}
+                                >
+                                  <div style={{ flex: 1 }}>
+                                    <strong>Parts:</strong>{" "}
+                                    {row.PartsName || "N/A"}
+                                  </div>
+                                  <div style={{ flex: 1 }}>
+                                    <strong>Material:</strong>{" "}
+                                    {row.MaterialName || "N/A"}
+                                  </div>
+                                  <div style={{ flex: 1 }}>
+                                    <strong>Damage:</strong>{" "}
+                                    {row.DamageKindName || "N/A"}
+                                  </div>
+                                </div>
+
+                                {/* Second row of details */}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    marginTop: "6px", // Reduced margin
+                                  }}
+                                >
+                                  <div style={{ flex: 1 }}>
+                                    <strong>Level:</strong>{" "}
+                                    {row.DamageLevel || "N/A"}
+                                  </div>
+                                  <div style={{ flex: 1 }}>
+                                    <strong>Inspector:</strong>{" "}
+                                    {row.Inspector || "N/A"}
+                                  </div>
+                                  <div style={{ flex: 1 }}>
+                                    <strong>Inspection Date:</strong>{" "}
+                                    {row.InspectationDate || "N/A"}
+                                  </div>
+                                </div>
+
+                                {/* Third row of details */}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    marginTop: "6px", // Reduced margin
+                                  }}
+                                >
+                                  <div style={{ flex: 1 }}>
+                                    <strong>Status:</strong>{" "}
+                                    {row.ApprovedFlag === 0
+                                      ? "Unapproved"
+                                      : row.ApprovedFlag || "N/A"}
+                                  </div>
+                                </div>
+
+                                {/* Photos Section */}
+                                {row.PhotoPaths &&
+                                  row.PhotoPaths.length > 0 && (
+                                    <div style={{ marginTop: "8px" }}>
+                                      <strong>Photos:</strong>
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          gap: "6px", // Reduced gap between photos
+                                          marginTop: "6px", // Reduced margin
+                                        }}
+                                      >
+                                        {row.PhotoPaths.map(
+                                          (photo, photoIndex) => (
+                                            <img
+                                              key={photoIndex}
+                                              src={photo}
+                                              alt={`Photo ${photoIndex + 1}`}
+                                              style={{
+                                                width: "80px", // Reduced size
+                                                height: "80px", // Reduced size
+                                                objectFit: "cover",
+                                                borderRadius: "5px",
+                                              }}
+                                            />
+                                          )
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                {/* Edit Button */}
+                                <div style={{ marginTop: "8px" }}>
+                                  <Button
+                                    onClick={() => handleEditClick(row)}
                                     style={{
-                                      width: "80px", // Reduced size
-                                      height: "80px", // Reduced size
-                                      objectFit: "cover",
-                                      borderRadius: "5px",
+                                      backgroundColor: "#4CAF50",
+                                      border: "none",
+                                      color: "white",
                                     }}
-                                  />
-                                ))}
+                                  >
+                                    Edit
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
+                            )
                           )}
                         </div>
                       ))}

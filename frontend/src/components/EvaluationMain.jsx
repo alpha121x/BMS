@@ -7,7 +7,6 @@ import {
   BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import BridgesList from "./BridgesList";
-import FilterComponent from "./FilterComponent";
 
 const EvaluationMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -22,7 +21,7 @@ const EvaluationMain = () => {
   const [inspectionStatus, setInspectionStatus] = useState("");
   const [minYear, setMinYear] = useState("");
   const [maxYear, setMaxYear] = useState("");
-  
+
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -114,71 +113,10 @@ const EvaluationMain = () => {
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-1">
         <h2 className="text-2xl font-semibold text-gray-500 mb-1">
-          Evaluation Module
+          Summary
         </h2>
-
-        <button
-          className="btn btn-primary flex items-center gap-2"
-          type="button"
-          data-bs-toggle="offcanvas"
-          data-bs-target="#offcanvasRight"
-          aria-controls="offcanvasRight"
-        >
-          {/* Filter Icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-5.414 5.414A2 2 0 0014 13.414V20a1 1 0 01-1.447.894l-4-2A1 1 0 018 17.618v-4.204a2 2 0 00-.586-1.414L3.293 6.707A1 1 0 013 6V4z"
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Offcanvas Sidebar for Filters */}
-      <div
-        className="offcanvas offcanvas-end"
-        tabIndex="-1"
-        id="offcanvasRight"
-        aria-labelledby="offcanvasRightLabel"
-      >
-        <div className="offcanvas-header">
-          <h5 id="offcanvasRightLabel" className="text-xl font-bold">
-            Filters
-          </h5>
-          <button
-            type="button"
-            className="btn-close text-reset"
-            data-bs-dismiss="offcanvas"
-            aria-label="Close"
-          ></button>
-        </div>
-
-        <div className="offcanvas-body">
-          <FilterComponent
-            setSelectedDistrict={setSelectedDistrict}
-            setMinBridgeLength={setMinBridgeLength}
-            setMaxBridgeLength={setMaxBridgeLength}
-            setMinSpanLength={setMinSpanLength}
-            setMaxSpanLength={setMaxSpanLength}
-            setStructureType={setStructureType}
-            setConstructionType={setConstructionType}
-            setCategory={setCategory}
-            setEvaluationStatus={setEvaluationStatus}
-            setInspectionStatus={setInspectionStatus}
-            setMinYear={setMinYear}
-            setMaxYear={setMaxYear}
-          />
-        </div>
       </div>
 
       {/* Evaluation Section */}
@@ -195,6 +133,18 @@ const EvaluationMain = () => {
       <div className="mt-2 flex justify-center">
         <div className="w-full p-4">
           <BridgesList
+            setSelectedDistrict={setSelectedDistrict}
+            setMinBridgeLength={setMinBridgeLength}
+            setMaxBridgeLength={setMaxBridgeLength}
+            setMinSpanLength={setMinSpanLength}
+            setMaxSpanLength={setMaxSpanLength}
+            setStructureType={setStructureType}
+            setConstructionType={setConstructionType}
+            setCategory={setCategory}
+            setEvaluationStatus={setEvaluationStatus}
+            setInspectionStatus={setInspectionStatus}
+            setMinYear={setMinYear}
+            setMaxYear={setMaxYear}
             district={selectedDistrict}
             structureType={structureType}
             constructionType={constructionType}
