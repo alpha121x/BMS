@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table, Modal } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import InspectionModal from "./InspectionModal";
 
 const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
   const [inspectionType, setInspectionType] = useState("new"); // "new" or "old"
 
   const itemsPerPage = 10;
@@ -173,15 +170,25 @@ const InspectionList = ({ bridgeId }) => {
     return buttons;
   };
 
-  // Group the inspection data by SpanIndex
+  // Group the inspection data by SpanIndex and then by WorkKind
   const groupedData = currentData.reduce((acc, row) => {
-    const key = row.SpanIndex || "N/A";
-    if (!acc[key]) {
-      acc[key] = [];
+    const spanKey = row.SpanIndex || "N/A";
+    const workKindKey = row.WorkKindName || "N/A";
+
+    if (!acc[spanKey]) {
+      acc[spanKey] = {};
     }
-    acc[key].push(row);
+
+    if (!acc[spanKey][workKindKey]) {
+      acc[spanKey][workKindKey] = [];
+    }
+
+    acc[spanKey][workKindKey].push(row);
+
     return acc;
   }, {});
+
+  // console.log(groupedData);
 
   return (
     <div
@@ -260,63 +267,77 @@ const InspectionList = ({ bridgeId }) => {
               >
                 <h5>{`Span Index: ${spanIndex}`}</h5>
               </div>
-              <div className="card-body">
-                {groupedData[spanIndex].map((row, index) => (
-                  <div
-                    key={index}
-                    className="inspection-item"
-                    style={{ marginBottom: "10px" }}
-                  >
-                    <div>
-                      <strong>Parts:</strong> {row.PartsName || "N/A"}
+              <div className="card">
+                <div className="card-body">
+                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                    <div
+                      key={workKind}
+                      style={{
+                        marginBottom: "15px",
+                        border: "1px solid #ddd",
+                        padding: "10px",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      {/* Work Kind Label without header style */}
+                      <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
+                        Work Kind: {workKind}
+                      </div>
+
+                      {groupedData[spanIndex][workKind].map((row, index) => (
+                        <div
+                          key={index}
+                          className="inspection-item"
+                          style={{
+                            marginBottom: "10px",
+                            borderBottom: "1px solid #ddd", // Border between items
+                            paddingBottom: "10px", // Padding at the bottom of each item
+                          }}
+                        >
+                          <div>
+                            <strong>Parts:</strong> {row.PartsName || "N/A"}
+                          </div>
+                          <div>
+                            <strong>Material:</strong>{" "}
+                            {row.MaterialName || "N/A"}
+                          </div>
+                          <div>
+                            <strong>Damage:</strong>{" "}
+                            {row.DamageKindName || "N/A"}
+                          </div>
+                          <div>
+                            <strong>Level:</strong> {row.DamageLevel || "N/A"}
+                          </div>
+                          <div>
+                            <strong>Inspector:</strong> {row.Inspector || "N/A"}
+                          </div>
+                          <div>
+                            <strong>Inspection Date:</strong>{" "}
+                            {row.InspectationDate || "N/A"}
+                          </div>
+                          <div>
+                            <strong>Status:</strong>{" "}
+                            {row.ApprovedFlag === 0
+                              ? "Unapproved"
+                              : row.ApprovedFlag || "N/A"}
+                          </div>
+                          <div style={{ marginTop: "10px" }}>
+                            <Button
+                              onClick={() => handleEditClick(row)}
+                              style={{
+                                backgroundColor: "#4CAF50",
+                                border: "none",
+                                color: "white",
+                              }}
+                            >
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <strong>Material:</strong> {row.MaterialName || "N/A"}
-                    </div>
-                    <div>
-                      <strong>Damage:</strong> {row.DamageKindName || "N/A"}
-                    </div>
-                    <div>
-                      <strong>Level:</strong> {row.DamageLevel || "N/A"}
-                    </div>
-                    <div>
-                      <strong>Inspector:</strong> {row.Inspector || "N/A"}
-                    </div>
-                    <div>
-                      <strong>Inspection Date:</strong>{" "}
-                      {row.InspectationDate || "N/A"}
-                    </div>
-                    <div>
-                      <strong>Status:</strong>{" "}
-                      {row.ApprovedFlag === 0
-                        ? "Unapproved"
-                        : row.ApprovedFlag || "N/A"}
-                    </div>
-                    <div style={{ marginTop: "10px" }}>
-                      <Button
-                        onClick={() => handleViewClick(row)}
-                        style={{
-                          backgroundColor: "#60A5FA",
-                          border: "none",
-                          color: "white",
-                          marginRight: "10px",
-                        }}
-                      >
-                        View
-                      </Button>
-                      <Button
-                        onClick={() => handleEditClick(row)}
-                        style={{
-                          backgroundColor: "#4CAF50",
-                          border: "none",
-                          color: "white",
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           ))}
@@ -331,13 +352,6 @@ const InspectionList = ({ bridgeId }) => {
           </div>
         </div>
       </div>
-
-      <Modal show={showModal} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Inspection Details</Modal.Title>
-        </Modal.Header>
-        <InspectionModal selectedRow={selectedRow} />
-      </Modal>
     </div>
   );
 };
