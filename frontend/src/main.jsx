@@ -105,6 +105,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }
         />
 
+           {/* Private Route for EditInspection */}
+           <Route
+          path="/EditInspection"
+          element={
+            <PrivateRoute>
+              <EditInspection />
+            </PrivateRoute>
+          }
+        />
+
         {/* Private Route for EditInspection */}
         <Route
           path="/InspectionDetails"

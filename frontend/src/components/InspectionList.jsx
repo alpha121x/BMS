@@ -51,7 +51,7 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleEditClick = (row) => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
-    const editUrl = `/EditInspection?data=${serializedRow}`;
+    const editUrl = `/EditInspectionNew?data=${serializedRow}`;
     window.location.href = editUrl;
   };
 
