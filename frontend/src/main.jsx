@@ -13,6 +13,7 @@ import EditBridge from './EditIBridge';
 import BridgeInfo from './components/BridgeInfo';
 import BridgeInfoDashboard from './components/BridgeinfoDaashboard';
 import InspectionDetails from './components/InspectionDetails';
+import EditInspectionNew from './EditInspectionNew';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -96,10 +97,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
          {/* Private Route for EditInspection */}
          <Route
-          path="/EditInspection"
+          path="/EditInspectionNew"
           element={
             <PrivateRoute>
-              <EditInspection />
+              <EditInspectionNew />
             </PrivateRoute>
           }
         />
