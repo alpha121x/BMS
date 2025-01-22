@@ -154,6 +154,43 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
+// API endpoint to get counts for structure types and total "Arch" construction types
+app.get('/api/structure-counts', async (req, res) => {
+  try {
+    // 1. Count of each structure_type
+    const structureTypeCounts = await pool.query(`
+      SELECT structure_type, COUNT(*) AS count
+      FROM bms.tbl_bms_master_data
+      GROUP BY structure_type
+      ORDER BY count DESC;
+    `);
+
+    // 2. Count of records where construction_type contains 'Arch'
+    const totalArchCount = await pool.query(`
+      SELECT COUNT(*) AS total_count
+      FROM bms.tbl_bms_master_data
+      WHERE construction_type ILIKE '%Arch%';
+    `);
+
+    // 3. Total count of all records (for structure_type)
+    const totalStructureCount = await pool.query(`
+      SELECT COUNT(*) AS total_count
+      FROM bms.tbl_bms_master_data;
+    `);
+
+    // Return all the counts as a single JSON response
+    res.json({
+      structureTypeCounts: structureTypeCounts.rows,
+      totalStructureCount: totalStructureCount.rows[0].total_count,
+      totalArchCount: totalArchCount.rows[0].total_count,
+    });
+  } catch (err) {
+    console.error('Error executing query', err.stack);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 // Define the API endpoint to get data from `bms.tbl_bms_master_data`
 app.get("/api/bridgesdownload", async (req, res) => {
   try {
