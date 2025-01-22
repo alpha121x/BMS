@@ -35,6 +35,8 @@ const InspectionList = ({ bridgeId }) => {
 
       const result = await response.json();
 
+      console.log(result);
+
       if (Array.isArray(result.data)) {
         setTableData(result.data);
       } else {
@@ -51,16 +53,6 @@ const InspectionList = ({ bridgeId }) => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
     const editUrl = `/EditInspection?data=${serializedRow}`;
     window.location.href = editUrl;
-  };
-
-  const handleViewClick = (row) => {
-    setSelectedRow(row);
-    setShowModal(true);
-  };
-
-  const handleClose = () => {
-    setShowModal(false);
-    setSelectedRow(null);
   };
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
@@ -294,33 +286,92 @@ const InspectionList = ({ bridgeId }) => {
                             paddingBottom: "10px", // Padding at the bottom of each item
                           }}
                         >
-                          <div>
-                            <strong>Parts:</strong> {row.PartsName || "N/A"}
+                          {/* Displaying 3 details per row using flexbox */}
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <strong>Parts:</strong> {row.PartsName || "N/A"}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <strong>Material:</strong>{" "}
+                              {row.MaterialName || "N/A"}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <strong>Damage:</strong>{" "}
+                              {row.DamageKindName || "N/A"}
+                            </div>
                           </div>
-                          <div>
-                            <strong>Material:</strong>{" "}
-                            {row.MaterialName || "N/A"}
+
+                          {/* Second row of details */}
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginTop: "10px",
+                            }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <strong>Level:</strong> {row.DamageLevel || "N/A"}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <strong>Inspector:</strong>{" "}
+                              {row.Inspector || "N/A"}
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <strong>Inspection Date:</strong>{" "}
+                              {row.InspectationDate || "N/A"}
+                            </div>
                           </div>
-                          <div>
-                            <strong>Damage:</strong>{" "}
-                            {row.DamageKindName || "N/A"}
+
+                          {/* Third row of details */}
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              marginTop: "10px",
+                            }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <strong>Status:</strong>{" "}
+                              {row.ApprovedFlag === 0
+                                ? "Unapproved"
+                                : row.ApprovedFlag || "N/A"}
+                            </div>
                           </div>
-                          <div>
-                            <strong>Level:</strong> {row.DamageLevel || "N/A"}
-                          </div>
-                          <div>
-                            <strong>Inspector:</strong> {row.Inspector || "N/A"}
-                          </div>
-                          <div>
-                            <strong>Inspection Date:</strong>{" "}
-                            {row.InspectationDate || "N/A"}
-                          </div>
-                          <div>
-                            <strong>Status:</strong>{" "}
-                            {row.ApprovedFlag === 0
-                              ? "Unapproved"
-                              : row.ApprovedFlag || "N/A"}
-                          </div>
+
+                          {/* Photos Section */}
+                          {row.PhotoPaths && row.PhotoPaths.length > 0 && (
+                            <div style={{ marginTop: "10px" }}>
+                              <strong>Photos:</strong>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "10px",
+                                  marginTop: "10px",
+                                }}
+                              >
+                                {row.PhotoPaths.map((photo, photoIndex) => (
+                                  <img
+                                    key={photoIndex}
+                                    src={photo}
+                                    alt={`Photo ${photoIndex + 1}`}
+                                    style={{
+                                      width: "100px",
+                                      height: "100px",
+                                      objectFit: "cover",
+                                      borderRadius: "5px",
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Edit Button */}
                           <div style={{ marginTop: "10px" }}>
                             <Button
                               onClick={() => handleEditClick(row)}
