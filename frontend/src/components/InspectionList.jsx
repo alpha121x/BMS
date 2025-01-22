@@ -265,15 +265,29 @@ const InspectionList = ({ bridgeId }) => {
                     <div
                       key={workKind}
                       style={{
-                        marginBottom: "15px",
+                        marginBottom: "10px", // Reduced margin
                         border: "1px solid #ddd",
-                        padding: "10px",
+                        padding: "8px", // Reduced padding
                         borderRadius: "8px",
                       }}
                     >
-                      {/* Work Kind Label without header style */}
-                      <div style={{ marginBottom: "10px", fontWeight: "bold" }}>
-                        Work Kind: {workKind}
+                      {/* Work Kind Label */}
+                      <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
+                        Work Kind: {workKind}{" "} <Button
+                          onClick={() => handleEditClick(workKind)} // Pass workKind or appropriate data
+                          style={{
+                            backgroundColor: "#4CAF50",
+                            border: "none",
+                            color: "white",
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+
+                      {/* Edit Button right after Work Kind Label */}
+                      <div style={{ marginBottom: "8px" }}>
+                       
                       </div>
 
                       {groupedData[spanIndex][workKind].map((row, index) => (
@@ -281,9 +295,9 @@ const InspectionList = ({ bridgeId }) => {
                           key={index}
                           className="inspection-item"
                           style={{
-                            marginBottom: "10px",
-                            borderBottom: "1px solid #ddd", // Border between items
-                            paddingBottom: "10px", // Padding at the bottom of each item
+                            marginBottom: "8px", // Reduced margin between items
+                            borderBottom: "1px solid #ddd",
+                            paddingBottom: "8px", // Reduced padding at the bottom of each item
                           }}
                         >
                           {/* Displaying 3 details per row using flexbox */}
@@ -291,6 +305,7 @@ const InspectionList = ({ bridgeId }) => {
                             style={{
                               display: "flex",
                               justifyContent: "space-between",
+                              marginBottom: "6px", // Reduced margin between rows
                             }}
                           >
                             <div style={{ flex: 1 }}>
@@ -311,7 +326,7 @@ const InspectionList = ({ bridgeId }) => {
                             style={{
                               display: "flex",
                               justifyContent: "space-between",
-                              marginTop: "10px",
+                              marginTop: "6px", // Reduced margin
                             }}
                           >
                             <div style={{ flex: 1 }}>
@@ -332,7 +347,7 @@ const InspectionList = ({ bridgeId }) => {
                             style={{
                               display: "flex",
                               justifyContent: "space-between",
-                              marginTop: "10px",
+                              marginTop: "6px", // Reduced margin
                             }}
                           >
                             <div style={{ flex: 1 }}>
@@ -345,13 +360,13 @@ const InspectionList = ({ bridgeId }) => {
 
                           {/* Photos Section */}
                           {row.PhotoPaths && row.PhotoPaths.length > 0 && (
-                            <div style={{ marginTop: "10px" }}>
+                            <div style={{ marginTop: "8px" }}>
                               <strong>Photos:</strong>
                               <div
                                 style={{
                                   display: "flex",
-                                  gap: "10px",
-                                  marginTop: "10px",
+                                  gap: "6px", // Reduced gap between photos
+                                  marginTop: "6px", // Reduced margin
                                 }}
                               >
                                 {row.PhotoPaths.map((photo, photoIndex) => (
@@ -360,8 +375,8 @@ const InspectionList = ({ bridgeId }) => {
                                     src={photo}
                                     alt={`Photo ${photoIndex + 1}`}
                                     style={{
-                                      width: "100px",
-                                      height: "100px",
+                                      width: "80px", // Reduced size
+                                      height: "80px", // Reduced size
                                       objectFit: "cover",
                                       borderRadius: "5px",
                                     }}
@@ -370,20 +385,6 @@ const InspectionList = ({ bridgeId }) => {
                               </div>
                             </div>
                           )}
-
-                          {/* Edit Button */}
-                          <div style={{ marginTop: "10px" }}>
-                            <Button
-                              onClick={() => handleEditClick(row)}
-                              style={{
-                                backgroundColor: "#4CAF50",
-                                border: "none",
-                                color: "white",
-                              }}
-                            >
-                              Edit
-                            </Button>
-                          </div>
                         </div>
                       ))}
                     </div>
