@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table } from "react-bootstrap";
+import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
+import InspectionModal from "./InspectionModal";
 
 const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
   const [inspectionType, setInspectionType] = useState("new"); // "new" or "old"
 
   const itemsPerPage = 10;
@@ -47,10 +50,20 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleViewClick = (row) => {
+  const handleEditClick = (row) => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
-    const detailUrl = `/InspectionDetails?data=${serializedRow}`;
-    window.location.href = detailUrl;
+    const editUrl = `/EditInspection?data=${serializedRow}`;
+    window.location.href = editUrl;
+  };
+
+  const handleViewClick = (row) => {
+    setSelectedRow(row);
+    setShowModal(true);
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+    setSelectedRow(null);
   };
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
@@ -264,6 +277,16 @@ const InspectionList = ({ bridgeId }) => {
                       }}
                     >
                       View
+                    </Button>{" "}
+                    <Button
+                      onClick={() => handleEditClick(row)}
+                      style={{
+                        backgroundColor: "#4CAF50",
+                        border: "none",
+                        color: "white",
+                      }}
+                    >
+                      Edit
                     </Button>
                   </td>
                 </tr>
@@ -287,6 +310,13 @@ const InspectionList = ({ bridgeId }) => {
           </div>
         </div>
       </div>
+
+      <Modal show={showModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Inspection Details</Modal.Title>
+        </Modal.Header>
+        <InspectionModal selectedRow={selectedRow} />
+      </Modal>
     </div>
   );
 };

@@ -35,7 +35,7 @@ const InspectionList = ({ bridgeId }) => {
 
       const result = await response.json();
 
-      console.log(result);
+      // console.log(result);
 
       if (Array.isArray(result.data)) {
         setTableData(result.data);
@@ -284,12 +284,6 @@ const InspectionList = ({ bridgeId }) => {
                           Edit
                         </Button>
                       </div>
-
-                      {/* Edit Button right after Work Kind Label */}
-                      <div style={{ marginBottom: "8px" }}>
-                       
-                      </div>
-
                       {groupedData[spanIndex][workKind].map((row, index) => (
                         <div
                           key={index}
