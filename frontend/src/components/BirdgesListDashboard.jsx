@@ -5,8 +5,22 @@ import { BASE_URL } from "./config";
 import "./BridgeList.css";
 import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
+import FilterComponent from "./FilterComponent";
 
 const BridgesListDashboard = ({
+  setSelectedDistrict,
+  setMinBridgeLength,
+  setMaxBridgeLength,
+  setMinSpanLength,
+  setMaxSpanLength,
+  setStructureType,
+  setConstructionType,
+  setCategory,
+  setEvaluationStatus,
+  setInspectionStatus,
+  setMinYear,
+  setMaxYear,
+  ////////
   district,
   structureType,
   constructionType,
@@ -270,6 +284,66 @@ const BridgesListDashboard = ({
             </div>
           </div>
           <div className="flex space-x-2">
+          <button
+              className="btn btn-primary flex items-center gap-2"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasRight"
+              aria-controls="offcanvasRight"
+            >
+              {/* Filter Icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-5.414 5.414A2 2 0 0014 13.414V20a1 1 0 01-1.447.894l-4-2A1 1 0 018 17.618v-4.204a2 2 0 00-.586-1.414L3.293 6.707A1 1 0 013 6V4z"
+                />
+              </svg>
+            </button>
+
+            {/* Offcanvas Sidebar for Filters */}
+            <div
+              className="offcanvas offcanvas-end"
+              tabIndex="-1"
+              id="offcanvasRight"
+              aria-labelledby="offcanvasRightLabel"
+            >
+              <div className="offcanvas-header">
+                <h5 id="offcanvasRightLabel" className="text-xl font-bold">
+                  Filters
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close text-reset"
+                  data-bs-dismiss="offcanvas"
+                  aria-label="Close"
+                ></button>
+              </div>
+
+              <div className="offcanvas-body">
+                <FilterComponent
+                  setSelectedDistrict={setSelectedDistrict}
+                  setMinBridgeLength={setMinBridgeLength}
+                  setMaxBridgeLength={setMaxBridgeLength}
+                  setMinSpanLength={setMinSpanLength}
+                  setMaxSpanLength={setMaxSpanLength}
+                  setStructureType={setStructureType}
+                  setConstructionType={setConstructionType}
+                  setCategory={setCategory}
+                  setEvaluationStatus={setEvaluationStatus}
+                  setInspectionStatus={setInspectionStatus}
+                  setMinYear={setMinYear}
+                  setMaxYear={setMaxYear}
+                />
+              </div>
+            </div>
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
               onClick={handleDownloadCSV}
