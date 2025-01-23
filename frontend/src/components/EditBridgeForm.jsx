@@ -10,6 +10,16 @@ const EditBridgeForm = () => {
   const [selectedSpan, setSelectedSpan] = useState("");
   const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
   const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
+  const [dropdownOptions, setDropdownOptions] = useState({
+    districtOptions: [],
+    structureTypeOptions: [],
+    constructionTypeOptions: [],
+    roadClassificationOptions: [],
+    carriagewayTypeOptions: [],
+    roadSurfaceTypeOptions: [],
+    visualConditionOptions: [],
+    directionOptions: [],
+  });
 
   const photos = bridgeData?.photos || [];
 
@@ -27,6 +37,89 @@ const EditBridgeForm = () => {
   }, [serializedData]);
 
   // console.log(bridgeData);
+
+  useEffect(() => {
+    const fetchDropdownOptions = async () => {
+      try {
+        const responseDistrict = await fetch(`${BASE_URL}/api/districts`);
+        const responseStructureType = await fetch(`${BASE_URL}/api/structure-types`);
+        const responseConstructionType = await fetch(`${BASE_URL}/api/construction-types`);
+        const responseRoadClassification = await fetch(`${BASE_URL}/api/road-classifications`);
+        const responseCarriagewayType = await fetch(`${BASE_URL}/api/carriageway-types`);
+        const responseRoadSurfaceType = await fetch(`${BASE_URL}/api/road-surface-types`);
+        const responseVisualCondition = await fetch(`${BASE_URL}/api/visual-conditions`);
+        const responseDirection = await fetch(`${BASE_URL}/api/directions`);
+  
+        const [districts, structureTypes, constructionTypes, roadClassifications, carriagewayTypes, roadSurfaceTypes, visualConditions, directions] = 
+        await Promise.all([
+            responseDistrict.json(),
+            responseStructureType.json(),
+            responseConstructionType.json(),
+            responseRoadClassification.json(),
+            responseCarriagewayType.json(),
+            responseRoadSurfaceType.json(),
+            responseVisualCondition.json(),
+            responseDirection.json(),
+        ]);
+        
+        console.log("Districts:", districts);
+        console.log("Structure Types:", structureTypes);
+        console.log("Construction Types:", constructionTypes);
+        console.log("Road Classifications:", roadClassifications);
+        console.log("Carriageway Types:", carriagewayTypes);
+        console.log("Road Surface Types:", roadSurfaceTypes);
+          await Promise.all([
+            responseDistrict.json(),
+            responseStructureType.json(),
+            responseConstructionType.json(),
+            responseRoadClassification.json(),
+            responseCarriagewayType.json(),
+            responseRoadSurfaceType.json(),
+            responseVisualCondition.json(),
+            responseDirection.json(),
+          ]);
+  
+        setDropdownOptions({
+          districtOptions: districts.map((item) => item.district), // Adjust based on API response structure
+          structureTypeOptions: structureTypes.map((item) => item.structure_type), // Adjust based on API response structure
+          constructionTypeOptions: constructionTypes.map((item) => item.construction_type), // Adjust based on API response structure
+          roadClassificationOptions: roadClassifications.map((item) => item.road_classification), // Adjust based on API response structure
+          carriagewayTypeOptions: carriagewayTypes.map((item) => item.carriageway_type), // Adjust based on API response structure
+          roadSurfaceTypeOptions: roadSurfaceTypes.map((item) => item.road_surface_type), // Adjust based on API response structure
+          visualConditionOptions: visualConditions.map((item) => item.visual_condition), // Adjust based on API response structure
+          directionOptions: directions.map((item) => item.direction), // Adjust based on API response structure
+        });
+      } catch (error) {
+        console.error("Error fetching dropdown options:", error);
+      }
+    };
+  
+    fetchDropdownOptions();
+  }, []);
+  
+  const renderDropdown = (field, optionsKey) => {
+    const currentValue = bridgeData?.[field] || "";
+    const options = [
+      ...new Set(
+        [...dropdownOptions[optionsKey], currentValue].filter(Boolean)
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  
+    return (
+      <Form.Control
+        as="select"
+        value={currentValue}
+        onChange={(e) => handleInputChange(field, e.target.value)}
+      >
+        <option value="">Select {field.replace(/([A-Z])/g, " $1")}</option>
+        {options.map((option, index) => (
+          <option key={index} value={option}>
+            {option}
+          </option>
+        ))}
+      </Form.Control>
+    );
+  };
 
   // This will hold the number of spans for the bridge
   const spanCount = bridgeData?.no_of_span || 0;
@@ -292,42 +385,6 @@ const EditBridgeForm = () => {
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group controlId="formStructureType">
-                  <Form.Label>Structure Type</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.structure_type || ""}
-                    onChange={(e) =>
-                      handleInputChange("structure_type", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formConstructionYear">
-                  <Form.Label>Construction Year</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.construction_year || ""}
-                    onChange={(e) =>
-                      handleInputChange("construction_year", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formDistrict">
-                  <Form.Label>District</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.district || ""}
-                    onChange={(e) =>
-                      handleInputChange("district", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
                 <Form.Group controlId="formRoadName">
                   <Form.Label>Road Name</Form.Label>
                   <Form.Control
@@ -352,17 +409,90 @@ const EditBridgeForm = () => {
                 </Form.Group>
               </Col>
               <Col md={6}>
-                <Form.Group controlId="formConstructionType">
-                  <Form.Label>Construction Type</Form.Label>
+                <Form.Group controlId="formConstructionYear">
+                  <Form.Label>Construction Year</Form.Label>
                   <Form.Control
                     type="text"
-                    value={bridgeData.construction_type || ""}
+                    value={bridgeData.construction_year || ""}
                     onChange={(e) =>
-                      handleInputChange("construction_type", e.target.value)
+                      handleInputChange("construction_year", e.target.value)
                     }
                   />
                 </Form.Group>
               </Col>
+              {/* District Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formDistrict">
+                  <Form.Label>District</Form.Label>
+                  {renderDropdown("district", "districtOptions")}
+                </Form.Group>
+              </Col>
+
+              {/* Structure Type Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formStructureType">
+                  <Form.Label>Structure Type</Form.Label>
+                  {renderDropdown("structure_type", "structureTypeOptions")}
+                </Form.Group>
+              </Col>
+
+              {/* Construction Type Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formConstructionType">
+                  <Form.Label>Construction Type</Form.Label>
+                  {renderDropdown(
+                    "construction_type",
+                    "constructionTypeOptions"
+                  )}
+                </Form.Group>
+              </Col>
+
+              {/* Road Classification Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formRoadClassification">
+                  <Form.Label>Road Classification</Form.Label>
+                  {renderDropdown(
+                    "road_classification",
+                    "roadClassificationOptions"
+                  )}
+                </Form.Group>
+              </Col>
+
+              {/* Carriageway Type Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formCarriagewayType">
+                  <Form.Label>Carriageway Type</Form.Label>
+                  {renderDropdown("carriageway_type", "carriagewayTypeOptions")}
+                </Form.Group>
+              </Col>
+
+              {/* Road Surface Type Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formRoadSurfaceType">
+                  <Form.Label>Road Surface Type</Form.Label>
+                  {renderDropdown(
+                    "road_surface_type",
+                    "roadSurfaceTypeOptions"
+                  )}
+                </Form.Group>
+              </Col>
+
+              {/* Visual Condition Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formVisualCondition">
+                  <Form.Label>Visual Condition</Form.Label>
+                  {renderDropdown("visual_condition", "visualConditionOptions")}
+                </Form.Group>
+              </Col>
+
+              {/* Direction Dropdown */}
+              <Col md={6}>
+                <Form.Group controlId="formDirection">
+                  <Form.Label>Direction</Form.Label>
+                  {renderDropdown("direction", "directionOptions")}
+                </Form.Group>
+              </Col>
+
               <Col md={6}>
                 <Form.Group controlId="formSurveyID">
                   <Form.Label>Survey ID</Form.Label>
@@ -383,66 +513,6 @@ const EditBridgeForm = () => {
                     value={bridgeData.surveyor_name || ""}
                     onChange={(e) =>
                       handleInputChange("surveyor_name", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formRoadClassification">
-                  <Form.Label>Road Classification</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.road_classification || ""}
-                    onChange={(e) =>
-                      handleInputChange("road_classification", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formCarriagewayType">
-                  <Form.Label>Carriageway Type</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.carriageway_type || ""}
-                    onChange={(e) =>
-                      handleInputChange("carriageway_type", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formRoadSurfaceType">
-                  <Form.Label>Road Surface Type</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.road_surface_type || ""}
-                    onChange={(e) =>
-                      handleInputChange("road_surface_type", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formVisualCondition">
-                  <Form.Label>Visual Condition</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.visual_condition || ""}
-                    onChange={(e) =>
-                      handleInputChange("visual_condition", e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group controlId="formDirection">
-                  <Form.Label>Direction</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.direction || ""}
-                    onChange={(e) =>
-                      handleInputChange("direction", e.target.value)
                     }
                   />
                 </Form.Group>
@@ -599,13 +669,12 @@ const EditBridgeForm = () => {
                                 variant="danger"
                                 size="sm"
                                 className="mt-1 w-100"
-                                onClick={
-                                  () =>
-                                    handleSpanPhotoRemove(
-                                      selectedSpan,
-                                      photo.fileName,
-                                      index
-                                    )
+                                onClick={() =>
+                                  handleSpanPhotoRemove(
+                                    selectedSpan,
+                                    photo.fileName,
+                                    index
+                                  )
                                 }
                               >
                                 Remove
