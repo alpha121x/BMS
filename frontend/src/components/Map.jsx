@@ -27,10 +27,10 @@ const Map = () => {
         const view = new MapView({
           container: mapRef.current,
           map: map,
-          center: [74.3436, 31.5497],
-          zoom: 11,
+          center: [73.1587, 31.5204],
+          zoom: 6,
           constraints: {
-            minZoom: 9,
+            minZoom: 1,
             maxZoom: 18
           }
         });

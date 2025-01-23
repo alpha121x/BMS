@@ -295,14 +295,14 @@ const EditInspectionForm = () => {
                           }}
                           onClick={() => handlePhotoClick(photo)}
                         />
-                        <Button
+                        {/* <Button
                           variant="danger"
                           size="sm"
                           className="mt-1 w-100"
                           onClick={() => handlePhotoRemove(photo)}
                         >
                           Remove
-                        </Button>
+                        </Button> */}
                       </div>
                     ))}
                   </div>
