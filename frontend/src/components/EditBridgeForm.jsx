@@ -267,45 +267,271 @@ const EditBridgeForm = () => {
           </h6>
           <Form onSubmit={handleSubmit}>
             <Row>
-              {[
-                { label: "Bridge ID", field: "uu_bms_id" },
-                { label: "Bridge Name", field: "bridge_name" },
-                { label: "Structure Type", field: "structure_type" },
-                { label: "Construction Year", field: "construction_year" },
-                { label: "District", field: "district" },
-                { label: "Road Name", field: "road_name" },
-                { label: "Road Name CWD", field: "road_name_cwd" },
-                { label: "Construction Type", field: "construction_type" },
-                { label: "Survey ID", field: "survey_id" },
-                { label: "Surveyor Name", field: "surveyor_name" },
-                { label: "Road Classification", field: "road_classification" },
-                { label: "Carriageway Type", field: "carriageway_type" },
-                { label: "Road Surface Type", field: "road_surface_type" },
-                { label: "Visual Condition", field: "visual_condition" },
-                { label: "Direction", field: "direction" },
-                {
-                  label: "Last Maintenance Date",
-                  field: "last_maintenance_date",
-                  type: "date",
-                },
-                { label: "Width Structure", field: "structure_width_m" },
-                { label: "Span Length", field: "span_length_m" },
-                { label: "No of Spans", field: "no_of_span" },
-                { label: "Latitude", field: "y_centroid" },
-                { label: "Longitude", field: "x_centroid" },
-                { label: "Remarks", field: "remarks" },
-              ].map(({ label, field }, index) => (
-                <Col key={index} md={6}>
-                  <Form.Group controlId={`form${field}`}>
-                    <Form.Label>{label}</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={bridgeData[field] || ""}
-                      onChange={(e) => handleInputChange(field, e.target.value)}
-                    />
-                  </Form.Group>
-                </Col>
-              ))}
+              <Col md={6}>
+                <Form.Group controlId="formBridgeID">
+                  <Form.Label>Bridge ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.uu_bms_id || ""}
+                    onChange={(e) =>
+                      handleInputChange("uu_bms_id", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formBridgeName">
+                  <Form.Label>Bridge Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.bridge_name || ""}
+                    onChange={(e) =>
+                      handleInputChange("bridge_name", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formStructureType">
+                  <Form.Label>Structure Type</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.structure_type || ""}
+                    onChange={(e) =>
+                      handleInputChange("structure_type", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formConstructionYear">
+                  <Form.Label>Construction Year</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.construction_year || ""}
+                    onChange={(e) =>
+                      handleInputChange("construction_year", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formDistrict">
+                  <Form.Label>District</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.district || ""}
+                    onChange={(e) =>
+                      handleInputChange("district", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formRoadName">
+                  <Form.Label>Road Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.road_name || ""}
+                    onChange={(e) =>
+                      handleInputChange("road_name", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formRoadNameCWD">
+                  <Form.Label>Road Name CWD</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.road_name_cwd || ""}
+                    onChange={(e) =>
+                      handleInputChange("road_name_cwd", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formConstructionType">
+                  <Form.Label>Construction Type</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.construction_type || ""}
+                    onChange={(e) =>
+                      handleInputChange("construction_type", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formSurveyID">
+                  <Form.Label>Survey ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.survey_id || ""}
+                    onChange={(e) =>
+                      handleInputChange("survey_id", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formSurveyorName">
+                  <Form.Label>Surveyor Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.surveyor_name || ""}
+                    onChange={(e) =>
+                      handleInputChange("surveyor_name", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formRoadClassification">
+                  <Form.Label>Road Classification</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.road_classification || ""}
+                    onChange={(e) =>
+                      handleInputChange("road_classification", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formCarriagewayType">
+                  <Form.Label>Carriageway Type</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.carriageway_type || ""}
+                    onChange={(e) =>
+                      handleInputChange("carriageway_type", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formRoadSurfaceType">
+                  <Form.Label>Road Surface Type</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.road_surface_type || ""}
+                    onChange={(e) =>
+                      handleInputChange("road_surface_type", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formVisualCondition">
+                  <Form.Label>Visual Condition</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.visual_condition || ""}
+                    onChange={(e) =>
+                      handleInputChange("visual_condition", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formDirection">
+                  <Form.Label>Direction</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.direction || ""}
+                    onChange={(e) =>
+                      handleInputChange("direction", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formLastMaintenanceDate">
+                  <Form.Label>Last Maintenance Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={bridgeData.last_maintenance_date || ""}
+                    onChange={(e) =>
+                      handleInputChange("last_maintenance_date", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formWidthStructure">
+                  <Form.Label>Width Structure</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.structure_width_m || ""}
+                    onChange={(e) =>
+                      handleInputChange("structure_width_m", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formSpanLength">
+                  <Form.Label>Span Length</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.span_length_m || ""}
+                    onChange={(e) =>
+                      handleInputChange("span_length_m", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formNoOfSpans">
+                  <Form.Label>No of Spans</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.no_of_span || ""}
+                    onChange={(e) =>
+                      handleInputChange("no_of_span", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formLatitude">
+                  <Form.Label>Latitude</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.y_centroid || ""}
+                    onChange={(e) =>
+                      handleInputChange("y_centroid", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formLongitude">
+                  <Form.Label>Longitude</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.x_centroid || ""}
+                    onChange={(e) =>
+                      handleInputChange("x_centroid", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group controlId="formRemarks">
+                  <Form.Label>Remarks</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={bridgeData.remarks || ""}
+                    onChange={(e) =>
+                      handleInputChange("remarks", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
 
               {/* Span Select Dropdown */}
               <div className="form-group">
