@@ -94,7 +94,6 @@ const EditBridgeForm = () => {
         value={currentValue}
         onChange={(e) => handleInputChange(field, e.target.value)}
       >
-        <option value="">Select {field.replace(/([A-Z])/g, " $1")}</option>
         {options.map((option, index) => (
           <option key={index} value={option}>
             {option}
