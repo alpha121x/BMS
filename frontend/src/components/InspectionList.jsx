@@ -303,59 +303,47 @@ const InspectionList = ({ bridgeId }) => {
                                   paddingBottom: "8px", // Reduced padding at the bottom of each item
                                 }}
                               >
-                                {/* Displaying 3 details per row using flexbox */}
+                                {/* Grid Layout: Displaying 4 details per row */}
                                 <div
                                   style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginBottom: "6px", // Reduced margin between rows
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(4, 1fr)", // 4 columns of equal width
+                                    columnGap: "12px", // Space between columns
+                                    rowGap: "8px", // Space between rows
                                   }}
                                 >
-                                  <div style={{ flex: 1 }}>
+                                  {/* Row 1 */}
+                                  <div>
                                     <strong>Parts:</strong>{" "}
                                     {row.PartsName || "N/A"}
                                   </div>
-                                  <div style={{ flex: 1 }}>
+                                  <div>
                                     <strong>Material:</strong>{" "}
                                     {row.MaterialName || "N/A"}
                                   </div>
-                                  <div style={{ flex: 1 }}>
+                                  <div>
                                     <strong>Damage:</strong>{" "}
                                     {row.DamageKindName || "N/A"}
                                   </div>
-                                </div>
-
-                                {/* Second row of details */}
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginTop: "6px", // Reduced margin
-                                  }}
-                                >
-                                  <div style={{ flex: 1 }}>
+                                  <div>
                                     <strong>Level:</strong>{" "}
                                     {row.DamageLevel || "N/A"}
                                   </div>
-                                  <div style={{ flex: 1 }}>
+
+                                  {/* Row 2 */}
+                                  <div>
                                     <strong>Inspector:</strong>{" "}
                                     {row.Inspector || "N/A"}
                                   </div>
-                                  <div style={{ flex: 1 }}>
+                                  <div>
                                     <strong>Inspection Date:</strong>{" "}
                                     {row.InspectationDate || "N/A"}
                                   </div>
-                                </div>
-
-                                {/* Third row of details */}
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    marginTop: "6px", // Reduced margin
-                                  }}
-                                >
-                                  <div style={{ flex: 1 }}>
+                                  <div>
+                                    <strong>Remarks:</strong>{" "}
+                                    {row.Remarks || "N/A"}
+                                  </div>
+                                  <div>
                                     <strong>Status:</strong>{" "}
                                     {row.ApprovedFlag === 0
                                       ? "Unapproved"
@@ -370,9 +358,11 @@ const InspectionList = ({ bridgeId }) => {
                                       <strong>Photos:</strong>
                                       <div
                                         style={{
-                                          display: "flex",
-                                          gap: "6px", // Reduced gap between photos
-                                          marginTop: "6px", // Reduced margin
+                                          display: "grid",
+                                          gridTemplateColumns:
+                                            "repeat(auto-fill, 80px)", // Dynamically fit images
+                                          gap: "6px", // Gap between photos
+                                          marginTop: "6px",
                                         }}
                                       >
                                         {row.PhotoPaths.map(
@@ -382,8 +372,8 @@ const InspectionList = ({ bridgeId }) => {
                                               src={photo}
                                               alt={`Photo ${photoIndex + 1}`}
                                               style={{
-                                                width: "80px", // Reduced size
-                                                height: "80px", // Reduced size
+                                                width: "80px",
+                                                height: "80px",
                                                 objectFit: "cover",
                                                 borderRadius: "5px",
                                               }}
