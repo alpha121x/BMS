@@ -18,6 +18,46 @@ const EditInspectionForm = () => {
   const queryParams = new URLSearchParams(search);
   const serializedData = queryParams.get("data");
 
+   // Predefined dropdown options
+   const dropdownOptions = {
+    workKindOptions: [
+      "Maintenance", 
+      "Repair", 
+      "Inspection", 
+      "Rehabilitation", 
+      "Construction"
+    ],
+    damageKindOptions: [
+      "Structural Damage", 
+      "Surface Wear", 
+      "Corrosion", 
+      "Crack", 
+      "Settlement"
+    ],
+    damageLevelOptions: [
+      "Low", 
+      "Medium", 
+      "High", 
+      "Critical"
+    ],
+    materialOptions: [
+      "Concrete", 
+      "Steel", 
+      "Timber", 
+      "Composite", 
+      "Masonry"
+    ],
+    partsOptions: [
+      "Deck", 
+      "Girder", 
+      "Pier", 
+      "Abutment", 
+      "Bearing", 
+      "Expansion Joint"
+    ]
+  };
+
+
   useEffect(() => {
     if (serializedData) {
       // Decode and parse the serialized data
@@ -159,6 +199,22 @@ const EditInspectionForm = () => {
     }
   };
 
+  // Render dropdown with options
+  const renderDropdown = (field, options) => (
+    <Form.Control 
+      as="select"
+      value={bridgeData[field] || ""}
+      onChange={(e) => handleInputChange(field, e.target.value)}
+    >
+      <option value="">Select {field.replace(/([A-Z])/g, ' $1')}</option>
+      {options.map((option, index) => (
+        <option key={index} value={option}>
+          {option}
+        </option>
+      ))}
+    </Form.Control>
+  );
+
    if (!bridgeData) {
     return (
       <div
@@ -224,39 +280,6 @@ const EditInspectionForm = () => {
               </Col>
 
               <Col md={6}>
-                <Form.Group controlId="formWorkKind">
-                  <Form.Label>Work Kind</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.WorkKindName || ""}
-                    onChange={(e) => handleInputChange("WorkKindName", e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group controlId="formDamageKind">
-                  <Form.Label>Damage Kind</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.DamageKindName || ""}
-                    onChange={(e) => handleInputChange("DamageKindName", e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group controlId="formDamageLevel">
-                  <Form.Label>Damage Level</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.DamageLevel || ""}
-                    onChange={(e) => handleInputChange("DamageLevel", e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
                 <Form.Group controlId="formSpanIndex">
                   <Form.Label>Span Index</Form.Label>
                   <Form.Control
@@ -269,24 +292,37 @@ const EditInspectionForm = () => {
               </Col>
 
               <Col md={6}>
+                <Form.Group controlId="formWorkKind">
+                  <Form.Label>Work Kind</Form.Label>
+                  {renderDropdown('WorkKindName', dropdownOptions.workKindOptions)}
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formDamageKind">
+                  <Form.Label>Damage Kind</Form.Label>
+                  {renderDropdown('DamageKindName', dropdownOptions.damageKindOptions)}
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formDamageLevel">
+                  <Form.Label>Damage Level</Form.Label>
+                  {renderDropdown('DamageLevel', dropdownOptions.damageLevelOptions)}
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
                 <Form.Group controlId="formMaterial">
                   <Form.Label>Material</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.MaterialName || ""}
-                    onChange={(e) => handleInputChange("MaterialName", e.target.value)}
-                  />
+                  {renderDropdown('MaterialName', dropdownOptions.materialOptions)}
                 </Form.Group>
               </Col>
 
               <Col md={6}>
                 <Form.Group controlId="formParts">
                   <Form.Label>Parts</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={bridgeData.PartsName || ""}
-                    onChange={(e) => handleInputChange("PartsName", e.target.value)}
-                  />
+                  {renderDropdown('PartsName', dropdownOptions.partsOptions)}
                 </Form.Group>
               </Col>
 
