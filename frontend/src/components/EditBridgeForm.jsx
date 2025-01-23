@@ -605,7 +605,7 @@ const EditBridgeForm = () => {
                                       selectedSpan,
                                       photo.fileName,
                                       index
-                                    ) // Use photo.fileName to remove photo
+                                    )
                                 }
                               >
                                 Remove
