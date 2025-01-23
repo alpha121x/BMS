@@ -50,24 +50,7 @@ const EditBridgeForm = () => {
         const responseVisualCondition = await fetch(`${BASE_URL}/api/visual-conditions`);
         const responseDirection = await fetch(`${BASE_URL}/api/directions`);
   
-        const [districts, structureTypes, constructionTypes, roadClassifications, carriagewayTypes, roadSurfaceTypes, visualConditions, directions] = 
-        await Promise.all([
-            responseDistrict.json(),
-            responseStructureType.json(),
-            responseConstructionType.json(),
-            responseRoadClassification.json(),
-            responseCarriagewayType.json(),
-            responseRoadSurfaceType.json(),
-            responseVisualCondition.json(),
-            responseDirection.json(),
-        ]);
-        
-        console.log("Districts:", districts);
-        console.log("Structure Types:", structureTypes);
-        console.log("Construction Types:", constructionTypes);
-        console.log("Road Classifications:", roadClassifications);
-        console.log("Carriageway Types:", carriagewayTypes);
-        console.log("Road Surface Types:", roadSurfaceTypes);
+        const [districts, structureTypes, constructionTypes, roadClassifications, carriagewayTypes, roadSurfaceTypes, visualConditions, directions] =
           await Promise.all([
             responseDistrict.json(),
             responseStructureType.json(),

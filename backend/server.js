@@ -590,10 +590,7 @@ app.get("/api/structure-types", async (req, res) => {
     const result = await pool.query(
       "SELECT id, structure_type FROM bms.tbl_structure_types"
     );
-    res.status(200).json({
-      success: true,
-      data: result.rows,
-    });
+    res.json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
@@ -608,10 +605,7 @@ app.get("/api/carriageway-types", async (req, res) => {
     const result = await pool.query(
       "SELECT id, carriageway_type FROM bms.tbl_carriageway_types"
     );
-    res.status(200).json({
-      success: true,
-      data: result.rows,
-    });
+    res.json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
@@ -626,10 +620,7 @@ app.get("/api/construction-types", async (req, res) => {
     const result = await pool.query(
       "SELECT id, construction_type FROM bms.tbl_construction_types"
     );
-    res.status(200).json({
-      success: true,
-      data: result.rows,
-    });
+    res.json(result.rows);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
