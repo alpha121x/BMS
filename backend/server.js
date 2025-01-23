@@ -652,6 +652,19 @@ app.get("/api/districts", async (req, res) => {
   }
 });
 
+// API route to get Districts
+app.get("/api/directions", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id,direction FROM bms.tbl_direction_types"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.get("/api/work-kinds", async (req, res) => {
   try {
     const result = await pool.query(
@@ -714,6 +727,39 @@ app.get("/api/damage-kinds", async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// API for Visual Conditions
+app.get('/api/visual-conditions', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, visual_condition FROM bms.tbl_visual_conditions');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching visual conditions:', error);
+    res.status(500).json({ error: 'Failed to fetch visual conditions' });
+  }
+});
+
+// API for Road Classifications
+app.get('/api/road-classifications', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, road_classification FROM bms.tbl_road_classifications');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching road classifications:', error);
+    res.status(500).json({ error: 'Failed to fetch road classifications' });
+  }
+});
+
+// API for Road Surface Types
+app.get('/api/road-surface-types', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, road_surface_type FROM bms.tbl_road_surface_types');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching road surface types:', error);
+    res.status(500).json({ error: 'Failed to fetch road surface types' });
   }
 });
 
