@@ -52,10 +52,6 @@ const Map = () => {
                 <img src="{image2}" alt="Image 2" style="width:100px;" />
                 <img src="{image3}" alt="Image 3" style="width:100px;" />
               </div>
-              <div>
-                <button onclick="showInventoryInfo()">Inventory Information</button>
-                <button onclick="showInspectionInfo()">Inspection Information</button>
-              </div>
             </div>
           `
         };
@@ -123,12 +119,3 @@ const Map = () => {
 };
 
 export default Map;
-
-// Placeholder functions for button actions
-function showInventoryInfo() {
-  alert("Inventory Information button clicked!");
-}
-
-function showInspectionInfo() {
-  alert("Inspection Information button clicked!");
-}
