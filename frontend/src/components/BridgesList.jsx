@@ -275,7 +275,7 @@ const BridgesList = ({
 
   return (
     <>
-      <div className="w-full mx-auto mt-2">
+      <div className="w-full mx-auto">
         <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
             <div className="text-2xl font-bold">Bridges List</div>
