@@ -152,14 +152,14 @@ const EditInspectionForm = () => {
 
     // Reset the corresponding file input field if needed
     const inputElement = document.getElementById(
-      `photoInput-${span}-${photoIndex}`
+      `SpanPhoto_${span}-${photoIndex}`
     );
     if (inputElement) {
       inputElement.value = ""; // Reset the file input
     }
   };
 
-  if (!bridgeData) {
+   if (!bridgeData) {
     return (
       <div
         className="loader"
@@ -181,18 +181,6 @@ const EditInspectionForm = () => {
     );
   }
 
-  const formFields = [
-    { label: "Bridge ID", field: "ObjectID", readOnly: true },
-    { label: "Bridge Name", field: "BridgeName" },
-    { label: "Work Kind", field: "WorkKindName" },
-    { label: "Damage Kind", field: "DamageKindName" },
-    { label: "Damage Level", field: "DamageLevel" },
-    { label: "Span Index", field: "SpanIndex" },
-    { label: "Material", field: "MaterialName" },
-    { label: "Parts", field: "PartsName" },
-    { label: "Remarks", field: "Remarks" },
-  ];
-
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100">
       <div
@@ -208,40 +196,111 @@ const EditInspectionForm = () => {
       >
         <div className="card-body pb-0">
           <h6 className="card-title text-lg font-semibold pb-2">
-          Edit Inspection{" "}{userRole}
+            Edit Inspection {userRole}
           </h6>
           <Form onSubmit={handleSubmit}>
             <Row>
-              {formFields.map(({ label, field, readOnly }, index) => (
-                <Col key={index} md={6}>
-                  <Form.Group controlId={`form${field}`}>
-                    <Form.Label>{label}</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={bridgeData[field] || ""}
-                      readOnly={readOnly}
-                      onChange={(e) => handleInputChange(field, e.target.value)}
-                    />
-                  </Form.Group>
-                </Col>
-              ))}
+              {/* Individual Form Groups */}
+              <Col md={6}>
+                <Form.Group controlId="formObjectID">
+                  <Form.Label>Bridge ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.ObjectID || ""}
+                    readOnly
+                  />
+                </Form.Group>
+              </Col>
 
-              {/* Span Select Dropdown */}
-              <div className="form-group">
-                <label>Select Span</label>
-                <select
-                  className="form-control"
-                  value={selectedSpan}
-                  onChange={handleSpanSelect}
-                >
-                  <option value="">-- Select Span --</option>
-                  {spanIndexes.map((span, index) => (
-                    <option key={index} value={span}>
-                      Span{span}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Col md={6}>
+                <Form.Group controlId="formBridgeName">
+                  <Form.Label>Bridge Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.BridgeName || ""}
+                    onChange={(e) => handleInputChange("BridgeName", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formWorkKind">
+                  <Form.Label>Work Kind</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.WorkKindName || ""}
+                    onChange={(e) => handleInputChange("WorkKindName", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formDamageKind">
+                  <Form.Label>Damage Kind</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.DamageKindName || ""}
+                    onChange={(e) => handleInputChange("DamageKindName", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formDamageLevel">
+                  <Form.Label>Damage Level</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.DamageLevel || ""}
+                    onChange={(e) => handleInputChange("DamageLevel", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formSpanIndex">
+                  <Form.Label>Span Index</Form.Label>
+                  <Form.Control
+                    type="text"
+                    readOnly
+                    value={bridgeData.SpanIndex || ""}
+                    onChange={(e) => handleInputChange("SpanIndex", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formMaterial">
+                  <Form.Label>Material</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.MaterialName || ""}
+                    onChange={(e) => handleInputChange("MaterialName", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={6}>
+                <Form.Group controlId="formParts">
+                  <Form.Label>Parts</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={bridgeData.PartsName || ""}
+                    onChange={(e) => handleInputChange("PartsName", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={12}>
+                <Form.Group controlId="formRemarks">
+                  <Form.Label>Remarks</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={bridgeData.Remarks || ""}
+                    onChange={(e) => handleInputChange("Remarks", e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
 
               {/* Show photo upload options if a span is selected */}
               {showUploadOptions && selectedSpan && (
