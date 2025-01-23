@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Button, Row, Col, Form, Modal } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
+import { BASE_URL } from "./config";
 
 const EditInspectionForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
+  const [dropdownOptions, setDropdownOptions] = useState({
+    workKindOptions: [],
+    partsOptions: [],
+    materialOptions: [],
+    damageLevelOptions: [],
+    damageKindOptions: [],
+  });
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   // Retrieve user information from local storage
@@ -18,39 +26,6 @@ const EditInspectionForm = () => {
   const queryParams = new URLSearchParams(search);
   const serializedData = queryParams.get("data");
 
-  const generateDropdownOptions = (currentValue, defaultOptions) => {
-    return [...new Set([...defaultOptions, currentValue].filter(Boolean))].sort(
-      (a, b) => a.localeCompare(b)
-    );
-  };
-
-  const dropdownOptions = {
-    workKindOptions: [
-      "Maintenance",
-      "Repair",
-      "Inspection",
-      "Rehabilitation",
-      "Construction",
-    ],
-    damageKindOptions: [
-      "Structural Damage",
-      "Surface Wear",
-      "Corrosion",
-      "Crack",
-      "Settlement",
-    ],
-    damageLevelOptions: ["Low", "Medium", "High", "Critical"],
-    materialOptions: ["Concrete", "Steel", "Timber", "Composite", "Masonry"],
-    partsOptions: [
-      "Deck",
-      "Girder",
-      "Pier",
-      "Abutment",
-      "Bearing",
-      "Expansion Joint",
-    ],
-  };
-
   useEffect(() => {
     if (serializedData) {
       // Decode and parse the serialized data
@@ -58,6 +33,66 @@ const EditInspectionForm = () => {
       setBridgeData(parsedData);
     }
   }, [serializedData]);
+
+  // Fetch dropdown options from APIs using fetch
+  useEffect(() => {
+    const fetchDropdownOptions = async () => {
+      try {
+        const responseWorkKinds = await fetch(`${BASE_URL}/api/work-kinds`);
+        const responseParts = await fetch(`${BASE_URL}/api/parts`);
+        const responseMaterials = await fetch(`${BASE_URL}/api/materials`);
+        const responseDamageLevels = await fetch(
+          `${BASE_URL}/api/damage-levels`
+        );
+        const responseDamageKinds = await fetch(`${BASE_URL}/api/damage-kinds`);
+
+        const [workKinds, parts, materials, damageLevels, damageKinds] =
+          await Promise.all([
+            responseWorkKinds.json(),
+            responseParts.json(),
+            responseMaterials.json(),
+            responseDamageLevels.json(),
+            responseDamageKinds.json(),
+          ]);
+
+        setDropdownOptions({
+          workKindOptions: workKinds.map((item) => item.WorkKindName),
+          partsOptions: parts.map((item) => item.PartsName),
+          materialOptions: materials.map((item) => item.MaterialName),
+          damageLevelOptions: damageLevels.map((item) => item.DamageLevel),
+          damageKindOptions: damageKinds.map((item) => item.DamageKindName),
+        });
+      } catch (error) {
+        console.error("Error fetching dropdown options:", error);
+      }
+    };
+
+    fetchDropdownOptions();
+  }, []);
+
+  const renderDropdown = (field, optionsKey) => {
+    const currentValue = bridgeData?.[field] || "";
+    const options = [
+      ...new Set(
+        [...dropdownOptions[optionsKey], currentValue].filter(Boolean)
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+
+    return (
+      <Form.Control
+        as="select"
+        value={currentValue}
+        onChange={(e) => handleInputChange(field, e.target.value)}
+      >
+        <option value="">Select {field.replace(/([A-Z])/g, " $1")}</option>
+        {options.map((option, index) => (
+          <option key={index} value={option}>
+            {option}
+          </option>
+        ))}
+      </Form.Control>
+    );
+  };
 
   const handleInputChange = (field, value) => {
     setBridgeData((prevData) => ({
@@ -96,28 +131,6 @@ const EditInspectionForm = () => {
         (photo) => photo !== photoToRemove
       ),
     }));
-  };
-
-  const renderDropdown = (field, optionsKey) => {
-    const currentValue = bridgeData?.[field] || "";
-    const options = generateDropdownOptions(
-      currentValue,
-      dropdownOptions[optionsKey]
-    );
-
-    return (
-      <Form.Control
-        as="select"
-        value={currentValue}
-        onChange={(e) => handleInputChange(field, e.target.value)}
-      >
-        {options.map((option, index) => (
-          <option key={index} value={option}>
-            {option}
-          </option>
-        ))}
-      </Form.Control>
-    );
   };
 
   if (!bridgeData) {
@@ -200,7 +213,7 @@ const EditInspectionForm = () => {
                 </Form.Group>
               </Col>
 
-              {/* Existing form fields */}
+              {/* Work Kind Dropdown */}
               <Col md={6}>
                 <Form.Group controlId="formWorkKind">
                   <Form.Label>Work Kind</Form.Label>
@@ -208,6 +221,7 @@ const EditInspectionForm = () => {
                 </Form.Group>
               </Col>
 
+              {/* Damage Kind Dropdown */}
               <Col md={6}>
                 <Form.Group controlId="formDamageKind">
                   <Form.Label>Damage Kind</Form.Label>
@@ -215,6 +229,7 @@ const EditInspectionForm = () => {
                 </Form.Group>
               </Col>
 
+              {/* Damage Level Dropdown */}
               <Col md={6}>
                 <Form.Group controlId="formDamageLevel">
                   <Form.Label>Damage Level</Form.Label>
@@ -222,6 +237,7 @@ const EditInspectionForm = () => {
                 </Form.Group>
               </Col>
 
+              {/* Material Dropdown */}
               <Col md={6}>
                 <Form.Group controlId="formMaterial">
                   <Form.Label>Material</Form.Label>
@@ -229,6 +245,7 @@ const EditInspectionForm = () => {
                 </Form.Group>
               </Col>
 
+              {/* Parts Dropdown */}
               <Col md={6}>
                 <Form.Group controlId="formParts">
                   <Form.Label>Parts</Form.Label>

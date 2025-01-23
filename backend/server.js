@@ -655,7 +655,7 @@ app.get("/api/districts", async (req, res) => {
 app.get("/api/work-kinds", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"WorkKindID\" AS value, \"WorkKindName\" AS label FROM bms.tbl_work_kinds"
+      "SELECT \"WorkKindID\", \"WorkKindName\" FROM bms.tbl_work_kinds"
     );
 
     res.json(result.rows);
@@ -668,7 +668,7 @@ app.get("/api/work-kinds", async (req, res) => {
 app.get("/api/parts", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"PartsID\" AS value, \"PartsName\" AS label FROM bms.tbl_parts"
+      "SELECT \"PartsID\", \"PartsName\" FROM bms.tbl_parts"
     );
 
     res.json(result.rows);
@@ -681,7 +681,7 @@ app.get("/api/parts", async (req, res) => {
 app.get("/api/materials", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"MaterialID\" AS value, \"MaterialName\" AS label FROM bms.tbl_materials"
+      "SELECT \"MaterialID\", \"MaterialName\" FROM bms.tbl_materials"
     );
 
     res.json(result.rows);
@@ -691,11 +691,10 @@ app.get("/api/materials", async (req, res) => {
   }
 });
 
-
 app.get("/api/damage-levels", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"DamageLevelID\" AS value, \"DamageLevel\" AS label FROM bms.tbl_damage_levels"
+      "SELECT \"DamageLevelID\", \"DamageLevel\" FROM bms.tbl_damage_levels"
     );
 
     res.json(result.rows);
@@ -708,7 +707,7 @@ app.get("/api/damage-levels", async (req, res) => {
 app.get("/api/damage-kinds", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"DamageKindID\" AS value, \"DamageKindName\" AS label FROM bms.tbl_damage_kinds"
+      "SELECT \"DamageKindID\", \"DamageKindName\" FROM bms.tbl_damage_kinds"
     );
 
     res.json(result.rows);
@@ -717,6 +716,7 @@ app.get("/api/damage-kinds", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // Set up multer to store uploaded files in a dynamically specified directory
 const storage = multer.diskStorage({
