@@ -28,11 +28,7 @@ const Map = () => {
           container: mapRef.current,
           map: map,
           center: [73.1587, 31.5204],
-          zoom: 6,
-          constraints: {
-            minZoom: 1,
-            maxZoom: 18
-          }
+          zoom: 6
         });
 
         viewRef.current = view;
