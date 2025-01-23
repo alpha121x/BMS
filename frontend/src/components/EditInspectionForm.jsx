@@ -18,45 +18,38 @@ const EditInspectionForm = () => {
   const queryParams = new URLSearchParams(search);
   const serializedData = queryParams.get("data");
 
-   // Predefined dropdown options
-   const dropdownOptions = {
-    workKindOptions: [
-      "Maintenance", 
-      "Repair", 
-      "Inspection", 
-      "Rehabilitation", 
-      "Construction"
-    ],
-    damageKindOptions: [
-      "Structural Damage", 
-      "Surface Wear", 
-      "Corrosion", 
-      "Crack", 
-      "Settlement"
-    ],
-    damageLevelOptions: [
-      "Low", 
-      "Medium", 
-      "High", 
-      "Critical"
-    ],
-    materialOptions: [
-      "Concrete", 
-      "Steel", 
-      "Timber", 
-      "Composite", 
-      "Masonry"
-    ],
-    partsOptions: [
-      "Deck", 
-      "Girder", 
-      "Pier", 
-      "Abutment", 
-      "Bearing", 
-      "Expansion Joint"
-    ]
+  const generateDropdownOptions = (currentValue, defaultOptions) => {
+    return [...new Set([...defaultOptions, currentValue].filter(Boolean))].sort(
+      (a, b) => a.localeCompare(b)
+    );
   };
 
+  const dropdownOptions = {
+    workKindOptions: [
+      "Maintenance",
+      "Repair",
+      "Inspection",
+      "Rehabilitation",
+      "Construction",
+    ],
+    damageKindOptions: [
+      "Structural Damage",
+      "Surface Wear",
+      "Corrosion",
+      "Crack",
+      "Settlement",
+    ],
+    damageLevelOptions: ["Low", "Medium", "High", "Critical"],
+    materialOptions: ["Concrete", "Steel", "Timber", "Composite", "Masonry"],
+    partsOptions: [
+      "Deck",
+      "Girder",
+      "Pier",
+      "Abutment",
+      "Bearing",
+      "Expansion Joint",
+    ],
+  };
 
   useEffect(() => {
     if (serializedData) {
@@ -199,23 +192,30 @@ const EditInspectionForm = () => {
     }
   };
 
-  // Render dropdown with options
-  const renderDropdown = (field, options) => (
-    <Form.Control 
-      as="select"
-      value={bridgeData[field] || ""}
-      onChange={(e) => handleInputChange(field, e.target.value)}
-    >
-      <option value="">Select {field.replace(/([A-Z])/g, ' $1')}</option>
-      {options.map((option, index) => (
-        <option key={index} value={option}>
-          {option}
-        </option>
-      ))}
-    </Form.Control>
-  );
+  const renderDropdown = (field, optionsKey) => {
+    const currentValue = bridgeData?.[field] || "";
+    const options = generateDropdownOptions(
+      currentValue,
+      dropdownOptions[optionsKey]
+    );
 
-   if (!bridgeData) {
+    return (
+      <Form.Control
+        as="select"
+        value={currentValue}
+        onChange={(e) => handleInputChange(field, e.target.value)}
+      >
+        <option value="">Select {field.replace(/([A-Z])/g, " $1")}</option>
+        {options.map((option, index) => (
+          <option key={index} value={option}>
+            {option}
+          </option>
+        ))}
+      </Form.Control>
+    );
+  };
+
+  if (!bridgeData) {
     return (
       <div
         className="loader"
@@ -274,7 +274,9 @@ const EditInspectionForm = () => {
                   <Form.Control
                     type="text"
                     value={bridgeData.BridgeName || ""}
-                    onChange={(e) => handleInputChange("BridgeName", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("BridgeName", e.target.value)
+                    }
                   />
                 </Form.Group>
               </Col>
@@ -286,43 +288,46 @@ const EditInspectionForm = () => {
                     type="text"
                     readOnly
                     value={bridgeData.SpanIndex || ""}
-                    onChange={(e) => handleInputChange("SpanIndex", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("SpanIndex", e.target.value)
+                    }
                   />
                 </Form.Group>
               </Col>
 
+              {/* Existing form fields */}
               <Col md={6}>
                 <Form.Group controlId="formWorkKind">
                   <Form.Label>Work Kind</Form.Label>
-                  {renderDropdown('WorkKindName', dropdownOptions.workKindOptions)}
+                  {renderDropdown("WorkKindName", "workKindOptions")}
                 </Form.Group>
               </Col>
 
               <Col md={6}>
                 <Form.Group controlId="formDamageKind">
                   <Form.Label>Damage Kind</Form.Label>
-                  {renderDropdown('DamageKindName', dropdownOptions.damageKindOptions)}
+                  {renderDropdown("DamageKindName", "damageKindOptions")}
                 </Form.Group>
               </Col>
 
               <Col md={6}>
                 <Form.Group controlId="formDamageLevel">
                   <Form.Label>Damage Level</Form.Label>
-                  {renderDropdown('DamageLevel', dropdownOptions.damageLevelOptions)}
+                  {renderDropdown("DamageLevel", "damageLevelOptions")}
                 </Form.Group>
               </Col>
 
               <Col md={6}>
                 <Form.Group controlId="formMaterial">
                   <Form.Label>Material</Form.Label>
-                  {renderDropdown('MaterialName', dropdownOptions.materialOptions)}
+                  {renderDropdown("MaterialName", "materialOptions")}
                 </Form.Group>
               </Col>
 
               <Col md={6}>
                 <Form.Group controlId="formParts">
                   <Form.Label>Parts</Form.Label>
-                  {renderDropdown('PartsName', dropdownOptions.partsOptions)}
+                  {renderDropdown("PartsName", "partsOptions")}
                 </Form.Group>
               </Col>
 
@@ -333,7 +338,9 @@ const EditInspectionForm = () => {
                     as="textarea"
                     rows={3}
                     value={bridgeData.Remarks || ""}
-                    onChange={(e) => handleInputChange("Remarks", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("Remarks", e.target.value)
+                    }
                   />
                 </Form.Group>
               </Col>
