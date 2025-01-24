@@ -43,9 +43,9 @@ const Map = () => {
               <p><strong>Inspection Score:</strong> {inspection_score}</p>
               <p><strong>Budget Cost:</strong> {budget_cost}</p>
               <div>
-                <img src="{image1}" alt="Image 1" style="width:100px;" />
-                <img src="{image2}" alt="Image 2" style="width:100px;" />
-                <img src="{image3}" alt="Image 3" style="width:100px;" />
+                <img src="{image_1}" alt="Image 1" style="width:100px;" />
+                <img src="{image_2}" alt="Image 2" style="width:100px;" />
+                <img src="{image_3}" alt="Image 3" style="width:100px;" />
               </div>
             </div>
           `
