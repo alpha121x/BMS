@@ -44,12 +44,11 @@ const Map = () => {
               id: 0, // Assuming the roads layer is at sublayer 0
               title: "Roads",
               popupTemplate: {
-                title: "Road Details",
                 content: `
                   <table class="table">
                     <thead>
                       <tr>
-                        <th colspan="2" class="table-primary text-center">Road Information</th>
+                        <th colspan="2" class="table-primary text-center">Birdge Information</th>
                       </tr>
                     </thead>
                     <tbody>
