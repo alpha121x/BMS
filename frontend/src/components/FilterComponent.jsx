@@ -47,49 +47,35 @@ const FilterComponent = ({
             district: district.district || district.name, // Handle different property names
           }))
         );
-
+  
         // Fetching structure types
         const structureTypeResponse = await fetch(
           `${BASE_URL}/api/structure-types`
         );
         const structureTypesData = await structureTypeResponse.json();
-
-        // Check if the response contains a valid 'data' array
-        if (Array.isArray(structureTypesData.data)) {
-          setStructureTypes(
-            structureTypesData.data.map((type) => ({
-              id: type.id,
-              name: type.structure_type || type.name, // Normalize the property name
-            }))
-          );
-        } else {
-          console.error(
-            'Expected "data" to be an array, but got:',
-            structureTypesData.data
-          );
-        }
-
+  
+        // Assuming the response now directly gives the array
+        setStructureTypes(
+          structureTypesData.map((type) => ({
+            id: type.id,
+            name: type.structure_type || type.name, // Normalize the property name
+          }))
+        );
+  
         // Fetching construction types
         const constructionTypeResponse = await fetch(
           `${BASE_URL}/api/construction-types`
         );
         const constructionTypeData = await constructionTypeResponse.json();
-
-        // Check if the response contains a valid 'data' array
-        if (Array.isArray(constructionTypeData.data)) {
-          setConstructionTypes(
-            constructionTypeData.data.map((type) => ({
-              id: type.id,
-              name: type.construction_type || type.name, // Normalize the property name
-            }))
-          );
-        } else {
-          console.error(
-            'Expected "data" to be an array, but got:',
-            constructionTypeData.data
-          );
-        }
-
+  
+        // Assuming the response now directly gives the array
+        setConstructionTypes(
+          constructionTypeData.map((type) => ({
+            id: type.id,
+            name: type.construction_type || type.name, // Normalize the property name
+          }))
+        );
+  
         // Fetching categories
         const categoryResponse = await fetch(`${BASE_URL}/api/categories`);
         const categoryData = await categoryResponse.json();
@@ -99,7 +85,7 @@ const FilterComponent = ({
             name: cat.category || cat.name, // Normalize the property name
           }))
         );
-
+  
         // Fetching evaluation statuses
         const evaluationStatusResponse = await fetch(
           `${BASE_URL}/api/evaluation-statuses`
@@ -111,7 +97,7 @@ const FilterComponent = ({
             name: status.evaluation_status || status.name, // Normalize the property name
           }))
         );
-
+  
         // Fetching inspection statuses
         const inspectionStatusResponse = await fetch(
           `${BASE_URL}/api/inspection-statuses`
@@ -127,9 +113,10 @@ const FilterComponent = ({
         console.error("Error fetching filters:", error);
       }
     };
-
+  
     fetchFilters();
   }, []);
+  
 
   // Handle handlers for various inputs
   const handleChange = (setter) => (e) => setter(e.target.value);
