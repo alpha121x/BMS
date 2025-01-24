@@ -45,7 +45,7 @@ const Map = () => {
               title: "Roads",
               popupTemplate: {
                 content: `
-                  <table class="table">
+                  <table class="table table-bordered">
                     <thead>
                       <tr>
                         <th colspan="2" class="table-primary text-center">Birdge Information</th>
@@ -72,16 +72,34 @@ const Map = () => {
                         <th>Budget Cost:</th>
                         <td>{budget_cost}</td>
                       </tr>
+                      <tr>
+                        <th>Images:</th>
+                        <td>
+                          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
+                            <img src="{image_1}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
+                            <img src="{image_2}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
+                            <img src="{image_3}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
+                            <img src="{image_4}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
+                            <img src="{image_5}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
+                          </div>
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 `,
               },
+              
               outFields: [
                 "road_name",
                 "district",
                 "inventory_score",
                 "inspection_score",
                 "budget_cost",
+                "image_1",
+                "image_2",
+                "image_3",
+                "image_4",
+                "image_5",
               ],
             },
           ],
@@ -114,11 +132,7 @@ const Map = () => {
 
   return (
     <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
-      <div
-        ref={mapRef}
-        className="map-container"
-        style={{ height: "500px" }}
-      />
+      <div ref={mapRef} className="map-container" style={{ height: "500px" }} />
     </div>
   );
 };
