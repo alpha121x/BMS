@@ -96,18 +96,22 @@ const InspectionList = ({ bridgeId }) => {
   
     // Ensure all rows have a valid value for 'PhotoPaths'
     tableData.forEach((row) => {
-      if (!row.PhotoPaths) {
-        row.PhotoPaths = 'No image path'; // Default value if no path is present
+      if (Array.isArray(row.PhotoPaths)) {
+        // Convert array to JSON string
+        row.PhotoPaths = JSON.stringify(row.PhotoPaths) || 'No image path';
+      } else if (!row.PhotoPaths) {
+        row.PhotoPaths = 'No image path'; // Default if no path is present
       }
     });
+    
   
     // Create a worksheet from the table data
     const ws = XLSX.utils.json_to_sheet(tableData);
-    // console.log(ws);
   
     // Create a new workbook and append the worksheet
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+    // console.log(wb);
   
     // Generate and download the Excel file
     XLSX.writeFile(wb, `${bridgename}.xlsx`);
