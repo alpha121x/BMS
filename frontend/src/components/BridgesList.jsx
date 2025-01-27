@@ -251,8 +251,24 @@ const BridgesList = ({
 
       const data = await response.json();
 
-      // Assuming `data.bridges` contains the bridge records
+      // Check if bridges data is available
+      if (!data.bridges || data.bridges.length === 0) {
+        console.error("No bridge data available to export.");
+        return;
+      }
+
+      // Handle any array fields (like PhotoPaths)
+      data.bridges.forEach((row) => {
+        // If PhotoPaths is an array, join it into a string
+        if (Array.isArray(row.photos)) {
+          row.photos = row.photos.join(", ") || "No image path"; // Default if array is empty
+        }
+      });
+
+      // Create the worksheet from the table data without custom headers
       const ws = XLSX.utils.json_to_sheet(data.bridges);
+
+      // Create a new workbook and append the worksheet
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
 
