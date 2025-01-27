@@ -265,6 +265,7 @@ const InspectionList = ({ bridgeId }) => {
             style={{
               backgroundColor: inspectionType === "new" ? "#3B82F6" : "#60A5FA",
             }}
+            className="mr-2" // Added margin-right to add space between the buttons
           >
             <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
             New Inspections
@@ -274,23 +275,24 @@ const InspectionList = ({ bridgeId }) => {
             style={{
               backgroundColor: inspectionType === "old" ? "#3B82F6" : "#60A5FA",
             }}
+            className="mr-2" // Added margin-right to add space between the buttons
           >
             <FontAwesomeIcon icon={faHistory} className="mr-2" />
             Old Inspections
           </Button>
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2" // Added margin-right
             onClick={() => handleDownloadCSV(tableData)}
           >
             <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-            Download CSV
+            CSV
           </button>
           <button
             className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
             onClick={() => handleDownloadExcel(tableData)}
           >
             <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-            Download Excel
+            Excel
           </button>
         </div>
 
