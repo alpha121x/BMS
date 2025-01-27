@@ -3,6 +3,14 @@ import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import InspectionModal from "./InspectionModal";
+import * as XLSX from "xlsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFileCsv,
+  faFileExcel,
+  faPlusCircle,
+  faHistory,
+} from "@fortawesome/free-solid-svg-icons";
 
 const InspectionListDashboard = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
@@ -49,6 +57,56 @@ const InspectionListDashboard = ({ bridgeId }) => {
       setLoading(false);
     }
   };
+
+  const handleDownloadCSV = (tableData) => {
+      if (!Array.isArray(tableData) || tableData.length === 0) {
+        console.error("No data to export");
+        return;
+      }
+  
+      // Extract BridgeName from the first row of tableData
+      const bridgename = tableData[0].BridgeName;
+  
+      // Prepare CSV rows without adding the extra "image" column
+      const csvRows = tableData.map((row) => {
+        const { imageUrl, ...rest } = row; // Exclude imageUrl if it exists
+        return rest; // Return the remaining properties
+      });
+  
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [
+          Object.keys(csvRows[0]).join(","), // Headers
+          ...csvRows.map((row) => Object.values(row).join(",")), // Rows
+        ].join("\n");
+  
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${bridgename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+  
+    const handleDownloadExcel = (tableData) => {
+      if (!Array.isArray(tableData) || tableData.length === 0) {
+        console.error("No data to export");
+        return;
+      }
+  
+      const bridgename = tableData[0].BridgeName;
+  
+      // Create a worksheet from the table data
+      const ws = XLSX.utils.json_to_sheet(tableData);
+  
+      // Create a new workbook and append the worksheet
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+  
+      // Generate and download the Excel file
+      XLSX.writeFile(wb, `${bridgename}.xlsx`);
+    };
 
   const handleViewClick = (row) => {
     setSelectedRow(row);
@@ -194,21 +252,37 @@ const InspectionListDashboard = ({ bridgeId }) => {
           <Button
             onClick={() => setInspectionType("new")}
             style={{
-              ...buttonStyles,
               backgroundColor: inspectionType === "new" ? "#3B82F6" : "#60A5FA",
             }}
+            className="mr-2" // Added margin-right to add space between the buttons
           >
+            <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
             New Inspections
           </Button>
           <Button
             onClick={() => setInspectionType("old")}
             style={{
-              ...buttonStyles,
               backgroundColor: inspectionType === "old" ? "#3B82F6" : "#60A5FA",
             }}
+            className="mr-2" // Added margin-right to add space between the buttons
           >
+            <FontAwesomeIcon icon={faHistory} className="mr-2" />
             Old Inspections
           </Button>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2" // Added margin-right
+            onClick={() => handleDownloadCSV(tableData)}
+          >
+            <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+            CSV
+          </button>
+          <button
+            className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+            onClick={() => handleDownloadExcel(tableData)}
+          >
+            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+            Excel
+          </button>
         </div>
 
         {loading && (
