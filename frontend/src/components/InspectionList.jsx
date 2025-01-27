@@ -53,21 +53,23 @@ const InspectionList = ({ bridgeId }) => {
       console.error("No data to export");
       return;
     }
-
-    const csvRows = tableData.map((row) => ({
-      ...row,
-      image: row.imageUrl || "No Image",
-    }));
-
+  
+    // Extract BridgeName from the first row of tableData
     const bridgename = tableData[0].BridgeName;
-
+  
+    // Prepare CSV rows without adding the extra "image" column
+    const csvRows = tableData.map((row) => {
+      const { imageUrl, ...rest } = row; // Exclude imageUrl if it exists
+      return rest; // Return the remaining properties
+    });
+  
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [
-        Object.keys(csvRows[0]).join(","),
-        ...csvRows.map((row) => Object.values(row).join(",")),
+        Object.keys(csvRows[0]).join(","), // Headers
+        ...csvRows.map((row) => Object.values(row).join(",")), // Rows
       ].join("\n");
-
+  
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -85,7 +87,6 @@ const InspectionList = ({ bridgeId }) => {
 
     const bridgename = tableData[0].BridgeName;
 
-
     // Create a worksheet from the table data
     const ws = XLSX.utils.json_to_sheet(tableData);
 
@@ -94,10 +95,8 @@ const InspectionList = ({ bridgeId }) => {
     XLSX.utils.book_append_sheet(wb, ws, "Inspections");
 
     // Generate and download the Excel file
-    XLSX.writeFile(wb, `${bridgename}.xlsx`); 
+    XLSX.writeFile(wb, `${bridgename}.xlsx`);
   };
-
-
 
   const handleEditClick = (row) => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
