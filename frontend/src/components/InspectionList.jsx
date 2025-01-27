@@ -180,6 +180,103 @@ const InspectionList = ({ bridgeId }) => {
     return acc;
   }, {});
 
+  // CSV download function
+  const handleDownloadCSV = async () => {
+    try {
+      // Define the params object dynamically
+      const params = {
+        district: district || "%",
+        structureType,
+        constructionType,
+        category,
+        evaluationStatus,
+        inspectionStatus,
+        minBridgeLength,
+        maxBridgeLength,
+        minSpanLength,
+        maxSpanLength,
+        minYear,
+        maxYear,
+      };
+
+      // Prepare the query string from params
+      const queryString = new URLSearchParams(params).toString();
+
+      // Fetch the data from the API with the dynamically created query string
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownload?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = await response.json();
+
+      // Assuming `data.bridges` contains the bridge records
+      const csv = Papa.unparse(data.bridges);
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "bridges_data.csv";
+      link.click();
+    } catch (error) {
+      console.error("Error generating CSV:", error);
+    }
+  };
+
+  // Excel download function
+  const handleDownloadExcel = async () => {
+    try {
+      // Define the params object dynamically
+      const params = {
+        district: district || "%",
+        structureType,
+        constructionType,
+        category,
+        evaluationStatus,
+        inspectionStatus,
+        minBridgeLength,
+        maxBridgeLength,
+        minSpanLength,
+        maxSpanLength,
+        minYear,
+        maxYear,
+      };
+
+      // Prepare the query string from params
+      const queryString = new URLSearchParams(params).toString();
+
+      // Fetch the data from the API with the dynamically created query string
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownload?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = await response.json();
+
+      // Assuming `data.bridges` contains the bridge records
+      const ws = XLSX.utils.json_to_sheet(data.bridges);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
+
+      // Generate and download the Excel file
+      XLSX.writeFile(wb, "bridges_data.xlsx");
+    } catch (error) {
+      console.error("Error generating Excel file:", error);
+    }
+  };
+
   // console.log(groupedData);
 
   return (
@@ -224,6 +321,18 @@ const InspectionList = ({ bridgeId }) => {
           >
             Old Inspections
           </Button>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+            onClick={handleDownloadCSV}
+          >
+            Download CSV
+          </button>
+          <button
+            className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+            onClick={handleDownloadExcel}
+          >
+            Download Excel
+          </button>
         </div>
 
         {loading && (
