@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
@@ -25,18 +27,16 @@ const InspectionList = ({ bridgeId }) => {
       if (!bridgeId) {
         throw new Error("bridgeId is required");
       }
-
+  
       const typeQuery = inspectionType === "new" ? "new" : "old";
       const response = await fetch(
         `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}&type=${typeQuery}`
       );
-
+  
       if (!response.ok) throw new Error("Failed to fetch data");
-
+  
       const result = await response.json();
-
-      // console.log(result);
-
+  
       if (Array.isArray(result.data)) {
         setTableData(result.data);
       } else {
@@ -47,6 +47,53 @@ const InspectionList = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadCSV = (tableData) => {
+    if (!Array.isArray(tableData) || tableData.length === 0) {
+      console.error("No data to export");
+      return;
+    }
+  
+    const csvRows = tableData.map((row) => ({
+      ...row,
+      image: row.imageUrl || "No Image",
+    }));
+  
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [
+        Object.keys(csvRows[0]).join(","),
+        ...csvRows.map((row) => Object.values(row).join(",")),
+      ].join("\n");
+  
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "inspections.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  const handleDownloadExcel = (tableData) => {
+    if (!Array.isArray(tableData) || tableData.length === 0) {
+      console.error("No data to export");
+      return;
+    }
+  
+    const workbook = XLSX.utils.book_new();
+    const worksheetData = tableData.map((row) => ({
+      ...row,
+      image: row.imageUrl || "No Image",
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Inspections");
+  
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(blob, "inspections.xlsx");
   };
 
   const handleEditClick = (row) => {
@@ -180,105 +227,6 @@ const InspectionList = ({ bridgeId }) => {
     return acc;
   }, {});
 
-  // CSV download function
-  const handleDownloadCSV = async () => {
-    try {
-      // Define the params object dynamically
-      const params = {
-        district: district || "%",
-        structureType,
-        constructionType,
-        category,
-        evaluationStatus,
-        inspectionStatus,
-        minBridgeLength,
-        maxBridgeLength,
-        minSpanLength,
-        maxSpanLength,
-        minYear,
-        maxYear,
-      };
-
-      // Prepare the query string from params
-      const queryString = new URLSearchParams(params).toString();
-
-      // Fetch the data from the API with the dynamically created query string
-      const response = await fetch(
-        `${BASE_URL}/api/bridgesdownload?${queryString}`,
-        {
-          method: "GET",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
-      const data = await response.json();
-
-      // Assuming `data.bridges` contains the bridge records
-      const csv = Papa.unparse(data.bridges);
-
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "bridges_data.csv";
-      link.click();
-    } catch (error) {
-      console.error("Error generating CSV:", error);
-    }
-  };
-
-  // Excel download function
-  const handleDownloadExcel = async () => {
-    try {
-      // Define the params object dynamically
-      const params = {
-        district: district || "%",
-        structureType,
-        constructionType,
-        category,
-        evaluationStatus,
-        inspectionStatus,
-        minBridgeLength,
-        maxBridgeLength,
-        minSpanLength,
-        maxSpanLength,
-        minYear,
-        maxYear,
-      };
-
-      // Prepare the query string from params
-      const queryString = new URLSearchParams(params).toString();
-
-      // Fetch the data from the API with the dynamically created query string
-      const response = await fetch(
-        `${BASE_URL}/api/bridgesdownload?${queryString}`,
-        {
-          method: "GET",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
-      const data = await response.json();
-
-      // Assuming `data.bridges` contains the bridge records
-      const ws = XLSX.utils.json_to_sheet(data.bridges);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
-
-      // Generate and download the Excel file
-      XLSX.writeFile(wb, "bridges_data.xlsx");
-    } catch (error) {
-      console.error("Error generating Excel file:", error);
-    }
-  };
-
-  // console.log(groupedData);
-
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -323,13 +271,13 @@ const InspectionList = ({ bridgeId }) => {
           </Button>
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
-            onClick={handleDownloadCSV}
+            onClick={() => handleDownloadCSV(tableData)}
           >
             Download CSV
           </button>
           <button
             className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-            onClick={handleDownloadExcel}
+            onClick={() => handleDownloadExcel(tableData)}
           >
             Download Excel
           </button>
