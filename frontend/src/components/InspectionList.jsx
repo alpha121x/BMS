@@ -59,6 +59,8 @@ const InspectionList = ({ bridgeId }) => {
       image: row.imageUrl || "No Image",
     }));
 
+    const bridgename = tableData[0].BridgeName;
+
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [
@@ -69,7 +71,7 @@ const InspectionList = ({ bridgeId }) => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "inspections.csv");
+    link.setAttribute("download", `${bridgename}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -81,6 +83,9 @@ const InspectionList = ({ bridgeId }) => {
       return;
     }
 
+    const bridgename = tableData[0].BridgeName;
+
+
     // Create a worksheet from the table data
     const ws = XLSX.utils.json_to_sheet(tableData);
 
@@ -89,8 +94,10 @@ const InspectionList = ({ bridgeId }) => {
     XLSX.utils.book_append_sheet(wb, ws, "Inspections");
 
     // Generate and download the Excel file
-    XLSX.writeFile(wb, "inspections.xlsx");
+    XLSX.writeFile(wb, `${bridgename}.xlsx`); 
   };
+
+
 
   const handleEditClick = (row) => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
