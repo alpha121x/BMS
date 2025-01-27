@@ -57,56 +57,67 @@ const InspectionListDashboard = ({ bridgeId }) => {
       setLoading(false);
     }
   };
+ const handleDownloadCSV = (tableData) => {
+    if (!Array.isArray(tableData) || tableData.length === 0) {
+      console.error("No data to export");
+      return;
+    }
 
-  const handleDownloadCSV = (tableData) => {
-      if (!Array.isArray(tableData) || tableData.length === 0) {
-        console.error("No data to export");
-        return;
+    // Extract BridgeName from the first row of tableData
+    const bridgename = tableData[0].BridgeName;
+
+    // Prepare CSV rows without adding the extra "image" column
+    const csvRows = tableData.map((row) => {
+      const { imageUrl, ...rest } = row; // Exclude imageUrl if it exists
+      return rest; // Return the remaining properties
+    });
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [
+        Object.keys(csvRows[0]).join(","), // Headers
+        ...csvRows.map((row) => Object.values(row).join(",")), // Rows
+      ].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${bridgename}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadExcel = (tableData) => {
+    if (!Array.isArray(tableData) || tableData.length === 0) {
+      console.error("No data to export");
+      return;
+    }
+  
+    const bridgename = tableData[0].BridgeName;
+  
+    // Ensure all rows have a valid value for 'PhotoPaths'
+    tableData.forEach((row) => {
+      if (Array.isArray(row.PhotoPaths)) {
+        // Convert array to JSON string
+        row.PhotoPaths = JSON.stringify(row.PhotoPaths) || 'No image path';
+      } else if (!row.PhotoPaths) {
+        row.PhotoPaths = 'No image path'; // Default if no path is present
       }
+    });
+    
   
-      // Extract BridgeName from the first row of tableData
-      const bridgename = tableData[0].BridgeName;
+    // Create a worksheet from the table data
+    const ws = XLSX.utils.json_to_sheet(tableData);
   
-      // Prepare CSV rows without adding the extra "image" column
-      const csvRows = tableData.map((row) => {
-        const { imageUrl, ...rest } = row; // Exclude imageUrl if it exists
-        return rest; // Return the remaining properties
-      });
+    // Create a new workbook and append the worksheet
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+    // console.log(wb);
   
-      const csvContent =
-        "data:text/csv;charset=utf-8," +
-        [
-          Object.keys(csvRows[0]).join(","), // Headers
-          ...csvRows.map((row) => Object.values(row).join(",")), // Rows
-        ].join("\n");
-  
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${bridgename}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-  
-    const handleDownloadExcel = (tableData) => {
-      if (!Array.isArray(tableData) || tableData.length === 0) {
-        console.error("No data to export");
-        return;
-      }
-  
-      const bridgename = tableData[0].BridgeName;
-  
-      // Create a worksheet from the table data
-      const ws = XLSX.utils.json_to_sheet(tableData);
-  
-      // Create a new workbook and append the worksheet
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
-  
-      // Generate and download the Excel file
-      XLSX.writeFile(wb, `${bridgename}.xlsx`);
-    };
+    // Generate and download the Excel file
+    XLSX.writeFile(wb, `${bridgename}.xlsx`);
+  };
 
   const handleViewClick = (row) => {
     setSelectedRow(row);
