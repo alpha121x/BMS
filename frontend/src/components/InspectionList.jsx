@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
@@ -27,16 +27,16 @@ const InspectionList = ({ bridgeId }) => {
       if (!bridgeId) {
         throw new Error("bridgeId is required");
       }
-  
+
       const typeQuery = inspectionType === "new" ? "new" : "old";
       const response = await fetch(
         `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}&type=${typeQuery}`
       );
-  
+
       if (!response.ok) throw new Error("Failed to fetch data");
-  
+
       const result = await response.json();
-  
+
       if (Array.isArray(result.data)) {
         setTableData(result.data);
       } else {
@@ -54,19 +54,19 @@ const InspectionList = ({ bridgeId }) => {
       console.error("No data to export");
       return;
     }
-  
+
     const csvRows = tableData.map((row) => ({
       ...row,
       image: row.imageUrl || "No Image",
     }));
-  
+
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [
         Object.keys(csvRows[0]).join(","),
         ...csvRows.map((row) => Object.values(row).join(",")),
       ].join("\n");
-  
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -75,22 +75,31 @@ const InspectionList = ({ bridgeId }) => {
     link.click();
     document.body.removeChild(link);
   };
-  
+
+  console.log(tableData);
+
   const handleDownloadExcel = (tableData) => {
     if (!Array.isArray(tableData) || tableData.length === 0) {
       console.error("No data to export");
       return;
     }
   
+    // Create a new workbook
     const workbook = XLSX.utils.book_new();
+  
+    // Prepare worksheet data
     const worksheetData = tableData.map((row) => ({
       ...row,
-      image: row.imageUrl || "No Image",
+      image: row.PhotoPaths || "No Image", // Add a placeholder for images
     }));
   
+    // Create a worksheet
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+  
+    // Add the worksheet to the workbook
     XLSX.utils.book_append_sheet(workbook, worksheet, "Inspections");
   
+    // Generate the Excel file
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(blob, "inspections.xlsx");
