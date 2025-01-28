@@ -6,9 +6,10 @@ import {
   WrenchIcon,
   BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
-import FilterComponent from "./FilterComponent";
 import Map from "./Map";
-import BridgesListDashboard from "./BirdgesListDashboard";
+// import BridgesListDashboard from "./BirdgesListDashboard";
+import BridgesListDashboard from "./BirdgesListDashboardNew";
+
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -149,13 +150,13 @@ const DashboardMain = () => {
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Header Section */}
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-500 mb-1">Summary</h2>
-      </div>
+      </div> */}
 
       {/* Structure Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">Structures</h3>
+        <h3 className="text-xl font-semibold text-gray-700">Bridges Structures Inventory</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {structureCards.map((card, index) => (
             <Card key={index} {...card} />
@@ -165,7 +166,7 @@ const DashboardMain = () => {
 
       {/* Evaluation Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">Inspected</h3>
+        <h3 className="text-xl font-semibold text-gray-700">Inspected/Detailed Surveyed</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
