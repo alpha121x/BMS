@@ -316,7 +316,7 @@ const BridgesListDashboard = ({
   return (
     <>
       <div className="w-full mx-auto mt-2">
-        <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
+        <div className="bg-[#60A5FA] text-grey p-2 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
             <div className="text-2xl font-bold">Bridges List</div>
             <div className="text-sm font-medium mt-1 text-gray-700">
@@ -407,9 +407,12 @@ const BridgesListDashboard = ({
           border: "2px solid #60A5FA",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
+          minHeight: "400px", // Set a minimum height for the card
+          width: "100%", // Ensure the card takes full width of its container
+          overflow: "hidden", // Prevent content from overflowing
         }}
       >
-        <div className="card-body pb-0">
+        <div className="card-body pb-0" style={{ padding: "0.5rem" }}>
           {loading && (
             <div
               style={{
@@ -437,97 +440,113 @@ const BridgesListDashboard = ({
 
           {!loading && !error && (
             <>
-              <Table bordered responsive className="custom-table">
-                <thead>
-                  <tr>
-                    <th>District</th>
-                    <th>Road Name</th>
-                    <th>Structure Type</th>
-                    <th>Bridge Name</th>
-                    <th>Photo</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableData.length > 0 ? (
-                    tableData.map((bridge, index) => (
-                      <tr
-                        key={index}
-                        onClick={() => handleRowClick(bridge)}
-                        className="hover-row"
-                      >
-                        <td>{bridge.district || "N/A"}</td>
-                        <td
-                          className="truncate-text"
-                          title={bridge.road_name || "N/A"}
+              <div style={{ overflowX: "auto" }}>
+                {" "}
+                {/* Make the table scrollable horizontally */}
+                <Table
+                  bordered
+                  responsive
+                  className="custom-table"
+                  style={{ minWidth: "800px" }}
+                >
+                  {" "}
+                  {/* Set a minimum width for the table */}
+                  <thead>
+                    <tr>
+                      <th>District</th>
+                      <th>Road Name</th>
+                      <th>Structure Type</th>
+                      <th>Bridge Name</th>
+                      <th>Photo</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {tableData.length > 0 ? (
+                      tableData.map((bridge, index) => (
+                        <tr
+                          key={index}
+                          onClick={() => handleRowClick(bridge)}
+                          className="hover-row"
                         >
-                          {bridge.road_name || "N/A"}
-                        </td>
-                        <td>{bridge.structure_type || "N/A"}</td>
-                        <td>
-                          {bridge.pms_sec_id || "N/A"},{" "}
-                          {bridge.structure_no || "N/A"}
-                        </td>
-                        <td>
-                          {bridge.photos && bridge.photos.length > 0 ? (
-                            <img
-                              src={bridge.photos[0]}
-                              alt="Bridge"
-                              className="w-16 h-16 object-cover rounded-md"
-                            />
-                          ) : (
-                            <img
-                              src="/download.jpeg"
-                              alt="No image available"
-                              className="w-30 h-10 object-cover rounded-md"
-                            />
-                          )}
-                        </td>
-                        <td>
-                          <div className="flex space-x-2">
-                            {/* Button for Bridge Inventory Info */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation(); // Prevent row click event
-                                handleViewInventory(bridge);
-                              }}
-                              className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600"
-                            >
-                              Inventory Info
-                            </button>
+                          <td>{bridge.district || "N/A"}</td>
+                          <td
+                            className="truncate-text"
+                            title={bridge.road_name || "N/A"}
+                          >
+                            {bridge.road_name || "N/A"}
+                          </td>
+                          <td>{bridge.structure_type || "N/A"}</td>
+                          <td>
+                            {bridge.pms_sec_id || "N/A"},{" "}
+                            {bridge.structure_no || "N/A"}
+                          </td>
+                          <td>
+                            {bridge.photos && bridge.photos.length > 0 ? (
+                              <img
+                                src={bridge.photos[0]}
+                                alt="Bridge"
+                                className="w-16 h-16 object-cover rounded-md"
+                              />
+                            ) : (
+                              <img
+                                src="/download.jpeg"
+                                alt="No image available"
+                                className="w-30 h-10 object-cover rounded-md"
+                              />
+                            )}
+                          </td>
+                          <td>
+                            <div className="flex space-x-2">
+                              {/* Button for Bridge Inventory Info */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row click event
+                                  handleViewInventory(bridge);
+                                }}
+                                className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 text-xs"
+                                style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              >
+                                Inventory Info
+                              </button>
 
-                            {/* Buttons for Inspection and Zoom */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewInspection(bridge);
-                              }}
-                              className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600"
-                            >
-                              Inspection Info
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleZoomToBridge(bridge);
-                              }}
-                              className="bg-purple-500 text-white px-2 py-1 rounded-md hover:bg-purple-600"
-                            >
-                              Zoom To
-                            </button>
-                          </div>
+                              {/* Button for Inspection Info */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewInspection(bridge);
+                                }}
+                                className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 text-xs"
+                                style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              >
+                                Inspection Info
+                              </button>
+
+                              {/* Button for Zoom To */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleZoomToBridge(bridge);
+                                }}
+                                className="bg-purple-500 text-white px-2 py-1 rounded-md hover:bg-purple-600 text-xs"
+                                style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              >
+                                Zoom To
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center">
+                          No data available
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="text-center">
-                        No data available
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </Table>
+                    )}
+                  </tbody>
+                </Table>
+              </div>
 
               {/* Modal for Bridge Inventory Details */}
               <Modal
@@ -551,7 +570,7 @@ const BridgesListDashboard = ({
                 </Modal.Footer>
               </Modal>
 
-              <div className="d-flex justify-content-center align-items-center">
+              <div className="d-flex justify-content-center align-items-center mt-3">
                 {renderPaginationButtons()}
               </div>
             </>

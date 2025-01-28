@@ -1,6 +1,6 @@
 .custom-table {
     border-collapse: separate;
-    border-spacing: 0 10px; /* Add spacing between rows */
+    border-spacing: 0;
     background-color: #f9f9f9;
   }
   
