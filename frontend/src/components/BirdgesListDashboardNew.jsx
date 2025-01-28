@@ -6,7 +6,7 @@ import "./BridgeList.css";
 import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
 import FilterComponent from "./FilterComponent";
-import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
+import InventoryInfo from "./InventoryInfoDashboardNew"; // Import the InventoryInfo component
 import InspectionListDashboardNew from "./InspectionListDashboardNew";
 import MapModal from "./MapModal"; // Adjust the import path as needed
 
