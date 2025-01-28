@@ -7,6 +7,8 @@ import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
 import FilterComponent from "./FilterComponent";
 import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
+import InspectionListDashboardNew from "./InspectionListDashboardNew";
+import MapModal from "./MapModal"; // Adjust the import path as needed
 
 const BridgesListDashboard = ({
   setSelectedDistrict,
@@ -36,7 +38,10 @@ const BridgesListDashboard = ({
   maxYear,
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
   const [selectedBridge, setSelectedBridge] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -111,12 +116,6 @@ const BridgesListDashboard = ({
     }
   };
 
-  const handleRowClick = (bridge) => {
-    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-    const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
-    window.location.href = editUrl;
-  };
-
   const renderPaginationButtons = () => {
     const buttons = [];
     const pageRange = 3;
@@ -181,13 +180,27 @@ const BridgesListDashboard = ({
   };
 
   const handleViewInspection = (bridge) => {
-    console.log("View Inspection Details for:", bridge);
-    // Add logic to show inspection details
+    setSelectedBridge(bridge); // Set the selected bridge data
+    setShowInspectionModal(true); // Open the inspection modal
+  };
+
+  const handleCloseInspectionModal = () => {
+    setShowInspectionModal(false); // Close the inspection modal
+    setSelectedBridge(null); // Clear the selected bridge data
   };
 
   const handleZoomToBridge = (bridge) => {
-    console.log("Zoom to Bridge:", bridge);
-    // Add logic to zoom to the bridge on a map
+    setSelectedLocation({
+      latitude: bridge.y_centroid, // y_centroid is latitude
+      longitude: bridge.x_centroid, // x_centroid is longitude
+      name: bridge.BridgeName, // Optional: Add a name for the marker label
+    });
+    setShowMapModal(true);
+  };
+
+  const handleCloseMapModal = () => {
+    setShowMapModal(false);
+    setSelectedLocation(null);
   };
 
   // CSV download function
@@ -457,7 +470,6 @@ const BridgesListDashboard = ({
                       <th>Road Name</th>
                       <th>Structure Type</th>
                       <th>Bridge Name</th>
-                      <th>Photo</th>
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -480,21 +492,6 @@ const BridgesListDashboard = ({
                           <td>
                             {bridge.pms_sec_id || "N/A"},{" "}
                             {bridge.structure_no || "N/A"}
-                          </td>
-                          <td>
-                            {bridge.photos && bridge.photos.length > 0 ? (
-                              <img
-                                src={bridge.photos[0]}
-                                alt="Bridge"
-                                className="w-16 h-16 object-cover rounded-md"
-                              />
-                            ) : (
-                              <img
-                                src="/download.jpeg"
-                                alt="No image available"
-                                className="w-30 h-10 object-cover rounded-md"
-                              />
-                            )}
                           </td>
                           <td>
                             <div className="flex space-x-2">
@@ -565,6 +562,58 @@ const BridgesListDashboard = ({
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={handleCloseModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              {/* Modal for Inspection Details */}
+              <Modal
+                show={showInspectionModal}
+                onHide={handleCloseInspectionModal}
+                size="lg"
+                centered
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Inspection Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <InspectionListDashboardNew
+                      bridgeId={selectedBridge.uu_bms_id}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="secondary"
+                    onClick={handleCloseInspectionModal}
+                  >
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              <Modal
+                show={showMapModal}
+                onHide={handleCloseMapModal}
+                size="lg" // Use a larger modal size to accommodate the map
+                centered
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Bridge Location on Map</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedLocation && (
+                    <MapModal
+                      location={selectedLocation}
+                      onClose={handleCloseMapModal}
+                      markerLabel={selectedLocation?.name || "Bridge Location"}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseMapModal}>
                     Close
                   </Button>
                 </Modal.Footer>
