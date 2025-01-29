@@ -477,7 +477,7 @@ const BridgesListDashboard = ({
                       <th>Road Name</th>
                       <th>Structure Type</th>
                       <th>Bridge Name</th>
-                      <th>Action</th>
+                      <th className="text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -501,7 +501,7 @@ const BridgesListDashboard = ({
                             {bridge.structure_no || "N/A"}
                           </td>
                           <td>
-                            <div className="flex space-x-2">
+                            <div className="flex space-x-2 justify-center">
                               {/* Button for Bridge Inventory Info */}
                               <button
                                 onClick={(e) => {

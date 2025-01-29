@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Row, Col, Form, Modal } from "react-bootstrap";
+import "../index.css";
 
 const InventoryInfoDashboard = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -63,7 +64,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
             ].map(({ label, field }, index) => (
               <Col key={index} md={3}>
                 <Form.Group>
-                  <Form.Label>{label}</Form.Label>
+                  <Form.Label className="custom-label">{label}</Form.Label>
                   <Form.Control
                     type="text"
                     value={inventoryData?.[field] || ""}
@@ -76,7 +77,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
           </Row>
 
           <Form.Group>
-            <Form.Label>Select Span</Form.Label>
+            <Form.Label className="custom-label">Select Span</Form.Label>
             <Form.Select
               value={selectedSpan}
               onChange={handleSpanSelect}
@@ -93,7 +94,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
 
           {selectedSpan && (
             <Form.Group>
-              <Form.Label>Photos for Span {selectedSpan}</Form.Label>
+              <Form.Label className="custom-label">Photos for Span {selectedSpan}</Form.Label>
               <div className="d-flex flex-wrap">
                 {spanphotos[selectedSpan]?.length > 0 ? (
                   spanphotos[selectedSpan].map((photo, index) => (
@@ -118,7 +119,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
           )}
 
           <Form.Group>
-            <Form.Label>Photos</Form.Label>
+            <Form.Label className="custom-label">Photos</Form.Label>
             <div className="d-flex flex-wrap">
               {photos.length > 0 ? (
                 photos.map((photo, index) => (

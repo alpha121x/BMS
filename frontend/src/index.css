@@ -11,3 +11,8 @@
       transform: rotate(360deg);
     }
   }
+  .custom-label {
+    color: #007bff; /* Bootstrap Primary Blue */
+    font-weight: bold;
+  }
+  

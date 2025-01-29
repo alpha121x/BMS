@@ -389,19 +389,19 @@ const InspectionList = ({ bridgeId }) => {
                                 >
                                   {/* Row 1 */}
                                   <div>
-                                    <strong>Parts:</strong>{" "}
+                                    <strong className="custom-label">Parts:</strong>{" "}
                                     {row.PartsName || "N/A"}
                                   </div>
                                   <div>
-                                    <strong>Material:</strong>{" "}
+                                    <strong className="custom-label">Material:</strong>{" "}
                                     {row.MaterialName || "N/A"}
                                   </div>
                                   <div>
-                                    <strong>Damage:</strong>{" "}
+                                    <strong className="custom-label">Damage:</strong>{" "}
                                     {row.DamageKindName || "N/A"}
                                   </div>
                                   <div>
-                                    <strong>Level:</strong>{" "}
+                                    <strong className="custom-label">Level:</strong>{" "}
                                     {row.DamageLevel || "N/A"}
                                   </div>
 
@@ -415,7 +415,7 @@ const InspectionList = ({ bridgeId }) => {
                                     {row.InspectationDate || "N/A"}
                                   </div> */}
                                   <div>
-                                    <strong>Remarks:</strong>{" "}
+                                    <strong className="custom-label">Remarks:</strong>{" "}
                                     {row.Remarks || "N/A"}
                                   </div>
                                   {/* <div>
