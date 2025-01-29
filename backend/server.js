@@ -721,6 +721,16 @@ app.get("/api/damage-kinds", async (req, res) => {
   }
 });
 
+app.get("/api/damage-ranks", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM bms.tbl_damage_levels");
+    res.json({ data: result.rows }); // Wrap the data in a "data" property
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // API for Visual Conditions
 app.get('/api/visual-conditions', async (req, res) => {
   try {

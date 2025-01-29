@@ -23,13 +23,16 @@ const DamageRanksTable = () => {
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
+      console.log("API Response:", result); // Log the API response
 
       if (Array.isArray(result.data)) {
         setTableData(result.data);
+        console.log("Table Data:", tableData); // Log the table data
       } else {
         throw new Error("Invalid data format");
       }
     } catch (error) {
+      console.error("Fetch Error:", error); // Log the error
       setError(error.message);
     } finally {
       setLoading(false);
@@ -154,9 +157,7 @@ const DamageRanksTable = () => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">
-          Damage Ranks
-        </h6>
+        <h6 className="card-title text-lg font-semibold pb-2">Damage Ranks</h6>
 
         {loading && (
           <div
@@ -194,13 +195,13 @@ const DamageRanksTable = () => {
             {currentData.length > 0 ? (
               currentData.map((row, index) => (
                 <tr key={index}>
-                  <td>{row.SrNo || "N/A"}</td>
+                  <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td>{row.DamageLevelID || "N/A"}</td>
                   <td>{row.DamageLevel || "N/A"}</td>
                   <td>{row.DamageScore || "N/A"}</td>
-                  <td>{row.Status || "N/A"}</td>
-                  <td>{row.CreationDate || "N/A"}</td>
-                  <td>{row.LastUpdateDate || "N/A"}</td>
+                  <td>{row.DeleteFlag === 0 ? "Active" : "Deleted"}</td>
+                  <td>{new Date(row.InYMD).toLocaleDateString()}</td>
+                  <td>{new Date(row.UpYMD).toLocaleDateString()}</td>
                 </tr>
               ))
             ) : (
