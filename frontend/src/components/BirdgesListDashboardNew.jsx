@@ -173,6 +173,13 @@ const BridgesListDashboard = ({
     setShowModal(true); // Show the modal
   };
 
+  
+  const handleRowClick = (bridge) => {
+    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+    const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
+    window.location.href = editUrl;
+  };
+
   // Function to close the modal
   const handleCloseModal = () => {
     setShowModal(false);
