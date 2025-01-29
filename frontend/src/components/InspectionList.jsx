@@ -264,11 +264,7 @@ const InspectionList = ({ bridgeId }) => {
           className="card-title text-lg font-semibold pb-2"
           style={{ fontSize: "1.25rem" }}
         >
-          Inspections List
-          <br />
-          <span style={{ fontSize: "0.875rem" }}>
-            Total Inspections: {tableData.length}
-          </span>
+          Condition Assessment Reports
         </h6>
 
         {/* Toggle buttons for old and new inspections */}
@@ -354,7 +350,6 @@ const InspectionList = ({ bridgeId }) => {
                         borderRadius: "8px",
                       }}
                     >
-                      {/* Work Kind Label without header style */}
                       {Object.keys(groupedData[spanIndex]).map((workKind) => (
                         <div
                           key={workKind}
@@ -394,41 +389,41 @@ const InspectionList = ({ bridgeId }) => {
                                 >
                                   {/* Row 1 */}
                                   <div>
-                                    <strong>Parts:</strong>{" "}
+                                    <strong className="custom-label">Parts:</strong>{" "}
                                     {row.PartsName || "N/A"}
                                   </div>
                                   <div>
-                                    <strong>Material:</strong>{" "}
+                                    <strong className="custom-label">Material:</strong>{" "}
                                     {row.MaterialName || "N/A"}
                                   </div>
                                   <div>
-                                    <strong>Damage:</strong>{" "}
+                                    <strong className="custom-label">Damage:</strong>{" "}
                                     {row.DamageKindName || "N/A"}
                                   </div>
                                   <div>
-                                    <strong>Level:</strong>{" "}
+                                    <strong className="custom-label">Level:</strong>{" "}
                                     {row.DamageLevel || "N/A"}
                                   </div>
 
                                   {/* Row 2 */}
-                                  <div>
+                                  {/* <div>
                                     <strong>Inspector:</strong>{" "}
                                     {row.Inspector || "N/A"}
-                                  </div>
-                                  <div>
+                                  </div> */}
+                                  {/* <div>
                                     <strong>Inspection Date:</strong>{" "}
                                     {row.InspectationDate || "N/A"}
-                                  </div>
+                                  </div> */}
                                   <div>
-                                    <strong>Remarks:</strong>{" "}
+                                    <strong className="custom-label">Remarks:</strong>{" "}
                                     {row.Remarks || "N/A"}
                                   </div>
-                                  <div>
+                                  {/* <div>
                                     <strong>Status:</strong>{" "}
                                     {row.ApprovedFlag === 0
                                       ? "Unapproved"
                                       : row.ApprovedFlag || "N/A"}
-                                  </div>
+                                  </div> */}
                                 </div>
 
                                 {/* Photos Section */}

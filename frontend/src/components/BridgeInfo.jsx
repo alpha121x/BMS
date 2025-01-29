@@ -5,9 +5,8 @@ import {
 } from "@heroicons/react/24/outline";
 import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
-import InventoryInfo from "./InventoryInfo";
+import InventoryInfo from "./InventoryInfoDashboard";
 import { useLocation } from "react-router-dom";
-import InspectionListNew from "./InspectionListnew";
 import InspectionList from "./InspectionList";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
