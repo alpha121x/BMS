@@ -179,7 +179,7 @@ const DamageRanksTable = () => {
           />
         )}
 
-        <Table bordered responsive>
+        <Table bordered className="custom-table">
           <thead>
             <tr>
               <th>Sr. No.</th>

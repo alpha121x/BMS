@@ -177,7 +177,7 @@ const Elements = () => {
           />
         )}
 
-        <Table bordered responsive>
+        <Table className="custom-table">
           <thead>
             <tr>
               <th>Sr. No.</th>
