@@ -181,15 +181,15 @@ const Elements = () => {
           <thead>
             <tr>
               <th>Sr. No.</th>
-              <th>Work Kind ID</th>
-              <th>Parts ID</th>
-              <th>Parts Name</th>
-              <th>Parts Code</th>
-              <th>Main Parts Flag</th>
-              <th>Delete Flag</th>
+              <th>Category ID</th>
+              <th>Category</th>
+              <th>Element ID</th>
+              <th>Element</th>
+              <th>Important Factor(%)</th>
+              <th>Is Main Element?</th>
+              <th>Status</th>
               <th>Creation Date</th>
               <th>Last Update Date</th>
-              <th>Parts Important Factor Percentage</th>
             </tr>
           </thead>
           <tbody>
@@ -198,14 +198,14 @@ const Elements = () => {
                 <tr key={index}>
                   <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
                   <td>{row.WorkKindID || "N/A"}</td>
+                  <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.PartsID || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
-                  <td>{row.PartsCode || "N/A"}</td>
+                  <td>{row.PartsImportantFactorPcentValue || "N/A"}</td>
                   <td>{row.MainPartsFlag === 1 ? "Yes" : "No"}</td>
                   <td>{row.DeleteFlag === 0 ? "Active" : "Deleted"}</td>
-                  <td>{new Date(row.InYMD).toLocaleDateString()}</td>
-                  <td>{new Date(row.UpYMD).toLocaleDateString()}</td>
-                  <td>{row.PartsImportantFactorPcentValue || "N/A"}</td>
+                  <td>{row.InYMD}</td>
+                  <td>{row.UpYMD}</td>
                 </tr>
               ))
             ) : (
