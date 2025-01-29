@@ -733,8 +733,30 @@ app.get("/api/damage-ranks", async (req, res) => {
 
 app.get("/api/elements", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM bms.tbl_parts");
-    res.json({ data: result.rows }); // Wrap the data in a "data" property
+    // Query to join tbl_parts and tbl_work_kinds based on WorkKindID
+    const result = await pool.query(`
+      SELECT 
+        parts."PartsID",
+        parts."PartsName",
+        parts."PartsNameJa",
+        parts."PartsCode",
+        parts."MainPartsFlag",
+        parts."DeleteFlag",
+        parts."InYMD",
+        parts."UpYMD",
+        parts."PartsImportantFactorPcentValue",
+        work."WorkKindID",
+        work."WorkKindName"
+      FROM 
+        bms.tbl_parts AS parts
+      LEFT JOIN 
+        bms.tbl_work_kinds AS work
+      ON 
+        parts."WorkKindID" = work."WorkKindID"
+    `);
+
+    // Send response
+    res.json({ data: result.rows });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -773,7 +795,6 @@ app.get('/api/road-surface-types', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch road surface types' });
   }
 });
-
 
 // Set up multer to store uploaded files in a dynamically specified directory
 const storage = multer.diskStorage({
