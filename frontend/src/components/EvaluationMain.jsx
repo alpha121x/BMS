@@ -112,13 +112,6 @@ const EvaluationMain = () => {
 
   return (
     <section className="bg-gray-100 min-h-screen">
-      {/* Header Section */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-500 mb-1">
-          Summary
-        </h2>
-      </div>
-
       {/* Evaluation Section */}
       <div className="mb-2">
         <h3 className="text-xl font-semibold text-gray-700">Inspected</h3>
