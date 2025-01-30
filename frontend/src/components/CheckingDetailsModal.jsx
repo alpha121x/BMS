@@ -2,18 +2,8 @@ import React from "react";
 import { Modal, Carousel } from "react-bootstrap";
 
 const CheckingDetailsModal = ({ selectedRow }) => {
-  // Dummy photos for testing
-  const dummyPhotos = [
-    "uploads/bus_2024_01_14_12_39_49.jpg",
-    "uploads/bus_2024_01_14_12_40_06.jpg",
-    "uploads/bus_2024_01_14_12_40_38.jpg",
-    "uploads/bus_2024_01_14_12_43_56.jpg",
-    "uploads/bus_2024_01_14_12_45_26.jpg",
-  ];
-
-
-  // Use dummy photos for testing, regardless of selectedRow.photos
-  const photosToDisplay = dummyPhotos;
+  // Extract paths from photopath array
+  const photosToDisplay = selectedRow?.photopath?.map(photo => photo.path) || [];
 
   return (
     <Modal.Body>
@@ -56,7 +46,7 @@ const CheckingDetailsModal = ({ selectedRow }) => {
       </table>
 
       {/* Photos Carousel */}
-      {photosToDisplay && photosToDisplay.length > 0 ? (
+      {photosToDisplay.length > 0 ? (
         <div className="mb-3">
           <h5>Checking Photos</h5>
           <Carousel>
@@ -64,7 +54,7 @@ const CheckingDetailsModal = ({ selectedRow }) => {
               <Carousel.Item key={index}>
                 <img
                   className="d-block w-100"
-                  src={`/${photo}`}  // Directly reference the public folder
+                  src={photo} // Directly use the photo path from API
                   alt={`Photo ${index + 1}`}
                   style={{ maxHeight: "300px", objectFit: "cover" }}
                 />

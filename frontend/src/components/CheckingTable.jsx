@@ -3,6 +3,7 @@ import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
+import Papa from "papaparse"; // Import PapaParse
 
 const CheckingTable = () => {
   const [tableData, setTableData] = useState([]);
@@ -22,7 +23,7 @@ const CheckingTable = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${BASE_URL}/api/checkings`);
+      const response = await fetch(`${BASE_URL}/api/inspections`);
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
@@ -38,7 +39,7 @@ const CheckingTable = () => {
       setLoading(false);
     }
   };
- 
+
   const handleViewClick = (row) => {
     setSelectedRow(row);
     setShowModal(true);
@@ -66,6 +67,52 @@ const CheckingTable = () => {
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
+
+  const handleDownloadCSV = () => {
+    // Define the custom headers you want to include in the CSV
+    const customHeaders = [
+      "Bridge Name",
+      "SpanIndex", 
+      "Work Kind", 
+      "Part Name", 
+      "Material Name", 
+      "Damage Kind", 
+      "Damage Level", 
+      "Situation Remarks", 
+      "Approved Flag",
+      "Photo Path"
+    ];
+  
+    // Map your tableData to match the custom headers
+    const filteredData = tableData.map(item => ({
+      BridgeName: item.bridge_name,
+      SpanIndex: item.SpanIndex,
+      WorkKindName: item.WorkKindName,
+      PartsName: item.PartsName,
+      MaterialName: item.MaterialName,
+      DamageKindName: item.DamageKindName,
+      DamageLevel: item.DamageLevel,
+      Remarks: item.Remarks,
+      Status: item.ApprovedFlag === 1 ? 'Approved' : 'Unapproved',
+      photopath: item.photopath,
+    }));
+  
+    // Add the custom headers to the CSV data
+    const csvData = Papa.unparse(filteredData, {
+      header: true,
+      columns: customHeaders.map(header => header.toLowerCase().replace(/ /g, ''))
+    });
+
+    const bridgeName = tableData[0]?.bridge_name || 'BridgeInspections';
+  
+    // Create a hidden link element to trigger the download
+    const link = document.createElement("a");
+    link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
+    link.target = "_blank";
+    link.download = `${bridgeName}.csv`; // File name
+    link.click();
+  };
+  
 
   const buttonStyles = {
     margin: "0 6px",
@@ -171,6 +218,15 @@ const CheckingTable = () => {
           Bridge Inspections
         </h6>
 
+        {/* Download CSV Button */}
+        <Button
+          variant="primary"
+          onClick={handleDownloadCSV}
+          style={{ marginBottom: "16px" }}
+        >
+          Download CSV
+        </Button>
+
         {loading && (
           <div
             className="loader"
@@ -206,8 +262,7 @@ const CheckingTable = () => {
             {currentData.length > 0 ? (
               currentData.map((row, index) => (
                 <tr key={index}>
-                  {/* <td>{row.CheckingID || "N/A"}</td> */}
-                  <td>{row.BridgeName || "N/A"}</td>
+                  <td>{row.bridge_name || "N/A"}</td>
                   <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>

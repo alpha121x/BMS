@@ -467,6 +467,26 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
+app.get("/api/inspections", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        inspection_id, "ObjectID", bridge_name, "SpanIndex", "WorkKindID", 
+        "WorkKindName", "PartsID", "PartsName", "MaterialID", "MaterialName", 
+        "DamageKindID", "DamageKindName", "DamageLevelID", "DamageLevel", 
+        "Remarks", "DeleteFlag", "InYMD", "UpYMD", photopath, "ApprovedFlag", 
+        current_date_time, inspection_version
+      FROM bms.tbl_inspection_f;
+    `;
+
+    const { rows } = await pool.query(query);
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 
 app.get("/api/get-inspections", async (req, res) => {
   const { bridgeId, type } = req.query; // Fetch bridgeId and type from the query parameters

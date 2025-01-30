@@ -338,7 +338,7 @@ const BridgesListDashboard = ({
       <div className="w-full mx-auto mt-2">
         <div className="bg-[#60A5FA] text-grey p-2 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Bridges List</div>
+            <div className="text-2xl font-bold">Structures Inventory</div>
             <div className="text-sm font-medium mt-1 text-gray-700">
               Total Bridges: {bridgeCount || 0}
             </div>

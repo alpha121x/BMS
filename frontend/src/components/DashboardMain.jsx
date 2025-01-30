@@ -9,6 +9,7 @@ import {
 import Map from "./Map";
 // import BridgesListDashboard from "./BirdgesListDashboard";
 import BridgesListDashboard from "./BirdgesListDashboardNew";
+import CheckingTable from "./CheckingTable";
 
 
 const DashboardMain = () => {
@@ -208,6 +209,11 @@ const DashboardMain = () => {
             minYear={minYear}
             maxYear={maxYear}
           />
+
+
+          <div className="mt-2">
+          <CheckingTable/>
+          </div>
         </div>
       </div>
 
