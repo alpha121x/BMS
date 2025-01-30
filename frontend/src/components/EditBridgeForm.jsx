@@ -7,9 +7,7 @@ const EditBridgeForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [selectedSpan, setSelectedSpan] = useState("");
   const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
-  const [showUploadOptions, setShowUploadOptions] = useState(false); // Show upload options
   const [dropdownOptions, setDropdownOptions] = useState({
     districtOptions: [],
     structureTypeOptions: [],
@@ -103,20 +101,6 @@ const EditBridgeForm = () => {
     );
   };
 
-  // This will hold the number of spans for the bridge
-  const spanCount = bridgeData?.no_of_span || 0;
-
-  // Generate an array of span values based on `spanCount`
-  const spanIndexes = Array.from(
-    { length: spanCount },
-    (_, index) => index + 1
-  );
-
-  // Handling the selection change
-  const handleSpanSelect = (e) => {
-    setSelectedSpan(e.target.value);
-    setShowUploadOptions(true); // Show upload options when a span is selected
-  };
 
   const handleInputChange = (field, value) => {
     setBridgeData((prevData) => ({
@@ -134,43 +118,6 @@ const EditBridgeForm = () => {
   // Handle form submit and upload all photos
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    console.log(updatedBridgeData);
-
-    // Get the photos array to upload, which contains file and directoryPath
-    const photosToUpload = bridgeData.photos || [];
-
-    // console.log(photosToUpload);
-    // return;
-
-    // Create an array of promises for uploading photos
-    const uploadPromises = photosToUpload.map((photoData) => {
-      const { file, directoryPath } = photoData; // Extract file and directory path
-
-      // Only upload if the file is present
-      if (!file) {
-        return Promise.reject("No file found for upload.");
-      }
-
-      const formData = new FormData();
-      formData.append("file", file); // Append the file for upload
-      formData.append("directoryPath", directoryPath); // Send the directory path
-
-      return fetch(`${BASE_URL}/api/upload`, {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to upload the photo");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          const uploadedPhotoUrl = data.imageUrl; // Full URL returned by the backend
-          return uploadedPhotoUrl; // Return the final uploaded photo URL
-        });
-    });
 
     // Wait for all photos to be uploaded
     Promise.all(uploadPromises)
@@ -213,93 +160,6 @@ const EditBridgeForm = () => {
     setShowPhotoModal(true);
   };
 
-  const handleSpanPhotoRemove = (span, photoToRemove, photoIndex) => {
-    // Create a copy of the current spanPhotos state
-    setSpanPhotos((prevData) => {
-      // Copy the existing spanPhotos
-      const newSpanPhotos = { ...prevData };
-
-      // Check if there are photos for this span
-      if (newSpanPhotos[span]) {
-        // Filter out the photo to remove based on the `fileName` property
-        newSpanPhotos[span] = newSpanPhotos[span].filter(
-          (photo) => photo.fileName !== photoToRemove
-        );
-      }
-
-      // Return the updated state
-      return newSpanPhotos;
-    });
-
-    // Reset the corresponding file input field if needed
-    const inputElement = document.getElementById(
-      `photoInput-${span}-${photoIndex}`
-    );
-    if (inputElement) {
-      inputElement.value = ""; // Reset the file input
-    }
-  };
-
-  // Function to handle the removal of a photo
-  const handlePhotoRemove = (photoToRemove) => {
-    setBridgeData((prevData) => ({
-      ...prevData,
-      photos: prevData.photos.filter((photo) => photo !== photoToRemove),
-    }));
-  };
-
-  // Function to handle the addition of a new photo
-  const handleNewPhotoAdd = (file) => {
-    const existingPhotos = bridgeData.photos || [];
-
-    let directoryPath = "";
-    if (existingPhotos.length > 0) {
-      const existingImageUrl = existingPhotos[0];
-      // Extract only the directory path (without filename)
-      const lastSlashIndex = Math.max(
-        existingImageUrl.lastIndexOf("/"),
-        existingImageUrl.lastIndexOf("\\")
-      );
-      directoryPath = existingImageUrl.substring(0, lastSlashIndex + 1); // Get only directory path
-    }
-
-    // Create only the path for the new photo (no need to store the file object here)
-    const newPhotoPath = `${directoryPath}${file.name}`;
-
-    // Update the photos array to include the new photo's path
-    setBridgeData((prevData) => ({
-      ...prevData,
-      photos: [...(prevData.photos || []), newPhotoPath], // Store only the path
-    }));
-  };
-
-  // Handle the photo upload for the selected span
-  const handleSpanPhotoAdd = (e, span) => {
-    const newSpanPhotos = { ...spanPhotos };
-
-    // If no photos exist for this span, initialize it
-    if (!newSpanPhotos[span]) newSpanPhotos[span] = [];
-
-    // Get the files selected by the user
-    const selectedFiles = Array.from(e.target.files);
-
-    selectedFiles.forEach((file, index) => {
-      // Generate a unique file name
-      const timestamp = new Date().toISOString().replace(/[^\w]/g, "_");
-      const newFileName = `Span${span}_photo_${
-        newSpanPhotos[span].length + index + 1
-      }_${timestamp}.jpg`;
-
-      // Add file to the newSpanPhotos object
-      newSpanPhotos[span].push({
-        file: file,
-        fileName: newFileName,
-      });
-    });
-
-    // Update the state with the new photos
-    setSpanPhotos(newSpanPhotos);
-  };
 
   if (!bridgeData) {
     return (
@@ -585,100 +445,7 @@ const EditBridgeForm = () => {
                 </Form.Group>
               </Col>
 
-              {/* Span Select Dropdown */}
-              <div className="form-group">
-                <label>Select Span</label>
-                <select
-                  className="form-control"
-                  value={selectedSpan}
-                  onChange={handleSpanSelect}
-                >
-                  <option value="">-- Select Span --</option>
-                  {spanIndexes.map((span, index) => (
-                    <option key={index} value={span}>
-                      Span{span}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Show photo upload options if a span is selected */}
-              {showUploadOptions && selectedSpan && (
-                <>
-                  {/* Display selected span */}
-                  <Col md={12}>
-                    <Form.Label>
-                      Upload Photos for Span {selectedSpan}
-                    </Form.Label>
-                  </Col>
-
-                  {/* Single Photo Upload Input */}
-                  <Col md={12}>
-                    <Form.Group controlId="formPhotos">
-                      <Form.Label>Upload Photos</Form.Label>
-                      <Form.Control
-                        type="file"
-                        accept="image/*"
-                        multiple // Allow multiple files
-                        onChange={(e) => handleSpanPhotoAdd(e, selectedSpan)}
-                      />
-                    </Form.Group>
-                  </Col>
-
-                  {/* Display Uploaded Photos */}
-                  <Col md={8}>
-                    <Form.Group controlId="formPhotos">
-                      <Form.Label>Span Photos</Form.Label>
-                      <div className="d-flex flex-wrap">
-                        {/* Display uploaded photos for the selected span */}
-                        {spanPhotos[selectedSpan] &&
-                          spanPhotos[selectedSpan].map((photo, index) => (
-                            <div key={photo.fileName} className="m-2">
-                              {" "}
-                              {/* Use photo.fileName as key */}
-                              <img
-                                src={`${photo.fileName}`} // Adjust the path if needed
-                                alt={`Photo ${index + 1}`}
-                                className="img-thumbnail"
-                                style={{
-                                  width: "100px",
-                                  height: "100px",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() => handlePhotoClick(photo.fileName)} // Add any click functionality if needed
-                              />
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                className="mt-1 w-100"
-                                onClick={() =>
-                                  handleSpanPhotoRemove(
-                                    selectedSpan,
-                                    photo.fileName,
-                                    index
-                                  )
-                                }
-                              >
-                                Remove
-                              </Button>
-                            </div>
-                          ))}
-                      </div>
-                    </Form.Group>
-                  </Col>
-                </>
-              )}
-
-              <Col md={12}>
-                <Form.Group controlId="formNewPhoto">
-                  <Form.Label>Add New Photo</Form.Label>
-                  <Form.Control
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
-                  />
-                </Form.Group>
-              </Col>
+            
 
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
