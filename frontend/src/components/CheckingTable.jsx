@@ -68,43 +68,12 @@ const CheckingTable = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
+  // CSV Export Function
   const handleDownloadCSV = () => {
-    // Define the custom headers you want to include in the CSV
-    const customHeaders = [
-      "Bridge Name",
-      "SpanIndex", 
-      "Work Kind", 
-      "Part Name", 
-      "Material Name", 
-      "Damage Kind", 
-      "Damage Level", 
-      "Situation Remarks", 
-      "Approved Flag",
-      "Photo Path"
-    ];
-  
-    // Map your tableData to match the custom headers
-    const filteredData = tableData.map(item => ({
-      BridgeName: item.bridge_name,
-      SpanIndex: item.SpanIndex,
-      WorkKindName: item.WorkKindName,
-      PartsName: item.PartsName,
-      MaterialName: item.MaterialName,
-      DamageKindName: item.DamageKindName,
-      DamageLevel: item.DamageLevel,
-      Remarks: item.Remarks,
-      Status: item.ApprovedFlag === 1 ? 'Approved' : 'Unapproved',
-      photopath: item.photopath,
-    }));
-  
-    // Add the custom headers to the CSV data
-    const csvData = Papa.unparse(filteredData, {
-      header: true,
-      columns: customHeaders.map(header => header.toLowerCase().replace(/ /g, ''))
-    });
+    const csvData = Papa.unparse(tableData); // Convert table data to CSV format
 
-    const bridgeName = tableData[0]?.bridge_name || 'BridgeInspections';
-  
+    const bridgeName = tableData[0]?.bridge_name || 'Bridge';
+
     // Create a hidden link element to trigger the download
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
@@ -112,7 +81,6 @@ const CheckingTable = () => {
     link.download = `${bridgeName}.csv`; // File name
     link.click();
   };
-  
 
   const buttonStyles = {
     margin: "0 6px",

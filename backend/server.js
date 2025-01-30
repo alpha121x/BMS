@@ -471,21 +471,31 @@ app.get("/api/inspections", async (req, res) => {
   try {
     const query = `
       SELECT 
-        inspection_id, "ObjectID", bridge_name, "SpanIndex", "WorkKindID", 
-        "WorkKindName", "PartsID", "PartsName", "MaterialID", "MaterialName", 
-        "DamageKindID", "DamageKindName", "DamageLevelID", "DamageLevel", 
-        "Remarks", "DeleteFlag", "InYMD", "UpYMD", photopath, "ApprovedFlag", 
-        current_date_time, inspection_version
+        bridge_name, "SpanIndex", "WorkKindName", "PartsName", "MaterialName", 
+        "DamageKindName", "DamageLevel", 
+        "Remarks", "photopath", "ApprovedFlag"
       FROM bms.tbl_inspection_f;
     `;
 
     const { rows } = await pool.query(query);
-    res.json({ success: true, data: rows });
+
+    // Map over the rows to handle the data manipulation
+    const modifiedRows = rows.map(row => {
+      return {
+        ...row,
+        photopath: row.photopath && Array.isArray(row.photopath) ? row.photopath.map(p => p.path) : [],  // Extract all paths from photopath array
+        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved"  // Mapping ApprovedFlag to approved/unapproved
+      };
+    });
+
+    res.json({ success: true, data: modifiedRows });
   } catch (error) {
     console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+
 
 
 app.get("/api/get-inspections", async (req, res) => {
