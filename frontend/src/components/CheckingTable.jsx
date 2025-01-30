@@ -267,7 +267,7 @@ const CheckingTable = () => {
       {/* Modal for viewing more details */}
       <Modal show={showModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Checking Details</Modal.Title>
+          <Modal.Title>Inspection Details</Modal.Title>
         </Modal.Header>
 
         {/* Passing selectedRow as a prop to CheckingDetailsModal */}

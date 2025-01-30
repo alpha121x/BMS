@@ -3,7 +3,7 @@ import { Modal, Carousel } from "react-bootstrap";
 
 const CheckingDetailsModal = ({ selectedRow }) => {
   // Extract paths from photopath array
-  const photosToDisplay = selectedRow?.photopath?.map(photo => photo.path) || [];
+  const photosToDisplay = selectedRow?.photopath || [];
 
   return (
     <Modal.Body>
@@ -48,7 +48,7 @@ const CheckingDetailsModal = ({ selectedRow }) => {
       {/* Photos Carousel */}
       {photosToDisplay.length > 0 ? (
         <div className="mb-3">
-          <h5>Checking Photos</h5>
+          <h5>Inspection Photos</h5>
           <Carousel>
             {photosToDisplay.map((photo, index) => (
               <Carousel.Item key={index}>
