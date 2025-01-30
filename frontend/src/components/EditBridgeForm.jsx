@@ -7,7 +7,8 @@ const EditBridgeForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [spanPhotos, setSpanPhotos] = useState({}); // Store photos for each span
+  const [selectedSpan, setSelectedSpan] = useState("");
+  const [spanPhotos, setSpanPhotos] = useState({});
   const [dropdownOptions, setDropdownOptions] = useState({
     districtOptions: [],
     structureTypeOptions: [],
@@ -40,44 +41,84 @@ const EditBridgeForm = () => {
     const fetchDropdownOptions = async () => {
       try {
         const responseDistrict = await fetch(`${BASE_URL}/api/districts`);
-        const responseStructureType = await fetch(`${BASE_URL}/api/structure-types`);
-        const responseConstructionType = await fetch(`${BASE_URL}/api/construction-types`);
-        const responseRoadClassification = await fetch(`${BASE_URL}/api/road-classifications`);
-        const responseCarriagewayType = await fetch(`${BASE_URL}/api/carriageway-types`);
-        const responseRoadSurfaceType = await fetch(`${BASE_URL}/api/road-surface-types`);
-        const responseVisualCondition = await fetch(`${BASE_URL}/api/visual-conditions`);
+        const responseStructureType = await fetch(
+          `${BASE_URL}/api/structure-types`
+        );
+        const responseConstructionType = await fetch(
+          `${BASE_URL}/api/construction-types`
+        );
+        const responseRoadClassification = await fetch(
+          `${BASE_URL}/api/road-classifications`
+        );
+        const responseCarriagewayType = await fetch(
+          `${BASE_URL}/api/carriageway-types`
+        );
+        const responseRoadSurfaceType = await fetch(
+          `${BASE_URL}/api/road-surface-types`
+        );
+        const responseVisualCondition = await fetch(
+          `${BASE_URL}/api/visual-conditions`
+        );
         const responseDirection = await fetch(`${BASE_URL}/api/directions`);
-  
-        const [districts, structureTypes, constructionTypes, roadClassifications, carriagewayTypes, roadSurfaceTypes, visualConditions, directions] =
-          await Promise.all([
-            responseDistrict.json(),
-            responseStructureType.json(),
-            responseConstructionType.json(),
-            responseRoadClassification.json(),
-            responseCarriagewayType.json(),
-            responseRoadSurfaceType.json(),
-            responseVisualCondition.json(),
-            responseDirection.json(),
-          ]);
-  
+
+        const [
+          districts,
+          structureTypes,
+          constructionTypes,
+          roadClassifications,
+          carriagewayTypes,
+          roadSurfaceTypes,
+          visualConditions,
+          directions,
+        ] = await Promise.all([
+          responseDistrict.json(),
+          responseStructureType.json(),
+          responseConstructionType.json(),
+          responseRoadClassification.json(),
+          responseCarriagewayType.json(),
+          responseRoadSurfaceType.json(),
+          responseVisualCondition.json(),
+          responseDirection.json(),
+        ]);
+
         setDropdownOptions({
           districtOptions: districts.map((item) => item.district), // Adjust based on API response structure
-          structureTypeOptions: structureTypes.map((item) => item.structure_type), // Adjust based on API response structure
-          constructionTypeOptions: constructionTypes.map((item) => item.construction_type), // Adjust based on API response structure
-          roadClassificationOptions: roadClassifications.map((item) => item.road_classification), // Adjust based on API response structure
-          carriagewayTypeOptions: carriagewayTypes.map((item) => item.carriageway_type), // Adjust based on API response structure
-          roadSurfaceTypeOptions: roadSurfaceTypes.map((item) => item.road_surface_type), // Adjust based on API response structure
-          visualConditionOptions: visualConditions.map((item) => item.visual_condition), // Adjust based on API response structure
+          structureTypeOptions: structureTypes.map(
+            (item) => item.structure_type
+          ), // Adjust based on API response structure
+          constructionTypeOptions: constructionTypes.map(
+            (item) => item.construction_type
+          ), // Adjust based on API response structure
+          roadClassificationOptions: roadClassifications.map(
+            (item) => item.road_classification
+          ), // Adjust based on API response structure
+          carriagewayTypeOptions: carriagewayTypes.map(
+            (item) => item.carriageway_type
+          ), // Adjust based on API response structure
+          roadSurfaceTypeOptions: roadSurfaceTypes.map(
+            (item) => item.road_surface_type
+          ), // Adjust based on API response structure
+          visualConditionOptions: visualConditions.map(
+            (item) => item.visual_condition
+          ), // Adjust based on API response structure
           directionOptions: directions.map((item) => item.direction), // Adjust based on API response structure
         });
       } catch (error) {
         console.error("Error fetching dropdown options:", error);
       }
     };
-  
+
     fetchDropdownOptions();
   }, []);
-  
+
+  const spanphotos = bridgeData?.images_spans || [];
+  const spanIndexes = Array.from(
+    { length: bridgeData?.no_of_span || 0 },
+    (_, i) => i + 1
+  );
+
+  const handleSpanSelect = (e) => setSelectedSpan(e.target.value);
+
   const renderDropdown = (field, optionsKey) => {
     const currentValue = bridgeData?.[field] || "";
     const options = [
@@ -85,7 +126,7 @@ const EditBridgeForm = () => {
         [...dropdownOptions[optionsKey], currentValue].filter(Boolean)
       ),
     ].sort((a, b) => a.localeCompare(b));
-  
+
     return (
       <Form.Control
         as="select"
@@ -100,7 +141,6 @@ const EditBridgeForm = () => {
       </Form.Control>
     );
   };
-
 
   const handleInputChange = (field, value) => {
     setBridgeData((prevData) => ({
@@ -159,7 +199,6 @@ const EditBridgeForm = () => {
     setSelectedPhoto(photo);
     setShowPhotoModal(true);
   };
-
 
   if (!bridgeData) {
     return (
@@ -445,7 +484,47 @@ const EditBridgeForm = () => {
                 </Form.Group>
               </Col>
 
-            
+              <Form.Group>
+                <Form.Label>Select Span</Form.Label>
+                <Form.Select
+                  value={selectedSpan}
+                  onChange={handleSpanSelect}
+                  style={{ padding: "8px", fontSize: "14px" }}
+                >
+                  <option value="">-- Select Span --</option>
+                  {spanIndexes.map((span) => (
+                    <option key={span} value={span}>
+                      Span {span}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+
+              {selectedSpan && (
+                <Form.Group>
+                  <Form.Label>Photos for Span {selectedSpan}</Form.Label>
+                  <div className="d-flex flex-wrap">
+                    {spanphotos[selectedSpan]?.length > 0 ? (
+                      spanphotos[selectedSpan].map((photo, index) => (
+                        <img
+                          key={index}
+                          src={photo.fileName}
+                          alt={`Span Photo ${index + 1}`}
+                          className="img-thumbnail m-1"
+                          style={{
+                            width: "80px",
+                            height: "80px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handlePhotoClick(photo.fileName)}
+                        />
+                      ))
+                    ) : (
+                      <p>No photos available for this span.</p>
+                    )}
+                  </div>
+                </Form.Group>
+              )}
 
               <Col md={12}>
                 <Form.Group controlId="formPhotos">
