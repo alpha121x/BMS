@@ -404,16 +404,6 @@ const InspectionList = ({ bridgeId }) => {
                                     <strong className="custom-label">Level:</strong>{" "}
                                     {row.DamageLevel || "N/A"}
                                   </div>
-
-                                  {/* Row 2 */}
-                                  {/* <div>
-                                    <strong>Inspector:</strong>{" "}
-                                    {row.Inspector || "N/A"}
-                                  </div> */}
-                                  {/* <div>
-                                    <strong>Inspection Date:</strong>{" "}
-                                    {row.InspectationDate || "N/A"}
-                                  </div> */}
                                   <div>
                                     <strong className="custom-label">Remarks:</strong>{" "}
                                     {row.Remarks || "N/A"}
