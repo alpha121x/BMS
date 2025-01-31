@@ -461,16 +461,12 @@ const BridgesListDashboard = ({
           {!loading && !error && (
             <>
               <div style={{ overflowX: "auto" }}>
-                {" "}
-                {/* Make the table scrollable horizontally */}
                 <Table
                   bordered
                   responsive
                   className="custom-table"
                   style={{ minWidth: "800px" }}
                 >
-                  {" "}
-                  {/* Set a minimum width for the table */}
                   <thead>
                     <tr>
                       <th>District</th>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Form, Modal } from "react-bootstrap";
+import { Button, Row, Col, Form, Modal, ToggleButtonGroup, ToggleButton  } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import { BASE_URL } from "./config";
 
@@ -26,6 +26,11 @@ const EditInspectionForm = () => {
   const queryParams = new URLSearchParams(search);
   const serializedData = queryParams.get("data");
 
+  // Ensure we have a default value if bridgeData is null
+  const initialApprovedFlag =
+    bridgeData?.ApprovedFlag === 1 ? "Approved" : "Unapproved";
+
+  const [approvedFlag, setApprovedFlag] = useState(initialApprovedFlag);
   useEffect(() => {
     if (serializedData) {
       // Decode and parse the serialized data
@@ -33,6 +38,19 @@ const EditInspectionForm = () => {
       setBridgeData(parsedData);
     }
   }, [serializedData]);
+
+  useEffect(() => {
+    if (bridgeData) {
+      setApprovedFlag(
+        bridgeData.ApprovedFlag === 1 ? "Approved" : "Unapproved"
+      );
+    }
+  }, [bridgeData]); // Update state when bridgeData is loaded
+
+  const handleToggleChange = (val) => {
+    setApprovedFlag(val);
+    handleInputChange("ApprovedFlag", val === "Approved" ? 1 : 0);
+  };
 
   // Fetch dropdown options from APIs using fetch
   useEffect(() => {
@@ -255,7 +273,21 @@ const EditInspectionForm = () => {
 
               <Col md={12}>
                 <Form.Group controlId="formRemarks">
-                  <Form.Label>Remarks</Form.Label>
+                  <Form.Label>Situation Remarks</Form.Label>
+                  <Form.Control
+                    type="text"
+                    readOnly
+                    value={bridgeData.Remarks || ""}
+                    onChange={(e) =>
+                      handleInputChange("Remarks", e.target.value)
+                    }
+                  />
+                </Form.Group>
+              </Col>
+
+              <Col md={12}>
+                <Form.Group controlId="formRemarks">
+                  <Form.Label>Consultant Remarks</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={3}
@@ -267,13 +299,37 @@ const EditInspectionForm = () => {
                 </Form.Group>
               </Col>
 
-              <Col md={12}>
-                <Form.Group controlId="formNewPhoto">
-                  <Form.Label>Add New Photo</Form.Label>
-                  <Form.Control
-                    type="file"
-                    onChange={(e) => handleNewPhotoAdd(e.target.files[0])}
-                  />
+              {/* Pill Toggle Button for ApprovedFlag */}
+              <Col md={12} className="mt-3">
+                <Form.Group controlId="formApprovalStatus">
+                  <Form.Label>
+                    <strong>Approval Status</strong>
+                  </Form.Label>
+                  <div>
+                    <ToggleButtonGroup
+                      type="radio"
+                      name="approvalStatus"
+                      value={approvedFlag}
+                      onChange={handleToggleChange}
+                    >
+                      <ToggleButton
+                        id="approved"
+                        value="Approved"
+                        variant="outline-success"
+                        className="rounded-pill px-4"
+                      >
+                        Approved
+                      </ToggleButton>
+                      <ToggleButton
+                        id="unapproved"
+                        value="Unapproved"
+                        variant="outline-danger"
+                        className="rounded-pill px-4"
+                      >
+                        Unapproved
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </div>
                 </Form.Group>
               </Col>
 
@@ -281,7 +337,7 @@ const EditInspectionForm = () => {
                 <Form.Group controlId="formPhotos">
                   <Form.Label>Photos</Form.Label>
                   <div className="d-flex flex-wrap">
-                    {/* Displaying dummy photos */}
+                    {/* Displaying photos */}
                     {photos.map((photo, index) => (
                       <div key={index} className="m-2">
                         <img
@@ -295,14 +351,6 @@ const EditInspectionForm = () => {
                           }}
                           onClick={() => handlePhotoClick(photo)}
                         />
-                        {/* <Button
-                          variant="danger"
-                          size="sm"
-                          className="mt-1 w-100"
-                          onClick={() => handlePhotoRemove(photo)}
-                        >
-                          Remove
-                        </Button> */}
                       </div>
                     ))}
                   </div>
