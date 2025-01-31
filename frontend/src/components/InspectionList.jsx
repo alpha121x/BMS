@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
@@ -55,6 +55,78 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
+  const handleUpdateInspection = async (row) => {
+    try {
+      // For testing: Show the data being sent in an alert and log it to the console
+      alert(`Data to be sent to the API:\n${JSON.stringify(row, null, 2)}`);
+      console.log("Data to be sent to the API:", row);
+
+      // Simulate a successful API response for testing
+      const simulatedResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({ message: "Inspection updated successfully" }),
+      };
+
+      // Simulate a delay to mimic network latency
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Simulate checking the response
+      if (!simulatedResponse.ok) throw new Error("Failed to update inspection");
+
+      // Simulate a successful update
+      console.log("Inspection updated successfully!");
+      alert("Inspection updated successfully!");
+
+      // Refetch data to reflect changes (simulated)
+      fetchData();
+    } catch (error) {
+      // Simulate error handling
+      console.error("Error updating inspection:", error.message);
+      alert(`Error updating inspection: ${error.message}`);
+      setError(error.message);
+    }
+  };
+
+  // const handleUpdateInspection = async (row) => {
+  //   try {
+  //     const response = await fetch(`${BASE_URL}/api/update-inspection`, {
+  //       method: "PUT",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(row),
+  //     });
+
+  //     if (!response.ok) throw new Error("Failed to update inspection");
+
+  //     // Refetch data to reflect changes
+  //     fetchData();
+  //   } catch (error) {
+  //     setError(error.message);
+  //   }
+  // };
+
+  const handleConsultantRemarksChange = (row, value) => {
+    const updatedRow = { ...row, ConsultantRemarks: value };
+    const updatedData = tableData.map((item) =>
+      item.id === row.id ? updatedRow : item
+    );
+    setTableData(updatedData);
+  };
+
+  const handleApprovedFlagChange = (row, value) => {
+    const updatedRow = { ...row, ApprovedFlag: value };
+    const updatedData = tableData.map((item) =>
+      item.id === row.id ? updatedRow : item
+    );
+    setTableData(updatedData);
+  };
+
+  const handleSaveChanges = (row) => {
+    handleUpdateInspection(row);
+  };
+
   const handleDownloadCSV = (tableData) => {
     if (!Array.isArray(tableData) || tableData.length === 0) {
       console.error("No data to export");
@@ -91,32 +163,30 @@ const InspectionList = ({ bridgeId }) => {
       console.error("No data to export");
       return;
     }
-  
+
     const bridgename = tableData[0].BridgeName;
-  
+
     // Ensure all rows have a valid value for 'PhotoPaths'
     tableData.forEach((row) => {
       if (Array.isArray(row.PhotoPaths)) {
         // Convert array to JSON string
-        row.PhotoPaths = JSON.stringify(row.PhotoPaths) || 'No image path';
+        row.PhotoPaths = JSON.stringify(row.PhotoPaths) || "No image path";
       } else if (!row.PhotoPaths) {
-        row.PhotoPaths = 'No image path'; // Default if no path is present
+        row.PhotoPaths = "No image path"; // Default if no path is present
       }
     });
-    
-  
+
     // Create a worksheet from the table data
     const ws = XLSX.utils.json_to_sheet(tableData);
-  
+
     // Create a new workbook and append the worksheet
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Inspections");
     // console.log(wb);
-  
+
     // Generate and download the Excel file
     XLSX.writeFile(wb, `${bridgename}.xlsx`);
   };
-  
 
   const handleEditClick = (row) => {
     const serializedRow = encodeURIComponent(JSON.stringify(row));
@@ -274,7 +344,7 @@ const InspectionList = ({ bridgeId }) => {
             style={{
               backgroundColor: inspectionType === "new" ? "#3B82F6" : "#60A5FA",
             }}
-            className="mr-2" // Added margin-right to add space between the buttons
+            className="mr-2"
           >
             <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
             New Inspections
@@ -284,13 +354,13 @@ const InspectionList = ({ bridgeId }) => {
             style={{
               backgroundColor: inspectionType === "old" ? "#3B82F6" : "#60A5FA",
             }}
-            className="mr-2" // Added margin-right to add space between the buttons
+            className="mr-2"
           >
             <FontAwesomeIcon icon={faHistory} className="mr-2" />
             Old Inspections
           </Button>
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2" // Added margin-right
+            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
             onClick={() => handleDownloadCSV(tableData)}
           >
             <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
@@ -344,126 +414,133 @@ const InspectionList = ({ bridgeId }) => {
                     <div
                       key={workKind}
                       style={{
-                        marginBottom: "10px", // Reduced margin
+                        marginBottom: "10px",
                         border: "1px solid #ddd",
-                        padding: "8px", // Reduced padding
+                        padding: "8px",
                         borderRadius: "8px",
                       }}
                     >
-                      {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                      <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
+                        Work Kind: {workKind}
+                      </div>
+
+                      {groupedData[spanIndex][workKind].map((row, index) => (
                         <div
-                          key={workKind}
+                          key={index}
+                          className="inspection-item"
                           style={{
-                            marginBottom: "10px", // Reduced margin
-                            border: "1px solid #ddd",
-                            padding: "8px", // Reduced padding
-                            borderRadius: "8px",
+                            marginBottom: "8px",
+                            borderBottom: "1px solid #ddd",
+                            paddingBottom: "8px",
                           }}
                         >
-                          {/* Work Kind Label without header style */}
                           <div
-                            style={{ marginBottom: "8px", fontWeight: "bold" }}
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "repeat(4, 1fr)",
+                              columnGap: "12px",
+                              rowGap: "8px",
+                            }}
                           >
-                            Work Kind: {workKind}
+                            <div>
+                              <strong className="custom-label">Parts:</strong>{" "}
+                              {row.PartsName || "N/A"}
+                            </div>
+                            <div>
+                              <strong className="custom-label">
+                                Material:
+                              </strong>{" "}
+                              {row.MaterialName || "N/A"}
+                            </div>
+                            <div>
+                              <strong className="custom-label">Damage:</strong>{" "}
+                              {row.DamageKindName || "N/A"}
+                            </div>
+                            <div>
+                              <strong className="custom-label">Level:</strong>{" "}
+                              {row.DamageLevel || "N/A"}
+                            </div>
+                            <div>
+                              <strong className="custom-label">Remarks:</strong>{" "}
+                              {row.Remarks || "N/A"}
+                            </div>
                           </div>
 
-                          {groupedData[spanIndex][workKind].map(
-                            (row, index) => (
+                          {/* Consultant Remarks */}
+                          <div style={{ marginTop: "8px" }}>
+                            <strong>Consultant Remarks:</strong>
+                            <Form.Control
+                              as="textarea"
+                              rows={2}
+                              value={row.ConsultantRemarks || ""}
+                              onChange={(e) =>
+                                handleConsultantRemarksChange(
+                                  row,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+
+                          {/* Approved Flag Toggle */}
+                          <div style={{ marginTop: "8px" }}>
+                            <strong>Approved Status:</strong>
+                            <Form.Select
+                              value={row.ApprovedFlag || 0}
+                              onChange={(e) =>
+                                handleApprovedFlagChange(
+                                  row,
+                                  parseInt(e.target.value)
+                                )
+                              }
+                            >
+                              <option value={0}>Unapproved</option>
+                              <option value={1}>Approved</option>
+                            </Form.Select>
+                          </div>
+
+                          {/* Save Changes Button */}
+                          <div style={{ marginTop: "8px" }}>
+                            <Button
+                              onClick={() => handleSaveChanges(row)}
+                              style={{
+                                backgroundColor: "#4CAF50",
+                                border: "none",
+                                color: "white",
+                              }}
+                            >
+                              Save Changes
+                            </Button>
+                          </div>
+
+                          {/* Photos Section */}
+                          {row.PhotoPaths && row.PhotoPaths.length > 0 && (
+                            <div style={{ marginTop: "8px" }}>
+                              <strong>Photos:</strong>
                               <div
-                                key={index}
-                                className="inspection-item"
                                 style={{
-                                  marginBottom: "8px", // Reduced margin between items
-                                  borderBottom: "1px solid #ddd",
-                                  paddingBottom: "8px", // Reduced padding at the bottom of each item
+                                  display: "grid",
+                                  gridTemplateColumns:
+                                    "repeat(auto-fill, 80px)",
+                                  gap: "6px",
+                                  marginTop: "6px",
                                 }}
                               >
-                                {/* Grid Layout: Displaying 4 details per row */}
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gridTemplateColumns: "repeat(4, 1fr)", // 4 columns of equal width
-                                    columnGap: "12px", // Space between columns
-                                    rowGap: "8px", // Space between rows
-                                  }}
-                                >
-                                  {/* Row 1 */}
-                                  <div>
-                                    <strong className="custom-label">Parts:</strong>{" "}
-                                    {row.PartsName || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Material:</strong>{" "}
-                                    {row.MaterialName || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Damage:</strong>{" "}
-                                    {row.DamageKindName || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Level:</strong>{" "}
-                                    {row.DamageLevel || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Remarks:</strong>{" "}
-                                    {row.Remarks || "N/A"}
-                                  </div>
-                                  {/* <div>
-                                    <strong>Status:</strong>{" "}
-                                    {row.ApprovedFlag === 0
-                                      ? "Unapproved"
-                                      : row.ApprovedFlag || "N/A"}
-                                  </div> */}
-                                </div>
-
-                                {/* Photos Section */}
-                                {row.PhotoPaths &&
-                                  row.PhotoPaths.length > 0 && (
-                                    <div style={{ marginTop: "8px" }}>
-                                      <strong>Photos:</strong>
-                                      <div
-                                        style={{
-                                          display: "grid",
-                                          gridTemplateColumns:
-                                            "repeat(auto-fill, 80px)", // Dynamically fit images
-                                          gap: "6px", // Gap between photos
-                                          marginTop: "6px",
-                                        }}
-                                      >
-                                        {row.PhotoPaths.map(
-                                          (photo, photoIndex) => (
-                                            <img
-                                              key={photoIndex}
-                                              src={photo}
-                                              alt={`Photo ${photoIndex + 1}`}
-                                              style={{
-                                                width: "80px",
-                                                height: "80px",
-                                                objectFit: "cover",
-                                                borderRadius: "5px",
-                                              }}
-                                            />
-                                          )
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                {/* Edit Button */}
-                                <div style={{ marginTop: "8px" }}>
-                                  <Button
-                                    onClick={() => handleEditClick(row)}
+                                {row.PhotoPaths.map((photo, photoIndex) => (
+                                  <img
+                                    key={photoIndex}
+                                    src={photo}
+                                    alt={`Photo ${photoIndex + 1}`}
                                     style={{
-                                      backgroundColor: "#4CAF50",
-                                      border: "none",
-                                      color: "white",
+                                      width: "80px",
+                                      height: "80px",
+                                      objectFit: "cover",
+                                      borderRadius: "5px",
                                     }}
-                                  >
-                                    Edit
-                                  </Button>
-                                </div>
+                                  />
+                                ))}
                               </div>
-                            )
+                            </div>
                           )}
                         </div>
                       ))}
