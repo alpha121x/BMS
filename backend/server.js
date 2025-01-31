@@ -320,6 +320,41 @@ app.get("/api/bridgesdownload", async (req, res) => {
   }
 });
 
+// API Endpoint
+app.get("/api/bridgesdownloadNew", async (req, res) => {
+  try {
+    const query = `
+      SELECT md.uu_bms_id, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, 
+             md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, 
+             md.survey_chainage_start, md.survey_chainage_end, md.pms_sec_id, md.structure_no, md.surveyor_name, 
+             md.zone_id, md.zone, md.district_id, md.district, md.road_classification_id, md.road_classification, 
+             md.road_surface_type_id, md.road_surface_type, md.carriageway_type_id, md.carriageway_type,
+             md.direction, md.visual_condition, md.construction_type_id, md.construction_type, md.no_of_span, 
+             md.span_length_m, md.structure_width_m, md.construction_year, md.last_maintenance_date, 
+             md.data_source, md.date_time, md.remarks, f.surveyed_by, f."SpanIndex", f."WorkKindID", 
+             f."WorkKindName", f."PartsID", f."PartsName", f."MaterialID", f."MaterialName",
+             f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", f.damage_extent, 
+             f."Remarks", f.current_date_time, photopath
+      FROM bms.tbl_bms_master_data md
+      JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+      WHERE f.inspection_id IN (
+          SELECT inspection_id FROM (
+              SELECT DISTINCT ON (uu_bms_id, "SpanIndex", "WorkKindID") uu_bms_id, "SpanIndex", "WorkKindID", 
+                     inspection_id, current_date_time 
+              FROM bms.tbl_inspection_f 
+              ORDER BY uu_bms_id, "SpanIndex", "WorkKindID", current_date_time DESC
+          ) subquery
+      );
+    `;
+
+    const { rows } = await pool.query(query);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching bridge data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.get("/api/bridges", async (req, res) => {
   try {
     const {

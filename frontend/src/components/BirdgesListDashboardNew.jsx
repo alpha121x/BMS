@@ -234,7 +234,7 @@ const BridgesListDashboard = ({
 
       // Fetch the data from the API with the dynamically created query string
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownload?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadNew?${queryString}`,
         {
           method: "GET",
         }
@@ -283,7 +283,7 @@ const BridgesListDashboard = ({
 
       // Fetch the data from the API with the dynamically created query string
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownload?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadNew?${queryString}`,
         {
           method: "GET",
         }
