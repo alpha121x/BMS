@@ -14,6 +14,7 @@ const FilterComponent = ({
   setInspectionStatus,
   setMinYear,
   setMaxYear,
+  setBridge,
 }) => {
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
@@ -23,6 +24,8 @@ const FilterComponent = ({
   const [inspectionStatuses, setInspectionStatuses] = useState([]);
 
   const [districtId, setDistrictId] = useState("");
+  const [localBridgeId, setLocalBridgeId] = useState("");
+  const [bridgeId, setBridgeId] = useState("");
   const [minBridgeLength, setMinBridgeLengthState] = useState("");
   const [maxBridgeLength, setMaxBridgeLengthState] = useState("");
   const [minSpanLength, setMinSpanLengthState] = useState("");
@@ -47,13 +50,13 @@ const FilterComponent = ({
             district: district.district || district.name, // Handle different property names
           }))
         );
-  
+
         // Fetching structure types
         const structureTypeResponse = await fetch(
           `${BASE_URL}/api/structure-types`
         );
         const structureTypesData = await structureTypeResponse.json();
-  
+
         // Assuming the response now directly gives the array
         setStructureTypes(
           structureTypesData.map((type) => ({
@@ -61,13 +64,13 @@ const FilterComponent = ({
             name: type.structure_type || type.name, // Normalize the property name
           }))
         );
-  
+
         // Fetching construction types
         const constructionTypeResponse = await fetch(
           `${BASE_URL}/api/construction-types`
         );
         const constructionTypeData = await constructionTypeResponse.json();
-  
+
         // Assuming the response now directly gives the array
         setConstructionTypes(
           constructionTypeData.map((type) => ({
@@ -75,7 +78,7 @@ const FilterComponent = ({
             name: type.construction_type || type.name, // Normalize the property name
           }))
         );
-  
+
         // Fetching categories
         const categoryResponse = await fetch(`${BASE_URL}/api/categories`);
         const categoryData = await categoryResponse.json();
@@ -85,7 +88,7 @@ const FilterComponent = ({
             name: cat.category || cat.name, // Normalize the property name
           }))
         );
-  
+
         // Fetching evaluation statuses
         const evaluationStatusResponse = await fetch(
           `${BASE_URL}/api/evaluation-statuses`
@@ -97,7 +100,7 @@ const FilterComponent = ({
             name: status.evaluation_status || status.name, // Normalize the property name
           }))
         );
-  
+
         // Fetching inspection statuses
         const inspectionStatusResponse = await fetch(
           `${BASE_URL}/api/inspection-statuses`
@@ -113,10 +116,9 @@ const FilterComponent = ({
         console.error("Error fetching filters:", error);
       }
     };
-  
+
     fetchFilters();
   }, []);
-  
 
   // Handle handlers for various inputs
   const handleChange = (setter) => (e) => setter(e.target.value);
@@ -261,6 +263,29 @@ const FilterComponent = ({
         </select>
       </div>
 
+      {/* Bridge ID Filter */}
+      <div className="flex mb-4 space-x-4">
+        <div className="flex-1">
+          <label
+            htmlFor="bridge-id"
+            className="block text-gray-700 font-medium mb-1"
+          >
+            Bridge ID
+          </label>
+          <input
+            id="bridge-id"
+            type="text"
+            className="w-full border rounded-md p-2 bg-gray-100"
+            value={localBridgeId}
+            onChange={(e) => {
+              const value = e.target.value;
+              setLocalBridgeId(value);
+            }}
+            placeholder="Enter Bridge ID"
+          />
+        </div>
+      </div>
+
       {/* Min and Max Year Filters */}
       <div className="flex mb-4 space-x-4">
         <div className="flex-1">
@@ -379,6 +404,7 @@ const FilterComponent = ({
             setInspectionStatus(inspectionStatus);
             setMinYear(minYear);
             setMaxYear(maxYear);
+            setBridge(localBridgeId);
           }}
           className="bg-blue-500 text-white rounded-md px-4 py-2"
         >

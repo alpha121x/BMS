@@ -12,6 +12,7 @@ import MapModal from "./MapModal"; // Adjust the import path as needed
 
 const BridgesListDashboard = ({
   setSelectedDistrict,
+  setBridge,
   setMinBridgeLength,
   setMaxBridgeLength,
   setMinSpanLength,
@@ -36,6 +37,7 @@ const BridgesListDashboard = ({
   maxSpanLength,
   minYear,
   maxYear,
+  bridgeId,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -66,6 +68,7 @@ const BridgesListDashboard = ({
     maxSpanLength,
     minYear,
     maxYear,
+    bridgeId,
   ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -90,6 +93,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridgeId,
       };
 
       // console.log(params);
@@ -401,6 +405,7 @@ const BridgesListDashboard = ({
                   setInspectionStatus={setInspectionStatus}
                   setMinYear={setMinYear}
                   setMaxYear={setMaxYear}
+                  setBridge={setBridge}
                 />
               </div>
             </div>

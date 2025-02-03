@@ -25,6 +25,7 @@ const DashboardMain = () => {
   const [inspectionStatus, setInspectionStatus] = useState("");
   const [minYear, setMinYear] = useState("");
   const [maxYear, setMaxYear] = useState("");
+  const [bridgeId, setBridgeId] = useState(""); // New state for bridge id filter
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -196,6 +197,7 @@ const DashboardMain = () => {
             setInspectionStatus={setInspectionStatus}
             setMinYear={setMinYear}
             setMaxYear={setMaxYear}
+            setBridge={setBridgeId}  // Also set the bridge id filter
             district={selectedDistrict}
             structureType={structureType}
             constructionType={constructionType}
@@ -208,6 +210,7 @@ const DashboardMain = () => {
             maxSpanLength={maxSpanLength}
             minYear={minYear}
             maxYear={maxYear}
+            bridgeId={bridgeId}  // Also pass the current bridge id filter
           />
 
 

@@ -204,6 +204,7 @@ app.get("/api/bridgesdownload", async (req, res) => {
       maxSpanLength,
       minYear,
       maxYear,
+      bridgeId,
     } = req.query;
 
     let query = `
@@ -250,6 +251,14 @@ app.get("/api/bridgesdownload", async (req, res) => {
     if (district !== '%') {
       query += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
+      paramIndex++;
+    }
+
+    
+    // Filter by district
+    if (bridgeId !== '%') {
+      query += ` AND uu_bms_id = $${paramIndex}`;
+      queryParams.push(bridgeId);
       paramIndex++;
     }
 
@@ -369,6 +378,7 @@ app.get("/api/bridges", async (req, res) => {
       maxSpanLength,
       minYear,
       maxYear,
+      bridgeId,
     } = req.query;
 
     let query = `
@@ -423,6 +433,13 @@ app.get("/api/bridges", async (req, res) => {
       countQuery += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
       countParams.push(district);
+      paramIndex++;
+    }
+    if (bridgeId !== '%') {
+      query += ` AND uu_bms_id = $${paramIndex}`;
+      countQuery += ` AND uu_bms_id = $${paramIndex}`;
+      queryParams.push(bridgeId);
+      countParams.push(bridgeId);
       paramIndex++;
     }
     if (structureType) {
@@ -575,7 +592,6 @@ app.get("/api/get-inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 // Endpoint to update inspection data
 app.put("/api/update-inspection", async (req, res) => {
