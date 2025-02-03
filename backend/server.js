@@ -531,73 +531,37 @@ app.get("/api/inspections", async (req, res) => {
 });
 
 app.get("/api/get-inspections", async (req, res) => {
-  const { bridgeId } = req.query; // Only fetch bridgeId from query parameters
-
-  if (!bridgeId) {
-    return res.status(400).json({ error: "Bridge ID (ObjectID) is required." });
-  }
-
-  let query = `
-    SELECT 
-      o."ObjectID", 
-      o."CheckingID", 
-      o."SpanIndex",  
-      o."ApprovedFlag",
-      o."Remarks",
-      wk."WorkKindName", 
-      p."PartsName", 
-      m."MaterialName", 
-      dk."DamageKindName", 
-      CONCAT(b."pms_sec_id", '-', b."structure_no") AS "BridgeName", 
-      dl."DamageLevel",
-      COALESCE(ph.photos, ARRAY[]::text[]) AS "PhotoPaths"
-    FROM bms."tbl_checkings" o
-    LEFT JOIN bms."tbl_work_kinds" wk ON o."WorkKindID" = wk."WorkKindID"
-    LEFT JOIN bms."tbl_bms_master_data" b ON o."ObjectID" = b."uu_bms_id"
-    LEFT JOIN bms."tbl_parts" p ON o."PartsID" = p."PartsID"
-    LEFT JOIN bms."tbl_materials" m ON o."MaterialID" = m."MaterialID"
-    LEFT JOIN bms."tbl_damage_kinds" dk ON o."DamageKindID" = dk."DamageKindID"
-    LEFT JOIN bms."tbl_damage_levels" dl ON o."DamageLevelID" = dl."DamageLevelID"
-    LEFT JOIN (
-      SELECT 
-        "CheckingID", 
-        ARRAY_AGG("photopath") AS photos
-      FROM bms."tbl_checking_photos"
-      GROUP BY "CheckingID"
-    ) ph ON o."CheckingID" = ph."CheckingID"
-    WHERE o."ObjectID" = $1
-    GROUP BY 
-      o."ObjectID", 
-      o."CheckingID", 
-      o."SpanIndex", 
-      o."ApprovedFlag",  
-      o."Remarks", 
-      wk."WorkKindName", 
-      p."PartsName", 
-      m."MaterialName", 
-      dk."DamageKindName", 
-      b."pms_sec_id",
-      b."structure_no", 
-      dl."DamageLevel", 
-      ph.photos
-    ORDER BY o."CheckingID" ASC;
-  `;
-
   try {
-    const result = await pool.query(query, [bridgeId]);
+    const query = `
+      SELECT 
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths",  -- Ensure photopath is always a JSON array
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f;
+    `;
 
-    res.status(200).json({
-      success: true,
-      data: result.rows,
-    });
+    const { rows } = await pool.query(query);
+
+    // Process the rows to extract paths from the JSON array
+    const modifiedRows = rows.map(row => ({
+      ...row,
+      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map(p => p.path) : [],
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved"
+    }));
+
+    res.status(200).json({ success: true, data: modifiedRows });
   } catch (error) {
-    console.error("Error fetching inspections data:", error.message);
-    res.status(500).json({
-      error: "An error occurred while fetching inspections data.",
-    });
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 app.get("/api/structure-types", async (req, res) => {
   try {
