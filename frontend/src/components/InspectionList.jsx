@@ -4,10 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFileCsv,
-  faFileExcel,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 
 const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
@@ -31,8 +28,9 @@ const InspectionList = ({ bridgeId }) => {
         throw new Error("bridgeId is required");
       }
 
-      const response = await fetch(`${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`);
-
+      const response = await fetch(
+        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
+      );
 
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -53,7 +51,7 @@ const InspectionList = ({ bridgeId }) => {
   const handleUpdateInspection = async (row) => {
     try {
       console.log("Updating inspection", row);
-  
+
       // Prepare the updated row with ConsultantRemarks and approval status
       const updatedData = {
         id: row.inspection_id,
@@ -63,7 +61,7 @@ const InspectionList = ({ bridgeId }) => {
 
       console.log(updatedData);
       // return;
-  
+
       // Call the API to update the database
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
         method: "PUT",
@@ -72,44 +70,35 @@ const InspectionList = ({ bridgeId }) => {
         },
         body: JSON.stringify(updatedData),
       });
-  
+
       if (!response.ok) throw new Error("Failed to update inspection");
-  
+
       // Refetch data to reflect changes
       fetchData();
     } catch (error) {
       setError(error.message);
     }
   };
-  
 
   const handleConsultantRemarksChange = (row, value) => {
     // Clone the row and update the ConsultantRemarks field
     const updatedRow = { ...row, ConsultantRemarks: value };
-  
+
     // Update the table data without triggering a reload
     setTableData((prevData) =>
-      prevData.map((item) =>
-        item.id === row.id ? updatedRow : item
-      )
+      prevData.map((item) => (item.id === row.id ? updatedRow : item))
     );
   };
-  
 
   const handleApprovedFlagChange = (row, value) => {
     // Clone the row and update the approved_by_consultant field
     const updatedRow = { ...row, approved_by_consultant: value };
-  
+
     // Update the table data without triggering a reload
     setTableData((prevData) =>
-      prevData.map((item) =>
-        item.id === row.id ? updatedRow : item
-      )
+      prevData.map((item) => (item.id === row.id ? updatedRow : item))
     );
   };
-  
-  
-  
 
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
