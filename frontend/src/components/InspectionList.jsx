@@ -7,8 +7,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFileCsv,
   faFileExcel,
-  faPlusCircle,
-  faHistory,
 } from "@fortawesome/free-solid-svg-icons";
 
 const InspectionList = ({ bridgeId }) => {
@@ -16,7 +14,6 @@ const InspectionList = ({ bridgeId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [inspectionType, setInspectionType] = useState("new"); // "new" or "old"
 
   const itemsPerPage = 10;
 
@@ -24,7 +21,7 @@ const InspectionList = ({ bridgeId }) => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId, inspectionType]); // Refetch when inspectionType changes
+  }, [bridgeId]); // Refetch when inspectionType changes
 
   const fetchData = async () => {
     setLoading(true);
@@ -34,10 +31,8 @@ const InspectionList = ({ bridgeId }) => {
         throw new Error("bridgeId is required");
       }
 
-      const typeQuery = inspectionType === "new" ? "new" : "old";
-      const response = await fetch(
-        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}&type=${typeQuery}`
-      );
+      const response = await fetch(`${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`);
+
 
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -339,26 +334,6 @@ const InspectionList = ({ bridgeId }) => {
 
         {/* Toggle buttons for old and new inspections */}
         <div className="d-flex mb-3">
-          <Button
-            onClick={() => setInspectionType("new")}
-            style={{
-              backgroundColor: inspectionType === "new" ? "#3B82F6" : "#60A5FA",
-            }}
-            className="mr-2"
-          >
-            <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
-            New Inspections
-          </Button>
-          <Button
-            onClick={() => setInspectionType("old")}
-            style={{
-              backgroundColor: inspectionType === "old" ? "#3B82F6" : "#60A5FA",
-            }}
-            className="mr-2"
-          >
-            <FontAwesomeIcon icon={faHistory} className="mr-2" />
-            Old Inspections
-          </Button>
           <button
             className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
             onClick={() => handleDownloadCSV(tableData)}
