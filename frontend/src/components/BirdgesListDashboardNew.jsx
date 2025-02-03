@@ -231,6 +231,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridgeId,
       };
 
       // Prepare the query string from params
@@ -280,6 +281,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridgeId,
       };
 
       // Prepare the query string from params
