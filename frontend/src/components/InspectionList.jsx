@@ -57,6 +57,8 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleUpdateInspection = async (row) => {
     try {
+      // For testing: Show the data being sent in an alert and log it to the console
+      alert(`Data to be sent to the API:\n${JSON.stringify(row, null, 2)}`);
       console.log("Data to be sent to the API:", row);
 
       // Simulate a successful API response for testing
@@ -74,7 +76,7 @@ const InspectionList = ({ bridgeId }) => {
 
       // Simulate a successful update
       console.log("Inspection updated successfully!");
-      alert("Remarks added successfully!");
+      alert("Inspection updated successfully!");
 
       // Refetch data to reflect changes (simulated)
       fetchData();
@@ -427,19 +429,17 @@ const InspectionList = ({ bridgeId }) => {
                           key={index}
                           className="inspection-item"
                           style={{
-                            marginBottom: "12px",
-                            padding: "12px",
-                            border: "1px solid #ddd",
-                            borderRadius: "8px",
-                            backgroundColor: "#f9f9f9",
+                            marginBottom: "8px",
+                            borderBottom: "1px solid #ddd",
+                            paddingBottom: "8px",
                           }}
                         >
                           <div
                             style={{
                               display: "grid",
                               gridTemplateColumns: "repeat(4, 1fr)",
-                              gap: "12px",
-                              marginBottom: "12px",
+                              columnGap: "12px",
+                              rowGap: "8px",
                             }}
                           >
                             <div>
@@ -467,7 +467,7 @@ const InspectionList = ({ bridgeId }) => {
                           </div>
 
                           {/* Consultant Remarks */}
-                          <div style={{ marginBottom: "12px" }}>
+                          <div style={{ marginTop: "8px" }}>
                             <strong>Consultant Remarks:</strong>
                             <Form.Control
                               as="textarea"
@@ -482,72 +482,40 @@ const InspectionList = ({ bridgeId }) => {
                             />
                           </div>
 
-                          {/* Approval Status */}
-                          <div style={{ marginBottom: "12px" }}>
-                            <strong>Approval Status:</strong>
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "16px",
-                                marginTop: "6px",
-                              }}
+                          {/* Approved Flag Toggle */}
+                          <div style={{ marginTop: "8px" }}>
+                            <strong>Approved Status:</strong>
+                            <Form.Select
+                              value={row.ApprovedFlag || 0}
+                              onChange={(e) =>
+                                handleApprovedFlagChange(
+                                  row,
+                                  parseInt(e.target.value)
+                                )
+                              }
                             >
-                              <label
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "6px",
-                                }}
-                              >
-                                <input
-                                  type="radio"
-                                  name={`approval-${index}`}
-                                  value="1"
-                                  checked={row.ApprovedFlag === 1}
-                                  onChange={() =>
-                                    handleApprovedFlagChange(row, 1)
-                                  }
-                                />
-                                Approved
-                              </label>
-                              <label
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "6px",
-                                }}
-                              >
-                                <input
-                                  type="radio"
-                                  name={`approval-${index}`}
-                                  value="0"
-                                  checked={row.ApprovedFlag === 0}
-                                  onChange={() =>
-                                    handleApprovedFlagChange(row, 0)
-                                  }
-                                />
-                                Unapproved
-                              </label>
-                            </div>
+                              <option value={0}>Unapproved</option>
+                              <option value={1}>Approved</option>
+                            </Form.Select>
                           </div>
 
                           {/* Save Changes Button */}
-                          <Button
-                            onClick={() => handleSaveChanges(row)}
-                            style={{
-                              backgroundColor: "#4CAF50",
-                              border: "none",
-                              color: "white",
-                              padding: "6px 12px",
-                              borderRadius: "4px",
-                            }}
-                          >
-                            Save Changes
-                          </Button>
+                          <div style={{ marginTop: "8px" }}>
+                            <Button
+                              onClick={() => handleSaveChanges(row)}
+                              style={{
+                                backgroundColor: "#4CAF50",
+                                border: "none",
+                                color: "white",
+                              }}
+                            >
+                              Save Changes
+                            </Button>
+                          </div>
 
                           {/* Photos Section */}
                           {row.PhotoPaths && row.PhotoPaths.length > 0 && (
-                            <div style={{ marginTop: "12px" }}>
+                            <div style={{ marginTop: "8px" }}>
                               <strong>Photos:</strong>
                               <div
                                 style={{
