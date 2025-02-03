@@ -52,71 +52,64 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleUpdateInspection = async (row) => {
     try {
-      // For testing: Show the data being sent in an alert and log it to the console
-      alert(`Data to be sent to the API:\n${JSON.stringify(row, null, 2)}`);
-      console.log("Data to be sent to the API:", row);
-
-      // Simulate a successful API response for testing
-      const simulatedResponse = {
-        ok: true,
-        status: 200,
-        json: async () => ({ message: "Inspection updated successfully" }),
+      console.log("Updating inspection", row);
+  
+      // Prepare the updated row with ConsultantRemarks and approval status
+      const updatedData = {
+        id: row.inspection_id,
+        ConsultantRemarks: row.ConsultantRemarks,
+        approved_by_consultant: row.approved_by_consultant,
       };
 
-      // Simulate a delay to mimic network latency
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Simulate checking the response
-      if (!simulatedResponse.ok) throw new Error("Failed to update inspection");
-
-      // Simulate a successful update
-      console.log("Inspection updated successfully!");
-      alert("Inspection updated successfully!");
-
-      // Refetch data to reflect changes (simulated)
+      console.log(updatedData);
+      // return;
+  
+      // Call the API to update the database
+      const response = await fetch(`${BASE_URL}/api/update-inspection`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+  
+      if (!response.ok) throw new Error("Failed to update inspection");
+  
+      // Refetch data to reflect changes
       fetchData();
     } catch (error) {
-      // Simulate error handling
-      console.error("Error updating inspection:", error.message);
-      alert(`Error updating inspection: ${error.message}`);
       setError(error.message);
     }
   };
-
-  // const handleUpdateInspection = async (row) => {
-  //   try {
-  //     const response = await fetch(`${BASE_URL}/api/update-inspection`, {
-  //       method: "PUT",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(row),
-  //     });
-
-  //     if (!response.ok) throw new Error("Failed to update inspection");
-
-  //     // Refetch data to reflect changes
-  //     fetchData();
-  //   } catch (error) {
-  //     setError(error.message);
-  //   }
-  // };
+  
 
   const handleConsultantRemarksChange = (row, value) => {
+    // Clone the row and update the ConsultantRemarks field
     const updatedRow = { ...row, ConsultantRemarks: value };
-    const updatedData = tableData.map((item) =>
-      item.id === row.id ? updatedRow : item
+  
+    // Update the table data without triggering a reload
+    setTableData((prevData) =>
+      prevData.map((item) =>
+        item.id === row.id ? updatedRow : item
+      )
     );
-    setTableData(updatedData);
   };
+  
 
   const handleApprovedFlagChange = (row, value) => {
-    const updatedRow = { ...row, ApprovedFlag: value };
-    const updatedData = tableData.map((item) =>
-      item.id === row.id ? updatedRow : item
+    // Clone the row and update the approved_by_consultant field
+    const updatedRow = { ...row, approved_by_consultant: value };
+  
+    // Update the table data without triggering a reload
+    setTableData((prevData) =>
+      prevData.map((item) =>
+        item.id === row.id ? updatedRow : item
+      )
     );
-    setTableData(updatedData);
   };
+  
+  
+  
 
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
@@ -459,9 +452,9 @@ const InspectionList = ({ bridgeId }) => {
 
                           {/* Approved Flag Toggle */}
                           <div style={{ marginTop: "8px" }}>
-                            <strong>Approved Status:</strong>
+                            <strong>Consultant Approved Status:</strong>
                             <Form.Select
-                              value={row.ApprovedFlag || 0}
+                              value={row.approved_by_consultant || 0}
                               onChange={(e) =>
                                 handleApprovedFlagChange(
                                   row,

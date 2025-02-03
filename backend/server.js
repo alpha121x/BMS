@@ -1,8 +1,8 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+// const multer = require("multer");
+// const path = require("path");
+// const fs = require("fs");
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
@@ -532,8 +532,16 @@ app.get("/api/inspections", async (req, res) => {
 
 app.get("/api/get-inspections", async (req, res) => {
   try {
+    const { bridgeId } = req.query;  // Get uu_bms_id from query parameters
+
+    if (!bridgeId) {
+      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+    }
+
     const query = `
       SELECT 
+        uu_bms_id,
+        inspection_id,
         bridge_name, 
         "SpanIndex", 
         "WorkKindName", 
@@ -542,12 +550,17 @@ app.get("/api/get-inspections", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths",  -- Ensure photopath is always a JSON array
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
         "ApprovedFlag"
-      FROM bms.tbl_inspection_f;
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1;  -- Search based on uu_bms_id
     `;
 
-    const { rows } = await pool.query(query);
+    const { rows } = await pool.query(query, [bridgeId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Inspection not found" });
+    }
 
     // Process the rows to extract paths from the JSON array
     const modifiedRows = rows.map(row => ({
@@ -562,6 +575,59 @@ app.get("/api/get-inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+
+// Endpoint to update inspection data
+app.put("/api/update-inspection", async (req, res) => {
+  const { id, ConsultantRemarks, approved_by_consultant } = req.body;
+
+  if (!id || (ConsultantRemarks === undefined && approved_by_consultant === undefined)) {
+    return res.status(400).json({ error: "Invalid data" });
+  }
+
+  try {
+    // Prepare the query and values dynamically based on what was provided in the request
+    let query = "UPDATE bms.tbl_inspection_f SET";
+    const values = [];
+    let valueIndex = 1;
+
+    // Conditionally add the fields to update
+    if (ConsultantRemarks !== undefined) {
+      query += ` consultant_remarks = $${valueIndex},`;
+      values.push(ConsultantRemarks);
+      valueIndex++;
+    }
+
+    if (approved_by_consultant !== undefined) {
+      query += ` approved_by_consultant = $${valueIndex},`;
+      values.push(approved_by_consultant);
+      valueIndex++;
+    }
+
+    // Remove the trailing comma
+    query = query.slice(0, -1);
+
+    // Add the WHERE clause
+    query += ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
+    values.push(id);
+
+    // Execute the query to update the record
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Inspection not found" });
+    }
+
+    res.status(200).json({
+      message: "Inspection updated successfully",
+      updatedRow: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error updating inspection:", error);
+    res.status(500).json({ error: "Failed to update inspection" });
+  }
+});
+
 
 app.get("/api/structure-types", async (req, res) => {
   try {
@@ -774,50 +840,50 @@ app.get('/api/road-surface-types', async (req, res) => {
   }
 });
 
-// Set up multer to store uploaded files in a dynamically specified directory
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Get the directory path from the request body
-    const directoryPath = req.body.directoryPath;
+// // Set up multer to store uploaded files in a dynamically specified directory
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     // Get the directory path from the request body
+//     const directoryPath = req.body.directoryPath;
 
-    if (!directoryPath) {
-      return cb(new Error("No directory path specified."));
-    }
+//     if (!directoryPath) {
+//       return cb(new Error("No directory path specified."));
+//     }
 
-    // Make sure the directory exists, or create it
-    const fullPath = path.join(__dirname, directoryPath);
-    fs.mkdirSync(fullPath, { recursive: true });
+//     // Make sure the directory exists, or create it
+//     const fullPath = path.join(__dirname, directoryPath);
+//     fs.mkdirSync(fullPath, { recursive: true });
 
-    // Store the file in the specified directory
-    cb(null, fullPath);
-  },
-  filename: (req, file, cb) => {
-    // Create a unique filename using current timestamp and file extension
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
+//     // Store the file in the specified directory
+//     cb(null, fullPath);
+//   },
+//   filename: (req, file, cb) => {
+//     // Create a unique filename using current timestamp and file extension
+//     cb(null, Date.now() + path.extname(file.originalname));
+//   },
+// });
 
-// Set up multer upload middleware
-const upload = multer({ storage });
+// // Set up multer upload middleware
+// const upload = multer({ storage });
 
-// Route to handle file upload
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("No file uploaded.");
-  }
+// // Route to handle file upload
+// app.post("/api/upload", upload.single("file"), (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).send("No file uploaded.");
+//   }
 
-  // Get the directory path from the body and generate the image URL
-  const directoryPath = req.body.directoryPath;
-  const uploadedFileUrl = path
-    .join(directoryPath, req.file.filename)
-    .replace(/\\/g, "/");
+//   // Get the directory path from the body and generate the image URL
+//   const directoryPath = req.body.directoryPath;
+//   const uploadedFileUrl = path
+//     .join(directoryPath, req.file.filename)
+//     .replace(/\\/g, "/");
 
-  // Send back the image URL and filename
-  res.json({
-    imageUrl: `${uploadedFileUrl}`, // Return the full URL of the uploaded image
-    filename: req.file.filename, // Send back the filename to the frontend
-  });
-});
+//   // Send back the image URL and filename
+//   res.json({
+//     imageUrl: `${uploadedFileUrl}`, // Return the full URL of the uploaded image
+//     filename: req.file.filename, // Send back the filename to the frontend
+//   });
+// });
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
