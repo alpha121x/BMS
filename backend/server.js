@@ -562,6 +562,8 @@ app.get("/api/get-inspections", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
+        approved_by_consultant,
+        consultant_remarks,
         bridge_name, 
         "SpanIndex", 
         "WorkKindName", 
