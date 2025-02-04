@@ -5,6 +5,8 @@ import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import '@fancyapps/ui/dist/fancybox/fancybox.css'; // Try this if `styles` path doesn't work
+import { Fancybox } from "@fancyapps/ui";
 
 const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
@@ -19,6 +21,14 @@ const InspectionList = ({ bridgeId }) => {
       fetchData();
     }
   }, [bridgeId]); // Refetch when inspectionType changes
+
+  useEffect(() => {
+    Fancybox.bind("[data-fancybox='gallery']", {});
+    
+    // Cleanup Fancybox when the component unmounts
+    return () => Fancybox.destroy();
+  }, []);
+  
 
   const fetchData = async () => {
     setLoading(true);
@@ -424,7 +434,7 @@ const InspectionList = ({ bridgeId }) => {
                             </div>
                             <div>
                               <strong className="custom-label">
-                                Consultant Remarks: 
+                                Consultant Remarks:
                               </strong>
                               <Form.Control
                                 as="textarea"
@@ -486,17 +496,25 @@ const InspectionList = ({ bridgeId }) => {
                                 }}
                               >
                                 {row.PhotoPaths.map((photo, photoIndex) => (
-                                  <img
+                                  <a
                                     key={photoIndex}
-                                    src={photo}
-                                    alt={`Photo ${photoIndex + 1}`}
-                                    style={{
-                                      width: "80px",
-                                      height: "80px",
-                                      objectFit: "cover",
-                                      borderRadius: "5px",
-                                    }}
-                                  />
+                                    href={photo} // Full image link
+                                    data-fancybox="gallery" // Enables lightbox functionality
+                                    data-caption={`Photo ${photoIndex + 1}`}
+                                  >
+                                    <img
+                                      src={photo}
+                                      alt={`Photo ${photoIndex + 1}`}
+                                      style={{
+                                        width: "80px",
+                                        height: "80px",
+                                        objectFit: "cover",
+                                        borderRadius: "5px",
+                                        cursor: "pointer",
+                                        border: "1px solid gray",
+                                      }}
+                                    />
+                                  </a>
                                 ))}
                               </div>
                             </div>
