@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Button, Row, Col, Form, Modal } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import { BASE_URL } from "./config";
+import '@fancyapps/ui/dist/fancybox/fancybox.css'; // Try this if `styles` path doesn't work
+import { Fancybox } from "@fancyapps/ui";
+
 
 const EditBridgeForm = () => {
   const [bridgeData, setBridgeData] = useState(null);
@@ -36,6 +39,13 @@ const EditBridgeForm = () => {
   }, [serializedData]);
 
   // console.log(bridgeData);
+
+    useEffect(() => {
+      Fancybox.bind("[data-fancybox='gallery']", {});
+      
+      // Cleanup Fancybox when the component unmounts
+      return () => Fancybox.destroy();
+    }, []);
 
   useEffect(() => {
     const fetchDropdownOptions = async () => {
@@ -559,28 +569,6 @@ const EditBridgeForm = () => {
           </Form>
         </div>
       </div>
-
-      {/* Photo Modal */}
-      <Modal
-        show={showPhotoModal}
-        onHide={() => setShowPhotoModal(false)}
-        centered
-        dialogClassName="modal-dialog-scrollable"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Photo Preview</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="text-center">
-          {selectedPhoto && (
-            <img
-              src={`${selectedPhoto}`}
-              alt="Selected Photo"
-              className="img-fluid"
-              style={{ maxHeight: "400px", objectFit: "contain" }}
-            />
-          )}
-        </Modal.Body>
-      </Modal>
     </div>
   );
 };
