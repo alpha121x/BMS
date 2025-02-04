@@ -35,6 +35,7 @@ const InspectionList = ({ bridgeId }) => {
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
+      console.log(result);
 
       if (Array.isArray(result.data)) {
         setTableData(result.data);
@@ -165,11 +166,11 @@ const InspectionList = ({ bridgeId }) => {
     XLSX.writeFile(wb, `${bridgename}.xlsx`);
   };
 
-  const handleEditClick = (row) => {
-    const serializedRow = encodeURIComponent(JSON.stringify(row));
-    const editUrl = `/EditInspectionNew?data=${serializedRow}`;
-    window.location.href = editUrl;
-  };
+  // const handleEditClick = (row) => {
+  //   const serializedRow = encodeURIComponent(JSON.stringify(row));
+  //   const editUrl = `/EditInspectionNew?data=${serializedRow}`;
+  //   window.location.href = editUrl;
+  // };
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
   const currentData = tableData.slice(
@@ -421,53 +422,54 @@ const InspectionList = ({ bridgeId }) => {
                               <strong className="custom-label">Remarks:</strong>{" "}
                               {row.Remarks || "N/A"}
                             </div>
-                          </div>
+                            <div>
+                              <strong className="custom-label">
+                                Consultant Remarks:
+                              </strong>
+                              <Form.Control
+                                as="textarea"
+                                rows={2}
+                                value={row.ConsultantRemarks || ""}
+                                onChange={(e) =>
+                                  handleConsultantRemarksChange(
+                                    row,
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            </div>
 
-                          {/* Consultant Remarks */}
-                          <div style={{ marginTop: "8px" }}>
-                            <strong>Consultant Remarks:</strong>
-                            <Form.Control
-                              as="textarea"
-                              rows={2}
-                              value={row.ConsultantRemarks || ""}
-                              onChange={(e) =>
-                                handleConsultantRemarksChange(
-                                  row,
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </div>
-
-                          {/* Approved Flag Toggle */}
-                          <div style={{ marginTop: "8px" }}>
-                            <strong>Consultant Approved Status:</strong>
-                            <Form.Select
-                              value={row.approved_by_consultant || 0}
-                              onChange={(e) =>
-                                handleApprovedFlagChange(
-                                  row,
-                                  parseInt(e.target.value)
-                                )
-                              }
-                            >
-                              <option value={0}>Unapproved</option>
-                              <option value={1}>Approved</option>
-                            </Form.Select>
-                          </div>
-
-                          {/* Save Changes Button */}
-                          <div style={{ marginTop: "8px" }}>
-                            <Button
-                              onClick={() => handleSaveChanges(row)}
-                              style={{
-                                backgroundColor: "#4CAF50",
-                                border: "none",
-                                color: "white",
-                              }}
-                            >
-                              Save Changes
-                            </Button>
+                            {/* Approved Flag Toggle */}
+                            <div>
+                              <strong className="custom-label">
+                                Consultant Approval Status:
+                              </strong>
+                              <Form.Select
+                                value={row.approved_by_consultant || 0}
+                                onChange={(e) =>
+                                  handleApprovedFlagChange(
+                                    row,
+                                    parseInt(e.target.value)
+                                  )
+                                }
+                              >
+                                <option value={0}>Unapproved</option>
+                                <option value={1}>Approved</option>
+                              </Form.Select>
+                            </div>
+                            {/* Save Changes Button */}
+                            <div>
+                              <Button
+                                onClick={() => handleSaveChanges(row)}
+                                style={{
+                                  backgroundColor: "#4CAF50",
+                                  border: "none",
+                                  color: "white",
+                                }}
+                              >
+                                Save Changes
+                              </Button>
+                            </div>
                           </div>
 
                           {/* Photos Section */}
