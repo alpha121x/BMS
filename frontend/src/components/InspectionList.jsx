@@ -424,7 +424,7 @@ const InspectionList = ({ bridgeId }) => {
                             </div>
                             <div>
                               <strong className="custom-label">
-                                Consultant Remarks:
+                                Consultant Remarks: 
                               </strong>
                               <Form.Control
                                 as="textarea"
