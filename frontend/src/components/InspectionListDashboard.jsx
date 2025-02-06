@@ -355,32 +355,33 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        {/* Toggle buttons for old and new inspections */}
-        <div className="d-flex mb-3">
+        <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
             className="card-title text-lg font-semibold pb-2"
             style={{ fontSize: "1.25rem" }}
           >
             Condition Assessment Reports
           </h6>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
-            onClick={() => handleDownloadCSV(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-            CSV
-          </button>
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-            onClick={() => handleDownloadExcel(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-            Excel
-          </button>
+          <div className="d-flex gap-3">
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+              onClick={() => handleDownloadCSV(inspectiondata)}
+            >
+              <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+              CSV
+            </button>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+              onClick={() => handleDownloadExcel(inspectiondata)}
+            >
+              <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+              Excel
+            </button>
+          </div>
         </div>
 
         <div className="summary-section mt-1 mb-2">
-          <table className="min-w-full table-auto border-collapse border border-gray-200">
+          <table className="min-w-full bg-gray-300 table-auto border-collapse border border-gray-200">
             <tbody>
               {/* Unique Span Indices */}
               <tr>
@@ -450,125 +451,107 @@ const InspectionList = ({ bridgeId }) => {
             }}
           />
         )}
+  <div className="inspection-cards-container">
+  {Object.keys(groupedData).map((spanIndex) => (
+    <div key={spanIndex} className="card mb-4">
+      <div className="card-header bg-light py-2">
+        <h5>{`Span No: ${spanIndex}`}</h5>
+      </div>
 
-        <div className="inspection-cards-container">
-          {Object.keys(groupedData).map((spanIndex) => (
-            <div key={spanIndex} className="card mb-4">
-              {/* Header: Span Number */}
-              <div className="card-header bg-light py-2">
-                <h5>{`Span No: ${spanIndex}`}</h5>
-              </div>
+      {groupedData[spanIndex] &&
+        Object.keys(groupedData[spanIndex]).map((workKind) => (
+          <div key={workKind} className="card mb-4 border shadow-sm">
+            <div className="card-header bg-primary text-white fw-bold">
+              {workKind}
+            </div>
 
-              {/* Mapping Work Kinds */}
-              {groupedData[spanIndex] &&
-                Object.keys(groupedData[spanIndex]).map((workKind) => (
-                  <div key={workKind} className="card mb-4 border shadow-sm">
-                    {/* Header: Work Kind */}
-                    <div className="card-header bg-primary text-white fw-bold">
-                      {workKind}
-                    </div>
-
-                    {/* Body: Mapping Inspections */}
-                    <div className="card-body bg-light p-3">
-                      {groupedData[spanIndex][workKind] &&
-                        groupedData[spanIndex][workKind].map((inspection) => (
-                          <div
-                            key={inspection.id}
-                            className="mb-4 p-4 border rounded shadow-sm"
-                            style={{ backgroundColor: "#f8f9fa" }}
-                          >
-                            <div className="row">
-                              {/* Left: Photos */}
-                              <div className="col-md-3">
-                                {inspection.PhotoPaths?.length > 0 && (
-                                  <div className="d-flex flex-wrap gap-2">
-                                    {inspection.PhotoPaths.map((photo, i) => (
-                                      <a
-                                        key={i}
-                                        href={photo}
-                                        data-fancybox="gallery"
-                                        data-caption={`Photo ${i + 1}`}
-                                      >
-                                        <img
-                                          src={photo}
-                                          alt={`Photo ${i + 1}`}
-                                          className="img-fluid rounded border"
-                                          style={{
-                                            width: "80px",
-                                            height: "80px",
-                                            objectFit: "cover",
-                                          }}
-                                        />
-                                      </a>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Right: Details */}
-                              <div className="col-md-6">
-                                <strong>Parts:</strong>{" "}
-                                {inspection.PartsName || "N/A"} <br />
-                                <strong>Material:</strong>{" "}
-                                {inspection.MaterialName || "N/A"} <br />
-                                <strong>Damage:</strong>{" "}
-                                {inspection.DamageKindName || "N/A"} <br />
-                                <strong>Level:</strong>{" "}
-                                {inspection.DamageLevel || "N/A"} <br />
-                                <strong>Situation Remarks:</strong>{" "}
-                                {inspection.Remarks || "N/A"}
-                              </div>
-
-                              {/* Footer: Consultant Remarks, Approval & Save Button */}
-                              <div className="col-md-3 d-flex flex-column justify-content-between">
-                                {/* Consultant Remarks Input */}
-                                <Form.Control
-                                  as="input"
-                                  type="text"
-                                  placeholder="Consultant Remarks"
-                                  value={inspection.consultant_remarks || ""}
-                                  onChange={(e) =>
-                                    handleConsultantRemarksChange(
-                                      inspection,
-                                      e.target.value
-                                    )
-                                  }
-                                  className="mb-2"
+            <div className="card-body p-3">
+              {groupedData[spanIndex][workKind] &&
+                groupedData[spanIndex][workKind].map((inspection) => (
+                  <div
+                    key={inspection.id}
+                    className="mb-4 p-4 border rounded shadow-sm"
+                    style={{ backgroundColor: "#CFE2FF" }}
+                  >
+                    <div className="row">
+                      {/* Photos Column - Reduced width */}
+                      <div className="col-md-3">
+                        {inspection.PhotoPaths?.length > 0 && (
+                          <div className="d-flex flex-wrap gap-2">
+                            {inspection.PhotoPaths.map((photo, i) => (
+                              <a
+                                key={i}
+                                href={photo}
+                                data-fancybox="gallery"
+                                data-caption={`Photo ${i + 1}`}
+                              >
+                                <img
+                                  src={photo}
+                                  alt={`Photo ${i + 1}`}
+                                  className="img-fluid rounded border"
+                                  style={{
+                                    width: "80px",
+                                    height: "80px",
+                                    objectFit: "cover",
+                                  }}
                                 />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-                                {/* Approval Status Dropdown */}
-                                <Form.Select
-                                  value={inspection.approved_by_consultant || 0}
-                                  onChange={(e) =>
-                                    handleApprovedFlagChange(
-                                      inspection,
-                                      parseInt(e.target.value)
-                                    )
-                                  }
-                                  className="mb-2"
-                                >
-                                  <option value={0}>Unapproved</option>
-                                  <option value={1}>Approved</option>
-                                </Form.Select>
-
-                                {/* Save Changes Button */}
-                                <Button
-                                  onClick={() => handleSaveChanges(inspection)}
-                                  className="btn-success"
-                                >
-                                  Save Changes
-                                </Button>
+                      {/* Details Column - Split into 2 columns */}
+                      <div className="col-md-9">
+                        <div className="row g-3">
+                          {/* Left Column Details */}
+                          <div className="col-md-6">
+                            <div className="d-flex flex-column gap-2">
+                              <div>
+                                <strong>Parts:</strong>{" "}
+                                {inspection.PartsName || "N/A"}
+                              </div>
+                              <div>
+                                <strong>Material:</strong>{" "}
+                                {inspection.MaterialName || "N/A"}
                               </div>
                             </div>
                           </div>
-                        ))}
+
+                          {/* Right Column Details */}
+                          <div className="col-md-6">
+                            <div className="d-flex flex-column gap-2">
+                              <div>
+                                <strong>Damage:</strong>{" "}
+                                {inspection.DamageKindName || "N/A"}
+                              </div>
+                              <div>
+                                <strong>Level:</strong>{" "}
+                                {inspection.DamageLevel || "N/A"}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Full-width Remarks */}
+                          <div className="col-12">
+                            <div className="mt-2">
+                              <strong>Situation Remarks:</strong>{" "}
+                              <span className="text-muted">
+                                {inspection.Remarks || "N/A"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
             </div>
-          ))}
-        </div>
-
+          </div>
+        ))}
+    </div>
+  ))}
+</div>
         <div className="d-flex justify-content-between">
           <div className="text-sm text-gray-500">
             Showing {currentData.length} of {tableData.length} inspections

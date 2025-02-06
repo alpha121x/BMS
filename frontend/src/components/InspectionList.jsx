@@ -245,7 +245,6 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        {/* Toggle buttons for old and new inspections */}
         <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
             className="card-title text-lg font-semibold pb-2"
@@ -272,7 +271,7 @@ const InspectionList = ({ bridgeId }) => {
         </div>
 
         <div className="summary-section mt-1 mb-2">
-          <table className="min-w-full table-auto border-collapse border border-gray-200">
+          <table className="min-w-full bg-gray-300 table-auto border-collapse border border-gray-200">
             <tbody>
               {/* Unique Span Indices */}
               <tr>
