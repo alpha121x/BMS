@@ -6,7 +6,7 @@ import {
 } from "@heroicons/react/24/outline";
 import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
-import InventoryInfo from "./InventoryInfoDashboard";
+import InventoryInfo from "./InventoryInfo";
 import { useLocation, useNavigate } from "react-router-dom";
 import InspectionList from "./InspectionList";
 import InspectionListRams from "./InspectionListRams";
