@@ -5,7 +5,7 @@ import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
-import '@fancyapps/ui/dist/fancybox/fancybox.css'; // Try this if `styles` path doesn't work
+import "@fancyapps/ui/dist/fancybox/fancybox.css"; // Try this if `styles` path doesn't work
 import { Fancybox } from "@fancyapps/ui";
 
 const InspectionList = ({ bridgeId }) => {
@@ -24,11 +24,10 @@ const InspectionList = ({ bridgeId }) => {
 
   useEffect(() => {
     Fancybox.bind("[data-fancybox='gallery']", {});
-    
+
     // Cleanup Fancybox when the component unmounts
     return () => Fancybox.destroy();
   }, []);
-  
 
   const fetchData = async () => {
     setLoading(true);
@@ -63,15 +62,18 @@ const InspectionList = ({ bridgeId }) => {
     try {
       console.log("Updating inspection", row);
 
+      // Allow empty remarks (send as null if empty)
+      const consultantRemarks =
+        row.ConsultantRemarks?.trim() === "" ? null : row.ConsultantRemarks;
+
       // Prepare the updated row with ConsultantRemarks and approval status
       const updatedData = {
         id: row.inspection_id,
-        ConsultantRemarks: row.ConsultantRemarks,
+        ConsultantRemarks: consultantRemarks, // Can be empty (null)
         approved_by_consultant: row.approved_by_consultant,
       };
 
       console.log(updatedData);
-      // return;
 
       // Call the API to update the database
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
@@ -174,6 +176,41 @@ const InspectionList = ({ bridgeId }) => {
 
     // Generate and download the Excel file
     XLSX.writeFile(wb, `${bridgename}.xlsx`);
+  };
+
+  const getDamageLevel = (data) => {
+    const damageLevels = [...new Set(data.map((item) => item.DamageLevel))]; // Get unique damage levels
+    return damageLevels.join(", "); // Join levels with commas
+  };
+
+  const getMaterials = (data) => {
+    const materials = [...new Set(data.map((item) => item.MaterialName))]; // Get unique materials
+    return materials.join(", "); // Join materials with commas
+  };
+
+  const getWorkKind = (data) => {
+    const workKinds = [...new Set(data.map((item) => item.WorkKindName))]; // Get unique work kinds
+    return workKinds.join(", "); // Join work kinds with commas
+  };
+
+  const getApprovalStatus = (data) => {
+    const approved = data.filter(
+      (item) => item.approved_by_consultant === "1"
+    ).length;
+    const unapproved = data.filter(
+      (item) => item.approved_by_consultant === "0" || "null"
+    ).length;
+    return `Approved: ${approved}, Unapproved: ${unapproved}`;
+  };
+
+  const getUniqueSpanIndices = (data) => {
+    // Extracting all SpanIndex values from the data
+    const spanIndices = data.map((item) => item.SpanIndex);
+
+    // Using Set to filter out duplicates and get unique values
+    const uniqueSpanIndices = [...new Set(spanIndices)];
+
+    return uniqueSpanIndices.length; // Return the count of unique span indices
   };
 
   // const handleEditClick = (row) => {
@@ -325,6 +362,49 @@ const InspectionList = ({ bridgeId }) => {
           Condition Assessment Reports
         </h6>
 
+        <div className="summary-section mt-1 mb-2">
+          <table className="min-w-full table-auto border-collapse border border-gray-200">
+            <tbody>
+              {/* Total Number of Spans */}
+              {/* Unique Span Indices */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Spans:</strong>
+                </td>
+                <td className="border px-4 py-2">
+                  {getUniqueSpanIndices(tableData)}
+                </td>
+              </tr>
+
+              {/* Materials Used */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Materials Used:</strong>
+                </td>
+                <td className="border px-4 py-2">{getMaterials(tableData)}</td>
+              </tr>
+
+              {/* Work Kind */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Work Kind:</strong>
+                </td>
+                <td className="border px-4 py-2">{getWorkKind(tableData)}</td>
+              </tr>
+
+              {/* Condition Status */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Consultant Approval Status:</strong>
+                </td>
+                <td className="border px-4 py-2">
+                  {getApprovalStatus(tableData)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         {/* Toggle buttons for old and new inspections */}
         <div className="d-flex mb-3">
           <button
@@ -374,7 +454,7 @@ const InspectionList = ({ bridgeId }) => {
                 className="card-header"
                 style={{ backgroundColor: "#f5f5f5", padding: "10px" }}
               >
-                <h5>{`Span Index: ${spanIndex}`}</h5>
+                <h5>{`Span No: ${spanIndex}`}</h5>
               </div>
               <div className="card">
                 <div className="card-body">

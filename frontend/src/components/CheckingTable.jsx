@@ -78,7 +78,7 @@ const CheckingTable = () => {
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
     link.target = "_blank";
-    link.download = `${bridgeName}.csv`; // File name
+    link.download = `Inspections.csv`; // File name
     link.click();
   };
 

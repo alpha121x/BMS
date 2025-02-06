@@ -602,12 +602,12 @@ app.get("/api/get-inspections", async (req, res) => {
 app.put("/api/update-inspection", async (req, res) => {
   const { id, ConsultantRemarks, approved_by_consultant } = req.body;
 
-  if (!id || (ConsultantRemarks === undefined && approved_by_consultant === undefined)) {
-    return res.status(400).json({ error: "Invalid data" });
+  if (!id) {
+    return res.status(400).json({ error: "Invalid data: ID is required" });
   }
 
   try {
-    // Prepare the query and values dynamically based on what was provided in the request
+    // Prepare the query and values dynamically based on provided fields
     let query = "UPDATE bms.tbl_inspection_f SET";
     const values = [];
     let valueIndex = 1;
@@ -615,7 +615,7 @@ app.put("/api/update-inspection", async (req, res) => {
     // Conditionally add the fields to update
     if (ConsultantRemarks !== undefined) {
       query += ` consultant_remarks = $${valueIndex},`;
-      values.push(ConsultantRemarks);
+      values.push(ConsultantRemarks === null ? null : ConsultantRemarks);
       valueIndex++;
     }
 
@@ -625,11 +625,13 @@ app.put("/api/update-inspection", async (req, res) => {
       valueIndex++;
     }
 
-    // Remove the trailing comma
-    query = query.slice(0, -1);
+    // If no fields to update, return an error
+    if (values.length === 0) {
+      return res.status(400).json({ error: "No fields provided for update" });
+    }
 
-    // Add the WHERE clause
-    query += ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
+    // Remove the trailing comma and add the WHERE clause
+    query = query.slice(0, -1) + ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
     values.push(id);
 
     // Execute the query to update the record
@@ -648,6 +650,7 @@ app.put("/api/update-inspection", async (req, res) => {
     res.status(500).json({ error: "Failed to update inspection" });
   }
 });
+
 
 
 app.get("/api/structure-types", async (req, res) => {
