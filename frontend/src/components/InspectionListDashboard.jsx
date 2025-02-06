@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Form } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
@@ -9,12 +9,9 @@ import "@fancyapps/ui/dist/fancybox/fancybox.css"; // Try this if `styles` path 
 import { Fancybox } from "@fancyapps/ui";
 
 const InspectionList = ({ bridgeId }) => {
-  const [tableData, setTableData] = useState([]);
+  const [inspectionData, setInspectionData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const itemsPerPage = 10;
 
   useEffect(() => {
     if (bridgeId) {
@@ -46,7 +43,7 @@ const InspectionList = ({ bridgeId }) => {
       const result = await response.json();
 
       if (Array.isArray(result.data)) {
-        setTableData(result.data);
+        setInspectionData(result.data);
       } else {
         throw new Error("Invalid data format");
       }
@@ -57,77 +54,17 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleUpdateInspection = async (row) => {
-    try {
-      console.log("Updating inspection", row);
-
-      // Allow empty remarks (send as null if empty)
-      const consultantRemarks =
-        row.consultant_remarks?.trim() === "" ? null : row.consultant_remarks;
-
-      // Prepare the updated row with ConsultantRemarks and approval status
-      const updatedData = {
-        id: row.inspection_id,
-        consultantRemarks: consultantRemarks, // Can be empty (null)
-        approved_by_consultant: row.approved_by_consultant,
-      };
-
-      console.log(updatedData);
-      // return;
-
-      // Call the API to update the database
-      const response = await fetch(`${BASE_URL}/api/update-inspection`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
-
-      if (!response.ok) throw new Error("Failed to update inspection");
-
-      // Refetch data to reflect changes
-      fetchData();
-    } catch (error) {
-      setError(error.message);
-    }
-  };
-
-  const handleConsultantRemarksChange = (row, value) => {
-    // Clone the row and update the ConsultantRemarks field
-    const updatedRow = { ...row, consultant_remarks: value };
-
-    // Update the table data without triggering a reload
-    setTableData((prevData) =>
-      prevData.map((item) => (item.id === row.id ? updatedRow : item))
-    );
-  };
-
-  const handleApprovedFlagChange = (row, value) => {
-    // Clone the row and update the approved_by_consultant field
-    const updatedRow = { ...row, approved_by_consultant: value };
-
-    // Update the table data without triggering a reload
-    setTableData((prevData) =>
-      prevData.map((item) => (item.id === row.id ? updatedRow : item))
-    );
-  };
-
-  const handleSaveChanges = (row) => {
-    handleUpdateInspection(row);
-  };
-
-  const handleDownloadCSV = (tableData) => {
-    if (!Array.isArray(tableData) || tableData.length === 0) {
+  const handleDownloadCSV = (inspectionData) => {
+    if (!Array.isArray(inspectionData) || inspectionData.length === 0) {
       console.error("No data to export");
       return;
     }
 
-    // Extract BridgeName from the first row of tableData
-    const bridgename = tableData[0].BridgeName;
+    // Extract BridgeName from the first row of inspectionData
+    const bridgename = inspectionData[0].BridgeName;
 
     // Prepare CSV rows without adding the extra "image" column
-    const csvRows = tableData.map((row) => {
+    const csvRows = inspectionData.map((row) => {
       const { imageUrl, ...rest } = row; // Exclude imageUrl if it exists
       return rest; // Return the remaining properties
     });
@@ -148,16 +85,16 @@ const InspectionList = ({ bridgeId }) => {
     document.body.removeChild(link);
   };
 
-  const handleDownloadExcel = (tableData) => {
-    if (!Array.isArray(tableData) || tableData.length === 0) {
+  const handleDownloadExcel = (inspectionData) => {
+    if (!Array.isArray(inspectionData) || inspectionData.length === 0) {
       console.error("No data to export");
       return;
     }
 
-    const bridgename = tableData[0].BridgeName;
+    const bridgename = inspectionData[0].BridgeName;
 
     // Ensure all rows have a valid value for 'PhotoPaths'
-    tableData.forEach((row) => {
+    inspectionData.forEach((row) => {
       if (Array.isArray(row.PhotoPaths)) {
         // Convert array to JSON string
         row.PhotoPaths = JSON.stringify(row.PhotoPaths) || "No image path";
@@ -167,7 +104,7 @@ const InspectionList = ({ bridgeId }) => {
     });
 
     // Create a worksheet from the table data
-    const ws = XLSX.utils.json_to_sheet(tableData);
+    const ws = XLSX.utils.json_to_sheet(inspectionData);
 
     // Create a new workbook and append the worksheet
     const wb = XLSX.utils.book_new();
@@ -213,121 +150,8 @@ const InspectionList = ({ bridgeId }) => {
     return uniqueSpanIndices.length; // Return the count of unique span indices
   };
 
-  // const handleEditClick = (row) => {
-  //   const serializedRow = encodeURIComponent(JSON.stringify(row));
-  //   const editUrl = `/EditInspectionNew?data=${serializedRow}`;
-  //   window.location.href = editUrl;
-  // };
-
-  const totalPages = Math.ceil(tableData.length / itemsPerPage);
-  const currentData = tableData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const buttonStyles = {
-    margin: "0 6px",
-    padding: "4px 8px",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "12px",
-    cursor: "pointer",
-  };
-
-  const renderPaginationButtons = () => {
-    const buttons = [];
-    buttons.push(
-      <Button
-        onClick={handlePrevPage}
-        disabled={currentPage === 1}
-        key="prev"
-        style={buttonStyles}
-      >
-        «
-      </Button>
-    );
-
-    buttons.push(
-      <Button
-        key="1"
-        onClick={() => handlePageChange(1)}
-        style={{
-          ...buttonStyles,
-          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA",
-        }}
-      >
-        1
-      </Button>
-    );
-
-    const pageRange = 3;
-    let startPage = Math.max(currentPage - pageRange, 2);
-    let endPage = Math.min(currentPage + pageRange, totalPages - 1);
-
-    if (totalPages <= 7) {
-      startPage = 2;
-      endPage = totalPages - 1;
-    }
-
-    for (let page = startPage; page <= endPage; page++) {
-      buttons.push(
-        <Button
-          key={page}
-          onClick={() => handlePageChange(page)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {page}
-        </Button>
-      );
-    }
-
-    if (totalPages > 1) {
-      buttons.push(
-        <Button
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    buttons.push(
-      <Button
-        onClick={handleNextPage}
-        disabled={currentPage === totalPages}
-        key="next"
-        style={buttonStyles}
-      >
-        »
-      </Button>
-    );
-
-    return buttons;
-  };
-
   // Group the inspection data by SpanIndex and then by WorkKind
-  const groupedData = currentData.reduce((acc, row) => {
+  const groupedData = inspectionData.reduce((acc, row) => {
     const spanKey = row.SpanIndex || "N/A";
     const workKindKey = row.WorkKindName || "N/A";
 
@@ -389,7 +213,7 @@ const InspectionList = ({ bridgeId }) => {
                   <strong>Spans:</strong>
                 </td>
                 <td className="border px-4 py-2">
-                  {getUniqueSpanIndices(tableData)}
+                  {getUniqueSpanIndices(inspectionData)}
                 </td>
               </tr>
 
@@ -399,7 +223,7 @@ const InspectionList = ({ bridgeId }) => {
                   <strong>Damage Levels:</strong>
                 </td>
                 <td className="border px-4 py-2">
-                  {getDamageLevel(tableData)}
+                  {getDamageLevel(inspectionData)}
                 </td>
               </tr>
 
@@ -408,7 +232,7 @@ const InspectionList = ({ bridgeId }) => {
                 <td className="border px-4 py-2">
                   <strong>Materials Used:</strong>
                 </td>
-                <td className="border px-4 py-2">{getMaterials(tableData)}</td>
+                <td className="border px-4 py-2">{getMaterials(inspectionData)}</td>
               </tr>
 
               {/* Work Kind */}
@@ -416,7 +240,7 @@ const InspectionList = ({ bridgeId }) => {
                 <td className="border px-4 py-2">
                   <strong>Work Kind:</strong>
                 </td>
-                <td className="border px-4 py-2">{getWorkKind(tableData)}</td>
+                <td className="border px-4 py-2">{getWorkKind(inspectionData)}</td>
               </tr>
 
               {/* Condition Status */}
@@ -425,7 +249,7 @@ const InspectionList = ({ bridgeId }) => {
                   <strong>Consultant Approval Status:</strong>
                 </td>
                 <td className="border px-4 py-2">
-                  {getApprovalStatus(tableData)}
+                  {getApprovalStatus(inspectionData)}
                 </td>
               </tr>
             </tbody>
@@ -451,114 +275,106 @@ const InspectionList = ({ bridgeId }) => {
             }}
           />
         )}
-  <div className="inspection-cards-container">
-  {Object.keys(groupedData).map((spanIndex) => (
-    <div key={spanIndex} className="card mb-4">
-      <div className="card-header bg-light py-2">
-        <h5>{`Span No: ${spanIndex}`}</h5>
-      </div>
+        <div className="inspection-cards-container">
+          {Object.keys(groupedData).map((spanIndex) => (
+            <div key={spanIndex} className="card mb-4">
+              <div className="card-header bg-light py-2">
+                <h5>{`Span No: ${spanIndex}`}</h5>
+              </div>
 
-      {groupedData[spanIndex] &&
-        Object.keys(groupedData[spanIndex]).map((workKind) => (
-          <div key={workKind} className="card mb-4 border shadow-sm">
-            <div className="card-header bg-primary text-white fw-bold">
-              {workKind}
-            </div>
+              {groupedData[spanIndex] &&
+                Object.keys(groupedData[spanIndex]).map((workKind) => (
+                  <div key={workKind} className="card mb-4 border shadow-sm">
+                    <div className="card-header bg-primary text-white fw-bold">
+                      {workKind}
+                    </div>
 
-            <div className="card-body p-3">
-              {groupedData[spanIndex][workKind] &&
-                groupedData[spanIndex][workKind].map((inspection) => (
-                  <div
-                    key={inspection.id}
-                    className="mb-4 p-4 border rounded shadow-sm"
-                    style={{ backgroundColor: "#CFE2FF" }}
-                  >
-                    <div className="row">
-                      {/* Photos Column - Reduced width */}
-                      <div className="col-md-3">
-                        {inspection.PhotoPaths?.length > 0 && (
-                          <div className="d-flex flex-wrap gap-2">
-                            {inspection.PhotoPaths.map((photo, i) => (
-                              <a
-                                key={i}
-                                href={photo}
-                                data-fancybox="gallery"
-                                data-caption={`Photo ${i + 1}`}
-                              >
-                                <img
-                                  src={photo}
-                                  alt={`Photo ${i + 1}`}
-                                  className="img-fluid rounded border"
-                                  style={{
-                                    width: "80px",
-                                    height: "80px",
-                                    objectFit: "cover",
-                                  }}
-                                />
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Details Column - Split into 2 columns */}
-                      <div className="col-md-9">
-                        <div className="row g-3">
-                          {/* Left Column Details */}
-                          <div className="col-md-6">
-                            <div className="d-flex flex-column gap-2">
-                              <div>
-                                <strong>Parts:</strong>{" "}
-                                {inspection.PartsName || "N/A"}
+                    <div className="card-body p-3">
+                      {groupedData[spanIndex][workKind] &&
+                        groupedData[spanIndex][workKind].map((inspection) => (
+                          <div
+                            key={inspection.id}
+                            className="mb-4 p-4 border rounded shadow-sm"
+                            style={{ backgroundColor: "#CFE2FF" }}
+                          >
+                            <div className="row">
+                              {/* Photos Column - Reduced width */}
+                              <div className="col-md-3">
+                                {inspection.PhotoPaths?.length > 0 && (
+                                  <div className="d-flex flex-wrap gap-2">
+                                    {inspection.PhotoPaths.map((photo, i) => (
+                                      <a
+                                        key={i}
+                                        href={photo}
+                                        data-fancybox="gallery"
+                                        data-caption={`Photo ${i + 1}`}
+                                      >
+                                        <img
+                                          src={photo}
+                                          alt={`Photo ${i + 1}`}
+                                          className="img-fluid rounded border"
+                                          style={{
+                                            width: "80px",
+                                            height: "80px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                              <div>
-                                <strong>Material:</strong>{" "}
-                                {inspection.MaterialName || "N/A"}
+
+                              {/* Details Column - Split into 2 columns */}
+                              <div className="col-md-9">
+                                <div className="row g-3">
+                                  {/* Left Column Details */}
+                                  <div className="col-md-6">
+                                    <div className="d-flex flex-column gap-2">
+                                      <div>
+                                        <strong>Parts:</strong>{" "}
+                                        {inspection.PartsName || "N/A"}
+                                      </div>
+                                      <div>
+                                        <strong>Material:</strong>{" "}
+                                        {inspection.MaterialName || "N/A"}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Right Column Details */}
+                                  <div className="col-md-6">
+                                    <div className="d-flex flex-column gap-2">
+                                      <div>
+                                        <strong>Damage:</strong>{" "}
+                                        {inspection.DamageKindName || "N/A"}
+                                      </div>
+                                      <div>
+                                        <strong>Level:</strong>{" "}
+                                        {inspection.DamageLevel || "N/A"}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Full-width Remarks */}
+                                  <div className="col-12">
+                                    <div className="mt-2">
+                                      <strong>Situation Remarks:</strong>{" "}
+                                      <span className="text-muted">
+                                        {inspection.Remarks || "N/A"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-
-                          {/* Right Column Details */}
-                          <div className="col-md-6">
-                            <div className="d-flex flex-column gap-2">
-                              <div>
-                                <strong>Damage:</strong>{" "}
-                                {inspection.DamageKindName || "N/A"}
-                              </div>
-                              <div>
-                                <strong>Level:</strong>{" "}
-                                {inspection.DamageLevel || "N/A"}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Full-width Remarks */}
-                          <div className="col-12">
-                            <div className="mt-2">
-                              <strong>Situation Remarks:</strong>{" "}
-                              <span className="text-muted">
-                                {inspection.Remarks || "N/A"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                        ))}
                     </div>
                   </div>
                 ))}
             </div>
-          </div>
-        ))}
-    </div>
-  ))}
-</div>
-        <div className="d-flex justify-content-between">
-          <div className="text-sm text-gray-500">
-            Showing {currentData.length} of {tableData.length} inspections
-          </div>
-          <div className="d-flex justify-content-center align-items-center">
-            {renderPaginationButtons()}
-          </div>
+          ))}
         </div>
       </div>
     </div>
