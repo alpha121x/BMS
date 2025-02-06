@@ -44,7 +44,6 @@ const InspectionList = ({ bridgeId }) => {
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
-      console.log(result);
 
       if (Array.isArray(result.data)) {
         setTableData(result.data);
@@ -198,7 +197,7 @@ const InspectionList = ({ bridgeId }) => {
       (item) => item.approved_by_consultant === "1"
     ).length;
     const unapproved = data.filter(
-      (item) => item.approved_by_consultant === "0" || "null"
+      (item) => item.approved_by_consultant === "0"
     ).length;
     return `Approved: ${approved}, Unapproved: ${unapproved}`;
   };
@@ -365,7 +364,6 @@ const InspectionList = ({ bridgeId }) => {
         <div className="summary-section mt-1 mb-2">
           <table className="min-w-full table-auto border-collapse border border-gray-200">
             <tbody>
-              {/* Total Number of Spans */}
               {/* Unique Span Indices */}
               <tr>
                 <td className="border px-4 py-2">
@@ -373,6 +371,16 @@ const InspectionList = ({ bridgeId }) => {
                 </td>
                 <td className="border px-4 py-2">
                   {getUniqueSpanIndices(tableData)}
+                </td>
+              </tr>
+
+                {/* Unique Damage Leves */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Spans:</strong>
+                </td>
+                <td className="border px-4 py-2">
+                  {getDamageLevel(tableData)}
                 </td>
               </tr>
 
