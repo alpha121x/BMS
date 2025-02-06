@@ -102,7 +102,7 @@ const InspectionList = ({ bridgeId }) => {
     const updatedRow = { ...row, approved_by_consultant: value };
 
     // Update the table data without triggering a reload
-    setinspectiondata((prevData) =>
+    setInspectionData((prevData) =>
       prevData.map((item) => (item.id === row.id ? updatedRow : item))
     );
   };
