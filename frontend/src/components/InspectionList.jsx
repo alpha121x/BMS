@@ -344,114 +344,134 @@ const InspectionList = ({ bridgeId }) => {
           />
         )}
 
-     <div className="inspection-cards-container">
-  {Object.keys(groupedData).map((spanIndex) => (
-    <div key={`span-${spanIndex}`} className="card mb-4">
-      {/* Span Index Header */}
-      <div className="card-header bg-primary text-white fw-bold">
-        <strong>Span No: {spanIndex}</strong>
-      </div>
-
-      {/* Work Kinds for Each Span */}
-      <div className="card-body">
-        {groupedData[spanIndex] &&
-          Object.keys(groupedData[spanIndex]).map((workKind) => (
-            <div
-              key={`workKind-${spanIndex}-${workKind}`}
-              className="card mb-4 border shadow-sm"
-            >
-              <div className="card-header bg-secondary text-white fw-bold">
-                {workKind}
+        <div className="inspection-cards-container">
+          {Object.keys(groupedData).map((spanIndex) => (
+            <div key={`span-${spanIndex}`} className="card mb-4">
+              {/* Span Index Header */}
+              <div className="card-header bg-primary text-white fw-bold">
+                <strong>Span No: {spanIndex}</strong>
               </div>
 
-              {/* Mapping Inspections */}
-              <div className="card-body p-3">
-                {groupedData[spanIndex][workKind] &&
-                  groupedData[spanIndex][workKind].map((inspection, index) => (
+              {/* Work Kinds for Each Span */}
+              <div className="card-body">
+                {groupedData[spanIndex] &&
+                  Object.keys(groupedData[spanIndex]).map((workKind) => (
                     <div
-                      key={`inspection-${inspection.id || index}`}
-                      className="mb-4 p-4 border rounded shadow-sm"
-                      style={{ backgroundColor: "#CFE2FF" }}
+                      key={`workKind-${spanIndex}-${workKind}`}
+                      className="card mb-4 border shadow-sm"
                     >
-                      <div className="row">
-                        {/* Left: Photos */}
-                        <div className="col-md-3">
-                          {inspection.PhotoPaths?.length > 0 && (
-                            <div className="d-flex flex-wrap gap-2">
-                              {inspection.PhotoPaths.map((photo, i) => (
-                                <a
-                                  key={`photo-${inspection.id}-${i}`}
-                                  href={photo}
-                                  data-fancybox="gallery"
-                                  data-caption={`Photo ${i + 1}`}
-                                >
-                                  <img
-                                    src={photo}
-                                    alt={`Photo ${i + 1}`}
-                                    className="img-fluid rounded border"
-                                    style={{
-                                      width: "80px",
-                                      height: "80px",
-                                      objectFit: "cover",
-                                    }}
-                                  />
-                                </a>
-                              ))}
-                            </div>
+                      <div className="card-header bg-secondary text-white fw-bold">
+                        {workKind}
+                      </div>
+
+                      {/* Mapping Inspections */}
+                      <div className="card-body p-3">
+                        {groupedData[spanIndex][workKind] &&
+                          groupedData[spanIndex][workKind].map(
+                            (inspection, index) => (
+                              <div
+                                key={`inspection-${inspection.id || index}`}
+                                className="mb-4 p-4 border rounded shadow-sm"
+                                style={{ backgroundColor: "#CFE2FF" }}
+                              >
+                                <div className="row">
+                                  {/* Left: Photos */}
+                                  <div className="col-md-3">
+                                    {inspection.PhotoPaths?.length > 0 && (
+                                      <div className="d-flex flex-wrap gap-2">
+                                        {inspection.PhotoPaths.map(
+                                          (photo, i) => (
+                                            <a
+                                              key={`photo-${inspection.id}-${i}`}
+                                              href={photo}
+                                              data-fancybox="gallery"
+                                              data-caption={`Photo ${i + 1}`}
+                                            >
+                                              <img
+                                                src={photo}
+                                                alt={`Photo ${i + 1}`}
+                                                className="img-fluid rounded border"
+                                                style={{
+                                                  width: "80px",
+                                                  height: "80px",
+                                                  objectFit: "cover",
+                                                }}
+                                              />
+                                            </a>
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Right: Details */}
+                                  <div className="col-md-6">
+                                    <strong>Parts:</strong>{" "}
+                                    {inspection.PartsName || "N/A"} <br />
+                                    <strong>Material:</strong>{" "}
+                                    {inspection.MaterialName || "N/A"} <br />
+                                    <strong>Damage:</strong>{" "}
+                                    {inspection.DamageKindName || "N/A"} <br />
+                                    <strong>Level:</strong>{" "}
+                                    {inspection.DamageLevel || "N/A"} <br />
+                                    <strong>Situation Remarks:</strong>{" "}
+                                    {inspection.Remarks || "N/A"}
+                                  </div>
+
+                                  {/* Footer: Consultant Remarks, Approval & Save Button */}
+                                  <div className="col-md-3 d-flex flex-column justify-content-between">
+                                    <Form.Control
+                                      as="input"
+                                      type="text"
+                                      placeholder="Consultant Remarks"
+                                      value={
+                                        inspection.consultant_remarks || ""
+                                      }
+                                      onChange={(e) =>
+                                        handleConsultantRemarksChange(
+                                          inspection,
+                                          e.target.value
+                                        )
+                                      }
+                                      className="mb-2"
+                                    />
+
+                                    <Form.Select
+                                      value={
+                                        inspection.approved_by_consultant || 0
+                                      }
+                                      onChange={(e) =>
+                                        handleApprovedFlagChange(
+                                          inspection,
+                                          parseInt(e.target.value)
+                                        )
+                                      }
+                                      className="mb-2"
+                                    >
+                                      <option value={0}>Unapproved</option>
+                                      <option value={1}>Approved</option>
+                                    </Form.Select>
+
+                                    <Button
+                                      onClick={() =>
+                                        handleSaveChanges(inspection)
+                                      }
+                                      className="bg-[#CFE2FF]"
+                                    >
+                                      Save Changes
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            )
                           )}
-                        </div>
-
-                        {/* Right: Details */}
-                        <div className="col-md-6">
-                          <strong>Parts:</strong> {inspection.PartsName || "N/A"} <br />
-                          <strong>Material:</strong> {inspection.MaterialName || "N/A"} <br />
-                          <strong>Damage:</strong> {inspection.DamageKindName || "N/A"} <br />
-                          <strong>Level:</strong> {inspection.DamageLevel || "N/A"} <br />
-                          <strong>Situation Remarks:</strong> {inspection.Remarks || "N/A"}
-                        </div>
-
-                        {/* Footer: Consultant Remarks, Approval & Save Button */}
-                        <div className="col-md-3 d-flex flex-column justify-content-between">
-                          <Form.Control
-                            as="input"
-                            type="text"
-                            placeholder="Consultant Remarks"
-                            value={inspection.consultant_remarks || ""}
-                            onChange={(e) =>
-                              handleConsultantRemarksChange(inspection, e.target.value)
-                            }
-                            className="mb-2"
-                          />
-
-                          <Form.Select
-                            value={inspection.approved_by_consultant || 0}
-                            onChange={(e) =>
-                              handleApprovedFlagChange(inspection, parseInt(e.target.value))
-                            }
-                            className="mb-2"
-                          >
-                            <option value={0}>Unapproved</option>
-                            <option value={1}>Approved</option>
-                          </Form.Select>
-
-                          <Button
-                            onClick={() => handleSaveChanges(inspection)}
-                            className="bg-[#CFE2FF]"
-                          >
-                            Save Changes
-                          </Button>
-                        </div>
                       </div>
                     </div>
                   ))}
               </div>
             </div>
           ))}
-      </div>
-    </div>
-  ))}
-</div>
-
+        </div>
       </div>
     </div>
   );
