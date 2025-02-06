@@ -38,9 +38,9 @@ const BridgeInfo = () => {
 
   const renderInspectionList = () => {
     console.log("Rendering inspection list, role is:", role);
-    if (role === "1") {
+    if (userToken?.role === "1") {
       return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
-    } else if (role === "2") {
+    } else if (userToken?.role === "2") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
     }
     return <InspectionList bridgeId={bridgeData?.uu_bms_id} />; // Handling case where role doesn't match

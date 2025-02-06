@@ -63,16 +63,17 @@ const InspectionList = ({ bridgeId }) => {
 
       // Allow empty remarks (send as null if empty)
       const consultantRemarks =
-        row.ConsultantRemarks?.trim() === "" ? null : row.ConsultantRemarks;
+        row.consultant_remarks?.trim() === "" ? null : row.consultant_remarks;
 
       // Prepare the updated row with ConsultantRemarks and approval status
       const updatedData = {
         id: row.inspection_id,
-        ConsultantRemarks: consultantRemarks, // Can be empty (null)
+        consultantRemarks: consultantRemarks, // Can be empty (null)
         approved_by_consultant: row.approved_by_consultant,
       };
 
       console.log(updatedData);
+      // return;
 
       // Call the API to update the database
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
@@ -94,7 +95,7 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleConsultantRemarksChange = (row, value) => {
     // Clone the row and update the ConsultantRemarks field
-    const updatedRow = { ...row, ConsultantRemarks: value };
+    const updatedRow = { ...row, consultant_remarks: value };
 
     // Update the table data without triggering a reload
     setTableData((prevData) =>
@@ -527,7 +528,7 @@ const InspectionList = ({ bridgeId }) => {
                               <Form.Control
                                 as="textarea"
                                 rows={2}
-                                value={row.ConsultantRemarks || ""}
+                                value={row.consultant_remarks || ""}
                                 onChange={(e) =>
                                   handleConsultantRemarksChange(
                                     row,
