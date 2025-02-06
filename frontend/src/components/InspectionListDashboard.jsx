@@ -189,14 +189,14 @@ const InspectionList = ({ bridgeId }) => {
           <div className="d-flex gap-3">
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
-              onClick={() => handleDownloadCSV(inspectiondata)}
+              onClick={() => handleDownloadCSV(inspectionData)}
             >
               <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
               CSV
             </button>
             <button
               className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-              onClick={() => handleDownloadExcel(inspectiondata)}
+              onClick={() => handleDownloadExcel(inspectionData)}
             >
               <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
               Excel

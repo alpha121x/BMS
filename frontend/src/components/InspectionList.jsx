@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useCallback } from "react";
 import { Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
@@ -26,22 +27,18 @@ const InspectionList = ({ bridgeId }) => {
     return () => Fancybox.destroy();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      if (!bridgeId) {
-        throw new Error("bridgeId is required");
-      }
+      if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
         `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
       );
-
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
-
       if (Array.isArray(result.data)) {
         setInspectionData(result.data);
       } else {
@@ -52,7 +49,7 @@ const InspectionList = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [bridgeId]);
 
   const handleUpdateInspection = async (row) => {
     try {
@@ -95,7 +92,7 @@ const InspectionList = ({ bridgeId }) => {
     const updatedRow = { ...row, consultant_remarks: value };
 
     // Update the table data without triggering a reload
-    setinspectiondata((prevData) =>
+    setInspectionData((prevData) =>
       prevData.map((item) => (item.id === row.id ? updatedRow : item))
     );
   };
@@ -298,7 +295,9 @@ const InspectionList = ({ bridgeId }) => {
                 <td className="border px-4 py-2">
                   <strong>Materials Used:</strong>
                 </td>
-                <td className="border px-4 py-2">{getMaterials(inspectiondata)}</td>
+                <td className="border px-4 py-2">
+                  {getMaterials(inspectiondata)}
+                </td>
               </tr>
 
               {/* Work Kind */}
@@ -306,7 +305,9 @@ const InspectionList = ({ bridgeId }) => {
                 <td className="border px-4 py-2">
                   <strong>Work Kind:</strong>
                 </td>
-                <td className="border px-4 py-2">{getWorkKind(inspectiondata)}</td>
+                <td className="border px-4 py-2">
+                  {getWorkKind(inspectiondata)}
+                </td>
               </tr>
 
               {/* Condition Status */}
@@ -344,10 +345,9 @@ const InspectionList = ({ bridgeId }) => {
 
         <div className="inspection-cards-container">
           {Object.keys(groupedData).map((spanIndex) => (
-            <div key={spanIndex} className="card mb-4">
+            <div key={`span-${spanIndex}`} className="card mb-4">
               {/* Accordion for Span Index */}
               <div className="accordion" id={`accordion-span-${spanIndex}`}>
-                {/* Accordion Item: Span Index */}
                 <div className="accordion-item">
                   <h2
                     className="accordion-header"
@@ -358,7 +358,7 @@ const InspectionList = ({ bridgeId }) => {
                       type="button"
                       data-bs-toggle="collapse"
                       data-bs-target={`#collapse-span-${spanIndex}`}
-                      aria-expanded="false" // Set to false for collapse by default
+                      aria-expanded="false"
                       aria-controls={`collapse-span-${spanIndex}`}
                     >
                       <strong>Span No: {spanIndex}</strong>
@@ -368,30 +368,30 @@ const InspectionList = ({ bridgeId }) => {
                   {/* Accordion Body for Work Kinds */}
                   <div
                     id={`collapse-span-${spanIndex}`}
-                    className="accordion-collapse collapse" // Removed the 'show' class
+                    className="accordion-collapse collapse"
                     aria-labelledby={`heading-span-${spanIndex}`}
                     data-bs-parent={`#accordion-span-${spanIndex}`}
                   >
                     <div className="accordion-body">
-                      {/* Mapping Work Kinds */}
                       {groupedData[spanIndex] &&
                         Object.keys(groupedData[spanIndex]).map((workKind) => (
                           <div
-                            key={workKind}
+                            key={`workKind-${spanIndex}-${workKind}`}
                             className="card mb-4 border shadow-sm"
                           >
-                            {/* Header: Work Kind */}
                             <div className="card-header bg-primary text-white fw-bold">
                               {workKind}
                             </div>
 
-                            {/* Body: Mapping Inspections */}
+                            {/* Mapping Inspections */}
                             <div className="card-body p-3">
                               {groupedData[spanIndex][workKind] &&
                                 groupedData[spanIndex][workKind].map(
-                                  (inspection) => (
+                                  (inspection, index) => (
                                     <div
-                                      key={inspection.id}
+                                      key={`inspection-${
+                                        inspection.id || index
+                                      }`}
                                       className="mb-4 p-4 border rounded shadow-sm"
                                       style={{ backgroundColor: "#CFE2FF" }}
                                     >
@@ -404,7 +404,7 @@ const InspectionList = ({ bridgeId }) => {
                                               {inspection.PhotoPaths.map(
                                                 (photo, i) => (
                                                   <a
-                                                    key={i}
+                                                    key={`photo-${inspection.id}-${i}`}
                                                     href={photo}
                                                     data-fancybox="gallery"
                                                     data-caption={`Photo ${
@@ -449,7 +449,6 @@ const InspectionList = ({ bridgeId }) => {
 
                                         {/* Footer: Consultant Remarks, Approval & Save Button */}
                                         <div className="col-md-3 d-flex flex-column justify-content-between">
-                                          {/* Consultant Remarks Input */}
                                           <Form.Control
                                             as="input"
                                             type="text"
@@ -467,7 +466,6 @@ const InspectionList = ({ bridgeId }) => {
                                             className="mb-2"
                                           />
 
-                                          {/* Approval Status Dropdown */}
                                           <Form.Select
                                             value={
                                               inspection.approved_by_consultant ||
@@ -487,7 +485,6 @@ const InspectionList = ({ bridgeId }) => {
                                             <option value={1}>Approved</option>
                                           </Form.Select>
 
-                                          {/* Save Changes Button */}
                                           <Button
                                             onClick={() =>
                                               handleSaveChanges(inspection)
