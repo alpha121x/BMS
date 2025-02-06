@@ -294,9 +294,9 @@ const BridgesList = ({
       <div className="w-full mx-auto">
         <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Bridges List</div>
+            <div className="text-2xl font-bold">Structures Inventory</div>
             <div className="text-sm font-medium mt-1 text-gray-700">
-              Total Bridges: {bridgeCount || 0}
+              Total Structures: {bridgeCount || 0}
             </div>
           </div>
           <div className="flex space-x-2">

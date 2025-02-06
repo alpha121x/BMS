@@ -114,7 +114,7 @@ const EvaluationMain = () => {
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">Inspected</h3>
+      <h3 className="text-xl font-semibold text-gray-700">Inspected/Detailed Surveyed</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
