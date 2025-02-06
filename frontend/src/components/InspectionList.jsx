@@ -356,27 +356,29 @@ const InspectionList = ({ bridgeId }) => {
     >
       <div className="card-body pb-0">
         {/* Toggle buttons for old and new inspections */}
-        <div className="d-flex mb-3">
+        <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
             className="card-title text-lg font-semibold pb-2"
             style={{ fontSize: "1.25rem" }}
           >
             Condition Assessment Reports
           </h6>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
-            onClick={() => handleDownloadCSV(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-            CSV
-          </button>
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-            onClick={() => handleDownloadExcel(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-            Excel
-          </button>
+          <div className="d-flex gap-3">
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+              onClick={() => handleDownloadCSV(tableData)}
+            >
+              <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+              CSV
+            </button>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+              onClick={() => handleDownloadExcel(tableData)}
+            >
+              <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+              Excel
+            </button>
+          </div>
         </div>
 
         <div className="summary-section mt-1 mb-2">
