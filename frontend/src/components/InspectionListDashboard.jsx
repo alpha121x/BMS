@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Card, Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFileCsv,
-  faFileExcel,
-  faPlusCircle,
-  faHistory,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import "@fancyapps/ui/dist/fancybox/fancybox.css"; // Try this if `styles` path doesn't work
+import { Fancybox } from "@fancyapps/ui";
 
-const InspectionListDashboard = ({ bridgeId }) => {
+const InspectionList = ({ bridgeId }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [inspectionType, setInspectionType] = useState("new"); // "new" or "old"
 
   const itemsPerPage = 10;
 
@@ -24,7 +20,14 @@ const InspectionListDashboard = ({ bridgeId }) => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId, inspectionType]); // Refetch when inspectionType changes
+  }, [bridgeId]); // Refetch when inspectionType changes
+
+  useEffect(() => {
+    Fancybox.bind("[data-fancybox='gallery']", {});
+
+    // Cleanup Fancybox when the component unmounts
+    return () => Fancybox.destroy();
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -34,9 +37,8 @@ const InspectionListDashboard = ({ bridgeId }) => {
         throw new Error("bridgeId is required");
       }
 
-      const typeQuery = inspectionType === "new" ? "new" : "old";
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}&type=${typeQuery}`
+        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch data");
@@ -53,6 +55,66 @@ const InspectionListDashboard = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateInspection = async (row) => {
+    try {
+      console.log("Updating inspection", row);
+
+      // Allow empty remarks (send as null if empty)
+      const consultantRemarks =
+        row.consultant_remarks?.trim() === "" ? null : row.consultant_remarks;
+
+      // Prepare the updated row with ConsultantRemarks and approval status
+      const updatedData = {
+        id: row.inspection_id,
+        consultantRemarks: consultantRemarks, // Can be empty (null)
+        approved_by_consultant: row.approved_by_consultant,
+      };
+
+      console.log(updatedData);
+      // return;
+
+      // Call the API to update the database
+      const response = await fetch(`${BASE_URL}/api/update-inspection`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (!response.ok) throw new Error("Failed to update inspection");
+
+      // Refetch data to reflect changes
+      fetchData();
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleConsultantRemarksChange = (row, value) => {
+    // Clone the row and update the ConsultantRemarks field
+    const updatedRow = { ...row, consultant_remarks: value };
+
+    // Update the table data without triggering a reload
+    setTableData((prevData) =>
+      prevData.map((item) => (item.id === row.id ? updatedRow : item))
+    );
+  };
+
+  const handleApprovedFlagChange = (row, value) => {
+    // Clone the row and update the approved_by_consultant field
+    const updatedRow = { ...row, approved_by_consultant: value };
+
+    // Update the table data without triggering a reload
+    setTableData((prevData) =>
+      prevData.map((item) => (item.id === row.id ? updatedRow : item))
+    );
+  };
+
+  const handleSaveChanges = (row) => {
+    handleUpdateInspection(row);
   };
 
   const handleDownloadCSV = (tableData) => {
@@ -91,38 +153,71 @@ const InspectionListDashboard = ({ bridgeId }) => {
       console.error("No data to export");
       return;
     }
-  
+
     const bridgename = tableData[0].BridgeName;
-  
+
     // Ensure all rows have a valid value for 'PhotoPaths'
     tableData.forEach((row) => {
       if (Array.isArray(row.PhotoPaths)) {
         // Convert array to JSON string
-        row.PhotoPaths = JSON.stringify(row.PhotoPaths) || 'No image path';
+        row.PhotoPaths = JSON.stringify(row.PhotoPaths) || "No image path";
       } else if (!row.PhotoPaths) {
-        row.PhotoPaths = 'No image path'; // Default if no path is present
+        row.PhotoPaths = "No image path"; // Default if no path is present
       }
     });
-    
-  
+
     // Create a worksheet from the table data
     const ws = XLSX.utils.json_to_sheet(tableData);
-  
+
     // Create a new workbook and append the worksheet
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Inspections");
     // console.log(wb);
-  
+
     // Generate and download the Excel file
     XLSX.writeFile(wb, `${bridgename}.xlsx`);
   };
-  
 
-  const handleEditClick = (row) => {
-    const serializedRow = encodeURIComponent(JSON.stringify(row));
-    const editUrl = `/EditInspectionNew?data=${serializedRow}`;
-    window.location.href = editUrl;
+  const getDamageLevel = (data) => {
+    const damageLevels = [...new Set(data.map((item) => item.DamageLevel))]; // Get unique damage levels
+    return damageLevels.join(", "); // Join levels with commas
   };
+
+  const getMaterials = (data) => {
+    const materials = [...new Set(data.map((item) => item.MaterialName))]; // Get unique materials
+    return materials.join(", "); // Join materials with commas
+  };
+
+  const getWorkKind = (data) => {
+    const workKinds = [...new Set(data.map((item) => item.WorkKindName))]; // Get unique work kinds
+    return workKinds.join(", "); // Join work kinds with commas
+  };
+
+  const getApprovalStatus = (data) => {
+    const approved = data.filter(
+      (item) => item.approved_by_consultant === "1"
+    ).length;
+    const unapproved = data.filter(
+      (item) => item.approved_by_consultant === "0"
+    ).length;
+    return `Approved: ${approved}, Unapproved: ${unapproved}`;
+  };
+
+  const getUniqueSpanIndices = (data) => {
+    // Extracting all SpanIndex values from the data
+    const spanIndices = data.map((item) => item.SpanIndex);
+
+    // Using Set to filter out duplicates and get unique values
+    const uniqueSpanIndices = [...new Set(spanIndices)];
+
+    return uniqueSpanIndices.length; // Return the count of unique span indices
+  };
+
+  // const handleEditClick = (row) => {
+  //   const serializedRow = encodeURIComponent(JSON.stringify(row));
+  //   const editUrl = `/EditInspectionNew?data=${serializedRow}`;
+  //   window.location.href = editUrl;
+  // };
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
   const currentData = tableData.slice(
@@ -260,37 +355,16 @@ const InspectionListDashboard = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        <h6
-          className="card-title text-lg font-semibold pb-2"
-          style={{ fontSize: "1.25rem" }}
-        >
-          Condition Assessment Reports
-        </h6>
-
         {/* Toggle buttons for old and new inspections */}
         <div className="d-flex mb-3">
-          <Button
-            onClick={() => setInspectionType("new")}
-            style={{
-              backgroundColor: inspectionType === "new" ? "#3B82F6" : "#60A5FA",
-            }}
-            className="mr-2" // Added margin-right to add space between the buttons
+          <h6
+            className="card-title text-lg font-semibold pb-2"
+            style={{ fontSize: "1.25rem" }}
           >
-            <FontAwesomeIcon icon={faPlusCircle} className="mr-2" />
-            New Inspections
-          </Button>
-          <Button
-            onClick={() => setInspectionType("old")}
-            style={{
-              backgroundColor: inspectionType === "old" ? "#3B82F6" : "#60A5FA",
-            }}
-            className="mr-2" // Added margin-right to add space between the buttons
-          >
-            <FontAwesomeIcon icon={faHistory} className="mr-2" />
-            Old Inspections
-          </Button>
+            Condition Assessment Reports
+          </h6>
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2" // Added margin-right
+            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
             onClick={() => handleDownloadCSV(tableData)}
           >
             <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
@@ -303,6 +377,58 @@ const InspectionListDashboard = ({ bridgeId }) => {
             <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
             Excel
           </button>
+        </div>
+
+        <div className="summary-section mt-1 mb-2">
+          <table className="min-w-full table-auto border-collapse border border-gray-200">
+            <tbody>
+              {/* Unique Span Indices */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Spans:</strong>
+                </td>
+                <td className="border px-4 py-2">
+                  {getUniqueSpanIndices(tableData)}
+                </td>
+              </tr>
+
+              {/* Unique Damage Leves */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Damage Levels:</strong>
+                </td>
+                <td className="border px-4 py-2">
+                  {getDamageLevel(tableData)}
+                </td>
+              </tr>
+
+              {/* Materials Used */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Materials Used:</strong>
+                </td>
+                <td className="border px-4 py-2">{getMaterials(tableData)}</td>
+              </tr>
+
+              {/* Work Kind */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Work Kind:</strong>
+                </td>
+                <td className="border px-4 py-2">{getWorkKind(tableData)}</td>
+              </tr>
+
+              {/* Condition Status */}
+              <tr>
+                <td className="border px-4 py-2">
+                  <strong>Consultant Approval Status:</strong>
+                </td>
+                <td className="border px-4 py-2">
+                  {getApprovalStatus(tableData)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {loading && (
@@ -327,144 +453,118 @@ const InspectionListDashboard = ({ bridgeId }) => {
 
         <div className="inspection-cards-container">
           {Object.keys(groupedData).map((spanIndex) => (
-            <div
-              key={spanIndex}
-              className="card"
-              style={{ marginBottom: "20px" }}
-            >
-              <div
-                className="card-header"
-                style={{ backgroundColor: "#f5f5f5", padding: "10px" }}
-              >
-                <h5>{`Span Index: ${spanIndex}`}</h5>
+            <div key={spanIndex} className="card mb-4">
+              {/* Header: Span Number */}
+              <div className="card-header bg-light py-2">
+                <h5>{`Span No: ${spanIndex}`}</h5>
               </div>
-              <div className="card">
-                <div className="card-body">
-                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                    <div
-                      key={workKind}
-                      style={{
-                        marginBottom: "10px", // Reduced margin
-                        border: "1px solid #ddd",
-                        padding: "8px", // Reduced padding
-                        borderRadius: "8px",
-                      }}
-                    >
-                      {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                        <div
-                          key={workKind}
-                          style={{
-                            marginBottom: "10px", // Reduced margin
-                            border: "1px solid #ddd",
-                            padding: "8px", // Reduced padding
-                            borderRadius: "8px",
-                          }}
-                        >
-                          {/* Work Kind Label without header style */}
-                          <div
-                            style={{ marginBottom: "8px", fontWeight: "bold" }}
-                          >
-                            Work Kind: {workKind}
-                          </div>
 
-                          {groupedData[spanIndex][workKind].map(
-                            (row, index) => (
-                              <div
-                                key={index}
-                                className="inspection-item"
-                                style={{
-                                  marginBottom: "8px", // Reduced margin between items
-                                  borderBottom: "1px solid #ddd",
-                                  paddingBottom: "8px", // Reduced padding at the bottom of each item
-                                }}
-                              >
-                                {/* Grid Layout: Displaying 4 details per row */}
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gridTemplateColumns: "repeat(4, 1fr)", // 4 columns of equal width
-                                    columnGap: "12px", // Space between columns
-                                    rowGap: "8px", // Space between rows
-                                  }}
-                                >
-                                  {/* Row 1 */}
-                                  <div>
-                                    <strong className="custom-label">Parts:</strong>{" "}
-                                    {row.PartsName || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Material:</strong>{" "}
-                                    {row.MaterialName || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Damage:</strong>{" "}
-                                    {row.DamageKindName || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Level:</strong>{" "}
-                                    {row.DamageLevel || "N/A"}
-                                  </div>
-                                  <div>
-                                    <strong className="custom-label">Remarks:</strong>{" "}
-                                    {row.Remarks || "N/A"}
-                                  </div>
-                                </div>
-
-                                {/* Photos Section */}
-                                {row.PhotoPaths &&
-                                  row.PhotoPaths.length > 0 && (
-                                    <div style={{ marginTop: "8px" }}>
-                                      <strong>Photos:</strong>
-                                      <div
-                                        style={{
-                                          display: "grid",
-                                          gridTemplateColumns:
-                                            "repeat(auto-fill, 80px)", // Dynamically fit images
-                                          gap: "6px", // Gap between photos
-                                          marginTop: "6px",
-                                        }}
-                                      >
-                                        {row.PhotoPaths.map(
-                                          (photo, photoIndex) => (
-                                            <img
-                                              key={photoIndex}
-                                              src={photo}
-                                              alt={`Photo ${photoIndex + 1}`}
-                                              style={{
-                                                width: "80px",
-                                                height: "80px",
-                                                objectFit: "cover",
-                                                borderRadius: "5px",
-                                              }}
-                                            />
-                                          )
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
-
-                                {/* Edit Button */}
-                                {/* <div style={{ marginTop: "8px" }}>
-                                  <Button
-                                    onClick={() => handleEditClick(row)}
-                                    style={{
-                                      backgroundColor: "#4CAF50",
-                                      border: "none",
-                                      color: "white",
-                                    }}
-                                  >
-                                    Edit
-                                  </Button>
-                                </div> */}
-                              </div>
-                            )
-                          )}
-                        </div>
-                      ))}
+              {/* Mapping Work Kinds */}
+              {groupedData[spanIndex] &&
+                Object.keys(groupedData[spanIndex]).map((workKind) => (
+                  <div key={workKind} className="card mb-4 border shadow-sm">
+                    {/* Header: Work Kind */}
+                    <div className="card-header bg-primary text-white fw-bold">
+                      {workKind}
                     </div>
-                  ))}
-                </div>
-              </div>
+
+                    {/* Body: Mapping Inspections */}
+                    <div className="card-body bg-light p-3">
+                      {groupedData[spanIndex][workKind] &&
+                        groupedData[spanIndex][workKind].map((inspection) => (
+                          <div
+                            key={inspection.id}
+                            className="mb-4 p-4 border rounded shadow-sm"
+                            style={{ backgroundColor: "#f8f9fa" }}
+                          >
+                            <div className="row">
+                              {/* Left: Photos */}
+                              <div className="col-md-3">
+                                {inspection.PhotoPaths?.length > 0 && (
+                                  <div className="d-flex flex-wrap gap-2">
+                                    {inspection.PhotoPaths.map((photo, i) => (
+                                      <a
+                                        key={i}
+                                        href={photo}
+                                        data-fancybox="gallery"
+                                        data-caption={`Photo ${i + 1}`}
+                                      >
+                                        <img
+                                          src={photo}
+                                          alt={`Photo ${i + 1}`}
+                                          className="img-fluid rounded border"
+                                          style={{
+                                            width: "80px",
+                                            height: "80px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Right: Details */}
+                              <div className="col-md-6">
+                                <strong>Parts:</strong>{" "}
+                                {inspection.PartsName || "N/A"} <br />
+                                <strong>Material:</strong>{" "}
+                                {inspection.MaterialName || "N/A"} <br />
+                                <strong>Damage:</strong>{" "}
+                                {inspection.DamageKindName || "N/A"} <br />
+                                <strong>Level:</strong>{" "}
+                                {inspection.DamageLevel || "N/A"} <br />
+                                <strong>Situation Remarks:</strong>{" "}
+                                {inspection.Remarks || "N/A"}
+                              </div>
+
+                              {/* Footer: Consultant Remarks, Approval & Save Button */}
+                              <div className="col-md-3 d-flex flex-column justify-content-between">
+                                {/* Consultant Remarks Input */}
+                                <Form.Control
+                                  as="input"
+                                  type="text"
+                                  placeholder="Consultant Remarks"
+                                  value={inspection.consultant_remarks || ""}
+                                  onChange={(e) =>
+                                    handleConsultantRemarksChange(
+                                      inspection,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="mb-2"
+                                />
+
+                                {/* Approval Status Dropdown */}
+                                <Form.Select
+                                  value={inspection.approved_by_consultant || 0}
+                                  onChange={(e) =>
+                                    handleApprovedFlagChange(
+                                      inspection,
+                                      parseInt(e.target.value)
+                                    )
+                                  }
+                                  className="mb-2"
+                                >
+                                  <option value={0}>Unapproved</option>
+                                  <option value={1}>Approved</option>
+                                </Form.Select>
+
+                                {/* Save Changes Button */}
+                                <Button
+                                  onClick={() => handleSaveChanges(inspection)}
+                                  className="btn-success"
+                                >
+                                  Save Changes
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
             </div>
           ))}
         </div>
@@ -482,4 +582,4 @@ const InspectionListDashboard = ({ bridgeId }) => {
   );
 };
 
-export default InspectionListDashboard;
+export default InspectionList;
