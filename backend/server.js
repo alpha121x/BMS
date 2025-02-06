@@ -45,7 +45,7 @@ app.post("/api/login", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password,  phone_num, email, id, is_active
+    SELECT id, username, password, role_id,  phone_num, email, id, is_active
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
@@ -71,7 +71,7 @@ app.post("/api/login", async (req, res) => {
       {
         userId: user.id,
         username: user.username,
-        role: user.role,
+        role: user.role_id,
         phoneNum: user.phone_num,
         email: user.email,
       },
@@ -85,6 +85,7 @@ app.post("/api/login", async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
+        role: user.role_id,
         email: user.email,
         phoneNum: user.phone_num,
         role: user.role,
@@ -103,7 +104,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, phone_num,  email, id, is_active
+    SELECT id, username, password, role_id, phone_num,  email, id, is_active
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
@@ -129,7 +130,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
       {
         userId: user.id,
         username: user.username,
-        role: user.role,
+        role: user.role_id,
         phoneNum: user.phone_num,
         email: user.email,
       },
@@ -143,6 +144,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
+        role: user.role_id,
         email: user.email,
         phoneNum: user.phone_num,
         role: user.role,
@@ -650,8 +652,6 @@ app.put("/api/update-inspection", async (req, res) => {
     res.status(500).json({ error: "Failed to update inspection" });
   }
 });
-
-
 
 app.get("/api/structure-types", async (req, res) => {
   try {
