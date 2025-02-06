@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Map from "./Map";
 // import BridgesListDashboard from "./BirdgesListDashboard";
-import BridgesListDashboard from "./BirdgesListDashboardNew";
+import BridgesListDashboard from "./BirdgesListDashboard";
 import CheckingTable from "./CheckingTable";
 
 

@@ -4,7 +4,7 @@ import Footer from "./Footer";
 import InventoryInfoDashboard from "./InventoryInfoDashboard";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import InspectionListDashboard from "./InspectionListDashboardNew";
+import InspectionListDashboard from "./InspectionListDashboard";
 
 const BridgeInfoDashboard = () => {
   const location = useLocation();

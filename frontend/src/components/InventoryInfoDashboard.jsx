@@ -75,7 +75,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
               </Col>
             ))}
           </Row>
-
+            
           <Form.Group>
             <Form.Label className="custom-label">Select Span</Form.Label>
             <Form.Select

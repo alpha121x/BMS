@@ -11,7 +11,7 @@ import Evaluation from './Evaluation'; // Evaluation Module Component
 import EditInspection from './EditInspection';
 import EditBridge from './EditIBridge';
 import BridgeInfo from './components/BridgeInfo';
-import BridgeInfoDashboard from './components/BridgeinfoDaashboard';
+import BridgeInfoDashboard from './components/BridgeinfoDashboard';
 import InspectionDetails from './components/InspectionDetails';
 import EditInspectionNew from './EditInspectionNew';
 

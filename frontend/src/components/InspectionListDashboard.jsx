@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table, Modal } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import InspectionModal from "./InspectionModal";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -17,8 +16,6 @@ const InspectionListDashboard = ({ bridgeId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
   const [inspectionType, setInspectionType] = useState("new"); // "new" or "old"
 
   const itemsPerPage = 10;
@@ -57,7 +54,8 @@ const InspectionListDashboard = ({ bridgeId }) => {
       setLoading(false);
     }
   };
- const handleDownloadCSV = (tableData) => {
+
+  const handleDownloadCSV = (tableData) => {
     if (!Array.isArray(tableData) || tableData.length === 0) {
       console.error("No data to export");
       return;
@@ -118,15 +116,12 @@ const InspectionListDashboard = ({ bridgeId }) => {
     // Generate and download the Excel file
     XLSX.writeFile(wb, `${bridgename}.xlsx`);
   };
+  
 
-  const handleViewClick = (row) => {
-    setSelectedRow(row);
-    setShowModal(true);
-  };
-
-  const handleClose = () => {
-    setShowModal(false);
-    setSelectedRow(null);
+  const handleEditClick = (row) => {
+    const serializedRow = encodeURIComponent(JSON.stringify(row));
+    const editUrl = `/EditInspectionNew?data=${serializedRow}`;
+    window.location.href = editUrl;
   };
 
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
@@ -236,6 +231,24 @@ const InspectionListDashboard = ({ bridgeId }) => {
     return buttons;
   };
 
+  // Group the inspection data by SpanIndex and then by WorkKind
+  const groupedData = currentData.reduce((acc, row) => {
+    const spanKey = row.SpanIndex || "N/A";
+    const workKindKey = row.WorkKindName || "N/A";
+
+    if (!acc[spanKey]) {
+      acc[spanKey] = {};
+    }
+
+    if (!acc[spanKey][workKindKey]) {
+      acc[spanKey][workKindKey] = [];
+    }
+
+    acc[spanKey][workKindKey].push(row);
+
+    return acc;
+  }, {});
+
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -251,11 +264,7 @@ const InspectionListDashboard = ({ bridgeId }) => {
           className="card-title text-lg font-semibold pb-2"
           style={{ fontSize: "1.25rem" }}
         >
-          Inspections List
-          <br />
-          <span style={{ fontSize: "0.875rem" }}>
-            Total Inspections: {tableData.length}
-          </span>
+          Condition Assessment Reports
         </h6>
 
         {/* Toggle buttons for old and new inspections */}
@@ -316,59 +325,149 @@ const InspectionListDashboard = ({ bridgeId }) => {
           />
         )}
 
-        <Table bordered responsive>
-          <thead>
-            <tr>
-              <th>Parts</th>
-              <th>Span</th>
-              <th>Material</th>
-              <th>Damage</th>
-              <th>Level</th>
-              <th>Inspector</th>
-              <th>Inspection Date</th>
-              <th>Status</th>
-              <th>Manage</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((row, index) => (
-                <tr key={index}>
-                  <td>{row.PartsName || "N/A"}</td>
-                  <td>{row.SpanIndex || "N/A"}</td>
-                  <td>{row.MaterialName || "N/A"}</td>
-                  <td>{row.DamageKindName || "N/A"}</td>
-                  <td>{row.DamageLevel || "N/A"}</td>
-                  <td>{row.Inspector || "N/A"}</td>
-                  <td>{row.InspectationDate || "N/A"}</td>
-                  <td>
-                    {row.ApprovedFlag === 0
-                      ? "Unapproved"
-                      : row.ApprovedFlag || "N/A"}
-                  </td>
-                  <td>
-                    <Button
-                      onClick={() => handleViewClick(row)}
+        <div className="inspection-cards-container">
+          {Object.keys(groupedData).map((spanIndex) => (
+            <div
+              key={spanIndex}
+              className="card"
+              style={{ marginBottom: "20px" }}
+            >
+              <div
+                className="card-header"
+                style={{ backgroundColor: "#f5f5f5", padding: "10px" }}
+              >
+                <h5>{`Span Index: ${spanIndex}`}</h5>
+              </div>
+              <div className="card">
+                <div className="card-body">
+                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                    <div
+                      key={workKind}
                       style={{
-                        backgroundColor: "#60A5FA",
-                        border: "none",
-                        color: "white",
+                        marginBottom: "10px", // Reduced margin
+                        border: "1px solid #ddd",
+                        padding: "8px", // Reduced padding
+                        borderRadius: "8px",
                       }}
                     >
-                      View
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="text-center">
-                  No data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+                      {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                        <div
+                          key={workKind}
+                          style={{
+                            marginBottom: "10px", // Reduced margin
+                            border: "1px solid #ddd",
+                            padding: "8px", // Reduced padding
+                            borderRadius: "8px",
+                          }}
+                        >
+                          {/* Work Kind Label without header style */}
+                          <div
+                            style={{ marginBottom: "8px", fontWeight: "bold" }}
+                          >
+                            Work Kind: {workKind}
+                          </div>
+
+                          {groupedData[spanIndex][workKind].map(
+                            (row, index) => (
+                              <div
+                                key={index}
+                                className="inspection-item"
+                                style={{
+                                  marginBottom: "8px", // Reduced margin between items
+                                  borderBottom: "1px solid #ddd",
+                                  paddingBottom: "8px", // Reduced padding at the bottom of each item
+                                }}
+                              >
+                                {/* Grid Layout: Displaying 4 details per row */}
+                                <div
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(4, 1fr)", // 4 columns of equal width
+                                    columnGap: "12px", // Space between columns
+                                    rowGap: "8px", // Space between rows
+                                  }}
+                                >
+                                  {/* Row 1 */}
+                                  <div>
+                                    <strong className="custom-label">Parts:</strong>{" "}
+                                    {row.PartsName || "N/A"}
+                                  </div>
+                                  <div>
+                                    <strong className="custom-label">Material:</strong>{" "}
+                                    {row.MaterialName || "N/A"}
+                                  </div>
+                                  <div>
+                                    <strong className="custom-label">Damage:</strong>{" "}
+                                    {row.DamageKindName || "N/A"}
+                                  </div>
+                                  <div>
+                                    <strong className="custom-label">Level:</strong>{" "}
+                                    {row.DamageLevel || "N/A"}
+                                  </div>
+                                  <div>
+                                    <strong className="custom-label">Remarks:</strong>{" "}
+                                    {row.Remarks || "N/A"}
+                                  </div>
+                                </div>
+
+                                {/* Photos Section */}
+                                {row.PhotoPaths &&
+                                  row.PhotoPaths.length > 0 && (
+                                    <div style={{ marginTop: "8px" }}>
+                                      <strong>Photos:</strong>
+                                      <div
+                                        style={{
+                                          display: "grid",
+                                          gridTemplateColumns:
+                                            "repeat(auto-fill, 80px)", // Dynamically fit images
+                                          gap: "6px", // Gap between photos
+                                          marginTop: "6px",
+                                        }}
+                                      >
+                                        {row.PhotoPaths.map(
+                                          (photo, photoIndex) => (
+                                            <img
+                                              key={photoIndex}
+                                              src={photo}
+                                              alt={`Photo ${photoIndex + 1}`}
+                                              style={{
+                                                width: "80px",
+                                                height: "80px",
+                                                objectFit: "cover",
+                                                borderRadius: "5px",
+                                              }}
+                                            />
+                                          )
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                {/* Edit Button */}
+                                {/* <div style={{ marginTop: "8px" }}>
+                                  <Button
+                                    onClick={() => handleEditClick(row)}
+                                    style={{
+                                      backgroundColor: "#4CAF50",
+                                      border: "none",
+                                      color: "white",
+                                    }}
+                                  >
+                                    Edit
+                                  </Button>
+                                </div> */}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
 
         <div className="d-flex justify-content-between">
           <div className="text-sm text-gray-500">
@@ -379,13 +478,6 @@ const InspectionListDashboard = ({ bridgeId }) => {
           </div>
         </div>
       </div>
-
-      <Modal show={showModal} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Inspection Details</Modal.Title>
-        </Modal.Header>
-        <InspectionModal selectedRow={selectedRow} />
-      </Modal>
     </div>
   );
 };

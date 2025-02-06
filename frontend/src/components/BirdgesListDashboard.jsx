@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table } from "react-bootstrap";
+import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
 import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
 import FilterComponent from "./FilterComponent";
+import InventoryInfoDashboard from "./InventoryInfoDashboard"; // Import the InventoryInfo component
+import InspectionListDashboard from "./InspectionListDashboard";
+import MapModal from "./MapModal"; // Adjust the import path as needed
 
 const BridgesListDashboard = ({
   setSelectedDistrict,
+  setBridge,
   setMinBridgeLength,
   setMaxBridgeLength,
   setMinSpanLength,
@@ -33,7 +37,13 @@ const BridgesListDashboard = ({
   maxSpanLength,
   minYear,
   maxYear,
+  bridgeId,
 }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [selectedBridge, setSelectedBridge] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,6 +68,7 @@ const BridgesListDashboard = ({
     maxSpanLength,
     minYear,
     maxYear,
+    bridgeId,
   ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -82,6 +93,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridgeId,
       };
 
       // console.log(params);
@@ -106,12 +118,6 @@ const BridgesListDashboard = ({
     if (pageNumber >= 1 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
     }
-  };
-
-  const handleRowClick = (bridge) => {
-    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-    const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
-    window.location.href = editUrl;
   };
 
   const renderPaginationButtons = () => {
@@ -165,6 +171,49 @@ const BridgesListDashboard = ({
 
     return buttons;
   };
+
+  const handleViewInventory = (bridge) => {
+    setSelectedBridge(bridge); // Set the selected bridge data
+    setShowModal(true); // Show the modal
+  };
+
+  
+  const handleRowClick = (bridge) => {
+    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+    const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
+    window.location.href = editUrl;
+  };
+
+  // Function to close the modal
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedBridge(null); // Clear the selected bridge data
+  };
+
+  const handleViewInspection = (bridge) => {
+    setSelectedBridge(bridge); // Set the selected bridge data
+    setShowInspectionModal(true); // Open the inspection modal
+  };
+
+  const handleCloseInspectionModal = () => {
+    setShowInspectionModal(false); // Close the inspection modal
+    setSelectedBridge(null); // Clear the selected bridge data
+  };
+
+  const handleZoomToBridge = (bridge) => {
+    setSelectedLocation({
+      latitude: bridge.y_centroid, // y_centroid is latitude
+      longitude: bridge.x_centroid, // x_centroid is longitude
+      name: bridge.BridgeName, // Optional: Add a name for the marker label
+    });
+    setShowMapModal(true);
+  };
+
+  const handleCloseMapModal = () => {
+    setShowMapModal(false);
+    setSelectedLocation(null);
+  };
+
   // CSV download function
   const handleDownloadCSV = async () => {
     try {
@@ -182,6 +231,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridgeId,
       };
 
       // Prepare the query string from params
@@ -231,6 +281,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridgeId,
       };
 
       // Prepare the query string from params
@@ -291,11 +342,11 @@ const BridgesListDashboard = ({
   return (
     <>
       <div className="w-full mx-auto mt-2">
-        <div className="bg-[#60A5FA] text-grey p-4 rounded-md shadow-md flex items-center justify-between">
+        <div className="bg-[#60A5FA] text-grey p-2 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Bridges List</div>
+            <div className="text-2xl font-bold">Structures Inventory</div>
             <div className="text-sm font-medium mt-1 text-gray-700">
-              Total Bridges: {bridgeCount || 0}
+            Total Structures: {bridgeCount || 0}
             </div>
           </div>
           <div className="flex space-x-2">
@@ -356,6 +407,7 @@ const BridgesListDashboard = ({
                   setInspectionStatus={setInspectionStatus}
                   setMinYear={setMinYear}
                   setMaxYear={setMaxYear}
+                  setBridge={setBridge}
                 />
               </div>
             </div>
@@ -382,9 +434,12 @@ const BridgesListDashboard = ({
           border: "2px solid #60A5FA",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
+          minHeight: "400px", // Set a minimum height for the card
+          width: "100%", // Ensure the card takes full width of its container
+          overflow: "hidden", // Prevent content from overflowing
         }}
       >
-        <div className="card-body pb-0">
+        <div className="card-body pb-0" style={{ padding: "0.5rem" }}>
           {loading && (
             <div
               style={{
@@ -412,66 +467,169 @@ const BridgesListDashboard = ({
 
           {!loading && !error && (
             <>
-              <Table bordered responsive className="custom-table">
-                <thead>
-                  <tr>
-                    <th>District</th>
-                    <th>Road Name</th>
-                    <th>Structure Type</th>
-                    <th>Bridge Name</th>
-                    <th>Photo</th>
-                    <th>Latest Inspection Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableData.length > 0 ? (
-                    tableData.map((bridge, index) => (
-                      <tr
-                        key={index}
-                        onClick={() => handleRowClick(bridge)}
-                        className="hover-row"
-                      >
-                        <td>{bridge.district || "N/A"}</td>
-                        <td
-                          className="truncate-text"
-                          title={bridge.road_name || "N/A"}
-                        >
-                          {bridge.road_name || "N/A"}
-                        </td>
-                        <td>{bridge.structure_type || "N/A"}</td>
-                        <td>
-                          {bridge.pms_sec_id || "N/A"},
-                          {bridge.structure_no || "N/A"}
-                        </td>
-                        <td>
-                          {bridge.photos && bridge.photos.length > 0 ? (
-                            <img
-                              src={bridge.photos[0]} // Display the first image from the photos array
-                              alt="Bridge"
-                              className="w-16 h-16 object-cover rounded-md"
-                            />
-                          ) : (
-                            <img
-                              src="/download.jpeg" // Path to your alternate image
-                              alt="No image available"
-                              className="w-30 h-10 object-cover rounded-md"
-                            />
-                          )}
-                        </td>
-                        <td></td>
-                      </tr>
-                    ))
-                  ) : (
+              <div style={{ overflowX: "auto" }}>
+                <Table
+                  bordered
+                  responsive
+                  className="custom-table"
+                  style={{ minWidth: "800px" }}
+                >
+                  <thead>
                     <tr>
-                      <td colSpan="6" className="text-center">
-                        No data available
-                      </td>
+                      <th>District</th>
+                      <th>Road Name</th>
+                      <th>Structure Type</th>
+                      <th>Bridge Name</th>
+                      <th className="text-center">Action</th>
                     </tr>
-                  )}
-                </tbody>
-              </Table>
+                  </thead>
+                  <tbody>
+                    {tableData.length > 0 ? (
+                      tableData.map((bridge, index) => (
+                        <tr
+                          key={index}
+                          onClick={() => handleRowClick(bridge)}
+                          className="hover-row"
+                        >
+                          <td>{bridge.district || "N/A"}</td>
+                          <td
+                            className="truncate-text"
+                            title={bridge.road_name || "N/A"}
+                          >
+                            {bridge.road_name || "N/A"}
+                          </td>
+                          <td>{bridge.structure_type || "N/A"}</td>
+                          <td>
+                            {bridge.pms_sec_id || "N/A"},{" "}
+                            {bridge.structure_no || "N/A"}
+                          </td>
+                          <td>
+                            <div className="flex space-x-2 justify-center">
+                              {/* Button for Bridge Inventory Info */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent row click event
+                                  handleViewInventory(bridge);
+                                }}
+                                className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 text-xs"
+                                style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              >
+                                Inventory Info
+                              </button>
 
-              <div className="d-flex justify-content-center align-items-center">
+                              {/* Button for Inspection Info */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewInspection(bridge);
+                                }}
+                                className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 text-xs"
+                                style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              >
+                                Inspection Info
+                              </button>
+
+                              {/* Button for Zoom To */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleZoomToBridge(bridge);
+                                }}
+                                className="bg-purple-500 text-white px-2 py-1 rounded-md hover:bg-purple-600 text-xs"
+                                style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              >
+                                Zoom To
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center">
+                          No data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              </div>
+
+              {/* Modal for Bridge Inventory Details */}
+              <Modal
+                show={showModal}
+                onHide={handleCloseModal}
+                size="lg" // Use a larger modal size to accommodate the InventoryInfo component
+                centered
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Bridge Inventory Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <InventoryInfoDashboard inventoryData={selectedBridge} /> // Pass the selected bridge data to InventoryInfo
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              {/* Modal for Inspection Details */}
+              <Modal
+                show={showInspectionModal}
+                onHide={handleCloseInspectionModal}
+                size="lg"
+                centered
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Inspection Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <InspectionListDashboard
+                      bridgeId={selectedBridge.uu_bms_id}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="secondary"
+                    onClick={handleCloseInspectionModal}
+                  >
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              <Modal
+                show={showMapModal}
+                onHide={handleCloseMapModal}
+                size="lg" // Use a larger modal size to accommodate the map
+                centered
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Bridge Location on Map</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedLocation && (
+                    <MapModal
+                      location={selectedLocation}
+                      onClose={handleCloseMapModal}
+                      markerLabel={selectedLocation?.name || "Bridge Location"}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseMapModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              <div className="d-flex justify-content-center align-items-center mt-3">
                 {renderPaginationButtons()}
               </div>
             </>
