@@ -25,11 +25,11 @@ const BridgeInfo = () => {
   }, [location]);
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-  console.log("User Token: ", userToken);
+  // console.log("User Token: ", userToken);
 
   if (!userToken) {
     // Redirect to login or show a message if no user token exists
-    console.log("No user token found, redirecting to login...");
+    // console.log("No user token found, redirecting to login...");
     // Example: window.location.href = "/login";
   }
 
@@ -37,7 +37,7 @@ const BridgeInfo = () => {
   console.log("User Role: ", role);
 
   const renderInspectionList = () => {
-    console.log("Rendering inspection list, role is:", role);
+    // console.log("Rendering inspection list, role is:", role);
     if (userToken?.role == "1") {
       return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
     } else if (userToken?.role == "2") {

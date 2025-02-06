@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Card, Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
@@ -355,12 +355,29 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        <h6
-          className="card-title text-lg font-semibold pb-2"
-          style={{ fontSize: "1.25rem" }}
-        >
-          Condition Assessment Reports
-        </h6>
+        {/* Toggle buttons for old and new inspections */}
+        <div className="d-flex mb-3">
+          <h6
+            className="card-title text-lg font-semibold pb-2"
+            style={{ fontSize: "1.25rem" }}
+          >
+            Condition Assessment Reports
+          </h6>
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
+            onClick={() => handleDownloadCSV(tableData)}
+          >
+            <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+            CSV
+          </button>
+          <button
+            className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+            onClick={() => handleDownloadExcel(tableData)}
+          >
+            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+            Excel
+          </button>
+        </div>
 
         <div className="summary-section mt-1 mb-2">
           <table className="min-w-full table-auto border-collapse border border-gray-200">
@@ -375,7 +392,7 @@ const InspectionList = ({ bridgeId }) => {
                 </td>
               </tr>
 
-                {/* Unique Damage Leves */}
+              {/* Unique Damage Leves */}
               <tr>
                 <td className="border px-4 py-2">
                   <strong>Damage Levels:</strong>
@@ -414,24 +431,6 @@ const InspectionList = ({ bridgeId }) => {
           </table>
         </div>
 
-        {/* Toggle buttons for old and new inspections */}
-        <div className="d-flex mb-3">
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
-            onClick={() => handleDownloadCSV(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-            CSV
-          </button>
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-            onClick={() => handleDownloadExcel(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-            Excel
-          </button>
-        </div>
-
         {loading && (
           <div
             className="loader"
@@ -454,166 +453,116 @@ const InspectionList = ({ bridgeId }) => {
 
         <div className="inspection-cards-container">
           {Object.keys(groupedData).map((spanIndex) => (
-            <div
-              key={spanIndex}
-              className="card"
-              style={{ marginBottom: "20px" }}
-            >
-              <div
-                className="card-header"
-                style={{ backgroundColor: "#f5f5f5", padding: "10px" }}
-              >
+            <div key={spanIndex} className="card mb-4">
+              {/* Header: Span Number */}
+              <div className="card-header bg-light py-2">
                 <h5>{`Span No: ${spanIndex}`}</h5>
               </div>
-              <div className="card">
-                <div className="card-body">
-                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                    <div
-                      key={workKind}
-                      style={{
-                        marginBottom: "10px",
-                        border: "1px solid #ddd",
-                        padding: "8px",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
-                        Work Kind: {workKind}
-                      </div>
 
-                      {groupedData[spanIndex][workKind].map((row, index) => (
+              {/* Mapping Work Kinds */}
+              {groupedData[spanIndex] &&
+                Object.keys(groupedData[spanIndex]).map((workKind) => (
+                  <Card key={workKind} className="mb-3 border shadow-sm">
+                    {/* Header: Work Kind */}
+                    <Card.Header className="bg-primary text-white fw-bold">
+                      {workKind}
+                    </Card.Header>
+
+                    {/* Body: Mapping Inspections */}
+                    <Card.Body className="bg-slate-300">
+                      {groupedData[spanIndex][workKind].map((inspection) => (
                         <div
-                          key={index}
-                          className="inspection-item"
-                          style={{
-                            marginBottom: "8px",
-                            borderBottom: "1px solid #ddd",
-                            paddingBottom: "8px",
-                          }}
+                          key={inspection.id}
+                          className="mb-3 p-3 border-bottom"
                         >
-                          <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "repeat(4, 1fr)",
-                              columnGap: "12px",
-                              rowGap: "8px",
-                            }}
-                          >
-                            <div>
-                              <strong className="custom-label">Parts:</strong>{" "}
-                              {row.PartsName || "N/A"}
+                          <div className="row">
+                            {/* Left: Photos */}
+                            <div className="col-md-3">
+                              {inspection.PhotoPaths?.length > 0 && (
+                                <div className="d-flex flex-wrap gap-2">
+                                  {inspection.PhotoPaths.map((photo, i) => (
+                                    <a
+                                      key={i}
+                                      href={photo}
+                                      data-fancybox="gallery"
+                                      data-caption={`Photo ${i + 1}`}
+                                    >
+                                      <img
+                                        src={photo}
+                                        alt={`Photo ${i + 1}`}
+                                        className="img-fluid rounded border"
+                                        style={{
+                                          width: "80px",
+                                          height: "80px",
+                                          objectFit: "cover",
+                                        }}
+                                      />
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                            <div>
-                              <strong className="custom-label">
-                                Material:
-                              </strong>{" "}
-                              {row.MaterialName || "N/A"}
+
+                            {/* Right: Details */}
+                            <div className="col-md-6">
+                              <strong>Parts:</strong>{" "}
+                              {inspection.PartsName || "N/A"} <br />
+                              <strong>Material:</strong>{" "}
+                              {inspection.MaterialName || "N/A"} <br />
+                              <strong>Damage:</strong>{" "}
+                              {inspection.DamageKindName || "N/A"} <br />
+                              <strong>Level:</strong>{" "}
+                              {inspection.DamageLevel || "N/A"} <br />
+                              <strong>Situation Remarks:</strong>{" "}
+                              {inspection.Remarks || "N/A"}
                             </div>
-                            <div>
-                              <strong className="custom-label">Damage:</strong>{" "}
-                              {row.DamageKindName || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">Level:</strong>{" "}
-                              {row.DamageLevel || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">Remarks:</strong>{" "}
-                              {row.Remarks || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">
-                                Consultant Remarks:
-                              </strong>
+
+                            {/* Footer: Consultant Remarks, Approval & Save Button (Moved inside this row) */}
+                            <div className="col-md-3 d-flex flex-column justify-content-between">
+                              {/* Consultant Remarks Input */}
                               <Form.Control
-                                as="textarea"
-                                rows={2}
-                                value={row.consultant_remarks || ""}
+                                as="input"
+                                type="text"
+                                placeholder="Consultant Remarks"
+                                value={inspection.consultant_remarks || ""}
                                 onChange={(e) =>
                                   handleConsultantRemarksChange(
-                                    row,
+                                    inspection,
                                     e.target.value
                                   )
                                 }
+                                className="mb-2"
                               />
-                            </div>
 
-                            {/* Approved Flag Toggle */}
-                            <div>
-                              <strong className="custom-label">
-                                Consultant Approval Status:
-                              </strong>
+                              {/* Approval Status Dropdown */}
                               <Form.Select
-                                value={row.approved_by_consultant || 0}
+                                value={inspection.approved_by_consultant || 0}
                                 onChange={(e) =>
                                   handleApprovedFlagChange(
-                                    row,
+                                    inspection,
                                     parseInt(e.target.value)
                                   )
                                 }
+                                className="mb-2"
                               >
                                 <option value={0}>Unapproved</option>
                                 <option value={1}>Approved</option>
                               </Form.Select>
-                            </div>
-                            {/* Save Changes Button */}
-                            <div>
+
+                              {/* Save Changes Button */}
                               <Button
-                                onClick={() => handleSaveChanges(row)}
-                                style={{
-                                  backgroundColor: "#4CAF50",
-                                  border: "none",
-                                  color: "white",
-                                }}
+                                onClick={() => handleSaveChanges(inspection)}
+                                className="btn-success"
                               >
                                 Save Changes
                               </Button>
                             </div>
                           </div>
-
-                          {/* Photos Section */}
-                          {row.PhotoPaths && row.PhotoPaths.length > 0 && (
-                            <div style={{ marginTop: "8px" }}>
-                              <strong>Photos:</strong>
-                              <div
-                                style={{
-                                  display: "grid",
-                                  gridTemplateColumns:
-                                    "repeat(auto-fill, 80px)",
-                                  gap: "6px",
-                                  marginTop: "6px",
-                                }}
-                              >
-                                {row.PhotoPaths.map((photo, photoIndex) => (
-                                  <a
-                                    key={photoIndex}
-                                    href={photo} // Full image link
-                                    data-fancybox="gallery" // Enables lightbox functionality
-                                    data-caption={`Photo ${photoIndex + 1}`}
-                                  >
-                                    <img
-                                      src={photo}
-                                      alt={`Photo ${photoIndex + 1}`}
-                                      style={{
-                                        width: "80px",
-                                        height: "80px",
-                                        objectFit: "cover",
-                                        borderRadius: "5px",
-                                        cursor: "pointer",
-                                        border: "1px solid gray",
-                                      }}
-                                    />
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    </Card.Body>
+                  </Card>
+                ))}
             </div>
           ))}
         </div>
