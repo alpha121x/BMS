@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Form } from "react-bootstrap";
+import {  Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
@@ -62,17 +62,18 @@ const InspectionList = ({ bridgeId }) => {
       console.log("Updating inspection", row);
 
       // Allow empty remarks (send as null if empty)
-      const consultantRemarks =
-        row.ConsultantRemarks?.trim() === "" ? null : row.ConsultantRemarks;
+      const ramsRemarks =
+        row.remarks_remarks?.trim() === "" ? null : row.rams_remarks;
 
       // Prepare the updated row with ConsultantRemarks and approval status
       const updatedData = {
         id: row.inspection_id,
-        RamsRemarks: consultantRemarks, // Can be empty (null)
-        approved_by_consultant: row.approved_by_rams,
+        ramsRemarks: ramsRemarks, // Can be empty (null)
+        approved_by_rams: row.approved_by_rams,
       };
 
       console.log(updatedData);
+      // return;
 
       // Call the API to update the database
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
@@ -92,9 +93,9 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleRamsRemarksChange = (row, value) => {
+  const handleConsultantRemarksChange = (row, value) => {
     // Clone the row and update the ConsultantRemarks field
-    const updatedRow = { ...row, RamsRemarks: value };
+    const updatedRow = { ...row, consultant_remarks: value };
 
     // Update the table data without triggering a reload
     setTableData((prevData) =>
@@ -104,7 +105,7 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleApprovedFlagChange = (row, value) => {
     // Clone the row and update the approved_by_consultant field
-    const updatedRow = { ...row, approved_by_rams: value };
+    const updatedRow = { ...row, approved_by_consultant: value };
 
     // Update the table data without triggering a reload
     setTableData((prevData) =>
@@ -354,12 +355,31 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        <h6
-          className="card-title text-lg font-semibold pb-2"
-          style={{ fontSize: "1.25rem" }}
-        >
-          Condition Assessment Reports
-        </h6>
+        {/* Toggle buttons for old and new inspections */}
+        <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
+          <h6
+            className="card-title text-lg font-semibold pb-2"
+            style={{ fontSize: "1.25rem" }}
+          >
+            Condition Assessment Reports
+          </h6>
+          <div className="d-flex gap-3">
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+              onClick={() => handleDownloadCSV(tableData)}
+            >
+              <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+              CSV
+            </button>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+              onClick={() => handleDownloadExcel(tableData)}
+            >
+              <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+              Excel
+            </button>
+          </div>
+        </div>
 
         <div className="summary-section mt-1 mb-2">
           <table className="min-w-full table-auto border-collapse border border-gray-200">
@@ -374,10 +394,10 @@ const InspectionList = ({ bridgeId }) => {
                 </td>
               </tr>
 
-                {/* Unique Damage Leves */}
+              {/* Unique Damage Leves */}
               <tr>
                 <td className="border px-4 py-2">
-                  <strong>Spans:</strong>
+                  <strong>Damage Levels:</strong>
                 </td>
                 <td className="border px-4 py-2">
                   {getDamageLevel(tableData)}
@@ -413,24 +433,6 @@ const InspectionList = ({ bridgeId }) => {
           </table>
         </div>
 
-        {/* Toggle buttons for old and new inspections */}
-        <div className="d-flex mb-3">
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 mr-2"
-            onClick={() => handleDownloadCSV(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-            CSV
-          </button>
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-            onClick={() => handleDownloadExcel(tableData)}
-          >
-            <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-            Excel
-          </button>
-        </div>
-
         {loading && (
           <div
             className="loader"
@@ -452,167 +454,119 @@ const InspectionList = ({ bridgeId }) => {
         )}
 
         <div className="inspection-cards-container">
-          {Object.keys(groupedData).map((spanIndex) => (
-            <div
-              key={spanIndex}
-              className="card"
-              style={{ marginBottom: "20px" }}
-            >
-              <div
-                className="card-header"
-                style={{ backgroundColor: "#f5f5f5", padding: "10px" }}
-              >
+          {Object.keys(groupedData).map((spanIndex, inspection_id) => (
+            <div key={spanIndex} className="card mb-4">
+              {/* Header: Span Number */}
+              <div className="card-header bg-light py-2">
                 <h5>{`Span No: ${spanIndex}`}</h5>
               </div>
-              <div className="card">
-                <div className="card-body">
-                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                    <div
-                      key={workKind}
-                      style={{
-                        marginBottom: "10px",
-                        border: "1px solid #ddd",
-                        padding: "8px",
-                        borderRadius: "8px",
-                      }}
-                    >
-                      <div style={{ marginBottom: "8px", fontWeight: "bold" }}>
-                        Work Kind: {workKind}
-                      </div>
 
-                      {groupedData[spanIndex][workKind].map((row, index) => (
-                        <div
-                          key={index}
-                          className="inspection-item"
-                          style={{
-                            marginBottom: "8px",
-                            borderBottom: "1px solid #ddd",
-                            paddingBottom: "8px",
-                          }}
-                        >
+              {/* Mapping Work Kinds */}
+              {groupedData[spanIndex] &&
+                Object.keys(groupedData[spanIndex]).map((workKind) => (
+                  <div key={workKind} className="card mb-4 border shadow-sm">
+                    {/* Header: Work Kind */}
+                    <div className="card-header bg-primary text-white fw-bold">
+                      {workKind}
+                    </div>
+
+                    {/* Body: Mapping Inspections */}
+                    <div className="card-body p-3">
+                      {groupedData[spanIndex][workKind] &&
+                        groupedData[spanIndex][workKind].map((inspection) => (
                           <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns: "repeat(4, 1fr)",
-                              columnGap: "12px",
-                              rowGap: "8px",
-                            }}
+                            key={inspection.id}
+                            className="mb-4 p-4 border rounded shadow-sm"
+                            style={{ backgroundColor: "#CFE2FF" }}
                           >
-                            <div>
-                              <strong className="custom-label">Parts:</strong>{" "}
-                              {row.PartsName || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">
-                                Material:
-                              </strong>{" "}
-                              {row.MaterialName || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">Damage:</strong>{" "}
-                              {row.DamageKindName || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">Level:</strong>{" "}
-                              {row.DamageLevel || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">Remarks:</strong>{" "}
-                              {row.Remarks || "N/A"}
-                            </div>
-                            <div>
-                              <strong className="custom-label">
-                                Rams Remarks:
-                              </strong>
-                              <Form.Control
-                                as="textarea"
-                                rows={2}
-                                value={row.RamsRemarks || ""}
-                                onChange={(e) =>
-                                  handleConsultantRemarksChange(
-                                    row,
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            </div>
+                            <div className="row">
+                              {/* Left: Photos */}
+                              <div className="col-md-3">
+                                {inspection.PhotoPaths?.length > 0 && (
+                                  <div className="d-flex flex-wrap gap-2">
+                                    {inspection.PhotoPaths.map((photo, i) => (
+                                      <a
+                                        key={i}
+                                        href={photo}
+                                        data-fancybox="gallery"
+                                        data-caption={`Photo ${i + 1}`}
+                                      >
+                                        <img
+                                          src={photo}
+                                          alt={`Photo ${i + 1}`}
+                                          className="img-fluid rounded border"
+                                          style={{
+                                            width: "80px",
+                                            height: "80px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
 
-                            {/* Approved Flag Toggle */}
-                            <div>
-                              <strong className="custom-label">
-                                Rams Approval Status:
-                              </strong>
-                              <Form.Select
-                                value={row.approved_by_rams || 0}
-                                onChange={(e) =>
-                                  handleApprovedFlagChange(
-                                    row,
-                                    parseInt(e.target.value)
-                                  )
-                                }
-                              >
-                                <option value={0}>Unapproved</option>
-                                <option value={1}>Approved</option>
-                              </Form.Select>
-                            </div>
-                            {/* Save Changes Button */}
-                            <div>
-                              <Button
-                                onClick={() => handleSaveChanges(row)}
-                                style={{
-                                  backgroundColor: "#4CAF50",
-                                  border: "none",
-                                  color: "white",
-                                }}
-                              >
-                                Save Changes
-                              </Button>
-                            </div>
-                          </div>
+                              {/* Right: Details */}
+                              <div className="col-md-6">
+                                <strong>Parts:</strong>{" "}
+                                {inspection.PartsName || "N/A"} <br />
+                                <strong>Material:</strong>{" "}
+                                {inspection.MaterialName || "N/A"} <br />
+                                <strong>Damage:</strong>{" "}
+                                {inspection.DamageKindName || "N/A"} <br />
+                                <strong>Level:</strong>{" "}
+                                {inspection.DamageLevel || "N/A"} <br />
+                                <strong>Situation Remarks:</strong>{" "}
+                                {inspection.Remarks || "N/A"}
+                              </div>
 
-                          {/* Photos Section */}
-                          {row.PhotoPaths && row.PhotoPaths.length > 0 && (
-                            <div style={{ marginTop: "8px" }}>
-                              <strong>Photos:</strong>
-                              <div
-                                style={{
-                                  display: "grid",
-                                  gridTemplateColumns:
-                                    "repeat(auto-fill, 80px)",
-                                  gap: "6px",
-                                  marginTop: "6px",
-                                }}
-                              >
-                                {row.PhotoPaths.map((photo, photoIndex) => (
-                                  <a
-                                    key={photoIndex}
-                                    href={photo} // Full image link
-                                    data-fancybox="gallery" // Enables lightbox functionality
-                                    data-caption={`Photo ${photoIndex + 1}`}
-                                  >
-                                    <img
-                                      src={photo}
-                                      alt={`Photo ${photoIndex + 1}`}
-                                      style={{
-                                        width: "80px",
-                                        height: "80px",
-                                        objectFit: "cover",
-                                        borderRadius: "5px",
-                                        cursor: "pointer",
-                                        border: "1px solid gray",
-                                      }}
-                                    />
-                                  </a>
-                                ))}
+                              {/* Footer: Consultant Remarks, Approval & Save Button */}
+                              <div className="col-md-3 d-flex flex-column justify-content-between">
+                                {/* Consultant Remarks Input */}
+                                <Form.Control
+                                  as="input"
+                                  type="text"
+                                  placeholder="Rams Remarks"
+                                  value={inspection.rams_remarks || ""}
+                                  onChange={(e) =>
+                                    handleConsultantRemarksChange(
+                                      inspection,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="mb-2"
+                                />
+
+                                {/* Approval Status Dropdown */}
+                                <Form.Select
+                                  value={inspection.approved_by_rams || 0}
+                                  onChange={(e) =>
+                                    handleApprovedFlagChange(
+                                      inspection,
+                                      parseInt(e.target.value)
+                                    )
+                                  }
+                                  className="mb-2"
+                                >
+                                  <option value={0}>Unapproved</option>
+                                  <option value={1}>Approved</option>
+                                </Form.Select>
+
+                                {/* Save Changes Button */}
+                                <Button
+                                  onClick={() => handleSaveChanges(inspection)}
+                                  className="bg-[#CFE2FF]"
+                                >
+                                  Save Changes
+                                </Button>
                               </div>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                          </div>
+                        ))}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
+                ))}
             </div>
           ))}
         </div>
