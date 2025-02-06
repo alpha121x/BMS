@@ -25,10 +25,10 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
       <div
         className="card p-3"
         style={{
-          maxWidth: "900px",
-          width: "100%",
+          background: "#FFFFFF",
           border: "2px solid #60A5FA",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          position: "relative",
         }}
       >
         <h5 className="card-title font-semibold pb-2">Inventory Info</h5>
