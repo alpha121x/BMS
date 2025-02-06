@@ -38,12 +38,12 @@ const BridgeInfo = () => {
 
   const renderInspectionList = () => {
     console.log("Rendering inspection list, role is:", role);
-    if (userToken?.role === "1") {
+    if (userToken?.role == "1") {
       return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
-    } else if (userToken?.role === "2") {
+    } else if (userToken?.role == "2") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
     }
-    return <InspectionList bridgeId={bridgeData?.uu_bms_id} />; // Handling case where role doesn't match
+    return <InspectionList bridgeId={bridgeData?.uu_bms_id} />; 
   };
 
   const handleBackClick = () => {
@@ -105,7 +105,10 @@ const BridgeInfo = () => {
             <div className="w-full sm:w-3/4 md:w-75 lg:w-75 bg-white p-6 rounded-lg shadow-md">
               {bridgeData && <InventoryInfo inventoryData={bridgeData} />}
               <div className="border-t border-gray-300 my-4"></div>
+              <div>
               {renderInspectionList()}
+
+              </div>
             </div>
           </div>
         </section>

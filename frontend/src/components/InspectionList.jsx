@@ -378,7 +378,7 @@ const InspectionList = ({ bridgeId }) => {
                 {/* Unique Damage Leves */}
               <tr>
                 <td className="border px-4 py-2">
-                  <strong>Spans:</strong>
+                  <strong>Damage Levels:</strong>
                 </td>
                 <td className="border px-4 py-2">
                   {getDamageLevel(tableData)}
