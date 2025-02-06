@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import "@fancyapps/ui/dist/fancybox/fancybox.css"; // Try this if `styles` path doesn't work
 import { Fancybox } from "@fancyapps/ui";
+import Swal from "sweetalert2";
 
 const InspectionList = ({ bridgeId }) => {
   const [inspectiondata, setInspectionData] = useState([]);
@@ -53,6 +54,22 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleUpdateInspection = async (row) => {
     try {
+      // Show confirmation alert using SweetAlert2
+      const { isConfirmed } = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, save it!",
+      });
+
+      if (!isConfirmed) {
+        console.log("Update cancelled by user.");
+        return; // Exit if the user cancels the update
+      }
+
       console.log("Updating inspection", row);
 
       // Allow empty remarks (send as null if empty)
@@ -67,7 +84,6 @@ const InspectionList = ({ bridgeId }) => {
       };
 
       console.log(updatedData);
-      // return;
 
       // Call the API to update the database
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
@@ -82,8 +98,13 @@ const InspectionList = ({ bridgeId }) => {
 
       // Refetch data to reflect changes
       fetchData();
+
+      // Show success alert after updating
+      Swal.fire("Updated!", "Your inspection has been updated.", "success");
     } catch (error) {
       setError(error.message);
+      // Show error alert if the update fails
+      Swal.fire("Error!", error.message, "error");
     }
   };
 
