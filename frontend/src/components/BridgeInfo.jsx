@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { TrashIcon, PencilIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import {
+  TrashIcon,
+  PencilIcon,
+  ArrowLeftIcon,
+} from "@heroicons/react/24/outline";
 import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfoDashboard";
 import { useLocation, useNavigate } from "react-router-dom";
 import InspectionList from "./InspectionList";
+import InspectionListRams from "./InspectionListRams";
 
 const BridgeInfo = () => {
   const location = useLocation();
@@ -18,6 +23,21 @@ const BridgeInfo = () => {
       setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
     }
   }, [location]);
+
+  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+  console.log("User Token: ", userToken);
+  const role = userToken?.role_id;
+  console.log("Role: ", role);
+
+  // Conditionally render components based on userRole
+  const renderInspectionList = () => {
+    if (role === "1") {
+      return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
+    } else if (role === "2") {
+      return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
+    }
+    return null;
+  };
 
   const handleBackClick = () => {
     navigate("/Evaluation");
@@ -74,7 +94,7 @@ const BridgeInfo = () => {
             <div className="w-full sm:w-3/4 md:w-75 lg:w-75 bg-white p-6 rounded-lg shadow-md">
               {bridgeData && <InventoryInfo inventoryData={bridgeData} />}
               <div className="border-t border-gray-300 my-4"></div>
-              <InspectionList bridgeId={bridgeData?.uu_bms_id} />
+              {renderInspectionList()}
             </div>
           </div>
         </section>
