@@ -147,7 +147,6 @@ app.post("/api/loginEvaluation", async (req, res) => {
         role: user.role_id,
         email: user.email,
         phoneNum: user.phone_num,
-        role: user.role,
       },
     });
   } catch (error) {
