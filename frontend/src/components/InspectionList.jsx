@@ -452,7 +452,7 @@ const InspectionList = ({ bridgeId }) => {
         )}
 
         <div className="inspection-cards-container">
-          {Object.keys(groupedData).map((spanIndex) => (
+          {Object.keys(groupedData).map((spanIndex, inspection_id) => (
             <div key={spanIndex} className="card mb-4">
               {/* Header: Span Number */}
               <div className="card-header bg-light py-2">
@@ -462,106 +462,108 @@ const InspectionList = ({ bridgeId }) => {
               {/* Mapping Work Kinds */}
               {groupedData[spanIndex] &&
                 Object.keys(groupedData[spanIndex]).map((workKind) => (
-                  <Card key={workKind} className="mb-3 border shadow-sm">
+                  <div key={workKind} className="card mb-4 border shadow-sm">
                     {/* Header: Work Kind */}
-                    <Card.Header className="bg-primary text-white fw-bold">
+                    <div className="card-header bg-primary text-white fw-bold">
                       {workKind}
-                    </Card.Header>
+                    </div>
 
                     {/* Body: Mapping Inspections */}
-                    <Card.Body className="bg-slate-300">
-                      {groupedData[spanIndex][workKind].map((inspection) => (
-                        <div
-                          key={inspection.id}
-                          className="mb-3 p-3 border-bottom"
-                        >
-                          <div className="row">
-                            {/* Left: Photos */}
-                            <div className="col-md-3">
-                              {inspection.PhotoPaths?.length > 0 && (
-                                <div className="d-flex flex-wrap gap-2">
-                                  {inspection.PhotoPaths.map((photo, i) => (
-                                    <a
-                                      key={i}
-                                      href={photo}
-                                      data-fancybox="gallery"
-                                      data-caption={`Photo ${i + 1}`}
-                                    >
-                                      <img
-                                        src={photo}
-                                        alt={`Photo ${i + 1}`}
-                                        className="img-fluid rounded border"
-                                        style={{
-                                          width: "80px",
-                                          height: "80px",
-                                          objectFit: "cover",
-                                        }}
-                                      />
-                                    </a>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
+                    <div className="card-body p-3">
+                      {groupedData[spanIndex][workKind] &&
+                        groupedData[spanIndex][workKind].map((inspection) => (
+                          <div
+                            key={inspection.id}
+                            className="mb-4 p-4 border rounded shadow-sm"
+                            style={{ backgroundColor: "#CFE2FF" }}
+                          >
+                            <div className="row">
+                              {/* Left: Photos */}
+                              <div className="col-md-3">
+                                {inspection.PhotoPaths?.length > 0 && (
+                                  <div className="d-flex flex-wrap gap-2">
+                                    {inspection.PhotoPaths.map((photo, i) => (
+                                      <a
+                                        key={i}
+                                        href={photo}
+                                        data-fancybox="gallery"
+                                        data-caption={`Photo ${i + 1}`}
+                                      >
+                                        <img
+                                          src={photo}
+                                          alt={`Photo ${i + 1}`}
+                                          className="img-fluid rounded border"
+                                          style={{
+                                            width: "80px",
+                                            height: "80px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                      </a>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
 
-                            {/* Right: Details */}
-                            <div className="col-md-6">
-                              <strong>Parts:</strong>{" "}
-                              {inspection.PartsName || "N/A"} <br />
-                              <strong>Material:</strong>{" "}
-                              {inspection.MaterialName || "N/A"} <br />
-                              <strong>Damage:</strong>{" "}
-                              {inspection.DamageKindName || "N/A"} <br />
-                              <strong>Level:</strong>{" "}
-                              {inspection.DamageLevel || "N/A"} <br />
-                              <strong>Situation Remarks:</strong>{" "}
-                              {inspection.Remarks || "N/A"}
-                            </div>
+                              {/* Right: Details */}
+                              <div className="col-md-6">
+                                <strong>Parts:</strong>{" "}
+                                {inspection.PartsName || "N/A"} <br />
+                                <strong>Material:</strong>{" "}
+                                {inspection.MaterialName || "N/A"} <br />
+                                <strong>Damage:</strong>{" "}
+                                {inspection.DamageKindName || "N/A"} <br />
+                                <strong>Level:</strong>{" "}
+                                {inspection.DamageLevel || "N/A"} <br />
+                                <strong>Situation Remarks:</strong>{" "}
+                                {inspection.Remarks || "N/A"}
+                              </div>
 
-                            {/* Footer: Consultant Remarks, Approval & Save Button (Moved inside this row) */}
-                            <div className="col-md-3 d-flex flex-column justify-content-between">
-                              {/* Consultant Remarks Input */}
-                              <Form.Control
-                                as="input"
-                                type="text"
-                                placeholder="Consultant Remarks"
-                                value={inspection.consultant_remarks || ""}
-                                onChange={(e) =>
-                                  handleConsultantRemarksChange(
-                                    inspection,
-                                    e.target.value
-                                  )
-                                }
-                                className="mb-2"
-                              />
+                              {/* Footer: Consultant Remarks, Approval & Save Button */}
+                              <div className="col-md-3 d-flex flex-column justify-content-between">
+                                {/* Consultant Remarks Input */}
+                                <Form.Control
+                                  as="input"
+                                  type="text"
+                                  placeholder="Consultant Remarks"
+                                  value={inspection.consultant_remarks || ""}
+                                  onChange={(e) =>
+                                    handleConsultantRemarksChange(
+                                      inspection,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="mb-2"
+                                />
 
-                              {/* Approval Status Dropdown */}
-                              <Form.Select
-                                value={inspection.approved_by_consultant || 0}
-                                onChange={(e) =>
-                                  handleApprovedFlagChange(
-                                    inspection,
-                                    parseInt(e.target.value)
-                                  )
-                                }
-                                className="mb-2"
-                              >
-                                <option value={0}>Unapproved</option>
-                                <option value={1}>Approved</option>
-                              </Form.Select>
+                                {/* Approval Status Dropdown */}
+                                <Form.Select
+                                  value={inspection.approved_by_consultant || 0}
+                                  onChange={(e) =>
+                                    handleApprovedFlagChange(
+                                      inspection,
+                                      parseInt(e.target.value)
+                                    )
+                                  }
+                                  className="mb-2"
+                                >
+                                  <option value={0}>Unapproved</option>
+                                  <option value={1}>Approved</option>
+                                </Form.Select>
 
-                              {/* Save Changes Button */}
-                              <Button
-                                onClick={() => handleSaveChanges(inspection)}
-                                className="btn-success"
-                              >
-                                Save Changes
-                              </Button>
+                                {/* Save Changes Button */}
+                                <Button
+                                  onClick={() => handleSaveChanges(inspection)}
+                                  className="bg-[#CFE2FF]"
+                                >
+                                  Save Changes
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </Card.Body>
-                  </Card>
+                        ))}
+                    </div>
+                  </div>
                 ))}
             </div>
           ))}

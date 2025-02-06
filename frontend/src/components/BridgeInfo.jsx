@@ -34,7 +34,7 @@ const BridgeInfo = () => {
   }
 
   const role = userToken?.role;
-  console.log("User Role: ", role);
+  // console.log("User Role: ", role);
 
   const renderInspectionList = () => {
     // console.log("Rendering inspection list, role is:", role);
@@ -43,7 +43,7 @@ const BridgeInfo = () => {
     } else if (userToken?.role == "2") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
     }
-    return <InspectionList bridgeId={bridgeData?.uu_bms_id} />; 
+    return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
   };
 
   const handleBackClick = () => {
@@ -56,7 +56,7 @@ const BridgeInfo = () => {
   };
 
   if (!bridgeData || !role) {
-    return <div>Loading...</div>;  // Or redirect to login
+    return <div>Loading...</div>; // Or redirect to login
   }
 
   return (
@@ -65,7 +65,7 @@ const BridgeInfo = () => {
       <main className="flex-grow p-1">
         <section className="bg-gray-100 min-h-screen">
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
-            <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
+            <div className="bg-[#CFE2FF] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
               <div className="flex-1">
                 <button
                   onClick={handleBackClick}
@@ -89,7 +89,7 @@ const BridgeInfo = () => {
               <div className="flex gap-2">
                 <button
                   onClick={handleEditClick}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                  className="bg-[#5C636A] hover:bg-slate-400 text-white px-4 py-2 rounded-md flex items-center gap-2"
                 >
                   <PencilIcon className="h-5 w-5" /> Edit
                 </button>
@@ -105,10 +105,7 @@ const BridgeInfo = () => {
             <div className="w-full sm:w-3/4 md:w-75 lg:w-75 bg-white p-6 rounded-lg shadow-md">
               {bridgeData && <InventoryInfo inventoryData={bridgeData} />}
               <div className="border-t border-gray-300 my-4"></div>
-              <div>
-              {renderInspectionList()}
-
-              </div>
+              <div>{renderInspectionList()}</div>
             </div>
           </div>
         </section>
