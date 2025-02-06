@@ -26,17 +26,24 @@ const BridgeInfo = () => {
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
   console.log("User Token: ", userToken);
-  const role = userToken?.role_id;
-  console.log("Role: ", role);
 
-  // Conditionally render components based on userRole
+  if (!userToken) {
+    // Redirect to login or show a message if no user token exists
+    console.log("No user token found, redirecting to login...");
+    // Example: window.location.href = "/login";
+  }
+
+  const role = userToken?.role;
+  console.log("User Role: ", role);
+
   const renderInspectionList = () => {
+    console.log("Rendering inspection list, role is:", role);
     if (role === "1") {
       return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
     } else if (role === "2") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
     }
-    return null;
+    return <InspectionList bridgeId={bridgeData?.uu_bms_id} />; // Handling case where role doesn't match
   };
 
   const handleBackClick = () => {
@@ -47,6 +54,10 @@ const BridgeInfo = () => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridgeData));
     window.location.href = `/EditBridge?data=${serializedBridgeData}`;
   };
+
+  if (!bridgeData || !role) {
+    return <div>Loading...</div>;  // Or redirect to login
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
