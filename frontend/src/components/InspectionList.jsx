@@ -101,7 +101,12 @@ const InspectionList = ({ bridgeId }) => {
       fetchData();
 
       // Show success alert after updating
-      Swal.fire("Updated!", "Your inspection has been updated.", "success");
+      Swal.fire({
+        title: "Updated!",
+        text: "Your inspection has been updated.",
+        icon: "success",
+        confirmButtonColor: "#0D6EFD", // Custom OK button color
+      });
     } catch (error) {
       setError(error.message);
       // Show error alert if the update fails
