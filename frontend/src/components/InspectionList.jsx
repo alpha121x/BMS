@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useCallback } from "react";
 import { Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -108,23 +108,23 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleConsultantRemarksChange = (row, value) => {
-    // Clone the row and update the ConsultantRemarks field
-    const updatedRow = { ...row, consultant_remarks: value };
-
-    // Update the table data without triggering a reload
+  const handleConsultantRemarksChange = (inspectionId, value) => {
     setInspectionData((prevData) =>
-      prevData.map((item) => (item.id === row.id ? updatedRow : item))
+      prevData.map((item) =>
+        item.inspection_id === inspectionId
+          ? { ...item, consultant_remarks: value }
+          : item
+      )
     );
   };
 
-  const handleApprovedFlagChange = (row, value) => {
-    // Clone the row and update the approved_by_consultant field
-    const updatedRow = { ...row, approved_by_consultant: value };
-
-    // Update the table data without triggering a reload
+  const handleApprovedFlagChange = (inspectionId, value) => {
     setInspectionData((prevData) =>
-      prevData.map((item) => (item.id === row.id ? updatedRow : item))
+      prevData.map((item) =>
+        item.inspection_id === inspectionId
+          ? { ...item, approved_by_consultant: value }
+          : item
+      )
     );
   };
 
@@ -228,30 +228,23 @@ const InspectionList = ({ bridgeId }) => {
     return uniqueSpanIndices.length; // Return the count of unique span indices
   };
 
-  // const handleEditClick = (row) => {
+  const groupedData = useMemo(() => {
+    return inspectiondata.reduce((acc, row) => {
+      const spanKey = row.SpanIndex || "N/A";
+      const workKindKey = row.WorkKindName || "N/A";
 
-  //   const serializedRow = encodeURIComponent(JSON.stringify(row));
-  //   const editUrl = `/EditInspectionNew?data=${serializedRow}`;
-  //   window.location.href = editUrl;
-  // };
+      if (!acc[spanKey]) {
+        acc[spanKey] = {};
+      }
 
-  // Group the inspection data by SpanIndex and then by WorkKind
-  const groupedData = inspectiondata.reduce((acc, row) => {
-    const spanKey = row.SpanIndex || "N/A";
-    const workKindKey = row.WorkKindName || "N/A";
+      if (!acc[spanKey][workKindKey]) {
+        acc[spanKey][workKindKey] = [];
+      }
 
-    if (!acc[spanKey]) {
-      acc[spanKey] = {};
-    }
-
-    if (!acc[spanKey][workKindKey]) {
-      acc[spanKey][workKindKey] = [];
-    }
-
-    acc[spanKey][workKindKey].push(row);
-
-    return acc;
-  }, {});
+      acc[spanKey][workKindKey].push(row);
+      return acc;
+    }, {});
+  }, [inspectiondata]); // <-- This ensures `groupedData` updates when `inspectionData` changes
 
   return (
     <div
@@ -450,7 +443,7 @@ const InspectionList = ({ bridgeId }) => {
                                       }
                                       onChange={(e) =>
                                         handleConsultantRemarksChange(
-                                          inspection,
+                                          inspection.inspection_id,
                                           e.target.value
                                         )
                                       }
@@ -463,7 +456,7 @@ const InspectionList = ({ bridgeId }) => {
                                       }
                                       onChange={(e) =>
                                         handleApprovedFlagChange(
-                                          inspection,
+                                          inspection.inspection_id,
                                           parseInt(e.target.value)
                                         )
                                       }
