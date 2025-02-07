@@ -563,8 +563,8 @@ app.get("/api/get-inspections", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
-        approved_by_consultant,
-        consultant_remarks,
+        qc_con,
+        qc_remarks_con,
         bridge_name, 
         "SpanIndex", 
         "WorkKindName", 
@@ -601,7 +601,7 @@ app.get("/api/get-inspections", async (req, res) => {
 
 // Endpoint to update inspection data
 app.put("/api/update-inspection", async (req, res) => {
-  const { id, consultantRemarks, approved_by_consultant } = req.body;
+  const { id, qc_remarks_con, qc_con } = req.body;
 
   if (!id) {
     return res.status(400).json({ error: "Invalid data: ID is required" });
@@ -614,15 +614,15 @@ app.put("/api/update-inspection", async (req, res) => {
     let valueIndex = 1;
 
     // Conditionally add the fields to update
-    if (consultantRemarks !== undefined) {
-      query += ` consultant_remarks = $${valueIndex},`;
-      values.push(consultantRemarks === null ? null : consultantRemarks);
+    if (qc_remarks_con !== undefined) {
+      query += ` qc_remarks_con = $${valueIndex},`;
+      values.push(qc_remarks_con === null ? null : qc_remarks_con);
       valueIndex++;
     }
 
-    if (approved_by_consultant !== undefined) {
-      query += ` approved_by_consultant = $${valueIndex},`;
-      values.push(approved_by_consultant);
+    if (qc_con !== undefined) {
+      query += ` qc_con = $${valueIndex},`;
+      values.push(qc_con);
       valueIndex++;
     }
 

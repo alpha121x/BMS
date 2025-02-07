@@ -61,8 +61,8 @@ const InspectionList = ({ bridgeId }) => {
         text: "You won't be able to revert this!",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
+        confirmButtonColor: "#0D6EFD",
+        cancelButtonColor: "#6C757D",
         confirmButtonText: "Yes, save it!",
       });
 
@@ -75,13 +75,13 @@ const InspectionList = ({ bridgeId }) => {
 
       // Allow empty remarks (send as null if empty)
       const consultantRemarks =
-        row.consultant_remarks?.trim() === "" ? null : row.consultant_remarks;
+        row.qc_remarks_con?.trim() === "" ? null : row.qc_remarks_con;
 
       // Prepare the updated row with ConsultantRemarks and approval status
       const updatedData = {
         id: row.inspection_id,
-        consultantRemarks: consultantRemarks, // Can be empty (null)
-        approved_by_consultant: row.approved_by_consultant,
+        qc_remarks_con: consultantRemarks, // Can be empty (null)
+        qc_con: row.qc_con,
       };
 
       console.log(updatedData);
@@ -113,7 +113,7 @@ const InspectionList = ({ bridgeId }) => {
     setInspectionData((prevData) =>
       prevData.map((item) =>
         item.inspection_id === inspectionId
-          ? { ...item, consultant_remarks: value }
+          ? { ...item, qc_remarks_con: value }
           : item
       )
     );
@@ -123,7 +123,7 @@ const InspectionList = ({ bridgeId }) => {
     setInspectionData((prevData) =>
       prevData.map((item) =>
         item.inspection_id === inspectionId
-          ? { ...item, approved_by_consultant: value }
+          ? { ...item, qc_con: value }
           : item
       )
     );
@@ -266,7 +266,7 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
+        <div className="d-flex mb-4 justify-content-between items-center p-3 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
             className="card-title text-lg font-semibold pb-2"
             style={{ fontSize: "1.25rem" }}
@@ -442,7 +442,7 @@ const InspectionList = ({ bridgeId }) => {
                                     as="input"
                                     type="text"
                                     placeholder="Consultant Remarks"
-                                    value={inspection.consultant_remarks || ""}
+                                    value={inspection.qc_remarks_con || ""}
                                     onChange={(e) =>
                                       handleConsultantRemarksChange(
                                         inspection.inspection_id,
@@ -454,7 +454,7 @@ const InspectionList = ({ bridgeId }) => {
 
                                   <Form.Select
                                     value={
-                                      inspection.approved_by_consultant || 0
+                                      inspection.qc_con || 1
                                     }
                                     onChange={(e) =>
                                       handleApprovedFlagChange(
@@ -464,8 +464,8 @@ const InspectionList = ({ bridgeId }) => {
                                     }
                                     className="mb-2"
                                   >
-                                    <option value={0}>Unapproved</option>
-                                    <option value={1}>Approved</option>
+                                    <option value={3}>Unapproved</option>
+                                    <option value={2}>Approved</option>
                                   </Form.Select>
 
                                   <Button
