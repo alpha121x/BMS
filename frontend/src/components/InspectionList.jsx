@@ -298,7 +298,7 @@ const InspectionList = ({ bridgeId }) => {
           <h4 className="text-sm font-semibold text-gray-700 mb-1">
             Reports Summary
           </h4>
-          <div className="bg-gray-200 mb-2 mt-1  py-2 px-3 rounded-md shadow border">
+          <div className="bg-gray-200  mb-2 mt-1  py-2 px-3 rounded-md shadow border">
             <div className="grid grid-cols-2 gap-y-1 text-sm">
               <div>
                 <strong>Total Spans:</strong>
@@ -454,12 +454,13 @@ const InspectionList = ({ bridgeId }) => {
                                     onClick={() =>
                                       handleSaveChanges(inspection)
                                     }
+                                    value={inspection.reviewd_by}
                                     className="bg-[#CFE2FF]"
                                   >
-                                    Save Changes
+                                    Save Changes{inspection.reviewd_by}
                                   </Button>
                                 </div>
-                              </div>
+                              </div> 
                             </div>
                           )
                         )}
