@@ -15,6 +15,7 @@ const InspectionList = ({ bridgeId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
+  const [updatedInspections, setUpdatedInspections] = useState(new Set());
 
   useEffect(() => {
     if (bridgeId) {
@@ -131,6 +132,9 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
+
+    // After updating, mark this inspection as updated
+    setUpdatedInspections((prev) => new Set(prev).add(row.inspection_id));
   };
 
   const handleDownloadCSV = (inspectiondata) => {
@@ -473,6 +477,9 @@ const InspectionList = ({ bridgeId }) => {
                                       handleSaveChanges(inspection)
                                     }
                                     className="bg-[#CFE2FF]"
+                                    disabled={updatedInspections.has(
+                                      inspection.inspection_id
+                                    )} // Disable if updated
                                   >
                                     Save Changes
                                   </Button>
