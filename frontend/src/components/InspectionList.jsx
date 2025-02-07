@@ -127,9 +127,7 @@ const InspectionList = ({ bridgeId }) => {
   const handleApprovedFlagChange = (inspectionId, value) => {
     setInspectionData((prevData) =>
       prevData.map((item) =>
-        item.inspection_id === inspectionId
-          ? { ...item, qc_con: value }
-          : item
+        item.inspection_id === inspectionId ? { ...item, qc_con: value } : item
       )
     );
   };
@@ -271,7 +269,7 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        <div className="d-flex mb-4 justify-content-between items-center p-3 bg-[#CFE2FF] rounded-lg shadow-md">
+        <div className="d-flex mb-2 justify-content-between items-center p-3 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
             className="card-title text-lg font-semibold pb-2"
             style={{ fontSize: "1.25rem" }}
@@ -296,53 +294,34 @@ const InspectionList = ({ bridgeId }) => {
           </div>
         </div>
 
-        <div className="summary-section mt-1 mb-2">
-          <h4 className="text-lg font-bold text-gray-700 mb-2">
+        <div className="summary-section mt-1 mb-1">
+          <h4 className="text-sm font-semibold text-gray-700 mb-1">
             Reports Summary
           </h4>
-          <table className="min-w-full bg-gray-300 table-auto border-collapse border border-gray-200">
-            <tbody>
-              {/* Unique Span Indices */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Spans:</strong>
-                </td>
-                <td className="border px-4 py-2">
+          <div className="bg-gray-200 mb-2 mt-1  py-2 px-3 rounded-md shadow border">
+            <div className="grid grid-cols-2 gap-y-1 text-sm">
+              <div>
+                <strong>Total Spans:</strong>
+                <p className="text-gray-700">
                   {getUniqueSpanIndices(inspectiondata)}
-                </td>
-              </tr>
-
-              {/* Unique Damage Levels */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Damage Levels:</strong>
-                </td>
-                <td className="border px-4 py-2">
+                </p>
+              </div>
+              <div>
+                <strong>Damage Levels:</strong>
+                <p className="text-gray-700">
                   {getDamageLevel(inspectiondata)}
-                </td>
-              </tr>
-
-              {/* Materials Used */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Materials Used:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getMaterials(inspectiondata)}
-                </td>
-              </tr>
-
-              {/* Work Kind */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Work Kind:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getWorkKind(inspectiondata)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </p>
+              </div>
+              <div>
+                <strong>Materials Used:</strong>
+                <p className="text-gray-700">{getMaterials(inspectiondata)}</p>
+              </div>
+              <div>
+                <strong>Work Kind:</strong>
+                <p className="text-gray-700">{getWorkKind(inspectiondata)}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {loading && (
@@ -458,9 +437,7 @@ const InspectionList = ({ bridgeId }) => {
                                   />
 
                                   <Form.Select
-                                    value={
-                                      inspection.qc_con || 1
-                                    }
+                                    value={inspection.qc_con || 1}
                                     onChange={(e) =>
                                       handleApprovedFlagChange(
                                         inspection.inspection_id,
