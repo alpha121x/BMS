@@ -13,6 +13,15 @@ const InspectionList = ({ bridgeId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [openAccordions, setOpenAccordions] = useState({});
+
+  const toggleAccordion = (spanIndex) => {
+    setOpenAccordions((prevState) => ({
+      ...prevState,
+      [spanIndex]: !prevState[spanIndex],
+    }));
+  };
+
   useEffect(() => {
     if (bridgeId) {
       fetchData();
@@ -205,6 +214,9 @@ const InspectionList = ({ bridgeId }) => {
         </div>
 
         <div className="summary-section mt-1 mb-2">
+          <h4 className="text-lg font-bold text-gray-700 mb-2">
+            Reports Summary
+          </h4>
           <table className="min-w-full bg-gray-300 table-auto border-collapse border border-gray-200">
             <tbody>
               {/* Unique Span Indices */}
@@ -232,7 +244,9 @@ const InspectionList = ({ bridgeId }) => {
                 <td className="border px-4 py-2">
                   <strong>Materials Used:</strong>
                 </td>
-                <td className="border px-4 py-2">{getMaterials(inspectionData)}</td>
+                <td className="border px-4 py-2">
+                  {getMaterials(inspectionData)}
+                </td>
               </tr>
 
               {/* Work Kind */}
@@ -240,7 +254,9 @@ const InspectionList = ({ bridgeId }) => {
                 <td className="border px-4 py-2">
                   <strong>Work Kind:</strong>
                 </td>
-                <td className="border px-4 py-2">{getWorkKind(inspectionData)}</td>
+                <td className="border px-4 py-2">
+                  {getWorkKind(inspectionData)}
+                </td>
               </tr>
 
               {/* Condition Status */}
@@ -275,30 +291,38 @@ const InspectionList = ({ bridgeId }) => {
             }}
           />
         )}
+
         <div className="inspection-cards-container">
           {Object.keys(groupedData).map((spanIndex) => (
             <div key={spanIndex} className="card mb-4">
-              <div className="card-header bg-light py-2">
-                <h5>{`Span No: ${spanIndex}`}</h5>
+              {/* Span Index Dropdown */}
+              <div
+                className="card-header bg-light py-2 d-flex justify-content-between align-items-center"
+                style={{ cursor: "pointer" }}
+                onClick={() => toggleAccordion(spanIndex)}
+              >
+                <h5 className="mb-0">{`Span No: ${spanIndex}`}</h5>
+                <span>{openAccordions[spanIndex] ? "▼" : "▶"}</span>
               </div>
 
-              {groupedData[spanIndex] &&
-                Object.keys(groupedData[spanIndex]).map((workKind) => (
-                  <div key={workKind} className="card mb-4 border shadow-sm">
-                    <div className="card-header bg-primary text-white fw-bold">
-                      {workKind}
-                    </div>
+              {/* Content - Only visible if expanded */}
+              {openAccordions[spanIndex] && (
+                <div className="card-body">
+                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                    <div key={workKind} className="card mb-4 border shadow-sm">
+                      <div className="card-header bg-primary text-white fw-bold">
+                        {workKind}
+                      </div>
 
-                    <div className="card-body p-3">
-                      {groupedData[spanIndex][workKind] &&
-                        groupedData[spanIndex][workKind].map((inspection) => (
+                      <div className="card-body p-3">
+                        {groupedData[spanIndex][workKind]?.map((inspection) => (
                           <div
                             key={inspection.id}
                             className="mb-4 p-4 border rounded shadow-sm"
                             style={{ backgroundColor: "#CFE2FF" }}
                           >
                             <div className="row">
-                              {/* Photos Column - Reduced width */}
+                              {/* Photos Column */}
                               <div className="col-md-3">
                                 {inspection.PhotoPaths?.length > 0 && (
                                   <div className="d-flex flex-wrap gap-2">
@@ -325,54 +349,37 @@ const InspectionList = ({ bridgeId }) => {
                                 )}
                               </div>
 
-                              {/* Details Column - Split into 2 columns */}
+                              {/* Details Column */}
                               <div className="col-md-9">
                                 <div className="row g-3">
-                                  {/* Left Column Details */}
                                   <div className="col-md-6">
-                                    <div className="d-flex flex-column gap-2">
-                                      <div>
-                                        <strong>Parts:</strong>{" "}
-                                        {inspection.PartsName || "N/A"}
-                                      </div>
-                                      <div>
-                                        <strong>Material:</strong>{" "}
-                                        {inspection.MaterialName || "N/A"}
-                                      </div>
-                                    </div>
+                                    <strong>Parts:</strong>{" "}
+                                    {inspection.PartsName || "N/A"} <br />
+                                    <strong>Material:</strong>{" "}
+                                    {inspection.MaterialName || "N/A"}
                                   </div>
-
-                                  {/* Right Column Details */}
                                   <div className="col-md-6">
-                                    <div className="d-flex flex-column gap-2">
-                                      <div>
-                                        <strong>Damage:</strong>{" "}
-                                        {inspection.DamageKindName || "N/A"}
-                                      </div>
-                                      <div>
-                                        <strong>Level:</strong>{" "}
-                                        {inspection.DamageLevel || "N/A"}
-                                      </div>
-                                    </div>
+                                    <strong>Damage:</strong>{" "}
+                                    {inspection.DamageKindName || "N/A"} <br />
+                                    <strong>Level:</strong>{" "}
+                                    {inspection.DamageLevel || "N/A"}
                                   </div>
-
-                                  {/* Full-width Remarks */}
                                   <div className="col-12">
-                                    <div className="mt-2">
-                                      <strong>Situation Remarks:</strong>{" "}
-                                      <span className="text-muted">
-                                        {inspection.Remarks || "N/A"}
-                                      </span>
-                                    </div>
+                                    <strong>Situation Remarks:</strong>{" "}
+                                    <span className="text-muted">
+                                      {inspection.Remarks || "N/A"}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                         ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

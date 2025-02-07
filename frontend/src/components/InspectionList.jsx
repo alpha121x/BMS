@@ -209,15 +209,15 @@ const InspectionList = ({ bridgeId }) => {
     return workKinds.join(", "); // Join work kinds with commas
   };
 
-  const getApprovalStatus = (data) => {
-    const approved = data.filter(
-      (item) => item.approved_by_consultant === "1"
-    ).length;
-    const unapproved = data.filter(
-      (item) => item.approved_by_consultant === "0"
-    ).length;
-    return `Approved: ${approved}, Unapproved: ${unapproved}`;
-  };
+  // const getApprovalStatus = (data) => {
+  //   const approved = data.filter(
+  //     (item) => item.approved_by_consultant === "1"
+  //   ).length;
+  //   const unapproved = data.filter(
+  //     (item) => item.approved_by_consultant === "0"
+  //   ).length;
+  //   return `Approved: ${approved}, Unapproved: ${unapproved}`;
+  // };
 
   const getUniqueSpanIndices = (data) => {
     // Extracting all SpanIndex values from the data
@@ -292,6 +292,9 @@ const InspectionList = ({ bridgeId }) => {
         </div>
 
         <div className="summary-section mt-1 mb-2">
+          <h4 className="text-lg font-bold text-gray-700 mb-2">
+            Reports Summary
+          </h4>
           <table className="min-w-full bg-gray-300 table-auto border-collapse border border-gray-200">
             <tbody>
               {/* Unique Span Indices */}
@@ -304,7 +307,7 @@ const InspectionList = ({ bridgeId }) => {
                 </td>
               </tr>
 
-              {/* Unique Damage Leves */}
+              {/* Unique Damage Levels */}
               <tr>
                 <td className="border px-4 py-2">
                   <strong>Damage Levels:</strong>
@@ -331,16 +334,6 @@ const InspectionList = ({ bridgeId }) => {
                 </td>
                 <td className="border px-4 py-2">
                   {getWorkKind(inspectiondata)}
-                </td>
-              </tr>
-
-              {/* Condition Status */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Consultant Approval Status:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getApprovalStatus(inspectiondata)}
                 </td>
               </tr>
             </tbody>
