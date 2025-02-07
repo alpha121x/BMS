@@ -454,13 +454,14 @@ const InspectionList = ({ bridgeId }) => {
                                     onClick={() =>
                                       handleSaveChanges(inspection)
                                     }
-                                    value={inspection.reviewd_by}
+                                    value={inspection.reviewed_by}
                                     className="bg-[#CFE2FF]"
+                                    disabled={inspection.reviewed_by === 1} // Disables button when reviewd_by is 1
                                   >
-                                    Save Changes{inspection.reviewd_by}
+                                    Save Changes {inspection.reviewd_by}
                                   </Button>
                                 </div>
-                              </div> 
+                              </div>
                             </div>
                           )
                         )}

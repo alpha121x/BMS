@@ -156,7 +156,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
 });
 
 // API endpoint to get counts for structure types and total "Arch" construction types
-app.get('/api/structure-counts', async (req, res) => {
+app.get("/api/structure-counts", async (req, res) => {
   try {
     // 1. Count of each structure_type
     const structureTypeCounts = await pool.query(`
@@ -186,17 +186,16 @@ app.get('/api/structure-counts', async (req, res) => {
       totalArchCount: totalArchCount.rows[0].total_count,
     });
   } catch (err) {
-    console.error('Error executing query', err.stack);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error executing query", err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // Define the API endpoint to get data from `bms.tbl_bms_master_data`
 app.get("/api/bridgesdownload", async (req, res) => {
   try {
     const {
-      district = '%',
+      district = "%",
       structureType,
       constructionType,
       minBridgeLength,
@@ -249,15 +248,14 @@ app.get("/api/bridgesdownload", async (req, res) => {
     let paramIndex = 1;
 
     // Filter by district
-    if (district !== '%') {
+    if (district !== "%") {
       query += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
     }
 
-    
     // Filter by district
-    if (bridgeId !== '%') {
+    if (bridgeId !== "%") {
       query += ` AND uu_bms_id = $${paramIndex}`;
       queryParams.push(bridgeId);
       paramIndex++;
@@ -370,7 +368,7 @@ app.get("/api/bridges", async (req, res) => {
     const {
       set = 0,
       limit = 10,
-      district = '%',
+      district = "%",
       structureType,
       constructionType,
       minBridgeLength,
@@ -379,7 +377,7 @@ app.get("/api/bridges", async (req, res) => {
       maxSpanLength,
       minYear,
       maxYear,
-      bridgeId = '%',
+      bridgeId = "%",
     } = req.query;
 
     let query = `
@@ -429,7 +427,7 @@ app.get("/api/bridges", async (req, res) => {
     const countParams = [];
     let paramIndex = 1;
 
-    if (district !== '%') {
+    if (district !== "%") {
       query += ` AND district_id = $${paramIndex}`;
       countQuery += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
@@ -438,7 +436,7 @@ app.get("/api/bridges", async (req, res) => {
     }
 
     // Only add the bridgeId condition if bridgeId is not empty, not just '%'
-    if (bridgeId && bridgeId.trim() !== "" && bridgeId !== '%') {
+    if (bridgeId && bridgeId.trim() !== "" && bridgeId !== "%") {
       query += ` AND uu_bms_id = $${paramIndex}`;
       countQuery += ` AND uu_bms_id = $${paramIndex}`;
       queryParams.push(bridgeId);
@@ -503,7 +501,9 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
@@ -536,11 +536,14 @@ app.get("/api/inspections", async (req, res) => {
     const { rows } = await pool.query(query);
 
     // Map over the rows to handle the data manipulation
-    const modifiedRows = rows.map(row => {
+    const modifiedRows = rows.map((row) => {
       return {
         ...row,
-        photopath: row.photopath && Array.isArray(row.photopath) ? row.photopath.map(p => p.path) : [],  // Extract all paths from photopath array
-        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved"  // Mapping ApprovedFlag to approved/unapproved
+        photopath:
+          row.photopath && Array.isArray(row.photopath)
+            ? row.photopath.map((p) => p.path)
+            : [], // Extract all paths from photopath array
+        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved", // Mapping ApprovedFlag to approved/unapproved
       };
     });
 
@@ -553,43 +556,51 @@ app.get("/api/inspections", async (req, res) => {
 
 app.get("/api/get-inspections", async (req, res) => {
   try {
-    const { bridgeId } = req.query;  // Get uu_bms_id from query parameters
+    const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
     if (!bridgeId) {
-      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
     }
 
     const query = `
-      SELECT 
-        uu_bms_id,
-        inspection_id,
-        qc_con,
-        qc_remarks_con,
-        bridge_name, 
-        "SpanIndex", 
-        "WorkKindName", 
-        "PartsName", 
-        "MaterialName", 
-        "DamageKindName", 
-        "DamageLevel", 
-        "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
-        "ApprovedFlag"
-      FROM bms.tbl_inspection_f
-      WHERE uu_bms_id = $1;  -- Search based on uu_bms_id
+   SELECT 
+    uu_bms_id,
+    inspection_id,
+    qc_con,
+    qc_remarks_con,
+    reviewed_by,
+    bridge_name, 
+    "SpanIndex", 
+    "WorkKindName", 
+    "PartsName", 
+    "MaterialName", 
+    "DamageKindName", 
+    "DamageLevel", 
+    "Remarks", 
+    COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+    "ApprovedFlag"
+FROM bms.tbl_inspection_f
+WHERE uu_bms_id = $1 
+ORDER BY inspection_id DESC;
     `;
 
     const { rows } = await pool.query(query, [bridgeId]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Inspection not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Inspection not found" });
     }
 
     // Process the rows to extract paths from the JSON array
-    const modifiedRows = rows.map(row => ({
+    const modifiedRows = rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map(p => p.path) : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved"
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
     res.status(200).json({ success: true, data: modifiedRows });
@@ -626,13 +637,17 @@ app.put("/api/update-inspection", async (req, res) => {
       valueIndex++;
     }
 
+    // Always update reviewd_by to 1
+    query += ` reviewed_by = 1,`;
+
     // If no fields to update, return an error
     if (values.length === 0) {
       return res.status(400).json({ error: "No fields provided for update" });
     }
 
     // Remove the trailing comma and add the WHERE clause
-    query = query.slice(0, -1) + ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
+    query =
+      query.slice(0, -1) + ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
     values.push(id);
 
     // Execute the query to update the record
@@ -651,6 +666,7 @@ app.put("/api/update-inspection", async (req, res) => {
     res.status(500).json({ error: "Failed to update inspection" });
   }
 });
+
 
 app.get("/api/structure-types", async (req, res) => {
   try {
@@ -726,7 +742,7 @@ app.get("/api/directions", async (req, res) => {
 app.get("/api/work-kinds", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"WorkKindID\", \"WorkKindName\" FROM bms.tbl_work_kinds"
+      'SELECT "WorkKindID", "WorkKindName" FROM bms.tbl_work_kinds'
     );
 
     res.json(result.rows);
@@ -739,7 +755,7 @@ app.get("/api/work-kinds", async (req, res) => {
 app.get("/api/parts", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"PartsID\", \"PartsName\" FROM bms.tbl_parts"
+      'SELECT "PartsID", "PartsName" FROM bms.tbl_parts'
     );
 
     res.json(result.rows);
@@ -752,7 +768,7 @@ app.get("/api/parts", async (req, res) => {
 app.get("/api/materials", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"MaterialID\", \"MaterialName\" FROM bms.tbl_materials"
+      'SELECT "MaterialID", "MaterialName" FROM bms.tbl_materials'
     );
 
     res.json(result.rows);
@@ -765,7 +781,7 @@ app.get("/api/materials", async (req, res) => {
 app.get("/api/damage-levels", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"DamageLevelID\", \"DamageLevel\" FROM bms.tbl_damage_levels"
+      'SELECT "DamageLevelID", "DamageLevel" FROM bms.tbl_damage_levels'
     );
 
     res.json(result.rows);
@@ -778,7 +794,7 @@ app.get("/api/damage-levels", async (req, res) => {
 app.get("/api/damage-kinds", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT \"DamageKindID\", \"DamageKindName\" FROM bms.tbl_damage_kinds"
+      'SELECT "DamageKindID", "DamageKindName" FROM bms.tbl_damage_kinds'
     );
 
     res.json(result.rows);
@@ -831,35 +847,41 @@ app.get("/api/elements", async (req, res) => {
 });
 
 // API for Visual Conditions
-app.get('/api/visual-conditions', async (req, res) => {
+app.get("/api/visual-conditions", async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, visual_condition FROM bms.tbl_visual_conditions');
+    const result = await pool.query(
+      "SELECT id, visual_condition FROM bms.tbl_visual_conditions"
+    );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching visual conditions:', error);
-    res.status(500).json({ error: 'Failed to fetch visual conditions' });
+    console.error("Error fetching visual conditions:", error);
+    res.status(500).json({ error: "Failed to fetch visual conditions" });
   }
 });
 
 // API for Road Classifications
-app.get('/api/road-classifications', async (req, res) => {
+app.get("/api/road-classifications", async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, road_classification FROM bms.tbl_road_classifications');
+    const result = await pool.query(
+      "SELECT id, road_classification FROM bms.tbl_road_classifications"
+    );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching road classifications:', error);
-    res.status(500).json({ error: 'Failed to fetch road classifications' });
+    console.error("Error fetching road classifications:", error);
+    res.status(500).json({ error: "Failed to fetch road classifications" });
   }
 });
 
 // API for Road Surface Types
-app.get('/api/road-surface-types', async (req, res) => {
+app.get("/api/road-surface-types", async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, road_surface_type FROM bms.tbl_road_surface_types');
+    const result = await pool.query(
+      "SELECT id, road_surface_type FROM bms.tbl_road_surface_types"
+    );
     res.json(result.rows);
   } catch (error) {
-    console.error('Error fetching road surface types:', error);
-    res.status(500).json({ error: 'Failed to fetch road surface types' });
+    console.error("Error fetching road surface types:", error);
+    res.status(500).json({ error: "Failed to fetch road surface types" });
   }
 });
 
