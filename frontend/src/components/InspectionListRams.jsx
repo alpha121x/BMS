@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import {  Button, Form } from "react-bootstrap";
+import React, { useEffect, useState, useMemo } from "react";
+import { useCallback } from "react";
+import { Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
@@ -7,14 +8,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import "@fancyapps/ui/dist/fancybox/fancybox.css"; // Try this if `styles` path doesn't work
 import { Fancybox } from "@fancyapps/ui";
+import Swal from "sweetalert2";
 
 const InspectionList = ({ bridgeId }) => {
-  const [tableData, setTableData] = useState([]);
+  const [inspectiondata, setInspectionData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const itemsPerPage = 10;
+  const [expandedSections, setExpandedSections] = useState({});
 
   useEffect(() => {
     if (bridgeId) {
@@ -29,24 +29,20 @@ const InspectionList = ({ bridgeId }) => {
     return () => Fancybox.destroy();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      if (!bridgeId) {
-        throw new Error("bridgeId is required");
-      }
+      if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-inspections-rams?bridgeId=${bridgeId}`
       );
-
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
-
       if (Array.isArray(result.data)) {
-        setTableData(result.data);
+        setInspectionData(result.data);
       } else {
         throw new Error("Invalid data format");
       }
@@ -55,25 +51,40 @@ const InspectionList = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [bridgeId]);
 
   const handleUpdateInspection = async (row) => {
     try {
+      // Show confirmation alert using SweetAlert2
+      const { isConfirmed } = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#0D6EFD",
+        cancelButtonColor: "#6C757D",
+        confirmButtonText: "Yes, save it!",
+      });
+
+      if (!isConfirmed) {
+        console.log("Update cancelled by user.");
+        return; // Exit if the user cancels the update
+      }
+
       console.log("Updating inspection", row);
 
       // Allow empty remarks (send as null if empty)
       const ramsRemarks =
-        row.remarks_remarks?.trim() === "" ? null : row.rams_remarks;
+        row.qc_remarks_rams?.trim() === "" ? null : row.qc_remarks_rams;
 
       // Prepare the updated row with ConsultantRemarks and approval status
       const updatedData = {
         id: row.inspection_id,
-        ramsRemarks: ramsRemarks, // Can be empty (null)
-        approved_by_rams: row.approved_by_rams,
+        qc_remarks_rams: ramsRemarks, // Can be empty (null)
+        qc_con: row.qc_rams,
       };
 
       console.log(updatedData);
-      // return;
 
       // Call the API to update the database
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
@@ -88,28 +99,36 @@ const InspectionList = ({ bridgeId }) => {
 
       // Refetch data to reflect changes
       fetchData();
+
+      // Show success alert after updating
+      Swal.fire({
+        title: "Updated!",
+        text: "Your inspection has been updated.",
+        icon: "success",
+        confirmButtonColor: "#0D6EFD", // Custom OK button color
+      });
     } catch (error) {
       setError(error.message);
+      // Show error alert if the update fails
+      Swal.fire("Error!", error.message, "error");
     }
   };
 
-  const handleConsultantRemarksChange = (row, value) => {
-    // Clone the row and update the ConsultantRemarks field
-    const updatedRow = { ...row, consultant_remarks: value };
-
-    // Update the table data without triggering a reload
-    setTableData((prevData) =>
-      prevData.map((item) => (item.id === row.id ? updatedRow : item))
+  const handleRamsRemarksChange = (inspectionId, value) => {
+    setInspectionData((prevData) =>
+      prevData.map((item) =>
+        item.inspection_id === inspectionId
+          ? { ...item, qc_remarks_rams: value }
+          : item
+      )
     );
   };
 
-  const handleApprovedFlagChange = (row, value) => {
-    // Clone the row and update the approved_by_consultant field
-    const updatedRow = { ...row, approved_by_consultant: value };
-
-    // Update the table data without triggering a reload
-    setTableData((prevData) =>
-      prevData.map((item) => (item.id === row.id ? updatedRow : item))
+  const handleApprovedFlagChange = (inspectionId, value) => {
+    setInspectionData((prevData) =>
+      prevData.map((item) =>
+        item.inspection_id === inspectionId ? { ...item, qc_rams: value } : item
+      )
     );
   };
 
@@ -117,17 +136,17 @@ const InspectionList = ({ bridgeId }) => {
     handleUpdateInspection(row);
   };
 
-  const handleDownloadCSV = (tableData) => {
-    if (!Array.isArray(tableData) || tableData.length === 0) {
+  const handleDownloadCSV = (inspectiondata) => {
+    if (!Array.isArray(inspectiondata) || inspectiondata.length === 0) {
       console.error("No data to export");
       return;
     }
 
-    // Extract BridgeName from the first row of tableData
-    const bridgename = tableData[0].BridgeName;
+    // Extract BridgeName from the first row of inspectiondata
+    const bridgename = inspectiondata[0].BridgeName;
 
     // Prepare CSV rows without adding the extra "image" column
-    const csvRows = tableData.map((row) => {
+    const csvRows = inspectiondata.map((row) => {
       const { imageUrl, ...rest } = row; // Exclude imageUrl if it exists
       return rest; // Return the remaining properties
     });
@@ -148,16 +167,16 @@ const InspectionList = ({ bridgeId }) => {
     document.body.removeChild(link);
   };
 
-  const handleDownloadExcel = (tableData) => {
-    if (!Array.isArray(tableData) || tableData.length === 0) {
+  const handleDownloadExcel = (inspectiondata) => {
+    if (!Array.isArray(inspectiondata) || inspectiondata.length === 0) {
       console.error("No data to export");
       return;
     }
 
-    const bridgename = tableData[0].BridgeName;
+    const bridgename = inspectiondata[0].BridgeName;
 
     // Ensure all rows have a valid value for 'PhotoPaths'
-    tableData.forEach((row) => {
+    inspectiondata.forEach((row) => {
       if (Array.isArray(row.PhotoPaths)) {
         // Convert array to JSON string
         row.PhotoPaths = JSON.stringify(row.PhotoPaths) || "No image path";
@@ -167,7 +186,7 @@ const InspectionList = ({ bridgeId }) => {
     });
 
     // Create a worksheet from the table data
-    const ws = XLSX.utils.json_to_sheet(tableData);
+    const ws = XLSX.utils.json_to_sheet(inspectiondata);
 
     // Create a new workbook and append the worksheet
     const wb = XLSX.utils.book_new();
@@ -193,15 +212,15 @@ const InspectionList = ({ bridgeId }) => {
     return workKinds.join(", "); // Join work kinds with commas
   };
 
-  const getApprovalStatus = (data) => {
-    const approved = data.filter(
-      (item) => item.approved_by_consultant === "1"
-    ).length;
-    const unapproved = data.filter(
-      (item) => item.approved_by_consultant === "0"
-    ).length;
-    return `Approved: ${approved}, Unapproved: ${unapproved}`;
-  };
+  // const getApprovalStatus = (data) => {
+  //   const approved = data.filter(
+  //     (item) => item.approved_by_consultant === "1"
+  //   ).length;
+  //   const unapproved = data.filter(
+  //     (item) => item.approved_by_consultant === "0"
+  //   ).length;
+  //   return `Approved: ${approved}, Unapproved: ${unapproved}`;
+  // };
 
   const getUniqueSpanIndices = (data) => {
     // Extracting all SpanIndex values from the data
@@ -213,136 +232,31 @@ const InspectionList = ({ bridgeId }) => {
     return uniqueSpanIndices.length; // Return the count of unique span indices
   };
 
-  // const handleEditClick = (row) => {
-  //   const serializedRow = encodeURIComponent(JSON.stringify(row));
-  //   const editUrl = `/EditInspectionNew?data=${serializedRow}`;
-  //   window.location.href = editUrl;
-  // };
+  const groupedData = useMemo(() => {
+    return inspectiondata.reduce((acc, row) => {
+      const spanKey = row.SpanIndex || "N/A";
+      const workKindKey = row.WorkKindName || "N/A";
 
-  const totalPages = Math.ceil(tableData.length / itemsPerPage);
-  const currentData = tableData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+      if (!acc[spanKey]) {
+        acc[spanKey] = {};
+      }
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+      if (!acc[spanKey][workKindKey]) {
+        acc[spanKey][workKindKey] = [];
+      }
+
+      acc[spanKey][workKindKey].push(row);
+      return acc;
+    }, {});
+  }, [inspectiondata]);
+
+  // Toggle function to expand/collapse a section
+  const toggleSection = (spanIndex) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [spanIndex]: !prev[spanIndex], // Toggle the section
+    }));
   };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const buttonStyles = {
-    margin: "0 6px",
-    padding: "4px 8px",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "12px",
-    cursor: "pointer",
-  };
-
-  const renderPaginationButtons = () => {
-    const buttons = [];
-    buttons.push(
-      <Button
-        onClick={handlePrevPage}
-        disabled={currentPage === 1}
-        key="prev"
-        style={buttonStyles}
-      >
-        «
-      </Button>
-    );
-
-    buttons.push(
-      <Button
-        key="1"
-        onClick={() => handlePageChange(1)}
-        style={{
-          ...buttonStyles,
-          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA",
-        }}
-      >
-        1
-      </Button>
-    );
-
-    const pageRange = 3;
-    let startPage = Math.max(currentPage - pageRange, 2);
-    let endPage = Math.min(currentPage + pageRange, totalPages - 1);
-
-    if (totalPages <= 7) {
-      startPage = 2;
-      endPage = totalPages - 1;
-    }
-
-    for (let page = startPage; page <= endPage; page++) {
-      buttons.push(
-        <Button
-          key={page}
-          onClick={() => handlePageChange(page)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {page}
-        </Button>
-      );
-    }
-
-    if (totalPages > 1) {
-      buttons.push(
-        <Button
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    buttons.push(
-      <Button
-        onClick={handleNextPage}
-        disabled={currentPage === totalPages}
-        key="next"
-        style={buttonStyles}
-      >
-        »
-      </Button>
-    );
-
-    return buttons;
-  };
-
-  // Group the inspection data by SpanIndex and then by WorkKind
-  const groupedData = currentData.reduce((acc, row) => {
-    const spanKey = row.SpanIndex || "N/A";
-    const workKindKey = row.WorkKindName || "N/A";
-
-    if (!acc[spanKey]) {
-      acc[spanKey] = {};
-    }
-
-    if (!acc[spanKey][workKindKey]) {
-      acc[spanKey][workKindKey] = [];
-    }
-
-    acc[spanKey][workKindKey].push(row);
-
-    return acc;
-  }, {});
 
   return (
     <div
@@ -355,8 +269,7 @@ const InspectionList = ({ bridgeId }) => {
       }}
     >
       <div className="card-body pb-0">
-        {/* Toggle buttons for old and new inspections */}
-        <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
+        <div className="d-flex mb-2 justify-content-between items-center p-3 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
             className="card-title text-lg font-semibold pb-2"
             style={{ fontSize: "1.25rem" }}
@@ -366,14 +279,14 @@ const InspectionList = ({ bridgeId }) => {
           <div className="d-flex gap-3">
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
-              onClick={() => handleDownloadCSV(tableData)}
+              onClick={() => handleDownloadCSV(inspectiondata)}
             >
               <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
               CSV
             </button>
             <button
               className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-              onClick={() => handleDownloadExcel(tableData)}
+              onClick={() => handleDownloadExcel(inspectiondata)}
             >
               <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
               Excel
@@ -381,56 +294,34 @@ const InspectionList = ({ bridgeId }) => {
           </div>
         </div>
 
-        <div className="summary-section mt-1 mb-2">
-          <table className="min-w-full table-auto border-collapse border border-gray-200">
-            <tbody>
-              {/* Unique Span Indices */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Spans:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getUniqueSpanIndices(tableData)}
-                </td>
-              </tr>
-
-              {/* Unique Damage Leves */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Damage Levels:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getDamageLevel(tableData)}
-                </td>
-              </tr>
-
-              {/* Materials Used */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Materials Used:</strong>
-                </td>
-                <td className="border px-4 py-2">{getMaterials(tableData)}</td>
-              </tr>
-
-              {/* Work Kind */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Work Kind:</strong>
-                </td>
-                <td className="border px-4 py-2">{getWorkKind(tableData)}</td>
-              </tr>
-
-              {/* Condition Status */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Consultant Approval Status:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getApprovalStatus(tableData)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="summary-section mt-1 mb-1">
+          <h4 className="text-sm font-semibold text-gray-700 mb-1">
+            Reports Summary
+          </h4>
+          <div className="bg-gray-200  mb-2 mt-1  py-2 px-3 rounded-md shadow border">
+            <div className="grid grid-cols-2 gap-y-1 text-sm">
+              <div>
+                <strong>Total Spans:</strong>
+                <p className="text-gray-700">
+                  {getUniqueSpanIndices(inspectiondata)}
+                </p>
+              </div>
+              <div>
+                <strong>Damage Levels:</strong>
+                <p className="text-gray-700">
+                  {getDamageLevel(inspectiondata)}
+                </p>
+              </div>
+              <div>
+                <strong>Materials Used:</strong>
+                <p className="text-gray-700">{getMaterials(inspectiondata)}</p>
+              </div>
+              <div>
+                <strong>Work Kind:</strong>
+                <p className="text-gray-700">{getWorkKind(inspectiondata)}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {loading && (
@@ -454,130 +345,134 @@ const InspectionList = ({ bridgeId }) => {
         )}
 
         <div className="inspection-cards-container">
-          {Object.keys(groupedData).map((spanIndex, inspection_id) => (
-            <div key={spanIndex} className="card mb-4">
-              {/* Header: Span Number */}
-              <div className="card-header bg-light py-2">
-                <h5>{`Span No: ${spanIndex}`}</h5>
+          {Object.keys(groupedData).map((spanIndex) => (
+            <div key={`span-${spanIndex}`} className="card mb-4">
+              {/* Span Index Header with Toggle Button */}
+              <div
+                className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                onClick={() => toggleSection(spanIndex)}
+                style={{ cursor: "pointer" }}
+              >
+                <strong>Reports For Span: {spanIndex}</strong>
+                <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
               </div>
 
-              {/* Mapping Work Kinds */}
-              {groupedData[spanIndex] &&
-                Object.keys(groupedData[spanIndex]).map((workKind) => (
-                  <div key={workKind} className="card mb-4 border shadow-sm">
-                    {/* Header: Work Kind */}
-                    <div className="card-header bg-primary text-white fw-bold">
-                      {workKind}
-                    </div>
+              {/* Work Kinds for Each Span - Toggle Visibility */}
+              {expandedSections[spanIndex] && (
+                <div className="card-body">
+                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                    <div
+                      key={`workKind-${spanIndex}-${workKind}`}
+                      className="card mb-4 border shadow-sm"
+                    >
+                      <div className="card-header bg-secondary text-white fw-bold">
+                        {workKind}
+                      </div>
 
-                    {/* Body: Mapping Inspections */}
-                    <div className="card-body p-3">
-                      {groupedData[spanIndex][workKind] &&
-                        groupedData[spanIndex][workKind].map((inspection) => (
-                          <div
-                            key={inspection.id}
-                            className="mb-4 p-4 border rounded shadow-sm"
-                            style={{ backgroundColor: "#CFE2FF" }}
-                          >
-                            <div className="row">
-                              {/* Left: Photos */}
-                              <div className="col-md-3">
-                                {inspection.PhotoPaths?.length > 0 && (
-                                  <div className="d-flex flex-wrap gap-2">
-                                    {inspection.PhotoPaths.map((photo, i) => (
-                                      <a
-                                        key={i}
-                                        href={photo}
-                                        data-fancybox="gallery"
-                                        data-caption={`Photo ${i + 1}`}
-                                      >
-                                        <img
-                                          src={photo}
-                                          alt={`Photo ${i + 1}`}
-                                          className="img-fluid rounded border"
-                                          style={{
-                                            width: "80px",
-                                            height: "80px",
-                                            objectFit: "cover",
-                                          }}
-                                        />
-                                      </a>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
+                      {/* Mapping Inspections */}
+                      <div className="card-body p-3">
+                        {groupedData[spanIndex][workKind].map(
+                          (inspection, index) => (
+                            <div
+                              key={`inspection-${inspection.id || index}`}
+                              className="mb-4 p-4 border rounded shadow-sm"
+                              style={{ backgroundColor: "#CFE2FF" }}
+                            >
+                              <div className="row">
+                                {/* Left: Photos */}
+                                <div className="col-md-3">
+                                  {inspection.PhotoPaths?.length > 0 && (
+                                    <div className="d-flex flex-wrap gap-2">
+                                      {inspection.PhotoPaths.map((photo, i) => (
+                                        <a
+                                          key={`photo-${inspection.id}-${i}`}
+                                          href={photo}
+                                          data-fancybox="gallery"
+                                          data-caption={`Photo ${i + 1}`}
+                                        >
+                                          <img
+                                            src={photo}
+                                            alt={`Photo ${i + 1}`}
+                                            className="img-fluid rounded border"
+                                            style={{
+                                              width: "80px",
+                                              height: "80px",
+                                              objectFit: "cover",
+                                            }}
+                                          />
+                                        </a>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
 
-                              {/* Right: Details */}
-                              <div className="col-md-6">
-                                <strong>Parts:</strong>{" "}
-                                {inspection.PartsName || "N/A"} <br />
-                                <strong>Material:</strong>{" "}
-                                {inspection.MaterialName || "N/A"} <br />
-                                <strong>Damage:</strong>{" "}
-                                {inspection.DamageKindName || "N/A"} <br />
-                                <strong>Level:</strong>{" "}
-                                {inspection.DamageLevel || "N/A"} <br />
-                                <strong>Situation Remarks:</strong>{" "}
-                                {inspection.Remarks || "N/A"}
-                              </div>
+                                {/* Right: Details */}
+                                <div className="col-md-6">
+                                  <strong>Parts:</strong>{" "}
+                                  {inspection.PartsName || "N/A"} <br />
+                                  <strong>Material:</strong>{" "}
+                                  {inspection.MaterialName || "N/A"} <br />
+                                  <strong>Damage:</strong>{" "}
+                                  {inspection.DamageKindName || "N/A"} <br />
+                                  <strong>Level:</strong>{" "}
+                                  {inspection.DamageLevel || "N/A"} <br />
+                                  <strong>Situation Remarks:</strong>{" "}
+                                  {inspection.Remarks || "N/A"}
+                                </div>
 
-                              {/* Footer: Consultant Remarks, Approval & Save Button */}
-                              <div className="col-md-3 d-flex flex-column justify-content-between">
-                                {/* Consultant Remarks Input */}
-                                <Form.Control
-                                  as="input"
-                                  type="text"
-                                  placeholder="Rams Remarks"
-                                  value={inspection.rams_remarks || ""}
-                                  onChange={(e) =>
-                                    handleConsultantRemarksChange(
-                                      inspection,
-                                      e.target.value
-                                    )
-                                  }
-                                  className="mb-2"
-                                />
+                                {/* Footer: Consultant Remarks, Approval & Save Button */}
+                                <div className="col-md-3 d-flex flex-column justify-content-between">
+                                  <Form.Control
+                                    as="input"
+                                    type="text"
+                                    placeholder="Rams Remarks"
+                                    value={inspection.qc_remarks_rams || ""}
+                                    onChange={(e) =>
+                                      handleRamsRemarksChange(
+                                        inspection.inspection_id,
+                                        e.target.value
+                                      )
+                                    }
+                                    className="mb-2"
+                                  />
 
-                                {/* Approval Status Dropdown */}
-                                <Form.Select
-                                  value={inspection.approved_by_rams || 0}
-                                  onChange={(e) =>
-                                    handleApprovedFlagChange(
-                                      inspection,
-                                      parseInt(e.target.value)
-                                    )
-                                  }
-                                  className="mb-2"
-                                >
-                                  <option value={0}>Unapproved</option>
-                                  <option value={1}>Approved</option>
-                                </Form.Select>
+                                  <Form.Select
+                                    value={inspection.qc_rams || ""}
+                                    onChange={(e) =>
+                                      handleApprovedFlagChange(
+                                        inspection.inspection_id,
+                                        parseInt(e.target.value)
+                                      )
+                                    }
+                                    className="mb-2"
+                                  >
+                                    <option value={""}>Select Status</option>
+                                    <option value={3}>Unapproved</option>
+                                    <option value={2}>Approved</option>
+                                  </Form.Select>
 
-                                {/* Save Changes Button */}
-                                <Button
-                                  onClick={() => handleSaveChanges(inspection)}
-                                  className="bg-[#CFE2FF]"
-                                >
-                                  Save Changes
-                                </Button>
+                                  <Button
+                                    onClick={() =>
+                                      handleSaveChanges(inspection)
+                                    }
+                                    value={inspection.reviewed_by}
+                                    className="bg-[#CFE2FF]"
+                                    disabled={inspection.reviewed_by === 2}
+                                  >
+                                    Save Changes
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              )}
             </div>
           ))}
-        </div>
-
-        <div className="d-flex justify-content-between">
-          <div className="text-sm text-gray-500">
-            Showing {currentData.length} of {tableData.length} inspections
-          </div>
-          <div className="d-flex justify-content-center align-items-center">
-            {renderPaginationButtons()}
-          </div>
         </div>
       </div>
     </div>

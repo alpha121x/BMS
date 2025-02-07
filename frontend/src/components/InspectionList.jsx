@@ -437,7 +437,7 @@ const InspectionList = ({ bridgeId }) => {
                                   />
 
                                   <Form.Select
-                                    value={inspection.qc_con || 1}
+                                    value={inspection.qc_con || ""}
                                     onChange={(e) =>
                                       handleApprovedFlagChange(
                                         inspection.inspection_id,
@@ -446,6 +446,7 @@ const InspectionList = ({ bridgeId }) => {
                                     }
                                     className="mb-2"
                                   >
+                                    <option value={""}>Select Status</option>
                                     <option value={3}>Unapproved</option>
                                     <option value={2}>Approved</option>
                                   </Form.Select>
@@ -456,7 +457,7 @@ const InspectionList = ({ bridgeId }) => {
                                     }
                                     value={inspection.reviewed_by}
                                     className="bg-[#CFE2FF]"
-                                    disabled={inspection.reviewed_by === 1} // Disables button when reviewd_by is 1
+                                    disabled={inspection.reviewed_by === 1}
                                   >
                                     Save Changes {inspection.reviewd_by}
                                   </Button>
