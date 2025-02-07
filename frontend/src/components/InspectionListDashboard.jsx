@@ -297,11 +297,11 @@ const InspectionList = ({ bridgeId }) => {
             <div key={spanIndex} className="card mb-4">
               {/* Span Index Dropdown */}
               <div
-                className="card-header bg-light py-2 d-flex justify-content-between align-items-center"
+                className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
                 style={{ cursor: "pointer" }}
                 onClick={() => toggleAccordion(spanIndex)}
               >
-                <h5 className="mb-0">{`Span No: ${spanIndex}`}</h5>
+                <h5 className="mb-0">{`Reeports For Span: ${spanIndex}`}</h5>
                 <span>{openAccordions[spanIndex] ? "▼" : "▶"}</span>
               </div>
 
@@ -310,7 +310,7 @@ const InspectionList = ({ bridgeId }) => {
                 <div className="card-body">
                   {Object.keys(groupedData[spanIndex]).map((workKind) => (
                     <div key={workKind} className="card mb-4 border shadow-sm">
-                      <div className="card-header bg-primary text-white fw-bold">
+                      <div className="card-header bg-secondary text-white fw-bold">
                         {workKind}
                       </div>
 
