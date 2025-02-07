@@ -81,13 +81,13 @@ const InspectionList = ({ bridgeId }) => {
       const updatedData = {
         id: row.inspection_id,
         qc_remarks_rams: ramsRemarks, // Can be empty (null)
-        qc_con: row.qc_rams,
+        qc_rams: row.qc_rams,
       };
 
       console.log(updatedData);
 
       // Call the API to update the database
-      const response = await fetch(`${BASE_URL}/api/update-inspection`, {
+      const response = await fetch(`${BASE_URL}/api/update-inspection-rams`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -417,7 +417,9 @@ const InspectionList = ({ bridgeId }) => {
                                   <strong>Level:</strong>{" "}
                                   {inspection.DamageLevel || "N/A"} <br />
                                   <strong>Situation Remarks:</strong>{" "}
-                                  {inspection.Remarks || "N/A"}
+                                  {inspection.Remarks || "N/A"} <br />
+                                  <strong>Consultant Remarks:</strong>{" "}
+                                  {inspection.qc_remarks_con || "N/A"}
                                 </div>
 
                                 {/* Footer: Consultant Remarks, Approval & Save Button */}

@@ -624,7 +624,8 @@ app.get("/api/get-inspections-rams", async (req, res) => {
  SELECT 
     uu_bms_id,
     inspection_id,
-    qc_con,
+    qc_rams,
+    qc_remarks_rams,
     qc_remarks_con,
     reviewed_by,
     bridge_name, 
@@ -639,7 +640,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
     "ApprovedFlag"
 FROM bms.tbl_inspection_f
 WHERE uu_bms_id = $1
-AND qc_con = '1'  -- ✅ Compare as a string, not a number
+AND qc_con = '2'
 ORDER BY inspection_id DESC;
     `;
 
@@ -696,6 +697,63 @@ app.put("/api/update-inspection", async (req, res) => {
 
     // Always update reviewd_by to 1
     query += ` reviewed_by = 1,`;
+
+    // If no fields to update, return an error
+    if (values.length === 0) {
+      return res.status(400).json({ error: "No fields provided for update" });
+    }
+
+    // Remove the trailing comma and add the WHERE clause
+    query =
+      query.slice(0, -1) + ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
+    values.push(id);
+
+    // Execute the query to update the record
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Inspection not found" });
+    }
+
+    res.status(200).json({
+      message: "Inspection updated successfully",
+      updatedRow: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error updating inspection:", error);
+    res.status(500).json({ error: "Failed to update inspection" });
+  }
+});
+
+// Endpoint to update inspection data
+app.put("/api/update-inspection-rams", async (req, res) => {
+  const { id, qc_remarks_rams, qc_rams } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: "Invalid data: ID is required" });
+  }
+
+  try {
+    // Prepare the query and values dynamically based on provided fields
+    let query = "UPDATE bms.tbl_inspection_f SET";
+    const values = [];
+    let valueIndex = 1;
+
+    // Conditionally add the fields to update
+    if (qc_remarks_rams !== undefined) {
+      query += ` qc_remarks_rams = $${valueIndex},`;
+      values.push(qc_remarks_rams === null ? null : qc_remarks_rams);
+      valueIndex++;
+    }
+
+    if (qc_rams !== undefined) {
+      query += ` qc_rams = $${valueIndex},`;
+      values.push(qc_rams);
+      valueIndex++;
+    }
+
+    // Always update reviewd_by to 1
+    query += ` reviewed_by = 2,`;
 
     // If no fields to update, return an error
     if (values.length === 0) {
