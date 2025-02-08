@@ -27,11 +27,6 @@ const BridgeInfo = () => {
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
   // console.log("User Token: ", userToken);
 
-  if (!userToken) {
-    // Redirect to login or show a message if no user token exists
-    // console.log("No user token found, redirecting to login...");
-    // Example: window.location.href = "/login";
-  }
 
   const role = userToken?.role;
   // console.log("User Role: ", role);
