@@ -195,7 +195,7 @@ app.get("/api/structure-counts", async (req, res) => {
 app.get("/api/bridgesdownload", async (req, res) => {
   try {
     const {
-      district = "%",
+      district = '%',
       structureType,
       constructionType,
       minBridgeLength,
@@ -204,7 +204,6 @@ app.get("/api/bridgesdownload", async (req, res) => {
       maxSpanLength,
       minYear,
       maxYear,
-      bridgeId,
     } = req.query;
 
     let query = `
@@ -248,16 +247,9 @@ app.get("/api/bridgesdownload", async (req, res) => {
     let paramIndex = 1;
 
     // Filter by district
-    if (district !== "%") {
+    if (district !== '%') {
       query += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
-      paramIndex++;
-    }
-
-    // Filter by district
-    if (bridgeId !== "%") {
-      query += ` AND uu_bms_id = $${paramIndex}`;
-      queryParams.push(bridgeId);
       paramIndex++;
     }
 
@@ -781,7 +773,6 @@ app.put("/api/update-inspection-rams", async (req, res) => {
     res.status(500).json({ error: "Failed to update inspection" });
   }
 });
-
 
 app.get("/api/structure-types", async (req, res) => {
   try {
