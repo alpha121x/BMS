@@ -137,63 +137,132 @@ const InspectionList = ({ bridgeId }) => {
   };
 
   const handleDownloadCSV = (inspectiondata) => {
-    if (!Array.isArray(inspectiondata) || inspectiondata.length === 0) {
-      console.error("No data to export");
-      return;
+    try {
+      if (!Array.isArray(inspectiondata) || inspectiondata.length === 0) {
+        console.error("No data to export");
+        return;
+      }
+
+      // Define the fields you want to include in the CSV
+      const fieldsToInclude = {
+        bridge_name: "BridgeName",
+        SpanIndex: "Span",
+        PartsName: "Parts",
+        MaterialName: "Material",
+        DamageKindName: "Damage Type",
+        DamageLevel: "Damage Level",
+        Remarks: "Situation Remarks",
+        qc_remarks_rams: "Rams Remarks",
+        qc_rams: "Rams Approval Status",
+      };
+
+      // Extract BridgeName from the first row of inspectiondata
+      const bridgename = inspectiondata[0].bridge_name || "bridge_inspection";
+
+      // Prepare CSV rows with only selected fields
+      const csvRows = inspectiondata.map((row) => {
+        const filteredRow = {};
+        Object.entries(fieldsToInclude).forEach(([key, label]) => {
+          // Handle approval status text
+          if (key === "qc_con") {
+            filteredRow[label] =
+              row[key] === 2
+                ? "Approved"
+                : row[key] === 3
+                ? "Unapproved"
+                : "Pending";
+          } else {
+            filteredRow[label] = row[key] || "N/A";
+          }
+        });
+        return filteredRow;
+      });
+
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [
+          Object.values(fieldsToInclude).join(","), // Custom Headers
+          ...csvRows.map((row) =>
+            Object.values(row)
+              .map((value) =>
+                // Handle values that contain commas
+                String(value).includes(",") ? `"${value}"` : value
+              )
+              .join(",")
+          ),
+        ].join("\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${bridgename}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+      Swal.fire("Error!", "Failed to download CSV file", "error");
     }
-
-    // Extract BridgeName from the first row of inspectiondata
-    const bridgename = inspectiondata[0].BridgeName;
-
-    // Prepare CSV rows without adding the extra "image" column
-    const csvRows = inspectiondata.map((row) => {
-      const { imageUrl, ...rest } = row; // Exclude imageUrl if it exists
-      return rest; // Return the remaining properties
-    });
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [
-        Object.keys(csvRows[0]).join(","), // Headers
-        ...csvRows.map((row) => Object.values(row).join(",")), // Rows
-      ].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${bridgename}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
-  const handleDownloadExcel = (inspectiondata) => {
+  const handleDownloadExcel = async (inspectiondata) => {
     if (!Array.isArray(inspectiondata) || inspectiondata.length === 0) {
       console.error("No data to export");
       return;
     }
 
-    const bridgename = inspectiondata[0].BridgeName;
+    const bridgename = inspectiondata[0].bridge_name;
 
-    // Ensure all rows have a valid value for 'PhotoPaths'
-    inspectiondata.forEach((row) => {
-      if (Array.isArray(row.PhotoPaths)) {
-        // Convert array to JSON string
-        row.PhotoPaths = JSON.stringify(row.PhotoPaths) || "No image path";
-      } else if (!row.PhotoPaths) {
-        row.PhotoPaths = "No image path"; // Default if no path is present
-      }
+    // Define the fields you want to include in the Excel
+    const fieldsToInclude = {
+      bridge_name: "BridgeName",
+      SpanIndex: "Span",
+      PartsName: "Parts",
+      MaterialName: "Material",
+      DamageKindName: "Damage Type",
+      DamageLevel: "Damage Level",
+      Remarks: "Situation Remarks",
+      qc_remarks_rams: "Rams Remarks",
+      qc_rams: "Rams Approval Status",
+      PhotoPaths: "Image URLs", 
+    };
+
+    // Process each row's data
+    const processedData = inspectiondata.map((row) => {
+      // Filter the row data according to fieldsToInclude
+      const filteredRow = {};
+      Object.entries(fieldsToInclude).forEach(([key, label]) => {
+        if (key === "qc_con") {
+          filteredRow[label] =
+            row[key] === 2
+              ? "Approved"
+              : row[key] === 3
+              ? "Unapproved"
+              : "Pending";
+        } else if (key === "PhotoPaths") {
+          // Handle photo paths - convert array to readable string
+          filteredRow[label] = Array.isArray(row[key])
+            ? row[key].join("\n")
+            : "No image path";
+        } else {
+          filteredRow[label] = row[key] || "N/A";
+        }
+      });
+
+      return filteredRow;
     });
 
-    // Create a worksheet from the table data
-    const ws = XLSX.utils.json_to_sheet(inspectiondata);
+    // Create worksheet with filtered data
+    const ws = XLSX.utils.json_to_sheet(processedData);
 
-    // Create a new workbook and append the worksheet
+    // Set column widths
+    ws["!cols"] = Object.keys(fieldsToInclude).map(() => ({ width: 20 }));
+
+    // Create workbook and append worksheet
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Inspections");
-    // console.log(wb);
 
-    // Generate and download the Excel file
+    // Generate and download Excel file
     XLSX.writeFile(wb, `${bridgename}.xlsx`);
   };
 
