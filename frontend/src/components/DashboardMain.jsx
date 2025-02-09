@@ -10,6 +10,8 @@ import Map from "./Map";
 // import BridgesListDashboard from "./BirdgesListDashboard";
 import BridgesListDashboard from "./BirdgesListDashboard";
 import CheckingTable from "./CheckingTable";
+import Graph from "./Graph";
+import GraphUpdated from "./Graph";
 
 
 const DashboardMain = () => {
@@ -179,6 +181,10 @@ const DashboardMain = () => {
       {/* Map */}
       <div className="">
         <Map />
+      </div>
+
+      <div className="mt-2">
+        <Graph />
       </div>
 
       {/* Bridges List */}
