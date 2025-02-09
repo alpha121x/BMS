@@ -324,6 +324,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
   try {
     const {
       district = "%",
+      bridgeId,
       structureType,
       constructionType,
       minBridgeLength,
@@ -357,19 +358,21 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     const parseNumber = (value) => (value && !isNaN(value) ? Number(value) : null);
 
     const filters = {
-      district_id: district !== "%" && district !== "" ? parseNumber(district) : null,
-      structure_type_id: parseNumber(structureType),
-      construction_type_id: parseNumber(constructionType),
-      structure_width_m_min: parseNumber(minBridgeLength),
-      structure_width_m_max: parseNumber(maxBridgeLength),
-      span_length_m_min: parseNumber(minSpanLength),
-      span_length_m_max: parseNumber(maxSpanLength),
-      construction_year_min: parseNumber(minYear),
-      construction_year_max: parseNumber(maxYear),
+      "md.district_id": district !== "%" && district !== "" ? parseNumber(district) : null,
+      "md.uu_bms_id": parseNumber(bridgeId),
+      "md.structure_type_id": parseNumber(structureType),
+      "md.construction_type_id": parseNumber(constructionType),
+      "md.structure_width_m_min": parseNumber(minBridgeLength),
+      "md.structure_width_m_max": parseNumber(maxBridgeLength),
+      "md.span_length_m_min": parseNumber(minSpanLength),
+      "md.span_length_m_max": parseNumber(maxSpanLength),
+      "md.construction_year_min": parseNumber(minYear),
+      "md.construction_year_max": parseNumber(maxYear),
     };
+    
 
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null) {  // Ignore null or empty values
+      if (value !== null) {  
         if (key.endsWith("_min")) {
           query += ` AND ${key.replace("_min", "")} >= $${paramIndex}`;
         } else if (key.endsWith("_max")) {
@@ -381,6 +384,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
         paramIndex++;
       }
     });
+    
 
     const result = await pool.query(query, queryParams);
     res.json({ success: true, bridges: result.rows });
