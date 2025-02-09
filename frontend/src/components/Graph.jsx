@@ -303,7 +303,7 @@ const Graph = () => {
   };
 
   return (
-    <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
+    <div className="bg-white border-2 text-[#364050] border-blue-400 p-2 rounded-lg shadow-md">
       <div
         style={{
           display: "flex",
