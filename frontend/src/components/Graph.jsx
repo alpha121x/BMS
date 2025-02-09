@@ -287,7 +287,7 @@ const Graph = () => {
       {
         name: "Concrete Deck Slab",
         data: [18000, 1500, 100, 50],
-        color: "#FF69B4",
+        color: "#FF7F7F",
       },
       {
         name: "Concrete Box Girder",
