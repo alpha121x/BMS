@@ -7,12 +7,9 @@ import {
   BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import Map from "./Map";
-// import BridgesListDashboard from "./BirdgesListDashboard";
 import BridgesListDashboard from "./BirdgesListDashboard";
 import CheckingTable from "./CheckingTable";
 import Graph from "./Graph";
-import GraphUpdated from "./Graph";
-
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -31,6 +28,7 @@ const DashboardMain = () => {
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -153,14 +151,11 @@ const DashboardMain = () => {
 
   return (
     <section className="bg-gray-100 min-h-screen">
-      {/* Header Section */}
-      {/* <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold text-gray-500 mb-1">Summary</h2>
-      </div> */}
-
       {/* Structure Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">Bridges Structures Inventory</h3>
+        <h3 className="text-xl font-semibold text-gray-700">
+          Bridges Structures Inventory
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {structureCards.map((card, index) => (
             <Card key={index} {...card} />
@@ -170,7 +165,9 @@ const DashboardMain = () => {
 
       {/* Evaluation Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">Inspected/Detailed Surveyed</h3>
+        <h3 className="text-xl font-semibold text-gray-700">
+          Inspected/Detailed Surveyed
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
@@ -178,13 +175,41 @@ const DashboardMain = () => {
         </div>
       </div>
 
-      {/* Map */}
-      <div className="">
-        <Map />
+      {/* Toggle Buttons */}
+      <div className="flex justify-start p-1 gap-3 w-50 mt-2">
+        <button
+          onClick={() => setActiveView("map")}
+          className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
+            activeView === "map"
+              ? "bg-blue-600 text-white shadow-lg transform scale-105"
+              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+          }`}
+        >
+          Map View
+        </button>
+        <button
+          onClick={() => setActiveView("graph")}
+          className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
+            activeView === "graph"
+              ? "bg-blue-600 text-white shadow-lg transform scale-105"
+              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+          }`}
+        >
+          Graph View
+        </button>
       </div>
 
-      <div className="mt-2">
-        <Graph />
+      {/* Content Container */}
+      <div>
+        {activeView === "map" ? (
+          <div className="mt-1">
+            <Map />
+          </div>
+        ) : (
+          <div className="mt-1">
+            <Graph />
+          </div>
+        )}
       </div>
 
       {/* Bridges List */}
@@ -203,7 +228,7 @@ const DashboardMain = () => {
             setInspectionStatus={setInspectionStatus}
             setMinYear={setMinYear}
             setMaxYear={setMaxYear}
-            setBridge={setBridgeId}  // Also set the bridge id filter
+            setBridge={setBridgeId} // Also set the bridge id filter
             district={selectedDistrict}
             structureType={structureType}
             constructionType={constructionType}
@@ -216,12 +241,11 @@ const DashboardMain = () => {
             maxSpanLength={maxSpanLength}
             minYear={minYear}
             maxYear={maxYear}
-            bridgeId={bridgeId}  // Also pass the current bridge id filter
+            bridgeId={bridgeId} // Also pass the current bridge id filter
           />
 
-
           <div className="mt-2">
-          <CheckingTable/>
+            <CheckingTable />
           </div>
         </div>
       </div>
