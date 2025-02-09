@@ -90,16 +90,17 @@ const Graph = () => {
   const materialElementDamagesOptions = {
     chart: {
       type: "bar",
-      height: 800,
+      height: 800
     },
     title: {
-      text: "Material Element-wise Damages",
+      text: "Material Element Damages",
+      style: {
+        fontSize: '16px',
+        fontWeight: 'bold'
+      }
     },
     xAxis: {
       categories: [
-        "Superstructure - Steel",
-        "Concrete",
-        "Other",
         "Substructure(Pier) - Steel",
         "Concrete",
         "Other",
@@ -127,62 +128,50 @@ const Graph = () => {
         "Other",
         "Wing wall - Concrete",
         "Other",
-        "Box Culvert - Other",
+        "Box Culvert - Other"
       ],
       title: {
-        text: "Elements",
-      },
+        text: "Elements"
+      }
     },
     yAxis: {
       min: 0,
       title: {
-        text: "Number of Damages",
-      },
+        text: "Number of Damages"
+      }
     },
     legend: {
-      reversed: true,
+      reversed: true
     },
     plotOptions: {
       series: {
-        stacking: "normal",
-      },
+        stacking: "normal"
+      }
     },
     series: [
       {
         name: "Number of Damages I",
-        data: [
-          100, 1800, 200, 300, 400, 150, 400, 200, 100, 100, 400, 50, 50, 20,
-          30, 20, 10, 200, 800, 100, 400, 200, 10, 10, 400, 50, 10, 20, 100,
-          800, 100,
-        ],
-        color: "#0000FF",
+        data: [100, 1800, 200, 300, 400, 150, 400, 200, 100, 100, 400, 50, 50, 20, 30, 20, 10, 200, 800, 100, 400, 200, 10, 10, 400, 50, 10, 20],
+        color: "#0000FF"
       },
       {
         name: "Number of Damages II",
-        data: [
-          50, 1200, 100, 200, 600, 100, 600, 150, 50, 50, 500, 30, 30, 10, 20,
-          10, 5, 150, 1000, 50, 500, 300, 5, 5, 600, 30, 5, 10, 50, 600, 50,
-        ],
-        color: "#FFA500",
+        data: [50, 1200, 100, 200, 600, 100, 600, 150, 50, 50, 500, 30, 30, 10, 20, 10, 5, 150, 1000, 50, 500, 300, 5, 5, 600, 30, 5, 10],
+        color: "#FFA500"
       },
       {
         name: "Number of Damages III",
-        data: [
-          30, 200, 50, 100, 100, 50, 100, 50, 30, 30, 100, 20, 20, 5, 10, 5, 3,
-          100, 200, 30, 100, 100, 3, 3, 200, 20, 3, 5, 30, 200, 30,
-        ],
-        color: "#808080",
+        data: [30, 200, 50, 100, 100, 50, 100, 50, 30, 30, 100, 20, 20, 5, 10, 5, 3, 100, 200, 30, 100, 100, 3, 3, 200, 20, 3, 5],
+        color: "#808080"
       },
       {
         name: "Number of Damages IV",
-        data: [
-          20, 100, 30, 50, 50, 30, 50, 30, 20, 20, 50, 10, 10, 3, 5, 3, 2, 50,
-          100, 20, 50, 50, 2, 2, 100, 10, 2, 3, 20, 100, 20,
-        ],
-        color: "#FFFF00",
-      },
-    ],
+        data: [20, 100, 30, 50, 50, 30, 50, 30, 20, 20, 50, 10, 10, 3, 5, 3, 2, 50, 100, 20, 50, 50, 2, 2, 100, 10, 2, 3],
+        color: "#FFFF00"
+      }
+    ]
   };
+
 
   const elementCategoryDamagesOptions = {
     chart: {
