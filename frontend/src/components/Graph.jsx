@@ -94,7 +94,9 @@ const Graph = () => {
   };
 
   const bridgeDamageLevelsOptions = {
-    chart: { type: "bar" },
+    chart: { type: "bar",
+      height: 800
+     },
     title: { text: "Bridges Damage Levels by Damage Kind" },
     xAxis: {
       categories: [
