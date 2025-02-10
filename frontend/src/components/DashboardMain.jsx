@@ -153,7 +153,7 @@ const DashboardMain = () => {
       {/* Structure Section */}
       <div className="mb-2">
         <h3 className="text-xl font-semibold text-gray-700">
-          Bridges Structures Inventory
+          Total Structures Inventory
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {structureCards.map((card, index) => (
