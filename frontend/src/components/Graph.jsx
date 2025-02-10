@@ -118,14 +118,29 @@ const Graph = () => {
       verticalAlign: "bottom",
     },
     series: [
-      { name: "Bridges Damage Level IV", data: [30, 50, 40, 20, 10, 15, 25, 35, 20, 40, 25, 30, 15, 35, 50, 30, 20, 10, 15, 25, 35, 20, 40, 25, 30, 15], color: "#FFFF00" }, // Yellow
-      { name: "Bridges Damage Level III", data: [50, 70, 60, 30, 15, 25, 35, 45, 30, 60, 35, 50, 25, 45, 70, 50, 30, 15, 25, 35, 45, 30, 60, 35, 50, 25], color: "#808080" }, // Gray
-      { name: "Bridges Damage Level II", data: [100, 200, 150, 80, 40, 60, 90, 110, 70, 150, 90, 100, 60, 120, 200, 150, 100, 50, 60, 90, 110, 70, 150, 90, 100, 60], color: "#FFA500" }, // Orange
-      { name: "Bridges Damage Level I", data: [200, 400, 300, 160, 80, 120, 180, 220, 140, 300, 180, 200, 120, 240, 400, 300, 200, 100, 120, 180, 220, 140, 300, 180, 200, 120], color: "#0000FF" }, // Blue
+      { 
+        name: "Bridges Damage Level IV", 
+        data: [9, 5, 14, 55, 51, 0, 28, 149, 7, 122, 6, 14, 9, 10, 20, 4, 45, 2, 7, 6, 1, 12, 92, 56, 20, 19], 
+        color: "#FFFF00" 
+      },
+      { 
+        name: "Bridges Damage Level III", 
+        data: [20, 8, 37, 87, 50, 6, 75, 276, 30, 126, 30, 28, 39, 33, 50, 5, 97, 10, 20, 13, 1, 5, 88, 136, 24, 22], 
+        color: "#808080" 
+      },
+      { 
+        name: "Bridges Damage Level II", 
+        data: [90, 63, 189, 217, 121, 17, 215, 556, 255, 295, 45, 125, 155, 164, 192, 11, 298, 21, 152, 65, 5, 9, 208, 352, 45, 45], 
+        color: "#FFA500" 
+      },
+      { 
+        name: "Bridges Damage Level I", 
+        data: [99, 23, 48, 69, 31, 5, 75, 142, 71, 104, 8, 30, 27, 32, 34, 1, 122, 6, 97, 15, 1, 0, 56, 55, 5, 12], 
+        color: "#0000FF" 
+      }
     ],
-  };
+};
 
-  // New bar chart configurations
   const materialElementDamagesOptions = {
     chart: {
       type: "bar",
