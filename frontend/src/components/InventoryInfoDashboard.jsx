@@ -35,7 +35,6 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
         <Form>
           <Row>
             {[
-              { label: "Bridge ID", field: "uu_bms_id" },
               { label: "Bridge Name", field: "bridge_name" },
               { label: "Structure Type", field: "structure_type" },
               { label: "Construction Year", field: "construction_year" },
@@ -60,7 +59,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
               { label: "No of Spans", field: "no_of_span" },
               { label: "Latitude", field: "y_centroid" },
               { label: "Longitude", field: "x_centroid" },
-              { label: "Remarks", field: "remarks" },
+              { label: "Situation Remarks", field: "remarks" },
             ].map(({ label, field }, index) => (
               <Col key={index} md={3}>
                 <Form.Group>
