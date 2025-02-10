@@ -152,6 +152,81 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
+// API Endpoint
+app.get("/api/bms-score", async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Default to page 1
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 records per page
+  const offset = (page - 1) * limit;
+
+  try {
+    const query = `
+     SELECT 
+    c.objectid AS uu_bms_id, 
+    c.damage_score, 
+    c.critical_damage_score,
+    c.inventory_score,
+    m.structure_no, 
+    m.structure_type_id, 
+    m.structure_type, 
+    m.road_name, 
+    m.road_name_cwd, 
+    m.route_id, 
+    m.survey_id, 
+    m.surveyor_name, 
+    m.district_id, 
+    m.district, 
+    m.road_classification, 
+    m.road_surface_type, 
+    m.carriageway_type, 
+    m.direction, 
+    m.visual_condition, 
+    m.construction_type_id, 
+    m.construction_type, 
+    m.no_of_span, 
+    m.span_length_m, 
+    m.structure_width_m, 
+    m.construction_year, 
+    m.last_maintenance_date, 
+    m.remarks, 
+    m.is_surveyed, 
+    m.x_centroid, 
+    m.y_centroid, 
+    m.images_spans,
+    CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+    ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+FROM 
+    bms.bms_calculations c
+LEFT JOIN 
+    bms.tbl_bms_master_data m 
+ON 
+    c.objectid = m.uu_bms_id
+LIMIT $1 OFFSET $2;
+    `;
+
+    const result = await pool.query(query, [limit, offset]);
+
+    // Query to get total records
+    const countQuery = `
+      SELECT COUNT(*) AS total
+      FROM bms.bms_calculations c 
+      LEFT JOIN bms.tbl_bms_master_data m
+      ON c.objectid = m.uu_bms_id;
+    `;
+    const countResult = await pool.query(countQuery);
+    const totalRecords = countResult.rows[0].total;
+
+    res.json({
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / limit),
+      currentPage: page,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // API endpoint to get counts for structure types and total "Arch" construction types
 app.get("/api/structure-counts", async (req, res) => {
   try {
