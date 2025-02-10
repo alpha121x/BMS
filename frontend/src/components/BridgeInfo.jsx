@@ -25,9 +25,7 @@ const BridgeInfo = () => {
   }, [location]);
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-  // console.log("User Token: ", userToken);
-
-
+  
   const role = userToken?.role;
   // console.log("User Role: ", role);
 
