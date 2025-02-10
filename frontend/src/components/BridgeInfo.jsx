@@ -25,18 +25,19 @@ const BridgeInfo = () => {
   }, [location]);
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-  
-  const role = userToken?.role;
-  // console.log("User Role: ", role);
 
+  // Extract username safely
+  const username = userToken?.username;
+
+  // Function to render components based on username
   const renderInspectionList = () => {
-    // console.log("Rendering inspection list, role is:", role);
-    if (userToken?.role == "1") {
+    if (username === "consultant") {
       return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
-    } else if (userToken?.role == "2") {
+    } else if (username === "rams") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
+    } else {
+      return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
     }
-    return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
   };
 
   const handleBackClick = () => {
@@ -48,7 +49,7 @@ const BridgeInfo = () => {
     window.location.href = `/EditBridge?data=${serializedBridgeData}`;
   };
 
-  if (!bridgeData || !role) {
+  if (!bridgeData || !username) {
     return <div>Loading...</div>; // Or redirect to login
   }
 
