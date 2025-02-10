@@ -136,6 +136,7 @@ const InspectionList = ({ bridgeId }) => {
     handleUpdateInspection(row);
   };
 
+  // download csv
   const handleDownloadCSV = async (bridgeId) => {
     try {
       // Fetch data from the API
@@ -181,7 +182,7 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
   
-
+  // download excel
   const handleDownloadExcel = async (bridgeId) => {
     try {
       // Fetch data from the API

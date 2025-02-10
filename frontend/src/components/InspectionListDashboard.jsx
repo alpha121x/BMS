@@ -63,127 +63,99 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-    const handleDownloadCSV = (inspectiondata) => {
-      try {
-        if (!Array.isArray(inspectiondata) || inspectiondata.length === 0) {
-          console.error("No data to export");
-          return;
-        }
-    
-        // Define the fields you want to include in the CSV
-        const fieldsToInclude = {
-          'bridge_name': 'BridgeName',
-          'SpanIndex': 'Span',
-          'PartsName': 'Parts',
-          'MaterialName': 'Material',
-          'DamageKindName': 'Damage Type',
-          'DamageLevel': 'Damage Level',
-          'Remarks': 'Situation Remarks',
-          'qc_remarks_con': 'Consultant Remarks',
-          'qc_con': 'Consultant Approval Status'
-        };
-    
-        // Extract BridgeName from the first row of inspectiondata
-        const bridgename = inspectiondata[0].bridge_name || 'bridge_inspection';
-    
-        // Prepare CSV rows with only selected fields
-        const csvRows = inspectiondata.map(row => {
-          const filteredRow = {};
-          Object.entries(fieldsToInclude).forEach(([key, label]) => {
-            // Handle approval status text
-            if (key === 'qc_con') {
-              filteredRow[label] = row[key] === 2 ? 'Approved' : 
-                                  row[key] === 3 ? 'Unapproved' : 'Pending';
-            } else {
-              filteredRow[label] = row[key] || 'N/A';
-            }
-          });
-          return filteredRow;
-        });
-    
-        const csvContent =
-          "data:text/csv;charset=utf-8," +
-          [
-            Object.values(fieldsToInclude).join(","), // Custom Headers
-            ...csvRows.map(row => 
-              Object.values(row)
-                .map(value => 
-                  // Handle values that contain commas
-                  String(value).includes(',') ? `"${value}"` : value
-                )
-                .join(",")
-            ),
-          ].join("\n");
-    
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `${bridgename}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    
-      } catch (error) {
-        console.error("Error downloading CSV:", error);
-        Swal.fire("Error!", "Failed to download CSV file", "error");
-      }
-    };
-  
-    const handleDownloadExcel = async (inspectiondata) => {
-      if (!Array.isArray(inspectiondata) || inspectiondata.length === 0) {
+  // download csv
+  const handleDownloadCSV = async (bridgeId) => {
+    try {
+      // Fetch data from the API
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+      );
+      const data = await response.json();
+
+      if (
+        !data.success ||
+        !Array.isArray(data.bridges) ||
+        data.bridges.length === 0
+      ) {
         console.error("No data to export");
+        Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
-      const bridgename = inspectiondata[0].bridge_name;
-  
-      // Define the fields you want to include in the Excel
-      const fieldsToInclude = {
-        'bridge_name': 'BridgeName',
-        'SpanIndex': 'Span',
-        'PartsName': 'Parts',
-        'MaterialName': 'Material',
-        'DamageKindName': 'Damage Type',
-        'DamageLevel': 'Damage Level',
-        'Remarks': 'Situation Remarks',
-        'qc_remarks_con': 'Consultant Remarks',
-        'qc_con': 'Consultant Approval Status',
-        'PhotoPaths': 'Image URLs' // Include photo paths as text
-      };
-  
-      // Process each row's data
-      const processedData = inspectiondata.map(row => {
-        // Filter the row data according to fieldsToInclude
-        const filteredRow = {};
-        Object.entries(fieldsToInclude).forEach(([key, label]) => {
-          if (key === 'qc_con') {
-            filteredRow[label] = row[key] === 2 ? 'Approved' : 
-                                row[key] === 3 ? 'Unapproved' : 'Pending';
-          } else if (key === 'PhotoPaths') {
-            // Handle photo paths - convert array to readable string
-            filteredRow[label] = Array.isArray(row[key]) 
-              ? row[key].join('\n') 
-              : 'No image path';
-          } else {
-            filteredRow[label] = row[key] || 'N/A';
-          }
-        });
-        
-        return filteredRow;
-      });
-  
-      // Create worksheet with filtered data
-      const ws = XLSX.utils.json_to_sheet(processedData);
-  
-      // Set column widths
-      ws['!cols'] = Object.keys(fieldsToInclude).map(() => ({ width: 20 }));
-  
-      // Create workbook and append worksheet
+
+      const inspectiondata = data.bridges; // Extract full data
+      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
+
+      // Extract headers dynamically from the first row
+      const headers = Object.keys(inspectiondata[0]);
+
+      // Generate CSV content
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [
+          headers.join(","), // Dynamic Headers
+          ...inspectiondata.map((row) =>
+            headers
+              .map((key) =>
+                String(row[key]).includes(",")
+                  ? `"${row[key]}"`
+                  : row[key] || "N/A"
+              )
+              .join(",")
+          ),
+        ].join("\n");
+
+      // Create CSV file and trigger download
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${bridgeName.replace(/\s+/g, "_")}.csv`); // Replace spaces with underscores
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+      Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
+    }
+  };
+
+  // download excel
+  const handleDownloadExcel = async (bridgeId) => {
+    try {
+      // Fetch data from the API
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+      );
+      const data = await response.json();
+
+      if (
+        !data.success ||
+        !Array.isArray(data.bridges) ||
+        data.bridges.length === 0
+      ) {
+        console.error("No data to export");
+        Swal.fire("Error!", "No data available for export", "error");
+        return;
+      }
+
+      const inspectiondata = data.bridges; // Extract full data
+      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection"; // Use bridge_name dynamically
+
+      // Convert JSON to worksheet
+      const ws = XLSX.utils.json_to_sheet(inspectiondata);
+
+      // Set column widths automatically based on data
+      ws["!cols"] = Object.keys(inspectiondata[0]).map(() => ({ width: 20 }));
+
+      // Create a new workbook and append the worksheet
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inspections");
-  
-      // Generate and download Excel file
-      XLSX.writeFile(wb, `${bridgename}.xlsx`);
+
+      // Generate and trigger file download
+      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`); // Replaces spaces with underscores
+    } catch (error) {
+      console.error("Error downloading Excel:", error);
+      Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+    }
   };
 
   const getDamageLevel = (data) => {
@@ -260,14 +232,14 @@ const InspectionList = ({ bridgeId }) => {
           <div className="d-flex gap-3">
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
-              onClick={() => handleDownloadCSV(inspectionData)}
+              onClick={() => handleDownloadCSV(bridgeId)}
             >
               <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
               CSV
             </button>
             <button
               className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-              onClick={() => handleDownloadExcel(inspectionData)}
+              onClick={() => handleDownloadExcel(bridgeId)}
             >
               <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
               Excel
