@@ -1,49 +1,215 @@
-import React, { useEffect, useState } from 'react';
-import { BASE_URL } from './config'; // Adjust as needed
+import React, { useEffect, useState } from "react";
+import { Button, Table } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { BASE_URL } from "./config";
+import Header from "./Header";
+import Footer from "./Footer";
 
 const BridgeWiseScore = () => {
-    const [data, setData] = useState([]);
+  const [bridgeScoreData, setBridgeScoreData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-    useEffect(() => {
-        fetch(`${BASE_URL}/api/bms-score`)
-            .then(response => response.json())
-            .then(setData)
-            .catch(error => console.error('Error fetching data:', error));
-    }, []);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-    return (
-        <div>
-            <h2>Bridge Wise Score</h2>
-            <table border="1" cellPadding="8" cellSpacing="0">
-                <thead>
-                    <tr>
-                        <th>Bridge Name</th>
-                        <th>District</th>
-                        <th>Damage Score</th>
-                        <th>Critical Damage Score</th>
-                        <th>Inventory Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.length > 0 ? (
-                        data.map((row, index) => (
-                            <tr key={index}>
-                                <td>{row.bridge_name}</td>
-                                <td>{row.district}</td>
-                                <td>{row.damage_score}</td>
-                                <td>{row.critical_damage_score}</td>
-                                <td>{row.inventory_score}</td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="5">Loading data...</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${BASE_URL}/api/bms-score`);
+      if (!response.ok) throw new Error("Failed to fetch data");
+
+      const result = await response.json();
+      if (Array.isArray(result.data)) {
+        setBridgeScoreData(result.data);
+      } else {
+        throw new Error("Invalid data format");
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const totalPages = Math.ceil(bridgeScoreData.length / itemsPerPage);
+  const currentData = bridgeScoreData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const buttonStyles = {
+    margin: "0 6px",
+    padding: "4px 8px",
+    color: "white",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "12px",
+    cursor: "pointer",
+  };
+
+  const renderPaginationButtons = () => {
+    const buttons = [];
+    buttons.push(
+      <Button
+        onClick={handlePrevPage}
+        disabled={currentPage === 1}
+        key="prev"
+        style={buttonStyles}
+      >
+        «
+      </Button>
     );
+
+    buttons.push(
+      <Button
+        key="1"
+        onClick={() => handlePageChange(1)}
+        style={{
+          ...buttonStyles,
+          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA",
+        }}
+      >
+        1
+      </Button>
+    );
+
+    const pageRange = 3;
+    let startPage = Math.max(currentPage - pageRange, 2);
+    let endPage = Math.min(currentPage + pageRange, totalPages - 1);
+
+    if (totalPages <= 7) {
+      startPage = 2;
+      endPage = totalPages - 1;
+    }
+
+    for (let page = startPage; page <= endPage; page++) {
+      buttons.push(
+        <Button
+          key={page}
+          onClick={() => handlePageChange(page)}
+          style={{
+            ...buttonStyles,
+            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA",
+          }}
+        >
+          {page}
+        </Button>
+      );
+    }
+
+    if (totalPages > 1) {
+      buttons.push(
+        <Button
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+          style={{
+            ...buttonStyles,
+            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
+          }}
+        >
+          {totalPages}
+        </Button>
+      );
+    }
+
+    buttons.push(
+      <Button
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+        key="next"
+        style={buttonStyles}
+      >
+        »
+      </Button>
+    );
+
+    return buttons;
+  };
+
+  return (
+    <>
+      <Header />
+      <div className="p-2 bg-gray-200 min-h-screen flex justify-center items-center">
+        <div
+          className="card p-2 rounded-lg text-black w-3/4"
+          style={{
+            background: "#FFFFFF",
+            border: "2px solid #60A5FA",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            position: "relative",
+          }}
+        >
+          <div className="card-body pb-0">
+            <h6 className="card-title text-lg font-semibold pb-2">
+              Bridge Wise Score
+            </h6>
+            {loading ? (
+              <p>Loading data...</p>
+            ) : error ? (
+              <p className="text-danger">{error}</p>
+            ) : (
+              <>
+                <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>Bridge Name</th>
+                      <th>District</th>
+                      <th>Damage Score</th>
+                      <th>Critical Damage Score</th>
+                      <th>Inventory Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentData.length > 0 ? (
+                      currentData.map((row, index) => (
+                        <tr key={index}>
+                          <td>{row.bridge_name || "N/A"}</td>
+                          <td>{row.district || "N/A"}</td>
+                          <td>{row.damage_score || "N/A"}</td>
+                          <td>{row.critical_damage_score || "N/A"}</td>
+                          <td>{row.inventory_score || "N/A"}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">
+                          No data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+
+                {/* Pagination Section */}
+                <div className="d-flex justify-content-center align-items-center mt-3">
+                  {renderPaginationButtons()}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </>
+  );
 };
 
 export default BridgeWiseScore;
