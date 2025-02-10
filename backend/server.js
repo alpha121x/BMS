@@ -1,8 +1,5 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-// const multer = require("multer");
-// const path = require("path");
-// const fs = require("fs");
 const cors = require("cors");
 const { Pool } = require("pg");
 require("dotenv").config();
@@ -336,20 +333,22 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     } = req.query;
 
     let query = `
-      SELECT md.uu_bms_id, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, md.road_name_cwd, 
-             md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, md.survey_chainage_start, md.survey_chainage_end, 
-             md.pms_sec_id, md.structure_no, md.surveyor_name, md.zone_id, md.zone, md.district_id, md.district, 
-             md.road_classification_id, md.road_classification, md.road_surface_type_id, md.road_surface_type, md.carriageway_type_id, 
-             md.carriageway_type, md.direction, md.visual_condition, md.construction_type_id, md.construction_type, md.no_of_span, 
-             md.span_length_m, md.structure_width_m, md.construction_year, md.last_maintenance_date, md.data_source, md.date_time, 
-             md.remarks, f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", f."PartsID", f."PartsName", 
-             f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
-             f.damage_extent, f."Remarks", f.current_date_time, 
-             ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS photos
-      FROM bms.tbl_bms_master_data md
-      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-      WHERE 1=1
-    `;
+    SELECT md.uu_bms_id, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, md.road_name_cwd, 
+           md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, md.survey_chainage_start, md.survey_chainage_end, 
+           md.pms_sec_id, md.structure_no, md.surveyor_name, md.zone_id, md.zone, md.district_id, md.district, 
+           md.road_classification_id, md.road_classification, md.road_surface_type_id, md.road_surface_type, md.carriageway_type_id, 
+           md.carriageway_type, md.direction, md.visual_condition, md.construction_type_id, md.construction_type, md.no_of_span, 
+           md.span_length_m, md.structure_width_m, md.construction_year, md.last_maintenance_date, md.data_source, md.date_time, 
+           md.remarks, f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", f."PartsID", f."PartsName", 
+           f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
+           f.damage_extent, f."Remarks", f.current_date_time, 
+           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+           /* Add the new column here */
+           COALESCE(f."photopath"::jsonb, '[]'::jsonb) AS "Inspection Photos"
+    FROM bms.tbl_bms_master_data md
+    LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+    WHERE 1=1
+  `;
 
     const queryParams = [];
     let paramIndex = 1;
@@ -393,7 +392,6 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching data from the database" });
   }
 });
-
 
 
 app.get("/api/bridges", async (req, res) => {
@@ -1032,50 +1030,6 @@ app.get("/api/road-surface-types", async (req, res) => {
   }
 });
 
-// // Set up multer to store uploaded files in a dynamically specified directory
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     // Get the directory path from the request body
-//     const directoryPath = req.body.directoryPath;
-
-//     if (!directoryPath) {
-//       return cb(new Error("No directory path specified."));
-//     }
-
-//     // Make sure the directory exists, or create it
-//     const fullPath = path.join(__dirname, directoryPath);
-//     fs.mkdirSync(fullPath, { recursive: true });
-
-//     // Store the file in the specified directory
-//     cb(null, fullPath);
-//   },
-//   filename: (req, file, cb) => {
-//     // Create a unique filename using current timestamp and file extension
-//     cb(null, Date.now() + path.extname(file.originalname));
-//   },
-// });
-
-// // Set up multer upload middleware
-// const upload = multer({ storage });
-
-// // Route to handle file upload
-// app.post("/api/upload", upload.single("file"), (req, res) => {
-//   if (!req.file) {
-//     return res.status(400).send("No file uploaded.");
-//   }
-
-//   // Get the directory path from the body and generate the image URL
-//   const directoryPath = req.body.directoryPath;
-//   const uploadedFileUrl = path
-//     .join(directoryPath, req.file.filename)
-//     .replace(/\\/g, "/");
-
-//   // Send back the image URL and filename
-//   res.json({
-//     imageUrl: `${uploadedFileUrl}`, // Return the full URL of the uploaded image
-//     filename: req.file.filename, // Send back the filename to the frontend
-//   });
-// });
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
