@@ -9,7 +9,7 @@ const Graph = () => {
     title: { text: "Construction Types" },
     series: [
       {
-        name: "Share",
+        name: "Count",
         data: [
           { name: "Bricks Wall With Concrete Slab", y: 16247, color: "#6D68DE" },
           { name: "Stone Wall With Concrete Slab", y: 476, color: "#FFCE83" },
@@ -27,7 +27,7 @@ const Graph = () => {
     title: { text: "Group Construction Types" },
     series: [
       {
-        name: "Category",
+        name: "Count",
         data: [
           { name: "Concrete Deck Slab", y: 17086, color: "#47F9E3" },
           { name: "Culverts (box and pipe)", y: 752, color: "#FF645B" },
@@ -46,7 +46,7 @@ const Graph = () => {
     title: { text: "Type of Structures" },
     series: [
       {
-        name: "Share",
+        name: "Count",
         data: [
           { name: "Underpass", y: 9, color: "#FE8F67" },
           { name: "Bridge", y: 1396, color: "#6D68DE" },
@@ -82,7 +82,7 @@ const Graph = () => {
     title: { text: "Plan A Score Category wise Summary" },
     series: [
       {
-        name: "Score",
+        name: "Count",
         data: [
           { name: "I: 1222", y: 1222, color: "#228B22" },
           { name: "II: 159", y: 159, color: "#FFD700" },
