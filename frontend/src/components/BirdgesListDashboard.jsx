@@ -283,10 +283,10 @@ const BridgesListDashboard = ({
         maxYear,
         bridgeId,
       };
-
+  
       // Prepare the query string from params
       const queryString = new URLSearchParams(params).toString();
-
+  
       // Fetch the data from the API with the dynamically created query string
       const response = await fetch(
         `${BASE_URL}/api/bridgesdownload?${queryString}`,
@@ -294,34 +294,58 @@ const BridgesListDashboard = ({
           method: "GET",
         }
       );
-
+  
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-
+  
       const data = await response.json();
-
+  
       // Check if bridges data is available
       if (!data.bridges || data.bridges.length === 0) {
         console.error("No bridge data available to export.");
         return;
       }
-
+  
       // Handle any array fields (like PhotoPaths)
-      data.bridges.forEach((row) => {
-        // If PhotoPaths is an array, join it into a string
+      const imagePromises = data.bridges.map(async (row) => {
         if (Array.isArray(row.photos)) {
-          row.photos = row.photos.join(", ") || "No image path"; // Default if array is empty
+          const photoPromises = row.photos.map(async (photo) => {
+            const response = await fetch(photo);
+            const blob = await response.blob();
+            return new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+          });
+          row.photos = await Promise.all(photoPromises);
         }
       });
-
+  
+      await Promise.all(imagePromises);
+  
       // Create the worksheet from the table data without custom headers
       const ws = XLSX.utils.json_to_sheet(data.bridges);
-
+  
+      // Add images to the worksheet
+      data.bridges.forEach((row, index) => {
+        if (Array.isArray(row.photos)) {
+          row.photos.forEach((photo, photoIndex) => {
+            const cellAddress = `C${index + 2 + photoIndex}`; // Adjust column as needed
+            ws[cellAddress] = {
+              t: 's',
+              v: photo,
+              l: { Target: photo },
+            };
+          });
+        }
+      });
+  
       // Create a new workbook and append the worksheet
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
-
+  
       // Generate and download the Excel file
       XLSX.writeFile(wb, "bridges_data.xlsx");
     } catch (error) {
