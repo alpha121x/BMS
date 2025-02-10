@@ -93,6 +93,38 @@ const Graph = () => {
     ],
   };
 
+  const bridgeDamageLevelsOptions = {
+    chart: { type: "bar" },
+    title: { text: "Bridges Damage Levels by Damage Kind" },
+    xAxis: {
+      categories: [
+        "NON", "Corrosion", "Crack (Concrete)", "Looseness • Fall", "Fracture",
+        "Deterioration of corrosion protection (paint)", "Crack (Steel)", 
+        "Spalling • Exposed re-bar", "Water leakage • Free lime", "Fall out",
+        "Slab crack", "Poor concrete adhesion", "Gap defect", "Uneven road surface",
+        "Pavement defect", "Bearing malfunction", "Other", "Fixing section defect",
+        "Discoloration • Deterioration", "Leakage • Stagnant water",
+        "Abnormal sound • Vibration", "Abnormal deflection", "Deformation • loss",
+        "Clogged soil", "Settlement • Move • Incline", "Scouring"
+      ],
+      title: { text: "Damage Kind" },
+    },
+    yAxis: {
+      title: { text: "Number of Damages" },
+    },
+    legend: {
+      layout: "horizontal",
+      align: "center",
+      verticalAlign: "bottom",
+    },
+    series: [
+      { name: "Bridges Damage Level IV", data: [30, 50, 40, 20, 10, 15, 25, 35, 20, 40, 25, 30, 15, 35, 50, 30, 20, 10, 15, 25, 35, 20, 40, 25, 30, 15], color: "#FFFF00" }, // Yellow
+      { name: "Bridges Damage Level III", data: [50, 70, 60, 30, 15, 25, 35, 45, 30, 60, 35, 50, 25, 45, 70, 50, 30, 15, 25, 35, 45, 30, 60, 35, 50, 25], color: "#808080" }, // Gray
+      { name: "Bridges Damage Level II", data: [100, 200, 150, 80, 40, 60, 90, 110, 70, 150, 90, 100, 60, 120, 200, 150, 100, 50, 60, 90, 110, 70, 150, 90, 100, 60], color: "#FFA500" }, // Orange
+      { name: "Bridges Damage Level I", data: [200, 400, 300, 160, 80, 120, 180, 220, 140, 300, 180, 200, 120, 240, 400, 300, 200, 100, 120, 180, 220, 140, 300, 180, 200, 120], color: "#0000FF" }, // Blue
+    ],
+  };
+
   // New bar chart configurations
   const materialElementDamagesOptions = {
     chart: {
@@ -273,37 +305,37 @@ const Graph = () => {
     series: [
       {
         name: "Others",
-        data: [100, 50, 10, 5],
+        data: [43, 5, 1, 2],
         color: "#008000",
       },
       {
         name: "Steel Girder",
-        data: [50, 30, 5, 3],
+        data: [0, 5, 1, 4],
         color: "#0000FF",
       },
       {
         name: "Culverts (box and pipe)",
-        data: [200, 100, 20, 10],
+        data: [723, 26, 3, 0],
         color: "#FFA500",
       },
       {
         name: "Concrete I-Girder",
-        data: [100, 50, 10, 5],
+        data: [39, 271, 62, 86],
         color: "#FFFF00",
       },
       {
         name: "Concrete Deck Slab",
-        data: [18000, 1500, 100, 50],
+        data: [16330, 668, 52, 28],
         color: "#FF7F7F",
       },
       {
         name: "Concrete Box Girder",
-        data: [50, 30, 5, 3],
+        data: [0, 1, 0, 1],
         color: "#E6E6FA",
       },
       {
         name: "Arch Structure",
-        data: [30, 20, 3, 2],
+        data: [14, 12, 2, 3],
         color: "#808080",
       },
     ],
@@ -347,6 +379,14 @@ const Graph = () => {
           <HighchartsReact
             highcharts={Highcharts}
             options={constructionTypesOptions}
+          />
+        </div>
+
+        {/* Bar Charts */}
+        <div style={{ width: "90%", marginBottom: "40px" }}>
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={bridgeDamageLevelsOptions}
           />
         </div>
 
