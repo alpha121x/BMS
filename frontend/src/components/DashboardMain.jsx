@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
-import {
-  UserIcon,
-  HomeIcon,
-  DocumentTextIcon,
-  WrenchIcon,
-  BuildingOfficeIcon,
-} from "@heroicons/react/24/outline";
 import Map from "./Map";
 import BridgesListDashboard from "./BirdgesListDashboard";
 import CheckingTable from "./CheckingTable";
 import Graph from "./Graph";
+import { FaBridge } from "react-icons/fa6";
+import { FaRoadBridge } from "react-icons/fa6";
+import { GiArchBridge } from "react-icons/gi";
+import { SiInstructure } from "react-icons/si";
+import { LuConstruction } from "react-icons/lu";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -50,36 +48,37 @@ const DashboardMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+
   // Data for Structure cards
   const structureCards = [
     {
       label: "Total",
       value: "42,830",
-      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
+      icon: <SiInstructure />,
       color: "blue",
     },
     {
       label: "Culvert",
       value: "37,307",
-      icon: <WrenchIcon className="w-10 h-10 text-blue-500" />, // Wrench for construction/maintenance
+      icon: <LuConstruction />, // Wrench for construction/maintenance
       color: "blue",
     },
     {
       label: "PC Bridge",
       value: "5,515",
-      icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />, // Building Office Icon, representing large structures like bridges
+      icon: <FaBridge />      , // Building Office Icon, representing large structures like bridges
       color: "blue",
     },
     {
       label: "Arch",
       value: "27",
-      icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />, // Document icon to represent an architectural design
+      icon: <GiArchBridge />, // Document icon to represent an architectural design
       color: "blue",
     },
     {
       label: "Underpass",
       value: "8",
-      icon: <HomeIcon className="w-10 h-10 text-blue-500" />, // Home icon representing an underpass construction type
+      icon: < FaRoadBridge />, // Home icon representing an underpass construction type
       color: "blue",
     },
   ];
@@ -89,31 +88,31 @@ const DashboardMain = () => {
     {
       label: "Total",
       value: "1,511",
-      icon: <UserIcon className="w-10 h-10 text-blue-500" />,
+      icon: <SiInstructure />,
       color: "blue",
     },
     {
       label: "Culvert",
       value: "1,102",
-      icon: <WrenchIcon className="w-10 h-10 text-blue-500" />,
+      icon: <LuConstruction />,
       color: "blue",
     },
     {
       label: "PC Bridge",
       value: "347",
-      icon: <BuildingOfficeIcon className="w-10 h-10 text-blue-500" />,
+      icon: <FaBridge />      ,
       color: "blue",
     },
     {
       label: "Arch",
       value: "4",
-      icon: <DocumentTextIcon className="w-10 h-10 text-blue-500" />,
+      icon: <GiArchBridge />,
       color: "blue",
     },
     {
       label: "Underpass",
       value: "1",
-      icon: <HomeIcon className="w-10 h-10 text-blue-500" />,
+      icon: < FaRoadBridge />,
       color: "blue",
     },
   ];
