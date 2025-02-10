@@ -11,7 +11,11 @@ const Graph = () => {
       {
         name: "Count",
         data: [
-          { name: "Bricks Wall With Concrete Slab", y: 16247, color: "#6D68DE" },
+          {
+            name: "Bricks Wall With Concrete Slab",
+            y: 16247,
+            color: "#6D68DE",
+          },
           { name: "Stone Wall With Concrete Slab", y: 476, color: "#FFCE83" },
           { name: "Pipe Culvert", y: 565, color: "#84A3D5" },
           { name: "I-Girder", y: 346, color: "#19FB8B" },
@@ -94,20 +98,36 @@ const Graph = () => {
   };
 
   const bridgeDamageLevelsOptions = {
-    chart: { type: "bar",
-      height: 800
-     },
+    chart: { type: "bar", height: 800 },
     title: { text: "Bridges Damage Levels by Damage Kind" },
     xAxis: {
       categories: [
-        "NON", "Corrosion", "Crack (Concrete)", "Looseness • Fall", "Fracture",
-        "Deterioration of corrosion protection (paint)", "Crack (Steel)", 
-        "Spalling • Exposed re-bar", "Water leakage • Free lime", "Fall out",
-        "Slab crack", "Poor concrete adhesion", "Gap defect", "Uneven road surface",
-        "Pavement defect", "Bearing malfunction", "Other", "Fixing section defect",
-        "Discoloration • Deterioration", "Leakage • Stagnant water",
-        "Abnormal sound • Vibration", "Abnormal deflection", "Deformation • loss",
-        "Clogged soil", "Settlement • Move • Incline", "Scouring"
+        "NON",
+        "Corrosion",
+        "Crack (Concrete)",
+        "Looseness • Fall",
+        "Fracture",
+        "Deterioration of corrosion protection (paint)",
+        "Crack (Steel)",
+        "Spalling • Exposed re-bar",
+        "Water leakage • Free lime",
+        "Fall out",
+        "Slab crack",
+        "Poor concrete adhesion",
+        "Gap defect",
+        "Uneven road surface",
+        "Pavement defect",
+        "Bearing malfunction",
+        "Other",
+        "Fixing section defect",
+        "Discoloration • Deterioration",
+        "Leakage • Stagnant water",
+        "Abnormal sound • Vibration",
+        "Abnormal deflection",
+        "Deformation • loss",
+        "Clogged soil",
+        "Settlement • Move • Incline",
+        "Scouring",
       ],
       title: { text: "Damage Kind" },
     },
@@ -120,43 +140,58 @@ const Graph = () => {
       verticalAlign: "bottom",
     },
     series: [
-      { 
-        name: "Bridges Damage Level IV", 
-        data: [9, 5, 14, 55, 51, 0, 28, 149, 7, 122, 6, 14, 9, 10, 20, 4, 45, 2, 7, 6, 1, 12, 92, 56, 20, 19], 
-        color: "#FFFF00" 
+      {
+        name: "Bridges Damage Level IV",
+        data: [
+          9, 5, 14, 55, 51, 0, 28, 149, 7, 122, 6, 14, 9, 10, 20, 4, 45, 2, 7,
+          6, 1, 12, 92, 56, 20, 19,
+        ],
+        color: "#FFFF00",
       },
-      { 
-        name: "Bridges Damage Level III", 
-        data: [20, 8, 37, 87, 50, 6, 75, 276, 30, 126, 30, 28, 39, 33, 50, 5, 97, 10, 20, 13, 1, 5, 88, 136, 24, 22], 
-        color: "#808080" 
+      {
+        name: "Bridges Damage Level III",
+        data: [
+          20, 8, 37, 87, 50, 6, 75, 276, 30, 126, 30, 28, 39, 33, 50, 5, 97, 10,
+          20, 13, 1, 5, 88, 136, 24, 22,
+        ],
+        color: "#808080",
       },
-      { 
-        name: "Bridges Damage Level II", 
-        data: [90, 63, 189, 217, 121, 17, 215, 556, 255, 295, 45, 125, 155, 164, 192, 11, 298, 21, 152, 65, 5, 9, 208, 352, 45, 45], 
-        color: "#FFA500" 
+      {
+        name: "Bridges Damage Level II",
+        data: [
+          90, 63, 189, 217, 121, 17, 215, 556, 255, 295, 45, 125, 155, 164, 192,
+          11, 298, 21, 152, 65, 5, 9, 208, 352, 45, 45,
+        ],
+        color: "#FFA500",
       },
-      { 
-        name: "Bridges Damage Level I", 
-        data: [99, 23, 48, 69, 31, 5, 75, 142, 71, 104, 8, 30, 27, 32, 34, 1, 122, 6, 97, 15, 1, 0, 56, 55, 5, 12], 
-        color: "#0000FF" 
-      }
+      {
+        name: "Bridges Damage Level I",
+        data: [
+          99, 23, 48, 69, 31, 5, 75, 142, 71, 104, 8, 30, 27, 32, 34, 1, 122, 6,
+          97, 15, 1, 0, 56, 55, 5, 12,
+        ],
+        color: "#0000FF",
+      },
     ],
-};
+  };
 
   const materialElementDamagesOptions = {
     chart: {
       type: "bar",
-      height: 800
+      height: 800,
     },
     title: {
       text: "Material Element Damages",
       style: {
-        fontSize: '16px',
-        fontWeight: 'bold'
-      }
+        fontSize: "16px",
+        fontWeight: "bold",
+      },
     },
     xAxis: {
       categories: [
+        "Superstructure",
+        "Concrete",
+        "Other",
         "Substructure(Pier) - Steel",
         "Concrete",
         "Other",
@@ -184,50 +219,61 @@ const Graph = () => {
         "Other",
         "Wing wall - Concrete",
         "Other",
-        "Box Culvert - Other"
+        "Box Culvert - Other",
       ],
       title: {
-        text: "Elements"
-      }
+        text: "Elements",
+      },
     },
     yAxis: {
       min: 0,
       title: {
-        text: "Number of Damages"
-      }
+        text: "Number of Damages",
+      },
     },
     legend: {
-      reversed: true
+      reversed: true,
     },
     plotOptions: {
       series: {
-        stacking: "normal"
-      }
+        stacking: "normal",
+      },
     },
     series: [
       {
-        name: "Number of Damages I",
-        data: [100, 1800, 200, 300, 400, 150, 400, 200, 100, 100, 400, 50, 50, 20, 30, 20, 10, 200, 800, 100, 400, 200, 10, 10, 400, 50, 10, 20],
-        color: "#0000FF"
-      },
-      {
-        name: "Number of Damages II",
-        data: [50, 1200, 100, 200, 600, 100, 600, 150, 50, 50, 500, 30, 30, 10, 20, 10, 5, 150, 1000, 50, 500, 300, 5, 5, 600, 30, 5, 10],
-        color: "#FFA500"
+        name: "Number of Damages IV",
+        data: [
+          35, 236, 15, 0, 153, 10, 53, 0, 19, 14, 39, 20, 7, 5, 11, 10, 7, 72,
+          166, 1, 63, 112, 3, 0, 72, 7, 0, 2, 26, 126, 0,
+        ],
+        color: "#FFFF00",
       },
       {
         name: "Number of Damages III",
-        data: [30, 200, 50, 100, 100, 50, 100, 50, 30, 30, 100, 20, 20, 5, 10, 5, 3, 100, 200, 30, 100, 100, 3, 3, 200, 20, 3, 5],
-        color: "#808080"
+        data: [
+          5, 464, 21, 1, 153, 27, 101, 1, 47, 20, 121, 16, 11, 2, 13, 5, 4, 106,
+          204, 69, 130, 69, 3, 4, 241, 14, 0, 1, 19, 177, 0,
+        ],
+        color: "#808080",
       },
       {
-        name: "Number of Damages IV",
-        data: [20, 100, 30, 50, 50, 30, 50, 30, 20, 20, 50, 10, 10, 3, 5, 3, 2, 50, 100, 20, 50, 50, 2, 2, 100, 10, 2, 3],
-        color: "#FFFF00"
-      }
-    ]
+        name: "Number of Damages II",
+        data: [
+          87, 1087, 73, 5, 442, 125, 601, 2, 159, 108, 483, 16, 29, 11, 34, 16,
+          10, 312, 817, 27, 612, 323, 14, 12, 628, 57, 2, 17, 97, 781, 1,
+        ],
+        color: "#FFA500",
+      },
+      {
+        name: "Number of Damages I",
+        data: [
+          6, 263, 13, 0, 160, 22, 149, 1, 56, 32, 146, 5, 7, 3, 10, 3, 2, 46,
+          164, 2, 111, 66, 0, 4, 80, 22, 3, 2, 27, 171, 0,
+        ],
+        color: "#0000FF",
+      },
+    ],
   };
-
 
   const elementCategoryDamagesOptions = {
     chart: {
@@ -271,27 +317,27 @@ const Graph = () => {
     },
     series: [
       {
-        name: "Number of Damages I",
-        data: [500, 400, 300, 50, 50, 800, 100, 50, 200, 0],
-        color: "#0000FF",
-      },
-      {
-        name: "Number of Damages II",
-        data: [1200, 800, 600, 30, 30, 1500, 150, 30, 500, 0],
-        color: "#FFA500",
+        name: "Number of Damages IV",
+        data: [286, 128, 72, 27, 33, 414, 75, 9, 152, 0],
+        color: "#FFFF00",
       },
       {
         name: "Number of Damages III",
-        data: [400, 300, 200, 20, 20, 500, 50, 20, 150, 0],
+        data: [490, 282, 189, 17, 24, 578, 248, 15, 196, 0],
         color: "#808080",
       },
       {
-        name: "Number of Damages IV",
-        data: [200, 150, 100, 10, 10, 250, 25, 10, 75, 0],
-        color: "#FFFF00",
+        name: "Number of Damages II",
+        data: [1247, 1173, 752, 45, 71, 2091, 654, 76, 878, 1],
+        color: "#FFA500",
       },
+      {
+        name: "Number of Damages I",
+        data: [282, 331, 235, 12, 18, 389, 84, 27, 198, 0],
+        color: "#0000FF",
+      }
     ],
-  };
+};
 
   const bridgeLengthOptions = {
     chart: {
