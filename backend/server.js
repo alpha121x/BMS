@@ -42,7 +42,7 @@ app.post("/api/login", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, role_id,  phone_num, email, id, is_active
+    SELECT id, username, password,phone_num, email, id, is_active
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
@@ -101,7 +101,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password, role_id, phone_num,  email, id, is_active
+    SELECT id, username, password,  phone_num,  email, id, is_active
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
     LIMIT 1
