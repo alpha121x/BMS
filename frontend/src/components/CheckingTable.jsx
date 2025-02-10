@@ -3,7 +3,7 @@ import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
-import Papa from "papaparse"; // Import PapaParse
+import Papa from "papaparse";
 
 const CheckingTable = () => {
   const [tableData, setTableData] = useState([]);
@@ -215,7 +215,7 @@ const CheckingTable = () => {
           />
         )}
 
-        <Table bordered responsive>
+        <Table className="custom-table">
           <thead>
             <tr>
               <th>Bridge Name</th>
