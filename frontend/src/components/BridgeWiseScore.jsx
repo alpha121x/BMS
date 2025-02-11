@@ -30,14 +30,9 @@ const BridgeWiseScore = () => {
       const response = await fetch(
         `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}`
       );
-      console.log(
-        "Fetching data from:",
-        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}`
-      ); // Log the request URL
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
-      console.log("Fetched data:", result); // Log the entire response
       if (Array.isArray(result.data)) {
         setBridgeScoreData(result.data);
         setTotalItems(parseInt(result.totalRecords, 10));
@@ -203,7 +198,7 @@ const BridgeWiseScore = () => {
                               onClick={() => handleClick(row)}
                               className="btn btn-primary btn-sm"
                             >
-                              See Bridge Information
+                              Bridge Information
                             </button>
                           </td>
                         </tr>

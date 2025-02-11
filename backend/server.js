@@ -160,48 +160,49 @@ app.get("/api/bms-score", async (req, res) => {
 
   try {
     const query = `
-     SELECT 
-    c.objectid AS uu_bms_id, 
-    c.damage_score, 
-    c.critical_damage_score,
-    c.inventory_score,
-    m.structure_no, 
-    m.structure_type_id, 
-    m.structure_type, 
-    m.road_name, 
-    m.road_name_cwd, 
-    m.route_id, 
-    m.survey_id, 
-    m.surveyor_name, 
-    m.district_id, 
-    m.district, 
-    m.road_classification, 
-    m.road_surface_type, 
-    m.carriageway_type, 
-    m.direction, 
-    m.visual_condition, 
-    m.construction_type_id, 
-    m.construction_type, 
-    m.no_of_span, 
-    m.span_length_m, 
-    m.structure_width_m, 
-    m.construction_year, 
-    m.last_maintenance_date, 
-    m.remarks, 
-    m.is_surveyed, 
-    m.x_centroid, 
-    m.y_centroid, 
-    m.images_spans,
-    CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-    ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
-FROM 
-    bms.bms_calculations c
-LEFT JOIN 
-    bms.tbl_bms_master_data m 
-ON 
-    c.objectid = m.uu_bms_id
-LIMIT $1 OFFSET $2;
-    `;
+    SELECT 
+        c.objectid AS uu_bms_id, 
+        c.damage_score, 
+        c.critical_damage_score,
+        c.inventory_score,
+        m.structure_no, 
+        m.structure_type_id, 
+        m.structure_type, 
+        m.road_name, 
+        m.road_name_cwd, 
+        m.route_id, 
+        m.survey_id, 
+        m.surveyor_name, 
+        m.district_id, 
+        m.district, 
+        m.road_classification, 
+        m.road_surface_type, 
+        m.carriageway_type, 
+        m.direction, 
+        m.visual_condition, 
+        m.construction_type_id, 
+        m.construction_type, 
+        m.no_of_span, 
+        m.span_length_m, 
+        m.structure_width_m, 
+        m.construction_year, 
+        m.last_maintenance_date, 
+        m.remarks, 
+        m.is_surveyed, 
+        m.x_centroid, 
+        m.y_centroid, 
+        m.images_spans,
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+        ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+    FROM 
+        bms.bms_calculations c
+    LEFT JOIN 
+        bms.tbl_bms_master_data m 
+    ON 
+        c.objectid = m.uu_bms_id
+    ORDER BY c.objectid
+    LIMIT $1 OFFSET $2;
+    `;    
 
     const result = await pool.query(query, [limit, offset]);
 
