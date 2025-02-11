@@ -9,6 +9,7 @@ import FilterComponent from "./FilterComponent";
 
 const BridgesList = ({
   setSelectedDistrict,
+  setBridge,
   setMinBridgeLength,
   setMaxBridgeLength,
   setMinSpanLength,
@@ -33,6 +34,7 @@ const BridgesList = ({
   maxSpanLength,
   minYear,
   maxYear,
+  bridge,
 }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,6 +60,7 @@ const BridgesList = ({
     maxSpanLength,
     minYear,
     maxYear,
+    bridge,
   ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -82,6 +85,7 @@ const BridgesList = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridge,
       };
 
       // console.log(params);
@@ -183,6 +187,7 @@ const BridgesList = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridge,
       };
 
       // Prepare the query string from params
@@ -232,6 +237,7 @@ const BridgesList = ({
         maxSpanLength,
         minYear,
         maxYear,
+        bridge,
       };
 
       // Prepare the query string from params
@@ -357,6 +363,7 @@ const BridgesList = ({
                   setInspectionStatus={setInspectionStatus}
                   setMinYear={setMinYear}
                   setMaxYear={setMaxYear}
+                  setBridge={setBridge}
                 />
               </div>
             </div>

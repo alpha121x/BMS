@@ -19,7 +19,7 @@ const EvaluationMain = () => {
   const [inspectionStatus, setInspectionStatus] = useState("");
   const [minYear, setMinYear] = useState("");
   const [maxYear, setMaxYear] = useState("");
-
+  const [bridge, setBridgeName] = useState("");
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -44,38 +44,38 @@ const EvaluationMain = () => {
   };
 
   // Data for Evaluation cards
-    const inspectedCards = [
-      {
-        label: "Total",
-        value: "1,511",
-        icon: <SiInstructure />,
-        color: "blue",
-      },
-      {
-        label: "Culvert",
-        value: "1,102",
-        icon: <LuConstruction />,
-        color: "blue",
-      },
-      {
-        label: "PC Bridge",
-        value: "347",
-        icon: <FaBridge />      ,
-        color: "blue",
-      },
-      // {
-      //   label: "Arch",
-      //   value: "4",
-      //   icon: <GiArchBridge />,
-      //   color: "blue",
-      // },
-      {
-        label: "Underpass",
-        value: "1",
-        icon: < FaRoadBridge />,
-        color: "blue",
-      },
-    ];
+  const inspectedCards = [
+    {
+      label: "Total",
+      value: "1,511",
+      icon: <SiInstructure />,
+      color: "blue",
+    },
+    {
+      label: "Culvert",
+      value: "1,102",
+      icon: <LuConstruction />,
+      color: "blue",
+    },
+    {
+      label: "PC Bridge",
+      value: "347",
+      icon: <FaBridge />,
+      color: "blue",
+    },
+    // {
+    //   label: "Arch",
+    //   value: "4",
+    //   icon: <GiArchBridge />,
+    //   color: "blue",
+    // },
+    {
+      label: "Underpass",
+      value: "1",
+      icon: <FaRoadBridge />,
+      color: "blue",
+    },
+  ];
 
   // Card Component with dynamic border color
   const Card = ({ label, value, icon, iconSize = 32 }) => (
@@ -138,6 +138,7 @@ const EvaluationMain = () => {
             setInspectionStatus={setInspectionStatus}
             setMinYear={setMinYear}
             setMaxYear={setMaxYear}
+            setBridge={setBridgeName}
             district={selectedDistrict}
             structureType={structureType}
             constructionType={constructionType}
@@ -150,6 +151,7 @@ const EvaluationMain = () => {
             maxSpanLength={maxSpanLength}
             minYear={minYear}
             maxYear={maxYear}
+            bridge={bridge} // Also pass the current bridge id filter
           />
         </div>
       </div>
