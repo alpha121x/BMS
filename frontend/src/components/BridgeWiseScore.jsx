@@ -15,6 +15,7 @@ const BridgeWiseScore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
@@ -90,7 +91,7 @@ const BridgeWiseScore = () => {
       link.click();
       document.body.removeChild(link);
   
-      console.log("CSV file downloaded successfully.");
+      // console.log("CSV file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading CSV:", error);
     }
@@ -120,7 +121,7 @@ const BridgeWiseScore = () => {
       link.click();
       document.body.removeChild(link);
   
-      console.log("Excel file downloaded successfully.");
+      // console.log("Excel file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading Excel:", error);
     }
@@ -135,6 +136,11 @@ const BridgeWiseScore = () => {
     fontSize: "12px",
     cursor: "pointer",
   };
+
+  const filteredData = currentData.filter((row) =>
+    (row.bridge_name && row.bridge_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (row.district && row.district.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   const renderPaginationButtons = () => {
     const buttons = [];
@@ -252,6 +258,17 @@ const BridgeWiseScore = () => {
               </div>
             </div>
 
+            <input
+              type="text"
+              placeholder="Search by Bridge Name or District"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset pagination to the first page
+              }}
+              className="form-control mb-3 w-50"
+            />
+
             {loading ? (
               <div
                 style={{
@@ -285,8 +302,8 @@ const BridgeWiseScore = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentData.length > 0 ? (
-                      currentData.map((row, index) => (
+                    {filteredData.length > 0 ? (
+                      filteredData.map((row, index) => (
                         <tr key={index}>
                           <td>{row.bridge_name || "N/A"}</td>
                           <td>{row.district || "N/A"}</td>
