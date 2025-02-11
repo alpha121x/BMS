@@ -69,12 +69,12 @@ const DashboardMain = () => {
       icon: <FaBridge />      , // Building Office Icon, representing large structures like bridges
       color: "blue",
     },
-    {
-      label: "Arch",
-      value: "27",
-      icon: <GiArchBridge />, // Document icon to represent an architectural design
-      color: "blue",
-    },
+    // {
+    //   label: "Arch",
+    //   value: "27",
+    //   icon: <GiArchBridge />, // Document icon to represent an architectural design
+    //   color: "blue",
+    // },
     {
       label: "Underpass",
       value: "8",
@@ -103,12 +103,12 @@ const DashboardMain = () => {
       icon: <FaBridge />      ,
       color: "blue",
     },
-    {
-      label: "Arch",
-      value: "4",
-      icon: <GiArchBridge />,
-      color: "blue",
-    },
+    // {
+    //   label: "Arch",
+    //   value: "4",
+    //   icon: <GiArchBridge />,
+    //   color: "blue",
+    // },
     {
       label: "Underpass",
       value: "1",
@@ -155,7 +155,7 @@ const DashboardMain = () => {
         <h3 className="text-xl font-semibold text-gray-700">
           Total Structures Inventory
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {structureCards.map((card, index) => (
             <Card key={index} {...card} />
           ))}
@@ -165,9 +165,9 @@ const DashboardMain = () => {
       {/* Evaluation Section */}
       <div className="mb-2">
         <h3 className="text-xl font-semibold text-gray-700">
-          Inspected/Detailed Surveyed
+          Inspected Structures
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
           ))}

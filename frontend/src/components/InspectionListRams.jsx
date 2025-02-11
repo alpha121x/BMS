@@ -508,7 +508,7 @@ const InspectionList = ({ bridgeId }) => {
                                   />
 
                                   <Form.Select
-                                    value={inspection.qc_rams || ""}
+                                    value={inspection.qc_rams}
                                     onChange={(e) =>
                                       handleApprovedFlagChange(
                                         inspection.inspection_id,
@@ -517,7 +517,7 @@ const InspectionList = ({ bridgeId }) => {
                                     }
                                     className="mb-2"
                                   >
-                                    <option value={""}>Select Status</option>
+                                    <option value={0}>Select Status</option>
                                     <option value={3}>Unapproved</option>
                                     <option value={2}>Approved</option>
                                   </Form.Select>

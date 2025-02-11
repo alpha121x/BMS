@@ -63,12 +63,12 @@ const EvaluationMain = () => {
         icon: <FaBridge />      ,
         color: "blue",
       },
-      {
-        label: "Arch",
-        value: "4",
-        icon: <GiArchBridge />,
-        color: "blue",
-      },
+      // {
+      //   label: "Arch",
+      //   value: "4",
+      //   icon: <GiArchBridge />,
+      //   color: "blue",
+      // },
       {
         label: "Underpass",
         value: "1",
@@ -112,8 +112,10 @@ const EvaluationMain = () => {
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
       <div className="mb-2">
-      <h3 className="text-xl font-semibold text-gray-700">Inspected/Detailed Surveyed</h3>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <h3 className="text-xl font-semibold text-gray-700">
+          Inspected Structures
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
           ))}
