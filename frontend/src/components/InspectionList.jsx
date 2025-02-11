@@ -436,13 +436,10 @@ const InspectionList = ({ bridgeId }) => {
         <div className="border rounded p-3 shadow-lg mt-2">
           <div className="inspection-cards-container">
             {Object.keys(filteredData).map((spanIndex) => (
-              <div
-                key={`span-${spanIndex}`}
-                className="card mb-4 border shadow-sm"
-              >
-                {/* Span Index Header with Toggle Button */}
+              <div key={`span-${spanIndex}`} className="mb-4">
+                {/* Span Index Header */}
                 <div
-                  className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                  className="border rounded p-3 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
                   onClick={() => toggleSection(spanIndex)}
                   style={{ cursor: "pointer" }}
                 >
@@ -450,25 +447,26 @@ const InspectionList = ({ bridgeId }) => {
                   <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                 </div>
 
-                {/* Work Kinds for Each Span - Toggle Visibility */}
+                {/* Work Kinds for Each Span */}
                 {expandedSections[spanIndex] && (
-                  <div className="card-body">
+                  <div className="mt-2">
                     {Object.keys(filteredData[spanIndex]).map((workKind) => (
                       <div
                         key={`workKind-${spanIndex}-${workKind}`}
-                        className="card mb-4 border shadow-sm"
+                        className="mb-4"
                       >
-                        <div className="card-header bg-secondary text-white fw-bold">
+                        {/* Work Kind Header */}
+                        <div className="border rounded p-3 bg-secondary text-white fw-bold">
                           {workKind}
                         </div>
 
-                        {/* Mapping Inspections */}
-                        <div className="card-body p-3">
+                        {/* Inspections List */}
+                        <div className="mt-2">
                           {filteredData[spanIndex][workKind].map(
                             (inspection, index) => (
                               <div
                                 key={`inspection-${inspection.id || index}`}
-                                className="mb-4 p-4 border rounded shadow-sm"
+                                className="border rounded p-4 shadow-sm mb-3"
                                 style={{ backgroundColor: "#CFE2FF" }}
                               >
                                 <div className="row">
