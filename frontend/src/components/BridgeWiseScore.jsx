@@ -11,21 +11,36 @@ const BridgeWiseScore = () => {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [totalItems, setTotalItems] = useState(0);
+
+  const handleClick = (bridge) => {
+    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+    const editUrl = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
+    window.location.href = editUrl; // Navigate to the new page
+  };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(); // Fetch data whenever currentPage changes
+  }, [currentPage]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${BASE_URL}/api/bms-score`);
+      const response = await fetch(
+        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}`
+      );
+      console.log(
+        "Fetching data from:",
+        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}`
+      ); // Log the request URL
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
+      console.log("Fetched data:", result); // Log the entire response
       if (Array.isArray(result.data)) {
         setBridgeScoreData(result.data);
+        setTotalItems(parseInt(result.totalRecords, 10));
       } else {
         throw new Error("Invalid data format");
       }
@@ -36,11 +51,8 @@ const BridgeWiseScore = () => {
     }
   };
 
-  const totalPages = Math.ceil(bridgeScoreData.length / itemsPerPage);
-  const currentData = bridgeScoreData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const currentData = bridgeScoreData; // Since data is already paginated from API
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -166,7 +178,7 @@ const BridgeWiseScore = () => {
               <p className="text-danger">{error}</p>
             ) : (
               <>
-                <Table striped bordered hover>
+                <Table className="custom-table">
                   <thead>
                     <tr>
                       <th>Bridge Name</th>
@@ -174,6 +186,7 @@ const BridgeWiseScore = () => {
                       <th>Damage Score</th>
                       <th>Critical Damage Score</th>
                       <th>Inventory Score</th>
+                      <th>Bridge Information</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -185,6 +198,14 @@ const BridgeWiseScore = () => {
                           <td>{row.damage_score || "N/A"}</td>
                           <td>{row.critical_damage_score || "N/A"}</td>
                           <td>{row.inventory_score || "N/A"}</td>
+                          <td>
+                            <button
+                              onClick={() => handleClick(row)}
+                              className="btn btn-primary btn-sm"
+                            >
+                              See Bridge Information
+                            </button>
+                          </td>
                         </tr>
                       ))
                     ) : (
