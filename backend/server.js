@@ -428,7 +428,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
   try {
     const {
       district = "%",
-      bridgeId,
+      bridge,
       structureType,
       constructionType,
       minBridgeLength,
@@ -440,7 +440,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     } = req.query;
 
     let query = `
-    SELECT md.uu_bms_id, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, md.road_name_cwd, 
+    SELECT CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, md.road_name_cwd, 
            md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, md.survey_chainage_start, md.survey_chainage_end, 
            md.pms_sec_id, md.structure_no, md.surveyor_name, md.zone_id, md.zone, md.district_id, md.district, 
            md.road_classification_id, md.road_classification, md.road_surface_type_id, md.road_surface_type, md.carriageway_type_id, 
@@ -450,7 +450,6 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
            f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
            f.damage_extent, f."Remarks", f.current_date_time, 
            ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-           /* Add the new column here */
            COALESCE(f."photopath"::jsonb, '[]'::jsonb) AS "Inspection Photos"
     FROM bms.tbl_bms_master_data md
     LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
@@ -464,33 +463,66 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     const parseNumber = (value) =>
       value && !isNaN(value) ? Number(value) : null;
 
-    const filters = {
-      "md.district_id":
-        district !== "%" && district !== "" ? parseNumber(district) : null,
-      "md.uu_bms_id": parseNumber(bridgeId),
-      "md.structure_type_id": parseNumber(structureType),
-      "md.construction_type_id": parseNumber(constructionType),
-      "md.structure_width_m_min": parseNumber(minBridgeLength),
-      "md.structure_width_m_max": parseNumber(maxBridgeLength),
-      "md.span_length_m_min": parseNumber(minSpanLength),
-      "md.span_length_m_max": parseNumber(maxSpanLength),
-      "md.construction_year_min": parseNumber(minYear),
-      "md.construction_year_max": parseNumber(maxYear),
-    };
-
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null) {
-        if (key.endsWith("_min")) {
-          query += ` AND ${key.replace("_min", "")} >= $${paramIndex}`;
-        } else if (key.endsWith("_max")) {
-          query += ` AND ${key.replace("_max", "")} <= $${paramIndex}`;
-        } else {
-          query += ` AND ${key} = $${paramIndex}`;
-        }
-        queryParams.push(value);
+    // Apply filters
+    if (district !== "%" && district !== "") {
+        query += ` AND md.district_id = $${paramIndex}`;
+        queryParams.push(parseNumber(district));
         paramIndex++;
-      }
-    });
+    }
+
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
+      queryParams.push(bridge);
+      paramIndex++;
+    }
+
+    if (structureType) {
+        query += ` AND md.structure_type_id = $${paramIndex}`;
+        queryParams.push(parseNumber(structureType));
+        paramIndex++;
+    }
+
+    if (constructionType) {
+        query += ` AND md.construction_type_id = $${paramIndex}`;
+        queryParams.push(parseNumber(constructionType));
+        paramIndex++;
+    }
+
+    if (minBridgeLength) {
+        query += ` AND md.structure_width_m >= $${paramIndex}`;
+        queryParams.push(parseNumber(minBridgeLength));
+        paramIndex++;
+    }
+
+    if (maxBridgeLength) {
+        query += ` AND md.structure_width_m <= $${paramIndex}`;
+        queryParams.push(parseNumber(maxBridgeLength));
+        paramIndex++;
+    }
+
+    if (minSpanLength) {
+        query += ` AND md.span_length_m >= $${paramIndex}`;
+        queryParams.push(parseNumber(minSpanLength));
+        paramIndex++;
+    }
+
+    if (maxSpanLength) {
+        query += ` AND md.span_length_m <= $${paramIndex}`;
+        queryParams.push(parseNumber(maxSpanLength));
+        paramIndex++;
+    }
+
+    if (minYear) {
+        query += ` AND md.construction_year >= $${paramIndex}`;
+        queryParams.push(parseNumber(minYear));
+        paramIndex++;
+    }
+
+    if (maxYear) {
+        query += ` AND md.construction_year <= $${paramIndex}`;
+        queryParams.push(parseNumber(maxYear));
+        paramIndex++;
+    }
 
     const result = await pool.query(query, queryParams);
     res.json({ success: true, bridges: result.rows });
@@ -502,6 +534,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     });
   }
 });
+
 
 app.get("/api/inspections-export", async (req, res) => {
   try {
@@ -621,7 +654,6 @@ app.get("/api/bridges", async (req, res) => {
       countParams.push(bridge);
       paramIndex++;
     }
-
 
     if (structureType) {
       query += ` AND structure_type_id = $${paramIndex}`;
