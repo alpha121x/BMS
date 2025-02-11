@@ -4,6 +4,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import Header from "./Header";
 import Footer from "./Footer";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import * as XLSX from "xlsx";
 
 const BridgeWiseScore = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
@@ -59,6 +62,68 @@ const BridgeWiseScore = () => {
 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handleDownloadCSV = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/bms-score-export`);
+      const { data } = await response.json();
+  
+      if (!data.length) {
+        console.warn("No data available for CSV download.");
+        return;
+      }
+  
+      // Convert JSON to CSV format
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [
+          Object.keys(data[0]).join(","), // CSV Headers
+          ...data.map((row) => Object.values(row).join(",")), // CSV Rows
+        ].join("\n");
+  
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "bridge_data.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      console.log("CSV file downloaded successfully.");
+    } catch (error) {
+      console.error("Error downloading CSV:", error);
+    }
+  };
+  
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/bms-score-export`);
+      const { data } = await response.json();
+  
+      if (!data.length) {
+        console.warn("No data available for Excel download.");
+        return;
+      }
+  
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
+  
+      // Create a Blob and trigger the download
+      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "bridge_data.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      console.log("Excel file downloaded successfully.");
+    } catch (error) {
+      console.error("Error downloading Excel:", error);
+    }
   };
 
   const buttonStyles = {
@@ -164,11 +229,46 @@ const BridgeWiseScore = () => {
           }}
         >
           <div className="card-body pb-0">
-            <h6 className="card-title text-lg font-semibold pb-2">
-              Bridge Wise Score
-            </h6>
+            <div className="flex items-center justify-between pb-2">
+              <h6 className="card-title text-lg font-semibold">
+                Bridge Wise Score
+              </h6>
+
+              <div className="flex gap-2">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+                  onClick={handleDownloadCSV}
+                >
+                  <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+                  CSV
+                </button>
+                <button
+                  className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+                  onClick={handleDownloadExcel}
+                >
+                  <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+                  Excel
+                </button>
+              </div>
+            </div>
+
             {loading ? (
-              <p>Loading data...</p>
+              <div
+                style={{
+                  border: "8px solid #f3f3f3",
+                  borderTop: "8px solid #3498db",
+                  borderRadius: "50%",
+                  width: "80px",
+                  height: "80px",
+                  animation: "spin 1s linear infinite",
+                  margin: "auto",
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 999,
+                }}
+              />
             ) : error ? (
               <p className="text-danger">{error}</p>
             ) : (

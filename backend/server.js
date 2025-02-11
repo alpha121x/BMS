@@ -202,7 +202,7 @@ app.get("/api/bms-score", async (req, res) => {
         c.objectid = m.uu_bms_id
     ORDER BY c.objectid
     LIMIT $1 OFFSET $2;
-    `;    
+    `;
 
     const result = await pool.query(query, [limit, offset]);
 
@@ -224,6 +224,37 @@ app.get("/api/bms-score", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// API Endpoint for Exporting Full BMS Data (No Limits)
+app.get("/api/bms-score-export", async (req, res) => {
+  try {
+    const query = `
+    SELECT 
+    CONCAT('"', m.pms_sec_id, ',', m.structure_no, '"') AS "BridgeName",
+    m.district,
+    c.damage_score, 
+    c.critical_damage_score,
+    c.inventory_score
+FROM 
+    bms.bms_calculations c
+LEFT JOIN 
+    bms.tbl_bms_master_data m 
+ON 
+    c.objectid = m.uu_bms_id
+ORDER BY c.objectid;
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      totalRecords: result.rows.length,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching export data:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -268,7 +299,7 @@ app.get("/api/structure-counts", async (req, res) => {
 app.get("/api/bridgesdownload", async (req, res) => {
   try {
     const {
-      district = '%',
+      district = "%",
       structureType,
       constructionType,
       minBridgeLength,
@@ -320,7 +351,7 @@ app.get("/api/bridgesdownload", async (req, res) => {
     let paramIndex = 1;
 
     // Filter by district
-    if (district !== '%') {
+    if (district !== "%") {
       query += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
@@ -430,10 +461,12 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     let paramIndex = 1;
 
     // Convert and sanitize query params
-    const parseNumber = (value) => (value && !isNaN(value) ? Number(value) : null);
+    const parseNumber = (value) =>
+      value && !isNaN(value) ? Number(value) : null;
 
     const filters = {
-      "md.district_id": district !== "%" && district !== "" ? parseNumber(district) : null,
+      "md.district_id":
+        district !== "%" && district !== "" ? parseNumber(district) : null,
       "md.uu_bms_id": parseNumber(bridgeId),
       "md.structure_type_id": parseNumber(structureType),
       "md.construction_type_id": parseNumber(constructionType),
@@ -444,10 +477,9 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       "md.construction_year_min": parseNumber(minYear),
       "md.construction_year_max": parseNumber(maxYear),
     };
-    
 
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null) {  
+      if (value !== null) {
         if (key.endsWith("_min")) {
           query += ` AND ${key.replace("_min", "")} >= $${paramIndex}`;
         } else if (key.endsWith("_max")) {
@@ -459,20 +491,22 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
         paramIndex++;
       }
     });
-    
 
     const result = await pool.query(query, queryParams);
     res.json({ success: true, bridges: result.rows });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res.status(500).json({ success: false, message: "Error fetching data from the database" });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
   }
 });
 
 app.get("/api/inspections-export", async (req, res) => {
   try {
     const { bridgeId } = req.query;
-    
+
     let query = `
     SELECT md.uu_bms_id, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, 
            md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, 
@@ -489,19 +523,22 @@ app.get("/api/inspections-export", async (req, res) => {
     FROM bms.tbl_bms_master_data md
     LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
     WHERE 1=1`;
-    
+
     const queryParams = [];
-    
+
     if (bridgeId && !isNaN(bridgeId)) {
       query += ` AND md.uu_bms_id = $1`;
       queryParams.push(Number(bridgeId));
     }
-    
+
     const result = await pool.query(query, queryParams);
     res.json({ success: true, bridges: result.rows });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res.status(500).json({ success: false, message: "Error fetching data from the database" });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
   }
 });
 
@@ -1140,7 +1177,6 @@ app.get("/api/road-surface-types", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch road surface types" });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
