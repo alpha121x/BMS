@@ -762,6 +762,7 @@ app.get("/api/get-inspections", async (req, res) => {
     "ApprovedFlag"
 FROM bms.tbl_inspection_f
 WHERE uu_bms_id = $1 
+AND qc_con = '1'
 ORDER BY inspection_id DESC;
     `;
 
