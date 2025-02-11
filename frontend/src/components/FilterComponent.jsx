@@ -24,8 +24,7 @@ const FilterComponent = ({
   const [inspectionStatuses, setInspectionStatuses] = useState([]);
 
   const [districtId, setDistrictId] = useState("");
-  const [localBridgeId, setLocalBridgeId] = useState("");
-  const [bridgeId, setBridgeId] = useState("");
+  const [localBridgeName, setLocalBridgeName] = useState("");
   const [minBridgeLength, setMinBridgeLengthState] = useState("");
   const [maxBridgeLength, setMaxBridgeLengthState] = useState("");
   const [minSpanLength, setMinSpanLengthState] = useState("");
@@ -267,21 +266,21 @@ const FilterComponent = ({
       <div className="flex mb-4 space-x-4">
         <div className="flex-1">
           <label
-            htmlFor="bridge-id"
+            htmlFor="bridge-name"
             className="block text-gray-700 font-medium mb-1"
           >
-            Bridge ID
+            Bridge Name
           </label>
           <input
-            id="bridge-id"
+            id="bridge-name"
             type="text"
             className="w-full border rounded-md p-2 bg-gray-100"
-            value={localBridgeId}
+            value={localBridgeName}
             onChange={(e) => {
               const value = e.target.value;
-              setLocalBridgeId(value);
+              setLocalBridgeName(value);
             }}
-            placeholder="Enter Bridge ID"
+            placeholder="Enter Bridge Name"
           />
         </div>
       </div>
@@ -404,7 +403,7 @@ const FilterComponent = ({
             setInspectionStatus(inspectionStatus);
             setMinYear(minYear);
             setMaxYear(maxYear);
-            setBridge(localBridgeId);
+            setBridge(localBridgeName);
           }}
           className="bg-blue-500 text-white rounded-md px-4 py-2"
         >

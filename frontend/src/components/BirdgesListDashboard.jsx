@@ -37,7 +37,7 @@ const BridgesListDashboard = ({
   maxSpanLength,
   minYear,
   maxYear,
-  bridgeId,
+  bridge,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -68,7 +68,7 @@ const BridgesListDashboard = ({
     maxSpanLength,
     minYear,
     maxYear,
-    bridgeId,
+    bridge,
   ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -93,7 +93,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
-        bridgeId,
+        bridge,
       };
 
       // console.log(params);
@@ -281,7 +281,7 @@ const BridgesListDashboard = ({
         maxSpanLength,
         minYear,
         maxYear,
-        bridgeId,
+        bridge,
       };
   
       // Prepare the query string from params

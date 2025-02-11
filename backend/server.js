@@ -556,7 +556,7 @@ app.get("/api/bridges", async (req, res) => {
       maxSpanLength,
       minYear,
       maxYear,
-      bridgeId = "%",
+      bridge = "%",
     } = req.query;
 
     let query = `
@@ -614,14 +614,14 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-    // Only add the bridgeId condition if bridgeId is not empty, not just '%'
-    if (bridgeId && bridgeId.trim() !== "" && bridgeId !== "%") {
-      query += ` AND uu_bms_id = $${paramIndex}`;
-      countQuery += ` AND uu_bms_id = $${paramIndex}`;
-      queryParams.push(bridgeId);
-      countParams.push(bridgeId);
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
+      queryParams.push(bridge);
+      countParams.push(bridge);
       paramIndex++;
     }
+
 
     if (structureType) {
       query += ` AND structure_type_id = $${paramIndex}`;
