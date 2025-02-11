@@ -140,33 +140,43 @@ const InspectionList = ({ bridgeId }) => {
   const handleDownloadCSV = async (bridgeId) => {
     try {
       // Fetch data from the API
-      const response = await fetch(`${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`);
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+      );
       const data = await response.json();
-  
-      if (!data.success || !Array.isArray(data.bridges) || data.bridges.length === 0) {
+
+      if (
+        !data.success ||
+        !Array.isArray(data.bridges) ||
+        data.bridges.length === 0
+      ) {
         console.error("No data to export");
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       const inspectiondata = data.bridges; // Extract full data
       const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
-  
+
       // Extract headers dynamically from the first row
       const headers = Object.keys(inspectiondata[0]);
-  
+
       // Generate CSV content
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
           headers.join(","), // Dynamic Headers
-          ...inspectiondata.map(row =>
-            headers.map(key => 
-              String(row[key]).includes(",") ? `"${row[key]}"` : row[key] || "N/A"
-            ).join(",")
+          ...inspectiondata.map((row) =>
+            headers
+              .map((key) =>
+                String(row[key]).includes(",")
+                  ? `"${row[key]}"`
+                  : row[key] || "N/A"
+              )
+              .join(",")
           ),
         ].join("\n");
-  
+
       // Create CSV file and trigger download
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
@@ -175,48 +185,51 @@ const InspectionList = ({ bridgeId }) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
     } catch (error) {
       console.error("Error downloading CSV:", error);
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
     }
   };
-  
+
   // download excel
   const handleDownloadExcel = async (bridgeId) => {
     try {
       // Fetch data from the API
-      const response = await fetch(`${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`);
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+      );
       const data = await response.json();
-  
-      if (!data.success || !Array.isArray(data.bridges) || data.bridges.length === 0) {
+
+      if (
+        !data.success ||
+        !Array.isArray(data.bridges) ||
+        data.bridges.length === 0
+      ) {
         console.error("No data to export");
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       const inspectiondata = data.bridges; // Extract full data
       const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection"; // Use bridge_name dynamically
-  
+
       // Convert JSON to worksheet
       const ws = XLSX.utils.json_to_sheet(inspectiondata);
-  
+
       // Set column widths automatically based on data
       ws["!cols"] = Object.keys(inspectiondata[0]).map(() => ({ width: 20 }));
-  
+
       // Create a new workbook and append the worksheet
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inspections");
-  
+
       // Generate and trigger file download
       XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`); // Replaces spaces with underscores
-  
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     }
   };
-  
 
   const getDamageLevel = (data) => {
     const damageLevels = [...new Set(data.map((item) => item.DamageLevel))]; // Get unique damage levels
@@ -365,135 +378,423 @@ const InspectionList = ({ bridgeId }) => {
           />
         )}
 
-        <div className="inspection-cards-container">
-          {Object.keys(groupedData).map((spanIndex) => (
-            <div key={`span-${spanIndex}`} className="card mb-4">
-              {/* Span Index Header with Toggle Button */}
+        {/* Pending Reports */}
+        <div className="border rounded p-3 shadow-lg">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <Button variant="warning" className="fw-bold">
+              View Pending Reports
+            </Button>
+          </div>
+
+          <div className="inspection-cards-container">
+            {Object.keys(groupedData).map((spanIndex) => (
               <div
-                className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                onClick={() => toggleSection(spanIndex)}
-                style={{ cursor: "pointer" }}
+                key={`span-${spanIndex}`}
+                className="card mb-4 border shadow-sm"
               >
-                <strong>Reports For Span: {spanIndex}</strong>
-                <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
-              </div>
+                {/* Span Index Header with Toggle Button */}
+                <div
+                  className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                  onClick={() => toggleSection(spanIndex)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <strong>Reports For Span: {spanIndex}</strong>
+                  <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                </div>
 
-              {/* Work Kinds for Each Span - Toggle Visibility */}
-              {expandedSections[spanIndex] && (
-                <div className="card-body">
-                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                    <div
-                      key={`workKind-${spanIndex}-${workKind}`}
-                      className="card mb-4 border shadow-sm"
-                    >
-                      <div className="card-header bg-secondary text-white fw-bold">
-                        {workKind}
-                      </div>
+                {/* Work Kinds for Each Span - Toggle Visibility */}
+                {expandedSections[spanIndex] && (
+                  <div className="card-body">
+                    {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                      <div
+                        key={`workKind-${spanIndex}-${workKind}`}
+                        className="card mb-4 border shadow-sm"
+                      >
+                        <div className="card-header bg-secondary text-white fw-bold">
+                          {workKind}
+                        </div>
 
-                      {/* Mapping Inspections */}
-                      <div className="card-body p-3">
-                        {groupedData[spanIndex][workKind].map(
-                          (inspection, index) => (
-                            <div
-                              key={`inspection-${inspection.id || index}`}
-                              className="mb-4 p-4 border rounded shadow-sm"
-                              style={{ backgroundColor: "#CFE2FF" }}
-                            >
-                              <div className="row">
-                                {/* Left: Photos */}
-                                <div className="col-md-3">
-                                  {inspection.PhotoPaths?.length > 0 && (
-                                    <div className="d-flex flex-wrap gap-2">
-                                      {inspection.PhotoPaths.map((photo, i) => (
-                                        <a
-                                          key={`photo-${inspection.id}-${i}`}
-                                          href={photo}
-                                          data-fancybox="gallery"
-                                          data-caption={`Photo ${i + 1}`}
-                                        >
-                                          <img
-                                            src={photo}
-                                            alt={`Photo ${i + 1}`}
-                                            className="img-fluid rounded border"
-                                            style={{
-                                              width: "80px",
-                                              height: "80px",
-                                              objectFit: "cover",
-                                            }}
-                                          />
-                                        </a>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
+                        {/* Mapping Inspections */}
+                        <div className="card-body p-3">
+                          {groupedData[spanIndex][workKind].map(
+                            (inspection, index) => (
+                              <div
+                                key={`inspection-${inspection.id || index}`}
+                                className="mb-4 p-4 border rounded shadow-sm"
+                                style={{ backgroundColor: "#CFE2FF" }}
+                              >
+                                <div className="row">
+                                  {/* Left: Photos */}
+                                  <div className="col-md-3">
+                                    {inspection.PhotoPaths?.length > 0 && (
+                                      <div className="d-flex flex-wrap gap-2">
+                                        {inspection.PhotoPaths.map(
+                                          (photo, i) => (
+                                            <a
+                                              key={`photo-${inspection.id}-${i}`}
+                                              href={photo}
+                                              data-fancybox="gallery"
+                                              data-caption={`Photo ${i + 1}`}
+                                            >
+                                              <img
+                                                src={photo}
+                                                alt={`Photo ${i + 1}`}
+                                                className="img-fluid rounded border"
+                                                style={{
+                                                  width: "80px",
+                                                  height: "80px",
+                                                  objectFit: "cover",
+                                                }}
+                                              />
+                                            </a>
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
 
-                                {/* Right: Details */}
-                                <div className="col-md-6">
-                                  <strong>Parts:</strong>{" "}
-                                  {inspection.PartsName || "N/A"} <br />
-                                  <strong>Material:</strong>{" "}
-                                  {inspection.MaterialName || "N/A"} <br />
-                                  <strong>Damage:</strong>{" "}
-                                  {inspection.DamageKindName || "N/A"} <br />
-                                  <strong>Level:</strong>{" "}
-                                  {inspection.DamageLevel || "N/A"} <br />
-                                  <strong>Situation Remarks:</strong>{" "}
-                                  {inspection.Remarks || "N/A"}
-                                </div>
+                                  {/* Right: Details */}
+                                  <div className="col-md-6">
+                                    <strong>Parts:</strong>{" "}
+                                    {inspection.PartsName || "N/A"} <br />
+                                    <strong>Material:</strong>{" "}
+                                    {inspection.MaterialName || "N/A"} <br />
+                                    <strong>Damage:</strong>{" "}
+                                    {inspection.DamageKindName || "N/A"} <br />
+                                    <strong>Level:</strong>{" "}
+                                    {inspection.DamageLevel || "N/A"} <br />
+                                    <strong>Situation Remarks:</strong>{" "}
+                                    {inspection.Remarks || "N/A"}
+                                  </div>
 
-                                {/* Footer: Consultant Remarks, Approval & Save Button */}
-                                <div className="col-md-3 d-flex flex-column justify-content-between">
-                                  <Form.Control
-                                    as="input"
-                                    type="text"
-                                    placeholder="Consultant Remarks"
-                                    value={inspection.qc_remarks_con || ""}
-                                    onChange={(e) =>
-                                      handleConsultantRemarksChange(
-                                        inspection.inspection_id,
-                                        e.target.value
-                                      )
-                                    }
-                                    className="mb-2"
-                                  />
+                                  {/* Footer: Consultant Remarks, Approval & Save Button */}
+                                  <div className="col-md-3 d-flex flex-column justify-content-between">
+                                    <Form.Control
+                                      as="input"
+                                      type="text"
+                                      placeholder="Consultant Remarks"
+                                      value={inspection.qc_remarks_con || ""}
+                                      onChange={(e) =>
+                                        handleConsultantRemarksChange(
+                                          inspection.inspection_id,
+                                          e.target.value
+                                        )
+                                      }
+                                      className="mb-2"
+                                    />
 
-                                  <Form.Select
-                                    value={inspection.qc_con}
-                                    onChange={(e) =>
-                                      handleApprovedFlagChange(
-                                        inspection.inspection_id,
-                                        parseInt(e.target.value)
-                                      )
-                                    }
-                                    className="mb-2"
-                                  >
-                                    <option value={1}>Select Status</option>
-                                    <option value={3}>Unapproved</option>
-                                    <option value={2}>Approved</option>
-                                  </Form.Select>
+                                    <Form.Select
+                                      value={inspection.qc_con}
+                                      onChange={(e) =>
+                                        handleApprovedFlagChange(
+                                          inspection.inspection_id,
+                                          parseInt(e.target.value)
+                                        )
+                                      }
+                                      className="mb-2"
+                                    >
+                                      <option value={1}>Select Status</option>
+                                      <option value={3}>Unapproved</option>
+                                      <option value={2}>Approved</option>
+                                    </Form.Select>
 
-                                  <Button
-                                    onClick={() =>
-                                      handleSaveChanges(inspection)
-                                    }
-                                    value={inspection.reviewed_by}
-                                    className="bg-[#CFE2FF]"
-                                    disabled={inspection.reviewed_by === 1}
-                                  >
-                                    Save Changes {inspection.reviewd_by}
-                                  </Button>
+                                    <Button
+                                      onClick={() =>
+                                        handleSaveChanges(inspection)
+                                      }
+                                      value={inspection.reviewed_by}
+                                      className="bg-[#CFE2FF]"
+                                      disabled={inspection.reviewed_by === 1}
+                                    >
+                                      Save Changes {inspection.reviewd_by}
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )
-                        )}
+                            )
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Approved Reports */}
+        <div className="border rounded p-3 shadow-lg mt-2">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <Button variant="warning" className="fw-bold">
+              View Approved Reports
+            </Button>
+          </div>
+
+          <div className="inspection-cards-container">
+            {Object.keys(groupedData).map((spanIndex) => (
+              <div
+                key={`span-${spanIndex}`}
+                className="card mb-4 border shadow-sm"
+              >
+                {/* Span Index Header with Toggle Button */}
+                <div
+                  className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                  onClick={() => toggleSection(spanIndex)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <strong>Reports For Span: {spanIndex}</strong>
+                  <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {/* Work Kinds for Each Span - Toggle Visibility */}
+                {expandedSections[spanIndex] && (
+                  <div className="card-body">
+                    {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                      <div
+                        key={`workKind-${spanIndex}-${workKind}`}
+                        className="card mb-4 border shadow-sm"
+                      >
+                        <div className="card-header bg-secondary text-white fw-bold">
+                          {workKind}
+                        </div>
+
+                        {/* Mapping Inspections */}
+                        <div className="card-body p-3">
+                          {groupedData[spanIndex][workKind].map(
+                            (inspection, index) => (
+                              <div
+                                key={`inspection-${inspection.id || index}`}
+                                className="mb-4 p-4 border rounded shadow-sm"
+                                style={{ backgroundColor: "#CFE2FF" }}
+                              >
+                                <div className="row">
+                                  {/* Left: Photos */}
+                                  <div className="col-md-3">
+                                    {inspection.PhotoPaths?.length > 0 && (
+                                      <div className="d-flex flex-wrap gap-2">
+                                        {inspection.PhotoPaths.map(
+                                          (photo, i) => (
+                                            <a
+                                              key={`photo-${inspection.id}-${i}`}
+                                              href={photo}
+                                              data-fancybox="gallery"
+                                              data-caption={`Photo ${i + 1}`}
+                                            >
+                                              <img
+                                                src={photo}
+                                                alt={`Photo ${i + 1}`}
+                                                className="img-fluid rounded border"
+                                                style={{
+                                                  width: "80px",
+                                                  height: "80px",
+                                                  objectFit: "cover",
+                                                }}
+                                              />
+                                            </a>
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Right: Details */}
+                                  <div className="col-md-6">
+                                    <strong>Parts:</strong>{" "}
+                                    {inspection.PartsName || "N/A"} <br />
+                                    <strong>Material:</strong>{" "}
+                                    {inspection.MaterialName || "N/A"} <br />
+                                    <strong>Damage:</strong>{" "}
+                                    {inspection.DamageKindName || "N/A"} <br />
+                                    <strong>Level:</strong>{" "}
+                                    {inspection.DamageLevel || "N/A"} <br />
+                                    <strong>Situation Remarks:</strong>{" "}
+                                    {inspection.Remarks || "N/A"}
+                                  </div>
+
+                                  {/* Footer: Consultant Remarks, Approval & Save Button */}
+                                  <div className="col-md-3 d-flex flex-column justify-content-between">
+                                    <Form.Control
+                                      as="input"
+                                      type="text"
+                                      placeholder="Consultant Remarks"
+                                      value={inspection.qc_remarks_con || ""}
+                                      onChange={(e) =>
+                                        handleConsultantRemarksChange(
+                                          inspection.inspection_id,
+                                          e.target.value
+                                        )
+                                      }
+                                      className="mb-2"
+                                    />
+
+                                    <Form.Select
+                                      value={inspection.qc_con}
+                                      onChange={(e) =>
+                                        handleApprovedFlagChange(
+                                          inspection.inspection_id,
+                                          parseInt(e.target.value)
+                                        )
+                                      }
+                                      className="mb-2"
+                                    >
+                                      <option value={1}>Select Status</option>
+                                      <option value={3}>Unapproved</option>
+                                      <option value={2}>Approved</option>
+                                    </Form.Select>
+
+                                    <Button
+                                      onClick={() =>
+                                        handleSaveChanges(inspection)
+                                      }
+                                      value={inspection.reviewed_by}
+                                      className="bg-[#CFE2FF]"
+                                      disabled={inspection.reviewed_by === 1}
+                                    >
+                                      Save Changes {inspection.reviewd_by}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/*  Unapproved Reports */}
+        <div className="border rounded p-3 shadow-lg mt-2">
+          {/* Top Button for Pending Reports */}
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <Button variant="warning" className="fw-bold">
+              View Unapproved Reports
+            </Button>
+          </div>
+
+          <div className="inspection-cards-container">
+            {Object.keys(groupedData).map((spanIndex) => (
+              <div
+                key={`span-${spanIndex}`}
+                className="card mb-4 border shadow-sm"
+              >
+                {/* Span Index Header with Toggle Button */}
+                <div
+                  className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                  onClick={() => toggleSection(spanIndex)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <strong>Reports For Span: {spanIndex}</strong>
+                  <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                </div>
+
+                {/* Work Kinds for Each Span - Toggle Visibility */}
+                {expandedSections[spanIndex] && (
+                  <div className="card-body">
+                    {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                      <div
+                        key={`workKind-${spanIndex}-${workKind}`}
+                        className="card mb-4 border shadow-sm"
+                      >
+                        <div className="card-header bg-secondary text-white fw-bold">
+                          {workKind}
+                        </div>
+
+                        {/* Mapping Inspections */}
+                        <div className="card-body p-3">
+                          {groupedData[spanIndex][workKind].map(
+                            (inspection, index) => (
+                              <div
+                                key={`inspection-${inspection.id || index}`}
+                                className="mb-4 p-4 border rounded shadow-sm"
+                                style={{ backgroundColor: "#CFE2FF" }}
+                              >
+                                <div className="row">
+                                  {/* Left: Photos */}
+                                  <div className="col-md-3">
+                                    {inspection.PhotoPaths?.length > 0 && (
+                                      <div className="d-flex flex-wrap gap-2">
+                                        {inspection.PhotoPaths.map(
+                                          (photo, i) => (
+                                            <a
+                                              key={`photo-${inspection.id}-${i}`}
+                                              href={photo}
+                                              data-fancybox="gallery"
+                                              data-caption={`Photo ${i + 1}`}
+                                            >
+                                              <img
+                                                src={photo}
+                                                alt={`Photo ${i + 1}`}
+                                                className="img-fluid rounded border"
+                                                style={{
+                                                  width: "80px",
+                                                  height: "80px",
+                                                  objectFit: "cover",
+                                                }}
+                                              />
+                                            </a>
+                                          )
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Right: Details */}
+                                  <div className="col-md-6">
+                                    <strong>Parts:</strong>{" "}
+                                    {inspection.PartsName || "N/A"} <br />
+                                    <strong>Material:</strong>{" "}
+                                    {inspection.MaterialName || "N/A"} <br />
+                                    <strong>Damage:</strong>{" "}
+                                    {inspection.DamageKindName || "N/A"} <br />
+                                    <strong>Level:</strong>{" "}
+                                    {inspection.DamageLevel || "N/A"} <br />
+                                    <strong>Situation Remarks:</strong>{" "}
+                                    {inspection.Remarks || "N/A"}
+                                  </div>
+
+                                  {/* Footer: Consultant Remarks, Approval & Save Button */}
+                                  <div className="col-md-3 d-flex flex-column justify-content-between">
+                                    <Form.Control
+                                      as="input"
+                                      type="text"
+                                      placeholder="Consultant Remarks"
+                                      value={inspection.qc_remarks_con || "N/A"}
+                                      readOnly
+                                      className="mb-2"
+                                    />
+
+                                    <Form.Select
+                                      value={inspection.qc_con}
+                                      disabled
+                                      className="mb-2"
+                                    >
+                                      <option value={1}>Select Status</option>
+                                      <option value={3}>Unapproved</option>
+                                      <option value={2}>Approved</option>
+                                    </Form.Select>
+
+                                    <Button disabled className="bg-[#CFE2FF]">
+                                      Save Changes
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
