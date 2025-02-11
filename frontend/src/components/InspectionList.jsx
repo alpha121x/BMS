@@ -266,23 +266,53 @@ const InspectionList = ({ bridgeId }) => {
     return uniqueSpanIndices.length; // Return the count of unique span indices
   };
 
-  const groupedData = useMemo(() => {
-    return inspectiondata.reduce((acc, row) => {
-      const spanKey = row.SpanIndex || "N/A";
-      const workKindKey = row.WorkKindName || "N/A";
+  const { pendingData, approvedData, unapprovedData } = useMemo(() => {
+    const grouped = inspectiondata.reduce(
+      (acc, row) => {
+        const spanKey = row.SpanIndex || "N/A";
+        const workKindKey = row.WorkKindName || "N/A";
 
-      if (!acc[spanKey]) {
-        acc[spanKey] = {};
-      }
+        if (!acc.pending[spanKey]) acc.pending[spanKey] = {};
+        if (!acc.approved[spanKey]) acc.approved[spanKey] = {};
+        if (!acc.unapproved[spanKey]) acc.unapproved[spanKey] = {};
 
-      if (!acc[spanKey][workKindKey]) {
-        acc[spanKey][workKindKey] = [];
-      }
+        if (!acc.pending[spanKey][workKindKey])
+          acc.pending[spanKey][workKindKey] = [];
+        if (!acc.approved[spanKey][workKindKey])
+          acc.approved[spanKey][workKindKey] = [];
+        if (!acc.unapproved[spanKey][workKindKey])
+          acc.unapproved[spanKey][workKindKey] = [];
 
-      acc[spanKey][workKindKey].push(row);
-      return acc;
-    }, {});
+        // Convert qc_con to a number
+        const status = Number(row.qc_con);
+        if (status === 1) acc.pending[spanKey][workKindKey].push(row);
+        else if (status === 2) acc.approved[spanKey][workKindKey].push(row);
+        else if (status === 3) acc.unapproved[spanKey][workKindKey].push(row);
+
+        return acc;
+      },
+      { pending: {}, approved: {}, unapproved: {} }
+    );
+
+    return {
+      pendingData: grouped.pending,
+      approvedData: grouped.approved,
+      unapprovedData: grouped.unapproved,
+    };
   }, [inspectiondata]);
+
+  const [filteredData, setFilteredData] = useState(pendingData);
+
+  // Ensure filteredData updates when pendingData changes
+  useEffect(() => {
+    setFilteredData(pendingData);
+  }, [pendingData]);
+
+  const handleStatusChange = (status) => {
+    if (status === 1) setFilteredData(pendingData);
+    else if (status === 2) setFilteredData(approvedData);
+    else if (status === 3) setFilteredData(unapprovedData);
+  };
 
   // Toggle function to expand/collapse a section
   const toggleSection = (spanIndex) => {
@@ -379,13 +409,25 @@ const InspectionList = ({ bridgeId }) => {
         )}
 
         <div className="border rounded p-3 d-flex justify-content-between align-items-center mt-2">
-          <Button variant="warning" className="fw-bold">
+          <Button
+            variant="warning"
+            className="fw-bold"
+            onClick={() => handleStatusChange(1)}
+          >
             View Pending Reports
           </Button>
-          <Button variant="success" className="fw-bold">
+          <Button
+            variant="success"
+            className="fw-bold"
+            onClick={() => handleStatusChange(2)}
+          >
             View Approved Reports
           </Button>
-          <Button variant="danger" className="fw-bold">
+          <Button
+            variant="danger"
+            className="fw-bold"
+            onClick={() => handleStatusChange(3)}
+          >
             View Unapproved Reports
           </Button>
         </div>
@@ -393,7 +435,7 @@ const InspectionList = ({ bridgeId }) => {
         {/* Reports */}
         <div className="border rounded p-3 shadow-lg mt-2">
           <div className="inspection-cards-container">
-            {Object.keys(groupedData).map((spanIndex) => (
+            {Object.keys(filteredData).map((spanIndex) => (
               <div
                 key={`span-${spanIndex}`}
                 className="card mb-4 border shadow-sm"
@@ -411,7 +453,7 @@ const InspectionList = ({ bridgeId }) => {
                 {/* Work Kinds for Each Span - Toggle Visibility */}
                 {expandedSections[spanIndex] && (
                   <div className="card-body">
-                    {Object.keys(groupedData[spanIndex]).map((workKind) => (
+                    {Object.keys(filteredData[spanIndex]).map((workKind) => (
                       <div
                         key={`workKind-${spanIndex}-${workKind}`}
                         className="card mb-4 border shadow-sm"
@@ -422,7 +464,7 @@ const InspectionList = ({ bridgeId }) => {
 
                         {/* Mapping Inspections */}
                         <div className="card-body p-3">
-                          {groupedData[spanIndex][workKind].map(
+                          {filteredData[spanIndex][workKind].map(
                             (inspection, index) => (
                               <div
                                 key={`inspection-${inspection.id || index}`}
@@ -512,7 +554,7 @@ const InspectionList = ({ bridgeId }) => {
                                       className="bg-[#CFE2FF]"
                                       disabled={inspection.reviewed_by === 1}
                                     >
-                                      Save Changes {inspection.reviewd_by}
+                                      Save Changes
                                     </Button>
                                   </div>
                                 </div>

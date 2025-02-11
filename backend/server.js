@@ -465,9 +465,9 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
 
     // Apply filters
     if (district !== "%" && district !== "") {
-        query += ` AND md.district_id = $${paramIndex}`;
-        queryParams.push(parseNumber(district));
-        paramIndex++;
+      query += ` AND md.district_id = $${paramIndex}`;
+      queryParams.push(parseNumber(district));
+      paramIndex++;
     }
 
     if (bridge && bridge.trim() !== "" && bridge !== "%") {
@@ -477,51 +477,51 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     }
 
     if (structureType) {
-        query += ` AND md.structure_type_id = $${paramIndex}`;
-        queryParams.push(parseNumber(structureType));
-        paramIndex++;
+      query += ` AND md.structure_type_id = $${paramIndex}`;
+      queryParams.push(parseNumber(structureType));
+      paramIndex++;
     }
 
     if (constructionType) {
-        query += ` AND md.construction_type_id = $${paramIndex}`;
-        queryParams.push(parseNumber(constructionType));
-        paramIndex++;
+      query += ` AND md.construction_type_id = $${paramIndex}`;
+      queryParams.push(parseNumber(constructionType));
+      paramIndex++;
     }
 
     if (minBridgeLength) {
-        query += ` AND md.structure_width_m >= $${paramIndex}`;
-        queryParams.push(parseNumber(minBridgeLength));
-        paramIndex++;
+      query += ` AND md.structure_width_m >= $${paramIndex}`;
+      queryParams.push(parseNumber(minBridgeLength));
+      paramIndex++;
     }
 
     if (maxBridgeLength) {
-        query += ` AND md.structure_width_m <= $${paramIndex}`;
-        queryParams.push(parseNumber(maxBridgeLength));
-        paramIndex++;
+      query += ` AND md.structure_width_m <= $${paramIndex}`;
+      queryParams.push(parseNumber(maxBridgeLength));
+      paramIndex++;
     }
 
     if (minSpanLength) {
-        query += ` AND md.span_length_m >= $${paramIndex}`;
-        queryParams.push(parseNumber(minSpanLength));
-        paramIndex++;
+      query += ` AND md.span_length_m >= $${paramIndex}`;
+      queryParams.push(parseNumber(minSpanLength));
+      paramIndex++;
     }
 
     if (maxSpanLength) {
-        query += ` AND md.span_length_m <= $${paramIndex}`;
-        queryParams.push(parseNumber(maxSpanLength));
-        paramIndex++;
+      query += ` AND md.span_length_m <= $${paramIndex}`;
+      queryParams.push(parseNumber(maxSpanLength));
+      paramIndex++;
     }
 
     if (minYear) {
-        query += ` AND md.construction_year >= $${paramIndex}`;
-        queryParams.push(parseNumber(minYear));
-        paramIndex++;
+      query += ` AND md.construction_year >= $${paramIndex}`;
+      queryParams.push(parseNumber(minYear));
+      paramIndex++;
     }
 
     if (maxYear) {
-        query += ` AND md.construction_year <= $${paramIndex}`;
-        queryParams.push(parseNumber(maxYear));
-        paramIndex++;
+      query += ` AND md.construction_year <= $${paramIndex}`;
+      queryParams.push(parseNumber(maxYear));
+      paramIndex++;
     }
 
     const result = await pool.query(query, queryParams);
@@ -534,7 +534,6 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     });
   }
 });
-
 
 app.get("/api/inspections-export", async (req, res) => {
   try {
@@ -794,7 +793,6 @@ app.get("/api/get-inspections", async (req, res) => {
     "ApprovedFlag"
 FROM bms.tbl_inspection_f
 WHERE uu_bms_id = $1 
-AND qc_con = '1'
 ORDER BY inspection_id DESC;
     `;
 
