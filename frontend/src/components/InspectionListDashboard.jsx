@@ -247,63 +247,34 @@ const InspectionList = ({ bridgeId }) => {
           </div>
         </div>
 
-        <div className="summary-section mt-1 mb-2">
-          <h4 className="text-lg font-bold text-gray-700 mb-2">
+        <div className="summary-section mt-1 mb-1">
+          <h4 className="text-sm font-semibold text-gray-700 mb-1">
             Reports Summary
           </h4>
-          <table className="min-w-full bg-gray-300 table-auto border-collapse border border-gray-200">
-            <tbody>
-              {/* Unique Span Indices */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Spans:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getUniqueSpanIndices(inspectionData)}
-                </td>
-              </tr>
-
-              {/* Unique Damage Leves */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Damage Levels:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getDamageLevel(inspectionData)}
-                </td>
-              </tr>
-
-              {/* Materials Used */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Materials Used:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getMaterials(inspectionData)}
-                </td>
-              </tr>
-
-              {/* Work Kind */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Work Kind:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getWorkKind(inspectionData)}
-                </td>
-              </tr>
-
-              {/* Condition Status */}
-              <tr>
-                <td className="border px-4 py-2">
-                  <strong>Consultant Approval Status:</strong>
-                </td>
-                <td className="border px-4 py-2">
-                  {getApprovalStatus(inspectionData)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div className="bg-gray-200  mb-2 mt-1  py-2 px-3 rounded-md shadow border">
+            <div className="grid grid-cols-2 gap-y-1 text-sm">
+              <div>
+                <strong>Total Spans:</strong>
+                <p className="text-gray-700">
+                  {getUniqueSpanIndices(inspectiondata)}
+                </p>
+              </div>
+              <div>
+                <strong>Damage Levels:</strong>
+                <p className="text-gray-700">
+                  {getDamageLevel(inspectiondata)}
+                </p>
+              </div>
+              <div>
+                <strong>Materials Used:</strong>
+                <p className="text-gray-700">{getMaterials(inspectiondata)}</p>
+              </div>
+              <div>
+                <strong>Work Kind:</strong>
+                <p className="text-gray-700">{getWorkKind(inspectiondata)}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {loading && (
