@@ -368,7 +368,7 @@ const InspectionList = ({ bridgeId }) => {
           />
         )}
 
-        <div className="border rounded p-3 d-flex justify-content-between align-items-center mt-2">
+        <div className="border rounded p-2 d-flex justify-content-start gap-2 align-items-center mt-2">
           <Button
             variant="warning"
             className="fw-bold text-grey"
@@ -423,10 +423,129 @@ const InspectionList = ({ bridgeId }) => {
                                 <div className="mt-2">
                                   {pendingData[spanIndex][workKind].map(
                                     (inspection) => (
-                                      <InspectionCard
-                                        key={inspection.inspection_id}
-                                        inspection={inspection}
-                                      />
+                                      <div
+                                        key={`inspection-${inspection.inspection_id}`}
+                                        className="border rounded p-4 shadow-sm mb-3"
+                                        style={{ backgroundColor: "#CFE2FF" }}
+                                      >
+                                        <div className="row">
+                                          <div className="col-md-3">
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
+                                              <div className="d-flex flex-wrap gap-2">
+                                                {inspection.PhotoPaths.map(
+                                                  (photo, i) => (
+                                                    <a
+                                                      key={`photo-${inspection.id}-${i}`}
+                                                      href={photo}
+                                                      data-fancybox="gallery"
+                                                      data-caption={`Photo ${
+                                                        i + 1
+                                                      }`}
+                                                    >
+                                                      <img
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                        }}
+                                                      />
+                                                    </a>
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="col-md-6">
+                                            <strong>Parts:</strong>{" "}
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Material:</strong>{" "}
+                                            {inspection.MaterialName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage:</strong>{" "}
+                                            {inspection.DamageKindName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Level:</strong>{" "}
+                                            {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
+                                            {inspection.Remarks || "N/A"}
+                                          </div>
+                                          <div className="col-md-3 d-flex flex-column justify-content-between">
+                                            {inspection.reviewed_by === 0 ? (
+                                              <>
+                                                <Form.Control
+                                                  as="input"
+                                                  type="text"
+                                                  placeholder="Consultant Remarks"
+                                                  value={
+                                                    inspection.qc_remarks_con ||
+                                                    ""
+                                                  }
+                                                  onChange={(e) =>
+                                                    handleConsultantRemarksChange(
+                                                      inspection.inspection_id,
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                  className="mb-2"
+                                                />
+                                                <Form.Select
+                                                  value={inspection.qc_con}
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="mb-2"
+                                                >
+                                                  <option value={1}>
+                                                    Select Status
+                                                  </option>
+                                                  <option value={3}>
+                                                    Unapproved
+                                                  </option>
+                                                  <option value={2}>
+                                                    Approved
+                                                  </option>
+                                                </Form.Select>
+                                                <Button
+                                                  onClick={() =>
+                                                    handleSaveChanges(
+                                                      inspection
+                                                    )
+                                                  }
+                                                  value={inspection.reviewed_by}
+                                                  className="bg-[#CFE2FF]"
+                                                  disabled={
+                                                    inspection.reviewed_by === 1
+                                                  }
+                                                >
+                                                  Save Changes
+                                                </Button>
+                                              </>
+                                            ) : (
+                                              <div className="text-start">
+                                                <strong>Remarks: </strong>
+                                                {inspection.qc_remarks_con ||
+                                                  "N/A"}{" "}
+                                                <br />
+                                                <strong>Status: </strong>
+                                                {inspection.qc_con === 2
+                                                  ? "Approved"
+                                                  : "Unapproved"}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
                                     )
                                   )}
                                 </div>
@@ -472,10 +591,74 @@ const InspectionList = ({ bridgeId }) => {
                                 <div className="mt-2">
                                   {approvedData[spanIndex][workKind].map(
                                     (inspection) => (
-                                      <InspectionCard
-                                        key={inspection.inspection_id}
-                                        inspection={inspection}
-                                      />
+                                      <div
+                                        key={`inspection-${inspection.inspection_id}`}
+                                        className="border rounded p-4 shadow-sm mb-3"
+                                        style={{ backgroundColor: "#CFE2FF" }}
+                                      >
+                                        <div className="row">
+                                          <div className="col-md-3">
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
+                                              <div className="d-flex flex-wrap gap-2">
+                                                {inspection.PhotoPaths.map(
+                                                  (photo, i) => (
+                                                    <a
+                                                      key={`photo-${inspection.id}-${i}`}
+                                                      href={photo}
+                                                      data-fancybox="gallery"
+                                                      data-caption={`Photo ${
+                                                        i + 1
+                                                      }`}
+                                                    >
+                                                      <img
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                        }}
+                                                      />
+                                                    </a>
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="col-md-6">
+                                            <strong>Parts:</strong>{" "}
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Material:</strong>{" "}
+                                            {inspection.MaterialName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage:</strong>{" "}
+                                            {inspection.DamageKindName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Level:</strong>{" "}
+                                            {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
+                                            {inspection.Remarks || "N/A"}
+                                          </div>
+                                          <div className="col-md-3 d-flex flex-column justify-content-between">
+                                            <div className="text-start">
+                                              <strong>Remarks: </strong>
+                                              {inspection.qc_remarks_con ||
+                                                "N/A"}{" "}
+                                              <br />
+                                              <strong>Status: </strong>
+                                              {inspection.qc_con === 2
+                                                ? "Approved"
+                                                : "Unapproved"}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
                                     )
                                   )}
                                 </div>
@@ -521,10 +704,74 @@ const InspectionList = ({ bridgeId }) => {
                                 <div className="mt-2">
                                   {unapprovedData[spanIndex][workKind].map(
                                     (inspection) => (
-                                      <InspectionCard
-                                        key={inspection.inspection_id}
-                                        inspection={inspection}
-                                      />
+                                      <div
+                                        key={`inspection-${inspection.inspection_id}`}
+                                        className="border rounded p-4 shadow-sm mb-3"
+                                        style={{ backgroundColor: "#CFE2FF" }}
+                                      >
+                                        <div className="row">
+                                          <div className="col-md-3">
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
+                                              <div className="d-flex flex-wrap gap-2">
+                                                {inspection.PhotoPaths.map(
+                                                  (photo, i) => (
+                                                    <a
+                                                      key={`photo-${inspection.id}-${i}`}
+                                                      href={photo}
+                                                      data-fancybox="gallery"
+                                                      data-caption={`Photo ${
+                                                        i + 1
+                                                      }`}
+                                                    >
+                                                      <img
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                        }}
+                                                      />
+                                                    </a>
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="col-md-6">
+                                            <strong>Parts:</strong>{" "}
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Material:</strong>{" "}
+                                            {inspection.MaterialName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage:</strong>{" "}
+                                            {inspection.DamageKindName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Level:</strong>{" "}
+                                            {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
+                                            {inspection.Remarks || "N/A"}
+                                          </div>
+                                          <div className="col-md-3 d-flex flex-column justify-content-between">
+                                            <div className="text-start">
+                                              <strong>Remarks: </strong>
+                                              {inspection.qc_remarks_con ||
+                                                "N/A"}{" "}
+                                              <br />
+                                              <strong>Status: </strong>
+                                              {inspection.qc_con === 2
+                                                ? "Approved"
+                                                : "Unapproved"}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
                                     )
                                   )}
                                 </div>
@@ -540,91 +787,6 @@ const InspectionList = ({ bridgeId }) => {
                 ))}
             </div>
           )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const InspectionCard = ({ inspection }) => {
-  return (
-    <div
-      className="border rounded p-4 shadow-sm mb-3"
-      style={{ backgroundColor: "#CFE2FF" }}
-    >
-      <div className="row">
-        <div className="col-md-3">
-          {inspection.PhotoPaths?.length > 0 && (
-            <div className="d-flex flex-wrap gap-2">
-              {inspection.PhotoPaths.map((photo, i) => (
-                <a
-                  key={`photo-${inspection.id}-${i}`}
-                  href={photo}
-                  data-fancybox="gallery"
-                  data-caption={`Photo ${i + 1}`}
-                >
-                  <img
-                    src={photo}
-                    alt={`Photo ${i + 1}`}
-                    className="img-fluid rounded border"
-                    style={{
-                      width: "80px",
-                      height: "80px",
-                      objectFit: "cover",
-                    }}
-                  />
-                </a>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="col-md-6">
-          <strong>Parts:</strong> {inspection.PartsName || "N/A"} <br />
-          <strong>Material:</strong> {inspection.MaterialName || "N/A"} <br />
-          <strong>Damage:</strong> {inspection.DamageKindName || "N/A"} <br />
-          <strong>Level:</strong> {inspection.DamageLevel || "N/A"} <br />
-          <strong>Situation Remarks:</strong> {inspection.Remarks || "N/A"}
-        </div>
-
-        <div className="col-md-3 d-flex flex-column justify-content-between">
-          <Form.Control
-            as="input"
-            type="text"
-            placeholder="Consultant Remarks"
-            value={inspection.qc_remarks_con || ""}
-            onChange={(e) =>
-              handleConsultantRemarksChange(
-                inspection.inspection_id,
-                e.target.value
-              )
-            }
-            className="mb-2"
-          />
-
-          <Form.Select
-            value={inspection.qc_con}
-            onChange={(e) =>
-              handleApprovedFlagChange(
-                inspection.inspection_id,
-                parseInt(e.target.value)
-              )
-            }
-            className="mb-2"
-          >
-            <option value={1}>Select Status</option>
-            <option value={3}>Unapproved</option>
-            <option value={2}>Approved</option>
-          </Form.Select>
-
-          <Button
-            onClick={() => handleSaveChanges(inspection)}
-            value={inspection.reviewed_by}
-            className="bg-[#CFE2FF]"
-            disabled={inspection.reviewed_by === 1}
-          >
-            Save Changes
-          </Button>
         </div>
       </div>
     </div>
