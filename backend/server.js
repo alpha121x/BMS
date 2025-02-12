@@ -764,7 +764,7 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
-app.get("/api/get-inspections", async (req, res) => {
+app.get("/api/get-inspections-new", async (req, res) => {
   try {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
@@ -814,6 +814,123 @@ ORDER BY inspection_id DESC;
     }));
 
     res.status(200).json({ success: true, data: modifiedRows });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.get("/api/get-inspections", async (req, res) => {
+  try {
+    const { bridgeId } = req.query; // Get uu_bms_id from query parameters
+
+    if (!bridgeId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
+    }
+
+    const pendingQuery = `
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_con,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      AND qc_con = '1'
+      ORDER BY inspection_id DESC;
+    `;
+
+    const approvedQuery = `
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_con,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      AND qc_con = '2'
+      ORDER BY inspection_id DESC;
+    `;
+
+    const unapprovedQuery = `
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_con,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      AND qc_con = '3'
+      ORDER BY inspection_id DESC;
+    `;
+
+    const [pendingRows, approvedRows, unapprovedRows] = await Promise.all([
+      pool.query(pendingQuery, [bridgeId]),
+      pool.query(approvedQuery, [bridgeId]),
+      pool.query(unapprovedQuery, [bridgeId]),
+    ]);
+
+    const modifiedPendingRows = pendingRows.rows.map((row) => ({
+      ...row,
+      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+    }));
+
+    const modifiedApprovedRows = approvedRows.rows.map((row) => ({
+      ...row,
+      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+    }));
+
+    const modifiedUnapprovedRows = unapprovedRows.rows.map((row) => ({
+      ...row,
+      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        pending: modifiedPendingRows,
+        approved: modifiedApprovedRows,
+        unapproved: modifiedUnapprovedRows,
+      },
+    });
   } catch (error) {
     console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
