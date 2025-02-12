@@ -256,22 +256,22 @@ const InspectionList = ({ bridgeId }) => {
               <div>
                 <strong>Total Spans:</strong>
                 <p className="text-gray-700">
-                  {getUniqueSpanIndices(inspectiondata)}
+                  {getUniqueSpanIndices(inspectionData)}
                 </p>
               </div>
               <div>
                 <strong>Damage Levels:</strong>
                 <p className="text-gray-700">
-                  {getDamageLevel(inspectiondata)}
+                  {getDamageLevel(inspectionData)}
                 </p>
               </div>
               <div>
                 <strong>Materials Used:</strong>
-                <p className="text-gray-700">{getMaterials(inspectiondata)}</p>
+                <p className="text-gray-700">{getMaterials(inspectionData)}</p>
               </div>
               <div>
                 <strong>Work Kind:</strong>
-                <p className="text-gray-700">{getWorkKind(inspectiondata)}</p>
+                <p className="text-gray-700">{getWorkKind(inspectionData)}</p>
               </div>
             </div>
           </div>
