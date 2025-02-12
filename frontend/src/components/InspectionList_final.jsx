@@ -12,14 +12,16 @@ import Swal from "sweetalert2";
 
 const InspectionList = ({ bridgeId }) => {
   const [inspectiondata, setInspectionData] = useState([]);
+  const [summaryData, setSummaryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
-  const [activeStatus, setActiveStatus] = useState(1); // Default to Pending Reports
+  const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
 
   useEffect(() => {
     if (bridgeId) {
       fetchData();
+      fetchSummaryData();
     }
   }, [bridgeId]);
 
@@ -42,6 +44,30 @@ const InspectionList = ({ bridgeId }) => {
       const result = await response.json();
       if (Array.isArray(result.data)) {
         setInspectionData(result.data);
+      } else {
+        throw new Error("Invalid data format");
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [bridgeId]);
+
+  const fetchSummaryData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (!bridgeId) throw new Error("bridgeId is required");
+
+      const response = await fetch(
+        `${BASE_URL}/api/get-inspections-new?bridgeId=${bridgeId}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch data");
+
+      const result = await response.json();
+      if (Array.isArray(result.data)) {
+        setSummaryData(result.data);
       } else {
         throw new Error("Invalid data format");
       }
@@ -227,53 +253,27 @@ const InspectionList = ({ bridgeId }) => {
     const uniqueSpanIndices = [...new Set(spanIndices)];
     return uniqueSpanIndices.length;
   };
-  
 
-  const { pendingData, approvedData, unapprovedData } = useMemo(() => {
-    const grouped = inspectiondata.reduce(
-      (acc, row) => {
-        const spanKey = row.SpanIndex || "N/A";
-        const workKindKey = row.WorkKindName || "N/A";
+  const groupedData = useMemo(() => {
+    return inspectiondata.reduce((acc, row) => {
+      const spanKey = row.SpanIndex || "N/A";
+      const workKindKey = row.WorkKindName || "N/A";
 
-        if (!acc.pending[spanKey]) acc.pending[spanKey] = {};
-        if (!acc.approved[spanKey]) acc.approved[spanKey] = {};
-        if (!acc.unapproved[spanKey]) acc.unapproved[spanKey] = {};
+      if (!acc[spanKey]) {
+        acc[spanKey] = {};
+      }
 
-        if (!acc.pending[spanKey][workKindKey])
-          acc.pending[spanKey][workKindKey] = [];
-        if (!acc.approved[spanKey][workKindKey])
-          acc.approved[spanKey][workKindKey] = [];
-        if (!acc.unapproved[spanKey][workKindKey])
-          acc.unapproved[spanKey][workKindKey] = [];
+      if (!acc[spanKey][workKindKey]) {
+        acc[spanKey][workKindKey] = [];
+      }
 
-        const status = Number(row.qc_con);
-        if (status === 1) acc.pending[spanKey][workKindKey].push(row);
-        else if (status === 2) acc.approved[spanKey][workKindKey].push(row);
-        else if (status === 3) acc.unapproved[spanKey][workKindKey].push(row);
-
-        return acc;
-      },
-      { pending: {}, approved: {}, unapproved: {} }
-    );
-
-    return {
-      pendingData: grouped.pending,
-      approvedData: grouped.approved,
-      unapprovedData: grouped.unapproved,
-    };
+      acc[spanKey][workKindKey].push(row);
+      return acc;
+    }, {});
   }, [inspectiondata]);
 
-  const [filteredData, setFilteredData] = useState(pendingData);
-
-  useEffect(() => {
-    setFilteredData(pendingData);
-  }, [pendingData]);
-
-  const handleStatusChange = (status) => {
-    setActiveStatus(status);
-    if (status === 1) setFilteredData(pendingData);
-    else if (status === 2) setFilteredData(approvedData);
-    else if (status === 3) setFilteredData(unapprovedData);
+  const handleDivChange = (div) => {
+    setActiveDiv(div);
   };
 
   const toggleSection = (spanIndex) => {
@@ -328,22 +328,20 @@ const InspectionList = ({ bridgeId }) => {
               <div>
                 <strong>Total Spans:</strong>
                 <p className="text-gray-700">
-                  {getUniqueSpanIndices(inspectiondata)}
+                  {getUniqueSpanIndices(summaryData)}
                 </p>
               </div>
               <div>
                 <strong>Damage Levels:</strong>
-                <p className="text-gray-700">
-                  {getDamageLevel(inspectiondata)}
-                </p>
+                <p className="text-gray-700">{getDamageLevel(summaryData)}</p>
               </div>
               <div>
                 <strong>Materials Used:</strong>
-                <p className="text-gray-700">{getMaterials(inspectiondata)}</p>
+                <p className="text-gray-700">{getMaterials(summaryData)}</p>
               </div>
               <div>
                 <strong>Work Kind:</strong>
-                <p className="text-gray-700">{getWorkKind(inspectiondata)}</p>
+                <p className="text-gray-700">{getWorkKind(summaryData)}</p>
               </div>
             </div>
           </div>
@@ -373,29 +371,28 @@ const InspectionList = ({ bridgeId }) => {
           <Button
             variant="warning"
             className="fw-bold text-grey"
-            onClick={() => handleStatusChange(1)}
+            onClick={() => handleDivChange("pending")}
           >
             View Pending Reports
           </Button>
           <Button
             variant="success"
             className="fw-bold"
-            onClick={() => handleStatusChange(2)}
+            onClick={() => handleDivChange("approved")}
           >
             View Approved Reports
           </Button>
           <Button
             variant="danger"
             className="fw-bold"
-            onClick={() => handleStatusChange(3)}
+            onClick={() => handleDivChange("unapproved")}
           >
             View Unapproved Reports
           </Button>
         </div>
-
         <div className="border rounded p-3 shadow-lg mt-2">
           {/* Reports Section */}
-          {activeStatus === 1 && (
+          {activeDiv === 1 && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
               {pendingData &&
@@ -563,7 +560,7 @@ const InspectionList = ({ bridgeId }) => {
             </div>
           )}
 
-          {activeStatus === 2 && (
+          {activeDiv === 2 && (
             <div className="mb-4">
               <h5>Approved Reports</h5>
               {approvedData &&
@@ -676,7 +673,7 @@ const InspectionList = ({ bridgeId }) => {
             </div>
           )}
 
-          {activeStatus === 3 && (
+          {activeDiv === 3 && (
             <div className="mb-4">
               <h5>Unapproved Reports</h5>
               {unapprovedData &&
