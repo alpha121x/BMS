@@ -6,7 +6,7 @@ import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
-import "@fancyapps/ui/dist/fancybox/fancybox.css"; 
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { Fancybox } from "@fancyapps/ui";
 import Swal from "sweetalert2";
 
@@ -14,10 +14,8 @@ const InspectionList = ({ bridgeId }) => {
   const [inspectiondata, setInspectionData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedSections, setExpandedSections1] = useState({});
-  const [expandedSections1, setExpandedSections2] = useState({});
-  const [expandedSections2, setExpandedSections3] = useState({});
-
+  const [expandedSections, setExpandedSections] = useState({});
+  const [activeStatus, setActiveStatus] = useState(1); // Default to Pending Reports
 
   useEffect(() => {
     if (bridgeId) {
@@ -271,27 +269,14 @@ const InspectionList = ({ bridgeId }) => {
   }, [pendingData]);
 
   const handleStatusChange = (status) => {
+    setActiveStatus(status);
     if (status === 1) setFilteredData(pendingData);
     else if (status === 2) setFilteredData(approvedData);
     else if (status === 3) setFilteredData(unapprovedData);
   };
 
-  const toggleSection1 = (spanIndex) => {
-    setExpandedSections1((prev) => ({
-      ...prev,
-      [spanIndex]: !prev[spanIndex],
-    }));
-  };
-
-   const toggleSection2 = (spanIndex) => {
-    setExpandedSections2((prev) => ({
-      ...prev,
-      [spanIndex]: !prev[spanIndex],
-    }));
-  };
-
-   const toggleSection3 = (spanIndex) => {
-    setExpandedSections3((prev) => ({
+  const toggleSection = (spanIndex) => {
+    setExpandedSections((prev) => ({
       ...prev,
       [spanIndex]: !prev[spanIndex],
     }));
@@ -383,105 +368,178 @@ const InspectionList = ({ bridgeId }) => {
           />
         )}
 
+        <div className="border rounded p-3 d-flex justify-content-between align-items-center mt-2">
+          <Button
+            variant="warning"
+            className="fw-bold text-grey"
+            onClick={() => handleStatusChange(1)}
+          >
+            View Pending Reports
+          </Button>
+          <Button
+            variant="success"
+            className="fw-bold"
+            onClick={() => handleStatusChange(2)}
+          >
+            View Approved Reports
+          </Button>
+          <Button
+            variant="danger"
+            className="fw-bold"
+            onClick={() => handleStatusChange(3)}
+          >
+            View Unapproved Reports
+          </Button>
+        </div>
+
         <div className="border rounded p-3 shadow-lg mt-2">
-          {/* Pending Reports */}
-          <div className="mb-4">
-            <h5>Pending Reports</h5>
-            {pendingData && Object.keys(pendingData).map((spanIndex) => (
-              <div key={`span-${spanIndex}`} className="mb-4">
-                <div
-                  className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                  onClick={() => toggleSection1(spanIndex)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>Reports For Span: {spanIndex}</strong>
-                  <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
-                </div>
-                {expandedSections[spanIndex] && (
-                  <div className="mt-2">
-                    {Object.keys(pendingData[spanIndex]).map((workKind) => (
-                      <div key={`workKind-${spanIndex}-${workKind}`} className="mb-4">
-                        <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                          {workKind}
-                        </div>
-                        <div className="mt-2">
-                          {pendingData[spanIndex][workKind].map((inspection) => (
-                            <InspectionCard key={inspection.inspection_id} inspection={inspection} />
-                          ))}
-                        </div>
+          {/* Reports Section */}
+          {activeStatus === 1 && (
+            <div className="mb-4">
+              <h5>Pending Reports</h5>
+              {pendingData &&
+                Object.keys(pendingData).map((spanIndex) => (
+                  <div key={`span-${spanIndex}`} className="mb-4">
+                    <div
+                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                      onClick={() => toggleSection(spanIndex)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>Reports For Span: {spanIndex}</strong>
+                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                    </div>
+                    {expandedSections[spanIndex] ? (
+                      <div className="mt-2">
+                        {Object.keys(pendingData[spanIndex]).length > 0 ? (
+                          Object.keys(pendingData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {pendingData[spanIndex][workKind].map(
+                                    (inspection) => (
+                                      <InspectionCard
+                                        key={inspection.inspection_id}
+                                        inspection={inspection}
+                                      />
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p>No data available</p>
+                        )}
                       </div>
-                    ))}
+                    ) : null}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                ))}
+            </div>
+          )}
 
-          {/* Approved Reports */}
-          <div className="mb-4">
-            <h5>Approved Reports</h5>
-            {approvedData && Object.keys(approvedData).map((spanIndex) => (
-              <div key={`span-${spanIndex}`} className="mb-4">
-                <div
-                  className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                  onClick={() => toggleSection2(spanIndex)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>Reports For Span: {spanIndex}</strong>
-                  <span>{expandedSections1[spanIndex] ? "▼" : "▶"}</span>
-                </div>
-                {expandedSections1[spanIndex] && (
-                  <div className="mt-2">
-                    {Object.keys(approvedData[spanIndex]).map((workKind) => (
-                      <div key={`workKind-${spanIndex}-${workKind}`} className="mb-4">
-                        <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                          {workKind}
-                        </div>
-                        <div className="mt-2">
-                          {approvedData[spanIndex][workKind].map((inspection) => (
-                            <InspectionCard key={inspection.inspection_id} inspection={inspection} />
-                          ))}
-                        </div>
+          {activeStatus === 2 && (
+            <div className="mb-4">
+              <h5>Approved Reports</h5>
+              {approvedData &&
+                Object.keys(approvedData).map((spanIndex) => (
+                  <div key={`span-${spanIndex}`} className="mb-4">
+                    <div
+                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                      onClick={() => toggleSection(spanIndex)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>Reports For Span: {spanIndex}</strong>
+                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                    </div>
+                    {expandedSections[spanIndex] ? (
+                      <div className="mt-2">
+                        {Object.keys(approvedData[spanIndex]).length > 0 ? (
+                          Object.keys(approvedData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {approvedData[spanIndex][workKind].map(
+                                    (inspection) => (
+                                      <InspectionCard
+                                        key={inspection.inspection_id}
+                                        inspection={inspection}
+                                      />
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p>No data available</p>
+                        )}
                       </div>
-                    ))}
+                    ) : null}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                ))}
+            </div>
+          )}
 
-          {/* Unapproved Reports */}
-          <div className="mb-4">
-            <h5>Unapproved Reports</h5>
-            {unapprovedData && Object.keys(unapprovedData).map((spanIndex) => (
-              <div key={`span-${spanIndex}`} className="mb-4">
-                <div
-                  className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                  onClick={() => toggleSection3(spanIndex)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>Reports For Span: {spanIndex}</strong>
-                  <span>{expandedSections2[spanIndex] ? "▼" : "▶"}</span>
-                </div>
-                {expandedSections2[spanIndex] && (
-                  <div className="mt-2">
-                    {Object.keys(unapprovedData[spanIndex]).map((workKind) => (
-                      <div key={`workKind-${spanIndex}-${workKind}`} className="mb-4">
-                        <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                          {workKind}
-                        </div>
-                        <div className="mt-2">
-                          {unapprovedData[spanIndex][workKind].map((inspection) => (
-                            <InspectionCard key={inspection.inspection_id} inspection={inspection} />
-                          ))}
-                        </div>
+          {activeStatus === 3 && (
+            <div className="mb-4">
+              <h5>Unapproved Reports</h5>
+              {unapprovedData &&
+                Object.keys(unapprovedData).map((spanIndex) => (
+                  <div key={`span-${spanIndex}`} className="mb-4">
+                    <div
+                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                      onClick={() => toggleSection(spanIndex)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>Reports For Span: {spanIndex}</strong>
+                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                    </div>
+                    {expandedSections[spanIndex] ? (
+                      <div className="mt-2">
+                        {Object.keys(unapprovedData[spanIndex]).length > 0 ? (
+                          Object.keys(unapprovedData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {unapprovedData[spanIndex][workKind].map(
+                                    (inspection) => (
+                                      <InspectionCard
+                                        key={inspection.inspection_id}
+                                        inspection={inspection}
+                                      />
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p>No data available</p>
+                        )}
                       </div>
-                    ))}
+                    ) : null}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -490,14 +548,31 @@ const InspectionList = ({ bridgeId }) => {
 
 const InspectionCard = ({ inspection }) => {
   return (
-    <div className="border rounded p-4 shadow-sm mb-3" style={{ backgroundColor: "#CFE2FF" }}>
+    <div
+      className="border rounded p-4 shadow-sm mb-3"
+      style={{ backgroundColor: "#CFE2FF" }}
+    >
       <div className="row">
         <div className="col-md-3">
           {inspection.PhotoPaths?.length > 0 && (
             <div className="d-flex flex-wrap gap-2">
               {inspection.PhotoPaths.map((photo, i) => (
-                <a key={`photo-${inspection.id}-${i}`} href={photo} data-fancybox="gallery" data-caption={`Photo ${i + 1}`}>
-                  <img src={photo} alt={`Photo ${i + 1}`} className="img-fluid rounded border" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
+                <a
+                  key={`photo-${inspection.id}-${i}`}
+                  href={photo}
+                  data-fancybox="gallery"
+                  data-caption={`Photo ${i + 1}`}
+                >
+                  <img
+                    src={photo}
+                    alt={`Photo ${i + 1}`}
+                    className="img-fluid rounded border"
+                    style={{
+                      width: "80px",
+                      height: "80px",
+                      objectFit: "cover",
+                    }}
+                  />
                 </a>
               ))}
             </div>
@@ -518,13 +593,23 @@ const InspectionCard = ({ inspection }) => {
             type="text"
             placeholder="Consultant Remarks"
             value={inspection.qc_remarks_con || ""}
-            onChange={(e) => handleConsultantRemarksChange(inspection.inspection_id, e.target.value)}
+            onChange={(e) =>
+              handleConsultantRemarksChange(
+                inspection.inspection_id,
+                e.target.value
+              )
+            }
             className="mb-2"
           />
 
           <Form.Select
             value={inspection.qc_con}
-            onChange={(e) => handleApprovedFlagChange(inspection.inspection_id, parseInt(e.target.value))}
+            onChange={(e) =>
+              handleApprovedFlagChange(
+                inspection.inspection_id,
+                parseInt(e.target.value)
+              )
+            }
             className="mb-2"
           >
             <option value={1}>Select Status</option>
