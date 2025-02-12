@@ -227,6 +227,7 @@ const InspectionList = ({ bridgeId }) => {
     const uniqueSpanIndices = [...new Set(spanIndices)];
     return uniqueSpanIndices.length;
   };
+  
 
   const { pendingData, approvedData, unapprovedData } = useMemo(() => {
     const grouped = inspectiondata.reduce(
