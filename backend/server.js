@@ -728,27 +728,36 @@ app.get("/api/bridges", async (req, res) => {
 app.get("/api/inspections", async (req, res) => {
   try {
     const query = `
-      SELECT 
-        bridge_name, "SpanIndex", "WorkKindName", "PartsName", "MaterialName", 
-        "DamageKindName", "DamageLevel", 
-        "Remarks", "photopath", "ApprovedFlag"
-      FROM bms.tbl_inspection_f;
-    `;
-
-    const { rows } = await pool.query(query);
-
-    // Map over the rows to handle the data manipulation
-    const modifiedRows = rows.map((row) => {
-      return {
-        ...row,
-        photopath:
-          row.photopath && Array.isArray(row.photopath)
-            ? row.photopath.map((p) => p.path)
-            : [], // Extract all paths from photopath array
-        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved", // Mapping ApprovedFlag to approved/unapproved
-      };
-    });
-
+    SELECT 
+      bridge_name, "SpanIndex", "WorkKindName", "PartsName", "MaterialName", 
+      "DamageKindName", "DamageLevel", 
+      "Remarks", "photopath", "ApprovedFlag"
+    FROM bms.tbl_inspection_f;
+  `;
+  
+  const { rows } = await pool.query(query);
+  
+  // Map over the rows to handle data manipulation
+  const modifiedRows = rows.map((row) => {
+    let photoPaths = [];
+  
+    // Check if photopath exists and try parsing it
+    if (row.photopath) {
+      try {
+        const parsed = JSON.parse(row.photopath);
+        photoPaths = Array.isArray(parsed) ? parsed.map((p) => p.path) : [];
+      } catch (error) {
+        console.error("Error parsing photopath:", error);
+      }
+    }
+  
+    return {
+      ...row,
+      photopath: photoPaths,
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+    };
+  });
+  
     res.json({ success: true, data: modifiedRows });
   } catch (error) {
     console.error("Error fetching inspection data:", error);
