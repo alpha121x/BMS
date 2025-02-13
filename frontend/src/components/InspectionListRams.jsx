@@ -506,6 +506,11 @@ const InspectionListRams = ({ bridgeId }) => {
                                               Situation Remarks:
                                             </strong>{" "}
                                             {inspection.Remarks || "N/A"}
+                                            <br />
+                                            <strong>
+                                              Consultant Remarks:
+                                            </strong>{" "}
+                                            {inspection.qc_remarks_con || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
