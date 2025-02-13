@@ -6,22 +6,24 @@ import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
-import "@fancyapps/ui/dist/fancybox/fancybox.css"; 
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { Fancybox } from "@fancyapps/ui";
 import Swal from "sweetalert2";
 
 const InspectionList = ({ bridgeId }) => {
-  const [inspectiondata, setInspectionData] = useState([]);
+  const [pendingData, setPendingData] = useState([]);
+  const [approvedData, setApprovedData] = useState([]);
+  const [unapprovedData, setUnapprovedData] = useState([]);
+  const [summaryData, setsummaryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [expandedSections, setExpandedSections1] = useState({});
-  const [expandedSections1, setExpandedSections2] = useState({});
-  const [expandedSections2, setExpandedSections3] = useState({});
-
+  const [expandedSections, setExpandedSections] = useState({});
+  const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
 
   useEffect(() => {
     if (bridgeId) {
       fetchData();
+      fetchsummaryData();
     }
   }, [bridgeId]);
 
@@ -42,8 +44,49 @@ const InspectionList = ({ bridgeId }) => {
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
+      if (result.success) {
+        // Generalized function for grouping
+        const groupBySpanAndWorkKind = (data) => {
+          return data.reduce((acc, item) => {
+            const spanKey = item.SpanIndex || "N/A";
+            const workKindKey = item.WorkKindName || "N/A";
+
+            if (!acc[spanKey]) acc[spanKey] = {};
+            if (!acc[spanKey][workKindKey]) acc[spanKey][workKindKey] = [];
+
+            acc[spanKey][workKindKey].push(item);
+            return acc;
+          }, {});
+        };
+
+        // Grouping the data separately
+        setPendingData(groupBySpanAndWorkKind(result.data.pending));
+        setApprovedData(groupBySpanAndWorkKind(result.data.approved));
+        setUnapprovedData(groupBySpanAndWorkKind(result.data.unapproved));
+      } else {
+        throw new Error("Invalid data format");
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [bridgeId]);
+
+  const fetchsummaryData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (!bridgeId) throw new Error("bridgeId is required");
+
+      const response = await fetch(
+        `${BASE_URL}/api/get-inspections-new?bridgeId=${bridgeId}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch data");
+
+      const result = await response.json();
       if (Array.isArray(result.data)) {
-        setInspectionData(result.data);
+        setsummaryData(result.data);
       } else {
         throw new Error("Invalid data format");
       }
@@ -104,22 +147,42 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleConsultantRemarksChange = (inspectionId, value) => {
-    setInspectionData((prevData) =>
-      prevData.map((item) =>
-        item.inspection_id === inspectionId
-          ? { ...item, qc_remarks_con: value }
-          : item
-      )
-    );
+  const handleConsultantRemarksChange = (
+    spanIndex,
+    workKind,
+    inspectionId,
+    value
+  ) => {
+    setPendingData((prevData) => ({
+      ...prevData,
+      [spanIndex]: {
+        ...prevData[spanIndex],
+        [workKind]: prevData[spanIndex][workKind].map((item) =>
+          item.inspection_id === inspectionId
+            ? { ...item, qc_remarks_con: value }
+            : item
+        ),
+      },
+    }));
   };
 
-  const handleApprovedFlagChange = (inspectionId, value) => {
-    setInspectionData((prevData) =>
-      prevData.map((item) =>
-        item.inspection_id === inspectionId ? { ...item, qc_con: value } : item
-      )
-    );
+  const handleApprovedFlagChange = (
+    spanIndex,
+    workKind,
+    inspectionId,
+    value
+  ) => {
+    setPendingData((prevData) => ({
+      ...prevData,
+      [spanIndex]: {
+        ...prevData[spanIndex],
+        [workKind]: prevData[spanIndex][workKind].map((item) =>
+          item.inspection_id === inspectionId
+            ? { ...item, qc_con: value }
+            : item
+        ),
+      },
+    }));
   };
 
   const handleSaveChanges = (row) => {
@@ -143,16 +206,16 @@ const InspectionList = ({ bridgeId }) => {
         return;
       }
 
-      const inspectiondata = data.bridges;
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
 
-      const headers = Object.keys(inspectiondata[0]);
+      const headers = Object.keys(summaryData[0]);
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
           headers.join(","),
-          ...inspectiondata.map((row) =>
+          ...summaryData.map((row) =>
             headers
               .map((key) =>
                 String(row[key]).includes(",")
@@ -193,11 +256,11 @@ const InspectionList = ({ bridgeId }) => {
         return;
       }
 
-      const inspectiondata = data.bridges;
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
 
-      const ws = XLSX.utils.json_to_sheet(inspectiondata);
-      ws["!cols"] = Object.keys(inspectiondata[0]).map(() => ({ width: 20 }));
+      const ws = XLSX.utils.json_to_sheet(summaryData);
+      ws["!cols"] = Object.keys(summaryData[0]).map(() => ({ width: 20 }));
 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inspections");
@@ -230,68 +293,12 @@ const InspectionList = ({ bridgeId }) => {
     return uniqueSpanIndices.length;
   };
 
-  const { pendingData, approvedData, unapprovedData } = useMemo(() => {
-    const grouped = inspectiondata.reduce(
-      (acc, row) => {
-        const spanKey = row.SpanIndex || "N/A";
-        const workKindKey = row.WorkKindName || "N/A";
-
-        if (!acc.pending[spanKey]) acc.pending[spanKey] = {};
-        if (!acc.approved[spanKey]) acc.approved[spanKey] = {};
-        if (!acc.unapproved[spanKey]) acc.unapproved[spanKey] = {};
-
-        if (!acc.pending[spanKey][workKindKey])
-          acc.pending[spanKey][workKindKey] = [];
-        if (!acc.approved[spanKey][workKindKey])
-          acc.approved[spanKey][workKindKey] = [];
-        if (!acc.unapproved[spanKey][workKindKey])
-          acc.unapproved[spanKey][workKindKey] = [];
-
-        const status = Number(row.qc_con);
-        if (status === 1) acc.pending[spanKey][workKindKey].push(row);
-        else if (status === 2) acc.approved[spanKey][workKindKey].push(row);
-        else if (status === 3) acc.unapproved[spanKey][workKindKey].push(row);
-
-        return acc;
-      },
-      { pending: {}, approved: {}, unapproved: {} }
-    );
-
-    return {
-      pendingData: grouped.pending,
-      approvedData: grouped.approved,
-      unapprovedData: grouped.unapproved,
-    };
-  }, [inspectiondata]);
-
-  const [filteredData, setFilteredData] = useState(pendingData);
-
-  useEffect(() => {
-    setFilteredData(pendingData);
-  }, [pendingData]);
-
-  const handleStatusChange = (status) => {
-    if (status === 1) setFilteredData(pendingData);
-    else if (status === 2) setFilteredData(approvedData);
-    else if (status === 3) setFilteredData(unapprovedData);
+  const handleDivChange = (div) => {
+    setActiveDiv(div);
   };
 
-  const toggleSection1 = (spanIndex) => {
-    setExpandedSections1((prev) => ({
-      ...prev,
-      [spanIndex]: !prev[spanIndex],
-    }));
-  };
-
-   const toggleSection2 = (spanIndex) => {
-    setExpandedSections2((prev) => ({
-      ...prev,
-      [spanIndex]: !prev[spanIndex],
-    }));
-  };
-
-   const toggleSection3 = (spanIndex) => {
-    setExpandedSections3((prev) => ({
+  const toggleSection = (spanIndex) => {
+    setExpandedSections((prev) => ({
       ...prev,
       [spanIndex]: !prev[spanIndex],
     }));
@@ -342,22 +349,20 @@ const InspectionList = ({ bridgeId }) => {
               <div>
                 <strong>Total Spans:</strong>
                 <p className="text-gray-700">
-                  {getUniqueSpanIndices(inspectiondata)}
+                  {getUniqueSpanIndices(summaryData)}
                 </p>
               </div>
               <div>
                 <strong>Damage Levels:</strong>
-                <p className="text-gray-700">
-                  {getDamageLevel(inspectiondata)}
-                </p>
+                <p className="text-gray-700">{getDamageLevel(summaryData)}</p>
               </div>
               <div>
                 <strong>Materials Used:</strong>
-                <p className="text-gray-700">{getMaterials(inspectiondata)}</p>
+                <p className="text-gray-700">{getMaterials(summaryData)}</p>
               </div>
               <div>
                 <strong>Work Kind:</strong>
-                <p className="text-gray-700">{getWorkKind(inspectiondata)}</p>
+                <p className="text-gray-700">{getWorkKind(summaryData)}</p>
               </div>
             </div>
           </div>
@@ -383,163 +388,423 @@ const InspectionList = ({ bridgeId }) => {
           />
         )}
 
-        <div className="border rounded p-3 shadow-lg mt-2">
-          {/* Pending Reports */}
-          <div className="mb-4">
-            <h5>Pending Reports</h5>
-            {pendingData && Object.keys(pendingData).map((spanIndex) => (
-              <div key={`span-${spanIndex}`} className="mb-4">
-                <div
-                  className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                  onClick={() => toggleSection1(spanIndex)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>Reports For Span: {spanIndex}</strong>
-                  <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
-                </div>
-                {expandedSections[spanIndex] && (
-                  <div className="mt-2">
-                    {Object.keys(pendingData[spanIndex]).map((workKind) => (
-                      <div key={`workKind-${spanIndex}-${workKind}`} className="mb-4">
-                        <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                          {workKind}
-                        </div>
-                        <div className="mt-2">
-                          {pendingData[spanIndex][workKind].map((inspection) => (
-                            <InspectionCard key={inspection.inspection_id} inspection={inspection} />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Approved Reports */}
-          <div className="mb-4">
-            <h5>Approved Reports</h5>
-            {approvedData && Object.keys(approvedData).map((spanIndex) => (
-              <div key={`span-${spanIndex}`} className="mb-4">
-                <div
-                  className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                  onClick={() => toggleSection2(spanIndex)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>Reports For Span: {spanIndex}</strong>
-                  <span>{expandedSections1[spanIndex] ? "▼" : "▶"}</span>
-                </div>
-                {expandedSections1[spanIndex] && (
-                  <div className="mt-2">
-                    {Object.keys(approvedData[spanIndex]).map((workKind) => (
-                      <div key={`workKind-${spanIndex}-${workKind}`} className="mb-4">
-                        <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                          {workKind}
-                        </div>
-                        <div className="mt-2">
-                          {approvedData[spanIndex][workKind].map((inspection) => (
-                            <InspectionCard key={inspection.inspection_id} inspection={inspection} />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Unapproved Reports */}
-          <div className="mb-4">
-            <h5>Unapproved Reports</h5>
-            {unapprovedData && Object.keys(unapprovedData).map((spanIndex) => (
-              <div key={`span-${spanIndex}`} className="mb-4">
-                <div
-                  className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                  onClick={() => toggleSection3(spanIndex)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>Reports For Span: {spanIndex}</strong>
-                  <span>{expandedSections2[spanIndex] ? "▼" : "▶"}</span>
-                </div>
-                {expandedSections2[spanIndex] && (
-                  <div className="mt-2">
-                    {Object.keys(unapprovedData[spanIndex]).map((workKind) => (
-                      <div key={`workKind-${spanIndex}-${workKind}`} className="mb-4">
-                        <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                          {workKind}
-                        </div>
-                        <div className="mt-2">
-                          {unapprovedData[spanIndex][workKind].map((inspection) => (
-                            <InspectionCard key={inspection.inspection_id} inspection={inspection} />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        <div className="border rounded p-2 d-flex justify-content-start gap-2 align-items-center mt-2">
+          <Button
+            variant="warning"
+            className="fw-bold text-grey"
+            onClick={() => handleDivChange("pending")}
+          >
+            View Pending Reports
+          </Button>
+          <Button
+            variant="success"
+            className="fw-bold"
+            onClick={() => handleDivChange("approved")}
+          >
+            View Approved Reports
+          </Button>
+          <Button
+            variant="danger"
+            className="fw-bold"
+            onClick={() => handleDivChange("unapproved")}
+          >
+            View Unapproved Reports
+          </Button>
         </div>
-      </div>
-    </div>
-  );
-};
-
-const InspectionCard = ({ inspection }) => {
-  return (
-    <div className="border rounded p-4 shadow-sm mb-3" style={{ backgroundColor: "#CFE2FF" }}>
-      <div className="row">
-        <div className="col-md-3">
-          {inspection.PhotoPaths?.length > 0 && (
-            <div className="d-flex flex-wrap gap-2">
-              {inspection.PhotoPaths.map((photo, i) => (
-                <a key={`photo-${inspection.id}-${i}`} href={photo} data-fancybox="gallery" data-caption={`Photo ${i + 1}`}>
-                  <img src={photo} alt={`Photo ${i + 1}`} className="img-fluid rounded border" style={{ width: "80px", height: "80px", objectFit: "cover" }} />
-                </a>
-              ))}
+        <div className="border rounded p-3 shadow-lg mt-2">
+          {/* Reports Section */}
+          {activeDiv === "pending" && (
+            <div className="mb-4">
+              <h5>Pending Reports</h5>
+              {pendingData &&
+                Object.keys(pendingData).map((spanIndex) => (
+                  <div key={`span-${spanIndex}`} className="mb-4">
+                    <div
+                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                      onClick={() => toggleSection(spanIndex)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>Reports For Span: {spanIndex}</strong>
+                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                    </div>
+                    {expandedSections[spanIndex] ? (
+                      <div className="mt-2">
+                        {Object.keys(pendingData[spanIndex]).length > 0 ? (
+                          Object.keys(pendingData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {pendingData[spanIndex][workKind].map(
+                                    (inspection) => (
+                                      <div
+                                        key={`inspection-${inspection.inspection_id}`}
+                                        className="border rounded p-4 shadow-sm mb-3"
+                                        style={{ backgroundColor: "#CFE2FF" }}
+                                      >
+                                        <div className="row">
+                                          <div className="col-md-3">
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
+                                              <div className="d-flex flex-wrap gap-2">
+                                                {inspection.PhotoPaths.map(
+                                                  (photo, i) => (
+                                                    <a
+                                                      key={`photo-${inspection.id}-${i}`}
+                                                      href={photo}
+                                                      data-fancybox="gallery"
+                                                      data-caption={`Photo ${
+                                                        i + 1
+                                                      }`}
+                                                    >
+                                                      <img
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                        }}
+                                                      />
+                                                    </a>
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="col-md-6">
+                                            <strong>Parts:</strong>{" "}
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Material:</strong>{" "}
+                                            {inspection.MaterialName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage:</strong>{" "}
+                                            {inspection.DamageKindName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Level:</strong>{" "}
+                                            {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
+                                            {inspection.Remarks || "N/A"}
+                                          </div>
+                                          <div className="col-md-3 d-flex flex-column justify-content-between">
+                                            <Form.Control
+                                              as="input"
+                                              type="text"
+                                              placeholder="Consultant Remarks"
+                                              value={
+                                                inspection.qc_remarks_con || ""
+                                              }
+                                              onChange={(e) =>
+                                                handleConsultantRemarksChange(
+                                                  spanIndex,
+                                                  workKind,
+                                                  inspection.inspection_id,
+                                                  e.target.value
+                                                )
+                                              }
+                                              className="mb-2"
+                                            />
+                                            <Form.Select
+                                              value={inspection.qc_con}
+                                              onChange={(e) =>
+                                                handleApprovedFlagChange(
+                                                  spanIndex,
+                                                  workKind,
+                                                  inspection.inspection_id,
+                                                  parseInt(e.target.value)
+                                                )
+                                              }
+                                              className="mb-2"
+                                            >
+                                              <option value={1}>
+                                                Select Status
+                                              </option>
+                                              <option value={3}>
+                                                Unapproved
+                                              </option>
+                                              <option value={2}>
+                                                Approved
+                                              </option>
+                                            </Form.Select>
+                                            <Button
+                                              onClick={() =>
+                                                handleSaveChanges(inspection)
+                                              }
+                                              className="bg-[#CFE2FF]"
+                                            >
+                                              Save Changes
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p>No data available</p>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
             </div>
           )}
-        </div>
 
-        <div className="col-md-6">
-          <strong>Parts:</strong> {inspection.PartsName || "N/A"} <br />
-          <strong>Material:</strong> {inspection.MaterialName || "N/A"} <br />
-          <strong>Damage:</strong> {inspection.DamageKindName || "N/A"} <br />
-          <strong>Level:</strong> {inspection.DamageLevel || "N/A"} <br />
-          <strong>Situation Remarks:</strong> {inspection.Remarks || "N/A"}
-        </div>
+          {activeDiv === "approved" && (
+            <div className="mb-4">
+              <h5>Approved Reports</h5>
+              {approvedData && Object.keys(approvedData).length > 0 ? (
+                Object.keys(approvedData).map((spanIndex) => (
+                  <div key={`span-${spanIndex}`} className="mb-4">
+                    <div
+                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                      onClick={() => toggleSection(spanIndex)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>Reports For Span: {spanIndex}</strong>
+                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                    </div>
+                    {expandedSections[spanIndex] && (
+                      <div className="mt-2">
+                        {Object.keys(approvedData[spanIndex]).length > 0 ? (
+                          Object.keys(approvedData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {approvedData[spanIndex][workKind].map(
+                                    (inspection) => (
+                                      <div
+                                        key={`inspection-${inspection.inspection_id}`}
+                                        className="border rounded p-4 shadow-sm mb-3"
+                                        style={{ backgroundColor: "#CFE2FF" }}
+                                      >
+                                        <div className="row">
+                                          <div className="col-md-3">
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
+                                              <div className="d-flex flex-wrap gap-2">
+                                                {inspection.PhotoPaths.map(
+                                                  (photo, i) => (
+                                                    <a
+                                                      key={`photo-${inspection.id}-${i}`}
+                                                      href={photo}
+                                                      data-fancybox="gallery"
+                                                      data-caption={`Photo ${
+                                                        i + 1
+                                                      }`}
+                                                    >
+                                                      <img
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                        }}
+                                                      />
+                                                    </a>
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="col-md-6">
+                                            <strong>Parts:</strong>{" "}
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Material:</strong>{" "}
+                                            {inspection.MaterialName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage:</strong>{" "}
+                                            {inspection.DamageKindName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Level:</strong>{" "}
+                                            {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
+                                            {inspection.Remarks || "N/A"}
+                                          </div>
+                                          <div className="col-md-3 d-flex flex-column justify-content-between">
+                                            <div className="text-start">
+                                              <strong>Remarks: </strong>
+                                              {inspection.qc_remarks_con ||
+                                                "N/A"}{" "}
+                                              <br />
+                                              <strong>Status: </strong>
+                                              {inspection.qc_con === 2
+                                                ? "Approved"
+                                                : "Unapproved"}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p>No data available</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p>No data available</p>
+              )}
+            </div>
+          )}
 
-        <div className="col-md-3 d-flex flex-column justify-content-between">
-          <Form.Control
-            as="input"
-            type="text"
-            placeholder="Consultant Remarks"
-            value={inspection.qc_remarks_con || ""}
-            onChange={(e) => handleConsultantRemarksChange(inspection.inspection_id, e.target.value)}
-            className="mb-2"
-          />
+          {activeDiv === "unapproved" && (
+            <div className="mb-4">
+              <h5>Unapproved Reports</h5>
 
-          <Form.Select
-            value={inspection.qc_con}
-            onChange={(e) => handleApprovedFlagChange(inspection.inspection_id, parseInt(e.target.value))}
-            className="mb-2"
-          >
-            <option value={1}>Select Status</option>
-            <option value={3}>Unapproved</option>
-            <option value={2}>Approved</option>
-          </Form.Select>
+              {unapprovedData && Object.keys(unapprovedData).length > 0 ? (
+                Object.keys(unapprovedData).map((spanIndex) => (
+                  <div key={`span-${spanIndex}`} className="mb-4">
+                    <div
+                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                      onClick={() => toggleSection(spanIndex)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>Reports For Span: {spanIndex}</strong>
+                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                    </div>
 
-          <Button
-            onClick={() => handleSaveChanges(inspection)}
-            value={inspection.reviewed_by}
-            className="bg-[#CFE2FF]"
-            disabled={inspection.reviewed_by === 1}
-          >
-            Save Changes
-          </Button>
+                    {expandedSections[spanIndex] && (
+                      <div className="mt-2">
+                        {Object.keys(unapprovedData[spanIndex]).length > 0 ? (
+                          Object.keys(unapprovedData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {unapprovedData[spanIndex][workKind].length >
+                                  0 ? (
+                                    unapprovedData[spanIndex][workKind].map(
+                                      (inspection) => (
+                                        <div
+                                          key={`inspection-${inspection.inspection_id}`}
+                                          className="border rounded p-4 shadow-sm mb-3"
+                                          style={{ backgroundColor: "#CFE2FF" }}
+                                        >
+                                          <div className="row">
+                                            <div className="col-md-3">
+                                              {inspection.PhotoPaths?.length >
+                                                0 && (
+                                                <div className="d-flex flex-wrap gap-2">
+                                                  {inspection.PhotoPaths.map(
+                                                    (photo, i) => (
+                                                      <a
+                                                        key={`photo-${inspection.id}-${i}`}
+                                                        href={photo}
+                                                        data-fancybox="gallery"
+                                                        data-caption={`Photo ${
+                                                          i + 1
+                                                        }`}
+                                                      >
+                                                        <img
+                                                          src={photo}
+                                                          alt={`Photo ${i + 1}`}
+                                                          className="img-fluid rounded border"
+                                                          style={{
+                                                            width: "80px",
+                                                            height: "80px",
+                                                            objectFit: "cover",
+                                                          }}
+                                                        />
+                                                      </a>
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <div className="col-md-6">
+                                              <strong>Parts:</strong>{" "}
+                                              {inspection.PartsName || "N/A"}{" "}
+                                              <br />
+                                              <strong>Material:</strong>{" "}
+                                              {inspection.MaterialName || "N/A"}{" "}
+                                              <br />
+                                              <strong>Damage:</strong>{" "}
+                                              {inspection.DamageKindName ||
+                                                "N/A"}{" "}
+                                              <br />
+                                              <strong>Level:</strong>{" "}
+                                              {inspection.DamageLevel || "N/A"}{" "}
+                                              <br />
+                                              <strong>
+                                                Situation Remarks:
+                                              </strong>{" "}
+                                              {inspection.Remarks || "N/A"}
+                                            </div>
+                                            <div className="col-md-3 d-flex flex-column justify-content-between">
+                                              <div className="text-start">
+                                                <strong>Remarks: </strong>{" "}
+                                                {inspection.qc_remarks_con ||
+                                                  "N/A"}{" "}
+                                                <br />
+                                                <strong>Status: </strong>{" "}
+                                                {inspection.qc_con === 2
+                                                  ? "Approved"
+                                                  : "Unapproved"}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    )
+                                  ) : (
+                                    <p>
+                                      No inspections available for this work
+                                      kind.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p>No work kinds available for this span.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p>No unapproved reports available.</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

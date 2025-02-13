@@ -766,7 +766,7 @@ app.get("/api/inspections", async (req, res) => {
 
 app.get("/api/get-inspections-new", async (req, res) => {
   try {
-    const { bridgeId } = req.query; // Get uu_bms_id from query parameters
+    const { bridgeId } = req.query;
 
     if (!bridgeId) {
       return res
@@ -942,58 +942,120 @@ app.get("/api/get-inspections-rams", async (req, res) => {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
     if (!bridgeId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "uu_bms_id is required" });
+      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
     }
 
-    const query = `
- SELECT 
-    uu_bms_id,
-    inspection_id,
-    qc_rams,
-    qc_remarks_rams,
-    qc_remarks_con,
-    reviewed_by,
-    bridge_name, 
-    "SpanIndex", 
-    "WorkKindName", 
-    "PartsName", 
-    "MaterialName", 
-    "DamageKindName", 
-    "DamageLevel", 
-    "Remarks", 
-    COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
-    "ApprovedFlag"
-FROM bms.tbl_inspection_f
-WHERE uu_bms_id = $1
-AND qc_con = '2'
-ORDER BY inspection_id DESC;
+    const pendingQuery = `
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_rams,
+        qc_remarks_rams,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      AND qc_con = '2'  -- Approved Consultant Inspections
+      AND qc_rams = '0' -- Pending RAMS Review
+      ORDER BY inspection_id DESC;
     `;
 
-    const { rows } = await pool.query(query, [bridgeId]);
+    const approvedQuery = `
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_rams,
+        qc_remarks_rams,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      AND qc_rams = '2'
+      ORDER BY inspection_id DESC;
+    `;
 
-    if (rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Inspection not found" });
-    }
+    const unapprovedQuery = `
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_rams,
+        qc_remarks_rams,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      AND qc_rams = '3'
+      ORDER BY inspection_id DESC;
+    `;
 
-    // Process the rows to extract paths from the JSON array
-    const modifiedRows = rows.map((row) => ({
+    const [pendingRows, approvedRows, unapprovedRows] = await Promise.all([
+      pool.query(pendingQuery, [bridgeId]),
+      pool.query(approvedQuery, [bridgeId]),
+      pool.query(unapprovedQuery, [bridgeId]),
+    ]);
+
+    const modifiedPendingRows = pendingRows.rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
+      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
-    res.status(200).json({ success: true, data: modifiedRows });
+    const modifiedApprovedRows = approvedRows.rows.map((row) => ({
+      ...row,
+      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+    }));
+
+    const modifiedUnapprovedRows = unapprovedRows.rows.map((row) => ({
+      ...row,
+      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: {
+        pending: modifiedPendingRows, // Now includes pending RAMS reviews
+        approved: modifiedApprovedRows,
+        unapproved: modifiedUnapprovedRows,
+      },
+    });
   } catch (error) {
-    console.error("Error fetching inspection data:", error);
+    console.error("Error fetching inspection data (RAMS):", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // Endpoint to update inspection data
 app.put("/api/update-inspection", async (req, res) => {

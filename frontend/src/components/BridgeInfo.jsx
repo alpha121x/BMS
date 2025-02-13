@@ -8,7 +8,7 @@ import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfo";
 import { useLocation, useNavigate } from "react-router-dom";
-import InspectionList from "./InspectionList_final";
+import InspectionList from "./InspectionList";
 import InspectionListRams from "./InspectionListRams";
 
 const BridgeInfo = () => {

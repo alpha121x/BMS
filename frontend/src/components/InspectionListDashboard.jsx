@@ -44,7 +44,7 @@ const InspectionList = ({ bridgeId }) => {
       }
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-inspections-new?bridgeId=${bridgeId}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch data");
