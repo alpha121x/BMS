@@ -147,7 +147,12 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleConsultantRemarksChange = (spanIndex, workKind, inspectionId, value) => {
+  const handleConsultantRemarksChange = (
+    spanIndex,
+    workKind,
+    inspectionId,
+    value
+  ) => {
     setPendingData((prevData) => ({
       ...prevData,
       [spanIndex]: {
@@ -160,19 +165,25 @@ const InspectionList = ({ bridgeId }) => {
       },
     }));
   };
-  
-  const handleApprovedFlagChange = (spanIndex, workKind, inspectionId, value) => {
+
+  const handleApprovedFlagChange = (
+    spanIndex,
+    workKind,
+    inspectionId,
+    value
+  ) => {
     setPendingData((prevData) => ({
       ...prevData,
       [spanIndex]: {
         ...prevData[spanIndex],
         [workKind]: prevData[spanIndex][workKind].map((item) =>
-          item.inspection_id === inspectionId ? { ...item, qc_con: value } : item
+          item.inspection_id === inspectionId
+            ? { ...item, qc_con: value }
+            : item
         ),
       },
     }));
   };
-  
 
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
@@ -501,7 +512,6 @@ const InspectionList = ({ bridgeId }) => {
                                                   e.target.value
                                                 )
                                               }
-                                              
                                               className="mb-2"
                                             />
                                             <Form.Select
@@ -513,7 +523,7 @@ const InspectionList = ({ bridgeId }) => {
                                                   inspection.inspection_id,
                                                   parseInt(e.target.value)
                                                 )
-                                              }                                              
+                                              }
                                               className="mb-2"
                                             >
                                               <option value={1}>
@@ -553,123 +563,101 @@ const InspectionList = ({ bridgeId }) => {
             </div>
           )}
 
-          {activeDiv === "approved" && (
-            <div className="mb-4">
-              <h5>Approved Reports</h5>
-              {approvedData &&
-                Object.keys(approvedData).map((spanIndex) => (
-                  <div key={`span-${spanIndex}`} className="mb-4">
-                    <div
-                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                      onClick={() => toggleSection(spanIndex)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <strong>Reports For Span: {spanIndex}</strong>
-                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+{activeDiv === "approved" && (
+  <div className="mb-4">
+    <h5>Approved Reports</h5>
+    {approvedData && Object.keys(approvedData).length > 0 ? (
+      Object.keys(approvedData).map((spanIndex) => (
+        <div key={`span-${spanIndex}`} className="mb-4">
+          <div
+            className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+            onClick={() => toggleSection(spanIndex)}
+            style={{ cursor: "pointer" }}
+          >
+            <strong>Reports For Span: {spanIndex}</strong>
+            <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+          </div>
+          {expandedSections[spanIndex] && (
+            <div className="mt-2">
+              {Object.keys(approvedData[spanIndex]).length > 0 ? (
+                Object.keys(approvedData[spanIndex]).map((workKind) => (
+                  <div key={`workKind-${spanIndex}-${workKind}`} className="mb-4">
+                    <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                      {workKind}
                     </div>
-                    {expandedSections[spanIndex] ? (
-                      <div className="mt-2">
-                        {Object.keys(approvedData[spanIndex]).length > 0 ? (
-                          Object.keys(approvedData[spanIndex]).map(
-                            (workKind) => (
-                              <div
-                                key={`workKind-${spanIndex}-${workKind}`}
-                                className="mb-4"
-                              >
-                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                                  {workKind}
+                    <div className="mt-2">
+                      {approvedData[spanIndex][workKind].map((inspection) => (
+                        <div
+                          key={`inspection-${inspection.inspection_id}`}
+                          className="border rounded p-4 shadow-sm mb-3"
+                          style={{ backgroundColor: "#CFE2FF" }}
+                        >
+                          <div className="row">
+                            <div className="col-md-3">
+                              {inspection.PhotoPaths?.length > 0 && (
+                                <div className="d-flex flex-wrap gap-2">
+                                  {inspection.PhotoPaths.map((photo, i) => (
+                                    <a
+                                      key={`photo-${inspection.id}-${i}`}
+                                      href={photo}
+                                      data-fancybox="gallery"
+                                      data-caption={`Photo ${i + 1}`}
+                                    >
+                                      <img
+                                        src={photo}
+                                        alt={`Photo ${i + 1}`}
+                                        className="img-fluid rounded border"
+                                        style={{
+                                          width: "80px",
+                                          height: "80px",
+                                          objectFit: "cover",
+                                        }}
+                                      />
+                                    </a>
+                                  ))}
                                 </div>
-                                <div className="mt-2">
-                                  {approvedData[spanIndex][workKind].map(
-                                    (inspection) => (
-                                      <div
-                                        key={`inspection-${inspection.inspection_id}`}
-                                        className="border rounded p-4 shadow-sm mb-3"
-                                        style={{ backgroundColor: "#CFE2FF" }}
-                                      >
-                                        <div className="row">
-                                          <div className="col-md-3">
-                                            {inspection.PhotoPaths?.length >
-                                              0 && (
-                                              <div className="d-flex flex-wrap gap-2">
-                                                {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
-                                                    <a
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      href={photo}
-                                                      data-fancybox="gallery"
-                                                      data-caption={`Photo ${
-                                                        i + 1
-                                                      }`}
-                                                    >
-                                                      <img
-                                                        src={photo}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="img-fluid rounded border"
-                                                        style={{
-                                                          width: "80px",
-                                                          height: "80px",
-                                                          objectFit: "cover",
-                                                        }}
-                                                      />
-                                                    </a>
-                                                  )
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
-                                          <div className="col-md-6">
-                                            <strong>Parts:</strong>{" "}
-                                            {inspection.PartsName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Material:</strong>{" "}
-                                            {inspection.MaterialName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Damage:</strong>{" "}
-                                            {inspection.DamageKindName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Level:</strong>{" "}
-                                            {inspection.DamageLevel || "N/A"}{" "}
-                                            <br />
-                                            <strong>
-                                              Situation Remarks:
-                                            </strong>{" "}
-                                            {inspection.Remarks || "N/A"}
-                                          </div>
-                                          <div className="col-md-3 d-flex flex-column justify-content-between">
-                                            <div className="text-start">
-                                              <strong>Remarks: </strong>
-                                              {inspection.qc_remarks_con ||
-                                                "N/A"}{" "}
-                                              <br />
-                                              <strong>Status: </strong>
-                                              {inspection.qc_con === 2
-                                                ? "Approved"
-                                                : "Unapproved"}
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    )
-                                  )}
-                                </div>
+                              )}
+                            </div>
+                            <div className="col-md-6">
+                              <strong>Parts:</strong> {inspection.PartsName || "N/A"} <br />
+                              <strong>Material:</strong> {inspection.MaterialName || "N/A"} <br />
+                              <strong>Damage:</strong> {inspection.DamageKindName || "N/A"} <br />
+                              <strong>Level:</strong> {inspection.DamageLevel || "N/A"} <br />
+                              <strong>Situation Remarks:</strong> {inspection.Remarks || "N/A"}
+                            </div>
+                            <div className="col-md-3 d-flex flex-column justify-content-between">
+                              <div className="text-start">
+                                <strong>Remarks: </strong>
+                                {inspection.qc_remarks_con || "N/A"} <br />
+                                <strong>Status: </strong>
+                                {inspection.qc_con === 2 ? "Approved" : "Unapproved"}
                               </div>
-                            )
-                          )
-                        ) : (
-                          <p>No data available</p>
-                        )}
-                      </div>
-                    ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                ))
+              ) : (
+                <p>No data available</p>
+              )}
             </div>
           )}
+        </div>
+      ))
+    ) : (
+      <p>No data available</p>
+    )}
+  </div>
+)}
+ 
 
           {activeDiv === "unapproved" && (
             <div className="mb-4">
               <h5>Unapproved Reports</h5>
-              {unapprovedData &&
+
+              {unapprovedData && Object.keys(unapprovedData).length > 0 ? (
                 Object.keys(unapprovedData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
                     <div
@@ -680,7 +668,8 @@ const InspectionList = ({ bridgeId }) => {
                       <strong>Reports For Span: {spanIndex}</strong>
                       <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                     </div>
-                    {expandedSections[spanIndex] ? (
+
+                    {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(unapprovedData[spanIndex]).length > 0 ? (
                           Object.keys(unapprovedData[spanIndex]).map(
@@ -693,89 +682,101 @@ const InspectionList = ({ bridgeId }) => {
                                   {workKind}
                                 </div>
                                 <div className="mt-2">
-                                  {unapprovedData[spanIndex][workKind].map(
-                                    (inspection) => (
-                                      <div
-                                        key={`inspection-${inspection.inspection_id}`}
-                                        className="border rounded p-4 shadow-sm mb-3"
-                                        style={{ backgroundColor: "#CFE2FF" }}
-                                      >
-                                        <div className="row">
-                                          <div className="col-md-3">
-                                            {inspection.PhotoPaths?.length >
-                                              0 && (
-                                              <div className="d-flex flex-wrap gap-2">
-                                                {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
-                                                    <a
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      href={photo}
-                                                      data-fancybox="gallery"
-                                                      data-caption={`Photo ${
-                                                        i + 1
-                                                      }`}
-                                                    >
-                                                      <img
-                                                        src={photo}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="img-fluid rounded border"
-                                                        style={{
-                                                          width: "80px",
-                                                          height: "80px",
-                                                          objectFit: "cover",
-                                                        }}
-                                                      />
-                                                    </a>
-                                                  )
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
-                                          <div className="col-md-6">
-                                            <strong>Parts:</strong>{" "}
-                                            {inspection.PartsName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Material:</strong>{" "}
-                                            {inspection.MaterialName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Damage:</strong>{" "}
-                                            {inspection.DamageKindName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Level:</strong>{" "}
-                                            {inspection.DamageLevel || "N/A"}{" "}
-                                            <br />
-                                            <strong>
-                                              Situation Remarks:
-                                            </strong>{" "}
-                                            {inspection.Remarks || "N/A"}
-                                          </div>
-                                          <div className="col-md-3 d-flex flex-column justify-content-between">
-                                            <div className="text-start">
-                                              <strong>Remarks: </strong>
-                                              {inspection.qc_remarks_con ||
+                                  {unapprovedData[spanIndex][workKind].length >
+                                  0 ? (
+                                    unapprovedData[spanIndex][workKind].map(
+                                      (inspection) => (
+                                        <div
+                                          key={`inspection-${inspection.inspection_id}`}
+                                          className="border rounded p-4 shadow-sm mb-3"
+                                          style={{ backgroundColor: "#CFE2FF" }}
+                                        >
+                                          <div className="row">
+                                            <div className="col-md-3">
+                                              {inspection.PhotoPaths?.length >
+                                                0 && (
+                                                <div className="d-flex flex-wrap gap-2">
+                                                  {inspection.PhotoPaths.map(
+                                                    (photo, i) => (
+                                                      <a
+                                                        key={`photo-${inspection.id}-${i}`}
+                                                        href={photo}
+                                                        data-fancybox="gallery"
+                                                        data-caption={`Photo ${
+                                                          i + 1
+                                                        }`}
+                                                      >
+                                                        <img
+                                                          src={photo}
+                                                          alt={`Photo ${i + 1}`}
+                                                          className="img-fluid rounded border"
+                                                          style={{
+                                                            width: "80px",
+                                                            height: "80px",
+                                                            objectFit: "cover",
+                                                          }}
+                                                        />
+                                                      </a>
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <div className="col-md-6">
+                                              <strong>Parts:</strong>{" "}
+                                              {inspection.PartsName || "N/A"}{" "}
+                                              <br />
+                                              <strong>Material:</strong>{" "}
+                                              {inspection.MaterialName || "N/A"}{" "}
+                                              <br />
+                                              <strong>Damage:</strong>{" "}
+                                              {inspection.DamageKindName ||
                                                 "N/A"}{" "}
                                               <br />
-                                              <strong>Status: </strong>
-                                              {inspection.qc_con === 2
-                                                ? "Approved"
-                                                : "Unapproved"}
+                                              <strong>Level:</strong>{" "}
+                                              {inspection.DamageLevel || "N/A"}{" "}
+                                              <br />
+                                              <strong>
+                                                Situation Remarks:
+                                              </strong>{" "}
+                                              {inspection.Remarks || "N/A"}
+                                            </div>
+                                            <div className="col-md-3 d-flex flex-column justify-content-between">
+                                              <div className="text-start">
+                                                <strong>Remarks: </strong>{" "}
+                                                {inspection.qc_remarks_con ||
+                                                  "N/A"}{" "}
+                                                <br />
+                                                <strong>Status: </strong>{" "}
+                                                {inspection.qc_con === 2
+                                                  ? "Approved"
+                                                  : "Unapproved"}
+                                              </div>
                                             </div>
                                           </div>
                                         </div>
-                                      </div>
+                                      )
                                     )
+                                  ) : (
+                                    <p>
+                                      No inspections available for this work
+                                      kind.
+                                    </p>
                                   )}
                                 </div>
                               </div>
                             )
                           )
                         ) : (
-                          <p>No data available</p>
+                          <p>No work kinds available for this span.</p>
                         )}
                       </div>
-                    ) : null}
+                    )}
                   </div>
-                ))}
+                ))
+              ) : (
+                <p>No unapproved reports available.</p>
+              )}
             </div>
           )}
         </div>
