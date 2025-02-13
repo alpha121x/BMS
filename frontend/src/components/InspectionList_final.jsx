@@ -11,8 +11,10 @@ import { Fancybox } from "@fancyapps/ui";
 import Swal from "sweetalert2";
 
 const InspectionList = ({ bridgeId }) => {
-  const [inspectiondata, setInspectionData] = useState([]);
-  const [summaryData, setSummaryData] = useState([]);
+  const [pendingData, setPendingData] = useState([]);
+  const [approvedData, setApprovedData] = useState([]);
+  const [unapprovedData, setUnapprovedData] = useState([]);
+  const [summaryData, setsummaryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
@@ -21,7 +23,7 @@ const InspectionList = ({ bridgeId }) => {
   useEffect(() => {
     if (bridgeId) {
       fetchData();
-      fetchSummaryData();
+      fetchsummaryData();
     }
   }, [bridgeId]);
 
@@ -35,15 +37,32 @@ const InspectionList = ({ bridgeId }) => {
     setError(null);
     try {
       if (!bridgeId) throw new Error("bridgeId is required");
-
+  
       const response = await fetch(
         `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
-
+  
       const result = await response.json();
-      if (Array.isArray(result.data)) {
-        setInspectionData(result.data);
+      if (result.success) {
+        // Generalized function for grouping
+        const groupBySpanAndWorkKind = (data) => {
+          return data.reduce((acc, item) => {
+            const spanKey = item.SpanIndex || "N/A";
+            const workKindKey = item.WorkKindName || "N/A";
+  
+            if (!acc[spanKey]) acc[spanKey] = {};
+            if (!acc[spanKey][workKindKey]) acc[spanKey][workKindKey] = [];
+  
+            acc[spanKey][workKindKey].push(item);
+            return acc;
+          }, {});
+        };
+  
+        // Grouping the data separately
+        setPendingData(groupBySpanAndWorkKind(result.data.pending));
+        setApprovedData(groupBySpanAndWorkKind(result.data.approved));
+        setUnapprovedData(groupBySpanAndWorkKind(result.data.unapproved));
       } else {
         throw new Error("Invalid data format");
       }
@@ -53,8 +72,9 @@ const InspectionList = ({ bridgeId }) => {
       setLoading(false);
     }
   }, [bridgeId]);
+  
 
-  const fetchSummaryData = useCallback(async () => {
+  const fetchsummaryData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -67,7 +87,7 @@ const InspectionList = ({ bridgeId }) => {
 
       const result = await response.json();
       if (Array.isArray(result.data)) {
-        setSummaryData(result.data);
+        setsummaryData(result.data);
       } else {
         throw new Error("Invalid data format");
       }
@@ -129,7 +149,7 @@ const InspectionList = ({ bridgeId }) => {
   };
 
   const handleConsultantRemarksChange = (inspectionId, value) => {
-    setInspectionData((prevData) =>
+    setsummaryData((prevData) =>
       prevData.map((item) =>
         item.inspection_id === inspectionId
           ? { ...item, qc_remarks_con: value }
@@ -139,7 +159,7 @@ const InspectionList = ({ bridgeId }) => {
   };
 
   const handleApprovedFlagChange = (inspectionId, value) => {
-    setInspectionData((prevData) =>
+    setsummaryData((prevData) =>
       prevData.map((item) =>
         item.inspection_id === inspectionId ? { ...item, qc_con: value } : item
       )
@@ -167,16 +187,16 @@ const InspectionList = ({ bridgeId }) => {
         return;
       }
 
-      const inspectiondata = data.bridges;
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
 
-      const headers = Object.keys(inspectiondata[0]);
+      const headers = Object.keys(summaryData[0]);
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
           headers.join(","),
-          ...inspectiondata.map((row) =>
+          ...summaryData.map((row) =>
             headers
               .map((key) =>
                 String(row[key]).includes(",")
@@ -217,11 +237,11 @@ const InspectionList = ({ bridgeId }) => {
         return;
       }
 
-      const inspectiondata = data.bridges;
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
 
-      const ws = XLSX.utils.json_to_sheet(inspectiondata);
-      ws["!cols"] = Object.keys(inspectiondata[0]).map(() => ({ width: 20 }));
+      const ws = XLSX.utils.json_to_sheet(summaryData);
+      ws["!cols"] = Object.keys(summaryData[0]).map(() => ({ width: 20 }));
 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inspections");
@@ -253,24 +273,6 @@ const InspectionList = ({ bridgeId }) => {
     const uniqueSpanIndices = [...new Set(spanIndices)];
     return uniqueSpanIndices.length;
   };
-
-  const groupedData = useMemo(() => {
-    return inspectiondata.reduce((acc, row) => {
-      const spanKey = row.SpanIndex || "N/A";
-      const workKindKey = row.WorkKindName || "N/A";
-
-      if (!acc[spanKey]) {
-        acc[spanKey] = {};
-      }
-
-      if (!acc[spanKey][workKindKey]) {
-        acc[spanKey][workKindKey] = [];
-      }
-
-      acc[spanKey][workKindKey].push(row);
-      return acc;
-    }, {});
-  }, [inspectiondata]);
 
   const handleDivChange = (div) => {
     setActiveDiv(div);
@@ -392,7 +394,7 @@ const InspectionList = ({ bridgeId }) => {
         </div>
         <div className="border rounded p-3 shadow-lg mt-2">
           {/* Reports Section */}
-          {activeDiv === 1 && (
+          {activeDiv === "pending" && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
               {pendingData &&
@@ -560,7 +562,7 @@ const InspectionList = ({ bridgeId }) => {
             </div>
           )}
 
-          {activeDiv === 2 && (
+          {activeDiv === "approved" && (
             <div className="mb-4">
               <h5>Approved Reports</h5>
               {approvedData &&
@@ -673,7 +675,7 @@ const InspectionList = ({ bridgeId }) => {
             </div>
           )}
 
-          {activeDiv === 3 && (
+          {activeDiv === "unapproved" && (
             <div className="mb-4">
               <h5>Unapproved Reports</h5>
               {unapprovedData &&
