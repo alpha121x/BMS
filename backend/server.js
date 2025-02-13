@@ -270,14 +270,7 @@ app.get("/api/structure-counts", async (req, res) => {
       ORDER BY count DESC;
     `);
 
-    // 2. Count of records where construction_type contains 'Arch'
-    const totalArchCount = await pool.query(`
-      SELECT COUNT(*) AS total_count
-      FROM bms.tbl_bms_master_data
-      WHERE construction_type ILIKE '%Arch%';
-    `);
-
-    // 3. Total count of all records (for structure_type)
+    // 2. Total count of all records (for structure_type)
     const totalStructureCount = await pool.query(`
       SELECT COUNT(*) AS total_count
       FROM bms.tbl_bms_master_data;
@@ -287,7 +280,6 @@ app.get("/api/structure-counts", async (req, res) => {
     res.json({
       structureTypeCounts: structureTypeCounts.rows,
       totalStructureCount: totalStructureCount.rows[0].total_count,
-      totalArchCount: totalArchCount.rows[0].total_count,
     });
   } catch (err) {
     console.error("Error executing query", err.stack);

@@ -8,6 +8,7 @@ import { FaRoadBridge } from "react-icons/fa6";
 import { GiArchBridge } from "react-icons/gi";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
+import { BASE_URL } from "./config";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -29,6 +30,7 @@ const DashboardMain = () => {
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
+  const [structureCards, setStructureCards] = useState([]);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -51,39 +53,49 @@ const DashboardMain = () => {
   };
 
 
-  // Data for Structure cards
-  const structureCards = [
-    {
-      label: "Total",
-      value: "42,830",
-      icon: <SiInstructure />,
-      color: "blue",
-    },
-    {
-      label: "Culvert",
-      value: "37,307",
-      icon: <LuConstruction />, // Wrench for construction/maintenance
-      color: "blue",
-    },
-    {
-      label: "PC Bridge",
-      value: "5,515",
-      icon: <FaBridge />      , // Building Office Icon, representing large structures like bridges
-      color: "blue",
-    },
-    // {
-    //   label: "Arch",
-    //   value: "27",
-    //   icon: <GiArchBridge />, // Document icon to represent an architectural design
-    //   color: "blue",
-    // },
-    {
-      label: "Underpass",
-      value: "8",
-      icon: < FaRoadBridge />, // Home icon representing an underpass construction type
-      color: "blue",
-    },
-  ];
+  useEffect(() => {
+    // Fetch data from API
+    fetch(`${BASE_URL}/api/structure-counts`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Extract total structure count
+        const totalCount = data.totalStructureCount || "N/A";
+
+        // Map the response to the expected format
+        const structureMap = {
+          CULVERT: {
+            label: "Culvert",
+            icon: <LuConstruction />,
+          },
+          BRIDGE: {
+            label: "PC Bridge",
+            icon: <FaBridge />,
+          },
+          UNDERPASS: {
+            label: "Underpass",
+            icon: <FaRoadBridge />,
+          },
+        };
+
+        const mappedCards = data.structureTypeCounts.map((item) => ({
+          label: structureMap[item.structure_type]?.label || item.structure_type,
+          value: item.count || "N/A",
+          icon: structureMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
+          color: "blue",
+        }));
+
+        // Add total count card
+        mappedCards.unshift({
+          label: "Total",
+          value: totalCount,
+          icon: <SiInstructure />,
+          color: "blue",
+        });
+
+        setStructureCards(mappedCards);
+      })
+      .catch((error) => console.error("Error fetching structure data:", error));
+  }, []);
 
   // Data for Evaluation cards
   const inspectedCards = [
