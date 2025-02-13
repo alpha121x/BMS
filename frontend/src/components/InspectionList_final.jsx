@@ -37,12 +37,12 @@ const InspectionList = ({ bridgeId }) => {
     setError(null);
     try {
       if (!bridgeId) throw new Error("bridgeId is required");
-  
+
       const response = await fetch(
         `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
-  
+
       const result = await response.json();
       if (result.success) {
         // Generalized function for grouping
@@ -50,15 +50,15 @@ const InspectionList = ({ bridgeId }) => {
           return data.reduce((acc, item) => {
             const spanKey = item.SpanIndex || "N/A";
             const workKindKey = item.WorkKindName || "N/A";
-  
+
             if (!acc[spanKey]) acc[spanKey] = {};
             if (!acc[spanKey][workKindKey]) acc[spanKey][workKindKey] = [];
-  
+
             acc[spanKey][workKindKey].push(item);
             return acc;
           }, {});
         };
-  
+
         // Grouping the data separately
         setPendingData(groupBySpanAndWorkKind(result.data.pending));
         setApprovedData(groupBySpanAndWorkKind(result.data.approved));
@@ -72,7 +72,6 @@ const InspectionList = ({ bridgeId }) => {
       setLoading(false);
     }
   }, [bridgeId]);
-  
 
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
@@ -148,23 +147,32 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleConsultantRemarksChange = (inspectionId, value) => {
-    setsummaryData((prevData) =>
-      prevData.map((item) =>
-        item.inspection_id === inspectionId
-          ? { ...item, qc_remarks_con: value }
-          : item
-      )
-    );
+  const handleConsultantRemarksChange = (spanIndex, workKind, inspectionId, value) => {
+    setPendingData((prevData) => ({
+      ...prevData,
+      [spanIndex]: {
+        ...prevData[spanIndex],
+        [workKind]: prevData[spanIndex][workKind].map((item) =>
+          item.inspection_id === inspectionId
+            ? { ...item, qc_remarks_con: value }
+            : item
+        ),
+      },
+    }));
   };
-
-  const handleApprovedFlagChange = (inspectionId, value) => {
-    setsummaryData((prevData) =>
-      prevData.map((item) =>
-        item.inspection_id === inspectionId ? { ...item, qc_con: value } : item
-      )
-    );
+  
+  const handleApprovedFlagChange = (spanIndex, workKind, inspectionId, value) => {
+    setPendingData((prevData) => ({
+      ...prevData,
+      [spanIndex]: {
+        ...prevData[spanIndex],
+        [workKind]: prevData[spanIndex][workKind].map((item) =>
+          item.inspection_id === inspectionId ? { ...item, qc_con: value } : item
+        ),
+      },
+    }));
   };
+  
 
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
@@ -478,71 +486,54 @@ const InspectionList = ({ bridgeId }) => {
                                             {inspection.Remarks || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
-                                            {inspection.reviewed_by === 0 ? (
-                                              <>
-                                                <Form.Control
-                                                  as="input"
-                                                  type="text"
-                                                  placeholder="Consultant Remarks"
-                                                  value={
-                                                    inspection.qc_remarks_con ||
-                                                    ""
-                                                  }
-                                                  onChange={(e) =>
-                                                    handleConsultantRemarksChange(
-                                                      inspection.inspection_id,
-                                                      e.target.value
-                                                    )
-                                                  }
-                                                  className="mb-2"
-                                                />
-                                                <Form.Select
-                                                  value={inspection.qc_con}
-                                                  onChange={(e) =>
-                                                    handleApprovedFlagChange(
-                                                      inspection.inspection_id,
-                                                      parseInt(e.target.value)
-                                                    )
-                                                  }
-                                                  className="mb-2"
-                                                >
-                                                  <option value={1}>
-                                                    Select Status
-                                                  </option>
-                                                  <option value={3}>
-                                                    Unapproved
-                                                  </option>
-                                                  <option value={2}>
-                                                    Approved
-                                                  </option>
-                                                </Form.Select>
-                                                <Button
-                                                  onClick={() =>
-                                                    handleSaveChanges(
-                                                      inspection
-                                                    )
-                                                  }
-                                                  value={inspection.reviewed_by}
-                                                  className="bg-[#CFE2FF]"
-                                                  disabled={
-                                                    inspection.reviewed_by === 1
-                                                  }
-                                                >
-                                                  Save Changes
-                                                </Button>
-                                              </>
-                                            ) : (
-                                              <div className="text-start">
-                                                <strong>Remarks: </strong>
-                                                {inspection.qc_remarks_con ||
-                                                  "N/A"}{" "}
-                                                <br />
-                                                <strong>Status: </strong>
-                                                {inspection.qc_con === 2
-                                                  ? "Approved"
-                                                  : "Unapproved"}
-                                              </div>
-                                            )}
+                                            <Form.Control
+                                              as="input"
+                                              type="text"
+                                              placeholder="Consultant Remarks"
+                                              value={
+                                                inspection.qc_remarks_con || ""
+                                              }
+                                              onChange={(e) =>
+                                                handleConsultantRemarksChange(
+                                                  spanIndex,
+                                                  workKind,
+                                                  inspection.inspection_id,
+                                                  e.target.value
+                                                )
+                                              }
+                                              
+                                              className="mb-2"
+                                            />
+                                            <Form.Select
+                                              value={inspection.qc_con}
+                                              onChange={(e) =>
+                                                handleApprovedFlagChange(
+                                                  spanIndex,
+                                                  workKind,
+                                                  inspection.inspection_id,
+                                                  parseInt(e.target.value)
+                                                )
+                                              }                                              
+                                              className="mb-2"
+                                            >
+                                              <option value={1}>
+                                                Select Status
+                                              </option>
+                                              <option value={3}>
+                                                Unapproved
+                                              </option>
+                                              <option value={2}>
+                                                Approved
+                                              </option>
+                                            </Form.Select>
+                                            <Button
+                                              onClick={() =>
+                                                handleSaveChanges(inspection)
+                                              }
+                                              className="bg-[#CFE2FF]"
+                                            >
+                                              Save Changes
+                                            </Button>
                                           </div>
                                         </div>
                                       </div>
