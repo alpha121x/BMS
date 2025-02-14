@@ -890,42 +890,38 @@ app.get("/api/bridgesNew", async (req, res) => {
 app.get("/api/inspections", async (req, res) => {
   try {
     const query = `
-    SELECT 
-      bridge_name, "SpanIndex", "WorkKindName", "PartsName", "MaterialName", 
-      "DamageKindName", "DamageLevel", 
-      "Remarks", "photopath", "ApprovedFlag"
-    FROM bms.tbl_inspection_f;
-  `;
-  
-  const { rows } = await pool.query(query);
-  
-  // Map over the rows to handle data manipulation
-  const modifiedRows = rows.map((row) => {
-    let photoPaths = [];
-  
-    // Check if photopath exists and try parsing it
-    if (row.photopath) {
-      try {
-        const parsed = JSON.parse(row.photopath);
-        photoPaths = Array.isArray(parsed) ? parsed.map((p) => p.path) : [];
-      } catch (error) {
-        console.error("Error parsing photopath:", error);
-      }
-    }
-  
-    return {
-      ...row,
-      photopath: photoPaths,
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    };
-  });
-  
+      SELECT 
+        bmd."pms_sec_id", 
+        bmd."structure_no",
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, -- Combine for bridge_name
+        ins."SpanIndex", ins."WorkKindName", ins."PartsName", ins."MaterialName", 
+        ins."DamageKindName", ins."DamageLevel", 
+        ins."Remarks", ins."inspection_images", ins."ApprovedFlag"
+      FROM bms.tbl_inspection_f AS ins
+      JOIN bms.tbl_bms_master_data AS bmd 
+      ON ins."uu_bms_id" = bmd."uu_bms_id"
+      WHERE ins.surveyed_by = 'RAMS-UU';
+    `;
+
+    const { rows } = await pool.query(query);
+
+    const modifiedRows = rows.map((row) => {
+      return {
+        ...row,
+        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+        inspection_images: row.inspection_images 
+          ? row.inspection_images.split(",") // Convert to array
+          : [], // Default to empty array if null
+      };
+    });
+
     res.json({ success: true, data: modifiedRows });
   } catch (error) {
     console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 app.get("/api/get-inspections-new", async (req, res) => {
   try {
