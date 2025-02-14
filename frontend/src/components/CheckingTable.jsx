@@ -72,7 +72,7 @@ const CheckingTable = () => {
   const handleDownloadCSV = () => {
     const csvData = Papa.unparse(tableData); // Convert table data to CSV format
 
-    const bridgeName = tableData[0]?.bridge_name || 'Bridge';
+    const bridgeName = tableData[0]?.bridge_name || "Bridge";
 
     // Create a hidden link element to trigger the download
     const link = document.createElement("a");
@@ -182,9 +182,10 @@ const CheckingTable = () => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">
-          Bridge Inspections
-        </h6>
+        <div className="text-2xl font-bold">Bridges Inspections</div>
+        <div className="text-sm font-medium mt-1 text-gray-700 mb-1">
+          Total Records: {tableData.length || 0}
+        </div>
 
         {/* Download CSV Button */}
         <Button
@@ -234,7 +235,11 @@ const CheckingTable = () => {
                   <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
-                  <td>{row.ApprovedFlag === 0 ? "Unapproved" : row.ApprovedFlag || "N/A"}</td>
+                  <td>
+                    {row.ApprovedFlag === 0
+                      ? "Unapproved"
+                      : row.ApprovedFlag || "N/A"}
+                  </td>
                   <td>
                     <Button
                       onClick={() => handleViewClick(row)}

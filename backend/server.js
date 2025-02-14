@@ -744,7 +744,7 @@ app.get("/api/bridgesNew", async (req, res) => {
     } = req.query;
 
     let query = `
-     SELECT 
+SELECT 
         uu_bms_id, surveyed_by,
         pms_sec_id, 
         structure_no, 
@@ -785,7 +785,7 @@ app.get("/api/bridgesNew", async (req, res) => {
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data
       WHERE 1=1
-      AND 
+      AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
     `;
 
     const queryParams = [];
@@ -909,7 +909,7 @@ app.get("/api/inspections", async (req, res) => {
       return {
         ...row,
         ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-        inspection_images: row.inspection_images 
+        inspection_images: row.inspection_images
           ? row.inspection_images.split(",") // Convert to array
           : [], // Default to empty array if null
       };
@@ -921,7 +921,6 @@ app.get("/api/inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 app.get("/api/get-inspections-new", async (req, res) => {
   try {
@@ -1066,19 +1065,25 @@ app.get("/api/get-inspections", async (req, res) => {
 
     const modifiedPendingRows = pendingRows.rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
     const modifiedApprovedRows = approvedRows.rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
     const modifiedUnapprovedRows = unapprovedRows.rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
@@ -1101,7 +1106,9 @@ app.get("/api/get-inspections-rams", async (req, res) => {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
     if (!bridgeId) {
-      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
     }
 
     const pendingQuery = `
@@ -1185,19 +1192,25 @@ app.get("/api/get-inspections-rams", async (req, res) => {
 
     const modifiedPendingRows = pendingRows.rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
     const modifiedApprovedRows = approvedRows.rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
     const modifiedUnapprovedRows = unapprovedRows.rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths) ? row.PhotoPaths.map((p) => p.path) : [],
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 

@@ -98,38 +98,38 @@ const DashboardMain = () => {
   }, []);
 
   // Data for Evaluation cards
-  const inspectedCards = [
-    {
-      label: "Total",
-      value: "1,511",
-      icon: <SiInstructure />,
-      color: "blue",
-    },
-    {
-      label: "Culvert",
-      value: "1,102",
-      icon: <LuConstruction />,
-      color: "blue",
-    },
-    {
-      label: "PC Bridge",
-      value: "347",
-      icon: <FaBridge />      ,
-      color: "blue",
-    },
-    // {
-    //   label: "Arch",
-    //   value: "4",
-    //   icon: <GiArchBridge />,
-    //   color: "blue",
-    // },
-    {
-      label: "Underpass",
-      value: "1",
-      icon: < FaRoadBridge />,
-      color: "blue",
-    },
-  ];
+   const inspectedCards = [
+     {
+       label: "Total",
+       value: "1,526",
+       icon: <SiInstructure />,
+       color: "blue",
+     },
+     {
+       label: "Culvert",
+       value: "774",
+       icon: <LuConstruction />,
+       color: "blue",
+     },
+     {
+       label: "PC Bridge",
+       value: "751",
+       icon: <FaBridge />,
+       color: "blue",
+     },
+     // {
+     //   label: "Arch",
+     //   value: "4",
+     //   icon: <GiArchBridge />,
+     //   color: "blue",
+     // },
+     {
+       label: "Underpass",
+       value: "1",
+       icon: <FaRoadBridge />,
+       color: "blue",
+     },
+   ];
 
   // Card Component with dynamic border color
   const Card = ({ label, value, icon, iconSize = 32 }) => (

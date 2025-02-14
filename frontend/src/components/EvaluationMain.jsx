@@ -47,19 +47,19 @@ const EvaluationMain = () => {
   const inspectedCards = [
     {
       label: "Total",
-      value: "1,511",
+      value: "1,526",
       icon: <SiInstructure />,
       color: "blue",
     },
     {
       label: "Culvert",
-      value: "1,102",
+      value: "774",
       icon: <LuConstruction />,
       color: "blue",
     },
     {
       label: "PC Bridge",
-      value: "347",
+      value: "751",
       icon: <FaBridge />,
       color: "blue",
     },
