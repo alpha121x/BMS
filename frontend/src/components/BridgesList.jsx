@@ -69,7 +69,7 @@ const BridgesList = ({
       const set = (page - 1) * limit;
 
       // Construct the URL with filters
-      const url = new URL(`${BASE_URL}/api/bridges`);
+      const url = new URL(`${BASE_URL}/api/bridgesNew`);
       const params = {
         set,
         limit,
@@ -85,7 +85,7 @@ const BridgesList = ({
         maxSpanLength,
         minYear,
         maxYear,
-        bridge,
+        bridge, 
       };
 
       // console.log(params);
@@ -300,7 +300,7 @@ const BridgesList = ({
       <div className="w-full mx-auto">
         <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
           <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Structures Inventory</div>
+            <div className="text-2xl font-bold">Inspected Structures</div>
             <div className="text-sm font-medium mt-1 text-gray-700">
               Total Structures: {bridgeCount || 0}
             </div>
