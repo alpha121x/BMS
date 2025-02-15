@@ -1049,25 +1049,25 @@ app.get("/api/get-inspections-new", async (req, res) => {
     }
 
     const query = `
-   SELECT 
-    uu_bms_id,
-    inspection_id,
-    qc_con,
-    qc_remarks_con,
-    reviewed_by,
-    bridge_name, 
-    "SpanIndex", 
-    "WorkKindName", 
-    "PartsName", 
-    "MaterialName", 
-    "DamageKindName", 
-    "DamageLevel", 
-    "Remarks", 
-    COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
-    "ApprovedFlag"
-FROM bms.tbl_inspection_f
-WHERE uu_bms_id = $1 
-ORDER BY inspection_id DESC;
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_con,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        COALESCE("inspection_images", '') AS "PhotoPaths",  -- Ensure it's always a string
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      ORDER BY inspection_id DESC;
     `;
 
     const { rows } = await pool.query(query, [bridgeId]);
@@ -1078,12 +1078,10 @@ ORDER BY inspection_id DESC;
         .json({ success: false, message: "Inspection not found" });
     }
 
-    // Process the rows to extract paths from the JSON array
+    // Process the rows to convert inspection_images to an array
     const modifiedRows = rows.map((row) => ({
       ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
+      PhotoPaths: row.PhotoPaths ? row.PhotoPaths.split(",") : [], // Convert to array
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
@@ -1093,6 +1091,7 @@ ORDER BY inspection_id DESC;
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 app.get("/api/get-inspections", async (req, res) => {
   try {
