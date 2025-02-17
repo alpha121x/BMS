@@ -416,6 +416,8 @@ app.get("/api/structure-counts", async (req, res) => {
 //   }
 // });
 
+
+// bridges details download for dashboard main
 app.get("/api/bridgesdownloadNew", async (req, res) => {
   try {
     const {
@@ -527,6 +529,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
   }
 });
 
+// briges details download for evaluation module
 app.get("/api/bridgesdownloadNeww", async (req, res) => {
   try {
     const {
@@ -642,7 +645,7 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
   }
 });
 
-
+// inspection download for a specific bridge and dashboard + evaluation module
 app.get("/api/inspections-export", async (req, res) => {
   try {
     const { bridgeId } = req.query;
@@ -682,6 +685,7 @@ app.get("/api/inspections-export", async (req, res) => {
   }
 });
 
+// bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
   try {
     const {
@@ -842,6 +846,7 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
+// bridges list for evaluation module
 app.get("/api/bridgesNew", async (req, res) => {
   try {
     const {
@@ -1003,6 +1008,7 @@ SELECT
   }
 });
 
+// for dashboard checking table inspections where = RAMS-UU
 app.get("/api/inspections", async (req, res) => {
   try {
     const query = `
@@ -1038,7 +1044,8 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
-app.get("/api/get-inspections-new", async (req, res) => {
+// for both(C+R) summary data 
+app.get("/api/get-summary", async (req, res) => {
   try {
     const { bridgeId } = req.query;
 
@@ -1092,7 +1099,7 @@ app.get("/api/get-inspections-new", async (req, res) => {
   }
 });
 
-
+// For consultant inspection
 app.get("/api/get-inspections", async (req, res) => {
   try {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
@@ -1216,6 +1223,7 @@ app.get("/api/get-inspections", async (req, res) => {
   }
 });
 
+// For Rams inspection
 app.get("/api/get-inspections-rams", async (req, res) => {
   try {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
