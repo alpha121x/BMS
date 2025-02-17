@@ -25,12 +25,11 @@ const DashboardMain = () => {
   const [maxYear, setMaxYear] = useState("");
   const [bridge, setBridgeName] = useState("");
 
-
-
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const [structureCards, setStructureCards] = useState([]);
+  const [inspectedCards, setInspectedCards] = useState([]);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -51,7 +50,6 @@ const DashboardMain = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
 
   useEffect(() => {
     // Fetch data from API
@@ -78,7 +76,8 @@ const DashboardMain = () => {
         };
 
         const mappedCards = data.structureTypeCounts.map((item) => ({
-          label: structureMap[item.structure_type]?.label || item.structure_type,
+          label:
+            structureMap[item.structure_type]?.label || item.structure_type,
           value: item.count || "N/A",
           icon: structureMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
           color: "blue",
@@ -97,39 +96,38 @@ const DashboardMain = () => {
       .catch((error) => console.error("Error fetching structure data:", error));
   }, []);
 
-  // Data for Evaluation cards
-   const inspectedCards = [
-     {
-       label: "Total",
-       value: "1,526",
-       icon: <SiInstructure />,
-       color: "blue",
-     },
-     {
-       label: "Culvert",
-       value: "774",
-       icon: <LuConstruction />,
-       color: "blue",
-     },
-     {
-       label: "PC Bridge",
-       value: "751",
-       icon: <FaBridge />,
-       color: "blue",
-     },
-     // {
-     //   label: "Arch",
-     //   value: "4",
-     //   icon: <GiArchBridge />,
-     //   color: "blue",
-     // },
-     {
-       label: "Underpass",
-       value: "1",
-       icon: <FaRoadBridge />,
-       color: "blue",
-     },
-   ];
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/structure-counts-inspected`)
+      .then((response) => response.json())
+      .then((data) => {
+        const totalCount = data.totalStructureCount || "N/A";
+
+        const structureMap = {
+          CULVERT: { label: "Culvert", icon: <LuConstruction /> },
+          "PC BRIDGE": { label: "PC Bridge", icon: <FaBridge /> },
+          ARCH: { label: "Arch", icon: <GiArchBridge /> },
+          UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
+        };
+
+        const mappedCards = data.structureTypeCounts.map((item) => ({
+          label:
+            structureMap[item.structure_type]?.label || item.structure_type,
+          value: item.count || "N/A",
+          icon: structureMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
+          color: "blue",
+        }));
+
+        mappedCards.unshift({
+          label: "Total",
+          value: totalCount,
+          icon: <SiInstructure />,
+          color: "blue",
+        });
+
+        setInspectedCards(mappedCards);
+      })
+      .catch((error) => console.error("Error fetching structure data:", error));
+  }, []);
 
   // Card Component with dynamic border color
   const Card = ({ label, value, icon, iconSize = 32 }) => (
