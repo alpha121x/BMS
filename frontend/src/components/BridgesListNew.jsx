@@ -8,6 +8,7 @@ import Papa from "papaparse"; // Import papaparse
 import FilterComponent from "./FilterComponent";
 import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
 import InspectionList from "./InspectionList";
+import InspectionListRams from "./InspectionListRams";
 import MapModal from "./MapModal"; // Adjust the import path as needed
 
 const BridgesListNew = ({
@@ -51,6 +52,11 @@ const BridgesListNew = ({
   const [bridgeCount, setBridgeCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 10;
+
+  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+
+  // Extract username safely
+  const username = userToken?.username;
 
   useEffect(() => {
     fetchAllBridges(currentPage, itemsPerPage);
@@ -579,7 +585,13 @@ const BridgesListNew = ({
             <Modal.Title>Inspection Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedBridge && (
+            {selectedBridge && username === "consultant" && (
+              <InspectionList bridgeId={selectedBridge.uu_bms_id} />
+            )}
+            {selectedBridge && username === "rams" && (
+              <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />
+            )}
+            {selectedBridge && username === "admin.bms" && (
               <InspectionList bridgeId={selectedBridge.uu_bms_id} />
             )}
           </Modal.Body>

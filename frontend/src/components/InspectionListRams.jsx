@@ -80,7 +80,7 @@ const InspectionListRams = ({ bridgeId }) => {
       if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections-new?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-summary?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
