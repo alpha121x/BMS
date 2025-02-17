@@ -1112,7 +1112,7 @@ app.get("/api/get-summary", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("inspection_images", '') AS "PhotoPaths",  -- Ensure it's always a string
+         COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1130,7 +1130,9 @@ app.get("/api/get-summary", async (req, res) => {
     // Process the rows to convert inspection_images to an array
     const modifiedRows = rows.map((row) => ({
       ...row,
-      PhotoPaths: row.PhotoPaths ? row.PhotoPaths.split(",") : [], // Convert to array
+      PhotoPaths: Array.isArray(row.PhotoPaths)
+      ? row.PhotoPaths.map((p) => p.path)
+      : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
