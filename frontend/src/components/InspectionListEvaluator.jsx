@@ -80,7 +80,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections-new?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-summary?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -115,12 +115,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       }
 
       const consultantRemarks =
-        row.qc_remarks_con?.trim() === "" ? null : row.qc_remarks_con;
+        row.qc_remarks_evaluator?.trim() === "" ? null : row.qc_remarks_evaluator;
 
       const updatedData = {
         id: row.inspection_id,
-        qc_remarks_con: consultantRemarks,
-        qc_con: row.qc_con,
+        qc_remarks_evaluator: consultantRemarks,
+        qc_evaluator: row.qc_evaluator,
       };
 
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
@@ -159,7 +159,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         ...prevData[spanIndex],
         [workKind]: prevData[spanIndex][workKind].map((item) =>
           item.inspection_id === inspectionId
-            ? { ...item, qc_remarks_con: value }
+            ? { ...item, qc_remarks_evaluator: value }
             : item
         ),
       },
@@ -178,7 +178,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         ...prevData[spanIndex],
         [workKind]: prevData[spanIndex][workKind].map((item) =>
           item.inspection_id === inspectionId
-            ? { ...item, qc_con: value }
+            ? { ...item, qc_evaluator: value }
             : item
         ),
       },
@@ -502,7 +502,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               type="text"
                                               placeholder="Consultant Remarks"
                                               value={
-                                                inspection.qc_remarks_con || ""
+                                                inspection.qc_remarks_evaluator || ""
                                               }
                                               onChange={(e) =>
                                                 handleConsultantRemarksChange(
@@ -515,7 +515,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               className="mb-2"
                                             />
                                             <Form.Select
-                                              value={inspection.qc_con}
+                                              value={inspection.qc_evaluator}
                                               onChange={(e) =>
                                                 handleApprovedFlagChange(
                                                   spanIndex,
@@ -649,11 +649,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <div className="text-start">
                                               <strong>Remarks: </strong>
-                                              {inspection.qc_remarks_con ||
+                                              {inspection.qc_remarks_evaluator ||
                                                 "N/A"}{" "}
                                               <br />
                                               <strong>Status: </strong>
-                                              {inspection.qc_con === 2
+                                              {inspection.qc_evaluator === 2
                                                 ? "Approved"
                                                 : "Unapproved"}
                                             </div>
@@ -770,11 +770,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             <div className="col-md-3 d-flex flex-column justify-content-between">
                                               <div className="text-start">
                                                 <strong>Remarks: </strong>{" "}
-                                                {inspection.qc_remarks_con ||
+                                                {inspection.qc_remarks_evaluator ||
                                                   "N/A"}{" "}
                                                 <br />
                                                 <strong>Status: </strong>{" "}
-                                                {inspection.qc_con === 2
+                                                {inspection.qc_evaluator === 2
                                                   ? "Approved"
                                                   : "Unapproved"}
                                               </div>
