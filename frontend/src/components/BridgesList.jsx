@@ -466,7 +466,7 @@ const BridgesList = ({
                             />
                           )}
                         </td>
-                        <td></td>
+                        <td>Unapproved</td>
                       </tr>
                     ))
                   ) : (
