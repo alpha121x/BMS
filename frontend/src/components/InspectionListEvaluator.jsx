@@ -114,12 +114,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         return;
       }
 
-      const consultantRemarks =
+      const evaluatorRemarks =
         row.qc_remarks_evaluator?.trim() === "" ? null : row.qc_remarks_evaluator;
 
       const updatedData = {
         id: row.inspection_id,
-        qc_remarks_evaluator: consultantRemarks,
+        qc_remarks_evaluator: evaluatorRemarks,
         qc_evaluator: row.qc_evaluator,
       };
 
