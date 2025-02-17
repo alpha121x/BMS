@@ -9,6 +9,7 @@ import { GiArchBridge } from "react-icons/gi";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
+import BridgeInspectionsCard from "./BridgeInspectionsCard";
 
 const DashboardMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");

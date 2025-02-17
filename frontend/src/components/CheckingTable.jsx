@@ -182,7 +182,7 @@ const CheckingTable = () => {
       }}
     >
       <div className="card-body pb-0">
-        <div className="text-2xl font-bold">Bridges Inspections</div>
+        <div className="text-2xl font-bold">Individual Bridge Inspections</div>
         <div className="text-sm font-medium mt-1 text-gray-700 mb-1">
           Total Records: {tableData.length || 0}
         </div>
