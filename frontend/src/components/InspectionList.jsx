@@ -498,8 +498,8 @@ const InspectionList = ({ bridgeId }) => {
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
-                                              as="input"
-                                              type="text"
+                                              as="textarea"
+                                              rows={3} // You can adjust the number of rows as per your requirement
                                               placeholder="Consultant Remarks"
                                               value={
                                                 inspection.qc_remarks_con || ""
@@ -514,6 +514,7 @@ const InspectionList = ({ bridgeId }) => {
                                               }
                                               className="mb-2"
                                             />
+
                                             <Form.Select
                                               value={inspection.qc_con}
                                               onChange={(e) =>
