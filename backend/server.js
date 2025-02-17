@@ -199,7 +199,7 @@ app.get("/api/bms-score", async (req, res) => {
     LEFT JOIN 
         bms.tbl_bms_master_data m 
     ON 
-        c.objectid = m.uu_bms_id
+        c.objectid = m.id
     ORDER BY c.objectid
     LIMIT $1 OFFSET $2;
     `;
@@ -211,7 +211,7 @@ app.get("/api/bms-score", async (req, res) => {
       SELECT COUNT(*) AS total
       FROM bms.bms_calculations c 
       LEFT JOIN bms.tbl_bms_master_data m
-      ON c.objectid = m.uu_bms_id;
+      ON c.objectid = m.id;
     `;
     const countResult = await pool.query(countQuery);
     const totalRecords = countResult.rows[0].total;
@@ -243,7 +243,7 @@ FROM
 LEFT JOIN 
     bms.tbl_bms_master_data m 
 ON 
-    c.objectid = m.uu_bms_id
+    c.objectid = m.id
 ORDER BY c.objectid;
     `;
 
