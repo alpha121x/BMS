@@ -1351,7 +1351,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
   }
 });
 
-// Endpoint to update inspection data
+// Endpoint to update inspection data for consultant
 app.put("/api/update-inspection", async (req, res) => {
   const { id, qc_remarks_con, qc_con } = req.body;
 
@@ -1408,7 +1408,7 @@ app.put("/api/update-inspection", async (req, res) => {
   }
 });
 
-// Endpoint to update inspection data
+// Endpoint to update inspection data for rams
 app.put("/api/update-inspection-rams", async (req, res) => {
   const { id, qc_remarks_rams, qc_rams } = req.body;
 
