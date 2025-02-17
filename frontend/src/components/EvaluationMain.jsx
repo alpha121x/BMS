@@ -52,29 +52,31 @@ const EvaluationMain = () => {
       .then((response) => response.json())
       .then((data) => {
         const totalCount = data.totalStructureCount || "N/A";
-
-        const structureMap = {
+  
+        // Create a structure for inspection types
+        const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
-          "PC BRIDGE": { label: "PC Bridge", icon: <FaBridge /> },
-          ARCH: { label: "Arch", icon: <GiArchBridge /> },
+          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
+          // Add any other inspection types as needed
         };
-
+  
+        // Map the response to the expected format for inspection data
         const mappedCards = data.structureTypeCounts.map((item) => ({
-          label:
-            structureMap[item.structure_type]?.label || item.structure_type,
+          label: inspectionMap[item.structure_type]?.label || item.structure_type,
           value: item.count || "N/A",
-          icon: structureMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
+          icon: inspectionMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
           color: "blue",
         }));
-
+  
+        // Add total count card
         mappedCards.unshift({
           label: "Total",
           value: totalCount,
           icon: <SiInstructure />,
           color: "blue",
         });
-
+  
         setInspectedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
