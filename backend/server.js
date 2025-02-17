@@ -1046,7 +1046,6 @@ SELECT
   }
 });
 
-// for dashboard checking table inspections where = RAMS-UU
 app.get("/api/inspections", async (req, res) => {
   try {
     const query = `
@@ -1054,9 +1053,16 @@ app.get("/api/inspections", async (req, res) => {
         bmd."pms_sec_id", 
         bmd."structure_no",
         CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, -- Combine for bridge_name
-        ins."SpanIndex", ins."WorkKindName", ins."PartsName", ins."MaterialName", 
-        ins."DamageKindName", ins."DamageLevel", 
-        ins."Remarks", ins."inspection_images", ins."ApprovedFlag"
+        ins."SpanIndex", 
+        ins."WorkKindName", 
+        ins."PartsName", 
+        ins."MaterialName", 
+        ins."DamageKindName", 
+        ins."DamageLevel", 
+        ins."damage_extent",  -- New column added
+        ins."Remarks", 
+        ins."inspection_images", 
+        ins."ApprovedFlag"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
       ON ins."uu_bms_id" = bmd."uu_bms_id"
@@ -1065,15 +1071,13 @@ app.get("/api/inspections", async (req, res) => {
 
     const { rows } = await pool.query(query);
 
-    const modifiedRows = rows.map((row) => {
-      return {
-        ...row,
-        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-        inspection_images: row.inspection_images
-          ? row.inspection_images.split(",") // Convert to array
-          : [], // Default to empty array if null
-      };
-    });
+    const modifiedRows = rows.map((row) => ({
+      ...row,
+      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+      inspection_images: row.inspection_images
+        ? row.inspection_images.split(",") // Convert to array
+        : [], // Default to empty array if null
+    }));
 
     res.json({ success: true, data: modifiedRows });
   } catch (error) {
@@ -1081,6 +1085,7 @@ app.get("/api/inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // for both(C+R) summary data 
 app.get("/api/get-summary", async (req, res) => {

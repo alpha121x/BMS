@@ -36,6 +36,14 @@ const CheckingDetailsModal = ({ selectedRow }) => {
           </tr>
           <tr>
             <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+              Damage Extent
+            </th>
+            <td className="border border-gray-200 px-4 py-2">
+              {selectedRow?.damage_extent || "N/A"}
+            </td>
+          </tr>
+          <tr>
+            <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
               Remarks
             </th>
             <td className="border border-gray-200 px-4 py-2">

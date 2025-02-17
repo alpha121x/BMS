@@ -4,7 +4,8 @@ import { FaRoadBridge } from "react-icons/fa6";
 import { GiArchBridge } from "react-icons/gi";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
-import BridgesList from "./BridgesList";
+// import BridgesList from "./BridgesList";
+import BridgesListNew from "./BridgesListNew";
 import { BASE_URL } from "./config";
 
 const EvaluationMain = () => {
@@ -127,7 +128,7 @@ const EvaluationMain = () => {
       {/* Bridges */}
       <div className="mt-2 flex justify-center">
         <div className="w-full p-4">
-          <BridgesList
+          <BridgesListNew
             setSelectedDistrict={setSelectedDistrict}
             setMinBridgeLength={setMinBridgeLength}
             setMaxBridgeLength={setMaxBridgeLength}
