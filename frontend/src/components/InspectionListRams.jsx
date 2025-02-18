@@ -502,6 +502,9 @@ const InspectionListRams = ({ bridgeId }) => {
                                             <strong>Level:</strong>{" "}
                                             {inspection.DamageLevel || "N/A"}{" "}
                                             <br />
+                                            <strong>Damage Extent:</strong>{" "}
+                                            {inspection.damage_extent || "N/A"}{" "}
+                                            <br />
                                             <strong>
                                               Situation Remarks:
                                             </strong>{" "}
@@ -658,6 +661,9 @@ const InspectionListRams = ({ bridgeId }) => {
                                             <strong>Level:</strong>{" "}
                                             {inspection.DamageLevel || "N/A"}{" "}
                                             <br />
+                                            <strong>Damage Extent:</strong>{" "}
+                                            {inspection.damage_extent || "N/A"}{" "}
+                                            <br />
                                             <strong>
                                               Situation Remarks:
                                             </strong>{" "}
@@ -778,6 +784,12 @@ const InspectionListRams = ({ bridgeId }) => {
                                               <br />
                                               <strong>Level:</strong>{" "}
                                               {inspection.DamageLevel || "N/A"}{" "}
+                                              <br />
+                                              <strong>
+                                                Damage Extent:
+                                              </strong>{" "}
+                                              {inspection.damage_extent ||
+                                                "N/A"}{" "}
                                               <br />
                                               <strong>
                                                 Situation Remarks:
