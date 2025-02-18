@@ -218,7 +218,7 @@ const DashboardMain = () => {
       <div>
         {activeView === "map" ? (
           <div className="mt-1">
-            <Map />
+            <Map distrcitId={selectedDistrict} />
           </div>
         ) : (
           <div className="mt-1">
