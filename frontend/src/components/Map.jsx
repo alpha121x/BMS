@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
-import {BASE_URL} from './config';
+import { BASE_URL } from './config';
 
 const Map = () => {
   const mapRef = useRef(null);
@@ -28,7 +28,7 @@ const Map = () => {
         const view = new MapView({
           container: mapRef.current,
           map: map,
-          center: [73.1587, 31.5204],
+          center: [73.1587, 31.5204], // Center the map on a default location
           zoom: 6,
         });
 
@@ -89,7 +89,7 @@ const Map = () => {
             className: "esri-popup__button--primary"
           }]
         };
-        
+
         view.popup.on("trigger-action", (event) => {
           if (event.action.id === "view-details") {
             const graphic = view.popup.selectedFeature;
@@ -100,13 +100,8 @@ const Map = () => {
               .then((response) => response.json())
               .then((data) => {
                 if (data.success) {
-                  // Extract the 'bridge' object from the response (assuming the data structure has a 'bridges' array)
                   const bridge = data.bridges[0]; // Assuming only one bridge is returned
-        
-                  // Serialize the bridge object into a JSON string and encode it for URL
                   const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-                          
-                  // Redirect to the BridgeInformation route with the serialized bridge data
                   window.location.href = `BridgeInformation?bridgeData=${serializedBridgeData}`;
                 } else {
                   alert("Error fetching details.");
@@ -118,25 +113,60 @@ const Map = () => {
               });
           }
         });
-        
-        
 
-        // Road Layer with Popup Template
-        const roadLayer = new MapImageLayer({
+        // MapImageLayer with multiple layers by index
+        const bridgeLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "BMS",
+          title: "Condition Locations",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
             {
-              id: 0,
+              id: 2, // BRIDGES LOCATIONS layer (index 2)
               title: "Bridge Locations",
               popupTemplate: popupTemplate,
+            },
+            {
+              id: 0, // Divisions layer (index 0)
+              title: "Divisions",
+              opacity: 0.6,
+              listMode: "show",
+            },
+            {
+              id: 1, // Districts layer (index 1)
+              title: "Districts",
+              opacity: 0.6,
+              listMode: "show",
+            },
+            {
+              id: 3, // GOOD layer (index 3)
+              title: "Good",
+              opacity: 0.6,
+              listMode: "show",
+            },
+            {
+              id: 4, // FAIR layer (index 4)
+              title: "Fair",
+              opacity: 0.6,
+              listMode: "show",
+            },
+            {
+              id: 5, // POOR layer (index 5)
+              title: "Poor",
+              opacity: 0.6,
+              listMode: "show",
+            },
+            {
+              id: 6, // UNDER CONSTRUCTION layer (index 6)
+              title: "Under Construction",
+              opacity: 0.6,
+              listMode: "show",
             },
           ],
         });
 
-        map.add(roadLayer);
+        // Add the Layer to the Map
+        map.add(bridgeLayer);
 
         // Layer List Widget
         const layerList = new LayerList({
@@ -144,7 +174,7 @@ const Map = () => {
           listItemCreatedFunction: (event) => {
             // Customize Layer List items
             const item = event.item;
-            if (item.layer === roadLayer) {
+            if (item.layer === bridgeLayer) {
               item.panel = {
                 content: "legend",
                 open: true,
