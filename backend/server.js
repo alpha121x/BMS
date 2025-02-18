@@ -738,6 +738,7 @@ app.get("/api/bridges", async (req, res) => {
       minYear,
       maxYear,
       bridge = "%",
+      bridgeId = "%"
     } = req.query;
 
     let query = `
@@ -793,6 +794,12 @@ app.get("/api/bridges", async (req, res) => {
       countQuery += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
       countParams.push(district);
+      paramIndex++;
+    }
+
+    if (bridgeId !== "%") {
+      query += ` AND uu_bms_id = $${paramIndex}`;
+      queryParams.push(bridgeId);
       paramIndex++;
     }
 
