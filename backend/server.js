@@ -453,48 +453,6 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 //   }
 // });
 
-// Endpoint to fetch district extent
-app.get('/api/districtExtent', async (req, res) => {
-  try {
-    const { districtId = "%" } = req.query; // Get districtId from query parameters, default to "%"
-
-    // SQL query to fetch the required data based on districtId
-    let query = `
-      SELECT gid, __gid, ____gid, district_n, div_name, geom
-      FROM public.punjab_district_boundary
-    `;
-    
-    if (districtId !== "%") {
-      query += ` WHERE district_n = $1`; // Modify the query to filter by districtId if it's not "%"
-    }
-
-    const values = districtId !== "%" ? [districtId] : [];
-
-    const result = await pool.query(query, values);
-
-    if (result.rows.length > 0) {
-      res.json({
-        success: true,
-        data: result.rows, // Send the rows returned by the query
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        message: 'District not found',
-      });
-    }
-
-  } catch (err) {
-    console.error('Error fetching district data', err);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching district data',
-      error: err.message,
-    });
-  }
-});
-
-
 
 // bridges details download for dashboard main
 app.get("/api/bridgesdownloadNew", async (req, res) => {
@@ -780,7 +738,6 @@ app.get("/api/bridges", async (req, res) => {
       minYear,
       maxYear,
       bridge = "%",
-      bridgeId = "%"
     } = req.query;
 
     let query = `
@@ -836,12 +793,6 @@ app.get("/api/bridges", async (req, res) => {
       countQuery += ` AND district_id = $${paramIndex}`;
       queryParams.push(district);
       countParams.push(district);
-      paramIndex++;
-    }
-
-    if (bridgeId !== "%") {
-      query += ` AND uu_bms_id = $${paramIndex}`;
-      queryParams.push(bridgeId);
       paramIndex++;
     }
 

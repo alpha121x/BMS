@@ -36,7 +36,7 @@ const Map = () => {
 
         const popupTemplate = {
           title: "Bridge Information",
-          content: `
+          content: ` 
             <table class="table table-bordered">
               <thead>
                 <tr>
@@ -114,30 +114,61 @@ const Map = () => {
           }
         });
 
-        // MapImageLayer with multiple layers by index
-        const bridgeLayer = new MapImageLayer({
+        // MapImageLayer for Divisions
+        const divisionsLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Condition Locations",
-          opacity: 0.8,
+          title: "Divisions",
+          opacity: 0.6,
           listMode: "show",
           sublayers: [
-            {
-              id: 2, // BRIDGES LOCATIONS layer (index 2)
-              title: "Bridge Locations",
-              popupTemplate: popupTemplate,
-            },
             {
               id: 0, // Divisions layer (index 0)
               title: "Divisions",
               opacity: 0.6,
               listMode: "show",
-            },
+            }
+          ]
+        });
+
+        // MapImageLayer for Districts
+        const districtsLayer = new MapImageLayer({
+          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
+          title: "Districts",
+          opacity: 0.6,
+          listMode: "show",
+          sublayers: [
             {
               id: 1, // Districts layer (index 1)
               title: "Districts",
               opacity: 0.6,
               listMode: "show",
-            },
+            }
+          ]
+        });
+
+        // MapImageLayer for Bridge Locations (Index 2)
+        const bridgeLayer = new MapImageLayer({
+          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
+          title: "Bridge Locations",
+          opacity: 0.8,
+          listMode: "show",
+          sublayers: [
+            {
+              id: 2, // Bridge Locations (index 2)
+              title: "Bridges",
+              opacity: 0.8,
+              listMode: "show",
+            }
+          ]
+        });
+
+        // MapImageLayer for Condition Layers (Good, Fair, Poor, etc.)
+        const conditionLayer = new MapImageLayer({
+          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
+          title: "Condition Locations",
+          opacity: 0.8,
+          listMode: "show",
+          sublayers: [
             {
               id: 3, // GOOD layer (index 3)
               title: "Good",
@@ -161,20 +192,22 @@ const Map = () => {
               title: "Under Construction",
               opacity: 0.6,
               listMode: "show",
-            },
-          ],
+            }
+          ]
         });
 
-        // Add the Layer to the Map
+        // Add Layers to the Map
+        map.add(divisionsLayer);
+        map.add(districtsLayer);
         map.add(bridgeLayer);
+        map.add(conditionLayer);
 
         // Layer List Widget
         const layerList = new LayerList({
           view: view,
           listItemCreatedFunction: (event) => {
-            // Customize Layer List items
             const item = event.item;
-            if (item.layer === bridgeLayer) {
+            if (item.layer === divisionsLayer || item.layer === districtsLayer || item.layer === bridgeLayer || item.layer === conditionLayer) {
               item.panel = {
                 content: "legend",
                 open: true,
