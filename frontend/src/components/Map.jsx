@@ -13,14 +13,14 @@ const Map = () => {
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/MapImageLayer",
-            "esri/widgets/LayerList",
+            "esri/widgets/LayerList"
           ],
           { css: true }
         );
 
         // Initialize Map
         const map = new Map({
-          basemap: "gray-vector",
+          basemap: "gray-vector"
         });
 
         // Initialize MapView
@@ -28,7 +28,7 @@ const Map = () => {
           container: mapRef.current,
           map: map,
           center: [73.1587, 31.5204],
-          zoom: 6,
+          zoom: 6
         });
 
         viewRef.current = view;
@@ -46,10 +46,6 @@ const Map = () => {
               <tr>
                 <th>Road Name:</th>
                 <td>{road_name}</td>
-              </tr>
-               <tr>
-                <th>Reference No:</th>
-                <td>{uu_bms_id}</td>
               </tr>
               <tr>
                 <th>District:</th>
@@ -80,7 +76,12 @@ const Map = () => {
                 </td>
               </tr>
             </tbody>
-          </table>`,
+          </table>
+          <div style="margin-top: 10px; text-align: center;">
+            <button class="btn btn-primary btn-sm" id="modal1Button">Open Modal 1</button>
+            <button class="btn btn-secondary btn-sm" id="modal2Button" style="margin-left: 10px;">Open Modal 2</button>
+          </div>
+        `
         };
 
         // Road Layer with Popup Template
@@ -93,9 +94,9 @@ const Map = () => {
             {
               id: 0,
               title: "Bridge Locations",
-              popupTemplate: popupTemplate,
-            },
-          ],
+              popupTemplate: popupTemplate
+            }
+          ]
         });
 
         map.add(roadLayer);
@@ -109,10 +110,10 @@ const Map = () => {
             if (item.layer === roadLayer) {
               item.panel = {
                 content: "legend",
-                open: true,
+                open: true
               };
             }
-          },
+          }
         });
 
         // Add Layer List to the view
@@ -120,51 +121,6 @@ const Map = () => {
 
         await view.when();
         console.log("EzriMap is ready.");
-
-        view.on("click", async (event) => {
-          const response = await view.hitTest(event);
-
-          for (const result of response.results) {
-            if (result.graphic && result.graphic.attributes) {
-              const bridgeId = result.graphic.attributes.uu_bms_id;
-              console.log(bridgeId);
-              if (bridgeId) {
-                try {
-                  const apiResponse = await fetch(
-                    `/api/bridges?BridgeId=${bridgeId}`
-                  );
-
-                  if (apiResponse.ok) {
-                    const bridgeData = await apiResponse.json();
-                    const serializedData = encodeURIComponent(
-                      JSON.stringify(bridgeData)
-                    );
-                    window.location.href = `/BridgeInformation?bridgeData=${serializedData}`;
-                  } else {
-                    console.error("API call failed:", apiResponse.statusText);
-                  }
-                } catch (error) {
-                  console.error("Error:", error);
-                }
-                break;
-              }
-            }
-          }
-        });
-
-        // Add actions to the popup
-        view.popup.actions = [
-          {
-            title: "Inventory Info",
-            id: "inventoryInfo",
-            className: "esri-icon-link",
-          },
-          {
-            title: "Inspection Info",
-            id: "inspectionInfo",
-            className: "esri-icon-link",
-          },
-        ];
       } catch (error) {
         console.error("Error initializing EzriMap:", error);
       }
@@ -181,7 +137,11 @@ const Map = () => {
 
   return (
     <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
-      <div ref={mapRef} className="map-container" style={{ height: "500px" }} />
+      <div
+        ref={mapRef}
+        className="map-container"
+        style={{ height: "500px" }}
+      />
     </div>
   );
 };
