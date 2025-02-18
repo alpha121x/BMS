@@ -449,10 +449,10 @@ const InspectionList = ({ bridgeId }) => {
                                       >
                                         <div className="row">
                                           <div className="col-md-3">
-                                            {inspection.PhotoPaths?.length >
-                                              0 && (
+                                            {inspection.inspection_images
+                                              ?.length > 0 && (
                                               <div className="d-flex flex-wrap gap-2">
-                                                {inspection.PhotoPaths.map(
+                                                {inspection.inspection_images.map(
                                                   (photo, i) => (
                                                     <a
                                                       key={`photo-${inspection.id}-${i}`}
@@ -518,28 +518,53 @@ const InspectionList = ({ bridgeId }) => {
                                               className="mb-2"
                                             />
 
-                                            <Form.Select
-                                              value={inspection.qc_con}
-                                              onChange={(e) =>
-                                                handleApprovedFlagChange(
-                                                  spanIndex,
-                                                  workKind,
-                                                  inspection.inspection_id,
-                                                  parseInt(e.target.value)
-                                                )
-                                              }
+                                            <Form.Group
+                                              controlId={`qc_con_${inspection.inspection_id}`}
                                               className="mb-2"
                                             >
-                                              <option value={1}>
-                                                Select Status
-                                              </option>
-                                              <option value={3}>
-                                                Unapproved
-                                              </option>
-                                              <option value={2}>
-                                                Approved
-                                              </option>
-                                            </Form.Select>
+                                              <div className="flex gap-4">
+                                                {/* Unapproved Option */}
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_con_${inspection.inspection_id}`}
+                                                  label="Unapproved"
+                                                  value="3"
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }} // Makes the radio button blue
+                                                />
+
+                                                {/* Approved Option */}
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_con_${inspection.inspection_id}`}
+                                                  label="Approved"
+                                                  value="2"
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }} // Makes the radio button blue
+                                                />
+                                              </div>
+                                            </Form.Group>
+
                                             <Button
                                               onClick={() =>
                                                 handleSaveChanges(inspection)
@@ -603,10 +628,10 @@ const InspectionList = ({ bridgeId }) => {
                                       >
                                         <div className="row">
                                           <div className="col-md-3">
-                                            {inspection.PhotoPaths?.length >
-                                              0 && (
+                                            {inspection.inspection_images
+                                              ?.length > 0 && (
                                               <div className="d-flex flex-wrap gap-2">
-                                                {inspection.PhotoPaths.map(
+                                                {inspection.inspection_images.map(
                                                   (photo, i) => (
                                                     <a
                                                       key={`photo-${inspection.id}-${i}`}
@@ -726,10 +751,10 @@ const InspectionList = ({ bridgeId }) => {
                                         >
                                           <div className="row">
                                             <div className="col-md-3">
-                                              {inspection.PhotoPaths?.length >
-                                                0 && (
+                                              {inspection.inspection_images
+                                                ?.length > 0 && (
                                                 <div className="d-flex flex-wrap gap-2">
-                                                  {inspection.PhotoPaths.map(
+                                                  {inspection.inspection_images.map(
                                                     (photo, i) => (
                                                       <a
                                                         key={`photo-${inspection.id}-${i}`}
