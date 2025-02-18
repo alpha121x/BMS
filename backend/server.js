@@ -1418,6 +1418,8 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
+         surveyed_by,
+        damage_extent,
         qc_rams,
         qc_remarks_rams,
         qc_remarks_con,
@@ -1435,6 +1437,7 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_rams = '2'  -- Approved Consultant Inspections
+      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
