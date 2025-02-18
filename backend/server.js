@@ -1100,6 +1100,8 @@ app.get("/api/get-summary", async (req, res) => {
     const query = `
       SELECT 
         uu_bms_id,
+        surveyed_by,
+        damage_extent,
         inspection_id,
         qc_con,
         qc_remarks_con,
@@ -1116,6 +1118,7 @@ app.get("/api/get-summary", async (req, res) => {
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
+      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1158,6 +1161,8 @@ app.get("/api/get-inspections", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
+        surveyed_by,
+        damage_extent,
         qc_con,
         qc_remarks_con,
         reviewed_by,
@@ -1174,6 +1179,7 @@ app.get("/api/get-inspections", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_con = '1'
+      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1282,6 +1288,8 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
+         surveyed_by,
+        damage_extent,
         qc_rams,
         qc_remarks_rams,
         qc_remarks_con,
