@@ -416,7 +416,7 @@ const InspectionList = ({ bridgeId }) => {
           {activeDiv === "pending" && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
-              {pendingData &&
+              {pendingData && Object.keys(pendingData).length > 0 ? (
                 Object.keys(pendingData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
                     <div
@@ -427,7 +427,7 @@ const InspectionList = ({ bridgeId }) => {
                       <strong>Reports For Span: {spanIndex}</strong>
                       <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                     </div>
-                    {expandedSections[spanIndex] ? (
+                    {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(pendingData[spanIndex]).length > 0 ? (
                           Object.keys(pendingData[spanIndex]).map(
@@ -502,7 +502,7 @@ const InspectionList = ({ bridgeId }) => {
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
                                               as="textarea"
-                                              rows={3} // You can adjust the number of rows as per your requirement
+                                              rows={3}
                                               placeholder="Consultant Remarks"
                                               value={
                                                 inspection.qc_remarks_con || ""
@@ -540,7 +540,7 @@ const InspectionList = ({ bridgeId }) => {
                                                   className="text-blue-500 font-medium"
                                                   style={{
                                                     accentColor: "blue",
-                                                  }} // Makes the radio button blue
+                                                  }}
                                                 />
 
                                                 {/* Approved Option */}
@@ -560,7 +560,7 @@ const InspectionList = ({ bridgeId }) => {
                                                   className="text-blue-500 font-medium"
                                                   style={{
                                                     accentColor: "blue",
-                                                  }} // Makes the radio button blue
+                                                  }}
                                                 />
                                               </div>
                                             </Form.Group>
@@ -583,12 +583,15 @@ const InspectionList = ({ bridgeId }) => {
                             )
                           )
                         ) : (
-                          <p>No data available</p>
+                          <p>No pending records found.</p>
                         )}
                       </div>
-                    ) : null}
+                    )}
                   </div>
-                ))}
+                ))
+              ) : (
+                <p>No pending records found.</p>
+              )}
             </div>
           )}
 
