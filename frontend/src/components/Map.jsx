@@ -105,9 +105,7 @@ const Map = () => {
         
                   // Serialize the bridge object into a JSON string and encode it for URL
                   const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-
-                  console.log()
-        
+                          
                   // Redirect to the BridgeInformation route with the serialized bridge data
                   window.location.href = `BridgeInformation?bridgeData=${serializedBridgeData}`;
                 } else {
