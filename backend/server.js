@@ -1103,7 +1103,6 @@ app.get("/api/inspections", async (req, res) => {
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
       ON ins."uu_bms_id" = bmd."uu_bms_id"
-      WHERE ins.surveyed_by = 'RAMS-UU';
     `;
 
     const { rows } = await pool.query(query);
@@ -1155,7 +1154,6 @@ app.get("/api/get-summary", async (req, res) => {
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
-      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1216,7 +1214,6 @@ app.get("/api/get-inspections", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_con = '1'
-      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1461,7 +1458,6 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_rams = '2'  -- Approved Consultant Inspections
-      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
