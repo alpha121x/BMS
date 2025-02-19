@@ -48,3 +48,8 @@
   text-overflow: ellipsis;
   max-width: 350px; /* Adjust the max-width as per your requirements */
 }
+
+.custom-modal .modal-dialog {
+  max-width: 80vw; /* 90% of viewport width */
+  width: 75vw;
+}

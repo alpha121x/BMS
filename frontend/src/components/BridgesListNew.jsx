@@ -563,6 +563,7 @@ const BridgesListNew = ({
           onHide={handleCloseModal}
           size="lg" // Use a larger modal size to accommodate the InventoryInfo component
           centered
+          className="custom-modal"
         >
           <Modal.Header closeButton>
             <Modal.Title>Bridge Inventory Details</Modal.Title>
@@ -580,6 +581,7 @@ const BridgesListNew = ({
           onHide={handleCloseInspectionModal}
           size="lg"
           centered
+          className="custom-modal"
         >
           <Modal.Header closeButton>
             <Modal.Title>Inspection Details</Modal.Title>
@@ -602,6 +604,7 @@ const BridgesListNew = ({
           onHide={handleCloseMapModal}
           size="lg" // Use a larger modal size to accommodate the map
           centered
+          className="custom-modal"
         >
           <Modal.Header closeButton>
             <Modal.Title>Bridge Location on Map</Modal.Title>
