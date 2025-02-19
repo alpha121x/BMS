@@ -496,9 +496,9 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
   try {
     const {
       district = "%",
-      bridge,
-      structureType,
-      constructionType,
+      bridge = "%",
+      structureType = "%",
+      constructionType = "%",
       minBridgeLength,
       maxBridgeLength,
       minSpanLength,
@@ -538,11 +538,12 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       paramIndex++;
     }
 
-    if (bridge && bridge.trim() !== "" && bridge !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
-      queryParams.push(bridge);
+    if (structureType) {
+      query += ` AND md.structure_type_id = $${paramIndex}`;
+      queryParams.push(parseNumber(structureType));
       paramIndex++;
     }
+
     if (bridge && bridge.trim() !== "" && bridge !== "%") {
       query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
       queryParams.push(`%${bridge}%`);
