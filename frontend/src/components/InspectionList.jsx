@@ -449,10 +449,10 @@ const InspectionList = ({ bridgeId }) => {
                                       >
                                         <div className="row">
                                           <div className="col-md-3">
-                                            {inspection.inspection_images
+                                            {inspection.PhotoPaths
                                               ?.length > 0 && (
                                               <div className="d-flex flex-wrap gap-2">
-                                                {inspection.inspection_images.map(
+                                                {inspection.PhotoPaths.map(
                                                   (photo, i) => (
                                                     <a
                                                       key={`photo-${inspection.id}-${i}`}
@@ -631,10 +631,10 @@ const InspectionList = ({ bridgeId }) => {
                                       >
                                         <div className="row">
                                           <div className="col-md-3">
-                                            {inspection.inspection_images
+                                            {inspection.PhotoPaths
                                               ?.length > 0 && (
                                               <div className="d-flex flex-wrap gap-2">
-                                                {inspection.inspection_images.map(
+                                                {inspection.PhotoPaths.map(
                                                   (photo, i) => (
                                                     <a
                                                       key={`photo-${inspection.id}-${i}`}
@@ -754,10 +754,10 @@ const InspectionList = ({ bridgeId }) => {
                                         >
                                           <div className="row">
                                             <div className="col-md-3">
-                                              {inspection.inspection_images
+                                              {inspection.PhotoPaths
                                                 ?.length > 0 && (
                                                 <div className="d-flex flex-wrap gap-2">
-                                                  {inspection.inspection_images.map(
+                                                  {inspection.PhotoPaths.map(
                                                     (photo, i) => (
                                                       <a
                                                         key={`photo-${inspection.id}-${i}`}

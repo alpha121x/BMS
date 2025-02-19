@@ -1211,7 +1211,7 @@ app.get("/api/get-inspections", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1235,7 +1235,7 @@ app.get("/api/get-inspections", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1258,7 +1258,7 @@ app.get("/api/get-inspections", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1272,36 +1272,22 @@ app.get("/api/get-inspections", async (req, res) => {
       pool.query(unapprovedQuery, [bridgeId]),
     ]);
 
-    const modifiedPendingRows = pendingRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
-
-    const modifiedApprovedRows = approvedRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
-
-    const modifiedUnapprovedRows = unapprovedRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+    // Format rows to clean paths
+    const formatRows = (rows) =>
+      rows.map((row) => ({
+        ...row,
+        PhotoPaths: Array.isArray(row.PhotoPaths)
+          ? row.PhotoPaths.map((p) => p.trim()) // Trim spaces around paths
+          : [],
+        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+      }));
 
     res.status(200).json({
       success: true,
       data: {
-        pending: modifiedPendingRows,
-        approved: modifiedApprovedRows,
-        unapproved: modifiedUnapprovedRows,
+        pending: formatRows(pendingRows.rows),
+        approved: formatRows(approvedRows.rows),
+        unapproved: formatRows(unapprovedRows.rows),
       },
     });
   } catch (error) {
@@ -1309,6 +1295,7 @@ app.get("/api/get-inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // For Rams inspection
 app.get("/api/get-inspections-rams", async (req, res) => {
