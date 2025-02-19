@@ -19,9 +19,7 @@ const FilterComponent = ({
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
   const [constructionTypes, setConstructionTypes] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [evaluationStatuses, setEvaluationStatuses] = useState([]);
-  const [inspectionStatuses, setInspectionStatuses] = useState([]);
+ 
 
   const [districtId, setDistrictId] = useState("");
   const [localBridgeName, setLocalBridgeName] = useState("");
@@ -36,6 +34,8 @@ const FilterComponent = ({
   const [inspectionStatus, setInspectionStatusState] = useState("");
   const [minYear, setMinYearState] = useState("");
   const [maxYear, setMaxYearState] = useState("");
+
+  console.log(category);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -75,40 +75,6 @@ const FilterComponent = ({
           constructionTypeData.map((type) => ({
             id: type.id,
             name: type.construction_type || type.name, // Normalize the property name
-          }))
-        );
-
-        // Fetching categories
-        const categoryResponse = await fetch(`${BASE_URL}/api/categories`);
-        const categoryData = await categoryResponse.json();
-        setCategories(
-          categoryData.map((cat) => ({
-            id: cat.id,
-            name: cat.category || cat.name, // Normalize the property name
-          }))
-        );
-
-        // Fetching evaluation statuses
-        const evaluationStatusResponse = await fetch(
-          `${BASE_URL}/api/evaluation-statuses`
-        );
-        const evaluationStatusData = await evaluationStatusResponse.json();
-        setEvaluationStatuses(
-          evaluationStatusData.map((status) => ({
-            id: status.id,
-            name: status.evaluation_status || status.name, // Normalize the property name
-          }))
-        );
-
-        // Fetching inspection statuses
-        const inspectionStatusResponse = await fetch(
-          `${BASE_URL}/api/inspection-statuses`
-        );
-        const inspectionStatusData = await inspectionStatusResponse.json();
-        setInspectionStatuses(
-          inspectionStatusData.map((status) => ({
-            id: status.id,
-            name: status.inspection_status || status.name, // Normalize the property name
           }))
         );
       } catch (error) {
@@ -208,16 +174,15 @@ const FilterComponent = ({
           onChange={handleChange(setCategoryState)}
         >
           <option value="%">--All Categories--</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
+          <option value="I">I</option>
+          <option value="II">II</option>
+          <option value="III">III</option>
+          <option value="IV">IV</option>
         </select>
       </div>
 
       {/* Evaluation Status Filter */}
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <label
           htmlFor="evaluation-status"
           className="block text-gray-700 font-medium mb-1"
@@ -237,7 +202,7 @@ const FilterComponent = ({
             </option>
           ))}
         </select>
-      </div>
+      </div> */}
 
       {/* Inspection Status Filter */}
       <div className="mb-4">
@@ -254,15 +219,12 @@ const FilterComponent = ({
           onChange={handleChange(setInspectionStatusState)}
         >
           <option value="%">--All Inspection Statuses--</option>
-          {inspectionStatuses.map((status) => (
-            <option key={status.id} value={status.id}>
-              {status.name}
-            </option>
-          ))}
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
         </select>
       </div>
 
-      {/* Bridge ID Filter */}
+      {/* Bridge Name Filter */}
       <div className="flex mb-4 space-x-4">
         <div className="flex-1">
           <label

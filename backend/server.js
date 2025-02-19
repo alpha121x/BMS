@@ -770,6 +770,7 @@ app.get("/api/bridges", async (req, res) => {
       district = "%",
       structureType = "%",
       constructionType = "%",
+      inspectionStatus,
       minBridgeLength,
       maxBridgeLength,
       minSpanLength,
@@ -777,6 +778,7 @@ app.get("/api/bridges", async (req, res) => {
       minYear,
       maxYear,
       bridge = "%",
+      category = "%",
     } = req.query;
 
     let query = `
@@ -851,6 +853,7 @@ app.get("/api/bridges", async (req, res) => {
       countParams.push(structureType);
       paramIndex++;
     }
+
     if (constructionType) {
       query += ` AND construction_type_id = $${paramIndex}`;
       countQuery += ` AND construction_type_id = $${paramIndex}`;
@@ -858,6 +861,17 @@ app.get("/api/bridges", async (req, res) => {
       countParams.push(constructionType);
       paramIndex++;
     }
+
+    if (inspectionStatus === 'yes') {
+      query += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
+      countQuery += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
+    } else if (inspectionStatus === 'no') {
+      query += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
+      countQuery += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
+    }
+    
+
+
     if (minBridgeLength) {
       query += ` AND structure_width_m >= $${paramIndex}`;
       countQuery += ` AND structure_width_m >= $${paramIndex}`;
