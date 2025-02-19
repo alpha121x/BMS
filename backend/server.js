@@ -861,6 +861,14 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
+    if (category) {
+      query += ` AND visual_condition ILIKE $${paramIndex}`;
+      countQuery += ` AND visual_condition ILIKE $${paramIndex}`;
+      queryParams.push(category);
+      countParams.push(category);
+      paramIndex++;
+    }
+
     if (constructionType) {
       query += ` AND construction_type_id = $${paramIndex}`;
       countQuery += ` AND construction_type_id = $${paramIndex}`;
