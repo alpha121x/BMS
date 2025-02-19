@@ -29,8 +29,8 @@ const Map = ({ districtId }) => {
         const view = new MapView({
           container: mapRef.current,
           map: map,
-          center: [73.1587, 31.5204], // Default center (Punjab)
-          zoom: 6, // Default zoom
+          center: [73.1587, 31.5204],
+          zoom: 6
         });
 
         viewRef.current = view;
@@ -138,12 +138,6 @@ const Map = ({ districtId }) => {
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            {
-              id: 0, // Divisions layer (index 0)
-              title: "Divisions",
-              opacity: 0.6,
-              listMode: "show",
-            },
             {
               id: 1, // Districts layer (index 1)
               title: "Districts",
