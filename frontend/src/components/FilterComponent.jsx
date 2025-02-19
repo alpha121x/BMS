@@ -174,10 +174,10 @@ const FilterComponent = ({
           onChange={handleChange(setCategoryState)}
         >
           <option value="%">--All Categories--</option>
-          <option value="I">I</option>
-          <option value="II">II</option>
-          <option value="III">III</option>
-          <option value="IV">IV</option>
+          <option value="GOOD">I</option>
+          <option value="FAIR">II</option>
+          <option value="POOR">III</option>
+          <option value="UNDER CONSTRUCTION">IV</option>
         </select>
       </div>
 
