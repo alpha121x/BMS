@@ -499,6 +499,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       bridge = "%",
       structureType = "%",
       constructionType = "%",
+      inspectionStatus,
       minBridgeLength,
       maxBridgeLength,
       minSpanLength,
@@ -548,6 +549,12 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
       queryParams.push(`%${bridge}%`);
       paramIndex++;
+    }
+
+    if (inspectionStatus === 'yes') {
+      query += ` AND md.uu_bms_id IN (SELECT DISTINCT f.uu_bms_id FROM bms.tbl_inspection_f)`;
+    } else if (inspectionStatus === 'no') {
+      query += ` AND md.uu_bms_id NOT IN (SELECT DISTINCT f.uu_bms_id FROM bms.tbl_inspection_f)`;
     }
     
 
@@ -870,7 +877,6 @@ app.get("/api/bridges", async (req, res) => {
       countQuery += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
     }
     
-
 
     if (minBridgeLength) {
       query += ` AND structure_width_m >= $${paramIndex}`;
