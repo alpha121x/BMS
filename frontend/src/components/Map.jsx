@@ -2,19 +2,20 @@ import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 import { BASE_URL } from './config';
 
-const Map = () => {
+const Map = ({ districtId }) => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
 
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, LayerList] = await loadModules(
+        const [Map, MapView, MapImageLayer, LayerList, Extent] = await loadModules(
           [
             "esri/Map",
             "esri/views/MapView",
             "esri/layers/MapImageLayer",
             "esri/widgets/LayerList",
+            "esri/geometry/Extent", // To work with extents
           ],
           { css: true }
         );
@@ -28,15 +29,53 @@ const Map = () => {
         const view = new MapView({
           container: mapRef.current,
           map: map,
-          center: [73.1587, 31.5204], // Center the map on a default location
-          zoom: 6,
+          center: [73.1587, 31.5204], // Default center (Punjab)
+          zoom: 6, // Default zoom
         });
 
         viewRef.current = view;
 
+        // Function to get extent by districtId
+        const getDistrictExtent = async (districtId) => {
+          if (districtId === "%") {
+            // Return extent for entire Punjab
+            return new Extent({
+              xmin: 69.0,
+              ymin: 29.5,
+              xmax: 77.0,
+              ymax: 35.0,
+              spatialReference: { wkid: 4326 },
+            });
+          } else {
+            // Fetch district extent from API or database based on districtId
+            const response = await fetch(`${BASE_URL}/api/districtExtent?districtId=${districtId}`);
+            const data = await response.json();
+            if (data.success && data.district) {
+              const { xmin, ymin, xmax, ymax } = data.district; // Assuming extent data is available
+              return new Extent({
+                xmin: xmin,
+                ymin: ymin,
+                xmax: xmax,
+                ymax: ymax,
+                spatialReference: { wkid: 4326 },
+              });
+            } else {
+              console.error("District not found");
+              return null; // Fallback if the district is not found
+            }
+          }
+        };
+
+        // Fetch the extent and zoom to the district
+        const extent = await getDistrictExtent(districtId);
+        if (extent) {
+          view.extent = extent; // Set the map extent to the district or Punjab
+        }
+
+        // Define the popup template for bridge information
         const popupTemplate = {
           title: "Bridge Information",
-          content: ` 
+          content: `
             <table class="table table-bordered">
               <thead>
                 <tr>
@@ -83,42 +122,20 @@ const Map = () => {
               </tbody>
             </table>
           `,
-          actions: [{
-            title: "View Details",
-            id: "view-details",
-            className: "esri-popup__button--primary"
-          }]
+          actions: [
+            {
+              title: "View Details",
+              id: "view-details",
+              className: "esri-popup__button--primary",
+            },
+          ],
         };
 
-        view.popup.on("trigger-action", (event) => {
-          if (event.action.id === "view-details") {
-            const graphic = view.popup.selectedFeature;
-            const uuBmsId = graphic.attributes.uu_bms_id;
-            
-            // Fetch the bridge information from the API
-            fetch(`${BASE_URL}/api/bridges?uu_bms_id=${uuBmsId}`)
-              .then((response) => response.json())
-              .then((data) => {
-                if (data.success) {
-                  const bridge = data.bridges[0]; // Assuming only one bridge is returned
-                  const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-                  window.location.href = `BridgeInformation?bridgeData=${serializedBridgeData}`;
-                } else {
-                  alert("Error fetching details.");
-                }
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-                alert("An error occurred while fetching the data.");
-              });
-          }
-        });
-
-        // MapImageLayer for Divisions
-        const divisionsLayer = new MapImageLayer({
+        // MapImageLayer with multiple layers by index
+        const bridgeLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Divisions",
-          opacity: 0.6,
+          title: "Condition Locations",
+          opacity: 0.8,
           listMode: "show",
           sublayers: [
             {
@@ -126,49 +143,13 @@ const Map = () => {
               title: "Divisions",
               opacity: 0.6,
               listMode: "show",
-            }
-          ]
-        });
-
-        // MapImageLayer for Districts
-        const districtsLayer = new MapImageLayer({
-          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Districts",
-          opacity: 0.6,
-          listMode: "show",
-          sublayers: [
+            },
             {
               id: 1, // Districts layer (index 1)
               title: "Districts",
               opacity: 0.6,
               listMode: "show",
-            }
-          ]
-        });
-
-        // MapImageLayer for Bridge Locations (Index 2)
-        const bridgeLayer = new MapImageLayer({
-          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Bridge Locations",
-          opacity: 0.8,
-          listMode: "show",
-          sublayers: [
-            {
-              id: 2, // Bridge Locations (index 2)
-              title: "Bridges",
-              opacity: 0.8,
-              listMode: "show",
-            }
-          ]
-        });
-
-        // MapImageLayer for Condition Layers (Good, Fair, Poor, etc.)
-        const conditionLayer = new MapImageLayer({
-          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Condition Locations",
-          opacity: 0.8,
-          listMode: "show",
-          sublayers: [
+            },
             {
               id: 3, // GOOD layer (index 3)
               title: "Good",
@@ -192,22 +173,25 @@ const Map = () => {
               title: "Under Construction",
               opacity: 0.6,
               listMode: "show",
-            }
-          ]
+            },
+            {
+              id: 2, // BRIDGES LOCATIONS layer (index 2)
+              title: "Bridge Locations",
+              popupTemplate: popupTemplate,
+            },
+          ],
         });
 
-        // Add Layers to the Map
-        map.add(divisionsLayer);
-        map.add(districtsLayer);
+        // Add the Layer to the Map
         map.add(bridgeLayer);
-        map.add(conditionLayer);
 
         // Layer List Widget
         const layerList = new LayerList({
           view: view,
           listItemCreatedFunction: (event) => {
+            // Customize Layer List items
             const item = event.item;
-            if (item.layer === divisionsLayer || item.layer === districtsLayer || item.layer === bridgeLayer || item.layer === conditionLayer) {
+            if (item.layer === bridgeLayer) {
               item.panel = {
                 content: "legend",
                 open: true,
@@ -233,7 +217,7 @@ const Map = () => {
         viewRef.current.container = null;
       }
     };
-  }, []);
+  }, [districtId]); // Re-run when districtId changes
 
   return (
     <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">

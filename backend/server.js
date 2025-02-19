@@ -287,7 +287,6 @@ app.get("/api/structure-counts", async (req, res) => {
   }
 });
 
-
 app.get("/api/structure-counts-inspected", async (req, res) => {
   try {
     const query = `
@@ -340,35 +339,35 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 //     } = req.query;
 
 //     let query = `
-//       SELECT 
-//         uu_bms_id, 
-//         pms_sec_id, 
-//         structure_no, 
-//         structure_type_id, 
-//         structure_type, 
-//         road_name, 
-//         road_name_cwd, 
-//         route_id, 
-//         survey_id, 
-//         surveyor_name, 
-//         district_id, 
-//         district, 
-//         road_classification, 
-//         road_surface_type, 
-//         carriageway_type, 
-//         direction, 
-//         visual_condition, 
-//         construction_type_id, 
-//         construction_type, 
-//         no_of_span, 
-//         span_length_m, 
-//         structure_width_m, 
-//         construction_year, 
-//         last_maintenance_date, 
-//         remarks, 
-//         is_surveyed, 
-//         x_centroid, 
-//         y_centroid, 
+//       SELECT
+//         uu_bms_id,
+//         pms_sec_id,
+//         structure_no,
+//         structure_type_id,
+//         structure_type,
+//         road_name,
+//         road_name_cwd,
+//         route_id,
+//         survey_id,
+//         surveyor_name,
+//         district_id,
+//         district,
+//         road_classification,
+//         road_surface_type,
+//         carriageway_type,
+//         direction,
+//         visual_condition,
+//         construction_type_id,
+//         construction_type,
+//         no_of_span,
+//         span_length_m,
+//         structure_width_m,
+//         construction_year,
+//         last_maintenance_date,
+//         remarks,
+//         is_surveyed,
+//         x_centroid,
+//         y_centroid,
 //         images_spans,
 //         CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
 //         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
@@ -453,6 +452,44 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 //   }
 // });
 
+app.get("/api/districtExtent", async (req, res) => {
+  try {
+    const { districtId = "%" } = req.query; // Get districtId from query parameters, default to "%"
+
+    // SQL query to fetch the required data based on districtId
+    let query = `
+      SELECT gid, __gid, ____gid, district_n, div_name, geom
+      FROM public.punjab_district_boundary
+    `;
+
+    if (districtId !== "%") {
+      query += ` WHERE district_n = $1`; // Modify the query to filter by districtId if it's not "%"
+    }
+
+    const values = districtId !== "%" ? [districtId] : [];
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length > 0) {
+      res.json({
+        success: true,
+        data: result.rows, // Send the rows returned by the query
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "District not found",
+      });
+    }
+  } catch (err) {
+    console.error("Error fetching district data", err);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching district data",
+      error: err.message,
+    });
+  }
+});
 
 // bridges details download for dashboard main
 app.get("/api/bridgesdownloadNew", async (req, res) => {
@@ -1086,7 +1123,7 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
-// for both(C+R) summary data 
+// for both(C+R) summary data
 app.get("/api/get-summary", async (req, res) => {
   try {
     const { bridgeId } = req.query;
@@ -1134,8 +1171,8 @@ app.get("/api/get-summary", async (req, res) => {
     const modifiedRows = rows.map((row) => ({
       ...row,
       PhotoPaths: Array.isArray(row.PhotoPaths)
-      ? row.PhotoPaths.map((p) => p.path)
-      : [],
+        ? row.PhotoPaths.map((p) => p.path)
+        : [],
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
     }));
 
