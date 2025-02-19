@@ -543,12 +543,12 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       queryParams.push(bridge);
       paramIndex++;
     }
-
-    if (structureType) {
-      query += ` AND md.structure_type_id = $${paramIndex}`;
-      queryParams.push(parseNumber(structureType));
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
       paramIndex++;
     }
+    
 
     if (constructionType) {
       query += ` AND md.construction_type_id = $${paramIndex}`;
@@ -649,10 +649,11 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
     }
 
     if (bridge && bridge.trim() !== "" && bridge !== "%") {
-      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) = $${paramIndex}`;
-      queryParams.push(bridge);
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
       paramIndex++;
     }
+    
 
     if (structureType) {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -834,12 +835,13 @@ app.get("/api/bridges", async (req, res) => {
     }
 
     if (bridge && bridge.trim() !== "" && bridge !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
-      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
-      queryParams.push(bridge);
-      countParams.push(bridge);
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
+      countParams.push(`%${bridge}%`);
       paramIndex++;
     }
+    
 
     if (structureType) {
       query += ` AND structure_type_id = $${paramIndex}`;
@@ -996,12 +998,13 @@ SELECT
     }
 
     if (bridge && bridge.trim() !== "" && bridge !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
-      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) = $${paramIndex}`;
-      queryParams.push(bridge);
-      countParams.push(bridge);
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
+      countParams.push(`%${bridge}%`);
       paramIndex++;
     }
+    
 
     if (structureType) {
       query += ` AND structure_type_id = $${paramIndex}`;

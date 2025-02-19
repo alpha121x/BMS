@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useCallback } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { Fancybox } from "@fancyapps/ui";
 import Swal from "sweetalert2";
 
 const InspectionList = ({ bridgeId }) => {
@@ -19,6 +17,8 @@ const InspectionList = ({ bridgeId }) => {
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
   const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   useEffect(() => {
     if (bridgeId) {
@@ -26,11 +26,6 @@ const InspectionList = ({ bridgeId }) => {
       fetchsummaryData();
     }
   }, [bridgeId]);
-
-  useEffect(() => {
-    Fancybox.bind("[data-fancybox='gallery']", {});
-    return () => Fancybox.destroy();
-  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -272,6 +267,15 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
+  const handleClosePhotoModal = () => {
+    setShowPhotoModal(false);
+  };
+
   const getDamageLevel = (data) => {
     const damageLevels = [...new Set(data.map((item) => item.DamageLevel))];
     return damageLevels.join(", ");
@@ -449,30 +453,26 @@ const InspectionList = ({ bridgeId }) => {
                                       >
                                         <div className="row">
                                           <div className="col-md-3">
-                                            {inspection.PhotoPaths
-                                              ?.length > 0 && (
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
                                               <div className="d-flex flex-wrap gap-2">
                                                 {inspection.PhotoPaths.map(
                                                   (photo, i) => (
-                                                    <a
+                                                    <img
                                                       key={`photo-${inspection.id}-${i}`}
-                                                      href={photo}
-                                                      data-fancybox="gallery"
-                                                      data-caption={`Photo ${
-                                                        i + 1
-                                                      }`}
-                                                    >
-                                                      <img
-                                                        src={photo}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="img-fluid rounded border"
-                                                        style={{
-                                                          width: "80px",
-                                                          height: "80px",
-                                                          objectFit: "cover",
-                                                        }}
-                                                      />
-                                                    </a>
+                                                      src={photo}
+                                                      alt={`Photo ${i + 1}`}
+                                                      className="img-fluid rounded border"
+                                                      style={{
+                                                        width: "80px",
+                                                        height: "80px",
+                                                        objectFit: "cover",
+                                                        cursor: "pointer",
+                                                      }}
+                                                      onClick={() =>
+                                                        handlePhotoClick(photo)
+                                                      } // Open modal on click
+                                                    />
                                                   )
                                                 )}
                                               </div>
@@ -631,30 +631,26 @@ const InspectionList = ({ bridgeId }) => {
                                       >
                                         <div className="row">
                                           <div className="col-md-3">
-                                            {inspection.PhotoPaths
-                                              ?.length > 0 && (
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
                                               <div className="d-flex flex-wrap gap-2">
                                                 {inspection.PhotoPaths.map(
                                                   (photo, i) => (
-                                                    <a
+                                                    <img
                                                       key={`photo-${inspection.id}-${i}`}
-                                                      href={photo}
-                                                      data-fancybox="gallery"
-                                                      data-caption={`Photo ${
-                                                        i + 1
-                                                      }`}
-                                                    >
-                                                      <img
-                                                        src={photo}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="img-fluid rounded border"
-                                                        style={{
-                                                          width: "80px",
-                                                          height: "80px",
-                                                          objectFit: "cover",
-                                                        }}
-                                                      />
-                                                    </a>
+                                                      src={photo}
+                                                      alt={`Photo ${i + 1}`}
+                                                      className="img-fluid rounded border"
+                                                      style={{
+                                                        width: "80px",
+                                                        height: "80px",
+                                                        objectFit: "cover",
+                                                        cursor: "pointer",
+                                                      }}
+                                                      onClick={() =>
+                                                        handlePhotoClick(photo)
+                                                      } // Open modal on click
+                                                    />
                                                   )
                                                 )}
                                               </div>
@@ -714,10 +710,30 @@ const InspectionList = ({ bridgeId }) => {
             </div>
           )}
 
+          <Modal
+            show={showPhotoModal}
+            onHide={handleClosePhotoModal}
+            centered
+            size="lg"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Enlarged Photo</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="text-center">
+              {selectedPhoto && (
+                <img
+                  src={selectedPhoto}
+                  alt="Enlarged"
+                  className="img-fluid rounded border"
+                  style={{ maxWidth: "100%", maxHeight: "80vh" }}
+                />
+              )}
+            </Modal.Body>
+          </Modal>
+
           {activeDiv === "unapproved" && (
             <div className="mb-4">
               <h5>Unapproved Reports</h5>
-
               {unapprovedData && Object.keys(unapprovedData).length > 0 ? (
                 Object.keys(unapprovedData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
@@ -754,30 +770,28 @@ const InspectionList = ({ bridgeId }) => {
                                         >
                                           <div className="row">
                                             <div className="col-md-3">
-                                              {inspection.PhotoPaths
-                                                ?.length > 0 && (
+                                              {inspection.PhotoPaths?.length >
+                                                0 && (
                                                 <div className="d-flex flex-wrap gap-2">
                                                   {inspection.PhotoPaths.map(
                                                     (photo, i) => (
-                                                      <a
+                                                      <img
                                                         key={`photo-${inspection.id}-${i}`}
-                                                        href={photo}
-                                                        data-fancybox="gallery"
-                                                        data-caption={`Photo ${
-                                                          i + 1
-                                                        }`}
-                                                      >
-                                                        <img
-                                                          src={photo}
-                                                          alt={`Photo ${i + 1}`}
-                                                          className="img-fluid rounded border"
-                                                          style={{
-                                                            width: "80px",
-                                                            height: "80px",
-                                                            objectFit: "cover",
-                                                          }}
-                                                        />
-                                                      </a>
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                          cursor: "pointer",
+                                                        }}
+                                                        onClick={() =>
+                                                          handlePhotoClick(
+                                                            photo
+                                                          )
+                                                        } // Open modal on click
+                                                      />
                                                     )
                                                   )}
                                                 </div>
