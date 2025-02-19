@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
-import "@fancyapps/ui/dist/fancybox/fancybox.css"; // Try this if `styles` path doesn't work
-import { Fancybox } from "@fancyapps/ui";
 
 const InspectionList = ({ bridgeId }) => {
   const [inspectionData, setInspectionData] = useState([]);
@@ -14,6 +12,8 @@ const InspectionList = ({ bridgeId }) => {
   const [error, setError] = useState(null);
 
   const [openAccordions, setOpenAccordions] = useState({});
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   const toggleAccordion = (spanIndex) => {
     setOpenAccordions((prevState) => ({
@@ -27,13 +27,6 @@ const InspectionList = ({ bridgeId }) => {
       fetchData();
     }
   }, [bridgeId]); // Refetch when inspectionType changes
-
-  useEffect(() => {
-    Fancybox.bind("[data-fancybox='gallery']", {});
-
-    // Cleanup Fancybox when the component unmounts
-    return () => Fancybox.destroy();
-  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -61,6 +54,15 @@ const InspectionList = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
+  const handleClosePhotoModal = () => {
+    setShowPhotoModal(false);
   };
 
   // download csv
@@ -332,23 +334,19 @@ const InspectionList = ({ bridgeId }) => {
                                 {inspection.PhotoPaths?.length > 0 && (
                                   <div className="d-flex flex-wrap gap-2">
                                     {inspection.PhotoPaths.map((photo, i) => (
-                                      <a
-                                        key={i}
-                                        href={photo}
-                                        data-fancybox="gallery"
-                                        data-caption={`Photo ${i + 1}`}
-                                      >
-                                        <img
-                                          src={photo}
-                                          alt={`Photo ${i + 1}`}
-                                          className="img-fluid rounded border"
-                                          style={{
-                                            width: "80px",
-                                            height: "80px",
-                                            objectFit: "cover",
-                                          }}
-                                        />
-                                      </a>
+                                      <img
+                                        key={`photo-${inspection.id}-${i}`}
+                                        src={photo}
+                                        alt={`Photo ${i + 1}`}
+                                        className="img-fluid rounded border"
+                                        style={{
+                                          width: "80px",
+                                          height: "80px",
+                                          objectFit: "cover",
+                                          cursor: "pointer",
+                                        }}
+                                        onClick={() => handlePhotoClick(photo)} // Open modal on click
+                                      />
                                     ))}
                                   </div>
                                 )}
@@ -377,6 +375,30 @@ const InspectionList = ({ bridgeId }) => {
                                   </div>
                                 </div>
                               </div>
+
+                              <Modal
+                                show={showPhotoModal}
+                                onHide={handleClosePhotoModal}
+                                centered
+                                size="lg"
+                              >
+                                <Modal.Header closeButton>
+                                  <Modal.Title>Enlarged Photo</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body className="text-center">
+                                  {selectedPhoto && (
+                                    <img
+                                      src={selectedPhoto}
+                                      alt="Enlarged"
+                                      className="img-fluid rounded border"
+                                      style={{
+                                        maxWidth: "100%",
+                                        maxHeight: "80vh",
+                                      }}
+                                    />
+                                  )}
+                                </Modal.Body>
+                              </Modal>
                             </div>
                           </div>
                         ))}
