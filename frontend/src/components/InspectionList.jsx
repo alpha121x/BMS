@@ -240,7 +240,7 @@ const InspectionList = ({ bridgeId }) => {
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
       );
       const data = await response.json();
-
+  
       if (
         !data.success ||
         !Array.isArray(data.bridges) ||
@@ -250,16 +250,92 @@ const InspectionList = ({ bridgeId }) => {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-
+  
       const summaryData = data.bridges;
       const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
-
+  
+      // Create worksheet with data
       const ws = XLSX.utils.json_to_sheet(summaryData);
-      ws["!cols"] = Object.keys(summaryData[0]).map(() => ({ width: 20 }));
-
+  
+      // Add columns for both photo types
+      ws['A1'].v = 'Overview Photos';
+      ws['B1'].v = 'Inspection Photos';
+  
+      // Process both photo arrays
+      await Promise.all(summaryData.map(async (row, rowIndex) => {
+        // Process Overview Photos
+        if (row.OverviewPhotos && row.OverviewPhotos.length > 0) {
+          try {
+            const img = new Image();
+            img.src = row.OverviewPhotos[0];
+            await img.decode();
+  
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const maxSize = 100;
+            const ratio = Math.min(maxSize / img.width, maxSize / img.height);
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  
+            const base64 = canvas.toDataURL('image/png');
+            const cellAddress = XLSX.utils.encode_cell({r: rowIndex + 1, c: 0});
+            ws[cellAddress] = { t: 's', v: 'Image' };
+            ws[cellAddress].s = { alignment: { vertical: 'center' }};
+  
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+            XLSX.utils.book_add_image(wb, base64, `overview${rowIndex}`, {
+              position: { type: 'twoCellAnchor', from: { col: 0, row: rowIndex }, to: { col: 0, row: rowIndex }},
+              editAs: 'oneCell'
+            });
+          } catch (error) {
+            console.error('Error processing overview photo:', error);
+          }
+        }
+  
+        // Process Inspection Photos
+        if (row.InspectionPhotos && row.InspectionPhotos.length > 0) {
+          try {
+            const img = new Image();
+            img.src = row.InspectionPhotos[0];
+            await img.decode();
+  
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const maxSize = 100;
+            const ratio = Math.min(maxSize / img.width, maxSize / img.height);
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  
+            const base64 = canvas.toDataURL('image/png');
+            const cellAddress = XLSX.utils.encode_cell({r: rowIndex + 1, c: 1});
+            ws[cellAddress] = { t: 's', v: 'Image' };
+            ws[cellAddress].s = { alignment: { vertical: 'center' }};
+  
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+            XLSX.utils.book_add_image(wb, base64, `inspection${rowIndex}`, {
+              position: { type: 'twoCellAnchor', from: { col: 1, row: rowIndex }, to: { col: 1, row: rowIndex }},
+              editAs: 'oneCell'
+            });
+          } catch (error) {
+            console.error('Error processing inspection photo:', error);
+          }
+        }
+      }));
+  
+      // Adjust column widths
+      ws['!cols'] = [
+        { wch: 20 }, // Overview Photos column
+        { wch: 20 }, // Inspection Photos column
+        ...Object.keys(summaryData[0]).map(() => ({ width: 20 }))
+      ];
+  
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inspections");
-
+  
       XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
