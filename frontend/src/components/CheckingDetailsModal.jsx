@@ -3,7 +3,7 @@ import { Modal, Carousel } from "react-bootstrap";
 
 const CheckingDetailsModal = ({ selectedRow }) => {
   // Extract paths from photopath array
-  const photosToDisplay = selectedRow?.inspection_images || [];
+  const photosToDisplay = selectedRow?.PhotoPaths || [];
 
   return (
     <Modal.Body>

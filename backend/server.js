@@ -1202,7 +1202,7 @@ app.get("/api/inspections", async (req, res) => {
         ins."DamageLevel", 
         ins."damage_extent",  
         ins."Remarks", 
-        ins."inspection_images", 
+        ins.inspection_images AS "PhotoPaths",
         ins."ApprovedFlag"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
@@ -1227,18 +1227,36 @@ app.get("/api/inspections", async (req, res) => {
       paramIndex++;
     }
 
-    const { rows } = await pool.query(query, queryParams);
+    const result = await pool.query(query, queryParams);
 
-    // Modify response data
-    const modifiedRows = rows.map((row) => ({
-      ...row,
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-      inspection_images: row.inspection_images
-        ? row.inspection_images.split(",") // Convert to array
-        : [], // Default to empty array if null
-    }));
+    // Process the "PhotoPaths" to extract only URLs
+    const processedData = result.rows.map(row => {
+      let extractedPhotoPaths = [];
 
-    res.json({ success: true, data: modifiedRows });
+      try {
+        if (row.PhotoPaths) {
+          // Fix any formatting issues before parsing
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          // Loop through the object and extract all image URLs
+          Object.values(parsedPhotos).forEach(category => {
+            Object.values(category).forEach(imagesArray => {
+              extractedPhotoPaths.push(...imagesArray);
+            });
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Replace nested structure with a simple array
+      };
+    });
+
+    res.json({ success: true, data: processedData });
   } catch (error) {
     console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
