@@ -17,6 +17,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());
 
+const path = require("path");
+
+// Serve the 'uploads' folder statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // PostgreSQL Pool Connection
 const pool = new Pool({
   host: process.env.DB_HOST,
