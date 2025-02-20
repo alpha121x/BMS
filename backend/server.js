@@ -540,14 +540,12 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       paramIndex++;
     }
 
-    
-    if (inspectionStatus === 'yes') {
+    if (inspectionStatus === "yes") {
       query += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    } else if (inspectionStatus === 'no') {
+    } else if (inspectionStatus === "no") {
       query += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
     }
 
-    
     if (category) {
       query += ` AND md.visual_condition ILIKE $${paramIndex}`;
       queryParams.push(category);
@@ -566,12 +564,11 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       paramIndex++;
     }
 
-    if (inspectionStatus === 'yes') {
+    if (inspectionStatus === "yes") {
       query += ` AND md.uu_bms_id IN (SELECT DISTINCT f.uu_bms_id FROM bms.tbl_inspection_f)`;
-    } else if (inspectionStatus === 'no') {
+    } else if (inspectionStatus === "no") {
       query += ` AND md.uu_bms_id NOT IN (SELECT DISTINCT f.uu_bms_id FROM bms.tbl_inspection_f)`;
     }
-    
 
     if (constructionType) {
       query += ` AND md.construction_type_id = $${paramIndex}`;
@@ -678,15 +675,13 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
       queryParams.push(`%${bridge}%`);
       paramIndex++;
     }
-    
 
-    if (inspectionStatus === 'yes') {
+    if (inspectionStatus === "yes") {
       query += ` AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    } else if (inspectionStatus === 'no') {
+    } else if (inspectionStatus === "no") {
       query += ` AND md.uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
     }
 
-    
     if (category) {
       query += ` AND md.visual_condition ILIKE $${paramIndex}`;
       queryParams.push(category);
@@ -881,7 +876,6 @@ app.get("/api/bridges", async (req, res) => {
       countParams.push(`%${bridge}%`);
       paramIndex++;
     }
-    
 
     if (structureType) {
       query += ` AND structure_type_id = $${paramIndex}`;
@@ -907,14 +901,13 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-    if (inspectionStatus === 'yes') {
+    if (inspectionStatus === "yes") {
       query += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
       countQuery += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    } else if (inspectionStatus === 'no') {
+    } else if (inspectionStatus === "no") {
       query += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
       countQuery += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
     }
-    
 
     if (minBridgeLength) {
       query += ` AND structure_width_m >= $${paramIndex}`;
@@ -1066,14 +1059,14 @@ SELECT
       paramIndex++;
     }
 
-    if (inspectionStatus === 'yes') {
+    if (inspectionStatus === "yes") {
       query += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
       countQuery += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    } else if (inspectionStatus === 'no') {
+    } else if (inspectionStatus === "no") {
       query += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
       countQuery += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
     }
-    
+
     if (category) {
       query += ` AND visual_condition ILIKE $${paramIndex}`;
       countQuery += ` AND visual_condition ILIKE $${paramIndex}`;
@@ -1260,7 +1253,6 @@ app.get("/api/get-summary", async (req, res) => {
   }
 });
 
-// For consultant inspection
 app.get("/api/get-inspections", async (req, res) => {
   try {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
@@ -1348,15 +1340,80 @@ app.get("/api/get-inspections", async (req, res) => {
       pool.query(unapprovedQuery, [bridgeId]),
     ]);
 
-    // Format rows to clean paths
+    // Helper function to extract URLs from potentially malformed JSON paths
+    function extractUrlsFromPath(pathString) {
+      // If it's not a string or empty, return empty array
+      if (!pathString || typeof pathString !== "string") return [];
+
+      // Clean up the string
+      const trimmedPath = pathString.trim();
+
+      // Case 1: Direct URL
+      if (trimmedPath.startsWith("http")) {
+        return [trimmedPath];
+      }
+
+      // Case 2: Try to parse as JSON
+      try {
+        // Handle malformed JSON with missing opening brace
+        let jsonStr = trimmedPath;
+        if (trimmedPath.startsWith('"') && !trimmedPath.startsWith('"{')) {
+          jsonStr = "{" + trimmedPath;
+        }
+
+        // Add missing closing brace if needed
+        const openBraces = (jsonStr.match(/{/g) || []).length;
+        const closeBraces = (jsonStr.match(/}/g) || []).length;
+        if (openBraces > closeBraces) {
+          jsonStr += "}";
+        }
+
+        const parsed = JSON.parse(jsonStr);
+        const urls = [];
+
+        // Extract URLs from nested structure
+        Object.keys(parsed).forEach((category) => {
+          const categoryObj = parsed[category];
+          Object.keys(categoryObj).forEach((index) => {
+            const urlArray = categoryObj[index];
+            if (Array.isArray(urlArray)) {
+              urlArray.forEach((url) => {
+                if (typeof url === "string" && url.startsWith("http")) {
+                  urls.push(url);
+                }
+              });
+            }
+          });
+        });
+
+        return urls;
+      } catch (e) {
+        // Case 3: Fallback - try to extract URL using regex
+        const urlMatches = trimmedPath.match(/(http[^"]+\.jpg)/g);
+        return urlMatches || [];
+      }
+    }
+
+    // Updated formatRows function
     const formatRows = (rows) =>
-      rows.map((row) => ({
-        ...row,
-        PhotoPaths: Array.isArray(row.PhotoPaths)
-          ? row.PhotoPaths.map((p) => p.trim()) // Trim spaces around paths
-          : [],
-        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-      }));
+      rows.map((row) => {
+        // Process PhotoPaths
+        let extractedUrls = [];
+        if (Array.isArray(row.PhotoPaths)) {
+          // Process each path string and collect all URLs
+          row.PhotoPaths.forEach((pathString) => {
+            extractedUrls = extractedUrls.concat(
+              extractUrlsFromPath(pathString)
+            );
+          });
+        }
+
+        return {
+          ...row,
+          PhotoPaths: extractedUrls,
+          ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+        };
+      });
 
     res.status(200).json({
       success: true,
@@ -1371,7 +1428,6 @@ app.get("/api/get-inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 // For Rams inspection
 app.get("/api/get-inspections-rams", async (req, res) => {

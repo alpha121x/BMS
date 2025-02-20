@@ -465,11 +465,11 @@ const InspectionList = ({ bridgeId }) => {
                                                 }}
                                               >
                                                 {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
+                                                  (photoUrl, index) => (
                                                     <img
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      src={photo}
-                                                      alt={`Photo ${i + 1}`}
+                                                      key={`photo-${inspection.id}-${index}`}
+                                                      src={photoUrl}
+                                                      alt={`Photo ${index + 1}`}
                                                       className="img-fluid rounded border"
                                                       style={{
                                                         width: "80px",
@@ -479,8 +479,15 @@ const InspectionList = ({ bridgeId }) => {
                                                         flexShrink: 0,
                                                       }}
                                                       onClick={() =>
-                                                        handlePhotoClick(photo)
+                                                        handlePhotoClick(
+                                                          photoUrl
+                                                        )
                                                       }
+                                                      onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                          "/placeholder-image.png";
+                                                      }}
                                                     />
                                                   )
                                                 )}
@@ -787,41 +794,43 @@ const InspectionList = ({ bridgeId }) => {
                                           style={{ backgroundColor: "#CFE2FF" }}
                                         >
                                           <div className="row">
-                                          <div className="col-md-3">
-                                            {inspection.PhotoPaths?.length >
-                                              0 && (
-                                              <div
-                                                className="d-flex gap-2"
-                                                style={{
-                                                  overflowX: "auto",
-                                                  whiteSpace: "nowrap",
-                                                  display: "flex",
-                                                  paddingBottom: "5px",
-                                                }}
-                                              >
-                                                {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
-                                                    <img
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      src={photo}
-                                                      alt={`Photo ${i + 1}`}
-                                                      className="img-fluid rounded border"
-                                                      style={{
-                                                        width: "80px",
-                                                        height: "80px",
-                                                        objectFit: "cover",
-                                                        cursor: "pointer",
-                                                        flexShrink: 0,
-                                                      }}
-                                                      onClick={() =>
-                                                        handlePhotoClick(photo)
-                                                      }
-                                                    />
-                                                  )
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
+                                            <div className="col-md-3">
+                                              {inspection.PhotoPaths?.length >
+                                                0 && (
+                                                <div
+                                                  className="d-flex gap-2"
+                                                  style={{
+                                                    overflowX: "auto",
+                                                    whiteSpace: "nowrap",
+                                                    display: "flex",
+                                                    paddingBottom: "5px",
+                                                  }}
+                                                >
+                                                  {inspection.PhotoPaths.map(
+                                                    (photo, i) => (
+                                                      <img
+                                                        key={`photo-${inspection.id}-${i}`}
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                          cursor: "pointer",
+                                                          flexShrink: 0,
+                                                        }}
+                                                        onClick={() =>
+                                                          handlePhotoClick(
+                                                            photo
+                                                          )
+                                                        }
+                                                      />
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
                                             <div className="col-md-6">
                                               <strong>Parts:</strong>{" "}
                                               {inspection.PartsName || "N/A"}{" "}
