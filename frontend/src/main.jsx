@@ -147,6 +147,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }
         />
 
+          {/* Private Route for BridgeInfo */}
+          <Route
+          path="/BridgeInfo"
+          element={
+            <PrivateEvaluationRoute>
+              <BridgeInfo />
+            </PrivateEvaluationRoute>
+          }
+        />
+
           {/* Private Route for BridgeWise Score */}
           <Route
           path="/BridgeWiseScore"
