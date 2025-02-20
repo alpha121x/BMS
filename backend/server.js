@@ -775,7 +775,7 @@ app.get("/api/inspections-export", async (req, res) => {
            f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
            f.damage_extent, f."Remarks", f.current_date_time, 
            ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-           COALESCE(f."photopath"::jsonb, '[]'::jsonb) AS "Inspection Photos"
+           COALESCE(string_to_array(f.inspection_images, ','), '{}') AS "Inspection Photos"
     FROM bms.tbl_bms_master_data md
     LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
     WHERE 1=1`;
