@@ -759,7 +759,7 @@ app.get("/api/inspections-export", async (req, res) => {
     const { bridgeId } = req.query;
 
     let query = `
-    SELECT f.bridge_name,  md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, 
+    SELECT f.bridge_name, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, 
            md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, 
            md.survey_chainage_start, md.survey_chainage_end, md.pms_sec_id, md.structure_no, md.surveyor_name, 
            md.zone_id, md.zone, md.district_id, md.district, md.road_classification_id, md.road_classification, 
@@ -769,20 +769,48 @@ app.get("/api/inspections-export", async (req, res) => {
            md.remarks, f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", f."PartsID", f."PartsName", 
            f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
            f.damage_extent, f."Remarks", f.current_date_time, 
-           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos"
+           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+           f.inspection_images AS "PhotoPaths"
     FROM bms.tbl_bms_master_data md
     LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
     WHERE 1=1`;
 
     const queryParams = [];
-
     if (bridgeId && !isNaN(bridgeId)) {
       query += ` AND md.uu_bms_id = $1`;
       queryParams.push(Number(bridgeId));
     }
 
     const result = await pool.query(query, queryParams);
-    res.json({ success: true, bridges: result.rows });
+
+    // Process the "PhotoPaths" to extract only URLs
+    const processedData = result.rows.map(row => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          // Fix any formatting issues before parsing
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          // Loop through the object and extract all image URLs
+          Object.values(parsedPhotos).forEach(category => {
+            Object.values(category).forEach(imagesArray => {
+              extractedPhotoPaths.push(...imagesArray);
+            });
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Replace nested structure with a simple array
+      };
+    });
+
+    res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({
@@ -1156,28 +1184,52 @@ SELECT
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
   try {
-    const query = `
+    // Extract and validate query parameters
+    let { district, bridge } = req.query;
+
+    // Base query
+    let query = `
       SELECT 
         bmd."pms_sec_id", 
         bmd."structure_no",
-        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, -- Combine for bridge_name
-        ins."SpanIndex", 
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
+        ins."SpanIndex",
+        ins."district_id", 
         ins."WorkKindName", 
         ins."PartsName", 
         ins."MaterialName", 
         ins."DamageKindName", 
         ins."DamageLevel", 
-        ins."damage_extent",  -- New column added
+        ins."damage_extent",  
         ins."Remarks", 
         ins."inspection_images", 
         ins."ApprovedFlag"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
       ON ins."uu_bms_id" = bmd."uu_bms_id"
+      WHERE 1=1
     `;
 
-    const { rows } = await pool.query(query);
+    const queryParams = [];
+    let paramIndex = 1;
 
+    // Ensure `district` is a valid number before adding it
+    if (district && !isNaN(parseInt(district))) {
+      query += ` AND ins."district_id" = $${paramIndex}`;
+      queryParams.push(parseInt(district)); // Convert to integer
+      paramIndex++;
+    }
+
+    // Validate `bridge`
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
+      paramIndex++;
+    }
+
+    const { rows } = await pool.query(query, queryParams);
+
+    // Modify response data
     const modifiedRows = rows.map((row) => ({
       ...row,
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
@@ -1192,6 +1244,7 @@ app.get("/api/inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // for both(C+R) summary data
 app.get("/api/get-summary", async (req, res) => {
