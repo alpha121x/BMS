@@ -478,6 +478,7 @@ const InspectionList = ({ bridgeId }) => {
                                                         cursor: "pointer",
                                                         flexShrink: 0,
                                                       }}
+                                                      loading="lazy" // Lazy loading added
                                                       onClick={() =>
                                                         handlePhotoClick(
                                                           photoUrl
@@ -494,6 +495,7 @@ const InspectionList = ({ bridgeId }) => {
                                               </div>
                                             )}
                                           </div>
+
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
                                             {inspection.PartsName || "N/A"}{" "}

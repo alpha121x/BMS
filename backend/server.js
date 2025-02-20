@@ -1303,7 +1303,7 @@ app.get("/api/get-inspections", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
+        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1326,7 +1326,7 @@ app.get("/api/get-inspections", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
+         COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1444,11 +1444,11 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
-         surveyed_by,
+        surveyed_by,
         damage_extent,
-        qc_rams,
-        qc_remarks_rams,
+        qc_con,
         qc_remarks_con,
+        qc_remarks_rams,
         reviewed_by,
         bridge_name, 
         "SpanIndex", 
@@ -1458,11 +1458,11 @@ app.get("/api/get-inspections-rams", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
-      AND qc_con = '2'  -- Approved Consultant Inspections
+     AND qc_con = '2'  -- Approved Consultant Inspections
       AND qc_rams = '0' -- Pending RAMS Review
       ORDER BY inspection_id DESC;
     `;
@@ -1471,9 +1471,9 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
-        qc_rams,
-        qc_remarks_rams,
+        qc_con,
         qc_remarks_con,
+        qc_remarks_rams,
         reviewed_by,
         bridge_name, 
         "SpanIndex", 
@@ -1483,7 +1483,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+       COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1495,9 +1495,9 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       SELECT 
         uu_bms_id,
         inspection_id,
-        qc_rams,
-        qc_remarks_rams,
+        qc_con,
         qc_remarks_con,
+        qc_remarks_rams,
         reviewed_by,
         bridge_name, 
         "SpanIndex", 
@@ -1507,11 +1507,11 @@ app.get("/api/get-inspections-rams", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
-      AND qc_rams = '3'
+       AND qc_rams = '3'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1521,45 +1521,96 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       pool.query(unapprovedQuery, [bridgeId]),
     ]);
 
-    const modifiedPendingRows = pendingRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+    // Helper function to extract URLs from potentially malformed JSON paths
+    function extractUrlsFromPath(pathString) {
+      // If it's not a string or empty, return empty array
+      if (!pathString || typeof pathString !== "string") return [];
 
-    const modifiedApprovedRows = approvedRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+      // Clean up the string
+      const trimmedPath = pathString.trim();
 
-    const modifiedUnapprovedRows = unapprovedRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+      // Case 1: Direct URL
+      if (trimmedPath.startsWith("http")) {
+        return [trimmedPath];
+      }
+
+      // Case 2: Try to parse as JSON
+      try {
+        // Handle malformed JSON with missing opening brace
+        let jsonStr = trimmedPath;
+        if (trimmedPath.startsWith('"') && !trimmedPath.startsWith('"{')) {
+          jsonStr = "{" + trimmedPath;
+        }
+
+        // Add missing closing brace if needed
+        const openBraces = (jsonStr.match(/{/g) || []).length;
+        const closeBraces = (jsonStr.match(/}/g) || []).length;
+        if (openBraces > closeBraces) {
+          jsonStr += "}";
+        }
+
+        const parsed = JSON.parse(jsonStr);
+        const urls = [];
+
+        // Extract URLs from nested structure
+        Object.keys(parsed).forEach((category) => {
+          const categoryObj = parsed[category];
+          Object.keys(categoryObj).forEach((index) => {
+            const urlArray = categoryObj[index];
+            if (Array.isArray(urlArray)) {
+              urlArray.forEach((url) => {
+                if (typeof url === "string" && url.startsWith("http")) {
+                  urls.push(url);
+                }
+              });
+            }
+          });
+        });
+
+        return urls;
+      } catch (e) {
+        // Case 3: Fallback - try to extract URL using regex
+        const urlMatches = trimmedPath.match(/(http[^"]+\.jpg)/g);
+        return urlMatches || [];
+      }
+    }
+
+    // Updated formatRows function
+    const formatRows = (rows) =>
+      rows.map((row) => {
+        // Process PhotoPaths
+        let extractedUrls = [];
+        if (Array.isArray(row.PhotoPaths)) {
+          // Process each path string and collect all URLs
+          row.PhotoPaths.forEach((pathString) => {
+            extractedUrls = extractedUrls.concat(
+              extractUrlsFromPath(pathString)
+            );
+          });
+        }
+
+        return {
+          ...row,
+          PhotoPaths: extractedUrls,
+          ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+        };
+      });
 
     res.status(200).json({
       success: true,
       data: {
-        pending: modifiedPendingRows, // Now includes pending RAMS reviews
-        approved: modifiedApprovedRows,
-        unapproved: modifiedUnapprovedRows,
+        pending: formatRows(pendingRows.rows),
+        approved: formatRows(approvedRows.rows),
+        unapproved: formatRows(unapprovedRows.rows),
       },
     });
   } catch (error) {
-    console.error("Error fetching inspection data (RAMS):", error);
+    console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// For Rams inspection
+// For Evaluator inspection
 app.get("/api/get-inspections-evaluator", async (req, res) => {
   try {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
@@ -1572,7 +1623,7 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
 
     const pendingQuery = `
       SELECT 
-        uu_bms_id,
+       uu_bms_id,
         inspection_id,
          surveyed_by,
         damage_extent,
@@ -1587,18 +1638,18 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
         "MaterialName", 
         "DamageKindName", 
         "DamageLevel", 
-        "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "Remarks",
+        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
-      AND qc_rams = '2'  -- Approved Consultant Inspections
+     AND qc_rams = '2'  -- Approved Consultant Inspections
       ORDER BY inspection_id DESC;
     `;
 
     const approvedQuery = `
       SELECT 
-        uu_bms_id,
+         uu_bms_id,
         inspection_id,
         qc_rams,
         qc_remarks_rams,
@@ -1612,16 +1663,17 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
+      AND qc_rams = '2'
       ORDER BY inspection_id DESC;
     `;
 
     const unapprovedQuery = `
       SELECT 
-        uu_bms_id,
+       uu_bms_id,
         inspection_id,
         qc_rams,
         qc_remarks_rams,
@@ -1635,10 +1687,11 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-        COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
+       AND qc_rams = '3'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1648,40 +1701,91 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
       pool.query(unapprovedQuery, [bridgeId]),
     ]);
 
-    const modifiedPendingRows = pendingRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+    // Helper function to extract URLs from potentially malformed JSON paths
+    function extractUrlsFromPath(pathString) {
+      // If it's not a string or empty, return empty array
+      if (!pathString || typeof pathString !== "string") return [];
 
-    const modifiedApprovedRows = approvedRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+      // Clean up the string
+      const trimmedPath = pathString.trim();
 
-    const modifiedUnapprovedRows = unapprovedRows.rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+      // Case 1: Direct URL
+      if (trimmedPath.startsWith("http")) {
+        return [trimmedPath];
+      }
+
+      // Case 2: Try to parse as JSON
+      try {
+        // Handle malformed JSON with missing opening brace
+        let jsonStr = trimmedPath;
+        if (trimmedPath.startsWith('"') && !trimmedPath.startsWith('"{')) {
+          jsonStr = "{" + trimmedPath;
+        }
+
+        // Add missing closing brace if needed
+        const openBraces = (jsonStr.match(/{/g) || []).length;
+        const closeBraces = (jsonStr.match(/}/g) || []).length;
+        if (openBraces > closeBraces) {
+          jsonStr += "}";
+        }
+
+        const parsed = JSON.parse(jsonStr);
+        const urls = [];
+
+        // Extract URLs from nested structure
+        Object.keys(parsed).forEach((category) => {
+          const categoryObj = parsed[category];
+          Object.keys(categoryObj).forEach((index) => {
+            const urlArray = categoryObj[index];
+            if (Array.isArray(urlArray)) {
+              urlArray.forEach((url) => {
+                if (typeof url === "string" && url.startsWith("http")) {
+                  urls.push(url);
+                }
+              });
+            }
+          });
+        });
+
+        return urls;
+      } catch (e) {
+        // Case 3: Fallback - try to extract URL using regex
+        const urlMatches = trimmedPath.match(/(http[^"]+\.jpg)/g);
+        return urlMatches || [];
+      }
+    }
+
+    // Updated formatRows function
+    const formatRows = (rows) =>
+      rows.map((row) => {
+        // Process PhotoPaths
+        let extractedUrls = [];
+        if (Array.isArray(row.PhotoPaths)) {
+          // Process each path string and collect all URLs
+          row.PhotoPaths.forEach((pathString) => {
+            extractedUrls = extractedUrls.concat(
+              extractUrlsFromPath(pathString)
+            );
+          });
+        }
+
+        return {
+          ...row,
+          PhotoPaths: extractedUrls,
+          ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+        };
+      });
 
     res.status(200).json({
       success: true,
       data: {
-        pending: modifiedPendingRows, // Now includes pending RAMS reviews
-        approved: modifiedApprovedRows,
-        unapproved: modifiedUnapprovedRows,
+        pending: formatRows(pendingRows.rows),
+        approved: formatRows(approvedRows.rows),
+        unapproved: formatRows(unapprovedRows.rows),
       },
     });
   } catch (error) {
-    console.error("Error fetching inspection data (RAMS):", error);
+    console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });

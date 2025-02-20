@@ -27,11 +27,6 @@ const InspectionListRams = ({ bridgeId }) => {
     }
   }, [bridgeId]);
 
-  useEffect(() => {
-    Fancybox.bind("[data-fancybox='gallery']", {});
-    return () => Fancybox.destroy();
-  }, []);
-
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -468,7 +463,7 @@ const InspectionListRams = ({ bridgeId }) => {
                                         style={{ backgroundColor: "#CFE2FF" }}
                                       >
                                         <div className="row">
-                                        <div className="col-md-3">
+                                          <div className="col-md-3">
                                             {inspection.PhotoPaths?.length >
                                               0 && (
                                               <div
@@ -481,11 +476,11 @@ const InspectionListRams = ({ bridgeId }) => {
                                                 }}
                                               >
                                                 {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
+                                                  (photoUrl, index) => (
                                                     <img
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      src={photo}
-                                                      alt={`Photo ${i + 1}`}
+                                                      key={`photo-${inspection.id}-${index}`}
+                                                      src={photoUrl}
+                                                      alt={`Photo ${index + 1}`}
                                                       className="img-fluid rounded border"
                                                       style={{
                                                         width: "80px",
@@ -494,15 +489,24 @@ const InspectionListRams = ({ bridgeId }) => {
                                                         cursor: "pointer",
                                                         flexShrink: 0,
                                                       }}
+                                                      loading="lazy" // Lazy loading added
                                                       onClick={() =>
-                                                        handlePhotoClick(photo)
+                                                        handlePhotoClick(
+                                                          photoUrl
+                                                        )
                                                       }
+                                                      onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                          "/placeholder-image.png";
+                                                      }}
                                                     />
                                                   )
                                                 )}
                                               </div>
                                             )}
                                           </div>
+
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
                                             {inspection.PartsName || "N/A"}{" "}
@@ -533,12 +537,12 @@ const InspectionListRams = ({ bridgeId }) => {
                                             <Form.Control
                                               as="textarea"
                                               rows={3} // You can adjust the number of rows as per your requirement
-                                              placeholder="Consultant Remarks"
+                                              placeholder="Rams Remarks"
                                               value={
-                                                inspection.qc_remarks_con || ""
+                                                inspection.qc_remarks_rams || ""
                                               }
                                               onChange={(e) =>
-                                                handleConsultantRemarksChange(
+                                                handleRamsRemarksChange(
                                                   spanIndex,
                                                   workKind,
                                                   inspection.inspection_id,
@@ -548,28 +552,52 @@ const InspectionListRams = ({ bridgeId }) => {
                                               className="mb-2"
                                             />
 
-                                            <Form.Select
-                                              value={inspection.qc_rams}
-                                              onChange={(e) =>
-                                                handleApprovedFlagChange(
-                                                  spanIndex,
-                                                  workKind,
-                                                  inspection.inspection_id,
-                                                  parseInt(e.target.value)
-                                                )
-                                              }
+                                            <Form.Group
+                                              controlId={`qc_con_${inspection.inspection_id}`}
                                               className="mb-2"
                                             >
-                                              <option value={1}>
-                                                Select Status
-                                              </option>
-                                              <option value={3}>
-                                                Unapproved
-                                              </option>
-                                              <option value={2}>
-                                                Approved
-                                              </option>
-                                            </Form.Select>
+                                              <div className="flex gap-4">
+                                                {/* Unapproved Option */}
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_rams_${inspection.inspection_id}`}
+                                                  label="Unapproved"
+                                                  value="3"
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }}
+                                                />
+
+                                                {/* Approved Option */}
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_rams_${inspection.inspection_id}`}
+                                                  label="Approved"
+                                                  value="2"
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }}
+                                                />
+                                              </div>
+                                            </Form.Group>
                                             <Button
                                               onClick={() =>
                                                 handleSaveChanges(inspection)
@@ -653,7 +681,7 @@ const InspectionListRams = ({ bridgeId }) => {
                                         style={{ backgroundColor: "#CFE2FF" }}
                                       >
                                         <div className="row">
-                                        <div className="col-md-3">
+                                          <div className="col-md-3">
                                             {inspection.PhotoPaths?.length >
                                               0 && (
                                               <div
@@ -666,11 +694,11 @@ const InspectionListRams = ({ bridgeId }) => {
                                                 }}
                                               >
                                                 {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
+                                                  (photoUrl, index) => (
                                                     <img
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      src={photo}
-                                                      alt={`Photo ${i + 1}`}
+                                                      key={`photo-${inspection.id}-${index}`}
+                                                      src={photoUrl}
+                                                      alt={`Photo ${index + 1}`}
                                                       className="img-fluid rounded border"
                                                       style={{
                                                         width: "80px",
@@ -679,15 +707,24 @@ const InspectionListRams = ({ bridgeId }) => {
                                                         cursor: "pointer",
                                                         flexShrink: 0,
                                                       }}
+                                                      loading="lazy" // Lazy loading added
                                                       onClick={() =>
-                                                        handlePhotoClick(photo)
+                                                        handlePhotoClick(
+                                                          photoUrl
+                                                        )
                                                       }
+                                                      onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                          "/placeholder-image.png";
+                                                      }}
                                                     />
                                                   )
                                                 )}
                                               </div>
                                             )}
                                           </div>
+
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
                                             {inspection.PartsName || "N/A"}{" "}
@@ -708,6 +745,11 @@ const InspectionListRams = ({ bridgeId }) => {
                                               Situation Remarks:
                                             </strong>{" "}
                                             {inspection.Remarks || "N/A"}
+                                            <br />
+                                            <strong>
+                                              Consultant Remarks:
+                                            </strong>{" "}
+                                            {inspection.qc_remarks_con || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <div className="text-start">
@@ -781,41 +823,53 @@ const InspectionListRams = ({ bridgeId }) => {
                                           style={{ backgroundColor: "#CFE2FF" }}
                                         >
                                           <div className="row">
-                                          <div className="col-md-3">
-                                            {inspection.PhotoPaths?.length >
-                                              0 && (
-                                              <div
-                                                className="d-flex gap-2"
-                                                style={{
-                                                  overflowX: "auto",
-                                                  whiteSpace: "nowrap",
-                                                  display: "flex",
-                                                  paddingBottom: "5px",
-                                                }}
-                                              >
-                                                {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
-                                                    <img
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      src={photo}
-                                                      alt={`Photo ${i + 1}`}
-                                                      className="img-fluid rounded border"
-                                                      style={{
-                                                        width: "80px",
-                                                        height: "80px",
-                                                        objectFit: "cover",
-                                                        cursor: "pointer",
-                                                        flexShrink: 0,
-                                                      }}
-                                                      onClick={() =>
-                                                        handlePhotoClick(photo)
-                                                      }
-                                                    />
-                                                  )
-                                                )}
-                                              </div>
-                                            )}
-                                          </div>
+                                            <div className="col-md-3">
+                                              {inspection.PhotoPaths?.length >
+                                                0 && (
+                                                <div
+                                                  className="d-flex gap-2"
+                                                  style={{
+                                                    overflowX: "auto",
+                                                    whiteSpace: "nowrap",
+                                                    display: "flex",
+                                                    paddingBottom: "5px",
+                                                  }}
+                                                >
+                                                  {inspection.PhotoPaths.map(
+                                                    (photoUrl, index) => (
+                                                      <img
+                                                        key={`photo-${inspection.id}-${index}`}
+                                                        src={photoUrl}
+                                                        alt={`Photo ${
+                                                          index + 1
+                                                        }`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                          cursor: "pointer",
+                                                          flexShrink: 0,
+                                                        }}
+                                                        loading="lazy" // Lazy loading added
+                                                        onClick={() =>
+                                                          handlePhotoClick(
+                                                            photoUrl
+                                                          )
+                                                        }
+                                                        onError={(e) => {
+                                                          e.target.onerror =
+                                                            null;
+                                                          e.target.src =
+                                                            "/placeholder-image.png";
+                                                        }}
+                                                      />
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+
                                             <div className="col-md-6">
                                               <strong>Parts:</strong>{" "}
                                               {inspection.PartsName || "N/A"}{" "}
@@ -840,6 +894,12 @@ const InspectionListRams = ({ bridgeId }) => {
                                                 Situation Remarks:
                                               </strong>{" "}
                                               {inspection.Remarks || "N/A"}
+                                              <br />
+                                              <strong>
+                                                Consultant Remarks:
+                                              </strong>{" "}
+                                              {inspection.qc_remarks_con ||
+                                                "N/A"}
                                             </div>
                                             <div className="col-md-3 d-flex flex-column justify-content-between">
                                               <div className="text-start">
