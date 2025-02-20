@@ -759,7 +759,7 @@ app.get("/api/inspections-export", async (req, res) => {
     const { bridgeId } = req.query;
 
     let query = `
-    SELECT f.bridge_name, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, 
+    SELECT CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, 
            md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, 
            md.survey_chainage_start, md.survey_chainage_end, md.pms_sec_id, md.structure_no, md.surveyor_name, 
            md.zone_id, md.zone, md.district_id, md.district, md.road_classification_id, md.road_classification, 
