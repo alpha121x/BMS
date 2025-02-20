@@ -1263,7 +1263,6 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
-
 // for both(C+R) summary data
 app.get("/api/get-summary", async (req, res) => {
   try {
@@ -1292,7 +1291,7 @@ app.get("/api/get-summary", async (req, res) => {
         "DamageKindName", 
         "DamageLevel", 
         "Remarks", 
-         COALESCE("photopath"::jsonb, '[]'::jsonb) AS "PhotoPaths", 
+        "inspection_images" AS "PhotoPaths",
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
@@ -1308,13 +1307,32 @@ app.get("/api/get-summary", async (req, res) => {
     }
 
     // Process the rows to convert inspection_images to an array
-    const modifiedRows = rows.map((row) => ({
-      ...row,
-      PhotoPaths: Array.isArray(row.PhotoPaths)
-        ? row.PhotoPaths.map((p) => p.path)
-        : [],
-      ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-    }));
+    const modifiedRows = rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          // Ensure JSON is properly formatted before parsing
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          // Extract all image URLs from the nested object
+          Object.values(parsedPhotos).forEach(category => {
+            Object.values(category).forEach(imagesArray => {
+              extractedPhotoPaths.push(...imagesArray);
+            });
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Replace nested structure with a simple array
+        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+      };
+    });
 
     res.status(200).json({ success: true, data: modifiedRows });
   } catch (error) {
