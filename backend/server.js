@@ -17,11 +17,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());
 
-const path = require("path");
-
-// Serve the 'uploads' folder statically
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
 // PostgreSQL Pool Connection
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -780,7 +775,7 @@ app.get("/api/inspections-export", async (req, res) => {
            f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
            f.damage_extent, f."Remarks", f.current_date_time, 
            ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-           COALESCE(string_to_array(f.inspection_images, ','), '{}') AS "Inspection Photos"
+           COALESCE(f."photopath"::jsonb, '[]'::jsonb) AS "Inspection Photos"
     FROM bms.tbl_bms_master_data md
     LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
     WHERE 1=1`;
@@ -1166,54 +1161,31 @@ SELECT
   }
 });
 
+// inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
   try {
-    // Extract and validate query parameters
-    let { district, bridge } = req.query;
-
-    // Base query
-    let query = `
+    const query = `
       SELECT 
         bmd."pms_sec_id", 
         bmd."structure_no",
-        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
-        ins."SpanIndex",
-        ins."district_id", 
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, -- Combine for bridge_name
+        ins."SpanIndex", 
         ins."WorkKindName", 
         ins."PartsName", 
         ins."MaterialName", 
         ins."DamageKindName", 
         ins."DamageLevel", 
-        ins."damage_extent",  
+        ins."damage_extent",  -- New column added
         ins."Remarks", 
         ins."inspection_images", 
         ins."ApprovedFlag"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
       ON ins."uu_bms_id" = bmd."uu_bms_id"
-      WHERE 1=1
     `;
 
-    const queryParams = [];
-    let paramIndex = 1;
+    const { rows } = await pool.query(query);
 
-    // Ensure `district` is a valid number before adding it
-    if (district && !isNaN(parseInt(district))) {
-      query += ` AND ins."district_id" = $${paramIndex}`;
-      queryParams.push(parseInt(district)); // Convert to integer
-      paramIndex++;
-    }
-
-    // Validate `bridge`
-    if (bridge && bridge.trim() !== "" && bridge !== "%") {
-      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridge}%`);
-      paramIndex++;
-    }
-
-    const { rows } = await pool.query(query, queryParams);
-
-    // Modify response data
     const modifiedRows = rows.map((row) => ({
       ...row,
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
@@ -1399,6 +1371,7 @@ app.get("/api/get-inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // For Rams inspection
 app.get("/api/get-inspections-rams", async (req, res) => {
