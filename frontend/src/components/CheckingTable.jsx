@@ -5,7 +5,7 @@ import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
 import Papa from "papaparse";
 
-const CheckingTable = () => {
+const CheckingTable = ({district, bridge}) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,17 +17,26 @@ const CheckingTable = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
-
+  }, [district, bridge]); // Dependency array to re-fetch when district or bridge changes
+  
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${BASE_URL}/api/inspections`);
+      // Construct the URL with parameters
+      const url = new URL(`${BASE_URL}/api/inspections`);
+      const params = new URLSearchParams();
+  
+      if (district) params.append("district", district);
+      if (bridge) params.append("bridge", bridge);
+  
+      url.search = params.toString(); // Append query parameters to the URL
+  
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch data");
-
+  
       const result = await response.json();
-
+  
       if (Array.isArray(result.data)) {
         setTableData(result.data);
       } else {
@@ -39,6 +48,7 @@ const CheckingTable = () => {
       setLoading(false);
     }
   };
+  
 
   const handleViewClick = (row) => {
     setSelectedRow(row);

@@ -259,7 +259,10 @@ const DashboardMain = () => {
           />
 
           <div className="mt-2">
-            <CheckingTable />
+            <CheckingTable
+             district={selectedDistrict}
+             bridge={bridge}
+             />
           </div>
         </div>
       </div>

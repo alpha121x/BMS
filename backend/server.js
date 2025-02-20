@@ -1161,31 +1161,54 @@ SELECT
   }
 });
 
-// inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
   try {
-    const query = `
+    // Extract and validate query parameters
+    let { district, bridge } = req.query;
+
+    // Base query
+    let query = `
       SELECT 
         bmd."pms_sec_id", 
         bmd."structure_no",
-        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, -- Combine for bridge_name
-        ins."SpanIndex", 
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
+        ins."SpanIndex",
+        ins."district_id", 
         ins."WorkKindName", 
         ins."PartsName", 
         ins."MaterialName", 
         ins."DamageKindName", 
         ins."DamageLevel", 
-        ins."damage_extent",  -- New column added
+        ins."damage_extent",  
         ins."Remarks", 
         ins."inspection_images", 
         ins."ApprovedFlag"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
       ON ins."uu_bms_id" = bmd."uu_bms_id"
+      WHERE 1=1
     `;
 
-    const { rows } = await pool.query(query);
+    const queryParams = [];
+    let paramIndex = 1;
 
+    // Ensure `district` is a valid number before adding it
+    if (district && !isNaN(parseInt(district))) {
+      query += ` AND ins."district_id" = $${paramIndex}`;
+      queryParams.push(parseInt(district)); // Convert to integer
+      paramIndex++;
+    }
+
+    // Validate `bridge`
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
+      paramIndex++;
+    }
+
+    const { rows } = await pool.query(query, queryParams);
+
+    // Modify response data
     const modifiedRows = rows.map((row) => ({
       ...row,
       ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
@@ -1371,7 +1394,6 @@ app.get("/api/get-inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 // For Rams inspection
 app.get("/api/get-inspections-rams", async (req, res) => {
