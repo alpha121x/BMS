@@ -766,10 +766,11 @@ app.get("/api/inspections-export", async (req, res) => {
            md.road_surface_type_id, md.road_surface_type, md.carriageway_type_id, md.carriageway_type, md.direction, 
            md.visual_condition, md.construction_type_id, md.construction_type, md.no_of_span, md.span_length_m, 
            md.structure_width_m, md.construction_year, md.last_maintenance_date, md.data_source, md.date_time, 
-           md.remarks, f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", f."PartsID", f."PartsName", 
+           md.remarks,
+           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+            f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", f."PartsID", f."PartsName", 
            f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
            f.damage_extent, f."Remarks", f.current_date_time, 
-           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
            f.inspection_images AS "PhotoPaths"
     FROM bms.tbl_bms_master_data md
     LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
