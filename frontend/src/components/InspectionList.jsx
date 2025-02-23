@@ -7,6 +7,8 @@ import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 const InspectionList = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
@@ -240,7 +242,7 @@ const InspectionList = ({ bridgeId }) => {
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
       );
       const data = await response.json();
-
+  
       if (
         !data.success ||
         !Array.isArray(data.bridges) ||
@@ -250,22 +252,72 @@ const InspectionList = ({ bridgeId }) => {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-
+  
       const summaryData = data.bridges;
       const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
-
-      const ws = XLSX.utils.json_to_sheet(summaryData);
-      ws["!cols"] = Object.keys(summaryData[0]).map(() => ({ width: 20 }));
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
-
-      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
+  
+      // Create a new workbook
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Inspections");
+  
+      // Define headers
+      worksheet.columns = [
+        { header: "Structure No", key: "structure_no", width: 15 },
+        { header: "Material", key: "MaterialName", width: 20 },
+        { header: "Damage Kind", key: "DamageKindName", width: 20 },
+        { header: "Damage Level", key: "DamageLevel", width: 20 },
+        { header: "Photo1", key: "photo1", width: 30 },
+        { header: "Photo2", key: "photo2", width: 30 },
+        { header: "Photo3", key: "photo3", width: 30 },
+      ];
+  
+      // Add Data Rows
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+  
+        worksheet.addRow({
+          structure_no: item.structure_no,
+          MaterialName: item.MaterialName,
+          DamageKindName: item.DamageKindName,
+          DamageLevel: item.DamageLevel,
+        });
+  
+        // Fix image URLs (replace \\ with /)
+        const photos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+  
+        // Add Images from URLs
+        for (let j = 0; j < Math.min(photos.length, 3); j++) {
+          try {
+            const response = await fetch(photos[j]);
+            const imageBlob = await response.blob();
+            const arrayBuffer = await imageBlob.arrayBuffer();
+  
+            const imageId = workbook.addImage({
+              buffer: arrayBuffer,
+              extension: "jpeg",
+            });
+  
+            worksheet.addImage(imageId, {
+              tl: { col: 4 + j, row: i + 1 }, // Place image in Photo1, Photo2, Photo3
+              ext: { width: 50, height: 50 },
+            });
+          } catch (error) {
+            console.error("Failed to load image:", photos[j], error);
+          }
+        }
+      }
+  
+      // Save File
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     }
   };
+
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
