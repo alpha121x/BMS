@@ -238,61 +238,63 @@ const InspectionList = ({ bridgeId }) => {
 
   const handleDownloadExcel = async (bridgeId) => {
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
-      );
+      const response = await fetch(`${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`);
       const data = await response.json();
   
-      if (
-        !data.success ||
-        !Array.isArray(data.bridges) ||
-        data.bridges.length === 0
-      ) {
+      if (!data.success || !Array.isArray(data.bridges) || data.bridges.length === 0) {
         console.error("No data to export");
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
   
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
   
-      // Create a new workbook
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Inspections");
   
-      // Define headers
-      worksheet.columns = [
-        { header: "Structure No", key: "structure_no", width: 15 },
-        { header: "Material", key: "MaterialName", width: 20 },
-        { header: "Damage Kind", key: "DamageKindName", width: 20 },
-        { header: "Damage Level", key: "DamageLevel", width: 20 },
-        { header: "Photo1", key: "photo1", width: 30 },
-        { header: "Photo2", key: "photo2", width: 30 },
-        { header: "Photo3", key: "photo3", width: 30 },
-      ];
+      // Define all columns except images
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+      );
   
-      // Add Data Rows
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: 20,
+      }));
+  
+      // Add image columns without text
+      for (let i = 1; i <= 5; i++) {
+        columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 40 });
+      }
+      for (let i = 1; i <= 5; i++) {
+        columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 40 });
+      }
+  
+      worksheet.columns = columns;
+  
+      // Add data rows without image URLs
       for (let i = 0; i < summaryData.length; i++) {
         const item = summaryData[i];
   
-        worksheet.addRow({
-          structure_no: item.structure_no,
-          MaterialName: item.MaterialName,
-          DamageKindName: item.DamageKindName,
-          DamageLevel: item.DamageLevel,
-        });
+        // Extract & fix image URLs
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) => url.replace(/\\/g, "/"));
+        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) => url.replace(/\\/g, "/"));
   
-        // Fix image URLs (replace \\ with /)
-        const photos = (item["Overview Photos"] || []).map((url) =>
-          url.replace(/\\/g, "/")
-        );
+        // Add normal data
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
   
-        // Add Images from URLs
-        for (let j = 0; j < Math.min(photos.length, 3); j++) {
+        // Add an empty row for images
+        const rowIndex = worksheet.addRow(rowData).number;
+  
+        // Insert Overview Photos
+        for (let j = 0; j < overviewPhotos.length && j < 5; j++) {
           try {
-            const response = await fetch(photos[j]);
-            const imageBlob = await response.blob();
-            const arrayBuffer = await imageBlob.arrayBuffer();
+            const imgResponse = await fetch(overviewPhotos[j]);
+            const imgBlob = await imgResponse.blob();
+            const arrayBuffer = await imgBlob.arrayBuffer();
   
             const imageId = workbook.addImage({
               buffer: arrayBuffer,
@@ -300,11 +302,32 @@ const InspectionList = ({ bridgeId }) => {
             });
   
             worksheet.addImage(imageId, {
-              tl: { col: 4 + j, row: i + 1 }, // Place image in Photo1, Photo2, Photo3
-              ext: { width: 50, height: 50 },
+              tl: { col: columnKeys.length + j, row: rowIndex },
+              ext: { width: 100, height: 100 }, // Increased image size
             });
           } catch (error) {
-            console.error("Failed to load image:", photos[j], error);
+            console.error("Failed to load overview image:", overviewPhotos[j], error);
+          }
+        }
+  
+        // Insert Inspection Photos
+        for (let j = 0; j < inspectionPhotos.length && j < 5; j++) {
+          try {
+            const imgResponse = await fetch(inspectionPhotos[j]);
+            const imgBlob = await imgResponse.blob();
+            const arrayBuffer = await imgBlob.arrayBuffer();
+  
+            const imageId = workbook.addImage({
+              buffer: arrayBuffer,
+              extension: "jpeg",
+            });
+  
+            worksheet.addImage(imageId, {
+              tl: { col: columnKeys.length + 5 + j, row: rowIndex },
+              ext: { width: 100, height: 100 }, // Increased image size
+            });
+          } catch (error) {
+            console.error("Failed to load inspection image:", inspectionPhotos[j], error);
           }
         }
       }
@@ -317,6 +340,8 @@ const InspectionList = ({ bridgeId }) => {
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     }
   };
+  
+  
 
 
   const handlePhotoClick = (photo) => {

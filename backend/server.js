@@ -759,12 +759,10 @@ app.get("/api/inspections-export", async (req, res) => {
     const { bridgeId } = req.query;
 
     let query = `
-    SELECT CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name, 
-           md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end, 
-           md.survey_chainage_start, md.survey_chainage_end, md.pms_sec_id, md.structure_no, md.surveyor_name, 
-           md.zone_id, md.zone, md.district_id, md.district, md.road_classification_id, md.road_classification, 
-           md.road_surface_type_id, md.road_surface_type, md.carriageway_type_id, md.carriageway_type, md.direction, 
-           md.visual_condition, md.construction_type_id, md.construction_type, md.no_of_span, md.span_length_m, 
+    SELECT CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type, md.road_no,md.road_name, 
+           md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_sec_id, md.structure_no, md.surveyor_name, 
+           md.zone, md.district, md.road_classification, md.road_surface_type, md.carriageway_type, md.direction, 
+           md.visual_condition, md.construction_type, md.no_of_span, md.span_length_m, 
            md.structure_width_m, md.construction_year, md.last_maintenance_date, md.data_source, md.date_time, 
            md.remarks,
            ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
