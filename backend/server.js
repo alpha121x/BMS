@@ -1709,12 +1709,10 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       pool.query(unapprovedQuery, [bridgeId]),
     ]);
 
-    // Helper function to extract URLs from potentially malformed JSON paths
-    function extractUrlsFromPath(pathString) {
-      // If it's not a string or empty, return empty array
+     // Helper function to extract URLs from potentially malformed JSON paths
+     function extractUrlsFromPath(pathString) {
       if (!pathString || typeof pathString !== "string") return [];
 
-      // Clean up the string
       const trimmedPath = pathString.trim();
 
       // Case 1: Direct URL
@@ -1722,43 +1720,32 @@ app.get("/api/get-inspections-rams", async (req, res) => {
         return [trimmedPath];
       }
 
-      // Case 2: Try to parse as JSON
+      // Case 2: Try to parse as JSON (handling nested objects)
       try {
-        // Handle malformed JSON with missing opening brace
-        let jsonStr = trimmedPath;
-        if (trimmedPath.startsWith('"') && !trimmedPath.startsWith('"{')) {
-          jsonStr = "{" + trimmedPath;
-        }
-
-        // Add missing closing brace if needed
-        const openBraces = (jsonStr.match(/{/g) || []).length;
-        const closeBraces = (jsonStr.match(/}/g) || []).length;
-        if (openBraces > closeBraces) {
-          jsonStr += "}";
-        }
-
-        const parsed = JSON.parse(jsonStr);
+        const parsed = JSON.parse(trimmedPath);
         const urls = [];
 
-        // Extract URLs from nested structure
-        Object.keys(parsed).forEach((category) => {
-          const categoryObj = parsed[category];
-          Object.keys(categoryObj).forEach((index) => {
-            const urlArray = categoryObj[index];
-            if (Array.isArray(urlArray)) {
-              urlArray.forEach((url) => {
-                if (typeof url === "string" && url.startsWith("http")) {
-                  urls.push(url);
-                }
-              });
-            }
-          });
-        });
+        function extractFromNested(obj) {
+          if (Array.isArray(obj)) {
+            obj.forEach((item) => {
+              if (typeof item === "string" && item.startsWith("http")) {
+                urls.push(item);
+              } else if (typeof item === "object" && item !== null) {
+                extractFromNested(item);
+              }
+            });
+          } else if (typeof obj === "object" && obj !== null) {
+            Object.values(obj).forEach((value) => extractFromNested(value));
+          }
+        }
 
+        extractFromNested(parsed);
         return urls;
       } catch (e) {
-        // Case 3: Fallback - try to extract URL using regex
-        const urlMatches = trimmedPath.match(/(http[^"]+\.jpg)/g);
+        // Case 3: Fallback - extract URLs using regex
+        const urlMatches = trimmedPath.match(
+          /(http[^"]+\.(jpg|jpeg|png|gif))/g
+        );
         return urlMatches || [];
       }
     }
@@ -1766,15 +1753,16 @@ app.get("/api/get-inspections-rams", async (req, res) => {
     // Updated formatRows function
     const formatRows = (rows) =>
       rows.map((row) => {
-        // Process PhotoPaths
         let extractedUrls = [];
+
         if (Array.isArray(row.PhotoPaths)) {
-          // Process each path string and collect all URLs
           row.PhotoPaths.forEach((pathString) => {
             extractedUrls = extractedUrls.concat(
               extractUrlsFromPath(pathString)
             );
           });
+        } else if (typeof row.PhotoPaths === "string") {
+          extractedUrls = extractUrlsFromPath(row.PhotoPaths);
         }
 
         return {
