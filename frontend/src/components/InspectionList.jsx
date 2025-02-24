@@ -5,7 +5,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFileCsv,
+  faFileExcel,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -187,6 +191,50 @@ const InspectionList = ({ bridgeId }) => {
   };
 
   const handleDownloadCSV = async (bridgeId) => {
+    setLoading(true); // Start loading
+    try {
+      const response = await fetch(`${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`);
+      const data = await response.json();
+  
+      if (!data.success || !Array.isArray(data.bridges) || data.bridges.length === 0) {
+        Swal.fire("Error!", "No data available for export", "error");
+        return;
+      }
+  
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
+  
+      const headers = Object.keys(summaryData[0]);
+  
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [
+          headers.join(","), 
+          ...summaryData.map((row) =>
+            headers
+              .map((key) =>
+                String(row[key]).includes(",") ? `"${row[key]}"` : row[key] || "N/A"
+              )
+              .join(",")
+          ),
+        ].join("\n");
+  
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `${bridgeName.replace(/\s+/g, "_")}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  const handleDownloadExcel = async (bridgeId, setLoading) => {
+    setLoading(true); // Start loader
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
@@ -204,143 +252,121 @@ const InspectionList = ({ bridgeId }) => {
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
-
-      const headers = Object.keys(summaryData[0]);
-
-      const csvContent =
-        "data:text/csv;charset=utf-8," +
-        [
-          headers.join(","),
-          ...summaryData.map((row) =>
-            headers
-              .map((key) =>
-                String(row[key]).includes(",")
-                  ? `"${row[key]}"`
-                  : row[key] || "N/A"
-              )
-              .join(",")
-          ),
-        ].join("\n");
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${bridgeName.replace(/\s+/g, "_")}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading CSV:", error);
-      Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
-    }
-  };
-
-  const handleDownloadExcel = async (bridgeId) => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`);
-      const data = await response.json();
-  
-      if (!data.success || !Array.isArray(data.bridges) || data.bridges.length === 0) {
-        console.error("No data to export");
-        Swal.fire("Error!", "No data available for export", "error");
-        return;
-      }
-  
-      const summaryData = data.bridges;
       const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
-  
+
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Inspections");
-  
+
       // Define all columns except images
       const columnKeys = Object.keys(summaryData[0]).filter(
         (key) => key !== "Overview Photos" && key !== "PhotoPaths"
       );
-  
+
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
         key: key,
         width: 20,
       }));
-  
+
       // Add image columns without text
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 40 });
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 40,
+        });
       }
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 40 });
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 40,
+        });
       }
-  
+
       worksheet.columns = columns;
-  
+
       // Add data rows without image URLs
       for (let i = 0; i < summaryData.length; i++) {
         const item = summaryData[i];
-  
+
         // Extract & fix image URLs
-        const overviewPhotos = (item["Overview Photos"] || []).map((url) => url.replace(/\\/g, "/"));
-        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) => url.replace(/\\/g, "/"));
-  
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+
         // Add normal data
         const rowData = {};
         columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
-  
+
         // Add an empty row for images
         const rowIndex = worksheet.addRow(rowData).number;
-  
+
         // Insert Overview Photos
         for (let j = 0; j < overviewPhotos.length && j < 5; j++) {
           try {
             const imgResponse = await fetch(overviewPhotos[j]);
             const imgBlob = await imgResponse.blob();
             const arrayBuffer = await imgBlob.arrayBuffer();
-  
+
             const imageId = workbook.addImage({
               buffer: arrayBuffer,
               extension: "jpeg",
             });
-  
+
             worksheet.addImage(imageId, {
               tl: { col: columnKeys.length + j, row: rowIndex },
               ext: { width: 100, height: 100 }, // Increased image size
             });
           } catch (error) {
-            console.error("Failed to load overview image:", overviewPhotos[j], error);
+            console.error(
+              "Failed to load overview image:",
+              overviewPhotos[j],
+              error
+            );
           }
         }
-  
+
         // Insert Inspection Photos
         for (let j = 0; j < inspectionPhotos.length && j < 5; j++) {
           try {
             const imgResponse = await fetch(inspectionPhotos[j]);
             const imgBlob = await imgResponse.blob();
             const arrayBuffer = await imgBlob.arrayBuffer();
-  
+
             const imageId = workbook.addImage({
               buffer: arrayBuffer,
               extension: "jpeg",
             });
-  
+
             worksheet.addImage(imageId, {
               tl: { col: columnKeys.length + 5 + j, row: rowIndex },
               ext: { width: 100, height: 100 }, // Increased image size
             });
           } catch (error) {
-            console.error("Failed to load inspection image:", inspectionPhotos[j], error);
+            console.error(
+              "Failed to load inspection image:",
+              inspectionPhotos[j],
+              error
+            );
           }
         }
       }
-  
+
       // Save File
       const buffer = await workbook.xlsx.writeBuffer();
       saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+    } finally {
+      setLoading(false); // Stop loader
     }
   };
-  
+
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
     setShowPhotoModal(true);
@@ -409,11 +435,16 @@ const InspectionList = ({ bridgeId }) => {
               CSV
             </button>
             <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-              onClick={() => handleDownloadExcel(bridgeId)}
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 flex items-center justify-center"
+              onClick={() => handleDownloadExcel(bridgeId, setLoading)}
+              disabled={loading}
             >
-              <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-              Excel
+              {loading ? (
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+              ) : (
+                <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+              )}
+              {loading ? "Processing..." : "Excel"}
             </button>
           </div>
         </div>
