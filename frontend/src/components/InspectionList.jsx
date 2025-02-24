@@ -341,9 +341,6 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
   
-  
-
-
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
     setShowPhotoModal(true);
