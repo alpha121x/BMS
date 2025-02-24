@@ -1250,10 +1250,8 @@ SELECT
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
   try {
-    // Extract and validate query parameters
     let { district, bridge } = req.query;
 
-    // Base query
     let query = `
       SELECT 
         bmd."pms_sec_id", 
@@ -1279,14 +1277,12 @@ app.get("/api/inspections", async (req, res) => {
     const queryParams = [];
     let paramIndex = 1;
 
-    // Ensure `district` is a valid number before adding it
     if (district && !isNaN(parseInt(district))) {
       query += ` AND ins."district_id" = $${paramIndex}`;
-      queryParams.push(parseInt(district)); // Convert to integer
+      queryParams.push(parseInt(district));
       paramIndex++;
     }
 
-    // Validate `bridge`
     if (bridge && bridge.trim() !== "" && bridge !== "%") {
       query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
       queryParams.push(`%${bridge}%`);
@@ -1295,22 +1291,32 @@ app.get("/api/inspections", async (req, res) => {
 
     const result = await pool.query(query, queryParams);
 
-    // Process the "PhotoPaths" to extract only URLs
+    // Process PhotoPaths to extract image URLs
     const processedData = result.rows.map(row => {
       let extractedPhotoPaths = [];
 
       try {
         if (row.PhotoPaths) {
-          // Fix any formatting issues before parsing
           const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
           const parsedPhotos = JSON.parse(cleanedJson);
 
-          // Loop through the object and extract all image URLs
-          Object.values(parsedPhotos).forEach(category => {
-            Object.values(category).forEach(imagesArray => {
-              extractedPhotoPaths.push(...imagesArray);
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path" keys
+            parsedPhotos.forEach(item => {
+              if (item.path) extractedPhotoPaths.push(item.path);
             });
-          });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with image paths
+            Object.values(parsedPhotos).forEach(category => {
+              if (typeof category === "object") {
+                Object.values(category).forEach(imagesArray => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
         }
       } catch (error) {
         console.error("Error parsing PhotoPaths:", error);
@@ -1318,7 +1324,7 @@ app.get("/api/inspections", async (req, res) => {
 
       return {
         ...row,
-        PhotoPaths: extractedPhotoPaths, // Replace nested structure with a simple array
+        PhotoPaths: extractedPhotoPaths, // Store extracted paths as a flat array
       };
     });
 
