@@ -458,12 +458,12 @@ app.get("/api/districtExtent", async (req, res) => {
 
     // SQL query to fetch the required data based on districtId
     let query = `
-      SELECT gid, __gid, ____gid, district_n, div_name, geom
+      SELECT gid, __gid, ____gid, district_n, div_name, geom , district_id,
       FROM public.punjab_district_boundary
     `;
 
     if (districtId !== "%") {
-      query += ` WHERE district_n = $1`; // Modify the query to filter by districtId if it's not "%"
+      query += ` WHERE district_id = $1`; // Modify the query to filter by districtId if it's not "%"
     }
 
     const values = districtId !== "%" ? [districtId] : [];
