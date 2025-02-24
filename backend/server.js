@@ -759,24 +759,66 @@ app.get("/api/inspections-export", async (req, res) => {
     const { bridgeId } = req.query;
 
     let query = `
-           SELECT md.uu_bms_id AS "Reference No:", CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type, md.road_no,md.road_name, 
-           md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_sec_id, md.structure_no, md.surveyor_name, 
-           md.zone, md.district, md.road_classification, md.road_surface_type, md.carriageway_type, md.direction, 
-           md.visual_condition, md.construction_type, md.no_of_span, md.span_length_m, 
-           md.structure_width_m, md.construction_year, md.last_maintenance_date, md.data_source, md.date_time, 
-           md.remarks,
-           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-            f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", f."PartsID", f."PartsName", 
-           f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
-           f.damage_extent, f."Remarks", f.current_date_time, 
-           f.inspection_images AS "PhotoPaths"
-    FROM bms.tbl_bms_master_data md
-    LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-    WHERE 1=1`;
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "Reference No:",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
+          md.structure_type, md.road_no, md.road_name, md.road_name_cwd, 
+          md.road_code_cwd, md.route_id, md.survey_id, md.surveyor_name, 
+          md.zone, md.district, md.road_classification, md.road_surface_type, 
+          md.carriageway_type, md.direction, md.visual_condition, md.construction_type, 
+          md.no_of_span, md.span_length_m, md.structure_width_m, md.construction_year, 
+          md.last_maintenance_date, md.data_source, md.date_time, md.remarks,
+          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+          
+          f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", 
+          f."PartsID", f."PartsName", f."MaterialID", f."MaterialName", 
+          f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
+          f.damage_extent, f."Remarks", f.current_date_time, f.inspection_images AS "PhotoPaths",
+
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
+        FROM bms.tbl_bms_master_data md
+        LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+      )
+      SELECT 
+        CASE WHEN rn = 1 THEN "Reference No:" ELSE NULL END AS "Reference No:",
+        CASE WHEN rn = 1 THEN bridge_name ELSE NULL END AS bridge_name,
+        CASE WHEN rn = 1 THEN structure_type ELSE NULL END AS structure_type,
+        CASE WHEN rn = 1 THEN road_no ELSE NULL END AS road_no,
+        CASE WHEN rn = 1 THEN road_name ELSE NULL END AS road_name,
+        CASE WHEN rn = 1 THEN road_name_cwd ELSE NULL END AS road_name_cwd,
+        CASE WHEN rn = 1 THEN road_code_cwd ELSE NULL END AS road_code_cwd,
+        CASE WHEN rn = 1 THEN route_id ELSE NULL END AS route_id,
+        CASE WHEN rn = 1 THEN survey_id ELSE NULL END AS survey_id,
+        CASE WHEN rn = 1 THEN surveyor_name ELSE NULL END AS surveyor_name,
+        CASE WHEN rn = 1 THEN zone ELSE NULL END AS zone,
+        CASE WHEN rn = 1 THEN district ELSE NULL END AS district,
+        CASE WHEN rn = 1 THEN road_classification ELSE NULL END AS road_classification,
+        CASE WHEN rn = 1 THEN road_surface_type ELSE NULL END AS road_surface_type,
+        CASE WHEN rn = 1 THEN carriageway_type ELSE NULL END AS carriageway_type,
+        CASE WHEN rn = 1 THEN direction ELSE NULL END AS direction,
+        CASE WHEN rn = 1 THEN visual_condition ELSE NULL END AS visual_condition,
+        CASE WHEN rn = 1 THEN construction_type ELSE NULL END AS construction_type,
+        CASE WHEN rn = 1 THEN no_of_span ELSE NULL END AS no_of_span,
+        CASE WHEN rn = 1 THEN span_length_m ELSE NULL END AS span_length_m,
+        CASE WHEN rn = 1 THEN structure_width_m ELSE NULL END AS structure_width_m,
+        CASE WHEN rn = 1 THEN construction_year ELSE NULL END AS construction_year,
+        CASE WHEN rn = 1 THEN last_maintenance_date ELSE NULL END AS last_maintenance_date,
+        CASE WHEN rn = 1 THEN data_source ELSE NULL END AS data_source,
+        CASE WHEN rn = 1 THEN date_time ELSE NULL END AS date_time,
+        CASE WHEN rn = 1 THEN remarks ELSE NULL END AS remarks,
+        CASE WHEN rn = 1 THEN "Overview Photos" ELSE NULL END AS "Overview Photos",
+
+        -- Inspection Data (Always Included)
+        surveyed_by, "SpanIndex", "WorkKindID", "WorkKindName", "PartsID", "PartsName",
+        "MaterialID", "MaterialName", "DamageKindID", "DamageKindName", 
+        "DamageLevelID", "DamageLevel", damage_extent, "Remarks", current_date_time, "PhotoPaths"
+      FROM ranked_data
+      WHERE 1=1`;
 
     const queryParams = [];
     if (bridgeId && !isNaN(bridgeId)) {
-      query += ` AND md.uu_bms_id = $1`;
+      query += ` AND "Reference No:" = $1`;
       queryParams.push(Number(bridgeId));
     }
 
@@ -785,29 +827,50 @@ app.get("/api/inspections-export", async (req, res) => {
     // Process the "PhotoPaths" to extract only URLs
     const processedData = result.rows.map(row => {
       let extractedPhotoPaths = [];
-
+      let updatedOverviewPhotos = row["Overview Photos"]; // Keep original reference
+    
       try {
+        // Process PhotoPaths
         if (row.PhotoPaths) {
-          // Fix any formatting issues before parsing
           const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
           const parsedPhotos = JSON.parse(cleanedJson);
-
-          // Loop through the object and extract all image URLs
+    
+          // Loop through object and extract image URLs
           Object.values(parsedPhotos).forEach(category => {
             Object.values(category).forEach(imagesArray => {
               extractedPhotoPaths.push(...imagesArray);
             });
           });
+    
+          // Replace IP with domain in PhotoPaths
+          extractedPhotoPaths = extractedPhotoPaths.map(path =>
+            typeof path === "string" ? path.replace("118.103.225.148", "cnw.urbanunit.gov.pk") : path
+          );
+        }
+    
+        // Process Overview Photos (Fix for Empty Array Issue)
+        if (Array.isArray(row["Overview Photos"])) {
+          updatedOverviewPhotos = row["Overview Photos"].map(photo =>
+            typeof photo === "string" && photo.trim() !== "" 
+              ? photo.replace("118.103.225.148", "cnw.urbanunit.gov.pk")
+              : null
+          ).filter(Boolean); // Remove any null/empty values
+        } else {
+          updatedOverviewPhotos = []; // Set to empty array if null/undefined
         }
       } catch (error) {
-        console.error("Error parsing PhotoPaths:", error);
+        console.error("Error processing photos:", error);
       }
-
+    
       return {
         ...row,
-        PhotoPaths: extractedPhotoPaths, // Replace nested structure with a simple array
+        PhotoPaths: extractedPhotoPaths, // Updated PhotoPaths with correct domain
+        "Overview Photos": updatedOverviewPhotos, // Fixed empty array issue
       };
     });
+    
+    
+    
 
     res.json({ success: true, bridges: processedData });
   } catch (error) {
