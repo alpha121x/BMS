@@ -1651,7 +1651,6 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
      AND qc_con = '2'  -- Approved Consultant Inspections
-      AND qc_rams = '0' -- Pending RAMS Review
       ORDER BY inspection_id DESC;
     `;
 
