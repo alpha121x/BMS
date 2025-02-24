@@ -759,7 +759,7 @@ app.get("/api/inspections-export", async (req, res) => {
     const { bridgeId } = req.query;
 
     let query = `
-    SELECT CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type, md.road_no,md.road_name, 
+           SELECT md.uu_bms_id AS "Reference No:", CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type, md.road_no,md.road_name, 
            md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_sec_id, md.structure_no, md.surveyor_name, 
            md.zone, md.district, md.road_classification, md.road_surface_type, md.carriageway_type, md.direction, 
            md.visual_condition, md.construction_type, md.no_of_span, md.span_length_m, 
@@ -858,6 +858,8 @@ app.get("/api/bridges", async (req, res) => {
         road_surface_type, 
         carriageway_type, 
         direction, 
+        data_source, 
+        date_time, 
         visual_condition, 
         construction_type_id, 
         construction_type, 
@@ -1041,7 +1043,9 @@ SELECT
         visual_condition, 
         construction_type_id, 
         construction_type, 
-        no_of_span, 
+        no_of_span,
+        data_source, 
+        date_time, 
         span_length_m, 
         structure_width_m, 
         construction_year, 
