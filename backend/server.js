@@ -452,44 +452,53 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 //   }
 // });
 
+// api endpoint for districts extent 
 app.get("/api/districtExtent", async (req, res) => {
   try {
-    const { districtId = "%" } = req.query; // Get districtId from query parameters, default to "%"
+    const { districtId } = req.query;
 
-    // SQL query to fetch the required data based on districtId
     let query = `
-      SELECT gid, __gid, ____gid, district_n, div_name, geom , district_id,
+      SELECT 
+        district_id, district_n, div_name, 
+        ST_Extent(geom) AS bbox 
       FROM public.punjab_district_boundary
     `;
 
-    if (districtId !== "%") {
-      query += ` WHERE district_id = $1`; // Modify the query to filter by districtId if it's not "%"
+    const values = [];
+    if (districtId) {
+      query += ` WHERE district_id = $1`;
+      values.push(districtId);
     }
 
-    const values = districtId !== "%" ? [districtId] : [];
+    query += " GROUP BY district_id, district_n, div_name"; // Ensure grouping for ST_Extent
 
     const result = await pool.query(query, values);
 
     if (result.rows.length > 0) {
+      const bboxString = result.rows[0].bbox.replace("BOX(", "").replace(")", "");
+      const [xmin, ymin, xmax, ymax] = bboxString.split(",").flatMap(coord => coord.split(" "));
+
       res.json({
         success: true,
-        data: result.rows, // Send the rows returned by the query
+        district: {
+          district_id: result.rows[0].district_id,
+          district_name: result.rows[0].district_n,
+          division_name: result.rows[0].div_name,
+          xmin: parseFloat(xmin),
+          ymin: parseFloat(ymin),
+          xmax: parseFloat(xmax),
+          ymax: parseFloat(ymax),
+        },
       });
     } else {
-      res.status(404).json({
-        success: false,
-        message: "District not found",
-      });
+      res.status(404).json({ success: false, message: "District not found" });
     }
   } catch (err) {
-    console.error("Error fetching district data", err);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching district data",
-      error: err.message,
-    });
+    console.error("Error fetching district extent:", err);
+    res.status(500).json({ success: false, message: "Error fetching district extent", error: err.message });
   }
 });
+
 
 // bridges details download for dashboard main
 app.get("/api/bridgesdownloadNew", async (req, res) => {

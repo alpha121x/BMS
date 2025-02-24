@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
-import { BASE_URL } from './config';
+import { BASE_URL } from "./config";
 
 const Map = ({ districtId }) => {
   const mapRef = useRef(null);
@@ -9,16 +9,17 @@ const Map = ({ districtId }) => {
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, LayerList, Extent] = await loadModules(
-          [
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/layers/MapImageLayer",
-            "esri/widgets/LayerList",
-            "esri/geometry/Extent", // To work with extents
-          ],
-          { css: true }
-        );
+        const [Map, MapView, MapImageLayer, LayerList, Extent] =
+          await loadModules(
+            [
+              "esri/Map",
+              "esri/views/MapView",
+              "esri/layers/MapImageLayer",
+              "esri/widgets/LayerList",
+              "esri/geometry/Extent", // To work with extents
+            ],
+            { css: true }
+          );
 
         // Initialize Map
         const map = new Map({
@@ -30,7 +31,7 @@ const Map = ({ districtId }) => {
           container: mapRef.current,
           map: map,
           center: [73.1587, 31.5204],
-          zoom: 6
+          zoom: 6,
         });
 
         viewRef.current = view;
@@ -47,21 +48,28 @@ const Map = ({ districtId }) => {
               spatialReference: { wkid: 4326 },
             });
           } else {
-            // Fetch district extent from API or database based on districtId
-            const response = await fetch(`${BASE_URL}/api/districtExtent?districtId=${districtId}`);
-            const data = await response.json();
-            if (data.success && data.district) {
-              const { xmin, ymin, xmax, ymax } = data.district; // Assuming extent data is available
-              return new Extent({
-                xmin: xmin,
-                ymin: ymin,
-                xmax: xmax,
-                ymax: ymax,
-                spatialReference: { wkid: 4326 },
-              });
-            } else {
-              console.error("District not found");
-              return null; // Fallback if the district is not found
+            try {
+              const response = await fetch(
+                `${BASE_URL}/api/districtExtent?districtId=${districtId}`
+              );
+              const data = await response.json();
+
+              if (data.success && data.district) {
+                const { xmin, ymin, xmax, ymax } = data.district;
+                return new Extent({
+                  xmin: xmin,
+                  ymin: ymin,
+                  xmax: xmax,
+                  ymax: ymax,
+                  spatialReference: { wkid: 4326 },
+                });
+              } else {
+                console.error("District not found");
+                return null;
+              }
+            } catch (error) {
+              console.error("Error fetching district extent:", error);
+              return null;
             }
           }
         };
