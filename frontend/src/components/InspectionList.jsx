@@ -264,20 +264,15 @@ const InspectionList = ({ bridgeId }) => {
             width: 25,
         }));
 
-        // Add image columns with appropriate spacing
+        // Add image columns with increased spacing
         for (let i = 1; i <= 5; i++) {
-            columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 30 });
+            columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 35 });
         }
         for (let i = 1; i <= 5; i++) {
-            columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 30 });
+            columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 40 });
         }
 
         worksheet.columns = columns;
-
-        // Increase row height to accommodate images
-        worksheet.eachRow((row) => {
-            row.height = 120; // Adjust row height for images
-        });
 
         // Add data rows without image URLs
         for (let i = 0; i < summaryData.length; i++) {
@@ -298,8 +293,11 @@ const InspectionList = ({ bridgeId }) => {
             // Add a row for each entry
             const rowIndex = worksheet.addRow(rowData).number;
 
+            // **Adjust row height for Overview Photos**
+            worksheet.getRow(rowIndex).height = 120;
+
             // Insert images in correct locations
-            const insertImage = async (photoUrls, columnOffset) => {
+            const insertImage = async (photoUrls, columnOffset, rowHeight) => {
                 for (let j = 0; j < photoUrls.length && j < 5; j++) {
                     try {
                         const imgResponse = await fetch(photoUrls[j]);
@@ -313,7 +311,7 @@ const InspectionList = ({ bridgeId }) => {
 
                         worksheet.addImage(imageId, {
                             tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 },
-                            ext: { width: 100, height: 100 }, // Ensure correct sizing
+                            ext: { width: 120, height: 120 }, // Larger image for better visibility
                         });
                     } catch (error) {
                         console.error("Failed to load image:", photoUrls[j], error);
@@ -321,8 +319,11 @@ const InspectionList = ({ bridgeId }) => {
                 }
             };
 
-            await insertImage(overviewPhotos, 0);
-            await insertImage(inspectionPhotos, 5);
+            await insertImage(overviewPhotos, 0, 120);
+
+            // **Adjust row height for Inspection Photos**
+            worksheet.getRow(rowIndex).height = 150;
+            await insertImage(inspectionPhotos, 5, 150);
         }
 
         // Save File
@@ -335,6 +336,7 @@ const InspectionList = ({ bridgeId }) => {
         setLoading(false); // Stop loader
     }
 };
+
 
 
   const handlePhotoClick = (photo) => {
