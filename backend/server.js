@@ -499,13 +499,11 @@ app.get("/api/districtExtent", async (req, res) => {
     }
   } catch (err) {
     console.error("Error fetching district extent:", err);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching district extent",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching district extent",
+      error: err.message,
+    });
   }
 });
 
@@ -774,6 +772,37 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
 // inspection download for a specific bridge and dashboard + evaluation module
 app.get("/api/inspections-export", async (req, res) => {
   try {
+    // Helper function to extract valid URLs from PhotoPaths
+    function extractUrlsFromPath(photoPaths) {
+      if (!photoPaths) return [];
+
+      try {
+        // Ensure JSON is properly parsed
+        const parsedData = typeof photoPaths === "string" ? JSON.parse(photoPaths) : photoPaths;
+        let urls = [];
+
+        function extractFromNested(obj) {
+          if (Array.isArray(obj)) {
+            obj.forEach((item) => extractFromNested(item));
+          } else if (typeof obj === "object" && obj !== null) {
+            // Check if object has a direct path property
+            if (obj.path && typeof obj.path === "string" && obj.path.startsWith("http")) {
+              urls.push(obj.path);
+            }
+            Object.values(obj).forEach((value) => extractFromNested(value));
+          } else if (typeof obj === "string" && obj.startsWith("http")) {
+            urls.push(obj);
+          }
+        }
+
+        extractFromNested(parsedData);
+        return urls.length > 0 ? urls : [];
+      } catch (e) {
+        console.error("Error parsing PhotoPaths:", e);
+        return [];
+      }
+    }
+
     const { bridgeId } = req.query;
 
     let query = `
@@ -792,47 +821,13 @@ app.get("/api/inspections-export", async (req, res) => {
           f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", 
           f."PartsID", f."PartsName", f."MaterialID", f."MaterialName", 
           f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
-          f.damage_extent, f."Remarks", f.current_date_time, f.inspection_images AS "PhotoPaths",
+          f.damage_extent, f."Remarks", f.current_date_time, COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
 
           ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
         FROM bms.tbl_bms_master_data md
         LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
       )
-      SELECT 
-        CASE WHEN rn = 1 THEN "Reference No:" ELSE NULL END AS "Reference No:",
-        CASE WHEN rn = 1 THEN bridge_name ELSE NULL END AS bridge_name,
-        CASE WHEN rn = 1 THEN structure_type ELSE NULL END AS structure_type,
-        CASE WHEN rn = 1 THEN road_no ELSE NULL END AS road_no,
-        CASE WHEN rn = 1 THEN road_name ELSE NULL END AS road_name,
-        CASE WHEN rn = 1 THEN road_name_cwd ELSE NULL END AS road_name_cwd,
-        CASE WHEN rn = 1 THEN road_code_cwd ELSE NULL END AS road_code_cwd,
-        CASE WHEN rn = 1 THEN route_id ELSE NULL END AS route_id,
-        CASE WHEN rn = 1 THEN survey_id ELSE NULL END AS survey_id,
-        CASE WHEN rn = 1 THEN surveyor_name ELSE NULL END AS surveyor_name,
-        CASE WHEN rn = 1 THEN zone ELSE NULL END AS zone,
-        CASE WHEN rn = 1 THEN district ELSE NULL END AS district,
-        CASE WHEN rn = 1 THEN road_classification ELSE NULL END AS road_classification,
-        CASE WHEN rn = 1 THEN road_surface_type ELSE NULL END AS road_surface_type,
-        CASE WHEN rn = 1 THEN carriageway_type ELSE NULL END AS carriageway_type,
-        CASE WHEN rn = 1 THEN direction ELSE NULL END AS direction,
-        CASE WHEN rn = 1 THEN visual_condition ELSE NULL END AS visual_condition,
-        CASE WHEN rn = 1 THEN construction_type ELSE NULL END AS construction_type,
-        CASE WHEN rn = 1 THEN no_of_span ELSE NULL END AS no_of_span,
-        CASE WHEN rn = 1 THEN span_length_m ELSE NULL END AS span_length_m,
-        CASE WHEN rn = 1 THEN structure_width_m ELSE NULL END AS structure_width_m,
-        CASE WHEN rn = 1 THEN construction_year ELSE NULL END AS construction_year,
-        CASE WHEN rn = 1 THEN last_maintenance_date ELSE NULL END AS last_maintenance_date,
-        CASE WHEN rn = 1 THEN data_source ELSE NULL END AS data_source,
-        CASE WHEN rn = 1 THEN date_time ELSE NULL END AS date_time,
-        CASE WHEN rn = 1 THEN remarks ELSE NULL END AS remarks,
-        CASE WHEN rn = 1 THEN "Overview Photos" ELSE NULL END AS "Overview Photos",
-
-        -- Inspection Data (Always Included)
-        surveyed_by, "SpanIndex", "WorkKindID", "WorkKindName", "PartsID", "PartsName",
-        "MaterialID", "MaterialName", "DamageKindID", "DamageKindName", 
-        "DamageLevelID", "DamageLevel", damage_extent, "Remarks", current_date_time, "PhotoPaths"
-      FROM ranked_data
-      WHERE 1=1`;
+      SELECT * FROM ranked_data WHERE 1=1`;
 
     const queryParams = [];
     if (bridgeId && !isNaN(bridgeId)) {
@@ -842,67 +837,26 @@ app.get("/api/inspections-export", async (req, res) => {
 
     const result = await pool.query(query, queryParams);
 
-    // Process the "PhotoPaths" to extract only URLs
     const processedData = result.rows.map((row) => {
-      let extractedPhotoPaths = [];
-      let updatedOverviewPhotos = row["Overview Photos"]; // Keep original reference
+      // Extract URLs from PhotoPaths using helper function
+      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
 
-      try {
-        // Process PhotoPaths
-        if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
-            /\}\"/g,
-            "}"
-          );
-          const parsedPhotos = JSON.parse(cleanedJson);
+      // Ensure Overview Photos are properly formatted
+      row["Overview Photos"] = row["Overview Photos"]
+        .map((photo) => (photo ? photo : null))
+        .filter(Boolean);
 
-          // Loop through object and extract image URLs
-          Object.values(parsedPhotos).forEach((category) => {
-            Object.values(category).forEach((imagesArray) => {
-              extractedPhotoPaths.push(...imagesArray);
-            });
-          });
-
-          // Replace IP with domain in PhotoPaths
-          extractedPhotoPaths = extractedPhotoPaths.map((path) =>
-            typeof path === "string"
-              ? path.replace("118.103.225.148", "cnw.urbanunit.gov.pk")
-              : path
-          );
-        }
-
-        // Process Overview Photos (Fix for Empty Array Issue)
-        if (Array.isArray(row["Overview Photos"])) {
-          updatedOverviewPhotos = row["Overview Photos"]
-            .map((photo) =>
-              typeof photo === "string" && photo.trim() !== ""
-                ? photo.replace("118.103.225.148", "cnw.urbanunit.gov.pk")
-                : null
-            )
-            .filter(Boolean); // Remove any null/empty values
-        } else {
-          updatedOverviewPhotos = []; // Set to empty array if null/undefined
-        }
-      } catch (error) {
-        console.error("Error processing photos:", error);
-      }
-
-      return {
-        ...row,
-        PhotoPaths: extractedPhotoPaths, // Updated PhotoPaths with correct domain
-        "Overview Photos": updatedOverviewPhotos, // Fixed empty array issue
-      };
+      return row;
     });
 
     res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching data from the database",
-    });
+    res.status(500).json({ success: false, message: "Error fetching data from the database" });
   }
 });
+
+
 
 // bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
@@ -1709,8 +1663,8 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       pool.query(unapprovedQuery, [bridgeId]),
     ]);
 
-     // Helper function to extract URLs from potentially malformed JSON paths
-     function extractUrlsFromPath(pathString) {
+    // Helper function to extract URLs from potentially malformed JSON paths
+    function extractUrlsFromPath(pathString) {
       if (!pathString || typeof pathString !== "string") return [];
 
       const trimmedPath = pathString.trim();
