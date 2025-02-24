@@ -36,7 +36,7 @@ const LoginEvaluation = () => {
   
       // Store the JWT token and user data
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("userEvaluation", data.token);
         localStorage.setItem("isEvaluationAuthenticated", "true");
       }
   

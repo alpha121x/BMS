@@ -19,13 +19,13 @@ import BridgeInformation from './components/BridgeInformation';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === "true";
+  const isAuthenticated = localStorage.getItem('isAuthenticated') == "true";
   return isAuthenticated ? children : <Navigate to="/" />;
 };
 
 // Always redirect to the login page for Evaluation Module
 const PrivateEvaluationRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("isEvaluationAuthenticated") === "true";
+  const isAuthenticated = localStorage.getItem("isEvaluationAuthenticated") == "true";
   // If authenticated, allow access to Evaluation, otherwise redirect to loginEvaluation
   return isAuthenticated ? children : <Navigate to="/loginEvaluation" />;
 };
