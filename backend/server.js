@@ -772,37 +772,6 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
 // inspection download for a specific bridge and dashboard + evaluation module
 app.get("/api/inspections-export", async (req, res) => {
   try {
-    // Helper function to extract valid URLs from PhotoPaths
-    function extractUrlsFromPath(photoPaths) {
-      if (!photoPaths) return [];
-
-      try {
-        // Ensure JSON is properly parsed
-        const parsedData = typeof photoPaths === "string" ? JSON.parse(photoPaths) : photoPaths;
-        let urls = [];
-
-        function extractFromNested(obj) {
-          if (Array.isArray(obj)) {
-            obj.forEach((item) => extractFromNested(item));
-          } else if (typeof obj === "object" && obj !== null) {
-            // Check if object has a direct path property
-            if (obj.path && typeof obj.path === "string" && obj.path.startsWith("http")) {
-              urls.push(obj.path);
-            }
-            Object.values(obj).forEach((value) => extractFromNested(value));
-          } else if (typeof obj === "string" && obj.startsWith("http")) {
-            urls.push(obj);
-          }
-        }
-
-        extractFromNested(parsedData);
-        return urls.length > 0 ? urls : [];
-      } catch (e) {
-        console.error("Error parsing PhotoPaths:", e);
-        return [];
-      }
-    }
-
     const { bridgeId } = req.query;
 
     let query = `
@@ -837,8 +806,8 @@ app.get("/api/inspections-export", async (req, res) => {
 
     const result = await pool.query(query, queryParams);
 
+    let firstRow = true;
     const processedData = result.rows.map((row) => {
-      // Extract URLs from PhotoPaths using helper function
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
 
       // Ensure Overview Photos are properly formatted
@@ -846,6 +815,37 @@ app.get("/api/inspections-export", async (req, res) => {
         .map((photo) => (photo ? photo : null))
         .filter(Boolean);
 
+      if (!firstRow) {
+        row["Reference No:"] = null;
+        row.bridge_name = null;
+        row.structure_type = null;
+        row.road_no = null;
+        row.road_name = null;
+        row.road_name_cwd = null;
+        row.road_code_cwd = null;
+        row.route_id = null;
+        row.survey_id = null;
+        row.surveyor_name = null;
+        row.zone = null;
+        row.district = null;
+        row.road_classification = null;
+        row.road_surface_type = null;
+        row.carriageway_type = null;
+        row.direction = null;
+        row.visual_condition = null;
+        row.construction_type = null;
+        row.no_of_span = null;
+        row.span_length_m = null;
+        row.structure_width_m = null;
+        row.construction_year = null;
+        row.last_maintenance_date = null;
+        row.data_source = null;
+        row.date_time = null;
+        row.remarks = null;
+        row["Overview Photos"] = null;
+      }
+
+      firstRow = false;
       return row;
     });
 
@@ -855,6 +855,37 @@ app.get("/api/inspections-export", async (req, res) => {
     res.status(500).json({ success: false, message: "Error fetching data from the database" });
   }
 });
+
+// Helper function to extract valid URLs from PhotoPaths
+function extractUrlsFromPath(photoPaths) {
+  if (!photoPaths) return [];
+
+  try {
+    const parsedData = typeof photoPaths === "string" ? JSON.parse(photoPaths) : photoPaths;
+    let urls = [];
+
+    function extractFromNested(obj) {
+      if (Array.isArray(obj)) {
+        obj.forEach((item) => extractFromNested(item));
+      } else if (typeof obj === "object" && obj !== null) {
+        if (obj.path && typeof obj.path === "string" && obj.path.startsWith("http")) {
+          urls.push(obj.path);
+        }
+        Object.values(obj).forEach((value) => extractFromNested(value));
+      } else if (typeof obj === "string" && obj.startsWith("http")) {
+        urls.push(obj);
+      }
+    }
+
+    extractFromNested(parsedData);
+    return urls.length > 0 ? urls : [];
+  } catch (e) {
+    console.error("Error parsing PhotoPaths:", e);
+    return [];
+  }
+}
+
+
 
 // bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
