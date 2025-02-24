@@ -85,7 +85,7 @@ const BridgesList = ({
         maxSpanLength,
         minYear,
         maxYear,
-        bridge, 
+        bridge,
       };
 
       // console.log(params);
@@ -170,10 +170,9 @@ const BridgesList = ({
     return buttons;
   };
 
-  // CSV download function
   const handleDownloadCSV = async () => {
+    setLoading(true); // Start loading
     try {
-      // Define the params object dynamically
       const params = {
         district: district || "%",
         structureType,
@@ -190,10 +189,7 @@ const BridgesList = ({
         bridge,
       };
 
-      // Prepare the query string from params
       const queryString = new URLSearchParams(params).toString();
-
-      // Fetch the data from the API with the dynamically created query string
       const response = await fetch(
         `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
         {
@@ -206,24 +202,27 @@ const BridgesList = ({
       }
 
       const data = await response.json();
+      if (!data.bridges || data.bridges.length === 0) {
+        Swal.fire("Error!", "No data available for export", "error");
+        return;
+      }
 
-      // Assuming `data.bridges` contains the bridge records
       const csv = Papa.unparse(data.bridges);
-
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "bridges_data.csv";
       link.click();
     } catch (error) {
-      console.error("Error generating CSV:", error);
+      Swal.fire("Error!", "Failed to download CSV file", "error");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
-  // Excel download function
   const handleDownloadExcel = async () => {
+    setLoading(true); // Start loading
     try {
-      // Define the params object dynamically
       const params = {
         district: district || "%",
         structureType,
@@ -240,10 +239,7 @@ const BridgesList = ({
         bridge,
       };
 
-      // Prepare the query string from params
       const queryString = new URLSearchParams(params).toString();
-
-      // Fetch the data from the API with the dynamically created query string
       const response = await fetch(
         `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
         {
@@ -256,32 +252,29 @@ const BridgesList = ({
       }
 
       const data = await response.json();
-
-      // Check if bridges data is available
       if (!data.bridges || data.bridges.length === 0) {
-        console.error("No bridge data available to export.");
+        Swal.fire("Error!", "No data available for export", "error");
         return;
       }
 
-      // Handle any array fields (like PhotoPaths)
+      // Handle array fields like photos
       data.bridges.forEach((row) => {
-        // If PhotoPaths is an array, join it into a string
         if (Array.isArray(row.photos)) {
-          row.photos = row.photos.join(", ") || "No image path"; // Default if array is empty
+          row.photos = row.photos.join(", ") || "No image path";
         }
       });
 
-      // Create the worksheet from the table data without custom headers
+      // Create the worksheet
       const ws = XLSX.utils.json_to_sheet(data.bridges);
-
-      // Create a new workbook and append the worksheet
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
 
-      // Generate and download the Excel file
+      // Download the Excel file
       XLSX.writeFile(wb, "bridges_data.xlsx");
     } catch (error) {
-      console.error("Error generating Excel file:", error);
+      Swal.fire("Error!", "Failed to download Excel file", "error");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -368,16 +361,19 @@ const BridgesList = ({
               </div>
             </div>
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 disabled:opacity-50"
               onClick={handleDownloadCSV}
+              disabled={loading}
             >
-              Download CSV
+              {loading ? "Downloading CSV..." : "Download CSV"}
             </button>
+
             <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 disabled:opacity-50"
               onClick={handleDownloadExcel}
+              disabled={loading}
             >
-              Download Excel
+              {loading ? "Downloading Excel..." : "Download Excel"}
             </button>
           </div>
         </div>
