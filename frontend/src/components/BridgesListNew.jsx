@@ -128,7 +128,7 @@ const BridgesListNew = ({
 
   const handleRowClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-    const editUrl = `/BridgeInfo?bridgeData=${serializedBridgeData}`;
+    const editUrl = `/BridgeInfoEvaluation?bridgeData=${serializedBridgeData}`;
     window.location.href = editUrl;
   };
 

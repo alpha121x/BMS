@@ -294,7 +294,7 @@ const InspectionList = ({ bridgeId }) => {
             const rowIndex = worksheet.addRow(rowData).number;
 
             // **Adjust row height for Overview Photos**
-            worksheet.getRow(rowIndex).height = 120;
+            worksheet.getRow(rowIndex).height = 100;
 
             // Insert images in correct locations
             const insertImage = async (photoUrls, columnOffset, rowHeight) => {
@@ -336,8 +336,6 @@ const InspectionList = ({ bridgeId }) => {
         setLoading(false); // Stop loader
     }
 };
-
-
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);

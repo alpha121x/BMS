@@ -149,7 +149,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
           {/* Private Route for BridgeInfo */}
           <Route
-          path="/BridgeInfo"
+          path="/BridgeInfoEvaluation"
           element={
             <PrivateEvaluationRoute>
               <BridgeInfo />
