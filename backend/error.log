@@ -136,6 +136,282 @@ Error processing photos: SyntaxError: Expected ':' after property name in JSON a
     at Array.map (<anonymous>)
     at C:\Users\PMYLS\Desktop\BMS\backend\server.js:828:39
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Error parsing PhotoPaths: SyntaxError: Expected ':' after property name in JSON at position 42
+    at JSON.parse (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1383:37
+    at Array.map (<anonymous>)
+    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:1376:31
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 Error processing photos: SyntaxError: Expected ':' after property name in JSON at position 42
     at JSON.parse (<anonymous>)
     at C:\Users\PMYLS\Desktop\BMS\backend\server.js:836:37
