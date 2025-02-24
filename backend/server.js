@@ -452,7 +452,7 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 //   }
 // });
 
-// api endpoint for districts extent 
+// api endpoint for districts extent
 app.get("/api/districtExtent", async (req, res) => {
   try {
     const { districtId } = req.query;
@@ -475,8 +475,12 @@ app.get("/api/districtExtent", async (req, res) => {
     const result = await pool.query(query, values);
 
     if (result.rows.length > 0) {
-      const bboxString = result.rows[0].bbox.replace("BOX(", "").replace(")", "");
-      const [xmin, ymin, xmax, ymax] = bboxString.split(",").flatMap(coord => coord.split(" "));
+      const bboxString = result.rows[0].bbox
+        .replace("BOX(", "")
+        .replace(")", "");
+      const [xmin, ymin, xmax, ymax] = bboxString
+        .split(",")
+        .flatMap((coord) => coord.split(" "));
 
       res.json({
         success: true,
@@ -495,10 +499,15 @@ app.get("/api/districtExtent", async (req, res) => {
     }
   } catch (err) {
     console.error("Error fetching district extent:", err);
-    res.status(500).json({ success: false, message: "Error fetching district extent", error: err.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching district extent",
+        error: err.message,
+      });
   }
 });
-
 
 // bridges details download for dashboard main
 app.get("/api/bridgesdownloadNew", async (req, res) => {
@@ -834,52 +843,56 @@ app.get("/api/inspections-export", async (req, res) => {
     const result = await pool.query(query, queryParams);
 
     // Process the "PhotoPaths" to extract only URLs
-    const processedData = result.rows.map(row => {
+    const processedData = result.rows.map((row) => {
       let extractedPhotoPaths = [];
       let updatedOverviewPhotos = row["Overview Photos"]; // Keep original reference
-    
+
       try {
         // Process PhotoPaths
         if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
           const parsedPhotos = JSON.parse(cleanedJson);
-    
+
           // Loop through object and extract image URLs
-          Object.values(parsedPhotos).forEach(category => {
-            Object.values(category).forEach(imagesArray => {
+          Object.values(parsedPhotos).forEach((category) => {
+            Object.values(category).forEach((imagesArray) => {
               extractedPhotoPaths.push(...imagesArray);
             });
           });
-    
+
           // Replace IP with domain in PhotoPaths
-          extractedPhotoPaths = extractedPhotoPaths.map(path =>
-            typeof path === "string" ? path.replace("118.103.225.148", "cnw.urbanunit.gov.pk") : path
+          extractedPhotoPaths = extractedPhotoPaths.map((path) =>
+            typeof path === "string"
+              ? path.replace("118.103.225.148", "cnw.urbanunit.gov.pk")
+              : path
           );
         }
-    
+
         // Process Overview Photos (Fix for Empty Array Issue)
         if (Array.isArray(row["Overview Photos"])) {
-          updatedOverviewPhotos = row["Overview Photos"].map(photo =>
-            typeof photo === "string" && photo.trim() !== "" 
-              ? photo.replace("118.103.225.148", "cnw.urbanunit.gov.pk")
-              : null
-          ).filter(Boolean); // Remove any null/empty values
+          updatedOverviewPhotos = row["Overview Photos"]
+            .map((photo) =>
+              typeof photo === "string" && photo.trim() !== ""
+                ? photo.replace("118.103.225.148", "cnw.urbanunit.gov.pk")
+                : null
+            )
+            .filter(Boolean); // Remove any null/empty values
         } else {
           updatedOverviewPhotos = []; // Set to empty array if null/undefined
         }
       } catch (error) {
         console.error("Error processing photos:", error);
       }
-    
+
       return {
         ...row,
         PhotoPaths: extractedPhotoPaths, // Updated PhotoPaths with correct domain
         "Overview Photos": updatedOverviewPhotos, // Fixed empty array issue
       };
     });
-    
-    
-    
 
     res.json({ success: true, bridges: processedData });
   } catch (error) {
@@ -1301,24 +1314,27 @@ app.get("/api/inspections", async (req, res) => {
     const result = await pool.query(query, queryParams);
 
     // Process PhotoPaths to extract image URLs
-    const processedData = result.rows.map(row => {
+    const processedData = result.rows.map((row) => {
       let extractedPhotoPaths = [];
 
       try {
         if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
           const parsedPhotos = JSON.parse(cleanedJson);
 
           if (Array.isArray(parsedPhotos)) {
             // Case 1: Array of objects with "path" keys
-            parsedPhotos.forEach(item => {
+            parsedPhotos.forEach((item) => {
               if (item.path) extractedPhotoPaths.push(item.path);
             });
           } else if (typeof parsedPhotos === "object") {
             // Case 2: Nested object with image paths
-            Object.values(parsedPhotos).forEach(category => {
+            Object.values(parsedPhotos).forEach((category) => {
               if (typeof category === "object") {
-                Object.values(category).forEach(imagesArray => {
+                Object.values(category).forEach((imagesArray) => {
                   if (Array.isArray(imagesArray)) {
                     extractedPhotoPaths.push(...imagesArray);
                   }
@@ -1350,7 +1366,9 @@ app.get("/api/get-summary", async (req, res) => {
     const { bridgeId } = req.query;
 
     if (!bridgeId) {
-      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
     }
 
     const query = `
@@ -1380,29 +1398,34 @@ app.get("/api/get-summary", async (req, res) => {
     const { rows } = await pool.query(query, [bridgeId]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Inspection not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Inspection not found" });
     }
 
     // Process PhotoPaths for all rows
-    const processedData = rows.map(row => {
+    const processedData = rows.map((row) => {
       let extractedPhotoPaths = [];
 
       try {
         if (row.PhotoPaths) {
           // Clean JSON if wrapped in quotes
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, '{').replace(/\}\"/g, '}'); 
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
           const parsedPhotos = JSON.parse(cleanedJson);
 
           if (Array.isArray(parsedPhotos)) {
             // Case 1: Array of objects with "path" keys
-            parsedPhotos.forEach(item => {
+            parsedPhotos.forEach((item) => {
               if (item.path) extractedPhotoPaths.push(item.path);
             });
           } else if (typeof parsedPhotos === "object") {
             // Case 2: Nested object with image paths
-            Object.values(parsedPhotos).forEach(category => {
+            Object.values(parsedPhotos).forEach((category) => {
               if (typeof category === "object") {
-                Object.values(category).forEach(imagesArray => {
+                Object.values(category).forEach((imagesArray) => {
                   if (Array.isArray(imagesArray)) {
                     extractedPhotoPaths.push(...imagesArray);
                   }
@@ -1519,10 +1542,8 @@ app.get("/api/get-inspections", async (req, res) => {
 
     // Helper function to extract URLs from potentially malformed JSON paths
     function extractUrlsFromPath(pathString) {
-      // If it's not a string or empty, return empty array
       if (!pathString || typeof pathString !== "string") return [];
 
-      // Clean up the string
       const trimmedPath = pathString.trim();
 
       // Case 1: Direct URL
@@ -1530,43 +1551,32 @@ app.get("/api/get-inspections", async (req, res) => {
         return [trimmedPath];
       }
 
-      // Case 2: Try to parse as JSON
+      // Case 2: Try to parse as JSON (handling nested objects)
       try {
-        // Handle malformed JSON with missing opening brace
-        let jsonStr = trimmedPath;
-        if (trimmedPath.startsWith('"') && !trimmedPath.startsWith('"{')) {
-          jsonStr = "{" + trimmedPath;
-        }
-
-        // Add missing closing brace if needed
-        const openBraces = (jsonStr.match(/{/g) || []).length;
-        const closeBraces = (jsonStr.match(/}/g) || []).length;
-        if (openBraces > closeBraces) {
-          jsonStr += "}";
-        }
-
-        const parsed = JSON.parse(jsonStr);
+        const parsed = JSON.parse(trimmedPath);
         const urls = [];
 
-        // Extract URLs from nested structure
-        Object.keys(parsed).forEach((category) => {
-          const categoryObj = parsed[category];
-          Object.keys(categoryObj).forEach((index) => {
-            const urlArray = categoryObj[index];
-            if (Array.isArray(urlArray)) {
-              urlArray.forEach((url) => {
-                if (typeof url === "string" && url.startsWith("http")) {
-                  urls.push(url);
-                }
-              });
-            }
-          });
-        });
+        function extractFromNested(obj) {
+          if (Array.isArray(obj)) {
+            obj.forEach((item) => {
+              if (typeof item === "string" && item.startsWith("http")) {
+                urls.push(item);
+              } else if (typeof item === "object" && item !== null) {
+                extractFromNested(item);
+              }
+            });
+          } else if (typeof obj === "object" && obj !== null) {
+            Object.values(obj).forEach((value) => extractFromNested(value));
+          }
+        }
 
+        extractFromNested(parsed);
         return urls;
       } catch (e) {
-        // Case 3: Fallback - try to extract URL using regex
-        const urlMatches = trimmedPath.match(/(http[^"]+\.jpg)/g);
+        // Case 3: Fallback - extract URLs using regex
+        const urlMatches = trimmedPath.match(
+          /(http[^"]+\.(jpg|jpeg|png|gif))/g
+        );
         return urlMatches || [];
       }
     }
@@ -1574,15 +1584,16 @@ app.get("/api/get-inspections", async (req, res) => {
     // Updated formatRows function
     const formatRows = (rows) =>
       rows.map((row) => {
-        // Process PhotoPaths
         let extractedUrls = [];
+
         if (Array.isArray(row.PhotoPaths)) {
-          // Process each path string and collect all URLs
           row.PhotoPaths.forEach((pathString) => {
             extractedUrls = extractedUrls.concat(
               extractUrlsFromPath(pathString)
             );
           });
+        } else if (typeof row.PhotoPaths === "string") {
+          extractedUrls = extractUrlsFromPath(row.PhotoPaths);
         }
 
         return {
