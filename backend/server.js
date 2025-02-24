@@ -856,8 +856,6 @@ app.get("/api/inspections-export", async (req, res) => {
   }
 });
 
-
-
 // bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
   try {
