@@ -347,6 +347,7 @@ const InspectionList = ({ bridgeId }) => {
                                         src={photo}
                                         alt={`Photo ${i + 1}`}
                                         className="img-fluid rounded border"
+                                        loading="lazy"
                                         style={{
                                           width: "80px",
                                           height: "80px",
