@@ -35,8 +35,6 @@ const FilterComponent = ({
   const [minYear, setMinYearState] = useState("");
   const [maxYear, setMaxYearState] = useState("");
 
-  console.log(category);
-
   useEffect(() => {
     const fetchFilters = async () => {
       try {

@@ -10,6 +10,10 @@ import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo compone
 import InspectionList from "./InspectionList";
 import InspectionListRams from "./InspectionListRams";
 import MapModal from "./MapModal"; // Adjust the import path as needed
+import Swal from "sweetalert2";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import { FaSpinner } from "react-icons/fa";
 
 const BridgesListNew = ({
   setSelectedDistrict,
@@ -47,6 +51,7 @@ const BridgesListNew = ({
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingExcel, setLoadingExcel] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
@@ -237,22 +242,25 @@ const BridgesListNew = ({
         maxYear,
         bridge,
       };
-  
+
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadNeww?${queryString}`, {
-        method: "GET",
-      });
-  
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       const csv = Papa.unparse(data.bridges);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
@@ -265,9 +273,9 @@ const BridgesListNew = ({
       setLoading(false); // Stop loading
     }
   };
-  
-  const handleDownloadExcel = async () => {
-    setLoading(true); // Start loading
+
+  const handleDownloadExcel = async (setLoading) => {
+    setLoadingExcel(true); // Start loading
     try {
       const params = {
         district: district || "%",
@@ -284,40 +292,127 @@ const BridgesListNew = ({
         maxYear,
         bridge,
       };
-  
+
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadNeww?${queryString}`, {
-        method: "GET",
-      });
-  
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export-new?${queryString}`,
+        { method: "GET" }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
-      // Handle array fields like photos
-      data.bridges.forEach((row) => {
-        if (Array.isArray(row.photos)) {
-          row.photos = row.photos.join(", ") || "No image path";
-        }
-      });
-  
-      // Create the worksheet
-      const ws = XLSX.utils.json_to_sheet(data.bridges);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
-  
-      // Download the Excel file
-      XLSX.writeFile(wb, "bridges_data.xlsx");
+
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.bridge_name || "bridges_data";
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Bridges Data");
+
+      // Define columns excluding image fields
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) => key !== "Overview Photos" && key !== "Inspection Photos"
+      );
+
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: 22,
+      }));
+
+      // Add image columns
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
+      }
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
+      }
+
+      worksheet.columns = columns;
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true, size: 14 };
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getRow(1).height = 25;
+
+      // Insert rows with images
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+
+        // Extract & fix image URLs
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+        const inspectionPhotos = (item["Inspection Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+
+        // Add normal data (excluding image URLs)
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
+
+        // Insert row
+        const rowIndex = worksheet.addRow(rowData).number;
+
+        // Set row height for images
+        worksheet.getRow(rowIndex).height = 90;
+
+        // Function to insert images
+        const insertImage = async (photoUrls, columnOffset) => {
+          for (let j = 0; j < photoUrls.length && j < 5; j++) {
+            try {
+              const imgResponse = await fetch(photoUrls[j]);
+              const imgBlob = await imgResponse.blob();
+              const arrayBuffer = await imgBlob.arrayBuffer();
+
+              const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: "jpeg",
+              });
+
+              worksheet.addImage(imageId, {
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
+                ext: { width: 150, height: 90 },
+              });
+            } catch (error) {
+              console.error("Failed to load image:", photoUrls[j], error);
+            }
+          }
+        };
+
+        // Insert images
+        await insertImage(overviewPhotos, 0);
+        await insertImage(inspectionPhotos, 5);
+      }
+
+      // Save File
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
-      Swal.fire("Error!", "Failed to download Excel file", "error");
+      console.error("Error downloading Excel:", error);
+      Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-      setLoading(false); // Stop loading
+      setLoadingExcel(false);
     }
   };
 
@@ -412,11 +507,18 @@ const BridgesListNew = ({
             </button>
 
             <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 disabled:opacity-50"
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 disabled:opacity-50 flex items-center justify-center"
               onClick={handleDownloadExcel}
-              disabled={loading}
+              disabled={loadingExcel}
             >
-              {loading ? "Downloading Excel..." : "Download Excel"}
+              {loadingExcel ? (
+                <>
+                  <FaSpinner className="animate-spin mr-2" /> Downloading
+                  Excel...
+                </>
+              ) : (
+                "Download Excel"
+              )}
             </button>
           </div>
         </div>
