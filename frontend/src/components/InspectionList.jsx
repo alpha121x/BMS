@@ -193,32 +193,40 @@ const InspectionList = ({ bridgeId }) => {
   const handleDownloadCSV = async (bridgeId) => {
     setLoading(true); // Start loading
     try {
-      const response = await fetch(`${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`);
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+      );
       const data = await response.json();
-  
-      if (!data.success || !Array.isArray(data.bridges) || data.bridges.length === 0) {
+
+      if (
+        !data.success ||
+        !Array.isArray(data.bridges) ||
+        data.bridges.length === 0
+      ) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       const summaryData = data.bridges;
       const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
-  
+
       const headers = Object.keys(summaryData[0]);
-  
+
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
-          headers.join(","), 
+          headers.join(","),
           ...summaryData.map((row) =>
             headers
               .map((key) =>
-                String(row[key]).includes(",") ? `"${row[key]}"` : row[key] || "N/A"
+                String(row[key]).includes(",")
+                  ? `"${row[key]}"`
+                  : row[key] || "N/A"
               )
               .join(",")
           ),
         ].join("\n");
-  
+
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -236,106 +244,137 @@ const InspectionList = ({ bridgeId }) => {
   const handleDownloadExcel = async (bridgeId, setLoading) => {
     setLoading(true); // Start loader
     try {
-        const response = await fetch(
-            `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+      );
+      const data = await response.json();
+
+      if (
+        !data.success ||
+        !Array.isArray(data.bridges) ||
+        data.bridges.length === 0
+      ) {
+        console.error("No data to export");
+        Swal.fire("Error!", "No data available for export", "error");
+        return;
+      }
+
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Inspections");
+
+      // Define all columns except images
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+      );
+
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: 22,
+      }));
+
+      // Add image columns with increased spacing
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
+      }
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
+      }
+
+      // Define worksheet columns
+      worksheet.columns = columns;
+
+      // Style the header row (first row)
+      worksheet.getRow(1).font = { bold: true, size: 14 }; // Bold text and increased font size
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      }; // Center align text
+      worksheet.getRow(1).height = 25; // Increase row height for better visibility
+
+      // Add data rows without image URLs
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+
+        // Extract & fix image URLs (replacing backslashes with forward slashes)
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
         );
-        const data = await response.json();
-
-        if (!data.success || !Array.isArray(data.bridges) || data.bridges.length === 0) {
-            console.error("No data to export");
-            Swal.fire("Error!", "No data available for export", "error");
-            return;
-        }
-
-        const summaryData = data.bridges;
-        const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
-
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet("Inspections");
-
-        // Define all columns except images
-        const columnKeys = Object.keys(summaryData[0]).filter(
-            (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
+          url.replace(/\\/g, "/")
         );
 
-        const columns = columnKeys.map((key) => ({
-            header: key.replace(/_/g, " "),
-            key: key,
-            width: 25,
-        }));
+        // Add normal data (excluding image URLs)
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
 
-        // Add image columns with increased spacing
-        for (let i = 1; i <= 5; i++) {
-            columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 35 });
-        }
-        for (let i = 1; i <= 5; i++) {
-            columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 40 });
-        }
+        // Add a row for each entry
+        const rowIndex = worksheet.addRow(rowData).number;
 
-        worksheet.columns = columns;
+        // **Adjust row height for images to fit properly**
+        worksheet.getRow(rowIndex).height = 90;
 
-        // Add data rows without image URLs
-        for (let i = 0; i < summaryData.length; i++) {
-            const item = summaryData[i];
+        // Function to insert images in the correct locations
+        const insertImage = async (photoUrls, columnOffset, rowHeight) => {
+          for (let j = 0; j < photoUrls.length && j < 5; j++) {
+            try {
+              // Fetch image data from the URL
+              const imgResponse = await fetch(photoUrls[j]);
+              const imgBlob = await imgResponse.blob();
+              const arrayBuffer = await imgBlob.arrayBuffer();
 
-            // Extract & fix image URLs
-            const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
-                url.replace(/\\/g, "/")
-            );
-            const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
-                url.replace(/\\/g, "/")
-            );
+              // Add image to the workbook
+              const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: "jpeg",
+              });
 
-            // Add normal data
-            const rowData = {};
-            columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
+              // **Insert image in the correct column**
+              // - `tl.col`: Column position, starting from normal data columns + offset
+              // - `tl.row`: Row position (adjusted for zero-based index)
+              // - `ext.width`: Width of the inserted image (150px for better visibility)
+              // - `ext.height`: Height of the inserted image (90px for consistency)
+              worksheet.addImage(imageId, {
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
+                ext: { width: 150, height: 90 },
+              });
+            } catch (error) {
+              console.error("Failed to load image:", photoUrls[j], error);
+            }
+          }
+        };
 
-            // Add a row for each entry
-            const rowIndex = worksheet.addRow(rowData).number;
+        // Insert Overview Photos (5 max)
+        await insertImage(overviewPhotos, 0, 90);
 
-            // **Adjust row height for Overview Photos**
-            worksheet.getRow(rowIndex).height = 100;
+        // Insert Inspection Photos (5 max)
+        await insertImage(inspectionPhotos, 5, 90);
+      }
 
-            // Insert images in correct locations
-            const insertImage = async (photoUrls, columnOffset, rowHeight) => {
-                for (let j = 0; j < photoUrls.length && j < 5; j++) {
-                    try {
-                        const imgResponse = await fetch(photoUrls[j]);
-                        const imgBlob = await imgResponse.blob();
-                        const arrayBuffer = await imgBlob.arrayBuffer();
-
-                        const imageId = workbook.addImage({
-                            buffer: arrayBuffer,
-                            extension: "jpeg",
-                        });
-
-                        worksheet.addImage(imageId, {
-                            tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 },
-                            ext: { width: 120, height: 120 }, // Larger image for better visibility
-                        });
-                    } catch (error) {
-                        console.error("Failed to load image:", photoUrls[j], error);
-                    }
-                }
-            };
-
-            await insertImage(overviewPhotos, 0, 120);
-
-            // **Adjust row height for Inspection Photos**
-            worksheet.getRow(rowIndex).height = 150;
-            await insertImage(inspectionPhotos, 5, 150);
-        }
-
-        // Save File
-        const buffer = await workbook.xlsx.writeBuffer();
-        saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
+      // Save File
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
-        console.error("Error downloading Excel:", error);
-        Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+      console.error("Error downloading Excel:", error);
+      Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-        setLoading(false); // Stop loader
+      setLoading(false); // Stop loader
     }
-};
+  };
 
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
