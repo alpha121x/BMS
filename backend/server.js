@@ -885,8 +885,6 @@ function extractUrlsFromPath(photoPaths) {
   }
 }
 
-
-
 // bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
   try {
