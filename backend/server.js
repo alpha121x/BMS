@@ -1512,6 +1512,7 @@ app.get("/api/get-inspections", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_con = '3'
+      and is_latest = true
       ORDER BY inspection_id DESC;
     `;
 
@@ -1681,6 +1682,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
        AND qc_rams = '3'
+      and is_latest = true
       ORDER BY inspection_id DESC;
     `;
 
@@ -1945,7 +1947,6 @@ app.put("/api/update-inspection", async (req, res) => {
   }
 
   try {
-    // Prepare the query and values dynamically based on provided fields
     let query = "UPDATE bms.tbl_inspection_f SET";
     const values = [];
     let valueIndex = 1;
@@ -1961,9 +1962,16 @@ app.put("/api/update-inspection", async (req, res) => {
       query += ` qc_con = $${valueIndex},`;
       values.push(qc_con);
       valueIndex++;
+
+      // Hard-code evaluation_status based on qc_con value
+      if (qc_con === 2) {
+        query += ` evaluation_status = 'approved',`;
+      } else if (qc_con === 3) {
+        query += ` evaluation_status = 'unapproved',`;
+      }
     }
 
-    // Always update reviewd_by to 1
+    // Always update reviewed_by to 1
     query += ` reviewed_by = 1,`;
 
     // If no fields to update, return an error
@@ -1992,6 +2000,7 @@ app.put("/api/update-inspection", async (req, res) => {
     res.status(500).json({ error: "Failed to update inspection" });
   }
 });
+
 
 // Endpoint to update inspection data for rams
 app.put("/api/update-inspection-rams", async (req, res) => {

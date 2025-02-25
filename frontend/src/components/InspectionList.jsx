@@ -609,7 +609,6 @@ const InspectionList = ({ bridgeId }) => {
                                               </div>
                                             )}
                                           </div>
-
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
                                             {inspection.PartsName || "N/A"}{" "}
@@ -630,6 +629,11 @@ const InspectionList = ({ bridgeId }) => {
                                               Situation Remarks:
                                             </strong>{" "}
                                             {inspection.Remarks || "N/A"}
+                                            <br />
+                                            <strong>
+                                              Surveeyed By
+                                            </strong>{" "}
+                                            {inspection.surveyed_by || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
