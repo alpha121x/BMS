@@ -852,7 +852,12 @@ app.get("/api/inspections-export", async (req, res) => {
     res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res.status(500).json({ success: false, message: "Error fetching data from the database" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching data from the database",
+      });
   }
 });
 
@@ -861,14 +866,19 @@ function extractUrlsFromPath(photoPaths) {
   if (!photoPaths) return [];
 
   try {
-    const parsedData = typeof photoPaths === "string" ? JSON.parse(photoPaths) : photoPaths;
+    const parsedData =
+      typeof photoPaths === "string" ? JSON.parse(photoPaths) : photoPaths;
     let urls = [];
 
     function extractFromNested(obj) {
       if (Array.isArray(obj)) {
         obj.forEach((item) => extractFromNested(item));
       } else if (typeof obj === "object" && obj !== null) {
-        if (obj.path && typeof obj.path === "string" && obj.path.startsWith("http")) {
+        if (
+          obj.path &&
+          typeof obj.path === "string" &&
+          obj.path.startsWith("http")
+        ) {
           urls.push(obj.path);
         }
         Object.values(obj).forEach((value) => extractFromNested(value));
@@ -2001,8 +2011,7 @@ app.put("/api/update-inspection", async (req, res) => {
   }
 });
 
-
-// Endpoint to update inspection data for rams
+// Endpoint to update inspection data for RAMS
 app.put("/api/update-inspection-rams", async (req, res) => {
   const { id, qc_remarks_rams, qc_rams } = req.body;
 
@@ -2011,12 +2020,11 @@ app.put("/api/update-inspection-rams", async (req, res) => {
   }
 
   try {
-    // Prepare the query and values dynamically based on provided fields
     let query = "UPDATE bms.tbl_inspection_f SET";
     const values = [];
     let valueIndex = 1;
 
-    // Conditionally add the fields to update
+    // Conditionally add fields to update
     if (qc_remarks_rams !== undefined) {
       query += ` qc_remarks_rams = $${valueIndex},`;
       values.push(qc_remarks_rams === null ? null : qc_remarks_rams);
@@ -2027,9 +2035,16 @@ app.put("/api/update-inspection-rams", async (req, res) => {
       query += ` qc_rams = $${valueIndex},`;
       values.push(qc_rams);
       valueIndex++;
+
+      // Hardcoded evaluation_status based on qc_rams value
+      if (qc_rams === 2) {
+        query += ` evaluation_status = 'approved',`;
+      } else if (qc_rams === 3) {
+        query += ` evaluation_status = 'unapproved',`;
+      }
     }
 
-    // Always update reviewd_by to 1
+    // Always update reviewed_by to 2
     query += ` reviewed_by = 2,`;
 
     // If no fields to update, return an error
@@ -2042,7 +2057,7 @@ app.put("/api/update-inspection-rams", async (req, res) => {
       query.slice(0, -1) + ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
     values.push(id);
 
-    // Execute the query to update the record
+    // Execute the query
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
@@ -2058,6 +2073,7 @@ app.put("/api/update-inspection-rams", async (req, res) => {
     res.status(500).json({ error: "Failed to update inspection" });
   }
 });
+
 
 app.get("/api/structure-types", async (req, res) => {
   try {
