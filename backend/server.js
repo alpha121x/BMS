@@ -982,39 +982,13 @@ app.get("/api/inspections-export", async (req, res) => {
     let firstRow = true;
     const processedData = result.rows.map((row) => {
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
-      // Ensure Overview Photos are properly formatted
+      
+      // Update Overview Photos using the same logic as PhotoPaths
       row["Overview Photos"] = row["Overview Photos"]
-        .map((photo) => (photo ? photo : null))
+        .map((photo) => (photo ? swapDomain(photo) : null))
         .filter(Boolean);
 
       if (!firstRow) {
-        row["Reference No:"] = row["Reference No:"];
-        row.bridge_name = row.bridge_name;
-        row.structure_type = row.structure_type;
-        row.road_no = row.road_no;
-        row.road_name = row.road_name;
-        row.road_name_cwd = row.road_name_cwd;
-        row.road_code_cwd = row.road_code_cwd;
-        row.route_id = row.route_id;
-        row.survey_id = row.survey_id;
-        row.surveyor_name = row.surveyor_name;
-        row.zone = row.zone;
-        row.district = row.district;
-        row.road_classification = row.road_classification;
-        row.road_surface_type = row.road_surface_type;
-        row.carriageway_type = row.carriageway_type;
-        row.direction = row.direction;
-        row.visual_condition = row.visual_condition;
-        row.construction_type = row.construction_type;
-        row.no_of_span = row.no_of_span;
-        row.span_length_m = row.span_length_m;
-        row.structure_width_m = row.structure_width_m;
-        row.construction_year = row.construction_year;
-        row.last_maintenance_date = row.last_maintenance_date;
-        row.data_source = row.data_source;
-        row.date_time = row.date_time;
-        row.remarks = row.remarks;
         row["Overview Photos"] = null;
       }
 
@@ -1025,12 +999,7 @@ app.get("/api/inspections-export", async (req, res) => {
     res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching data from the database",
-      });
+    res.status(500).json({ success: false, message: "Error fetching data from the database" });
   }
 });
 
@@ -1047,16 +1016,12 @@ function extractUrlsFromPath(photoPaths) {
       if (Array.isArray(obj)) {
         obj.forEach((item) => extractFromNested(item));
       } else if (typeof obj === "object" && obj !== null) {
-        if (
-          obj.path &&
-          typeof obj.path === "string" &&
-          obj.path.startsWith("http")
-        ) {
-          urls.push(obj.path);
+        if (obj.path && typeof obj.path === "string" && obj.path.startsWith("http")) {
+          urls.push(swapDomain(obj.path));
         }
         Object.values(obj).forEach((value) => extractFromNested(value));
       } else if (typeof obj === "string" && obj.startsWith("http")) {
-        urls.push(obj);
+        urls.push(swapDomain(obj));
       }
     }
 
@@ -1067,6 +1032,14 @@ function extractUrlsFromPath(photoPaths) {
     return [];
   }
 }
+
+// Function to swap domain/IP
+function swapDomain(url) {
+  return url.includes("cnw.urbanunit.gov.pk")
+    ? url.replace("cnw.urbanunit.gov.pk", "118.103.225.148")
+    : url.replace("118.103.225.148", "cnw.urbanunit.gov.pk");
+}
+
 
 // bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
