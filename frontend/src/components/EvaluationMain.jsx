@@ -84,8 +84,10 @@ const EvaluationMain = () => {
 
   // Card Component with dynamic border color
   const Card = ({ label, value, icon, iconSize = 32 }) => (
-    <div
-      className="rounded-lg shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
+    
+    <div className="col-md-3">
+<div
+      className="rounded-1 shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
       style={{
         background:
           "linear-gradient(135deg, rgba(59, 100, 246, 0.8), rgba(96, 165, 250, 1))", // Light blue gradient
@@ -111,25 +113,38 @@ const EvaluationMain = () => {
 
       <div className="text-3xl font-bold ml-2 text-white">{value}</div>
     </div>
+    </div>
+
+    
   );
 
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
       <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Inspected Structures
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {inspectedCards.map((card, index) => (
+        
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-md-12">
+            <h5 className="font-semibold text-gray-700">Inspected Structures</h5>
+            </div>
+          </div>
+        <div className="row gx-2">
+        {inspectedCards.map((card, index) => (
             <Card key={index} {...card} />
           ))}
         </div>
+        </div>
+        
+        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          
+        </div> */}
       </div>
 
       {/* Bridges */}
-      <div className="mt-2 flex justify-center">
-        <div className="w-full p-4">
+      <div className="container-fluid">
+      <div className="row">
+        <div className="col-md-12">
           <BridgesListNew
             setSelectedDistrict={setSelectedDistrict}
             setMinBridgeLength={setMinBridgeLength}
@@ -160,6 +175,8 @@ const EvaluationMain = () => {
           />
         </div>
       </div>
+      </div>
+      
 
       {/* Back to Top Button */}
       {showBackToTop && (

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faSignOutAlt, faUserCircle } from "@fortawesome/free-solid-svg-icons";
+import { FaCircleUser } from "react-icons/fa6";
 
 const Header = () => {
   const location = useLocation();
@@ -44,22 +45,22 @@ const Header = () => {
   return (
     <header className="p-1 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mx-2">
-        <div className="flex items-center">
-          <img src="/punjab.png" alt="Logo" className="h-[35px] w-[45px]" />
-          <div className="p-1 rounded">
+        <dsssssiv className="flex items-center">
+          <img src="/cnw.jpg" alt="Logo" className="h-[26px]" />
+          <div className="mt-1 ms-2">
             <Link to="/Evaluation" className="no-underline">
-              <h4 className="text-2xl font-bold uppercase">
+              <h5 className="font-bold uppercase">
                 <span className="text-blue-500">C&W BMS- Evluation Module</span>
-              </h4>
+              </h5>
             </Link>
           </div>
-        </div>
+        </dsssssiv>
 
         <nav className="flex space-x-2 items-center">
 
           <Link
             to="/Evaluation"
-            className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
+            className={`py-1 px-3 rounded-1 font-semibold transition duration-300 no-underline ${
               activeTab === "/Evaluation"
                 ? "bg-blue-500 text-white"
                 : "hover:bg-green-100 text-blue-500"
@@ -73,28 +74,36 @@ const Header = () => {
             <Link
               to="#"
               onClick={toggleProfileDropdown}
-              className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
+              className={`p-1 ms-2 font-semibold transition duration-300 no-underline ${
                 activeTab === "#"
                   ? "bg-blue-500 text-white"
-                  : "hover:bg-green-100 text-blue-500"
+                  : "hover:bg-gray-100 text-blue-500"
               }`}
             >
-              <FontAwesomeIcon icon={faUser} className="mr-2" />
-              {userName}
+              <FontAwesomeIcon icon={faUserCircle} className="mr-2 fs-3"  />
+              
             </Link>
             {isProfileDropdownOpen && (
-              <div className="absolute right-8 z-10 mt-2 w-fit bg-white border border-gray-200 rounded-md shadow-lg transition-all duration-200 ease-in-out transform scale-95">
+              <div className="absolute right-0 z-10 mt-2 w-fit bg-white border border-gray-200 rounded-1 shadow-lg transition-all duration-200 ease-in-out transform scale-95">
+                <Link
+                  className="flex items-center px-4 py-2 hover:bg-gray-100 no-underline transition duration-200"
+                >
+                  <span className="text-capitalize">{userName}</span>
+                </Link>
                 <Link
                   to="#"
                   onClick={(e) => {
                     e.preventDefault();
                     handleLogout();
                   }}
-                  className="flex items-center px-4 py-2 text-red-600 hover:bg-green-100 no-underline transition duration-200"
+                  className="flex items-center px-4 py-2 hover:bg-red-100 no-underline transition duration-200"
                 >
                   <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
                   Logout
                 </Link>
+
+
+                
               </div>
             )}
           </div>

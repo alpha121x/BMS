@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
 import * as XLSX from "xlsx"; // Excel library
@@ -14,6 +15,12 @@ import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { FaSpinner } from "react-icons/fa";
+import { FaFilter } from "react-icons/fa6";
+import { FaFileCsv } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa6";
+import { MdInventory } from "react-icons/md";
+import { FcInspection } from "react-icons/fc";
+import { BiSolidZoomIn } from "react-icons/bi";
 
 const BridgesListNew = ({
   setSelectedDistrict,
@@ -81,6 +88,12 @@ const BridgesListNew = ({
     maxYear,
     bridge,
   ]);
+
+  useEffect(() => {
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach((tooltip) => new window.bootstrap.Tooltip(tooltip));
+  }, []);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -169,7 +182,6 @@ const BridgesListNew = ({
     });
     setShowMapModal(true);
   };
-  
 
   const handleCloseMapModal = () => {
     setShowMapModal(false);
@@ -432,112 +444,106 @@ const BridgesListNew = ({
 
   return (
     <>
-      <div className="w-full mx-auto">
-        <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
-          <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Inspected Structures</div>
-            <div className="text-sm font-medium mt-1 text-gray-700">
-              Total Structures: {bridgeCount || 0}
-            </div>
-          </div>
-          <div className="flex space-x-2">
-            <button
-              className="btn btn-primary flex items-center gap-2"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasRight"
-              aria-controls="offcanvasRight"
-            >
-              {/* Filter Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-5.414 5.414A2 2 0 0014 13.414V20a1 1 0 01-1.447.894l-4-2A1 1 0 018 17.618v-4.204a2 2 0 00-.586-1.414L3.293 6.707A1 1 0 013 6V4z"
-                />
-              </svg>
-            </button>
-
-            {/* Offcanvas Sidebar for Filters */}
-            <div
-              className="offcanvas offcanvas-end"
-              tabIndex="-1"
-              id="offcanvasRight"
-              aria-labelledby="offcanvasRightLabel"
-            >
-              <div className="offcanvas-header">
-                <h5 id="offcanvasRightLabel" className="text-xl font-bold">
-                  Filters
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close text-reset"
-                  data-bs-dismiss="offcanvas"
-                  aria-label="Close"
-                ></button>
-              </div>
-
-              <div className="offcanvas-body">
-                <FilterComponent
-                  setSelectedDistrict={setSelectedDistrict}
-                  setMinBridgeLength={setMinBridgeLength}
-                  setMaxBridgeLength={setMaxBridgeLength}
-                  setMinSpanLength={setMinSpanLength}
-                  setMaxSpanLength={setMaxSpanLength}
-                  setStructureType={setStructureType}
-                  setConstructionType={setConstructionType}
-                  setCategory={setCategory}
-                  setEvaluationStatus={setEvaluationStatus}
-                  setInspectionStatus={setInspectionStatus}
-                  setMinYear={setMinYear}
-                  setMaxYear={setMaxYear}
-                  setBridge={setBridge}
-                />
-              </div>
-            </div>
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 disabled:opacity-50"
-              onClick={handleDownloadCSV}
-              disabled={loading}
-            >
-              {loading ? "Downloading CSV..." : "Download CSV"}
-            </button>
-
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 disabled:opacity-50 flex items-center justify-center"
-              onClick={handleDownloadExcel}
-              disabled={loadingExcel}
-            >
-              {loadingExcel ? (
-                <>
-                  <FaSpinner className="animate-spin mr-2" /> Downloading
-                  Excel...
-                </>
-              ) : (
-                "Download Excel"
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div
-        className="card p-2 rounded-lg text-black"
+        className="card p-0 rounded-lg text-black"
         style={{
           background: "#FFFFFF",
-          border: "2px solid #60A5FA",
+          // border: "2px solid #60A5FA",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
         }}
       >
-        <div className="card-body pb-0">
+        <div class="card-header p-2">
+          <div className="flex items-center justify-between">
+            <h6 className="mb-0">
+              Structure Details
+              <span class="badge text-bg-success ms-2">
+                <h6 className="mb-0">{bridgeCount || 0}</h6>
+              </span>
+            </h6>
+
+            <div className="flex space-x-2">
+              {/* Offcanvas Sidebar for Filters */}
+              <div
+                className="offcanvas offcanvas-end"
+                tabIndex="-1"
+                id="offcanvasRight"
+                aria-labelledby="offcanvasRightLabel"
+              >
+                <div className="offcanvas-header">
+                  <h5 id="offcanvasRightLabel" className="text-xl font-bold">
+                    Filters
+                  </h5>
+                  <button
+                    type="button"
+                    className="btn-close text-reset"
+                    data-bs-dismiss="offcanvas"
+                    aria-label="Close"
+                  ></button>
+                </div>
+
+                <div className="offcanvas-body">
+                  <FilterComponent
+                    setSelectedDistrict={setSelectedDistrict}
+                    setMinBridgeLength={setMinBridgeLength}
+                    setMaxBridgeLength={setMaxBridgeLength}
+                    setMinSpanLength={setMinSpanLength}
+                    setMaxSpanLength={setMaxSpanLength}
+                    setStructureType={setStructureType}
+                    setConstructionType={setConstructionType}
+                    setCategory={setCategory}
+                    setEvaluationStatus={setEvaluationStatus}
+                    setInspectionStatus={setInspectionStatus}
+                    setMinYear={setMinYear}
+                    setMaxYear={setMaxYear}
+                    setBridge={setBridge}
+                  />
+                </div>
+              </div>
+              <button
+                className="btn btn-outline-primary"
+                onClick={handleDownloadCSV}
+                disabled={loading}
+              >
+                <div className="flex items-center gap-1">
+                  <FaFileCsv />
+                  {loading ? "Downloading CSV..." : "CSV"}
+                </div>
+              </button>
+
+              <button
+                className="btn btn-outline-success"
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+              >
+                {loadingExcel ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" /> Downloading
+                    Excel...{" "}
+                  </>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <FaFileExcel />
+                    {loading ? "Downloading Excel..." : "Excel"}
+                  </div>
+                )}
+              </button>
+
+              <button
+                className="btn btn-sm btn-info"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasRight"
+                aria-controls="offcanvasRight"
+              >
+                <div className="flex items-center gap-1">
+                  <FaFilter /> Filter{" "}
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="card-body p-0 pb-2">
           {loading && (
             <div
               style={{
@@ -565,14 +571,21 @@ const BridgesListNew = ({
 
           {!loading && !error && (
             <>
-              <Table bordered responsive className="custom-table">
+              <Table
+                bordered
+                responsive
+                className="table table-striped table-hover table-sm"
+                style={{ fontSize: "12px" }}
+              >
                 <thead>
-                  <tr>
-                    <th>District</th>
-                    <th>Road Name</th>
-                    <th>Structure Type</th>
-                    <th>Bridge Name</th>
-                    <th className="text-center">Action</th>
+                  <tr className="table-primary">
+                    <th style={{ width: "10%" }}>District</th>
+                    <th style={{ width: "50%" }}>Road Name</th>
+                    <th style={{ width: "10%" }}>Structure Type</th>
+                    <th style={{ width: "20%" }}>Bridge Name</th>
+                    <th style={{ width: "10%" }} className="text-center">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -603,10 +616,11 @@ const BridgesListNew = ({
                                 e.stopPropagation(); // Prevent row click event
                                 handleViewInventory(bridge);
                               }}
-                              className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 text-xs"
-                              style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              className="bg-blue-400 p-1 text-white py-1 rounded-1 hover:bg-blue-200"
+                              data-bs-toggle="tooltip"
+                              title="View Inventory"
                             >
-                              Inventory Info
+                              <MdInventory />
                             </button>
 
                             {/* Button for Inspection Info */}
@@ -615,10 +629,11 @@ const BridgesListNew = ({
                                 e.stopPropagation();
                                 handleViewInspection(bridge);
                               }}
-                              className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 text-xs"
-                              style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              className="bg-blue-400 p-1 text-white rounded-1 hover:bg-blue-200"
+                              data-bs-toggle="tooltip"
+                              title="View Inspection Info"
                             >
-                              Inspection Info
+                              <FcInspection />
                             </button>
 
                             {/* Button for Zoom To */}
@@ -627,10 +642,11 @@ const BridgesListNew = ({
                                 e.stopPropagation();
                                 handleZoomToBridge(bridge);
                               }}
-                              className="bg-purple-500 text-white px-2 py-1 rounded-md hover:bg-purple-600 text-xs"
-                              style={{ minWidth: "80px" }} // Optional: Set a minimum width for consistency
+                              className="bg-blue-400 text-white p-1 rounded-md hover:bg-blue-200"
+                              data-bs-toggle="tooltip"
+                              title="Zoom to Bridge"
                             >
-                              Zoom To
+                              <BiSolidZoomIn />
                             </button>
                           </div>
                         </td>
