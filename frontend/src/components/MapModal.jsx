@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
-const MapModal = ({ location, onClose, markerLabel }) => {
+const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {
   if (!location) return null;
 
   const { latitude, longitude } = location;
@@ -9,9 +9,14 @@ const MapModal = ({ location, onClose, markerLabel }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button onClick={onClose} className="close-button">
-          Close
-        </button>
+        {/* Bridge Details */}
+        <div className="bridge-details">
+          <p>
+            <strong>Bridge:</strong> {bridgeName} <br />
+            <strong>District:</strong> {district} <br />
+            <strong>Road:</strong> {road}
+          </p>
+        </div>
         <div style={{ height: "400px", width: "100%" }}>
           <MapContainer
             center={[latitude, longitude]}

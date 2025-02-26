@@ -163,9 +163,13 @@ const BridgesListNew = ({
       latitude: bridge.y_centroid, // y_centroid is latitude
       longitude: bridge.x_centroid, // x_centroid is longitude
       name: bridge.BridgeName, // Optional: Add a name for the marker label
+      bridgeName: `${bridge.pms_sec_id} - ${bridge.structure_no}`, // Combine pms_sec_id and structure_no
+      district: bridge.district,
+      road: bridge.road_name,
     });
     setShowMapModal(true);
   };
+  
 
   const handleCloseMapModal = () => {
     setShowMapModal(false);
@@ -698,15 +702,17 @@ const BridgesListNew = ({
           centered
           className="custom-modal"
         >
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>Bridge Location on Map</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             {selectedLocation && (
               <MapModal
                 location={selectedLocation}
-                onClose={handleCloseMapModal}
                 markerLabel={selectedLocation?.name || "Bridge Location"}
+                bridgeName={selectedLocation?.bridgeName}
+                district={selectedLocation?.district}
+                road={selectedLocation?.road}
               />
             )}
           </Modal.Body>
