@@ -453,11 +453,11 @@ const BridgesListNew = ({
           position: "relative",
         }}
       >
-        <div class="card-header p-2">
+        <div className="card-header p-2">
           <div className="flex items-center justify-between">
             <h6 className="mb-0">
               Structure Details
-              <span class="badge text-bg-success ms-2">
+              <span className="badge text-bg-success ms-2">
                 <h6 className="mb-0">{bridgeCount || 0}</h6>
               </span>
             </h6>

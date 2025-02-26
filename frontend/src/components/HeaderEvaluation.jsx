@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSignOutAlt, faUserCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faUser,
+  faSignOutAlt,
+  faUserCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FaCircleUser } from "react-icons/fa6";
 
 const Header = () => {
@@ -24,7 +28,6 @@ const Header = () => {
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
   const userName = userToken?.username;
 
-
   const toggleProfileDropdown = () => {
     setIsProfileDropdownOpen((prev) => !prev);
   };
@@ -45,7 +48,7 @@ const Header = () => {
   return (
     <header className="p-1 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mx-2">
-        <dsssssiv className="flex items-center">
+        <div className="flex items-center">
           <img src="/cnw.jpg" alt="Logo" className="h-[26px]" />
           <div className="mt-1 ms-2">
             <Link to="/Evaluation" className="no-underline">
@@ -54,10 +57,9 @@ const Header = () => {
               </h5>
             </Link>
           </div>
-        </dsssssiv>
+        </div>
 
         <nav className="flex space-x-2 items-center">
-
           <Link
             to="/Evaluation"
             className={`py-1 px-3 rounded-1 font-semibold transition duration-300 no-underline ${
@@ -80,14 +82,11 @@ const Header = () => {
                   : "hover:bg-gray-100 text-blue-500"
               }`}
             >
-              <FontAwesomeIcon icon={faUserCircle} className="mr-2 fs-3"  />
-              
+              <FontAwesomeIcon icon={faUserCircle} className="mr-2 fs-3" />
             </Link>
             {isProfileDropdownOpen && (
               <div className="absolute right-0 z-10 mt-2 w-fit bg-white border border-gray-200 rounded-1 shadow-lg transition-all duration-200 ease-in-out transform scale-95">
-                <Link
-                  className="flex items-center px-4 py-2 hover:bg-gray-100 no-underline transition duration-200"
-                >
+                <Link className="flex items-center px-4 py-2 hover:bg-gray-100 no-underline transition duration-200">
                   <span className="text-capitalize">{userName}</span>
                 </Link>
                 <Link
@@ -101,9 +100,6 @@ const Header = () => {
                   <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
                   Logout
                 </Link>
-
-
-                
               </div>
             )}
           </div>
