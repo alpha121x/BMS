@@ -399,74 +399,52 @@ const Graph = () => {
 
   return (
     <div className="bg-white border-2 text-[#364050] border-blue-400 p-2 rounded-lg shadow-md">
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        {/* Pie Charts */}
-        <div style={{ width: "80%", height: "500px", marginBottom: "20px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={planAScoreOptions}
-          />
-        </div>
-        <div style={{ width: "80%", height: "500px", marginBottom: "20px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={crossingTypesOptions}
-          />
-        </div>
-        <div style={{ width: "80%", height: "500px", marginBottom: "20px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={structureTypesOptions}
-          />
-        </div>
-        <div style={{ width: "80%", height: "500px", marginBottom: "20px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={groupConstructionTypesOptions}
-          />
-        </div>
-        <div style={{ width: "80%", height: "500px", marginBottom: "20px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={constructionTypesOptions}
-          />
-        </div>
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}
+  >
+    {/* Pie Charts (3 in First Row, 2 in Second Row) */}
+    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "20px" }}>
+      {/* First Row - 3 Charts */}
+      <div style={{ width: "30%", height: "400px" }}>
+        <HighchartsReact highcharts={Highcharts} options={planAScoreOptions} />
+      </div>
+      <div style={{ width: "30%", height: "400px" }}>
+        <HighchartsReact highcharts={Highcharts} options={crossingTypesOptions} />
+      </div>
+      <div style={{ width: "30%", height: "400px" }}>
+        <HighchartsReact highcharts={Highcharts} options={structureTypesOptions} />
+      </div>
 
-        {/* Bar Charts */}
-        <div style={{ width: "90%", marginBottom: "40px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={bridgeDamageLevelsOptions}
-          />
-        </div>
-
-        {/* Bar Charts */}
-        <div style={{ width: "90%", marginBottom: "40px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={materialElementDamagesOptions}
-          />
-        </div>
-        <div style={{ width: "90%", marginBottom: "40px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={elementCategoryDamagesOptions}
-          />
-        </div>
-        <div style={{ width: "90%", marginBottom: "40px" }}>
-          <HighchartsReact
-            highcharts={Highcharts}
-            options={bridgeLengthOptions}
-          />
-        </div>
+      {/* Second Row - 2 Charts */}
+      <div style={{ width: "40%", height: "400px" }}>
+        <HighchartsReact highcharts={Highcharts} options={groupConstructionTypesOptions} />
+      </div>
+      <div style={{ width: "40%", height: "400px" }}>
+        <HighchartsReact highcharts={Highcharts} options={constructionTypesOptions} />
       </div>
     </div>
+
+    {/* Bar Charts */}
+    <div style={{ width: "90%", marginBottom: "40px" }}>
+      <HighchartsReact highcharts={Highcharts} options={bridgeDamageLevelsOptions} />
+    </div>
+
+    <div style={{ width: "90%", marginBottom: "40px" }}>
+      <HighchartsReact highcharts={Highcharts} options={materialElementDamagesOptions} />
+    </div>
+    <div style={{ width: "90%", marginBottom: "40px" }}>
+      <HighchartsReact highcharts={Highcharts} options={elementCategoryDamagesOptions} />
+    </div>
+    <div style={{ width: "90%", marginBottom: "40px" }}>
+      <HighchartsReact highcharts={Highcharts} options={bridgeLengthOptions} />
+    </div>
+  </div>
+</div>
+
   );
 };
 
