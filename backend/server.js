@@ -1040,7 +1040,6 @@ function swapDomain(url) {
     : url.replace("118.103.225.148", "cnw.urbanunit.gov.pk");
 }
 
-
 // bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
   try {
