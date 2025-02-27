@@ -31,6 +31,7 @@ const BridgesListNew = ({}) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingExcel, setLoadingExcel] = useState(false);
+  const [loadingCSV, setLoadingCSV] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
@@ -235,22 +236,12 @@ const BridgesListNew = ({}) => {
   };
 
   const handleDownloadCSV = async () => {
-    setLoading(true); // Start loading
+    setLoadingCSV(true); // Start loading
     try {
       const params = {
-        district: district || "%",
+        district: districtId || "%",
         structureType,
-        constructionType,
-        category,
-        evaluationStatus,
-        inspectionStatus,
-        minBridgeLength,
-        maxBridgeLength,
-        minSpanLength,
-        maxSpanLength,
-        minYear,
-        maxYear,
-        bridge,
+        bridgeName,
       };
 
       const queryString = new URLSearchParams(params).toString();
@@ -280,7 +271,7 @@ const BridgesListNew = ({}) => {
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
     } finally {
-      setLoading(false); // Stop loading
+      setLoadingCSV(false); // Stop loading
     }
   };
 
@@ -502,10 +493,12 @@ const BridgesListNew = ({}) => {
                 />
               </div>
               <div className="flex space-x-2">
-                <button className="btn btn-outline-primary" disabled={loading}>
+                <button className="btn btn-outline-primary"
+                 onClick={handleDownloadCSV}
+                 disabled={loadingCSV}>
                   <div className="flex items-center gap-1">
                     <FaFileCsv />
-                    {loading ? "Downloading CSV..." : "CSV"}
+                    {loadingCSV ? "Downloading CSV..." : "CSV"}
                   </div>
                 </button>
                 <button

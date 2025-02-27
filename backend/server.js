@@ -645,16 +645,7 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
     const {
       district = "%",
       structureType = "%",
-      constructionType = "%",
-      inspectionStatus = "%",
-      minBridgeLength,
-      maxBridgeLength,
-      minSpanLength,
-      maxSpanLength,
-      minYear,
-      maxYear,
-      bridge = "%",
-      category = "%",
+      bridgeName = "%",
     } = req.query;
 
     let query = `
@@ -686,69 +677,15 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
       paramIndex++;
     }
 
-    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridge}%`);
+      queryParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
-    if (inspectionStatus === "yes") {
-      query += ` AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    } else if (inspectionStatus === "no") {
-      query += ` AND md.uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    }
-
-    if (category) {
-      query += ` AND md.visual_condition ILIKE $${paramIndex}`;
-      queryParams.push(category);
-      paramIndex++;
-    }
-
-    if (structureType) {
+    if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
-      paramIndex++;
-    }
-
-    if (constructionType) {
-      query += ` AND md.construction_type_id = $${paramIndex}`;
-      queryParams.push(constructionType);
-      paramIndex++;
-    }
-
-    if (minBridgeLength) {
-      query += ` AND md.structure_width_m >= $${paramIndex}`;
-      queryParams.push(minBridgeLength);
-      paramIndex++;
-    }
-
-    if (maxBridgeLength) {
-      query += ` AND md.structure_width_m <= $${paramIndex}`;
-      queryParams.push(maxBridgeLength);
-      paramIndex++;
-    }
-
-    if (minSpanLength) {
-      query += ` AND md.span_length_m >= $${paramIndex}`;
-      queryParams.push(minSpanLength);
-      paramIndex++;
-    }
-
-    if (maxSpanLength) {
-      query += ` AND md.span_length_m <= $${paramIndex}`;
-      queryParams.push(maxSpanLength);
-      paramIndex++;
-    }
-
-    if (minYear) {
-      query += ` AND md.construction_year >= $${paramIndex}`;
-      queryParams.push(minYear);
-      paramIndex++;
-    }
-
-    if (maxYear) {
-      query += ` AND md.construction_year <= $${paramIndex}`;
-      queryParams.push(maxYear);
       paramIndex++;
     }
 
