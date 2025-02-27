@@ -21,6 +21,8 @@ import { FaFileExcel } from "react-icons/fa6";
 import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
+import { driver } from "driver.js";
+import "driver.js/dist/driver.css";
 
 const BridgesListNew = ({}) => {
   const [showModal, setShowModal] = useState(false);
@@ -43,6 +45,50 @@ const BridgesListNew = ({}) => {
   const [districtId, setDistrictId] = useState("%");
   const [structureType, setStructureTypeState] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
+
+  const driverObj = new driver({
+    showProgress: true,
+    animate: true,
+    allowClose: true,
+    doneBtnText: "Finish",
+    steps: [
+      {
+        element: "#inventory-btn",
+        popover: {
+          title: "View Inventory",
+          description: "Click here to view bridge inventory details.",
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
+        element: "#inspection-btn",
+        popover: {
+          title: "View Inspection Info",
+          description: "Click here to see the inspection information.",
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
+        element: "#zoom-btn",
+        popover: {
+          title: "Zoom to Bridge",
+          description: "Click this button to zoom in on the bridge.",
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
+        popover: {
+          title: "You're all set!",
+          description: "Now you know how to navigate through these options.",
+        },
+      },
+    ],
+  });
+
+  driverObj.drive();
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -493,9 +539,11 @@ const BridgesListNew = ({}) => {
                 />
               </div>
               <div className="flex space-x-2">
-                <button className="btn btn-outline-primary"
-                 onClick={handleDownloadCSV}
-                 disabled={loadingCSV}>
+                <button
+                  className="btn btn-outline-primary"
+                  onClick={handleDownloadCSV}
+                  disabled={loadingCSV}
+                >
                   <div className="flex items-center gap-1">
                     <FaFileCsv />
                     {loadingCSV ? "Downloading CSV..." : "CSV"}
@@ -591,8 +639,9 @@ const BridgesListNew = ({}) => {
                           <div className="flex space-x-2 justify-center">
                             {/* Button for Bridge Inventory Info */}
                             <button
+                              id="inventory-btn"
                               onClick={(e) => {
-                                e.stopPropagation(); // Prevent row click event
+                                e.stopPropagation();
                                 handleViewInventory(bridge);
                               }}
                               className="bg-blue-400 p-1 text-white py-1 rounded-1 hover:bg-blue-200"
@@ -604,6 +653,7 @@ const BridgesListNew = ({}) => {
 
                             {/* Button for Inspection Info */}
                             <button
+                              id="inspection-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleViewInspection(bridge);
@@ -617,6 +667,7 @@ const BridgesListNew = ({}) => {
 
                             {/* Button for Zoom To */}
                             <button
+                              id="zoom-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleZoomToBridge(bridge);
