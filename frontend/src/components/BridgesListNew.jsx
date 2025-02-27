@@ -53,6 +53,15 @@ const BridgesListNew = ({}) => {
     doneBtnText: "Finish",
     steps: [
       {
+        element: "#structure-heading",
+        popover: {
+          title: "Structure Details",
+          description: "This badge shows the total number of bridges inspected.",
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
         element: "#inventory-btn",
         popover: {
           title: "View Inventory",
@@ -486,7 +495,7 @@ const BridgesListNew = ({}) => {
       >
         <div className="card-header p-2 " style={{ background: "#CFE2FF" }}>
           <div className="flex items-center justify-between">
-            <h6 className="mb-0">
+            <h6 className="mb-0" id="structure-heading">
               Structure Details
               <span className="badge text-bg-success ms-2">
                 <h6 className="mb-0">{bridgeCount || 0}</h6>
