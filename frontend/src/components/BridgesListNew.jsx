@@ -22,35 +22,7 @@ import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 
-const BridgesListNew = ({
-  setSelectedDistrict,
-  setBridge,
-  setMinBridgeLength,
-  setMaxBridgeLength,
-  setMinSpanLength,
-  setMaxSpanLength,
-  setStructureType,
-  setConstructionType,
-  setCategory,
-  setEvaluationStatus,
-  setInspectionStatus,
-  setMinYear,
-  setMaxYear,
-  ////////
-  district,
-  structureType,
-  constructionType,
-  category,
-  evaluationStatus,
-  inspectionStatus,
-  minBridgeLength,
-  maxBridgeLength,
-  minSpanLength,
-  maxSpanLength,
-  minYear,
-  maxYear,
-  bridge,
-}) => {
+const BridgesListNew = ({}) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -63,7 +35,50 @@ const BridgesListNew = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [districts, setDistricts] = useState([]);
+  const [structureTypes, setStructureTypes] = useState([]);
   const itemsPerPage = 10;
+
+  const [districtId, setDistrictId] = useState("%");
+  const [structureType, setStructureTypeState] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
+
+  useEffect(() => {
+    const fetchFilters = async () => {
+      try {
+        // Fetching districts
+        const districtResponse = await fetch(`${BASE_URL}/api/districts`);
+        const districtData = await districtResponse.json();
+        setDistricts(
+          districtData.map((district) => ({
+            id: district.id,
+            district: district.district || district.name, // Handle different property names
+          }))
+        );
+
+        // Fetching structure types
+        const structureTypeResponse = await fetch(
+          `${BASE_URL}/api/structure-types`
+        );
+        const structureTypesData = await structureTypeResponse.json();
+
+        // Assuming the response now directly gives the array
+        setStructureTypes(
+          structureTypesData.map((type) => ({
+            id: type.id,
+            name: type.structure_type || type.name, // Normalize the property name
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching filters:", error);
+      }
+    };
+
+    fetchFilters();
+  }, []);
+
+  // Handle handlers for various inputs
+  const handleChange = (setter) => (e) => setter(e.target.value);
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
@@ -72,27 +87,16 @@ const BridgesListNew = ({
 
   useEffect(() => {
     fetchAllBridges(currentPage, itemsPerPage);
-  }, [
-    currentPage,
-    district,
-    structureType,
-    constructionType,
-    category,
-    evaluationStatus,
-    inspectionStatus,
-    minBridgeLength,
-    maxBridgeLength,
-    minSpanLength,
-    maxSpanLength,
-    minYear,
-    maxYear,
-    bridge,
-  ]);
+  }, [currentPage, districtId, structureType]);
 
   useEffect(() => {
     // Initialize Bootstrap tooltips
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltipTriggerList.forEach((tooltip) => new window.bootstrap.Tooltip(tooltip));
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]'
+    );
+    tooltipTriggerList.forEach(
+      (tooltip) => new window.bootstrap.Tooltip(tooltip)
+    );
   }, []);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -105,19 +109,8 @@ const BridgesListNew = ({
       const params = {
         set,
         limit,
-        district: district || "%",
+        district: districtId || "%",
         structureType,
-        constructionType,
-        category,
-        evaluationStatus,
-        inspectionStatus,
-        minBridgeLength,
-        maxBridgeLength,
-        minSpanLength,
-        maxSpanLength,
-        minYear,
-        maxYear,
-        bridge,
       };
 
       // console.log(params);
@@ -137,6 +130,11 @@ const BridgesListNew = ({
       setLoading(false);
     }
   };
+
+  const filteredData = tableData.filter((item) =>
+    item.bridge_name.toLowerCase().includes(bridgeName.toLowerCase())
+  );
+  
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -453,7 +451,7 @@ const BridgesListNew = ({
           position: "relative",
         }}
       >
-        <div className="card-header p-2">
+        <div className="card-header p-2 " style={{ background: "#CFE2FF" }}>
           <div className="flex items-center justify-between">
             <h6 className="mb-0">
               Structure Details
@@ -461,48 +459,54 @@ const BridgesListNew = ({
                 <h6 className="mb-0">{bridgeCount || 0}</h6>
               </span>
             </h6>
-
-            <div className="flex space-x-2">
-              {/* Offcanvas Sidebar for Filters */}
-              <div
-                className="offcanvas offcanvas-end"
-                tabIndex="-1"
-                id="offcanvasRight"
-                aria-labelledby="offcanvasRightLabel"
+            <div className="flex items-center gap-1 justify-between">
+            {/* District Filter */}
+            <div>
+              <select
+                id="district-filter"
+                className="w-full border-1 rounded-1 border-[#3B82F6] p-1 bg-gray-200"
+                value={districtId}
+                onChange={handleChange(setDistrictId)}
               >
-                <div className="offcanvas-header">
-                  <h5 id="offcanvasRightLabel" className="text-xl font-bold">
-                    Filters
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close text-reset"
-                    data-bs-dismiss="offcanvas"
-                    aria-label="Close"
-                  ></button>
-                </div>
+                <option value="%">--Select District--</option>
+                {districts.map((district, index) => (
+                  <option key={district.id || index} value={district.id}>
+                    {district.district}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                <div className="offcanvas-body">
-                  <FilterComponent
-                    setSelectedDistrict={setSelectedDistrict}
-                    setMinBridgeLength={setMinBridgeLength}
-                    setMaxBridgeLength={setMaxBridgeLength}
-                    setMinSpanLength={setMinSpanLength}
-                    setMaxSpanLength={setMaxSpanLength}
-                    setStructureType={setStructureType}
-                    setConstructionType={setConstructionType}
-                    setCategory={setCategory}
-                    setEvaluationStatus={setEvaluationStatus}
-                    setInspectionStatus={setInspectionStatus}
-                    setMinYear={setMinYear}
-                    setMaxYear={setMaxYear}
-                    setBridge={setBridge}
-                  />
-                </div>
-              </div>
+            {/* Structure Type Filter */}
+            <div>
+              <select
+                id="structure-type"
+                className="w-full border-1 rounded-1 p-1 border-[#3B82F6] bg-gray-200"
+                value={structureType}
+                onChange={handleChange(setStructureTypeState)}
+              >
+                <option value="%">--Select Structure Type--</option>
+                {structureTypes.map((type, index) => (
+                  <option key={type.id || index} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Free Search Input */}
+            <div>
+              <input
+                type="text"
+                placeholder="Search by Bridge Name"
+                className="w-full border-1 rounded-1 border-[#3B82F6] p-1 bg-gray-200"
+                value={bridgeName}
+                onChange={(e) => setBridgeName(e.target.value)}
+              />
+            </div>
+            <div className="flex space-x-2">
               <button
                 className="btn btn-outline-primary"
-                onClick={handleDownloadCSV}
                 disabled={loading}
               >
                 <div className="flex items-center gap-1">
@@ -510,7 +514,6 @@ const BridgesListNew = ({
                   {loading ? "Downloading CSV..." : "CSV"}
                 </div>
               </button>
-
               <button
                 className="btn btn-outline-success"
                 onClick={handleDownloadExcel}
@@ -528,19 +531,10 @@ const BridgesListNew = ({
                   </div>
                 )}
               </button>
-
-              <button
-                className="btn btn-sm btn-info"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasRight"
-                aria-controls="offcanvasRight"
-              >
-                <div className="flex items-center gap-1">
-                  <FaFilter /> Filter{" "}
-                </div>
-              </button>
             </div>
+            </div>
+
+         
           </div>
         </div>
         <div className="card-body p-0 pb-2">
@@ -578,7 +572,7 @@ const BridgesListNew = ({
                 style={{ fontSize: "12px" }}
               >
                 <thead>
-                  <tr className="table-primary">
+                  <tr>
                     <th style={{ width: "10%" }}>District</th>
                     <th style={{ width: "50%" }}>Road Name</th>
                     <th style={{ width: "10%" }}>Structure Type</th>
@@ -589,8 +583,8 @@ const BridgesListNew = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {tableData.length > 0 ? (
-                    tableData.map((bridge, index) => (
+                  {filteredData.length > 0 ? (
+                    filteredData.map((bridge, index) => (
                       <tr
                         key={index}
                         onClick={() => handleRowClick(bridge)}

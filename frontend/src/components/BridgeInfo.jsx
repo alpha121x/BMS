@@ -16,6 +16,7 @@ const BridgeInfo = () => {
   const navigate = useNavigate();
   const [bridgeData, setBridgeData] = useState(null);
 
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const serializedBridgeData = urlParams.get("bridgeData");
@@ -50,23 +51,25 @@ const BridgeInfo = () => {
   };
 
   if (!bridgeData || !username) {
-    return  <div
-    className="loader"
-    style={{
-      border: "8px solid #f3f3f3",
-      borderTop: "8px solid #3498db",
-      borderRadius: "50%",
-      width: "80px",
-      height: "80px",
-      animation: "spin 1s linear infinite",
-      margin: "auto",
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      zIndex: "999",
-    }}
-  />; // Or redirect to login
+    return (
+      <div
+        className="loader"
+        style={{
+          border: "8px solid #f3f3f3",
+          borderTop: "8px solid #3498db",
+          borderRadius: "50%",
+          width: "80px",
+          height: "80px",
+          animation: "spin 1s linear infinite",
+          margin: "auto",
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: "999",
+        }}
+      />
+    ); // Or redirect to login
   }
 
   return (

@@ -1,14 +1,18 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useCallback } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { Fancybox } from "@fancyapps/ui";
+import {
+  faFileCsv,
+  faFileExcel,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 const InspectionList = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
@@ -19,6 +23,8 @@ const InspectionList = ({ bridgeId }) => {
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
   const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   useEffect(() => {
     if (bridgeId) {
@@ -26,11 +32,6 @@ const InspectionList = ({ bridgeId }) => {
       fetchsummaryData();
     }
   }, [bridgeId]);
-
-  useEffect(() => {
-    Fancybox.bind("[data-fancybox='gallery']", {});
-    return () => Fancybox.destroy();
-  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -80,7 +81,7 @@ const InspectionList = ({ bridgeId }) => {
       if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections-new?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-summary?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -113,6 +114,9 @@ const InspectionList = ({ bridgeId }) => {
         console.log("Update cancelled by user.");
         return;
       }
+
+      console.log("Updating inspection:", row);
+      return;
 
       const consultantRemarks =
         row.qc_remarks_con?.trim() === "" ? null : row.qc_remarks_con;
@@ -147,39 +151,59 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handleConsultantRemarksChange = (
-    spanIndex,
-    workKind,
-    inspectionId,
-    value
-  ) => {
-    setPendingData((prevData) => ({
-      ...prevData,
-      [spanIndex]: {
-        ...prevData[spanIndex],
-        [workKind]: prevData[spanIndex][workKind].map((item) =>
-          item.inspection_id === inspectionId
-            ? { ...item, qc_remarks_con: value }
-            : item
-        ),
-      },
-    }));
-  };
+  // const handleConsultantRemarksChange = (
+  //   spanIndex,
+  //   workKind,
+  //   inspectionId,
+  //   value
+  // ) => {
+  //   setPendingData((prevData) => ({
+  //     ...prevData,
+  //     [spanIndex]: {
+  //       ...prevData[spanIndex],
+  //       [workKind]: prevData[spanIndex][workKind].map((item) =>
+  //         item.inspection_id === inspectionId
+  //           ? { ...item, qc_remarks_con: value }
+  //           : item
+  //       ),
+  //     },
+  //   }));
+  // };
 
-  const handleApprovedFlagChange = (
+  // const handleApprovedFlagChange = (
+  //   spanIndex,
+  //   workKind,
+  //   inspectionId,
+  //   value
+  // ) => {
+  //   setPendingData((prevData) => ({
+  //     ...prevData,
+  //     [spanIndex]: {
+  //       ...prevData[spanIndex],
+  //       [workKind]: prevData[spanIndex][workKind].map((item) =>
+  //         item.inspection_id === inspectionId
+  //           ? { ...item, qc_con: value }
+  //           : item
+  //       ),
+  //     },
+  //   }));
+  // };
+
+  const handleInputChange = (
     spanIndex,
     workKind,
     inspectionId,
+    field,
     value
   ) => {
     setPendingData((prevData) => ({
       ...prevData,
       [spanIndex]: {
         ...prevData[spanIndex],
-        [workKind]: prevData[spanIndex][workKind].map((item) =>
-          item.inspection_id === inspectionId
-            ? { ...item, qc_con: value }
-            : item
+        [workKind]: prevData[spanIndex][workKind].map((inspection) =>
+          inspection.inspection_id === inspectionId
+            ? { ...inspection, [field]: value }
+            : inspection
         ),
       },
     }));
@@ -190,6 +214,7 @@ const InspectionList = ({ bridgeId }) => {
   };
 
   const handleDownloadCSV = async (bridgeId) => {
+    setLoading(true); // Start loading
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
@@ -201,13 +226,12 @@ const InspectionList = ({ bridgeId }) => {
         !Array.isArray(data.bridges) ||
         data.bridges.length === 0
       ) {
-        console.error("No data to export");
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
 
       const headers = Object.keys(summaryData[0]);
 
@@ -234,12 +258,14 @@ const InspectionList = ({ bridgeId }) => {
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error("Error downloading CSV:", error);
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
-  const handleDownloadExcel = async (bridgeId) => {
+  const handleDownloadExcel = async (bridgeId, setLoading) => {
+    setLoading(true); // Start loader
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
@@ -257,19 +283,129 @@ const InspectionList = ({ bridgeId }) => {
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
 
-      const ws = XLSX.utils.json_to_sheet(summaryData);
-      ws["!cols"] = Object.keys(summaryData[0]).map(() => ({ width: 20 }));
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Inspections");
 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+      // Define all columns except images
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+      );
 
-      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: 22,
+      }));
+
+      // Add image columns with increased spacing
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
+      }
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
+      }
+
+      // Define worksheet columns
+      worksheet.columns = columns;
+
+      // Style the header row (first row)
+      worksheet.getRow(1).font = { bold: true, size: 14 }; // Bold text and increased font size
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      }; // Center align text
+      worksheet.getRow(1).height = 25; // Increase row height for better visibility
+
+      // Add data rows without image URLs
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+
+        // Extract & fix image URLs (replacing backslashes with forward slashes)
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+
+        // Add normal data (excluding image URLs)
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
+
+        // Add a row for each entry
+        const rowIndex = worksheet.addRow(rowData).number;
+
+        // **Adjust row height for images to fit properly**
+        worksheet.getRow(rowIndex).height = 90;
+
+        // Function to insert images in the correct locations
+        const insertImage = async (photoUrls, columnOffset, rowHeight) => {
+          for (let j = 0; j < photoUrls.length && j < 5; j++) {
+            try {
+              // Fetch image data from the URL
+              const imgResponse = await fetch(photoUrls[j]);
+              const imgBlob = await imgResponse.blob();
+              const arrayBuffer = await imgBlob.arrayBuffer();
+
+              // Add image to the workbook
+              const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: "jpeg",
+              });
+
+              // **Insert image in the correct column**
+              // - `tl.col`: Column position, starting from normal data columns + offset
+              // - `tl.row`: Row position (adjusted for zero-based index)
+              // - `ext.width`: Width of the inserted image (150px for better visibility)
+              // - `ext.height`: Height of the inserted image (90px for consistency)
+              worksheet.addImage(imageId, {
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
+                ext: { width: 150, height: 90 },
+              });
+            } catch (error) {
+              console.error("Failed to load image:", photoUrls[j], error);
+            }
+          }
+        };
+
+        // Insert Overview Photos (5 max)
+        await insertImage(overviewPhotos, 0, 90);
+
+        // Insert Inspection Photos (5 max)
+        await insertImage(inspectionPhotos, 5, 90);
+      }
+
+      // Save File
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+    } finally {
+      setLoading(false); // Stop loader
     }
+  };
+
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
+  const handleClosePhotoModal = () => {
+    setShowPhotoModal(false);
   };
 
   const getDamageLevel = (data) => {
@@ -331,11 +467,16 @@ const InspectionList = ({ bridgeId }) => {
               CSV
             </button>
             <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-              onClick={() => handleDownloadExcel(bridgeId)}
+              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 flex items-center justify-center"
+              onClick={() => handleDownloadExcel(bridgeId, setLoading)}
+              disabled={loading}
             >
-              <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-              Excel
+              {loading ? (
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+              ) : (
+                <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+              )}
+              {loading ? "Processing..." : "Excel"}
             </button>
           </div>
         </div>
@@ -416,7 +557,7 @@ const InspectionList = ({ bridgeId }) => {
           {activeDiv === "pending" && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
-              {pendingData &&
+              {pendingData && Object.keys(pendingData).length > 0 ? (
                 Object.keys(pendingData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
                     <div
@@ -427,7 +568,7 @@ const InspectionList = ({ bridgeId }) => {
                       <strong>Reports For Span: {spanIndex}</strong>
                       <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                     </div>
-                    {expandedSections[spanIndex] ? (
+                    {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(pendingData[spanIndex]).length > 0 ? (
                           Object.keys(pendingData[spanIndex]).map(
@@ -448,102 +589,327 @@ const InspectionList = ({ bridgeId }) => {
                                         style={{ backgroundColor: "#CFE2FF" }}
                                       >
                                         <div className="row">
+                                          {/* Image Section */}
                                           <div className="col-md-3">
                                             {inspection.PhotoPaths?.length >
                                               0 && (
-                                              <div className="d-flex flex-wrap gap-2">
+                                              <div
+                                                className="d-flex gap-2"
+                                                style={{
+                                                  overflowX: "auto",
+                                                  whiteSpace: "nowrap",
+                                                  display: "flex",
+                                                  paddingBottom: "5px",
+                                                }}
+                                              >
                                                 {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
-                                                    <a
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      href={photo}
-                                                      data-fancybox="gallery"
-                                                      data-caption={`Photo ${
-                                                        i + 1
-                                                      }`}
-                                                    >
-                                                      <img
-                                                        src={photo}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="img-fluid rounded border"
-                                                        style={{
-                                                          width: "80px",
-                                                          height: "80px",
-                                                          objectFit: "cover",
-                                                        }}
-                                                      />
-                                                    </a>
+                                                  (photoUrl, index) => (
+                                                    <img
+                                                      key={`photo-${inspection.id}-${index}`}
+                                                      src={photoUrl}
+                                                      alt={`Photo ${index + 1}`}
+                                                      className="img-fluid rounded border"
+                                                      style={{
+                                                        width: "80px",
+                                                        height: "80px",
+                                                        objectFit: "cover",
+                                                        cursor: "pointer",
+                                                        flexShrink: 0,
+                                                      }}
+                                                      loading="lazy"
+                                                      onClick={() =>
+                                                        handlePhotoClick(
+                                                          photoUrl
+                                                        )
+                                                      }
+                                                      onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                          "/placeholder-image.png";
+                                                      }}
+                                                    />
                                                   )
                                                 )}
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-md-6">
-                                            <strong>Parts:</strong>{" "}
-                                            {inspection.PartsName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Material:</strong>{" "}
-                                            {inspection.MaterialName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Damage:</strong>{" "}
-                                            {inspection.DamageKindName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Level:</strong>{" "}
-                                            {inspection.DamageLevel || "N/A"}{" "}
-                                            <br />
-                                            <strong>
-                                              Situation Remarks:
-                                            </strong>{" "}
-                                            {inspection.Remarks || "N/A"}
-                                          </div>
-                                          <div className="col-md-3 d-flex flex-column justify-content-between">
-                                            <Form.Control
-                                              as="input"
-                                              type="text"
-                                              placeholder="Consultant Remarks"
-                                              value={
-                                                inspection.qc_remarks_con || ""
-                                              }
-                                              onChange={(e) =>
-                                                handleConsultantRemarksChange(
-                                                  spanIndex,
-                                                  workKind,
-                                                  inspection.inspection_id,
-                                                  e.target.value
-                                                )
-                                              }
-                                              className="mb-2"
-                                            />
-                                            <Form.Select
-                                              value={inspection.qc_con}
-                                              onChange={(e) =>
-                                                handleApprovedFlagChange(
-                                                  spanIndex,
-                                                  workKind,
-                                                  inspection.inspection_id,
-                                                  parseInt(e.target.value)
-                                                )
-                                              }
-                                              className="mb-2"
-                                            >
-                                              <option value={1}>
-                                                Select Status
-                                              </option>
-                                              <option value={3}>
-                                                Unapproved
-                                              </option>
-                                              <option value={2}>
-                                                Approved
-                                              </option>
-                                            </Form.Select>
-                                            <Button
-                                              onClick={() =>
-                                                handleSaveChanges(inspection)
-                                              }
-                                              className="bg-[#CFE2FF]"
-                                            >
-                                              Save Changes
-                                            </Button>
+
+                                          {/* Improved Editable Fields Component */}
+                                          <div className="row g-4">
+                                            {/* Left Column - Basic Information */}
+                                            <div className="col-md-7">
+                                              <div className="card border-0 shadow-sm h-100">
+                                                <div className="card-body">
+                                                  {/* First Row - Parts and Material */}
+                                                  <div className="row mb-4">
+                                                    <div className="col-md-6">
+                                                      <Form.Group>
+                                                        <Form.Label className="fw-semibold text-secondary">
+                                                          Parts
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                          type="text"
+                                                          value={
+                                                            inspection.PartsName ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleInputChange(
+                                                              spanIndex,
+                                                              workKind,
+                                                              inspection.inspection_id,
+                                                              "PartsName",
+                                                              e.target.value
+                                                            )
+                                                          }
+                                                        />
+                                                      </Form.Group>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                      <Form.Group>
+                                                        <Form.Label className="fw-semibold text-secondary">
+                                                          Material
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                          type="text"
+                                                          value={
+                                                            inspection.MaterialName ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleInputChange(
+                                                              spanIndex,
+                                                              workKind,
+                                                              inspection.inspection_id,
+                                                              "MaterialName",
+                                                              e.target.value
+                                                            )
+                                                          }
+                                                        />
+                                                      </Form.Group>
+                                                    </div>
+                                                  </div>
+
+                                                  {/* Second Row - Damage, Level, Extent */}
+                                                  <div className="row mb-4">
+                                                    <div className="col-md-4">
+                                                      <Form.Group>
+                                                        <Form.Label className="fw-semibold text-secondary">
+                                                          Damage
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                          type="text"
+                                                          value={
+                                                            inspection.DamageKindName ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleInputChange(
+                                                              spanIndex,
+                                                              workKind,
+                                                              inspection.inspection_id,
+                                                              "DamageKindName",
+                                                              e.target.value
+                                                            )
+                                                          }
+                                                        />
+                                                      </Form.Group>
+                                                    </div>
+                                                    <div className="col-md-4">
+                                                      <Form.Group>
+                                                        <Form.Label className="fw-semibold text-secondary">
+                                                          Level
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                          type="text"
+                                                          value={
+                                                            inspection.DamageLevel ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleInputChange(
+                                                              spanIndex,
+                                                              workKind,
+                                                              inspection.inspection_id,
+                                                              "DamageLevel",
+                                                              e.target.value
+                                                            )
+                                                          }
+                                                        />
+                                                      </Form.Group>
+                                                    </div>
+                                                    <div className="col-md-4">
+                                                      <Form.Group>
+                                                        <Form.Label className="fw-semibold text-secondary">
+                                                          Damage Extent
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                          type="text"
+                                                          value={
+                                                            inspection.damage_extent ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleInputChange(
+                                                              spanIndex,
+                                                              workKind,
+                                                              inspection.inspection_id,
+                                                              "damage_extent",
+                                                              e.target.value
+                                                            )
+                                                          }
+                                                        />
+                                                      </Form.Group>
+                                                    </div>
+                                                  </div>
+
+                                                  {/* Third Row - Situation Remarks */}
+                                                  <div className="row mb-4">
+                                                    <div className="col-12">
+                                                      <Form.Group>
+                                                        <Form.Label className="fw-semibold text-secondary">
+                                                          Situation Remarks
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                          as="textarea"
+                                                          rows={2}
+                                                          value={
+                                                            inspection.Remarks ||
+                                                            ""
+                                                          }
+                                                          onChange={(e) =>
+                                                            handleInputChange(
+                                                              spanIndex,
+                                                              workKind,
+                                                              inspection.inspection_id,
+                                                              "Remarks",
+                                                              e.target.value
+                                                            )
+                                                          }
+                                                        />
+                                                      </Form.Group>
+                                                    </div>
+                                                  </div>
+
+                                                  {/* Fourth Row - Surveyed By (read-only) */}
+                                                  <div className="row">
+                                                    <div className="col-md-6">
+                                                      <Form.Group>
+                                                        <Form.Label className="fw-semibold text-secondary">
+                                                          Surveyed By
+                                                        </Form.Label>
+                                                        <Form.Control
+                                                          readOnly
+                                                          type="text"
+                                                          className="bg-light"
+                                                          value={
+                                                            inspection.surveyed_by ||
+                                                            ""
+                                                          }
+                                                        />
+                                                      </Form.Group>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            {/* Right Column - Consultant Feedback */}
+                                            <div className="col-md-5">
+                                              <div className="card border-0 shadow-sm h-100">
+                                                <div className="card-body d-flex flex-column">
+                                                  <Form.Group className="mb-4 flex-grow-1">
+                                                    <Form.Label className="fw-semibold text-secondary">
+                                                      Consultant Remarks
+                                                    </Form.Label>
+                                                    <Form.Control
+                                                      as="textarea"
+                                                      rows={3}
+                                                      className="flex-grow-1"
+                                                      value={
+                                                        inspection.qc_remarks_con ||
+                                                        ""
+                                                      }
+                                                      onChange={(e) =>
+                                                        handleInputChange(
+                                                          spanIndex,
+                                                          workKind,
+                                                          inspection.inspection_id,
+                                                          "qc_remarks_con",
+                                                          e.target.value
+                                                        )
+                                                      }
+                                                    />
+                                                  </Form.Group>
+
+                                                  <Form.Group className="mb-4">
+                                                    <Form.Label className="fw-semibold text-secondary">
+                                                      Approval Status
+                                                    </Form.Label>
+                                                    <div className="d-flex gap-4">
+                                                      <Form.Check
+                                                        type="radio"
+                                                        id={`unapproved-${inspection.inspection_id}`}
+                                                        name={`qc_con_${inspection.inspection_id}`}
+                                                        label="Unapproved"
+                                                        value="3"
+                                                        checked={
+                                                          inspection.qc_approval ===
+                                                          3
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleInputChange(
+                                                            spanIndex,
+                                                            workKind,
+                                                            inspection.inspection_id,
+                                                            "qc_approval",
+                                                            parseInt(
+                                                              e.target.value
+                                                            )
+                                                          )
+                                                        }
+                                                      />
+                                                      <Form.Check
+                                                        type="radio"
+                                                        id={`approved-${inspection.inspection_id}`}
+                                                        name={`qc_con_${inspection.inspection_id}`}
+                                                        label="Approved"
+                                                        value="2"
+                                                        checked={
+                                                          inspection.qc_approval ===
+                                                          2
+                                                        }
+                                                        onChange={(e) =>
+                                                          handleInputChange(
+                                                            spanIndex,
+                                                            workKind,
+                                                            inspection.inspection_id,
+                                                            "qc_approval",
+                                                            parseInt(
+                                                              e.target.value
+                                                            )
+                                                          )
+                                                        }
+                                                      />
+                                                    </div>
+                                                  </Form.Group>
+
+                                                  {/* Save Button Aligned Properly */}
+                                                  <div className="d-flex justify-content-end">
+                                                    <Button
+                                                      onClick={() =>
+                                                        handleSaveChanges(
+                                                          inspection
+                                                        )
+                                                      }
+                                                      variant="primary"
+                                                    >
+                                                      Save Changes
+                                                    </Button>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
@@ -554,12 +920,15 @@ const InspectionList = ({ bridgeId }) => {
                             )
                           )
                         ) : (
-                          <p>No data available</p>
+                          <p>No pending records found.</p>
                         )}
                       </div>
-                    ) : null}
+                    )}
                   </div>
-                ))}
+                ))
+              ) : (
+                <p>No pending records found.</p>
+              )}
             </div>
           )}
 
@@ -601,28 +970,33 @@ const InspectionList = ({ bridgeId }) => {
                                           <div className="col-md-3">
                                             {inspection.PhotoPaths?.length >
                                               0 && (
-                                              <div className="d-flex flex-wrap gap-2">
+                                              <div
+                                                className="d-flex gap-2"
+                                                style={{
+                                                  overflowX: "auto",
+                                                  whiteSpace: "nowrap",
+                                                  display: "flex",
+                                                  paddingBottom: "5px",
+                                                }}
+                                              >
                                                 {inspection.PhotoPaths.map(
                                                   (photo, i) => (
-                                                    <a
+                                                    <img
                                                       key={`photo-${inspection.id}-${i}`}
-                                                      href={photo}
-                                                      data-fancybox="gallery"
-                                                      data-caption={`Photo ${
-                                                        i + 1
-                                                      }`}
-                                                    >
-                                                      <img
-                                                        src={photo}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="img-fluid rounded border"
-                                                        style={{
-                                                          width: "80px",
-                                                          height: "80px",
-                                                          objectFit: "cover",
-                                                        }}
-                                                      />
-                                                    </a>
+                                                      src={photo}
+                                                      alt={`Photo ${i + 1}`}
+                                                      className="img-fluid rounded border"
+                                                      style={{
+                                                        width: "80px",
+                                                        height: "80px",
+                                                        objectFit: "cover",
+                                                        cursor: "pointer",
+                                                        flexShrink: 0,
+                                                      }}
+                                                      onClick={() =>
+                                                        handlePhotoClick(photo)
+                                                      }
+                                                    />
                                                   )
                                                 )}
                                               </div>
@@ -640,6 +1014,9 @@ const InspectionList = ({ bridgeId }) => {
                                             <br />
                                             <strong>Level:</strong>{" "}
                                             {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage Extent:</strong>{" "}
+                                            {inspection.damage_extent || "N/A"}{" "}
                                             <br />
                                             <strong>
                                               Situation Remarks:
@@ -679,10 +1056,30 @@ const InspectionList = ({ bridgeId }) => {
             </div>
           )}
 
+          <Modal
+            show={showPhotoModal}
+            onHide={handleClosePhotoModal}
+            centered
+            size="lg"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Enlarged Photo</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="text-center">
+              {selectedPhoto && (
+                <img
+                  src={selectedPhoto}
+                  alt="Enlarged"
+                  className="img-fluid rounded border"
+                  style={{ maxWidth: "100%", maxHeight: "80vh" }}
+                />
+              )}
+            </Modal.Body>
+          </Modal>
+
           {activeDiv === "unapproved" && (
             <div className="mb-4">
               <h5>Unapproved Reports</h5>
-
               {unapprovedData && Object.keys(unapprovedData).length > 0 ? (
                 Object.keys(unapprovedData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
@@ -721,28 +1118,35 @@ const InspectionList = ({ bridgeId }) => {
                                             <div className="col-md-3">
                                               {inspection.PhotoPaths?.length >
                                                 0 && (
-                                                <div className="d-flex flex-wrap gap-2">
+                                                <div
+                                                  className="d-flex gap-2"
+                                                  style={{
+                                                    overflowX: "auto",
+                                                    whiteSpace: "nowrap",
+                                                    display: "flex",
+                                                    paddingBottom: "5px",
+                                                  }}
+                                                >
                                                   {inspection.PhotoPaths.map(
                                                     (photo, i) => (
-                                                      <a
+                                                      <img
                                                         key={`photo-${inspection.id}-${i}`}
-                                                        href={photo}
-                                                        data-fancybox="gallery"
-                                                        data-caption={`Photo ${
-                                                          i + 1
-                                                        }`}
-                                                      >
-                                                        <img
-                                                          src={photo}
-                                                          alt={`Photo ${i + 1}`}
-                                                          className="img-fluid rounded border"
-                                                          style={{
-                                                            width: "80px",
-                                                            height: "80px",
-                                                            objectFit: "cover",
-                                                          }}
-                                                        />
-                                                      </a>
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                          cursor: "pointer",
+                                                          flexShrink: 0,
+                                                        }}
+                                                        onClick={() =>
+                                                          handlePhotoClick(
+                                                            photo
+                                                          )
+                                                        }
+                                                      />
                                                     )
                                                   )}
                                                 </div>
@@ -761,6 +1165,12 @@ const InspectionList = ({ bridgeId }) => {
                                               <br />
                                               <strong>Level:</strong>{" "}
                                               {inspection.DamageLevel || "N/A"}{" "}
+                                              <br />
+                                              <strong>
+                                                Damage Extent:
+                                              </strong>{" "}
+                                              {inspection.damage_extent ||
+                                                "N/A"}{" "}
                                               <br />
                                               <strong>
                                                 Situation Remarks:
