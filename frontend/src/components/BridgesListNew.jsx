@@ -62,6 +62,24 @@ const BridgesListNew = ({}) => {
         },
       },
       {
+        element: "#filters-div",
+        popover: {
+          title: "Filters Section",
+          description: "Use these filters to sort down the bridge data.",
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
+        element: "#bridges-table",
+        popover: {
+          title: "Bridges Table",
+          description: "This table displays detailed bridge inspection data.",
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
         element: "#inventory-btn",
         popover: {
           title: "View Inventory",
@@ -89,6 +107,15 @@ const BridgesListNew = ({}) => {
         },
       },
       {
+        element: "#download-btn",
+        popover: {
+          title: "Download Report",
+          description: "Click here to download the bridge inspection report.",
+          side: "bottom",
+          align: "start",
+        },
+      },
+      {
         popover: {
           title: "You're all set!",
           description: "Now you know how to navigate through these options.",
@@ -96,8 +123,9 @@ const BridgesListNew = ({}) => {
       },
     ],
   });
-
+  
   driverObj.drive();
+  
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -501,7 +529,7 @@ const BridgesListNew = ({}) => {
                 <h6 className="mb-0">{bridgeCount || 0}</h6>
               </span>
             </h6>
-            <div className="flex items-center gap-1 justify-between">
+            <div className="flex items-center gap-1 justify-between" id="filters-div">
               {/* District Filter */}
               <div>
                 <select
@@ -547,7 +575,8 @@ const BridgesListNew = ({}) => {
                   onChange={(e) => setBridgeName(e.target.value)}
                 />
               </div>
-              <div className="flex space-x-2">
+
+              <div className="flex space-x-2" id="download-btn">
                 <button
                   className="btn btn-outline-primary"
                   onClick={handleDownloadCSV}
@@ -612,6 +641,7 @@ const BridgesListNew = ({}) => {
                 responsive
                 className="table table-striped table-hover table-sm"
                 style={{ fontSize: "12px" }}
+                id="bridges-table"
               >
                 <thead>
                   <tr>
