@@ -87,7 +87,7 @@ const BridgesListNew = ({}) => {
 
   useEffect(() => {
     fetchAllBridges(currentPage, itemsPerPage);
-  }, [currentPage, districtId, structureType]);
+  }, [currentPage, districtId, structureType, bridgeName]);
 
   useEffect(() => {
     // Initialize Bootstrap tooltips
@@ -111,6 +111,7 @@ const BridgesListNew = ({}) => {
         limit,
         district: districtId || "%",
         structureType,
+        bridgeName,
       };
 
       // console.log(params);
@@ -130,11 +131,6 @@ const BridgesListNew = ({}) => {
       setLoading(false);
     }
   };
-
-  const filteredData = tableData.filter((item) =>
-    item.bridge_name.toLowerCase().includes(bridgeName.toLowerCase())
-  );
-  
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -460,81 +456,77 @@ const BridgesListNew = ({}) => {
               </span>
             </h6>
             <div className="flex items-center gap-1 justify-between">
-            {/* District Filter */}
-            <div>
-              <select
-                id="district-filter"
-                className="w-full border-1 rounded-1 border-[#3B82F6] p-1 bg-gray-200"
-                value={districtId}
-                onChange={handleChange(setDistrictId)}
-              >
-                <option value="%">--Select District--</option>
-                {districts.map((district, index) => (
-                  <option key={district.id || index} value={district.id}>
-                    {district.district}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* District Filter */}
+              <div>
+                <select
+                  id="district-filter"
+                  className="w-full border-1 rounded-1 border-[#3B82F6] p-1 bg-gray-200"
+                  value={districtId}
+                  onChange={handleChange(setDistrictId)}
+                >
+                  <option value="%">--Select District--</option>
+                  {districts.map((district, index) => (
+                    <option key={district.id || index} value={district.id}>
+                      {district.district}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Structure Type Filter */}
-            <div>
-              <select
-                id="structure-type"
-                className="w-full border-1 rounded-1 p-1 border-[#3B82F6] bg-gray-200"
-                value={structureType}
-                onChange={handleChange(setStructureTypeState)}
-              >
-                <option value="%">--Select Structure Type--</option>
-                {structureTypes.map((type, index) => (
-                  <option key={type.id || index} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Structure Type Filter */}
+              <div>
+                <select
+                  id="structure-type"
+                  className="w-full border-1 rounded-1 p-1 border-[#3B82F6] bg-gray-200"
+                  value={structureType}
+                  onChange={handleChange(setStructureTypeState)}
+                >
+                  <option value="%">--Select Structure Type--</option>
+                  {structureTypes.map((type, index) => (
+                    <option key={type.id || index} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Free Search Input */}
-            <div>
-              <input
-                type="text"
-                placeholder="Search by Bridge Name"
-                className="w-full border-1 rounded-1 border-[#3B82F6] p-1 bg-gray-200"
-                value={bridgeName}
-                onChange={(e) => setBridgeName(e.target.value)}
-              />
-            </div>
-            <div className="flex space-x-2">
-              <button
-                className="btn btn-outline-primary"
-                disabled={loading}
-              >
-                <div className="flex items-center gap-1">
-                  <FaFileCsv />
-                  {loading ? "Downloading CSV..." : "CSV"}
-                </div>
-              </button>
-              <button
-                className="btn btn-outline-success"
-                onClick={handleDownloadExcel}
-                disabled={loadingExcel}
-              >
-                {loadingExcel ? (
-                  <>
-                    <FaSpinner className="animate-spin mr-2" /> Downloading
-                    Excel...{" "}
-                  </>
-                ) : (
+              {/* Free Search Input for Bridge Name */}
+              <div>
+                <input
+                  type="text"
+                  id="bridge-name"
+                  className="w-full border-1 rounded-1 p-1 border-[#3B82F6] bg-gray-200"
+                  placeholder="Search Bridge Name..."
+                  value={bridgeName}
+                  onChange={(e) => setBridgeName(e.target.value)}
+                />
+              </div>
+              <div className="flex space-x-2">
+                <button className="btn btn-outline-primary" disabled={loading}>
                   <div className="flex items-center gap-1">
-                    <FaFileExcel />
-                    {loading ? "Downloading Excel..." : "Excel"}
+                    <FaFileCsv />
+                    {loading ? "Downloading CSV..." : "CSV"}
                   </div>
-                )}
-              </button>
+                </button>
+                <button
+                  className="btn btn-outline-success"
+                  onClick={handleDownloadExcel}
+                  disabled={loadingExcel}
+                >
+                  {loadingExcel ? (
+                    <>
+                      <FaSpinner className="animate-spin mr-2" /> Downloading
+                      Excel...{" "}
+                    </>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <FaFileExcel />
+                      {loading ? "Downloading Excel..." : "Excel"}
+                    </div>
+                  )}
+                </button>
+              </div>
             </div>
-            </div>
-
-         
           </div>
         </div>
         <div className="card-body p-0 pb-2">
@@ -583,8 +575,8 @@ const BridgesListNew = ({}) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.length > 0 ? (
-                    filteredData.map((bridge, index) => (
+                  {tableData.length > 0 ? (
+                    tableData.map((bridge, index) => (
                       <tr
                         key={index}
                         onClick={() => handleRowClick(bridge)}
