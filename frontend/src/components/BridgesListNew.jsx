@@ -21,8 +21,6 @@ import { FaFileExcel } from "react-icons/fa6";
 import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
-import { driver } from "driver.js";
-import "driver.js/dist/driver.css";
 
 const BridgesListNew = ({}) => {
   const [showModal, setShowModal] = useState(false);
@@ -46,87 +44,8 @@ const BridgesListNew = ({}) => {
   const [structureType, setStructureTypeState] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
 
-  // const driverObj = new driver({
-  //   showProgress: true,
-  //   animate: true,
-  //   allowClose: true,
-  //   doneBtnText: "Finish",
-  //   steps: [
-  //     {
-  //       element: "#structure-heading",
-  //       popover: {
-  //         title: "Structure Details",
-  //         description: "This badge shows the total number of bridges inspected.",
-  //         side: "bottom",
-  //         align: "start",
-  //       },
-  //     },
-  //     {
-  //       element: "#filters-div",
-  //       popover: {
-  //         title: "Filters Section",
-  //         description: "Use these filters to sort down the bridge data.",
-  //         side: "bottom",
-  //         align: "start",
-  //       },
-  //     },
-  //     {
-  //       element: "#bridges-table",
-  //       popover: {
-  //         title: "Bridges Table",
-  //         description: "This table displays detailed bridge inspection data.",
-  //         side: "bottom",
-  //         align: "start",
-  //       },
-  //     },
-  //     {
-  //       element: "#inventory-btn",
-  //       popover: {
-  //         title: "View Inventory",
-  //         description: "Click here to view bridge inventory details.",
-  //         side: "bottom",
-  //         align: "start",
-  //       },
-  //     },
-  //     {
-  //       element: "#inspection-btn",
-  //       popover: {
-  //         title: "View Inspection Info",
-  //         description: "Click here to see the inspection information.",
-  //         side: "bottom",
-  //         align: "start",
-  //       },
-  //     },
-  //     {
-  //       element: "#zoom-btn",
-  //       popover: {
-  //         title: "Zoom to Bridge",
-  //         description: "Click this button to zoom in on the bridge.",
-  //         side: "bottom",
-  //         align: "start",
-  //       },
-  //     },
-  //     {
-  //       element: "#download-btn",
-  //       popover: {
-  //         title: "Download Report",
-  //         description: "Click here to download the bridge inspection report.",
-  //         side: "bottom",
-  //         align: "start",
-  //       },
-  //     },
-  //     {
-  //       popover: {
-  //         title: "You're all set!",
-  //         description: "Now you know how to navigate through these options.",
-  //       },
-  //     },
-  //   ],
-  // });
-  
-  // driverObj.drive();
-  
 
+  // Fetch filters on component mount
   useEffect(() => {
     const fetchFilters = async () => {
       try {
