@@ -324,6 +324,7 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
   }
 });
 
+// counts for Con
 app.get("/api/inspection-counts-con", async (req, res) => {
   try {
     let { districtId } = req.query;
@@ -355,7 +356,6 @@ app.get("/api/inspection-counts-con", async (req, res) => {
     });
   }
 });
-
 
 
 // Counts for Rams 
