@@ -21,6 +21,7 @@ import { FaFileExcel } from "react-icons/fa6";
 import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
+import { FaSearch } from "react-icons/fa";
 
 const BridgesListNew = ({}) => {
   const [showModal, setShowModal] = useState(false);
@@ -43,6 +44,8 @@ const BridgesListNew = ({}) => {
   const [districtId, setDistrictId] = useState("%");
   const [structureType, setStructureTypeState] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
+
+  
 
 
   // Fetch filters on component mount
@@ -92,15 +95,7 @@ const BridgesListNew = ({}) => {
     fetchAllBridges(currentPage, itemsPerPage);
   }, [currentPage, districtId, structureType, bridgeName]);
 
-  useEffect(() => {
-    // Initialize Bootstrap tooltips
-    const tooltipTriggerList = document.querySelectorAll(
-      '[data-bs-toggle="tooltip"]'
-    );
-    tooltipTriggerList.forEach(
-      (tooltip) => new window.bootstrap.Tooltip(tooltip)
-    );
-  }, []);
+  
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -134,6 +129,16 @@ const BridgesListNew = ({}) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]'
+    );
+    tooltipTriggerList.forEach(
+      (tooltip) => new window.bootstrap.Tooltip(tooltip)
+    );
+  }, []);
 
   const handlePageChange = (pageNumber) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
@@ -430,15 +435,18 @@ const BridgesListNew = ({}) => {
           position: "relative",
         }}
       >
-        <div className="card-header p-2 " style={{ background: "#CFE2FF" }}>
+        <div  className="card-header p-2 " style={{ background: "#CFE2FF" }}>
           <div className="flex items-center justify-between">
+            <div>
             <h6 className="mb-0" id="structure-heading">
               Structure Details
               <span className="badge text-bg-success ms-2">
                 <h6 className="mb-0">{bridgeCount || 0}</h6>
               </span>
             </h6>
-            <div className="flex items-center gap-1 justify-between" id="filters-div">
+            </div>
+           
+            <div className="flex items-center gap-1 justify-between">
               {/* District Filter */}
               <div>
                 <select
@@ -455,7 +463,6 @@ const BridgesListNew = ({}) => {
                   ))}
                 </select>
               </div>
-
               {/* Structure Type Filter */}
               <div>
                 <select
@@ -472,8 +479,7 @@ const BridgesListNew = ({}) => {
                   ))}
                 </select>
               </div>
-
-              {/* Free Search Input for Bridge Name */}
+              {/* Bridge Name Filter */}
               <div>
                 <input
                   type="text"
@@ -484,8 +490,9 @@ const BridgesListNew = ({}) => {
                   onChange={(e) => setBridgeName(e.target.value)}
                 />
               </div>
+             </div> 
 
-              <div className="flex space-x-2" id="download-btn">
+              <div className="flex items-center gap-1">
                 <button
                   className="btn btn-outline-primary"
                   onClick={handleDownloadCSV}
@@ -517,6 +524,7 @@ const BridgesListNew = ({}) => {
             </div>
           </div>
         </div>
+
         <div className="card-body p-0 pb-2">
           {loading && (
             <div
@@ -711,7 +719,6 @@ const BridgesListNew = ({}) => {
             )}
           </Modal.Body>
         </Modal>
-      </div>
     </>
   );
 };
