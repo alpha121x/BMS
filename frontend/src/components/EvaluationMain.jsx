@@ -7,6 +7,7 @@ import { LuConstruction } from "react-icons/lu";
 // import BridgesList from "./BridgesList";
 import BridgesListNew from "./BridgesListNew";
 import { BASE_URL } from "./config";
+import TopCard from "./TopCard";
 
 const EvaluationMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -82,41 +83,6 @@ const EvaluationMain = () => {
       .catch((error) => console.error("Error fetching structure data:", error));
   }, []);
 
-  // Card Component with dynamic border color
-  const Card = ({ label, value, icon, iconSize = 32 }) => (
-    <div className="col-md-3">
-      <div
-        className="rounded-1 shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(59, 100, 246, 0.8), rgba(96, 165, 250, 1))", // Light blue gradient
-          border: `2px solid #3B82F6`, // Blue border for contrast
-          borderRadius: "9px", // Rounded corners
-        }}
-      >
-        <div className="flex items-center flex-grow text-white">
-          <div
-            className="p-2 rounded-full mr-3 flex items-center justify-center"
-            style={{
-              backgroundColor: "rgb(123, 179, 247)", // Slightly lighter background for the icon
-              width: `${iconSize + 16}px`,
-              height: `${iconSize + 16}px`,
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Add shadow for depth
-            }}
-          >
-            {React.cloneElement(icon, { size: iconSize, color: "#fff" })}{" "}
-            {/* White icon color */}
-          </div>
-          <h3 className="text-xl font-semibold flex-grow text-white">
-            {label}
-          </h3>
-        </div>
-
-        <div className="text-3xl font-bold ml-2 text-white">{value}</div>
-      </div>
-    </div>
-  );
-
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
@@ -131,7 +97,7 @@ const EvaluationMain = () => {
           </div>
           <div className="row gx-2">
             {inspectedCards.map((card, index) => (
-              <Card key={index} {...card} />
+              <TopCard key={index} {...card} />
             ))}
           </div>
         </div>
