@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BASE_URL } from "./config";
 import { FaSearch } from "react-icons/fa";
 
-const FilterComponent = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchAllBridges, handleSearch }) => {
+const Filters = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchAllBridges, handleSearch }) => {
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
 
@@ -53,4 +53,4 @@ const FilterComponent = ({ districtId, setDistrictId, structureType, setStructur
   );
 };
 
-export default FilterComponent;
+export default Filters;
