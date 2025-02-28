@@ -1423,7 +1423,7 @@ app.get("/api/get-inspections", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_con = '1'
-    
+      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1447,6 +1447,7 @@ app.get("/api/get-inspections", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_con = '2'
+      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1471,6 +1472,7 @@ app.get("/api/get-inspections", async (req, res) => {
       WHERE uu_bms_id = $1 
       AND qc_con = '3'
       and is_latest = true
+      AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1592,6 +1594,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       WHERE uu_bms_id = $1 
      AND qc_con = '2'  -- Approved Consultant Inspections
      AND qc_rams = '0'  -- Pending Rams Inspections
+       AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1616,6 +1619,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
       AND qc_rams = '2'
+        AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1641,6 +1645,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
       WHERE uu_bms_id = $1 
        AND qc_rams = '3'
       and is_latest = true
+        AND surveyed_by = 'RAMS-UU'
       ORDER BY inspection_id DESC;
     `;
 
