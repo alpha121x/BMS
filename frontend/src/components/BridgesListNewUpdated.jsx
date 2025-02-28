@@ -19,7 +19,7 @@ import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 
-const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, handleSearch }) => {
+const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchInspectionCounts }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -396,7 +396,7 @@ const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setSt
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
               fetchAllBridges={fetchAllBridges} // Search triggered manually
-              handleSearch={handleSearch} // Passing handleSearch down
+              fetchInspectionCounts={fetchInspectionCounts} // Passing handleSearch down
             />
 
             <div className="flex items-center gap-1">

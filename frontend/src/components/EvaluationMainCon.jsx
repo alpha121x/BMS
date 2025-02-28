@@ -14,34 +14,35 @@ const EvaluationMainCon = () => {
   const [inspectedCards, setInspectedCards] = useState([]);
 
 
-  useEffect(() => {
+  const fetchInspectionCounts = async () => {
     if (!districtId) return; // Avoid unnecessary API calls
 
-    fetch(`${BASE_URL}/api/inspection-counts-con?districtId=${districtId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        const pendingCount = data.pending || "N/A";
-        const approvedCount = data.approved || "N/A";
+    try {
+      const response = await fetch(`${BASE_URL}/api/inspection-counts-con?districtId=${districtId}`);
+      const data = await response.json();
 
-        const inspectedCards = [
-          {
-            label: "Pending Records",
-            value: pendingCount,
-            icon: <FaClipboardList />,
-            color: "orange",
-          },
-          {
-            label: "Approved Records",
-            value: approvedCount,
-            icon: <FaClipboardCheck />,
-            color: "green",
-          },
-        ];
+      setInspectedCards([
+        {
+          label: "Pending Records",
+          value: data.pending || "N/A",
+          icon: <FaClipboardList />,
+          color: "orange",
+        },
+        {
+          label: "Approved Records",
+          value: data.approved || "N/A",
+          icon: <FaClipboardCheck />,
+          color: "green",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error fetching inspection counts:", error);
+    }
+  };
 
-        setInspectedCards(inspectedCards);
-      })
-      .catch((error) => console.error("Error fetching inspection counts:", error));
-  }, [districtId]); // Refetch when districtId changes
+  useEffect(() => {
+    fetchInspectionCounts();
+  }, []);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -95,6 +96,7 @@ const EvaluationMainCon = () => {
               setStructureType={setStructureType}
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
+              fetchInspectionCounts={fetchInspectionCounts}
             />
           </div>
         </div>
