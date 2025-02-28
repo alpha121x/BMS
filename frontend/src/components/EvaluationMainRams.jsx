@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { FaBridge } from "react-icons/fa6";
-import { FaRoadBridge } from "react-icons/fa6";
-import { SiInstructure } from "react-icons/si";
-import { LuConstruction } from "react-icons/lu";
 // import BridgesList from "./BridgesList";
 import BridgesListNew from "./BridgesListNew";
 import { BASE_URL } from "./config";
+import TopCard from "./TopCard";
+import { FaClipboardCheck, FaClipboardList } from "react-icons/fa";
+
 
 const EvaluationMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
@@ -46,75 +45,34 @@ const EvaluationMain = () => {
   };
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts-inspected`)
-      .then((response) => response.json())
-      .then((data) => {
-        const totalCount = data.totalStructureCount || "N/A";
-
-        // Create a structure for inspection types
-        const inspectionMap = {
-          CULVERT: { label: "Culvert", icon: <LuConstruction /> },
-          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
-          UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
-          // Add any other inspection types as needed
-        };
-
-        // Map the response to the expected format for inspection data
-        const mappedCards = data.structureTypeCounts.map((item) => ({
-          label:
-            inspectionMap[item.structure_type]?.label || item.structure_type,
-          value: item.count || "N/A",
-          icon: inspectionMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
-          color: "blue",
-        }));
-
-        // Add total count card
-        mappedCards.unshift({
-          label: "Total",
-          value: totalCount,
-          icon: <SiInstructure />,
-          color: "blue",
-        });
-
-        setInspectedCards(mappedCards);
-      })
-      .catch((error) => console.error("Error fetching structure data:", error));
-  }, []);
-
-  // Card Component with dynamic border color
-  const Card = ({ label, value, icon, iconSize = 32 }) => (
-    <div className="col-md-3">
-      <div
-        className="rounded-1 shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(59, 100, 246, 0.8), rgba(96, 165, 250, 1))", // Light blue gradient
-          border: `2px solid #3B82F6`, // Blue border for contrast
-          borderRadius: "9px", // Rounded corners
-        }}
-      >
-        <div className="flex items-center flex-grow text-white">
-          <div
-            className="p-2 rounded-full mr-3 flex items-center justify-center"
-            style={{
-              backgroundColor: "rgb(123, 179, 247)", // Slightly lighter background for the icon
-              width: `${iconSize + 16}px`,
-              height: `${iconSize + 16}px`,
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Add shadow for depth
-            }}
-          >
-            {React.cloneElement(icon, { size: iconSize, color: "#fff" })}{" "}
-            {/* White icon color */}
-          </div>
-          <h3 className="text-xl font-semibold flex-grow text-white">
-            {label}
-          </h3>
-        </div>
-
-        <div className="text-3xl font-bold ml-2 text-white">{value}</div>
-      </div>
-    </div>
-  );
+      fetch(`${BASE_URL}/api/inspection-counts-rams`)
+        .then((response) => response.json())
+        .then((data) => {
+          const pendingCount = data.pending || "N/A";
+          const approvedCount = data.approved || "N/A";
+  
+          // Define structure for displaying cards
+          const inspectedCards = [
+            {
+              label: "Pending Records",
+              value: pendingCount,
+              icon: <FaClipboardList />, // Pending icon
+              color: "orange",
+            },
+            {
+              label: "Approved Records",
+              value: approvedCount,
+              icon: <FaClipboardCheck />, // Approved icon
+              color: "green",
+            },
+          ];
+  
+          setInspectedCards(inspectedCards);
+        })
+        .catch((error) =>
+          console.error("Error fetching inspection counts:", error)
+        );
+    }, []);
 
   return (
     <section className="bg-gray-100 min-h-screen">
@@ -130,7 +88,7 @@ const EvaluationMain = () => {
           </div>
           <div className="row gx-2">
             {inspectedCards.map((card, index) => (
-              <Card key={index} {...card} />
+              <TopCard key={index} {...card} />
             ))}
           </div>
         </div>

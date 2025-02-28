@@ -287,6 +287,7 @@ app.get("/api/structure-counts", async (req, res) => {
   }
 });
 
+// API endpoint to get counts for inspected structures
 app.get("/api/structure-counts-inspected", async (req, res) => {
   try {
     const query = `
@@ -323,12 +324,39 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
   }
 });
 
+// Counts for consultant
 app.get("/api/inspection-counts-con", async (req, res) => {
   try {
     const query = `
       SELECT 
         COUNT(CASE WHEN qc_con = 1 THEN 1 END) AS pending_count,
         COUNT(CASE WHEN qc_con = 2 THEN 1 END) AS approved_count
+      FROM bms.tbl_inspection_f
+      WHERE surveyed_by = 'RAMS-UU'
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      pending: result.rows[0].pending_count,
+      approved: result.rows[0].approved_count,
+    });
+  } catch (error) {
+    console.error("Error fetching counts:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching counts from the database",
+    });
+  }
+});
+
+// Counts for Rams 
+app.get("/api/inspection-counts-rams", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        COUNT(CASE WHEN qc_rams = 0 AND qc_con = 2 THEN 1 END) AS pending_count,
+        COUNT(CASE WHEN qc_rams = 2 THEN 1 END) AS approved_count
       FROM bms.tbl_inspection_f
       WHERE surveyed_by = 'RAMS-UU'
     `;
