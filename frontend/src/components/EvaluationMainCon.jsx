@@ -13,27 +13,8 @@ const EvaluationMainCon = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
 
-  // Show back-to-top button based on scroll position
+
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowBackToTop(true);
-      } else {
-        setShowBackToTop(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Scroll to top function
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
- useEffect(() => {
     if (!districtId) return; // Avoid unnecessary API calls
 
     fetch(`${BASE_URL}/api/inspection-counts-con?districtId=${districtId}`)
@@ -62,7 +43,27 @@ const EvaluationMainCon = () => {
       .catch((error) => console.error("Error fetching inspection counts:", error));
   }, [districtId]); // Refetch when districtId changes
 
- 
+  // Show back-to-top button based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
