@@ -323,6 +323,32 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
   }
 });
 
+app.get("/api/inspection-counts-con", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        COUNT(CASE WHEN qc_con = 1 THEN 1 END) AS pending_count,
+        COUNT(CASE WHEN qc_con = 2 THEN 1 END) AS approved_count
+      FROM bms.tbl_inspection_f
+      WHERE surveyed_by = 'RAMS-UU'
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      pending: result.rows[0].pending_count,
+      approved: result.rows[0].approved_count,
+    });
+  } catch (error) {
+    console.error("Error fetching counts:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching counts from the database",
+    });
+  }
+});
+
+
 // // Define the API endpoint to get data from `bms.tbl_bms_master_data`
 // app.get("/api/bridgesdownload", async (req, res) => {
 //   try {
