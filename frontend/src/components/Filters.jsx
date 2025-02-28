@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BASE_URL } from "./config";
 import { FaSearch } from "react-icons/fa";
 
-const Filters = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchAllBridges }) => {
+const FilterComponent = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchAllBridges, handleSearch }) => {
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
 
@@ -24,6 +24,10 @@ const Filters = ({ districtId, setDistrictId, structureType, setStructureType, b
     fetchFilters();
   }, []);
 
+  handleSearch = () => {
+    fetchAllBridges();
+  }
+
   return (
     <div className="flex items-center gap-2 justify-between">
       <select className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
@@ -42,11 +46,11 @@ const Filters = ({ districtId, setDistrictId, structureType, setStructureType, b
         placeholder="Search Bridge Name..."
         value={bridgeName} onChange={(e) => setBridgeName(e.target.value)} />
 
-      <button onClick={fetchAllBridges} className="p-2 bg-[#3B82F6] text-white rounded hover:bg-blue-700">
+      <button onClick={handleSearch} className="p-2 bg-[#3B82F6] text-white rounded hover:bg-blue-700">
         <FaSearch />
       </button>
     </div>
   );
 };
 
-export default Filters;
+export default FilterComponent;

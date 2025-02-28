@@ -19,7 +19,7 @@ import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 
-const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName }) => {
+const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, handleSearch }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -58,6 +58,7 @@ const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setSt
 
       const data = await response.json();
       setTableData(data.bridges);
+      setBridgeCount(data.totalCount);
       setTotalPages(Math.ceil(data.totalCount / itemsPerPage));
     } catch (error) {
       setError(error.message);
@@ -380,7 +381,7 @@ const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setSt
           <div className="flex items-center justify-between">
             <div>
               <h6 className="mb-0" id="structure-heading">
-                Structure Details
+                Structure Counts:
                 <span className="badge text-bg-success ms-2">
                   <h6 className="mb-0">{bridgeCount || 0}</h6>
                 </span>
@@ -395,6 +396,7 @@ const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setSt
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
               fetchAllBridges={fetchAllBridges} // Search triggered manually
+              handleSearch={handleSearch} // Passing handleSearch down
             />
 
             <div className="flex items-center gap-1">
