@@ -6,9 +6,9 @@ import TopCard from "./TopCard";
 import { FaClipboardCheck, FaClipboardList } from "react-icons/fa";
 
 const EvaluationMain = () => {
-  const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [structureType, setStructureType] = useState("");
-  const [bridge, setBridgeName] = useState("");
+  const [districtId, setDistrictId] = useState("%");
+  const [structureType, setStructureType] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
@@ -89,12 +89,12 @@ const EvaluationMain = () => {
         <div className="row">
           <div className="col-md-12">
             <BridgesListNewUpdated
-              setSelectedDistrict={setSelectedDistrict}
-              setStructureType={setStructureType}
-              setBridge={setBridgeName}
-              district={selectedDistrict}
+              districtId={districtId}
+              setDistrictId={setDistrictId}
               structureType={structureType}
-              bridge={bridge} // Also pass the current bridge id filter
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
             />
           </div>
         </div>

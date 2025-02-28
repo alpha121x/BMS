@@ -19,7 +19,7 @@ import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 
-const BridgesListNew = () => {
+const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -35,50 +35,30 @@ const BridgesListNew = () => {
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 10;
 
-  const [districtId, setDistrictId] = useState("%");
-  const [structureType, setStructureTypeState] = useState("%");
-  const [bridgeName, setBridgeName] = useState("");
-
-  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-
-  // Extract username safely
-  const username = userToken?.username;
-
+  // Fetch Bridges when filters change
   useEffect(() => {
-    fetchAllBridges(currentPage, itemsPerPage);
-  }, [currentPage, districtId, structureType, bridgeName]);
+    fetchAllBridges();
+  }, [currentPage]); // Only trigger on page change
 
-  const fetchAllBridges = async (
-    page = 1,
-    limit = itemsPerPage,
-    districtId = "%",
-    structureType = "%",
-    bridgeName = ""
-  ) => {
+  const fetchAllBridges = async () => {
     setLoading(true);
     try {
-      const set = (page - 1) * limit;
-
-      // Construct the URL with filters
+      const set = (currentPage - 1) * itemsPerPage;
       const url = new URL(`${BASE_URL}/api/bridgesNew`);
-      const params = {
+      url.search = new URLSearchParams({
         set,
-        limit,
+        limit: itemsPerPage,
         district: districtId,
         structureType,
         bridgeName,
-      };
-
-      url.search = new URLSearchParams(params).toString(); // Add query parameters
+      }).toString();
 
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
 
       const data = await response.json();
-
       setTableData(data.bridges);
-      setBridgeCount(data.totalCount);
-      setTotalPages(Math.ceil(data.totalCount / limit));
+      setTotalPages(Math.ceil(data.totalCount / itemsPerPage));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -86,6 +66,12 @@ const BridgesListNew = () => {
     }
   };
 
+  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+
+  // Extract username safely
+  const username = userToken?.username;
+
+  // use effect for tooltip
   useEffect(() => {
     // Initialize Bootstrap tooltips
     const tooltipTriggerList = document.querySelectorAll(
@@ -401,7 +387,15 @@ const BridgesListNew = () => {
               </h6>
             </div>
 
-            <Filters fetchAllBridges={fetchAllBridges} />
+            <Filters
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
+              fetchAllBridges={fetchAllBridges} // Search triggered manually
+            />
 
             <div className="flex items-center gap-1">
               <button
@@ -634,4 +628,4 @@ const BridgesListNew = () => {
   );
 };
 
-export default BridgesListNew;
+export default BridgesListNewUpdated;
