@@ -45,9 +45,6 @@ const BridgesListNew = ({}) => {
   const [structureType, setStructureTypeState] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
 
-  
-
-
   // Fetch filters on component mount
   useEffect(() => {
     const fetchFilters = async () => {
@@ -83,45 +80,109 @@ const BridgesListNew = ({}) => {
     fetchFilters();
   }, []);
 
-  // Handle handlers for various inputs
-  const handleChange = (setter) => (e) => setter(e.target.value);
-
-  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-
-  // Extract username safely
-  const username = userToken?.username;
-
   useEffect(() => {
     fetchAllBridges(currentPage, itemsPerPage);
   }, [currentPage, districtId, structureType, bridgeName]);
 
+  const Filters = ({ fetchAllBridges }) => {
+    const [districtId, setDistrictId] = useState("%");
+    const [structureType, setStructureType] = useState("%");
+    const [bridgeName, setBridgeName] = useState("");
   
+    // When search button is clicked, trigger fetchAllBridges manually
+    const handleSearch = () => {
+      fetchAllBridges(1, 10, districtId, structureType, bridgeName);
+    };
+  
+    return (
+      <div className="flex items-center gap-2 justify-between">
+        {/* District Filter */}
+        <div>
+          <select
+            id="district-filter"
+            className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
+            value={districtId}
+            onChange={(e) => setDistrictId(e.target.value)}
+          >
+            <option value="%">--Select District--</option>
+            {districts.map((district) => (
+              <option key={district.id} value={district.id}>
+                {district.district}
+              </option>
+            ))}
+          </select>
+        </div>
+  
+        {/* Structure Type Filter */}
+        <div>
+          <select
+            id="structure-type"
+            className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
+            value={structureType}
+            onChange={(e) => setStructureType(e.target.value)}
+          >
+            <option value="%">--Select Structure Type--</option>
+            {structureTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+        </div>
+  
+        {/* Bridge Name Filter */}
+        <div>
+          <input
+            type="text"
+            id="bridge-name"
+            className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
+            placeholder="Search Bridge Name..."
+            value={bridgeName}
+            onChange={(e) => setBridgeName(e.target.value)}
+          />
+        </div>
+  
+        {/* Search Button */}
+        <button
+          onClick={handleSearch}
+          className="p-2 bg-[#3B82F6] text-white rounded hover:bg-blue-700"
+        >
+          <FaSearch />
+        </button>
+      </div>
+    );
+  };
 
-  const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
+  const fetchAllBridges = async (
+    page = 1,
+    limit = itemsPerPage,
+    districtId = "%",
+    structureType = "%",
+    bridgeName = ""
+  ) => {
     setLoading(true);
     try {
       const set = (page - 1) * limit;
-
+  
       // Construct the URL with filters
       const url = new URL(`${BASE_URL}/api/bridgesNew`);
       const params = {
         set,
         limit,
-        district: districtId || "%",
+        district: districtId,
         structureType,
         bridgeName,
       };
-
-      // console.log(params);
+  
       url.search = new URLSearchParams(params).toString(); // Add query parameters
-
+  
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
-
+  
       const data = await response.json();
-
-      setTableData(data.bridges); // Assuming the response contains a 'bridges' array
-      setBridgeCount(data.totalCount); // Assuming the response includes a 'totalCount'
+  
+      setTableData(data.bridges);
+      setBridgeCount(data.totalCount);
       setTotalPages(Math.ceil(data.totalCount / limit));
     } catch (error) {
       setError(error.message);
@@ -129,6 +190,7 @@ const BridgesListNew = ({}) => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     // Initialize Bootstrap tooltips
@@ -446,51 +508,7 @@ const BridgesListNew = ({}) => {
             </h6>
             </div>
            
-            <div className="flex items-center gap-1 justify-between">
-              {/* District Filter */}
-              <div>
-                <select
-                  id="district-filter"
-                  className="w-full border-1 rounded-1 border-[#3B82F6] p-1 bg-gray-200"
-                  value={districtId}
-                  onChange={handleChange(setDistrictId)}
-                >
-                  <option value="%">--Select District--</option>
-                  {districts.map((district, index) => (
-                    <option key={district.id || index} value={district.id}>
-                      {district.district}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/* Structure Type Filter */}
-              <div>
-                <select
-                  id="structure-type"
-                  className="w-full border-1 rounded-1 p-1 border-[#3B82F6] bg-gray-200"
-                  value={structureType}
-                  onChange={handleChange(setStructureTypeState)}
-                >
-                  <option value="%">--Select Structure Type--</option>
-                  {structureTypes.map((type, index) => (
-                    <option key={type.id || index} value={type.id}>
-                      {type.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {/* Bridge Name Filter */}
-              <div>
-                <input
-                  type="text"
-                  id="bridge-name"
-                  className="w-full border-1 rounded-1 p-1 border-[#3B82F6] bg-gray-200"
-                  placeholder="Search Bridge Name..."
-                  value={bridgeName}
-                  onChange={(e) => setBridgeName(e.target.value)}
-                />
-              </div>
-             </div> 
+           {Filters({ fetchAllBridges })}
 
               <div className="flex items-center gap-1">
                 <button
