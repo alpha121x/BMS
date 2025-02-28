@@ -328,9 +328,9 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 app.get("/api/inspection-counts-con", async (req, res) => {
   try {
     let { districtId } = req.query;
-    
+
     // Default to '%' if districtId is not provided
-    districtId = districtId || '%';
+    districtId = districtId || "%";
 
     const query = `
       SELECT 
@@ -357,19 +357,25 @@ app.get("/api/inspection-counts-con", async (req, res) => {
   }
 });
 
-
-// Counts for Rams 
+// Counts for Rams
 app.get("/api/inspection-counts-rams", async (req, res) => {
   try {
+    let { districtId } = req.query;
+
+    // Default to '%' if districtId is not provided
+    districtId = districtId || "%";
+
     const query = `
-      SELECT 
+    SELECT 
         COUNT(CASE WHEN qc_rams = 0 AND qc_con = 2 THEN 1 END) AS pending_count,
-        COUNT(CASE WHEN qc_rams = 2 THEN 1 END) AS approved_count
-      FROM bms.tbl_inspection_f
+       COUNT(CASE WHEN qc_rams = 2 THEN 1 END) AS approved_count
+    FROM bms.tbl_inspection_f
       WHERE surveyed_by = 'RAMS-UU'
+      AND district_id::TEXT LIKE $1
     `;
 
-    const result = await pool.query(query);
+    const values = [districtId];
+    const result = await pool.query(query, values);
 
     res.json({
       pending: result.rows[0].pending_count,
@@ -383,7 +389,6 @@ app.get("/api/inspection-counts-rams", async (req, res) => {
     });
   }
 });
-
 
 // // Define the API endpoint to get data from `bms.tbl_bms_master_data`
 // app.get("/api/bridgesdownload", async (req, res) => {
@@ -704,11 +709,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
 // briges details download for evaluation module
 app.get("/api/bridgesdownloadNeww", async (req, res) => {
   try {
-    const {
-      district = "%",
-      structureType = "%",
-      bridgeName = "%",
-    } = req.query;
+    const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
     let query = `
     SELECT CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type_id, md.structure_type, 
@@ -770,11 +771,7 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
 
 app.get("/api/inspections-export-new", async (req, res) => {
   try {
-    const {
-      district = "%",
-      structureType = "%",
-      bridgeName = "%",
-    } = req.query;
+    const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
     let query = `
     WITH ranked_data AS (
@@ -821,7 +818,6 @@ app.get("/api/inspections-export-new", async (req, res) => {
       queryParams.push(structureType);
       paramIndex++;
     }
-
 
     query += ` ) SELECT * FROM ranked_data ORDER BY "Reference No:"`;
 
@@ -919,7 +915,7 @@ app.get("/api/inspections-export", async (req, res) => {
     let firstRow = true;
     const processedData = result.rows.map((row) => {
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-      
+
       // Update Overview Photos using the same logic as PhotoPaths
       row["Overview Photos"] = row["Overview Photos"]
         .map((photo) => (photo ? swapDomain(photo) : null))
@@ -936,7 +932,12 @@ app.get("/api/inspections-export", async (req, res) => {
     res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res.status(500).json({ success: false, message: "Error fetching data from the database" });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching data from the database",
+      });
   }
 });
 
@@ -953,7 +954,11 @@ function extractUrlsFromPath(photoPaths) {
       if (Array.isArray(obj)) {
         obj.forEach((item) => extractFromNested(item));
       } else if (typeof obj === "object" && obj !== null) {
-        if (obj.path && typeof obj.path === "string" && obj.path.startsWith("http")) {
+        if (
+          obj.path &&
+          typeof obj.path === "string" &&
+          obj.path.startsWith("http")
+        ) {
           urls.push(swapDomain(obj.path));
         }
         Object.values(obj).forEach((value) => extractFromNested(value));
@@ -1237,7 +1242,6 @@ SELECT
       countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
-
 
     if (structureType !== "%") {
       query += ` AND structure_type_id = $${paramIndex}`;
@@ -2088,7 +2092,6 @@ app.put("/api/update-inspection-rams", async (req, res) => {
     res.status(500).json({ error: "Failed to update inspection" });
   }
 });
-
 
 app.get("/api/structure-types", async (req, res) => {
   try {

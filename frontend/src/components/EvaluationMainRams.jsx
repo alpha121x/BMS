@@ -13,6 +13,37 @@ const EvaluationMainRams = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
 
+
+  const fetchInspectionCounts = async () => {
+    if (!districtId) return; // Avoid unnecessary API calls
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/inspection-counts-rams?districtId=${districtId}`);
+      const data = await response.json();
+
+      setInspectedCards([
+        {
+          label: "Pending Records",
+          value: data.pending || "N/A",
+          icon: <FaClipboardList />,
+          color: "orange",
+        },
+        {
+          label: "Approved Records",
+          value: data.approved || "N/A",
+          icon: <FaClipboardCheck />,
+          color: "green",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error fetching inspection counts:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchInspectionCounts();
+  }, []);
+
   // Show back-to-top button based on scroll position
   useEffect(() => {
     const handleScroll = () => {
@@ -33,37 +64,7 @@ const EvaluationMainRams = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  useEffect(() => {
-    fetch(`${BASE_URL}/api/inspection-counts-con`)
-      .then((response) => response.json())
-      .then((data) => {
-        const pendingCount = data.pending || "N/A";
-        const approvedCount = data.approved || "N/A";
 
-        // Define structure for displaying cards
-        const inspectedCards = [
-          {
-            label: "Pending Records",
-            value: pendingCount,
-            icon: <FaClipboardList />, // Pending icon
-            color: "orange",
-          },
-          {
-            label: "Approved Records",
-            value: approvedCount,
-            icon: <FaClipboardCheck />, // Approved icon
-            color: "green",
-          },
-        ];
-
-        setInspectedCards(inspectedCards);
-      })
-      .catch((error) =>
-        console.error("Error fetching inspection counts:", error)
-      );
-  }, []);
-
- 
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
@@ -95,6 +96,7 @@ const EvaluationMainRams = () => {
               setStructureType={setStructureType}
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
+              fetchInspectionCounts={fetchInspectionCounts}
             />
           </div>
         </div>
