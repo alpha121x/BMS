@@ -5,7 +5,7 @@ import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
 import { FaClipboardCheck, FaClipboardList } from "react-icons/fa";
 
-const EvaluationMain = () => {
+const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
   const [structureType, setStructureType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
@@ -33,35 +33,34 @@ const EvaluationMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  useEffect(() => {
-    fetch(`${BASE_URL}/api/inspection-counts-con`)
+ useEffect(() => {
+    if (!districtId) return; // Avoid unnecessary API calls
+
+    fetch(`${BASE_URL}/api/inspection-counts-con?districtId=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
         const pendingCount = data.pending || "N/A";
         const approvedCount = data.approved || "N/A";
 
-        // Define structure for displaying cards
         const inspectedCards = [
           {
             label: "Pending Records",
             value: pendingCount,
-            icon: <FaClipboardList />, // Pending icon
+            icon: <FaClipboardList />,
             color: "orange",
           },
           {
             label: "Approved Records",
             value: approvedCount,
-            icon: <FaClipboardCheck />, // Approved icon
+            icon: <FaClipboardCheck />,
             color: "green",
           },
         ];
 
         setInspectedCards(inspectedCards);
       })
-      .catch((error) =>
-        console.error("Error fetching inspection counts:", error)
-      );
-  }, []);
+      .catch((error) => console.error("Error fetching inspection counts:", error));
+  }, [districtId]); // Refetch when districtId changes
 
  
   return (
@@ -113,4 +112,4 @@ const EvaluationMain = () => {
   );
 };
 
-export default EvaluationMain;
+export default EvaluationMainCon;

@@ -324,18 +324,24 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
   }
 });
 
-// Counts for consultant
 app.get("/api/inspection-counts-con", async (req, res) => {
   try {
+    let { districtId } = req.query;
+    
+    // Default to '%' if districtId is not provided
+    districtId = districtId || '%';
+
     const query = `
       SELECT 
         COUNT(CASE WHEN qc_con = 1 THEN 1 END) AS pending_count,
         COUNT(CASE WHEN qc_con = 2 THEN 1 END) AS approved_count
       FROM bms.tbl_inspection_f
       WHERE surveyed_by = 'RAMS-UU'
+      AND district_id::TEXT LIKE $1
     `;
 
-    const result = await pool.query(query);
+    const values = [districtId];
+    const result = await pool.query(query, values);
 
     res.json({
       pending: result.rows[0].pending_count,
@@ -349,6 +355,8 @@ app.get("/api/inspection-counts-con", async (req, res) => {
     });
   }
 });
+
+
 
 // Counts for Rams 
 app.get("/api/inspection-counts-rams", async (req, res) => {
