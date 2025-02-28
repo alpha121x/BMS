@@ -5,7 +5,7 @@ import { GiArchBridge } from "react-icons/gi";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 // import BridgesList from "./BridgesList";
-import BridgesListNew from "./BridgesListNew";
+import BridgesListNew from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
 

@@ -3,10 +3,8 @@ import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { BASE_URL } from "./config";
-import "./BridgeList.css";
-import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
-import FilterComponent from "./FilterComponent";
+import Filters from "./Filters";
 import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
 import InspectionList from "./InspectionList";
 import InspectionListRams from "./InspectionListRams";
@@ -20,9 +18,8 @@ import { FaFileExcel } from "react-icons/fa6";
 import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
-import { FaSearch } from "react-icons/fa";
 
-const BridgesListNew = ({}) => {
+const BridgesListNew = () => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -36,121 +33,20 @@ const BridgesListNew = ({}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [districts, setDistricts] = useState([]);
-  const [structureTypes, setStructureTypes] = useState([]);
   const itemsPerPage = 10;
 
   const [districtId, setDistrictId] = useState("%");
   const [structureType, setStructureTypeState] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
 
-  // Fetch filters on component mount
-  useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        // Fetching districts
-        const districtResponse = await fetch(`${BASE_URL}/api/districts`);
-        const districtData = await districtResponse.json();
-        setDistricts(
-          districtData.map((district) => ({
-            id: district.id,
-            district: district.district || district.name, // Handle different property names
-          }))
-        );
+  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
-        // Fetching structure types
-        const structureTypeResponse = await fetch(
-          `${BASE_URL}/api/structure-types`
-        );
-        const structureTypesData = await structureTypeResponse.json();
-
-        // Assuming the response now directly gives the array
-        setStructureTypes(
-          structureTypesData.map((type) => ({
-            id: type.id,
-            name: type.structure_type || type.name, // Normalize the property name
-          }))
-        );
-      } catch (error) {
-        console.error("Error fetching filters:", error);
-      }
-    };
-
-    fetchFilters();
-  }, []);
+  // Extract username safely
+  const username = userToken?.username;
 
   useEffect(() => {
     fetchAllBridges(currentPage, itemsPerPage);
   }, [currentPage, districtId, structureType, bridgeName]);
-
-  const Filters = ({ fetchAllBridges }) => {
-    const [districtId, setDistrictId] = useState("%");
-    const [structureType, setStructureType] = useState("%");
-    const [bridgeName, setBridgeName] = useState("");
-  
-    // When search button is clicked, trigger fetchAllBridges manually
-    const handleSearch = () => {
-      fetchAllBridges(1, 10, districtId, structureType, bridgeName);
-    };
-  
-    return (
-      <div className="flex items-center gap-2 justify-between">
-        {/* District Filter */}
-        <div>
-          <select
-            id="district-filter"
-            className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-            value={districtId}
-            onChange={(e) => setDistrictId(e.target.value)}
-          >
-            <option value="%">--Select District--</option>
-            {districts.map((district) => (
-              <option key={district.id} value={district.id}>
-                {district.district}
-              </option>
-            ))}
-          </select>
-        </div>
-  
-        {/* Structure Type Filter */}
-        <div>
-          <select
-            id="structure-type"
-            className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-            value={structureType}
-            onChange={(e) => setStructureType(e.target.value)}
-          >
-            <option value="%">--Select Structure Type--</option>
-            {structureTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.name}
-              </option>
-            ))}
-          </select>
-        </div>
-  
-        {/* Bridge Name Filter */}
-        <div>
-          <input
-            type="text"
-            id="bridge-name"
-            className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-            placeholder="Search Bridge Name..."
-            value={bridgeName}
-            onChange={(e) => setBridgeName(e.target.value)}
-          />
-        </div>
-  
-        {/* Search Button */}
-        <button
-          onClick={handleSearch}
-          className="p-2 bg-[#3B82F6] text-white rounded hover:bg-blue-700"
-        >
-          <FaSearch />
-        </button>
-      </div>
-    );
-  };
 
   const fetchAllBridges = async (
     page = 1,
@@ -162,7 +58,7 @@ const BridgesListNew = ({}) => {
     setLoading(true);
     try {
       const set = (page - 1) * limit;
-  
+
       // Construct the URL with filters
       const url = new URL(`${BASE_URL}/api/bridgesNew`);
       const params = {
@@ -172,14 +68,14 @@ const BridgesListNew = ({}) => {
         structureType,
         bridgeName,
       };
-  
+
       url.search = new URLSearchParams(params).toString(); // Add query parameters
-  
+
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch bridge data");
-  
+
       const data = await response.json();
-  
+
       setTableData(data.bridges);
       setBridgeCount(data.totalCount);
       setTotalPages(Math.ceil(data.totalCount / limit));
@@ -189,7 +85,6 @@ const BridgesListNew = ({}) => {
       setLoading(false);
     }
   };
-  
 
   useEffect(() => {
     // Initialize Bootstrap tooltips
@@ -491,53 +386,51 @@ const BridgesListNew = ({}) => {
         className="card p-0 rounded-lg text-black"
         style={{
           background: "#FFFFFF",
-          // border: "2px solid #60A5FA",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
         }}
       >
-        <div  className="card-header p-2 " style={{ background: "#CFE2FF" }}>
+        <div className="card-header p-2 " style={{ background: "#CFE2FF" }}>
           <div className="flex items-center justify-between">
             <div>
-            <h6 className="mb-0" id="structure-heading">
-              Structure Details
-              <span className="badge text-bg-success ms-2">
-                <h6 className="mb-0">{bridgeCount || 0}</h6>
-              </span>
-            </h6>
+              <h6 className="mb-0" id="structure-heading">
+                Structure Details
+                <span className="badge text-bg-success ms-2">
+                  <h6 className="mb-0">{bridgeCount || 0}</h6>
+                </span>
+              </h6>
             </div>
-           
-           {Filters({ fetchAllBridges })}
 
-              <div className="flex items-center gap-1">
-                <button
-                  className="btn btn-outline-primary"
-                  onClick={handleDownloadCSV}
-                  disabled={loadingCSV}
-                >
+            <Filters fetchAllBridges={fetchAllBridges} />
+
+            <div className="flex items-center gap-1">
+              <button
+                className="btn btn-outline-primary"
+                onClick={handleDownloadCSV}
+                disabled={loadingCSV}
+              >
+                <div className="flex items-center gap-1">
+                  <FaFileCsv />
+                  {loadingCSV ? "Downloading CSV..." : "CSV"}
+                </div>
+              </button>
+              <button
+                className="btn btn-outline-success"
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+              >
+                {loadingExcel ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" /> Downloading
+                    Excel...{" "}
+                  </>
+                ) : (
                   <div className="flex items-center gap-1">
-                    <FaFileCsv />
-                    {loadingCSV ? "Downloading CSV..." : "CSV"}
+                    <FaFileExcel />
+                    {loading ? "Downloading Excel..." : "Excel"}
                   </div>
-                </button>
-                <button
-                  className="btn btn-outline-success"
-                  onClick={handleDownloadExcel}
-                  disabled={loadingExcel}
-                >
-                  {loadingExcel ? (
-                    <>
-                      <FaSpinner className="animate-spin mr-2" /> Downloading
-                      Excel...{" "}
-                    </>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <FaFileExcel />
-                      {loading ? "Downloading Excel..." : "Excel"}
-                    </div>
-                  )}
-                </button>
-              </div>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -736,6 +629,7 @@ const BridgesListNew = ({}) => {
             )}
           </Modal.Body>
         </Modal>
+      </div>
     </>
   );
 };
