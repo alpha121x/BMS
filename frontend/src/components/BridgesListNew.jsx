@@ -15,7 +15,6 @@ import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { FaSpinner } from "react-icons/fa";
-import { FaFilter } from "react-icons/fa6";
 import { FaFileCsv } from "react-icons/fa6";
 import { FaFileExcel } from "react-icons/fa6";
 import { MdInventory } from "react-icons/md";
