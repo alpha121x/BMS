@@ -115,7 +115,9 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       }
 
       const evaluatorRemarks =
-        row.qc_remarks_evaluator?.trim() === "" ? null : row.qc_remarks_evaluator;
+        row.qc_remarks_evaluator?.trim() === ""
+          ? null
+          : row.qc_remarks_evaluator;
 
       const updatedData = {
         id: row.inspection_id,
@@ -416,7 +418,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           {activeDiv === "pending" && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
-              {pendingData &&
+              {pendingData && Object.keys(pendingData).length > 0 ? (
                 Object.keys(pendingData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
                     <div
@@ -427,7 +429,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                       <strong>Reports For Span: {spanIndex}</strong>
                       <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                     </div>
-                    {expandedSections[spanIndex] ? (
+                    {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(pendingData[spanIndex]).length > 0 ? (
                           Object.keys(pendingData[spanIndex]).map(
@@ -451,28 +453,41 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                           <div className="col-md-3">
                                             {inspection.PhotoPaths?.length >
                                               0 && (
-                                              <div className="d-flex flex-wrap gap-2">
+                                              <div
+                                                className="d-flex gap-2"
+                                                style={{
+                                                  overflowX: "auto",
+                                                  whiteSpace: "nowrap",
+                                                  display: "flex",
+                                                  paddingBottom: "5px",
+                                                }}
+                                              >
                                                 {inspection.PhotoPaths.map(
-                                                  (photo, i) => (
-                                                    <a
-                                                      key={`photo-${inspection.id}-${i}`}
-                                                      href={photo}
-                                                      data-fancybox="gallery"
-                                                      data-caption={`Photo ${
-                                                        i + 1
-                                                      }`}
-                                                    >
-                                                      <img
-                                                        src={photo}
-                                                        alt={`Photo ${i + 1}`}
-                                                        className="img-fluid rounded border"
-                                                        style={{
-                                                          width: "80px",
-                                                          height: "80px",
-                                                          objectFit: "cover",
-                                                        }}
-                                                      />
-                                                    </a>
+                                                  (photoUrl, index) => (
+                                                    <img
+                                                      key={`photo-${inspection.id}-${index}`}
+                                                      src={photoUrl}
+                                                      alt={`Photo ${index + 1}`}
+                                                      className="img-fluid rounded border"
+                                                      style={{
+                                                        width: "80px",
+                                                        height: "80px",
+                                                        objectFit: "cover",
+                                                        cursor: "pointer",
+                                                        flexShrink: 0,
+                                                      }}
+                                                      loading="lazy" // Lazy loading added
+                                                      onClick={() =>
+                                                        handlePhotoClick(
+                                                          photoUrl
+                                                        )
+                                                      }
+                                                      onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                          "/placeholder-image.png";
+                                                      }}
+                                                    />
                                                   )
                                                 )}
                                               </div>
@@ -491,18 +506,24 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             <strong>Level:</strong>{" "}
                                             {inspection.DamageLevel || "N/A"}{" "}
                                             <br />
+                                            <strong>Damage Extent:</strong>{" "}
+                                            {inspection.damage_extent || "N/A"}{" "}
+                                            <br />
                                             <strong>
                                               Situation Remarks:
                                             </strong>{" "}
                                             {inspection.Remarks || "N/A"}
+                                            <br />
+                                            <strong>Surveeyed By</strong>{" "}
+                                            {inspection.surveyed_by || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
-                                              as="input"
-                                              type="text"
+                                              as="textarea"
+                                              rows={3}
                                               placeholder="Consultant Remarks"
                                               value={
-                                                inspection.qc_remarks_evaluator || ""
+                                                inspection.qc_remarks_con || ""
                                               }
                                               onChange={(e) =>
                                                 handleConsultantRemarksChange(
@@ -514,28 +535,54 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               }
                                               className="mb-2"
                                             />
-                                            <Form.Select
-                                              value={inspection.qc_evaluator}
-                                              onChange={(e) =>
-                                                handleApprovedFlagChange(
-                                                  spanIndex,
-                                                  workKind,
-                                                  inspection.inspection_id,
-                                                  parseInt(e.target.value)
-                                                )
-                                              }
+
+                                            <Form.Group
+                                              controlId={`qc_con_${inspection.inspection_id}`}
                                               className="mb-2"
                                             >
-                                              <option value={1}>
-                                                Select Status
-                                              </option>
-                                              <option value={3}>
-                                                Unapproved
-                                              </option>
-                                              <option value={2}>
-                                                Approved
-                                              </option>
-                                            </Form.Select>
+                                              <div className="flex gap-4">
+                                                {/* Unapproved Option */}
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_con_${inspection.inspection_id}`}
+                                                  label="Unapproved"
+                                                  value="3"
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }}
+                                                />
+
+                                                {/* Approved Option */}
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_con_${inspection.inspection_id}`}
+                                                  label="Approved"
+                                                  value="2"
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }}
+                                                />
+                                              </div>
+                                            </Form.Group>
+
                                             <Button
                                               onClick={() =>
                                                 handleSaveChanges(inspection)
@@ -554,12 +601,15 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                             )
                           )
                         ) : (
-                          <p>No data available</p>
+                          <p>No pending records found.</p>
                         )}
                       </div>
-                    ) : null}
+                    )}
                   </div>
-                ))}
+                ))
+              ) : (
+                <p>No pending records found.</p>
+              )}
             </div>
           )}
 

@@ -1214,6 +1214,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
 	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
+    AND surveyed_by = 'RAMS-UU'
     `;
 
     let countQuery = `
@@ -1221,6 +1222,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1
       AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
+      AND surveyed_by = 'RAMS-UU'
     `;
 
     const queryParams = [];
