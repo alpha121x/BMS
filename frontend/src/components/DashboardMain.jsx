@@ -101,7 +101,7 @@ const DashboardMain = () => {
       .then((response) => response.json())
       .then((data) => {
         const totalCount = data.totalStructureCount || "N/A";
-  
+
         // Create a structure for inspection types
         const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
@@ -109,15 +109,16 @@ const DashboardMain = () => {
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
           // Add any other inspection types as needed
         };
-  
+
         // Map the response to the expected format for inspection data
         const mappedCards = data.structureTypeCounts.map((item) => ({
-          label: inspectionMap[item.structure_type]?.label || item.structure_type,
+          label:
+            inspectionMap[item.structure_type]?.label || item.structure_type,
           value: item.count || "N/A",
           icon: inspectionMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
           color: "blue",
         }));
-  
+
         // Add total count card
         mappedCards.unshift({
           label: "Total",
@@ -125,12 +126,11 @@ const DashboardMain = () => {
           icon: <SiInstructure />,
           color: "blue",
         });
-  
+
         setInspectedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
   }, []);
-  
 
   // Card Component with dynamic border color
   const Card = ({ label, value, icon, iconSize = 32 }) => (
@@ -166,103 +166,114 @@ const DashboardMain = () => {
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Structure Section */}
-      <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Total Structures Inventory
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {structureCards.map((card, index) => (
-            <Card key={index} {...card} />
-          ))}
-        </div>
-      </div>
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="mb-2">
+              <h3 className="text-xl font-semibold text-gray-700">
+                Total Structures Inventory
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                {structureCards.map((card, index) => (
+                  <Card key={index} {...card} />
+                ))}
+              </div>
+            </div>
 
-      {/* Evaluation Section */}
-      <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Inspected Structures
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {inspectedCards.map((card, index) => (
-            <Card key={index} {...card} />
-          ))}
+            {/* Evaluation Section */}
+            <div className="mb-2">
+              <h3 className="text-xl font-semibold text-gray-700">
+                Inspected Structures
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                {inspectedCards.map((card, index) => (
+                  <Card key={index} {...card} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Toggle Buttons */}
-      <div className="flex justify-start p-1 gap-3 w-50 mt-2">
-        <button
-          onClick={() => setActiveView("map")}
-          className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
-            activeView === "map"
-              ? "bg-blue-600 text-white shadow-lg transform scale-105"
-              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-          }`}
-        >
-          Map View
-        </button>
-        <button
-          onClick={() => setActiveView("graph")}
-          className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
-            activeView === "graph"
-              ? "bg-blue-600 text-white shadow-lg transform scale-105"
-              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-          }`}
-        >
-          Graph View
-        </button>
-      </div>
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="flex justify-start p-1 gap-3 w-50 mt-2">
+              <button
+                onClick={() => setActiveView("map")}
+                className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
+                  activeView === "map"
+                    ? "bg-blue-600 text-white shadow-lg transform scale-105"
+                    : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                }`}
+              >
+                Map View
+              </button>
+              <button
+                onClick={() => setActiveView("graph")}
+                className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
+                  activeView === "graph"
+                    ? "bg-blue-600 text-white shadow-lg transform scale-105"
+                    : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                }`}
+              >
+                Graph View
+              </button>
+            </div>
 
-      {/* Content Container */}
-      <div>
-        {activeView === "map" ? (
-          <div className="mt-1">
-            <Map districtId={selectedDistrict} />
+            {/* Content Container */}
+            <div>
+              {activeView === "map" ? (
+                <div className="mt-1">
+                  <Map districtId={selectedDistrict} />
+                </div>
+              ) : (
+                <div className="mt-1">
+                  <Graph />
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="mt-1">
-            <Graph />
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Bridges List */}
-      <div className="mt-2 flex justify-center">
-        <div className="w-full p-4">
-          <BridgesListDashboard
-            setSelectedDistrict={setSelectedDistrict}
-            setMinBridgeLength={setMinBridgeLength}
-            setMaxBridgeLength={setMaxBridgeLength}
-            setMinSpanLength={setMinSpanLength}
-            setMaxSpanLength={setMaxSpanLength}
-            setStructureType={setStructureType}
-            setConstructionType={setConstructionType}
-            setCategory={setCategory}
-            setEvaluationStatus={setEvaluationStatus}
-            setInspectionStatus={setInspectionStatus}
-            setMinYear={setMinYear}
-            setMaxYear={setMaxYear}
-            setBridge={setBridgeName}
-            district={selectedDistrict}
-            structureType={structureType}
-            constructionType={constructionType}
-            category={category}
-            evaluationStatus={evaluationStatus}
-            inspectionStatus={inspectionStatus}
-            minBridgeLength={minBridgeLength}
-            maxBridgeLength={maxBridgeLength}
-            minSpanLength={minSpanLength}
-            maxSpanLength={maxSpanLength}
-            minYear={minYear}
-            maxYear={maxYear}
-            bridge={bridge} // Also pass the current bridge id filter
-          />
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-12">
+            <BridgesListDashboard
+              setSelectedDistrict={setSelectedDistrict}
+              setMinBridgeLength={setMinBridgeLength}
+              setMaxBridgeLength={setMaxBridgeLength}
+              setMinSpanLength={setMinSpanLength}
+              setMaxSpanLength={setMaxSpanLength}
+              setStructureType={setStructureType}
+              setConstructionType={setConstructionType}
+              setCategory={setCategory}
+              setEvaluationStatus={setEvaluationStatus}
+              setInspectionStatus={setInspectionStatus}
+              setMinYear={setMinYear}
+              setMaxYear={setMaxYear}
+              setBridge={setBridgeName}
+              district={selectedDistrict}
+              structureType={structureType}
+              constructionType={constructionType}
+              category={category}
+              evaluationStatus={evaluationStatus}
+              inspectionStatus={inspectionStatus}
+              minBridgeLength={minBridgeLength}
+              maxBridgeLength={maxBridgeLength}
+              minSpanLength={minSpanLength}
+              maxSpanLength={maxSpanLength}
+              minYear={minYear}
+              maxYear={maxYear}
+              bridge={bridge} // Also pass the current bridge id filter
+            />
 
-          <div className="mt-2">
-            <CheckingTable
-             district={selectedDistrict}
-             bridge={bridge}
-             />
+            <div className="mt-2">
+              <CheckingTable district={selectedDistrict} bridge={bridge} />
+            </div>
           </div>
         </div>
       </div>
