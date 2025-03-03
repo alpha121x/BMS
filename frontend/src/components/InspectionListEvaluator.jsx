@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useCallback } from "react";
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
@@ -19,6 +19,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
   const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   useEffect(() => {
     if (bridgeId) {
@@ -149,7 +151,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }
   };
 
-  const handleConsultantRemarksChange = (
+  const handleEvalRemarksChange = (
     spanIndex,
     workKind,
     inspectionId,
@@ -274,6 +276,15 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }
   };
 
+  const handlePhotoClick = (photo) => {
+    setSelectedPhoto(photo);
+    setShowPhotoModal(true);
+  };
+
+  const handleClosePhotoModal = () => {
+    setShowPhotoModal(false);
+  };
+
   const getDamageLevel = (data) => {
     const damageLevels = [...new Set(data.map((item) => item.DamageLevel))];
     return damageLevels.join(", ");
@@ -306,7 +317,13 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }));
   };
 
-  const handleFieldChange = (spanIndex, workKind, inspectionId, field, value) => {
+  const handleFieldChange = (
+    spanIndex,
+    workKind,
+    inspectionId,
+    field,
+    value
+  ) => {
     setPendingData((prevData) => ({
       ...prevData,
       [spanIndex]: {
@@ -321,7 +338,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       },
     }));
   };
-  
 
   return (
     <div
@@ -611,52 +627,24 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               <strong>
                                                 Situation Remarks:
                                               </strong>{" "}
-                                              <Form.Control
-                                                as="textarea"
-                                                rows={2}
-                                                value={inspection.Remarks || ""}
-                                                onChange={(e) =>
-                                                  handleFieldChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    "Remarks",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="form-control-sm d-inline-block w-75 ms-2"
-                                              />
+                                              {inspection.surveyed_by || "N/A"}
                                             </div>
                                             <div className="mb-2">
-                                              <strong>Surveyed By:</strong>{" "}
-                                              <Form.Control
-                                                type="text"
-                                                value={
-                                                  inspection.surveyed_by || ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleFieldChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    "surveyed_by",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="form-control-sm d-inline-block w-75 ms-2"
-                                              />
+                                              <strong>Surveeyed By</strong>{" "}
+                                              {inspection.surveyed_by || "N/A"}
                                             </div>
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
                                               as="textarea"
                                               rows={3}
-                                              placeholder="Consultant Remarks"
+                                              placeholder="Evaluator Remarks"
                                               value={
-                                                inspection.qc_remarks_con || ""
+                                                inspection.qc_remarks_evaluator ||
+                                                ""
                                               }
                                               onChange={(e) =>
-                                                handleConsultantRemarksChange(
+                                                handleEvalRemarksChange(
                                                   spanIndex,
                                                   workKind,
                                                   inspection.inspection_id,
@@ -742,6 +730,27 @@ const InspectionListEvaluator = ({ bridgeId }) => {
               )}
             </div>
           )}
+
+          <Modal
+            show={showPhotoModal}
+            onHide={handleClosePhotoModal}
+            centered
+            size="lg"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>Enlarged Photo</Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="text-center">
+              {selectedPhoto && (
+                <img
+                  src={selectedPhoto}
+                  alt="Enlarged"
+                  className="img-fluid rounded border"
+                  style={{ maxWidth: "100%", maxHeight: "80vh" }}
+                />
+              )}
+            </Modal.Body>
+          </Modal>
 
           {activeDiv === "approved" && (
             <div className="mb-4">
