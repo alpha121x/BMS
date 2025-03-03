@@ -1456,6 +1456,199 @@ app.get("/api/get-summary", async (req, res) => {
   }
 });
 
+// for consultant summary data
+app.get("/api/get-summary-con", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    if (!bridgeId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
+    }
+
+    const query = `
+      SELECT 
+        uu_bms_id,
+        surveyed_by,
+        damage_extent,
+        inspection_id,
+        qc_con,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        "inspection_images" AS "PhotoPaths",
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+	  AND qc_con = '1'
+	  AND surveyed_by = 'RAMS-UU'
+    AND evaluation_status = 'draft'
+      ORDER BY inspection_id DESC;
+    `;
+
+    const { rows } = await pool.query(query, [bridgeId]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Inspection not found" });
+    }
+
+    // Process PhotoPaths for all rows
+    const processedData = rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          // Clean JSON if wrapped in quotes
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path" keys
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with image paths
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Flattened array of image paths
+        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+      };
+    });
+
+    res.status(200).json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// for consultant summary data
+app.get("/api/get-summary-rams", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    if (!bridgeId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
+    }
+
+    const query = `
+      SELECT 
+        uu_bms_id,
+        surveyed_by,
+        damage_extent,
+        inspection_id,
+        qc_con,
+        qc_remarks_con,
+        qc_rams,
+        qc_rams_remarks,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+        "inspection_images" AS "PhotoPaths",
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+	  AND qc_con = '2'
+    AND qc_rams = '0'
+	  AND surveyed_by = 'RAMS-UU'
+    AND evaluation_status = 'draft'
+      ORDER BY inspection_id DESC;
+    `;
+
+    const { rows } = await pool.query(query, [bridgeId]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Inspection not found" });
+    }
+
+    // Process PhotoPaths for all rows
+    const processedData = rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          // Clean JSON if wrapped in quotes
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path" keys
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with image paths
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Flattened array of image paths
+        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+      };
+    });
+
+    res.status(200).json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // api endpoint for consultant inspections data
 app.get("/api/get-inspections", async (req, res) => {
   try {
