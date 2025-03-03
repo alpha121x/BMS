@@ -14,7 +14,7 @@ import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
-const InspectionList = ({ bridgeId }) => {
+const InspectionListCon = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [unapprovedData, setUnapprovedData] = useState([]);
@@ -1020,4 +1020,4 @@ const InspectionList = ({ bridgeId }) => {
   );
 };
 
-export default InspectionList;
+export default InspectionListCon;

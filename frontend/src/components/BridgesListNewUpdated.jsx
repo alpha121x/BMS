@@ -6,7 +6,7 @@ import { BASE_URL } from "./config";
 import Papa from "papaparse"; // Import papaparse
 import Filters from "./Filters";
 import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
-import InspectionList from "./InspectionList";
+import InspectionListCon from "./InspectionListCon";
 import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListRams from "./InspectionListRams";
 import MapModal from "./MapModal"; // Adjust the import path as needed
@@ -614,7 +614,7 @@ const BridgesListNewUpdated = ({
           </Modal.Header>
           <Modal.Body>
             {selectedBridge && username === "consultant" && (
-              <InspectionList bridgeId={selectedBridge.uu_bms_id} />
+              <InspectionListCon bridgeId={selectedBridge.uu_bms_id} />
             )}
             {selectedBridge && username === "rams" && (
               <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />

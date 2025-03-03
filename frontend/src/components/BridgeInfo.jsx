@@ -8,9 +8,9 @@ import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfo";
 import { useLocation, useNavigate } from "react-router-dom";
-import InspectionList from "./InspectionList";
 import InspectionListRams from "./InspectionListRams";
 import InspectionListEvaluator from "./InspectionListEvaluator";
+import InspectionListCon from "./InspectionListCon";
 
 const BridgeInfo = () => {
   const location = useLocation();
@@ -34,14 +34,14 @@ const BridgeInfo = () => {
   // Function to render components based on username
   const renderInspectionList = () => {
     if (username === "consultant") {
-      return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
+      return <InspectionListCon bridgeId={bridgeData?.uu_bms_id} />;
     }  else if (username === "rams") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
     } else if (username === "evaluator") {
       return <InspectionListEvaluator bridgeId={bridgeData?.uu_bms_id} />;
     }
     else {
-      return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
+      return <InspectionListCon bridgeId={bridgeData?.uu_bms_id} />;
     }
   };
 
