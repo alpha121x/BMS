@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useCallback } from "react";
 import { Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -80,7 +80,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-summary?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-summary-evaluator?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 

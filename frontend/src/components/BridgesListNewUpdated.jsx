@@ -20,7 +20,15 @@ import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 
-const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchInspectionCounts }) => {
+const BridgesListNewUpdated = ({
+  districtId,
+  setDistrictId,
+  structureType,
+  setStructureType,
+  bridgeName,
+  setBridgeName,
+  fetchInspectionCounts,
+}) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -36,16 +44,34 @@ const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setSt
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 10;
 
+  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+
+  // Extract username safely
+  const username = userToken?.username;
+
   // Fetch Bridges when filters change
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage]); // Only trigger on page change
+  }, [currentPage, username]); // Re-fetch when username changes
 
   const fetchAllBridges = async () => {
     setLoading(true);
     try {
       const set = (currentPage - 1) * itemsPerPage;
-      const url = new URL(`${BASE_URL}/api/bridgesNew`);
+
+      // Define different URLs based on username
+      let url;
+      if (username === "consultant") {
+        url = new URL(`${BASE_URL}/api/bridgesNew`);
+      } else if (username === "rams") {
+        url = new URL(`${BASE_URL}/api/bridgesNew`);
+      } else if (username === "evaluator") {
+        url = new URL(`${BASE_URL}/api/bridgesEvaluator`); // Default for normal users
+      } else {
+        url = new URL(`${BASE_URL}/api/bridgesNew`);
+      }
+
+      // Set query parameters
       url.search = new URLSearchParams({
         set,
         limit: itemsPerPage,
@@ -67,11 +93,6 @@ const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setSt
       setLoading(false);
     }
   };
-
-  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-
-  // Extract username safely
-  const username = userToken?.username;
 
   // use effect for tooltip
   useEffect(() => {
