@@ -520,8 +520,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             )}
                                           </div>
                                           <div className="col-md-6">
-                                            <div className="mb-2">
-                                              <strong>Parts:</strong>{" "}
+                                            <div className="mb-1">
+                                              <strong>Parts:</strong>
                                               <Form.Control
                                                 type="text"
                                                 value={
@@ -536,11 +536,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                     e.target.value
                                                   )
                                                 }
-                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                                className="form-control-sm d-inline-block w-50 ms-1"
                                               />
                                             </div>
-                                            <div className="mb-2">
-                                              <strong>Material:</strong>{" "}
+
+                                            <div className="mb-1">
+                                              <strong>Material:</strong>
                                               <Form.Control
                                                 type="text"
                                                 value={
@@ -555,11 +556,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                     e.target.value
                                                   )
                                                 }
-                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                                className="form-control-sm d-inline-block w-50 ms-1"
                                               />
                                             </div>
-                                            <div className="mb-2">
-                                              <strong>Damage:</strong>{" "}
+
+                                            <div className="mb-1">
+                                              <strong>Damage:</strong>
                                               <Form.Control
                                                 type="text"
                                                 value={
@@ -575,11 +577,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                     e.target.value
                                                   )
                                                 }
-                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                                className="form-control-sm d-inline-block w-50 ms-1"
                                               />
                                             </div>
-                                            <div className="mb-2">
-                                              <strong>Level:</strong>{" "}
+
+                                            <div className="mb-1">
+                                              <strong>Level:</strong>
                                               <Form.Control
                                                 type="text"
                                                 value={
@@ -594,13 +597,15 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                     e.target.value
                                                   )
                                                 }
-                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                                className="form-control-sm d-inline-block w-50 ms-1"
                                               />
                                             </div>
-                                            <div className="mb-2">
-                                              <strong>Damage Extent:</strong>{" "}
+
+                                            <div className="mb-1">
+                                              <strong>Damage Extent:</strong>
                                               <Form.Control
                                                 type="text"
+                                                placeholder="%"
                                                 value={
                                                   inspection.damage_extent || ""
                                                 }
@@ -613,9 +618,10 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                     e.target.value
                                                   )
                                                 }
-                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                                className="form-control-sm d-inline-block w-50 ms-1"
                                               />
                                             </div>
+
                                             <div className="mb-2">
                                               <strong>
                                                 Situation Remarks:
@@ -623,7 +629,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               {inspection.surveyed_by || "N/A"}
                                             </div>
                                             <div className="mb-2">
-                                              <strong>Surveeyed By</strong>{" "}
+                                              <strong>Surveyed By</strong>{" "}
                                               {inspection.surveyed_by || "N/A"}
                                             </div>
                                           </div>
