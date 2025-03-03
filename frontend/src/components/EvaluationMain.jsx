@@ -9,8 +9,9 @@ import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
 
 const EvaluationMain = () => {
-  const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [structureType, setStructureType] = useState("");
+  const [districtId, setDistrictId] = useState("%");
+  const [structureType, setStructureType] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
@@ -96,8 +97,12 @@ const EvaluationMain = () => {
         <div className="row">
           <div className="col-md-12">
             <BridgesListNewUpdated
-              district={selectedDistrict}
+              districtId={districtId}
+              setDistrictId={setDistrictId}
               structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
             />
           </div>
         </div>
