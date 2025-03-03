@@ -29,11 +29,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }
   }, [bridgeId]);
 
-  useEffect(() => {
-    Fancybox.bind("[data-fancybox='gallery']", {});
-    return () => Fancybox.destroy();
-  }, []);
-
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -328,13 +323,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       ...prevData,
       [spanIndex]: {
         ...prevData[spanIndex],
-        [workKind]: {
-          ...prevData[spanIndex]?.[workKind],
-          [inspectionId]: {
-            ...prevData[spanIndex]?.[workKind]?.[inspectionId],
-            [field]: value,
-          },
-        },
+        [workKind]: prevData[spanIndex][workKind].map((item) =>
+          item.inspection_id === inspectionId
+            ? { ...item, [field]: value }
+            : item
+        ),
       },
     }));
   };
