@@ -21,6 +21,33 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [damageLevels, setDamageLevels] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [parts, setParts] = useState([]);
+  const [damageKinds, setDamageKinds] = useState([]);
+
+  // Fetch dropdown options from API
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/damage-levels`)
+      .then((res) => res.json())
+      .then((data) => setDamageLevels(data))
+      .catch((err) => console.error("Error fetching damage levels:", err));
+
+    fetch(`${BASE_URL}/api/materials`)
+      .then((res) => res.json())
+      .then((data) => setMaterials(data))
+      .catch((err) => console.error("Error fetching materials:", err));
+
+    fetch(`${BASE_URL}/api/parts`)
+      .then((res) => res.json())
+      .then((data) => setParts(data))
+      .catch((err) => console.error("Error fetching parts:", err));
+
+    fetch(`${BASE_URL}/api/damage-kinds`)
+      .then((res) => res.json())
+      .then((data) => setDamageKinds(data))
+      .catch((err) => console.error("Error fetching damage kinds:", err));
+  }, []);
 
   useEffect(() => {
     if (bridgeId) {
@@ -116,11 +143,20 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           ? null
           : row.qc_remarks_evaluator;
 
-      const updatedData = {
-        id: row.inspection_id,
-        qc_remarks_evaluator: evaluatorRemarks,
-        qc_evaluator: row.qc_evaluator,
-      };
+          const updatedData = {
+            id: row.inspection_id,
+            qc_remarks_evaluator: evaluatorRemarks,
+            qc_evaluator: row.qc_evaluator,
+            PartsName: row.PartsName, // Element
+            MaterialName: row.MaterialName, // Material
+            DamageKindName: row.DamageKindName, // Damage
+            DamageLevel: row.DamageLevel, // Damage Level
+            damage_extent: row.damage_extent, // New field for Damage Extent
+          };
+          
+
+      console.log(updatedData);
+      return;
 
       const response = await fetch(`${BASE_URL}/api/update-inspection`, {
         method: "PUT",
@@ -520,10 +556,10 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             )}
                                           </div>
                                           <div className="col-md-6">
+                                            {/* Parts Dropdown */}
                                             <div className="mb-1">
-                                              <strong>Parts:</strong>
-                                              <Form.Control
-                                                type="text"
+                                              <strong>Elements:</strong>
+                                              <Form.Select
                                                 value={
                                                   inspection.PartsName || ""
                                                 }
@@ -537,13 +573,24 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   )
                                                 }
                                                 className="form-control-sm d-inline-block w-50 ms-1"
-                                              />
+                                              >
+                                                <option value="">
+                                                  Select Element
+                                                </option>
+                                                {parts.map((part) => (
+                                                  <option
+                                                    key={part.PartsID}
+                                                    value={part.PartsName}
+                                                  >
+                                                    {part.PartsName}
+                                                  </option>
+                                                ))}
+                                              </Form.Select>
                                             </div>
-
+                                            {/* Material Dropdown */}
                                             <div className="mb-1">
                                               <strong>Material:</strong>
-                                              <Form.Control
-                                                type="text"
+                                              <Form.Select
                                                 value={
                                                   inspection.MaterialName || ""
                                                 }
@@ -557,13 +604,27 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   )
                                                 }
                                                 className="form-control-sm d-inline-block w-50 ms-1"
-                                              />
+                                              >
+                                                <option value="">
+                                                  Select Material
+                                                </option>
+                                                {materials.map((material) => (
+                                                  <option
+                                                    key={material.MaterialID}
+                                                    value={
+                                                      material.MaterialName
+                                                    }
+                                                  >
+                                                    {material.MaterialName}
+                                                  </option>
+                                                ))}
+                                              </Form.Select>
                                             </div>
 
+                                            {/* Damage Kind Dropdown */}
                                             <div className="mb-1">
                                               <strong>Damage:</strong>
-                                              <Form.Control
-                                                type="text"
+                                              <Form.Select
                                                 value={
                                                   inspection.DamageKindName ||
                                                   ""
@@ -578,13 +639,27 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   )
                                                 }
                                                 className="form-control-sm d-inline-block w-50 ms-1"
-                                              />
+                                              >
+                                                <option value="">
+                                                  Select Damage
+                                                </option>
+                                                {damageKinds.map((damage) => (
+                                                  <option
+                                                    key={damage.DamageKindID}
+                                                    value={
+                                                      damage.DamageKindName
+                                                    }
+                                                  >
+                                                    {damage.DamageKindName}
+                                                  </option>
+                                                ))}
+                                              </Form.Select>
                                             </div>
 
+                                            {/* Damage Level Dropdown */}
                                             <div className="mb-1">
-                                              <strong>Level:</strong>
-                                              <Form.Control
-                                                type="text"
+                                              <strong>Damage Level:</strong>
+                                              <Form.Select
                                                 value={
                                                   inspection.DamageLevel || ""
                                                 }
@@ -598,7 +673,19 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   )
                                                 }
                                                 className="form-control-sm d-inline-block w-50 ms-1"
-                                              />
+                                              >
+                                                <option value="">
+                                                  Select Damage Level
+                                                </option>
+                                                {damageLevels.map((level) => (
+                                                  <option
+                                                    key={level.DamageLevelID}
+                                                    value={level.DamageLevel}
+                                                  >
+                                                    {level.DamageLevel}
+                                                  </option>
+                                                ))}
+                                              </Form.Select>
                                             </div>
 
                                             <div className="mb-1">
@@ -626,7 +713,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               <strong>
                                                 Situation Remarks:
                                               </strong>{" "}
-                                              {inspection.surveyed_by || "N/A"}
+                                              {inspection.Remarks || "N/A"}
                                             </div>
                                             <div className="mb-2">
                                               <strong>Surveyed By</strong>{" "}
