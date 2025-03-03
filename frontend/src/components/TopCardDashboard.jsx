@@ -3,7 +3,7 @@ import React from 'react'
 const TopCardDashboard = ({ label, value, icon, iconSize = 32 }) => {
   return (
     <div
-      className="rounded-lg shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
+      className="rounded-1 shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
       style={{
         background:
           "linear-gradient(135deg, rgba(59, 100, 246, 0.8), rgba(96, 165, 250, 1))", // Light blue gradient
