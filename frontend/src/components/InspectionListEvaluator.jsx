@@ -306,6 +306,23 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }));
   };
 
+  const handleFieldChange = (spanIndex, workKind, inspectionId, field, value) => {
+    setPendingData((prevData) => ({
+      ...prevData,
+      [spanIndex]: {
+        ...prevData[spanIndex],
+        [workKind]: {
+          ...prevData[spanIndex]?.[workKind],
+          [inspectionId]: {
+            ...prevData[spanIndex]?.[workKind]?.[inspectionId],
+            [field]: value,
+          },
+        },
+      },
+    }));
+  };
+  
+
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -476,7 +493,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                         cursor: "pointer",
                                                         flexShrink: 0,
                                                       }}
-                                                      loading="lazy" // Lazy loading added
+                                                      loading="lazy"
                                                       onClick={() =>
                                                         handlePhotoClick(
                                                           photoUrl
@@ -494,28 +511,141 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             )}
                                           </div>
                                           <div className="col-md-6">
-                                            <strong>Parts:</strong>{" "}
-                                            {inspection.PartsName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Material:</strong>{" "}
-                                            {inspection.MaterialName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Damage:</strong>{" "}
-                                            {inspection.DamageKindName || "N/A"}{" "}
-                                            <br />
-                                            <strong>Level:</strong>{" "}
-                                            {inspection.DamageLevel || "N/A"}{" "}
-                                            <br />
-                                            <strong>Damage Extent:</strong>{" "}
-                                            {inspection.damage_extent || "N/A"}{" "}
-                                            <br />
-                                            <strong>
-                                              Situation Remarks:
-                                            </strong>{" "}
-                                            {inspection.Remarks || "N/A"}
-                                            <br />
-                                            <strong>Surveeyed By</strong>{" "}
-                                            {inspection.surveyed_by || "N/A"}
+                                            <div className="mb-2">
+                                              <strong>Parts:</strong>{" "}
+                                              <Form.Control
+                                                type="text"
+                                                value={
+                                                  inspection.PartsName || ""
+                                                }
+                                                onChange={(e) =>
+                                                  handleFieldChange(
+                                                    spanIndex,
+                                                    workKind,
+                                                    inspection.inspection_id,
+                                                    "PartsName",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                              />
+                                            </div>
+                                            <div className="mb-2">
+                                              <strong>Material:</strong>{" "}
+                                              <Form.Control
+                                                type="text"
+                                                value={
+                                                  inspection.MaterialName || ""
+                                                }
+                                                onChange={(e) =>
+                                                  handleFieldChange(
+                                                    spanIndex,
+                                                    workKind,
+                                                    inspection.inspection_id,
+                                                    "MaterialName",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                              />
+                                            </div>
+                                            <div className="mb-2">
+                                              <strong>Damage:</strong>{" "}
+                                              <Form.Control
+                                                type="text"
+                                                value={
+                                                  inspection.DamageKindName ||
+                                                  ""
+                                                }
+                                                onChange={(e) =>
+                                                  handleFieldChange(
+                                                    spanIndex,
+                                                    workKind,
+                                                    inspection.inspection_id,
+                                                    "DamageKindName",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                              />
+                                            </div>
+                                            <div className="mb-2">
+                                              <strong>Level:</strong>{" "}
+                                              <Form.Control
+                                                type="text"
+                                                value={
+                                                  inspection.DamageLevel || ""
+                                                }
+                                                onChange={(e) =>
+                                                  handleFieldChange(
+                                                    spanIndex,
+                                                    workKind,
+                                                    inspection.inspection_id,
+                                                    "DamageLevel",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                              />
+                                            </div>
+                                            <div className="mb-2">
+                                              <strong>Damage Extent:</strong>{" "}
+                                              <Form.Control
+                                                type="text"
+                                                value={
+                                                  inspection.damage_extent || ""
+                                                }
+                                                onChange={(e) =>
+                                                  handleFieldChange(
+                                                    spanIndex,
+                                                    workKind,
+                                                    inspection.inspection_id,
+                                                    "damage_extent",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                              />
+                                            </div>
+                                            <div className="mb-2">
+                                              <strong>
+                                                Situation Remarks:
+                                              </strong>{" "}
+                                              <Form.Control
+                                                as="textarea"
+                                                rows={2}
+                                                value={inspection.Remarks || ""}
+                                                onChange={(e) =>
+                                                  handleFieldChange(
+                                                    spanIndex,
+                                                    workKind,
+                                                    inspection.inspection_id,
+                                                    "Remarks",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                              />
+                                            </div>
+                                            <div className="mb-2">
+                                              <strong>Surveyed By:</strong>{" "}
+                                              <Form.Control
+                                                type="text"
+                                                value={
+                                                  inspection.surveyed_by || ""
+                                                }
+                                                onChange={(e) =>
+                                                  handleFieldChange(
+                                                    spanIndex,
+                                                    workKind,
+                                                    inspection.inspection_id,
+                                                    "surveyed_by",
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="form-control-sm d-inline-block w-75 ms-2"
+                                              />
+                                            </div>
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control

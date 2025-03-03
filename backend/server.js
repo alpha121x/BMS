@@ -1213,16 +1213,14 @@ SELECT
         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
-	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
-    AND surveyed_by = 'RAMS-UU'
+	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
     `;
 
     let countQuery = `
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data
       WHERE 1=1
-      AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
-      AND surveyed_by = 'RAMS-UU'
+      AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
     `;
 
     const queryParams = [];

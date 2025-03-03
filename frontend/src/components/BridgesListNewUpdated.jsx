@@ -6,8 +6,8 @@ import { BASE_URL } from "./config";
 import Papa from "papaparse"; // Import papaparse
 import Filters from "./Filters";
 import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
-// import InspectionList from "./InspectionList";
-import InspectionList from "./InspectionListEvaluator";
+import InspectionList from "./InspectionList";
+import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListRams from "./InspectionListRams";
 import MapModal from "./MapModal"; // Adjust the import path as needed
 import Swal from "sweetalert2";
@@ -598,8 +598,8 @@ const BridgesListNewUpdated = ({ districtId, setDistrictId, structureType, setSt
             {selectedBridge && username === "rams" && (
               <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />
             )}
-            {selectedBridge && username === "admin.bms" && (
-              <InspectionList bridgeId={selectedBridge.uu_bms_id} />
+            {selectedBridge && username === "evaluator" && (
+              <InspectionListEvaluator bridgeId={selectedBridge.uu_bms_id} />
             )}
           </Modal.Body>
         </Modal>

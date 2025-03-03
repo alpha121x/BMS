@@ -4,24 +4,13 @@ import { FaRoadBridge } from "react-icons/fa6";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 // import BridgesList from "./BridgesList";
-import BridgesListNew from "./BridgesListNewUpdated";
+import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
 
 const EvaluationMain = () => {
   const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [minBridgeLength, setMinBridgeLength] = useState("");
-  const [maxBridgeLength, setMaxBridgeLength] = useState("");
-  const [minSpanLength, setMinSpanLength] = useState("");
-  const [maxSpanLength, setMaxSpanLength] = useState("");
   const [structureType, setStructureType] = useState("");
-  const [constructionType, setConstructionType] = useState("");
-  const [category, setCategory] = useState("");
-  const [evaluationStatus, setEvaluationStatus] = useState("");
-  const [inspectionStatus, setInspectionStatus] = useState("");
-  const [minYear, setMinYear] = useState("");
-  const [maxYear, setMaxYear] = useState("");
-  const [bridge, setBridgeName] = useState("");
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
@@ -106,33 +95,9 @@ const EvaluationMain = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-12">
-            <BridgesListNew
-              setSelectedDistrict={setSelectedDistrict}
-              setMinBridgeLength={setMinBridgeLength}
-              setMaxBridgeLength={setMaxBridgeLength}
-              setMinSpanLength={setMinSpanLength}
-              setMaxSpanLength={setMaxSpanLength}
-              setStructureType={setStructureType}
-              setConstructionType={setConstructionType}
-              setCategory={setCategory}
-              setEvaluationStatus={setEvaluationStatus}
-              setInspectionStatus={setInspectionStatus}
-              setMinYear={setMinYear}
-              setMaxYear={setMaxYear}
-              setBridge={setBridgeName}
+            <BridgesListNewUpdated
               district={selectedDistrict}
               structureType={structureType}
-              constructionType={constructionType}
-              category={category}
-              evaluationStatus={evaluationStatus}
-              inspectionStatus={inspectionStatus}
-              minBridgeLength={minBridgeLength}
-              maxBridgeLength={maxBridgeLength}
-              minSpanLength={minSpanLength}
-              maxSpanLength={maxSpanLength}
-              minYear={minYear}
-              maxYear={maxYear}
-              bridge={bridge} // Also pass the current bridge id filter
             />
           </div>
         </div>

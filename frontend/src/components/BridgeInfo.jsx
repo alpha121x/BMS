@@ -10,6 +10,7 @@ import InventoryInfo from "./InventoryInfo";
 import { useLocation, useNavigate } from "react-router-dom";
 import InspectionList from "./InspectionList";
 import InspectionListRams from "./InspectionListRams";
+import InspectionListEvaluator from "./InspectionListEvaluator";
 
 const BridgeInfo = () => {
   const location = useLocation();
@@ -34,9 +35,12 @@ const BridgeInfo = () => {
   const renderInspectionList = () => {
     if (username === "consultant") {
       return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
-    } else if (username === "rams") {
+    }  else if (username === "rams") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
-    } else {
+    } else if (username === "evaluator") {
+      return <InspectionListEvaluator bridgeId={bridgeData?.uu_bms_id} />;
+    }
+    else {
       return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
     }
   };
