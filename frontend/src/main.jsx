@@ -12,7 +12,6 @@ import EditInspection from './EditInspection';
 import EditBridge from './EditIBridge';
 import BridgeInfo from './components/BridgeInfo';
 import BridgeInfoDashboard from './components/BridgeinfoDashboard';
-import InspectionDetails from './components/InspectionDetails';
 import EditInspectionNew from './EditInspectionNew';
 import BridgeWiseScore from './components/BridgeWiseScore';
 import BridgeInformation from './components/BridgeInformation';
@@ -113,16 +112,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           element={
             <PrivateRoute>
               <EditInspection />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Private Route for EditInspection */}
-        <Route
-          path="/InspectionDetails"
-          element={
-            <PrivateRoute>
-              <InspectionDetails />
             </PrivateRoute>
           }
         />
