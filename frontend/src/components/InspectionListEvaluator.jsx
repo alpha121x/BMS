@@ -707,7 +707,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                 }
                                                 className="form-control-sm d-inline-block w-50 ms-1"
                                               />
-                                            </div>
+                                            </div> 
 
                                             <div className="mb-2">
                                               <strong>
