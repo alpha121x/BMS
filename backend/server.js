@@ -157,10 +157,9 @@ app.get("/api/bms-score", async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Default to page 1
   const limit = parseInt(req.query.limit) || 10; // Default to 10 records per page
   const offset = (page - 1) * limit;
-  const { districtId = "%", structureType = "%", bridgeName = "%"} = req.query; // Extracting additional filters
 
   try {
-    let query = `
+    const query = `
     SELECT 
         c.objectid AS uu_bms_id, 
         c.damage_score, 
@@ -201,58 +200,20 @@ app.get("/api/bms-score", async (req, res) => {
         bms.tbl_bms_master_data m 
     ON 
         c.objectid = m.id
-    WHERE 1 = 1
+    ORDER BY c.objectid
+    LIMIT $1 OFFSET $2;
     `;
 
-    const queryParams = [];
+    const result = await pool.query(query, [limit, offset]);
 
-    if (districtId) {
-      queryParams.push(districtId);
-      query += ` AND m.district_id = $${queryParams.length}`;
-    }
-
-    if (structureType) {
-      queryParams.push(structureType);
-      query += ` AND m.structure_type_id = $${queryParams.length}`;
-    }
-
-    if (bridgeName) {
-      queryParams.push(`%${bridgeName}%`);
-      query += ` AND CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${queryParams.length}`;
-    }
-
-    query += ` ORDER BY c.objectid LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2};`;
-
-    queryParams.push(limit, offset);
-    const result = await pool.query(query, queryParams);
-
-    // Query to get total records with filters applied
-    let countQuery = `
+    // Query to get total records
+    const countQuery = `
       SELECT COUNT(*) AS total
       FROM bms.bms_calculations c 
       LEFT JOIN bms.tbl_bms_master_data m
-      ON c.objectid = m.id
-      WHERE 1 = 1
+      ON c.objectid = m.id;
     `;
-
-    const countParams = [];
-
-    if (districtId) {
-      countParams.push(districtId);
-      countQuery += ` AND m.district_id = $${countParams.length}`;
-    }
-
-    if (structureType) {
-      countParams.push(structureType);
-      countQuery += ` AND m.structure_type_id = $${countParams.length}`;
-    }
-
-    if (bridgeName) {
-      countParams.push(`%${bridgeName}%`);
-      countQuery += ` AND CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${countParams.length}`;
-    }
-
-    const countResult = await pool.query(countQuery, countParams);
+    const countResult = await pool.query(countQuery);
     const totalRecords = countResult.rows[0].total;
 
     res.json({
@@ -2265,6 +2226,7 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
        AND qc_rams = '2'  -- Approved Rams Inspections
+
       ORDER BY inspection_id DESC;
     `;
 
