@@ -7,7 +7,6 @@ import Footer from "./Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
-import Filters from "./Filters";
 
 const BridgeWiseScore = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
@@ -16,9 +15,7 @@ const BridgeWiseScore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
-  const [districtId, setDistrictId] = useState("%");
-  const [structureType, setStructureType] = useState("%");
-  const [bridgeName, setBridgeName] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
@@ -35,7 +32,7 @@ const BridgeWiseScore = () => {
     setError(null);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}&districtId=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
+        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -72,12 +69,12 @@ const BridgeWiseScore = () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bms-score-export`);
       const { data } = await response.json();
-
+  
       if (!data.length) {
         console.warn("No data available for CSV download.");
         return;
       }
-
+  
       // Convert JSON to CSV format
       const csvContent =
         "data:text/csv;charset=utf-8," +
@@ -85,7 +82,7 @@ const BridgeWiseScore = () => {
           Object.keys(data[0]).join(","), // CSV Headers
           ...data.map((row) => Object.values(row).join(",")), // CSV Rows
         ].join("\n");
-
+  
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -93,42 +90,37 @@ const BridgeWiseScore = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
+  
       // console.log("CSV file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading CSV:", error);
     }
   };
-
+  
   const handleDownloadExcel = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bms-score-export`);
       const { data } = await response.json();
-
+  
       if (!data.length) {
         console.warn("No data available for Excel download.");
         return;
       }
-
+  
       const worksheet = XLSX.utils.json_to_sheet(data);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
-
+  
       // Create a Blob and trigger the download
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
-      const blob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
+      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "bridge_data.xlsx";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
+  
       // console.log("Excel file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading Excel:", error);
@@ -144,6 +136,11 @@ const BridgeWiseScore = () => {
     fontSize: "12px",
     cursor: "pointer",
   };
+
+  const filteredData = currentData.filter((row) =>
+    (row.bridge_name && row.bridge_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (row.district && row.district.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   const renderPaginationButtons = () => {
     const buttons = [];
@@ -243,18 +240,6 @@ const BridgeWiseScore = () => {
                 Bridge Wise Score
               </h6>
 
-              <div>
-                <Filters
-                 districtId={districtId}
-                 setDistrictId={setDistrictId}
-                 structureType={structureType}
-                 setStructureType={setStructureType}
-                 bridgeName={bridgeName}
-                 setBridgeName={setBridgeName}
-                 fetchBridgeScoreData={fetchData}
-                />
-              </div>
-
               <div className="flex gap-2">
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
@@ -294,12 +279,11 @@ const BridgeWiseScore = () => {
               <p className="text-danger">{error}</p>
             ) : (
               <>
-                <Table className="table table-stiped table-bordered">
+                <Table className="table table-striped table-hover table-bordered table-responsive">
                   <thead>
                     <tr>
                       <th>Bridge Name</th>
                       <th>District</th>
-                      <th>Structure Type</th>
                       <th>Total Damage Score</th>
                       <th>Critical Damage Score</th>
                       <th>Average Damage Score</th>
@@ -312,14 +296,13 @@ const BridgeWiseScore = () => {
                         <tr key={index}>
                           <td>{row.bridge_name || "N/A"}</td>
                           <td>{row.district || "N/A"}</td>
-                          <td>{row.structure_type || "N/A"}</td>
                           <td>{row.damage_score || "N/A"}</td>
                           <td>{row.critical_damage_score || "N/A"}</td>
                           <td>{row.inventory_score || "N/A"}</td>
-                          <td>
+                          <td className="text-center">
                             <button
                               onClick={() => handleClick(row)}
-                              className="btn btn-secondary btn-sm"
+                              className="btn btn-primary btn-sm"
                             >
                               Bridge Info
                             </button>
