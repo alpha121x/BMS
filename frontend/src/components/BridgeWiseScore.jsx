@@ -313,9 +313,9 @@ const BridgeWiseScore = () => {
                           <td className="text-center">
                             <button
                               onClick={() => handleClick(row)}
-                              className="btn btn-primary btn-sm"
+                              className="btn btn-secondary btn-sm"
                             >
-                              Bridge Information
+                              Bridge Info
                             </button>
                           </td>
                         </tr>
