@@ -258,6 +258,17 @@ const BridgeWiseScore = () => {
               </div>
             </div>
 
+            <input
+              type="text"
+              placeholder="Search by Bridge Name or District"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset pagination to the first page
+              }}
+              className="form-control mb-3 w-50"
+            />
+
             {loading ? (
               <div
                 style={{
@@ -279,7 +290,7 @@ const BridgeWiseScore = () => {
               <p className="text-danger">{error}</p>
             ) : (
               <>
-                <Table className="table table-striped table-hover table-bordered table-responsive">
+                <Table className="table table-bordered table-hover table-striped table-responsive">
                   <thead>
                     <tr>
                       <th>Bridge Name</th>
@@ -291,8 +302,8 @@ const BridgeWiseScore = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {currentData.length > 0 ? (
-                      currentData.map((row, index) => (
+                    {filteredData.length > 0 ? (
+                      filteredData.map((row, index) => (
                         <tr key={index}>
                           <td>{row.bridge_name || "N/A"}</td>
                           <td>{row.district || "N/A"}</td>
@@ -304,7 +315,7 @@ const BridgeWiseScore = () => {
                               onClick={() => handleClick(row)}
                               className="btn btn-primary btn-sm"
                             >
-                              Bridge Info
+                              Bridge Information
                             </button>
                           </td>
                         </tr>
