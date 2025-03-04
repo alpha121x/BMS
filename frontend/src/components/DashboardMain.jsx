@@ -9,7 +9,6 @@ import { GiArchBridge } from "react-icons/gi";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
-import TopCard from "./TopCard";
 import TopCardDashboard from "./TopCardDashboard";
 
 const DashboardMain = () => {

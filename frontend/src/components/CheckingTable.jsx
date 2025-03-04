@@ -226,7 +226,7 @@ const CheckingTable = ({district, bridge}) => {
           />
         )}
 
-        <Table className="custom-table">
+        <Table className="table table-striped table-bordered table-hover">
           <thead>
             <tr>
               <th>Bridge Name</th>

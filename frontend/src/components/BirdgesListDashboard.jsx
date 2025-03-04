@@ -457,12 +457,9 @@ const BridgesListDashboard = ({
 
           {!loading && !error && (
             <>
-              <div style={{ overflowX: "auto" }}>
+              <div>
                 <Table
-                  bordered
-                  responsive
-                  className="custom-table"
-                  style={{ minWidth: "800px" }}
+                  className="table table-bordered table-hover table-striped" 
                 >
                   <thead>
                     <tr>
