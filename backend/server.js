@@ -1597,7 +1597,6 @@ app.get("/api/get-summary-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
 	  AND qc_rams = '2'
-    AND evaluation_status = 'draft'
       ORDER BY inspection_id DESC;
     `;
 

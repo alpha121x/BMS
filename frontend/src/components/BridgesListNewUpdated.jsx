@@ -494,6 +494,7 @@ const BridgesListNewUpdated = ({
                     <th style={{ width: "50%" }}>Road Name</th>
                     <th style={{ width: "10%" }}>Structure Type</th>
                     <th style={{ width: "20%" }}>Bridge Name</th>
+                    <th style={{ width: "20%" }}>Date Time</th>
                     <th style={{ width: "10%" }} className="text-center">
                       Action
                     </th>
@@ -519,6 +520,7 @@ const BridgesListNewUpdated = ({
                           {bridge.pms_sec_id || "N/A"},{" "}
                           {bridge.structure_no || "N/A"}
                         </td>
+                        <td>{bridge.date_time}</td>
                         <td>
                           <div className="flex space-x-2 justify-center">
                             {/* Button for Bridge Inventory Info */}

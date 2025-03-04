@@ -35,7 +35,7 @@ const BridgeWiseScore = () => {
     setError(null);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}`
+        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}&districtId=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -319,9 +319,9 @@ const BridgeWiseScore = () => {
                           <td>
                             <button
                               onClick={() => handleClick(row)}
-                              className="btn btn-primary btn-sm"
+                              className="btn btn-secondary btn-sm"
                             >
-                              Bridge Information
+                              Bridge Info
                             </button>
                           </td>
                         </tr>

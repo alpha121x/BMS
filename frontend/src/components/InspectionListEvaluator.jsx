@@ -664,246 +664,298 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               </div>
                                             )}
                                           </div>
-                                          <div className="col-md-6">
-                                            {/* Parts Dropdown */}
-                                            <div className="mb-1">
-                                              <strong>Elements:</strong>
-                                              <Form.Select
-                                                value={
-                                                  inspection.PartsName || ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleFieldChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    "PartsName",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="form-control-sm d-inline-block w-50 ms-1"
-                                              >
-                                                <option value="">
-                                                  Select Element
-                                                </option>
-                                                {parts.map((part) => (
-                                                  <option
-                                                    key={part.PartsID}
-                                                    value={part.PartsName}
-                                                  >
-                                                    {part.PartsName}
-                                                  </option>
-                                                ))}
-                                              </Form.Select>
-                                            </div>
-                                            {/* Material Dropdown */}
-                                            <div className="mb-1">
-                                              <strong>Material:</strong>
-                                              <Form.Select
-                                                value={
-                                                  inspection.MaterialName || ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleFieldChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    "MaterialName",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="form-control-sm d-inline-block w-50 ms-1"
-                                              >
-                                                <option value="">
-                                                  Select Material
-                                                </option>
-                                                {materials.map((material) => (
-                                                  <option
-                                                    key={material.MaterialID}
+                                          <div className="col-md-9">
+                                            <div className="row">
+                                              <div className="col-md-6">
+                                                <div className="mb-1">
+                                                  <strong>Elements:</strong>
+                                                  <Form.Select
                                                     value={
-                                                      material.MaterialName
+                                                      inspection.PartsName || ""
                                                     }
-                                                  >
-                                                    {material.MaterialName}
-                                                  </option>
-                                                ))}
-                                              </Form.Select>
-                                            </div>
-
-                                            {/* Damage Kind Dropdown */}
-                                            <div className="mb-1">
-                                              <strong>Damage:</strong>
-                                              <Form.Select
-                                                value={
-                                                  inspection.DamageKindName ||
-                                                  ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleFieldChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    "DamageKindName",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="form-control-sm d-inline-block w-50 ms-1"
-                                              >
-                                                <option value="">
-                                                  Select Damage
-                                                </option>
-                                                {damageKinds.map((damage) => (
-                                                  <option
-                                                    key={damage.DamageKindID}
-                                                    value={
-                                                      damage.DamageKindName
+                                                    onChange={(e) =>
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "PartsName",
+                                                        e.target.value
+                                                      )
                                                     }
+                                                    className="form-control-sm ms-1"
                                                   >
-                                                    {damage.DamageKindName}
-                                                  </option>
-                                                ))}
-                                              </Form.Select>
-                                            </div>
-
-                                            {/* Damage Level Dropdown */}
-                                            <div className="mb-1">
-                                              <strong>Damage Level:</strong>
-                                              <Form.Select
-                                                value={
-                                                  inspection.DamageLevel || ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleFieldChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    "DamageLevel",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="form-control-sm d-inline-block w-50 ms-1"
-                                              >
-                                                <option value="">
-                                                  Select Damage Level
-                                                </option>
-                                                {damageLevels.map((level) => (
-                                                  <option
-                                                    key={level.DamageLevelID}
-                                                    value={level.DamageLevel}
-                                                  >
-                                                    {level.DamageLevel}
-                                                  </option>
-                                                ))}
-                                              </Form.Select>
-                                            </div>
-
-                                            <div className="mb-1">
-                                              <strong>Damage Extent:</strong>
-                                              <Form.Control
-                                                type="text"
-                                                placeholder="%"
-                                                value={
-                                                  inspection.damage_extent || ""
-                                                }
-                                                onChange={(e) =>
-                                                  handleFieldChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    "damage_extent",
-                                                    e.target.value
-                                                  )
-                                                }
-                                                className="form-control-sm d-inline-block w-50 ms-1"
-                                              />
-                                            </div>
-
-                                            <div className="mb-2">
-                                              <strong>
-                                                Situation Remarks:
-                                              </strong>{" "}
-                                              {inspection.Remarks || "N/A"}
-                                            </div>
-                                            <div className="mb-2">
-                                              <strong>Surveyed By</strong>{" "}
-                                              {inspection.surveyed_by || "N/A"}
-                                            </div>
-                                          </div>
-                                          <div className="col-md-3 d-flex flex-column justify-content-between">
-                                            <Form.Control
-                                              as="textarea"
-                                              rows={3}
-                                              placeholder="Evaluator Remarks"
-                                              value={
-                                                inspection.qc_remarks_evaluator ||
-                                                ""
-                                              }
-                                              onChange={(e) =>
-                                                handleEvalRemarksChange(
-                                                  spanIndex,
-                                                  workKind,
-                                                  inspection.inspection_id,
-                                                  e.target.value
-                                                )
-                                              }
-                                              className="mb-2"
-                                            />
-
-                                            <Form.Group
-                                              controlId={`qc_con_${inspection.inspection_id}`}
-                                              className="mb-2"
-                                            >
-                                              <div className="flex gap-4">
-                                                {/* Unapproved Option */}
-                                                <Form.Check
-                                                  type="radio"
-                                                  name={`qc_con_${inspection.inspection_id}`}
-                                                  label="Unapproved"
-                                                  value="3"
-                                                  onChange={(e) =>
-                                                    handleApprovedFlagChange(
-                                                      spanIndex,
-                                                      workKind,
-                                                      inspection.inspection_id,
-                                                      parseInt(e.target.value)
-                                                    )
-                                                  }
-                                                  className="text-blue-500 font-medium"
-                                                  style={{
-                                                    accentColor: "blue",
-                                                  }}
-                                                />
-
-                                                {/* Approved Option */}
-                                                <Form.Check
-                                                  type="radio"
-                                                  name={`qc_con_${inspection.inspection_id}`}
-                                                  label="Approved"
-                                                  value="2"
-                                                  onChange={(e) =>
-                                                    handleApprovedFlagChange(
-                                                      spanIndex,
-                                                      workKind,
-                                                      inspection.inspection_id,
-                                                      parseInt(e.target.value)
-                                                    )
-                                                  }
-                                                  className="text-blue-500 font-medium"
-                                                  style={{
-                                                    accentColor: "blue",
-                                                  }}
-                                                />
+                                                    <option value="">
+                                                      Select Element
+                                                    </option>
+                                                    {parts.map((part) => (
+                                                      <option
+                                                        key={part.PartsID}
+                                                        value={part.PartsName}
+                                                      >
+                                                        {part.PartsName}
+                                                      </option>
+                                                    ))}
+                                                  </Form.Select>
+                                                </div>
                                               </div>
-                                            </Form.Group>
+                                              <div className="col-md-6">
+                                                <div className="mb-1">
+                                                  <strong>Material:</strong>
+                                                  <Form.Select
+                                                    value={
+                                                      inspection.MaterialName ||
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "MaterialName",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    className="form-control-sm ms-1"
+                                                  >
+                                                    <option value="">
+                                                      Select Material
+                                                    </option>
+                                                    {materials.map(
+                                                      (material) => (
+                                                        <option
+                                                          key={
+                                                            material.MaterialID
+                                                          }
+                                                          value={
+                                                            material.MaterialName
+                                                          }
+                                                        >
+                                                          {
+                                                            material.MaterialName
+                                                          }
+                                                        </option>
+                                                      )
+                                                    )}
+                                                  </Form.Select>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="row">
+                                              <div className="col-md-6">
+                                                {" "}
+                                                {/* Damage Kind Dropdown */}
+                                                <div className="mb-1">
+                                                  <strong>Damage:</strong>
+                                                  <Form.Select
+                                                    value={
+                                                      inspection.DamageKindName ||
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "DamageKindName",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    className="form-control-sm ms-1"
+                                                  >
+                                                    <option value="">
+                                                      Select Damage
+                                                    </option>
+                                                    {damageKinds.map(
+                                                      (damage) => (
+                                                        <option
+                                                          key={
+                                                            damage.DamageKindID
+                                                          }
+                                                          value={
+                                                            damage.DamageKindName
+                                                          }
+                                                        >
+                                                          {
+                                                            damage.DamageKindName
+                                                          }
+                                                        </option>
+                                                      )
+                                                    )}
+                                                  </Form.Select>
+                                                </div>
+                                              </div>
+                                              <div className="col-md-6">
+                                                {/* Damage Level Dropdown */}
+                                                <div className="mb-1">
+                                                  <strong>Damage Level:</strong>
+                                                  <Form.Select
+                                                    value={
+                                                      inspection.DamageLevel ||
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "DamageLevel",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    className="form-control-sm ms-1"
+                                                  >
+                                                    <option value="">
+                                                      Select Damage Level
+                                                    </option>
+                                                    {damageLevels.map(
+                                                      (level) => (
+                                                        <option
+                                                          key={
+                                                            level.DamageLevelID
+                                                          }
+                                                          value={
+                                                            level.DamageLevel
+                                                          }
+                                                        >
+                                                          {level.DamageLevel}
+                                                        </option>
+                                                      )
+                                                    )}
+                                                  </Form.Select>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="row">
+                                              <div className="col-md-12">
+                                                <div className="mb-1">
+                                                  <strong>
+                                                    Damage Extent:
+                                                  </strong>
+                                                  <Form.Control
+                                                    type="text"
+                                                    placeholder="%"
+                                                    value={
+                                                      inspection.damage_extent ||
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "damage_extent",
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    className="form-control-sm ms-1"
+                                                  />
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="row">
+                                              <div className="col-md-6">
+                                                <div className="mb-2">
+                                                  <strong>
+                                                    Situation Remarks:
+                                                  </strong>{" "}
+                                                  {inspection.Remarks || "N/A"}
+                                                </div>
+                                              </div>
+                                              <div className="col-md-6">
+                                                <div className="mb-2">
+                                                  <strong>Surveyed By:</strong>{" "}
+                                                  {inspection.surveyed_by ||
+                                                    "N/A"}
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="row">
+                                              <div className="col-md-12 d-flex flex-column justify-content-between">
+                                                <Form.Group
+                                                  controlId={`qc_con_${inspection.inspection_id}`}
+                                                  className="mb-2"
+                                                >
+                                                  <div className="flex gap-4">
+                                                    {/* Unapproved Option */}
+                                                    <Form.Check
+                                                      type="radio"
+                                                      name={`qc_con_${inspection.inspection_id}`}
+                                                      label="Unapproved"
+                                                      value="3"
+                                                      onChange={(e) =>
+                                                        handleApprovedFlagChange(
+                                                          spanIndex,
+                                                          workKind,
+                                                          inspection.inspection_id,
+                                                          parseInt(
+                                                            e.target.value
+                                                          )
+                                                        )
+                                                      }
+                                                      className="text-blue-500 font-medium"
+                                                      style={{
+                                                        accentColor: "blue",
+                                                      }}
+                                                    />
 
-                                            <Button
-                                              onClick={() =>
-                                                handleSaveChanges(inspection)
-                                              }
-                                              className="bg-[#CFE2FF]"
-                                            >
-                                              Save Changes
-                                            </Button>
+                                                    {/* Approved Option */}
+                                                    <Form.Check
+                                                      type="radio"
+                                                      name={`qc_con_${inspection.inspection_id}`}
+                                                      label="Approved"
+                                                      value="2"
+                                                      onChange={(e) =>
+                                                        handleApprovedFlagChange(
+                                                          spanIndex,
+                                                          workKind,
+                                                          inspection.inspection_id,
+                                                          parseInt(
+                                                            e.target.value
+                                                          )
+                                                        )
+                                                      }
+                                                      className="text-blue-500 font-medium"
+                                                      style={{
+                                                        accentColor: "blue",
+                                                      }}
+                                                    />
+                                                  </div>
+                                                </Form.Group>
+                                                <div className="mb-1">
+                                                  <strong>
+                                                    Evaluator Remarks:
+                                                  </strong>
+                                                  <Form.Control
+                                                    as="textarea"
+                                                    rows={3}
+                                                    placeholder="Evaluator Remarks"
+                                                    value={
+                                                      inspection.qc_remarks_evaluator ||
+                                                      ""
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleEvalRemarksChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        e.target.value
+                                                      )
+                                                    }
+                                                    className="mb-2"
+                                                  />
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="text-end">
+                                              <Button
+                                                onClick={() =>
+                                                  handleSaveChanges(inspection)
+                                                }
+                                                className="bg-[#CFE2FF]"
+                                              >
+                                                Save Changes
+                                              </Button>
+                                            </div>
                                           </div>
                                         </div>
                                       </div>

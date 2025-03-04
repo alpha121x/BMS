@@ -138,25 +138,25 @@ const DashboardMain = () => {
     // Add same 3 types here also
     {
       label: "Total",
-      value: "N/A",
+      value: "0",
       icon: <SiInstructure />,
       color: "blue",
     },
     {
       label: "Culvert",
-      value: "N/A",
+      value: "0",
       icon: <LuConstruction />,
       color: "blue",
     },
     {
       label: "PC Bridge",
-      value: "N/A",
+      value: "0",
       icon: <FaBridge />,
       color: "blue",
     },
     {
       label: "Underpass",
-      value: "N/A",
+      value: "0",
       icon: <FaRoadBridge />,
       color: "blue",
     },
@@ -172,7 +172,7 @@ const DashboardMain = () => {
               <h3 className="text-xl font-semibold text-gray-700">
                 Total Structures Inventory
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {structureCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
                 ))}
@@ -184,7 +184,7 @@ const DashboardMain = () => {
               <h3 className="text-xl font-semibold text-gray-700">
                 Inspected Structures
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {inspectedCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
                 ))}
@@ -196,7 +196,7 @@ const DashboardMain = () => {
               <h3 className="text-xl font-semibold text-gray-700">
                 Evaluated Structures
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {evaluatedCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
                 ))}
