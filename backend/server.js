@@ -2226,7 +2226,6 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
        AND qc_rams = '2'  -- Approved Rams Inspections
-
       ORDER BY inspection_id DESC;
     `;
 

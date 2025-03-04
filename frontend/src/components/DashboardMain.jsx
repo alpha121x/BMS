@@ -77,13 +77,16 @@ const DashboardMain = () => {
           },
         };
 
-        const mappedCards = data.structureTypeCounts.map((item) => ({
-          label:
-            structureMap[item.structure_type]?.label || item.structure_type,
-          value: item.count || "N/A",
-          icon: structureMap[item.structure_type]?.icon || <SiInstructure />, // Fallback icon
-          color: "blue",
-        }));
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase(); // Normalize case
+          return {
+            label: structureMap[typeKey]?.label || item.structure_type,
+            value: item.count || "N/A",
+            icon: structureMap[typeKey]?.icon || <SiInstructure />, // Fallback icon
+            color: "blue",
+          };
+        });
+        
 
         // Add total count card
         mappedCards.unshift({
@@ -113,13 +116,17 @@ const DashboardMain = () => {
         };
 
         // Map the response to the expected format for inspection data
-        const mappedCards = data.structureTypeCounts.map((item) => ({
-          label:
-            inspectionMap[item.structure_type]?.label || item.structure_type,
-          value: item.count || "N/A",
-          icon: inspectionMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
-          color: "blue",
-        }));
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase(); // Normalize case
+          
+          return {
+            label: inspectionMap[typeKey]?.label || item.structure_type,
+            value: item.count || "N/A",
+            icon: inspectionMap[typeKey]?.icon || <SiInstructure />, // Default icon
+            color: "blue",
+          };
+        });
+        
 
         // Add total count card
         mappedCards.unshift({
