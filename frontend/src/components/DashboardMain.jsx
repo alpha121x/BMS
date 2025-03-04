@@ -12,19 +12,9 @@ import { BASE_URL } from "./config";
 import TopCardDashboard from "./TopCardDashboard";
 
 const DashboardMain = () => {
-  const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [minBridgeLength, setMinBridgeLength] = useState("");
-  const [maxBridgeLength, setMaxBridgeLength] = useState("");
-  const [minSpanLength, setMinSpanLength] = useState("");
-  const [maxSpanLength, setMaxSpanLength] = useState("");
-  const [structureType, setStructureType] = useState("");
-  const [constructionType, setConstructionType] = useState("");
-  const [category, setCategory] = useState("");
-  const [evaluationStatus, setEvaluationStatus] = useState("");
-  const [inspectionStatus, setInspectionStatus] = useState("");
-  const [minYear, setMinYear] = useState("");
-  const [maxYear, setMaxYear] = useState("");
-  const [bridge, setBridgeName] = useState("");
+  const [districtId, setDistrictId] = useState("%");
+  const [structureType, setStructureType] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -85,7 +75,6 @@ const DashboardMain = () => {
             color: "blue",
           };
         });
-        
 
         // Add total count card
         mappedCards.unshift({
@@ -117,7 +106,7 @@ const DashboardMain = () => {
         // Map the response to the expected format for inspection data
         const mappedCards = data.structureTypeCounts.map((item) => {
           const typeKey = item.structure_type.toUpperCase(); // Normalize case
-          
+
           return {
             label: inspectionMap[typeKey]?.label || item.structure_type,
             value: item.count || "N/A",
@@ -125,7 +114,6 @@ const DashboardMain = () => {
             color: "blue",
           };
         });
-        
 
         // Add total count card
         mappedCards.unshift({
@@ -243,7 +231,7 @@ const DashboardMain = () => {
             <div>
               {activeView === "map" ? (
                 <div className="mt-1">
-                  <Map districtId={selectedDistrict} />
+                  <Map districtId={districtId} />
                 </div>
               ) : (
                 <div className="mt-1">
@@ -260,36 +248,16 @@ const DashboardMain = () => {
         <div className="row">
           <div className="col-md-12">
             <BridgesListDashboard
-              setSelectedDistrict={setSelectedDistrict}
-              setMinBridgeLength={setMinBridgeLength}
-              setMaxBridgeLength={setMaxBridgeLength}
-              setMinSpanLength={setMinSpanLength}
-              setMaxSpanLength={setMaxSpanLength}
-              setStructureType={setStructureType}
-              setConstructionType={setConstructionType}
-              setCategory={setCategory}
-              setEvaluationStatus={setEvaluationStatus}
-              setInspectionStatus={setInspectionStatus}
-              setMinYear={setMinYear}
-              setMaxYear={setMaxYear}
-              setBridge={setBridgeName}
-              district={selectedDistrict}
-              structureType={structureType}
-              constructionType={constructionType}
-              category={category}
-              evaluationStatus={evaluationStatus}
-              inspectionStatus={inspectionStatus}
-              minBridgeLength={minBridgeLength}
-              maxBridgeLength={maxBridgeLength}
-              minSpanLength={minSpanLength}
-              maxSpanLength={maxSpanLength}
-              minYear={minYear}
-              maxYear={maxYear}
-              bridge={bridge} // Also pass the current bridge id filter
+               districtId={districtId}
+               setDistrictId={setDistrictId}
+               structureType={structureType}
+               setStructureType={setStructureType}
+               bridgeName={bridgeName}
+               setBridgeName={setBridgeName}
             />
 
             <div className="mt-2">
-              <CheckingTable district={selectedDistrict} bridge={bridge} />
+              <CheckingTable district={districtId} bridge={bridgeName} />
             </div>
           </div>
         </div>

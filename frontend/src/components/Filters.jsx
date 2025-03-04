@@ -2,13 +2,9 @@ import React, { useState, useEffect } from "react";
 import { BASE_URL } from "./config";
 import { FaSearch } from "react-icons/fa";
 
-const Filters = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchAllBridges, fetchInspectionCounts, handleSearch }) => {
+const Filters = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchAllBridges, fetchInspectionCounts }) => {
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
-  
-
-
-
   useEffect(() => {
     const fetchFilters = async () => {
       try {
@@ -27,10 +23,11 @@ const Filters = ({ districtId, setDistrictId, structureType, setStructureType, b
     fetchFilters();
   }, []);
 
-  handleSearch = () => {
-    fetchAllBridges();
-    fetchInspectionCounts();
-  }
+  const handleSearch = () => {
+    if (fetchAllBridges) fetchAllBridges();
+    if (fetchInspectionCounts) fetchInspectionCounts();
+  };
+
 
   return (
     <div className="flex items-center gap-2 justify-between">

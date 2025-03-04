@@ -6,38 +6,21 @@ import "./BridgeList.css";
 import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
 import FilterComponent from "./FilterComponent";
+import Filters from "./Filters";
 import InventoryInfoDashboard from "./InventoryInfoDashboard"; // Import the InventoryInfo component
 import InspectionListDashboard from "./InspectionListDashboard";
 import MapModal from "./MapModal"; // Adjust the import path as needed
+import { FaSpinner } from "react-icons/fa";
+import { FaFileCsv } from "react-icons/fa6";
+import { FaFileExcel } from "react-icons/fa6";
 
 const BridgesListDashboard = ({
-  setSelectedDistrict,
-  setBridge,
-  setMinBridgeLength,
-  setMaxBridgeLength,
-  setMinSpanLength,
-  setMaxSpanLength,
-  setStructureType,
-  setConstructionType,
-  setCategory,
-  setEvaluationStatus,
-  setInspectionStatus,
-  setMinYear,
-  setMaxYear,
-  ////////
-  district,
+  districtId,
+  setDistrictId,
   structureType,
-  constructionType,
-  category,
-  evaluationStatus,
-  inspectionStatus,
-  minBridgeLength,
-  maxBridgeLength,
-  minSpanLength,
-  maxSpanLength,
-  minYear,
-  maxYear,
-  bridge,
+  setStructureType,
+  bridgeName,
+  setBridgeName,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -46,6 +29,8 @@ const BridgesListDashboard = ({
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
+   const [loadingExcel, setLoadingExcel] = useState(false);
+    const [loadingCSV, setLoadingCSV] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
@@ -53,23 +38,8 @@ const BridgesListDashboard = ({
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetchAllBridges(currentPage, itemsPerPage);
-  }, [
-    currentPage,
-    district,
-    structureType,
-    constructionType,
-    category,
-    evaluationStatus,
-    inspectionStatus,
-    minBridgeLength,
-    maxBridgeLength,
-    minSpanLength,
-    maxSpanLength,
-    minYear,
-    maxYear,
-    bridge,
-  ]);
+      fetchAllBridges();
+    }, [currentPage]); // Re-fetch when username changes
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -81,19 +51,9 @@ const BridgesListDashboard = ({
       const params = {
         set,
         limit,
-        district: district || "%",
+        district: districtId,
         structureType,
-        constructionType,
-        category,
-        evaluationStatus,
-        inspectionStatus,
-        minBridgeLength,
-        maxBridgeLength,
-        minSpanLength,
-        maxSpanLength,
-        minYear,
-        maxYear,
-        bridge,
+        bridgeName,
       };
 
       // console.log(params);
@@ -218,19 +178,9 @@ const BridgesListDashboard = ({
     setLoading(true); // Start loading
     try {
       const params = {
-        district: district || "%",
+        district: districtId || "%",
         structureType,
-        constructionType,
-        category,
-        evaluationStatus,
-        inspectionStatus,
-        minBridgeLength,
-        maxBridgeLength,
-        minSpanLength,
-        maxSpanLength,
-        minYear,
-        maxYear,
-        bridge,
+        bridgeName,
       };
   
       const queryString = new URLSearchParams(params).toString();
@@ -265,19 +215,9 @@ const BridgesListDashboard = ({
     setLoading(true); // Start loading
     try {
       const params = {
-        district: district || "%",
+        district: districtId || "%",
         structureType,
-        constructionType,
-        category,
-        evaluationStatus,
-        inspectionStatus,
-        minBridgeLength,
-        maxBridgeLength,
-        minSpanLength,
-        maxSpanLength,
-        minYear,
-        maxYear,
-        bridge,
+        bridgeName,
       };
   
       const queryString = new URLSearchParams(params).toString();
@@ -328,108 +268,68 @@ const BridgesListDashboard = ({
 
   return (
     <>
-      <div className="w-full mx-auto mt-2">
-        <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
-          <div className="text-lg font-semibold">
-            <div className="text-2xl font-bold">Structures Inventory</div>
-            <div className="text-sm font-medium mt-1 text-gray-700">
-            Total Structures: {bridgeCount || 0}
-            </div>
-          </div>
-          <div className="flex space-x-2">
-            <button
-              className="btn btn-primary flex items-center gap-2"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasRight"
-              aria-controls="offcanvasRight"
-            >
-              {/* Filter Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707l-5.414 5.414A2 2 0 0014 13.414V20a1 1 0 01-1.447.894l-4-2A1 1 0 018 17.618v-4.204a2 2 0 00-.586-1.414L3.293 6.707A1 1 0 013 6V4z"
-                />
-              </svg>
-            </button>
-
-            {/* Offcanvas Sidebar for Filters */}
-            <div
-              className="offcanvas offcanvas-end"
-              tabIndex="-1"
-              id="offcanvasRight"
-              aria-labelledby="offcanvasRightLabel"
-            >
-              <div className="offcanvas-header">
-                <h5 id="offcanvasRightLabel" className="text-xl font-bold">
-                  Filters
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close text-reset"
-                  data-bs-dismiss="offcanvas"
-                  aria-label="Close"
-                ></button>
-              </div>
-
-              <div className="offcanvas-body">
-                <FilterComponent
-                  setSelectedDistrict={setSelectedDistrict}
-                  setMinBridgeLength={setMinBridgeLength}
-                  setMaxBridgeLength={setMaxBridgeLength}
-                  setMinSpanLength={setMinSpanLength}
-                  setMaxSpanLength={setMaxSpanLength}
-                  setStructureType={setStructureType}
-                  setConstructionType={setConstructionType}
-                  setCategory={setCategory}
-                  setEvaluationStatus={setEvaluationStatus}
-                  setInspectionStatus={setInspectionStatus}
-                  setMinYear={setMinYear}
-                  setMaxYear={setMaxYear}
-                  setBridge={setBridge}
-                />
-              </div>
-            </div>
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700 disabled:opacity-50"
-              onClick={handleDownloadCSV}
-              disabled={loading}
-            >
-              {loading ? "Downloading CSV..." : "Download CSV"}
-            </button>
-
-            <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 disabled:opacity-50"
-              onClick={handleDownloadExcel}
-              disabled={loading}
-            >
-              {loading ? "Downloading Excel..." : "Download Excel"}
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div
-        className="card p-2 rounded-lg text-black"
+        className="card p-0 rounded-lg text-black mt-2"
         style={{
           background: "#FFFFFF",
-          border: "2px solid #60A5FA",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
-          minHeight: "400px", // Set a minimum height for the card
-          width: "100%", // Ensure the card takes full width of its container
-          overflow: "hidden", // Prevent content from overflowing
         }}
       >
-        <div className="card-body pb-0" style={{ padding: "0.5rem" }}>
+        <div className="card-header p-2 " style={{ background: "#CFE2FF" }}>
+          <div className="flex items-center justify-between">
+            <div>
+              <h6 className="mb-0" id="structure-heading">
+                Structure Counts:
+                <span className="badge text-bg-success ms-2">
+                  <h6 className="mb-0">{bridgeCount || 0}</h6>
+                </span>
+              </h6>
+            </div>
+
+            <Filters
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
+              fetchAllBridges={fetchAllBridges} // Search triggered manually
+            />
+
+            <div className="flex items-center gap-1">
+              <button
+                className="btn btn-outline-primary"
+                onClick={handleDownloadCSV}
+                disabled={loadingCSV}
+              >
+                <div className="flex items-center gap-1">
+                  <FaFileCsv />
+                  {loadingCSV ? "Downloading CSV..." : "CSV"}
+                </div>
+              </button>
+              <button
+                className="btn btn-outline-success"
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+              >
+                {loadingExcel ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" /> Downloading
+                    Excel...{" "}
+                  </>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <FaFileExcel />
+                    {loading ? "Downloading Excel..." : "Excel"}
+                  </div>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="card-body p-0 pb-2">
           {loading && (
             <div
               style={{

@@ -990,16 +990,7 @@ app.get("/api/bridges", async (req, res) => {
       limit = 10,
       district = "%",
       structureType = "%",
-      constructionType = "%",
-      inspectionStatus = "%",
-      minBridgeLength,
-      maxBridgeLength,
-      minSpanLength,
-      maxSpanLength,
-      minYear,
-      maxYear,
-      bridge = "%",
-      category = "%",
+      bridgeName = "%",
     } = req.query;
 
     let query = `
@@ -1060,86 +1051,19 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
       countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridge}%`);
-      countParams.push(`%${bridge}%`);
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
-    if (structureType) {
+    if (structureType !== "%") {
       query += ` AND structure_type_id = $${paramIndex}`;
       countQuery += ` AND structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       countParams.push(structureType);
-      paramIndex++;
-    }
-
-    if (category) {
-      query += ` AND visual_condition ILIKE $${paramIndex}`;
-      countQuery += ` AND visual_condition ILIKE $${paramIndex}`;
-      queryParams.push(category);
-      countParams.push(category);
-      paramIndex++;
-    }
-
-    if (constructionType) {
-      query += ` AND construction_type_id = $${paramIndex}`;
-      countQuery += ` AND construction_type_id = $${paramIndex}`;
-      queryParams.push(constructionType);
-      countParams.push(constructionType);
-      paramIndex++;
-    }
-
-    if (inspectionStatus === "yes") {
-      query += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-      countQuery += ` AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    } else if (inspectionStatus === "no") {
-      query += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-      countQuery += ` AND uu_bms_id NOT IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)`;
-    }
-
-    if (minBridgeLength) {
-      query += ` AND structure_width_m >= $${paramIndex}`;
-      countQuery += ` AND structure_width_m >= $${paramIndex}`;
-      queryParams.push(minBridgeLength);
-      countParams.push(minBridgeLength);
-      paramIndex++;
-    }
-    if (maxBridgeLength) {
-      query += ` AND structure_width_m <= $${paramIndex}`;
-      countQuery += ` AND structure_width_m <= $${paramIndex}`;
-      queryParams.push(maxBridgeLength);
-      countParams.push(maxBridgeLength);
-      paramIndex++;
-    }
-    if (minSpanLength) {
-      query += ` AND span_length_m >= $${paramIndex}`;
-      countQuery += ` AND span_length_m >= $${paramIndex}`;
-      queryParams.push(minSpanLength);
-      countParams.push(minSpanLength);
-      paramIndex++;
-    }
-    if (maxSpanLength) {
-      query += ` AND span_length_m <= $${paramIndex}`;
-      countQuery += ` AND span_length_m <= $${paramIndex}`;
-      queryParams.push(maxSpanLength);
-      countParams.push(maxSpanLength);
-      paramIndex++;
-    }
-    if (minYear) {
-      query += ` AND construction_year >= $${paramIndex}`;
-      countQuery += ` AND construction_year >= $${paramIndex}`;
-      queryParams.push(minYear);
-      countParams.push(minYear);
-      paramIndex++;
-    }
-    if (maxYear) {
-      query += ` AND construction_year <= $${paramIndex}`;
-      countQuery += ` AND construction_year <= $${paramIndex}`;
-      queryParams.push(maxYear);
-      countParams.push(maxYear);
       paramIndex++;
     }
 
