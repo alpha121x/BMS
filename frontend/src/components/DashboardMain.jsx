@@ -134,6 +134,33 @@ const DashboardMain = () => {
       .catch((error) => console.error("Error fetching structure data:", error));
   }, []);
 
+  const evaluatedCards = [
+    // Add same 3 types here also
+    {
+      label: "Total",
+      value: "N/A",
+      icon: <SiInstructure />,
+      color: "blue",
+    },
+    {
+      label: "Culvert",
+      value: "N/A",
+      icon: <LuConstruction />,
+      color: "blue",
+    },
+    {
+      label: "PC Bridge",
+      value: "N/A",
+      icon: <FaBridge />,
+      color: "blue",
+    },
+    {
+      label: "Underpass",
+      value: "N/A",
+      icon: <FaRoadBridge />,
+      color: "blue",
+    },
+  ];
 
   return (
     <section className="bg-gray-100 min-h-screen">
@@ -152,13 +179,25 @@ const DashboardMain = () => {
               </div>
             </div>
 
-            {/* Evaluation Section */}
+            {/* Inspection Section */}
             <div className="mb-2">
               <h3 className="text-xl font-semibold text-gray-700">
                 Inspected Structures
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
                 {inspectedCards.map((card, index) => (
+                  <TopCardDashboard key={index} {...card} />
+                ))}
+              </div>
+            </div>
+
+            {/* Evaluation Section */}
+            <div className="mb-2">
+              <h3 className="text-xl font-semibold text-gray-700">
+                Evaluated Structures
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                {evaluatedCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
                 ))}
               </div>

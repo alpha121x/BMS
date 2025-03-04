@@ -69,12 +69,12 @@ const BridgeWiseScore = () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bms-score-export`);
       const { data } = await response.json();
-  
+
       if (!data.length) {
         console.warn("No data available for CSV download.");
         return;
       }
-  
+
       // Convert JSON to CSV format
       const csvContent =
         "data:text/csv;charset=utf-8," +
@@ -82,7 +82,7 @@ const BridgeWiseScore = () => {
           Object.keys(data[0]).join(","), // CSV Headers
           ...data.map((row) => Object.values(row).join(",")), // CSV Rows
         ].join("\n");
-  
+
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -90,37 +90,42 @@ const BridgeWiseScore = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       // console.log("CSV file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading CSV:", error);
     }
   };
-  
+
   const handleDownloadExcel = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bms-score-export`);
       const { data } = await response.json();
-  
+
       if (!data.length) {
         console.warn("No data available for Excel download.");
         return;
       }
-  
+
       const worksheet = XLSX.utils.json_to_sheet(data);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
-  
+
       // Create a Blob and trigger the download
-      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "bridge_data.xlsx";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       // console.log("Excel file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading Excel:", error);
@@ -137,9 +142,12 @@ const BridgeWiseScore = () => {
     cursor: "pointer",
   };
 
-  const filteredData = currentData.filter((row) =>
-    (row.bridge_name && row.bridge_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (row.district && row.district.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredData = currentData.filter(
+    (row) =>
+      (row.bridge_name &&
+        row.bridge_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (row.district &&
+        row.district.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const renderPaginationButtons = () => {
@@ -290,14 +298,14 @@ const BridgeWiseScore = () => {
               <p className="text-danger">{error}</p>
             ) : (
               <>
-                <Table className="custom-table">
+                <Table className="table table-stiped table-bordered">
                   <thead>
                     <tr>
                       <th>Bridge Name</th>
                       <th>District</th>
-                      <th>Damage Score</th>
+                      <th>Total Damage Score</th>
                       <th>Critical Damage Score</th>
-                      <th>Inventory Score</th>
+                      <th>Average Damage Score</th>
                       <th>Bridge Information</th>
                     </tr>
                   </thead>
