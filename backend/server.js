@@ -152,7 +152,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
-// API Endpoint
+// API Endpoint for bridge eise score
 app.get("/api/bms-score", async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Default to page 1
   const limit = parseInt(req.query.limit) || 10; // Default to 10 records per page

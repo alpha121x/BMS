@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
+import Filters from "./Filters";
 
 const BridgeWiseScore = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
@@ -15,7 +16,9 @@ const BridgeWiseScore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [districtId, setDistrictId] = useState("%");
+  const [structureType, setStructureType] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
 
   const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
@@ -142,14 +145,6 @@ const BridgeWiseScore = () => {
     cursor: "pointer",
   };
 
-  const filteredData = currentData.filter(
-    (row) =>
-      (row.bridge_name &&
-        row.bridge_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (row.district &&
-        row.district.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
-
   const renderPaginationButtons = () => {
     const buttons = [];
     buttons.push(
@@ -248,6 +243,18 @@ const BridgeWiseScore = () => {
                 Bridge Wise Score
               </h6>
 
+              <div>
+                <Filters
+                 districtId={districtId}
+                 setDistrictId={setDistrictId}
+                 structureType={structureType}
+                 setStructureType={setStructureType}
+                 bridgeName={bridgeName}
+                 setBridgeName={setBridgeName}
+                 fetchBridgeScoreData={fetchData}
+                />
+              </div>
+
               <div className="flex gap-2">
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
@@ -265,17 +272,6 @@ const BridgeWiseScore = () => {
                 </button>
               </div>
             </div>
-
-            <input
-              type="text"
-              placeholder="Search by Bridge Name or District"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1); // Reset pagination to the first page
-              }}
-              className="form-control mb-3 w-50"
-            />
 
             {loading ? (
               <div
@@ -303,6 +299,7 @@ const BridgeWiseScore = () => {
                     <tr>
                       <th>Bridge Name</th>
                       <th>District</th>
+                      <th>Structure Type</th>
                       <th>Total Damage Score</th>
                       <th>Critical Damage Score</th>
                       <th>Average Damage Score</th>
@@ -310,11 +307,12 @@ const BridgeWiseScore = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredData.length > 0 ? (
-                      filteredData.map((row, index) => (
+                    {currentData.length > 0 ? (
+                      currentData.map((row, index) => (
                         <tr key={index}>
                           <td>{row.bridge_name || "N/A"}</td>
                           <td>{row.district || "N/A"}</td>
+                          <td>{row.structure_type || "N/A"}</td>
                           <td>{row.damage_score || "N/A"}</td>
                           <td>{row.critical_damage_score || "N/A"}</td>
                           <td>{row.inventory_score || "N/A"}</td>
