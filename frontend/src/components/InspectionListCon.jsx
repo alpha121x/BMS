@@ -39,7 +39,7 @@ const InspectionListCon = ({ bridgeId }) => {
       if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-inspections-con?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 

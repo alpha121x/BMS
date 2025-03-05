@@ -1776,7 +1776,7 @@ app.get("/api/get-summary-rams", async (req, res) => {
 });
 
 // api endpoint for consultant inspections data
-app.get("/api/get-inspections", async (req, res) => {
+app.get("/api/get-inspections-con", async (req, res) => {
   try {
     const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
