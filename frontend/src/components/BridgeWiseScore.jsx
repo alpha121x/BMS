@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
+import Filters from "./Filters";
 
 const BridgeWiseScore = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
@@ -15,6 +16,9 @@ const BridgeWiseScore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
+  const [districtId, setDistrictId] = useState("%");
+   const [structureType, setStructureType] = useState("%");
+   const [bridgeName, setBridgeName] = useState("");
 
   const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
@@ -31,7 +35,7 @@ const BridgeWiseScore = () => {
     setError(null);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}`
+        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -233,6 +237,16 @@ const BridgeWiseScore = () => {
               <h6 className="card-title text-lg font-semibold">
                 Bridge Wise Score
               </h6>
+
+              <Filters
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
+            />
+
 
               <div className="flex gap-2">
                 <button

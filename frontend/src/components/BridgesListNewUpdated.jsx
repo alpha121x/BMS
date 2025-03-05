@@ -27,7 +27,6 @@ const BridgesListNewUpdated = ({
   setStructureType,
   bridgeName,
   setBridgeName,
-  fetchInspectionCounts,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);

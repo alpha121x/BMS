@@ -39,7 +39,7 @@ const BridgesListDashboard = ({
 
   useEffect(() => {
       fetchAllBridges();
-    }, [currentPage]); // Re-fetch when username changes
+    }, [currentPage, districtId, structureType, bridgeName]); // Re-fetch when username changes
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
