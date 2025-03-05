@@ -157,24 +157,28 @@ const Map = ({ districtId }) => {
               title: "Good",
               opacity: 0.6,
               listMode: "show",
+              popupTemplate: popupTemplate,
             },
             {
               id: 4, // FAIR layer (index 4)
               title: "Fair",
               opacity: 0.6,
               listMode: "show",
+              popupTemplate: popupTemplate,
             },
             {
               id: 5, // POOR layer (index 5)
               title: "Poor",
               opacity: 0.6,
               listMode: "show",
+              popupTemplate: popupTemplate,
             },
             {
               id: 6, // UNDER CONSTRUCTION layer (index 6)
               title: "Under Construction",
               opacity: 0.6,
               listMode: "show",
+              popupTemplate: popupTemplate,
             },
             {
               id: 2, // BRIDGES LOCATIONS layer (index 2)
