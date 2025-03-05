@@ -10,6 +10,7 @@ import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
 import TopCardDashboard from "./TopCardDashboard";
+import { icon } from "leaflet";
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -156,6 +157,34 @@ const DashboardMain = () => {
     },
   ];
 
+  const constructionCards = [
+    // Add same 3 types here also
+    {
+      label: "Deck Slab Bridges",
+      value: "0",
+      icon: <FaBridge />,
+      color: "blue",
+    },
+    {
+      label: "Girder Bridges",
+      value: "0",
+      icon: <FaBridge />,
+      color: "blue",
+    },
+    {
+      label: "Arch & Others",
+      value: "0",
+      icon: <GiArchBridge />,
+      color: "blue",
+    },
+    {
+      label: "Culverts",
+      value: "0",
+      icon: <LuConstruction />,
+      color: "blue",
+    },
+  ];
+
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Structure Section */}
@@ -168,6 +197,17 @@ const DashboardMain = () => {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {structureCards.map((card, index) => (
+                  <TopCardDashboard key={index} {...card} />
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-2">
+              <h3 className="text-xl font-semibold text-gray-700">
+                 Constuction Type Structures
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                {constructionCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
                 ))}
               </div>
@@ -248,12 +288,12 @@ const DashboardMain = () => {
         <div className="row">
           <div className="col-md-12">
             <BridgesListDashboard
-               districtId={districtId}
-               setDistrictId={setDistrictId}
-               structureType={structureType}
-               setStructureType={setStructureType}
-               bridgeName={bridgeName}
-               setBridgeName={setBridgeName}
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
             />
 
             <div className="mt-2">
