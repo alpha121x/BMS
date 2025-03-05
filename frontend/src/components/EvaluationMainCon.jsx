@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
+import Map from "./Map";
 import { FaClipboardCheck, FaClipboardList } from "react-icons/fa";
 
 const EvaluationMainCon = () => {
@@ -83,6 +84,10 @@ const EvaluationMainCon = () => {
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="mb-2 container-fluid">
+        <Map />
       </div>
 
       {/* Bridges */}

@@ -30,7 +30,7 @@ const Map = ({ districtId }) => {
         const view = new MapView({
           container: mapRef.current,
           map: map,
-          center: [75.9587, 34.5204],
+          center: [72.7097, 31.1704],
           zoom: 6,
         });
 
