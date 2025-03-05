@@ -20,7 +20,7 @@ const BridgeWiseScore = () => {
    const [structureType, setStructureType] = useState("%");
    const [bridgeName, setBridgeName] = useState("");
 
-  const handleClick = (bridge) => {
+  const handleClick = () => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
     const editUrl = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
     window.location.href = editUrl; // Navigate to the new page
@@ -28,7 +28,7 @@ const BridgeWiseScore = () => {
 
   useEffect(() => {
     fetchData(); // Fetch data whenever currentPage changes
-  }, [currentPage]);
+  }, [currentPage, districtId, structureType, bridgeName]);
 
   const fetchData = async () => {
     setLoading(true);
