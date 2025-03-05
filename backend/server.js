@@ -1330,6 +1330,7 @@ app.get("/api/inspections", async (req, res) => {
       JOIN bms.tbl_bms_master_data AS bmd 
       ON ins."uu_bms_id" = bmd."uu_bms_id"
       WHERE 1=1
+       ORDER BY inspection_id DESC;
     `;
 
     const queryParams = [];
