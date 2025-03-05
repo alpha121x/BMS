@@ -932,12 +932,10 @@ app.get("/api/inspections-export", async (req, res) => {
     res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching data from the database",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
   }
 });
 
@@ -1197,7 +1195,7 @@ SELECT
   }
 });
 
-// bridges list for evaluation module for evaluator 
+// bridges list for evaluation module for evaluator
 app.get("/api/bridgesEvaluator", async (req, res) => {
   try {
     const {
@@ -2129,29 +2127,31 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
     }
 
     const pendingQuery = `
-      SELECT 
-       uu_bms_id,
-        inspection_id,
-         surveyed_by,
-        damage_extent,
-        qc_rams,
-        qc_remarks_rams,
-        qc_remarks_con,
-        reviewed_by,
-        bridge_name, 
-        "SpanIndex", 
-        "WorkKindName", 
-        "PartsName", 
-        "MaterialName", 
-        "DamageKindName", 
-        "DamageLevel", 
-        "Remarks",
-        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
-        "ApprovedFlag"
-      FROM bms.tbl_inspection_f
-      WHERE uu_bms_id = $1 
-       AND qc_rams = '2'  -- Approved Rams Inspections
-      ORDER BY inspection_id DESC;
+   SELECT 
+   uu_bms_id,
+    inspection_id,
+    surveyed_by,
+    damage_extent,
+    qc_rams,
+    qc_remarks_rams,
+    qc_remarks_con,
+    reviewed_by,
+    bridge_name, 
+    "SpanIndex", 
+    "WorkKindName", 
+    "PartsName", 
+    "MaterialName", 
+    "DamageKindName", 
+    "DamageLevel", 
+    "Remarks",
+    COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
+    "ApprovedFlag"
+FROM bms.tbl_inspection_f
+WHERE uu_bms_id = $1 
+  AND surveyed_by = 'RAMS-PITB'
+    AND qc_rams = 2
+  AND "DamageLevelID" IN (4, 5, 6)  
+ORDER BY inspection_id DESC;
     `;
 
     const approvedQuery = `
