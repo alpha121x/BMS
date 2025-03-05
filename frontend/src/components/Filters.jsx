@@ -5,6 +5,12 @@ import { FaSearch } from "react-icons/fa";
 const Filters = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, fetchAllBridges, fetchInspectionCounts }) => {
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
+
+  // Temporary state for filtering
+  const [tempDistrictId, setTempDistrictId] = useState(districtId);
+  const [tempStructureType, setTempStructureType] = useState(structureType);
+  const [tempBridgeName, setTempBridgeName] = useState(bridgeName);
+
   useEffect(() => {
     const fetchFilters = async () => {
       try {
@@ -24,28 +30,31 @@ const Filters = ({ districtId, setDistrictId, structureType, setStructureType, b
   }, []);
 
   const handleSearch = () => {
+    setDistrictId(tempDistrictId);
+    setStructureType(tempStructureType);
+    setBridgeName(tempBridgeName);
+
     if (fetchAllBridges) fetchAllBridges();
     if (fetchInspectionCounts) fetchInspectionCounts();
   };
 
-
   return (
     <div className="flex items-center gap-2 justify-between">
       <select className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-        value={districtId} onChange={(e) => setDistrictId(e.target.value)}>
+        value={tempDistrictId} onChange={(e) => setTempDistrictId(e.target.value)}>
         <option value="%">--Select District--</option>
         {districts.map(d => <option key={d.id} value={d.id}>{d.district}</option>)}
       </select>
 
       <select className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-        value={structureType} onChange={(e) => setStructureType(e.target.value)}>
+        value={tempStructureType} onChange={(e) => setTempStructureType(e.target.value)}>
         <option value="%">--Select Structure Type--</option>
         {structureTypes.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}
       </select>
 
       <input type="text" className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
         placeholder="Search Bridge Name..."
-        value={bridgeName} onChange={(e) => setBridgeName(e.target.value)} />
+        value={tempBridgeName} onChange={(e) => setTempBridgeName(e.target.value)} />
 
       <button onClick={handleSearch} className="p-2 bg-[#3B82F6] text-white rounded hover:bg-blue-700">
         <FaSearch />
