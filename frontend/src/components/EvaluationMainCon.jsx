@@ -74,7 +74,7 @@ const EvaluationMainCon = () => {
           <div className="row">
             <div className="col-md-12">
               <h5 className="font-semibold text-gray-700">
-                Inspected Structures
+                Consultant Records
               </h5>
             </div>
           </div>
