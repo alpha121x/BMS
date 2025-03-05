@@ -52,7 +52,7 @@ const BridgesListNewUpdated = ({
   // Fetch Bridges when filters change
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage, username]); // Re-fetch when username changes
+  }, [currentPage, username, districtId, structureType, bridgeName]); // Re-fetch when username changes
 
   const fetchAllBridges = async () => {
     setLoading(true);
@@ -417,8 +417,6 @@ const BridgesListNewUpdated = ({
               setStructureType={setStructureType}
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
-              fetchAllBridges={fetchAllBridges} // Search triggered manually
-              fetchInspectionCounts={fetchInspectionCounts} // Passing handleSearch down
             />
 
             <div className="flex items-center gap-1">

@@ -42,7 +42,7 @@ const EvaluationMainCon = () => {
 
   useEffect(() => {
     fetchInspectionCounts();
-  }, []);
+  }, [districtId, structureType, bridgeName]); // Re-run the effect when any of these state variables change
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -96,7 +96,6 @@ const EvaluationMainCon = () => {
               setStructureType={setStructureType}
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
-              fetchInspectionCounts={fetchInspectionCounts}
             />
           </div>
         </div>
