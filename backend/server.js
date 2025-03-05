@@ -161,10 +161,11 @@ app.get("/api/bms-score", async (req, res) => {
   try {
     const query = `
     SELECT 
-        c.objectid AS uu_bms_id, 
-        c.damage_score, 
+        c."ObjectID" AS uu_bms_id,  -- Use double quotes for exact case
+        c.total_damage_score, 
         c.critical_damage_score,
-        c.inventory_score,
+        c.avg_damage_score AS average_damage_score,  -- Fix column name
+        c.bridge_performance_index,
         m.structure_no, 
         m.structure_type_id, 
         m.structure_type, 
@@ -195,24 +196,26 @@ app.get("/api/bms-score", async (req, res) => {
         CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
         ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
     FROM 
-        bms.bms_calculations c
+        bms.tbl_bms_calculations_2 c
     LEFT JOIN 
         bms.tbl_bms_master_data m 
-    ON 
-        c.objectid = m.id
-    ORDER BY c.objectid
+      ON c."ObjectID"::INTEGER = m.id  -- Ensure column case matches
+    ORDER BY c."ObjectID"
     LIMIT $1 OFFSET $2;
-    `;
+  `;
+  
+
 
     const result = await pool.query(query, [limit, offset]);
 
     // Query to get total records
     const countQuery = `
-      SELECT COUNT(*) AS total
-      FROM bms.bms_calculations c 
-      LEFT JOIN bms.tbl_bms_master_data m
-      ON c.objectid = m.id;
-    `;
+    SELECT COUNT(*) AS total
+    FROM bms.tbl_bms_calculations_2 c 
+    LEFT JOIN bms.tbl_bms_master_data m
+    ON c."ObjectID"::INTEGER = m.id
+  `;
+  
     const countResult = await pool.query(countQuery);
     const totalRecords = countResult.rows[0].total;
 
@@ -233,24 +236,24 @@ app.get("/api/bms-score-export", async (req, res) => {
   try {
     const query = `
     SELECT 
-    CONCAT('"', m.pms_sec_id, ',', m.structure_no, '"') AS "BridgeName",
-    m.district,
-    c.damage_score, 
-    c.critical_damage_score,
-    c.inventory_score
-FROM 
-    bms.bms_calculations c
-LEFT JOIN 
-    bms.tbl_bms_master_data m 
-ON 
-    c.objectid = m.id
-ORDER BY c.objectid;
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS "BridgeName",
+        m.district,
+        c.total_damage_score, 
+        c.critical_damage_score,
+        c.avg_damage_score AS average_damage_score  -- Ensure consistent column naming
+    FROM 
+        bms.tbl_bms_calculations_2 c  -- Ensure correct table name
+    LEFT JOIN 
+        bms.tbl_bms_master_data m 
+    ON 
+        c."ObjectID"::INTEGER = m.id  -- Ensure case-sensitive match
+    ORDER BY c."ObjectID";
     `;
 
     const result = await pool.query(query);
 
     res.json({
-      totalRecords: result.rows.length,
+      totalRecords: result.rowCount, // More efficient than result.rows.length
       data: result.rows,
     });
   } catch (error) {

@@ -15,7 +15,6 @@ const BridgeWiseScore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
 
   const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
@@ -86,7 +85,7 @@ const BridgeWiseScore = () => {
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "bridge_data.csv");
+      link.setAttribute("download", "Bridge_Wise_Score.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -116,7 +115,7 @@ const BridgeWiseScore = () => {
       const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "bridge_data.xlsx";
+      link.download = "Bridge_Wise_Score.xlsx";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -136,11 +135,6 @@ const BridgeWiseScore = () => {
     fontSize: "12px",
     cursor: "pointer",
   };
-
-  const filteredData = currentData.filter((row) =>
-    (row.bridge_name && row.bridge_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (row.district && row.district.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
 
   const renderPaginationButtons = () => {
     const buttons = [];
@@ -258,17 +252,6 @@ const BridgeWiseScore = () => {
               </div>
             </div>
 
-            <input
-              type="text"
-              placeholder="Search by Bridge Name or District"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1); // Reset pagination to the first page
-              }}
-              className="form-control mb-3 w-50"
-            />
-
             {loading ? (
               <div
                 style={{
@@ -302,14 +285,14 @@ const BridgeWiseScore = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredData.length > 0 ? (
-                      filteredData.map((row, index) => (
+                    {currentData.length > 0 ? (
+                      currentData.map((row, index) => (
                         <tr key={index}>
                           <td>{row.bridge_name || "N/A"}</td>
                           <td>{row.district || "N/A"}</td>
-                          <td>{row.damage_score || "N/A"}</td>
+                          <td>{row.total_damage_score || "N/A"}</td>
                           <td>{row.critical_damage_score || "N/A"}</td>
-                          <td>{row.inventory_score || "N/A"}</td>
+                          <td>{row.average_damage_score || "N/A"}</td>
                           <td className="text-center">
                             <button
                               onClick={() => handleClick(row)}
