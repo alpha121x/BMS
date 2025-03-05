@@ -1859,10 +1859,35 @@ app.get("/api/get-inspections-con", async (req, res) => {
       ORDER BY inspection_id DESC;
     `;
 
-    const [pendingRows, approvedRows, unapprovedRows] = await Promise.all([
+    const unapprovedRamsQuery = `
+      SELECT 
+        uu_bms_id,
+        inspection_id,
+        qc_con,
+        qc_remarks_con,
+        reviewed_by,
+        bridge_name, 
+        "SpanIndex", 
+        "WorkKindName", 
+        "PartsName", 
+        "MaterialName", 
+        "DamageKindName", 
+        "DamageLevel", 
+        "Remarks", 
+         COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
+        "ApprovedFlag"
+      FROM bms.tbl_inspection_f
+      WHERE uu_bms_id = $1 
+      AND qc_rams = '3'
+      AND surveyed_by = 'RAMS-UU'
+      ORDER BY inspection_id DESC;
+    `;
+
+    const [pendingRows, approvedRows, unapprovedRows, unapprovedRamsRows] = await Promise.all([
       pool.query(pendingQuery, [bridgeId]),
       pool.query(approvedQuery, [bridgeId]),
       pool.query(unapprovedQuery, [bridgeId]),
+      pool.query(unapprovedRamsQuery, [bridgeId]),
     ]);
 
     // Helper function to extract URLs from potentially malformed JSON paths
@@ -1934,6 +1959,7 @@ app.get("/api/get-inspections-con", async (req, res) => {
         pending: formatRows(pendingRows.rows),
         approved: formatRows(approvedRows.rows),
         unapproved: formatRows(unapprovedRows.rows),
+        unapproved_by_rams: formatRows(unapprovedRamsRows.rows),
       },
     });
   } catch (error) {

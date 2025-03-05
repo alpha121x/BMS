@@ -17,6 +17,7 @@ const InspectionListCon = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
   const [unapprovedData, setUnapprovedData] = useState([]);
+  const [unapprovedRamsData, setUnapprovedRamsData] = useState([]);
   const [summaryData, setsummaryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -63,6 +64,9 @@ const InspectionListCon = ({ bridgeId }) => {
         setPendingData(groupBySpanAndWorkKind(result.data.pending));
         setApprovedData(groupBySpanAndWorkKind(result.data.approved));
         setUnapprovedData(groupBySpanAndWorkKind(result.data.unapproved));
+        setUnapprovedRamsData(
+          groupBySpanAndWorkKind(result.data.unapproved_by_rams)
+        );
       } else {
         throw new Error("Invalid data format");
       }
@@ -527,6 +531,13 @@ const InspectionListCon = ({ bridgeId }) => {
           >
             View Unapproved Reports
           </Button>
+          <Button
+            variant="info"
+            className="fw-bold"
+            onClick={() => handleDivChange("unapproved_by_rams")}
+          >
+            Unapproved By RAMS
+          </Button>
         </div>
         <div className="border rounded p-3 shadow-lg mt-2">
           {/* Reports Section */}
@@ -629,9 +640,7 @@ const InspectionListCon = ({ bridgeId }) => {
                                             </strong>{" "}
                                             {inspection.Remarks || "N/A"}
                                             <br />
-                                            <strong>
-                                              Surveeyed By
-                                            </strong>{" "}
+                                            <strong>Surveeyed By</strong>{" "}
                                             {inspection.surveyed_by || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
@@ -1010,6 +1019,145 @@ const InspectionListCon = ({ bridgeId }) => {
                 ))
               ) : (
                 <p>No unapproved reports available.</p>
+              )}
+            </div>
+          )}
+
+          {activeDiv === "unapproved_by_rams" && (
+            <div className="mb-4">
+              <h5>Unapproved Rams Reports</h5>
+              {unapprovedRamsData && Object.keys(unapprovedRamsData).length > 0 ? (
+                Object.keys(unapprovedRamsData).map((spanIndex) => (
+                  <div key={`span-${spanIndex}`} className="mb-4">
+                    <div
+                      className="border rounded p-2 bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                      onClick={() => toggleSection(spanIndex)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <strong>Reports For Span: {spanIndex}</strong>
+                      <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
+                    </div>
+
+                    {expandedSections[spanIndex] && (
+                      <div className="mt-2">
+                        {Object.keys(unapprovedData[spanIndex]).length > 0 ? (
+                          Object.keys(unapprovedData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {unapprovedData[spanIndex][workKind].length >
+                                  0 ? (
+                                    unapprovedData[spanIndex][workKind].map(
+                                      (inspection) => (
+                                        <div
+                                          key={`inspection-${inspection.inspection_id}`}
+                                          className="border rounded p-4 shadow-sm mb-3"
+                                          style={{ backgroundColor: "#CFE2FF" }}
+                                        >
+                                          <div className="row">
+                                            <div className="col-md-3">
+                                              {inspection.PhotoPaths?.length >
+                                                0 && (
+                                                <div
+                                                  className="d-flex gap-2"
+                                                  style={{
+                                                    overflowX: "auto",
+                                                    whiteSpace: "nowrap",
+                                                    display: "flex",
+                                                    paddingBottom: "5px",
+                                                  }}
+                                                >
+                                                  {inspection.PhotoPaths.map(
+                                                    (photo, i) => (
+                                                      <img
+                                                        key={`photo-${inspection.id}-${i}`}
+                                                        src={photo}
+                                                        alt={`Photo ${i + 1}`}
+                                                        className="img-fluid rounded border"
+                                                        style={{
+                                                          width: "80px",
+                                                          height: "80px",
+                                                          objectFit: "cover",
+                                                          cursor: "pointer",
+                                                          flexShrink: 0,
+                                                        }}
+                                                        onClick={() =>
+                                                          handlePhotoClick(
+                                                            photo
+                                                          )
+                                                        }
+                                                      />
+                                                    )
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
+                                            <div className="col-md-6">
+                                              <strong>Parts:</strong>{" "}
+                                              {inspection.PartsName || "N/A"}{" "}
+                                              <br />
+                                              <strong>Material:</strong>{" "}
+                                              {inspection.MaterialName || "N/A"}{" "}
+                                              <br />
+                                              <strong>Damage:</strong>{" "}
+                                              {inspection.DamageKindName ||
+                                                "N/A"}{" "}
+                                              <br />
+                                              <strong>Level:</strong>{" "}
+                                              {inspection.DamageLevel || "N/A"}{" "}
+                                              <br />
+                                              <strong>
+                                                Damage Extent:
+                                              </strong>{" "}
+                                              {inspection.damage_extent ||
+                                                "N/A"}{" "}
+                                              <br />
+                                              <strong>
+                                                Situation Remarks:
+                                              </strong>{" "}
+                                              {inspection.Remarks || "N/A"}
+                                            </div>
+                                            <div className="col-md-3 d-flex flex-column justify-content-between">
+                                              <div className="text-start">
+                                                <strong>Remarks: </strong>{" "}
+                                                {inspection.qc_remarks_con ||
+                                                  "N/A"}{" "}
+                                                <br />
+                                                <strong>Status: </strong>{" "}
+                                                {inspection.qc_con === 2
+                                                  ? "Approved"
+                                                  : "Unapproved"}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    )
+                                  ) : (
+                                    <p>
+                                      No inspections available for this work
+                                      kind.
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          )
+                        ) : (
+                          <p>No work kinds available for this span.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p>No reports available.</p>
               )}
             </div>
           )}
