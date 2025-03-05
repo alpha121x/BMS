@@ -178,7 +178,7 @@ const DashboardMain = () => {
       color: "blue",
     },
     {
-      label: "Culverts",
+      label: "Culverts (Box & Pipes)",
       value: "0",
       icon: <LuConstruction />,
       color: "blue",

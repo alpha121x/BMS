@@ -295,6 +295,7 @@ const BridgeWiseScore = () => {
                       <th>Total Damage Score</th>
                       <th>Critical Damage Score</th>
                       <th>Average Damage Score</th>
+                      <th>BPI</th>
                       <th>Bridge Information</th>
                     </tr>
                   </thead>
@@ -307,6 +308,7 @@ const BridgeWiseScore = () => {
                           <td>{row.total_damage_score || "N/A"}</td>
                           <td>{row.critical_damage_score || "N/A"}</td>
                           <td>{row.average_damage_score || "N/A"}</td>
+                          <td>{row.bridge_performance_index || "N/A"}</td>
                           <td className="text-center">
                             <button
                               onClick={() => handleClick(row)}
