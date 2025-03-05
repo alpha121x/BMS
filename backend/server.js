@@ -1331,6 +1331,7 @@ app.get("/api/inspections", async (req, res) => {
   try {
     let { district, bridge } = req.query;
 
+    // Build the base query without ORDER BY
     let query = `
       SELECT 
         bmd."pms_sec_id", 
@@ -1349,9 +1350,8 @@ app.get("/api/inspections", async (req, res) => {
         ins."ApprovedFlag"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
-      ON ins."uu_bms_id" = bmd."uu_bms_id"
+        ON ins."uu_bms_id" = bmd."uu_bms_id"
       WHERE 1=1
-       ORDER BY inspection_id DESC;
     `;
 
     const queryParams = [];
@@ -1369,6 +1369,9 @@ app.get("/api/inspections", async (req, res) => {
       paramIndex++;
     }
 
+    // Append ORDER BY clause after dynamic filters
+    query += ` ORDER BY inspection_id DESC;`;
+
     const result = await pool.query(query, queryParams);
 
     // Process PhotoPaths to extract image URLs
@@ -1377,10 +1380,7 @@ app.get("/api/inspections", async (req, res) => {
 
       try {
         if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
-            /\}\"/g,
-            "}"
-          );
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(/\}\"/g, "}");
           const parsedPhotos = JSON.parse(cleanedJson);
 
           if (Array.isArray(parsedPhotos)) {
@@ -1417,6 +1417,7 @@ app.get("/api/inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // for evaluator summary data
 app.get("/api/get-summary", async (req, res) => {

@@ -5,7 +5,7 @@ import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
 import Papa from "papaparse";
 
-const CheckingTable = ({district, bridge}) => {
+const CheckingTable = ({districtId, bridgeName}) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,7 +17,7 @@ const CheckingTable = ({district, bridge}) => {
 
   useEffect(() => {
     fetchData();
-  }, [district, bridge]); // Dependency array to re-fetch when district or bridge changes
+  }, [districtId, bridgeName]); // Dependency array to re-fetch when district or bridge changes
   
   const fetchData = async () => {
     setLoading(true);
@@ -27,8 +27,8 @@ const CheckingTable = ({district, bridge}) => {
       const url = new URL(`${BASE_URL}/api/inspections`);
       const params = new URLSearchParams();
   
-      if (district) params.append("district", district);
-      if (bridge) params.append("bridge", bridge);
+      if (districtId) params.append("district", districtId);
+      if (bridgeName) params.append("bridge", bridgeName);
   
       url.search = params.toString(); // Append query parameters to the URL
   
