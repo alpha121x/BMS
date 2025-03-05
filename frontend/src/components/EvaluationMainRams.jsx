@@ -96,7 +96,6 @@ const EvaluationMainRams = () => {
               setStructureType={setStructureType}
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
-              fetchInspectionCounts={fetchInspectionCounts}
             />
           </div>
         </div>
