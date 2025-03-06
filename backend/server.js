@@ -155,7 +155,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
 // API Endpoint for bridge eise score
 app.get("/api/bms-score", async (req, res) => {
   try {
-    let { page, limit, districtId, structureType, bridgeName } = req.query;
+    let { page, limit, district, structureType, bridgeName } = req.query;
 
     // Default values
     page = parseInt(page) || 1; // Default to 1 if not provided
@@ -163,7 +163,7 @@ app.get("/api/bms-score", async (req, res) => {
     const offset = (page - 1) * limit;
 
     // Default to '%' for optional filters
-    districtId = districtId || "%";
+    district = district || "%";
     structureType = structureType || "%";
     bridgeName = bridgeName ? `%${bridgeName}%` : "%";
 
@@ -216,7 +216,7 @@ app.get("/api/bms-score", async (req, res) => {
       LIMIT $4 OFFSET $5;
     `;
 
-    const values = [districtId, structureType, bridgeName, limit, offset];
+    const values = [district, structureType, bridgeName, limit, offset];
 
     const result = await pool.query(query, values);
 
@@ -249,7 +249,6 @@ app.get("/api/bms-score", async (req, res) => {
     });
   }
 });
-
 
 // API Endpoint for Exporting Full BMS Data (No Limits)
 app.get("/api/bms-score-export", async (req, res) => {

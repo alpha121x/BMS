@@ -16,9 +16,10 @@ const BridgeWiseScore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
+  const [bridgeCount, setBridgeCount] = useState(0);
   const [districtId, setDistrictId] = useState("%");
-   const [structureType, setStructureType] = useState("%");
-   const [bridgeName, setBridgeName] = useState("");
+  const [structureType, setStructureType] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
 
   const handleClick = () => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
@@ -42,6 +43,7 @@ const BridgeWiseScore = () => {
       const result = await response.json();
       if (Array.isArray(result.data)) {
         setBridgeScoreData(result.data);
+        setBridgeCount(result.totalRecords);
         setTotalItems(parseInt(result.totalRecords, 10));
       } else {
         throw new Error("Invalid data format");
@@ -72,12 +74,12 @@ const BridgeWiseScore = () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bms-score-export`);
       const { data } = await response.json();
-  
+
       if (!data.length) {
         console.warn("No data available for CSV download.");
         return;
       }
-  
+
       // Convert JSON to CSV format
       const csvContent =
         "data:text/csv;charset=utf-8," +
@@ -85,7 +87,7 @@ const BridgeWiseScore = () => {
           Object.keys(data[0]).join(","), // CSV Headers
           ...data.map((row) => Object.values(row).join(",")), // CSV Rows
         ].join("\n");
-  
+
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
@@ -93,37 +95,42 @@ const BridgeWiseScore = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       // console.log("CSV file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading CSV:", error);
     }
   };
-  
+
   const handleDownloadExcel = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bms-score-export`);
       const { data } = await response.json();
-  
+
       if (!data.length) {
         console.warn("No data available for Excel download.");
         return;
       }
-  
+
       const worksheet = XLSX.utils.json_to_sheet(data);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
-  
+
       // Create a Blob and trigger the download
-      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = "Bridge_Wise_Score.xlsx";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       // console.log("Excel file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading Excel:", error);
@@ -232,32 +239,38 @@ const BridgeWiseScore = () => {
             position: "relative",
           }}
         >
-          <div className="card-body pb-0">
-            <div className="flex items-center justify-between pb-2">
-              <h6 className="card-title text-lg font-semibold">
-                Bridge Wise Score
-              </h6>
+          <div className="card-header" style={{ background: "#CFE2FF" }}>
+            {" "}
+            <h4>Bridge Wise Score</h4>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <h6 className="mb-0" id="structure-heading">
+                  Structure Counts:
+                  <span className="badge text-bg-success ms-2">
+                    <h6 className="mb-0">{bridgeCount || 0}</h6>
+                  </span>
+                </h6>
+              </div>
 
               <Filters
-              districtId={districtId}
-              setDistrictId={setDistrictId}
-              structureType={structureType}
-              setStructureType={setStructureType}
-              bridgeName={bridgeName}
-              setBridgeName={setBridgeName}
-            />
-
+                districtId={districtId}
+                setDistrictId={setDistrictId}
+                structureType={structureType}
+                setStructureType={setStructureType}
+                bridgeName={bridgeName}
+                setBridgeName={setBridgeName}
+              />
 
               <div className="flex gap-2">
                 <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+                  className="btn btn-outline-primary"
                   onClick={handleDownloadCSV}
                 >
                   <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
                   CSV
                 </button>
                 <button
-                  className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+                  className="btn btn-outline-success"
                   onClick={handleDownloadExcel}
                 >
                   <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
@@ -265,7 +278,9 @@ const BridgeWiseScore = () => {
                 </button>
               </div>
             </div>
+          </div>
 
+          <div className="card-body p-0 pb-2">
             {loading ? (
               <div
                 style={{
