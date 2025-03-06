@@ -1553,7 +1553,7 @@ app.get("/api/get-summary-evaluator", async (req, res) => {
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
-	  AND qc_rams = '2'
+	     AND qc_rams = '2'
       ORDER BY inspection_id DESC;
     `;
 
@@ -1648,7 +1648,6 @@ app.get("/api/get-summary-con", async (req, res) => {
       WHERE uu_bms_id = $1 
 	  AND qc_con = '1'
 	  AND surveyed_by = 'RAMS-UU'
-    AND evaluation_status = 'draft'
       ORDER BY inspection_id DESC;
     `;
 
