@@ -201,25 +201,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }));
   };
 
-  const handleApprovedFlagChange = (
-    spanIndex,
-    workKind,
-    inspectionId,
-    value
-  ) => {
-    setPendingData((prevData) => ({
-      ...prevData,
-      [spanIndex]: {
-        ...prevData[spanIndex],
-        [workKind]: prevData[spanIndex][workKind].map((item) =>
-          item.inspection_id === inspectionId
-            ? { ...item, qc_evaluator: value }
-            : item
-        ),
-      },
-    }));
-  };
-
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
   };
@@ -855,56 +836,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             </div>
                                             <div className="row">
                                               <div className="col-md-12 d-flex flex-column justify-content-between">
-                                                <Form.Group
-                                                  controlId={`qc_con_${inspection.inspection_id}`}
-                                                  className="mb-2"
-                                                >
-                                                  <div className="flex gap-4">
-                                                    {/* Unapproved Option */}
-                                                    <Form.Check
-                                                      type="radio"
-                                                      name={`qc_con_${inspection.inspection_id}`}
-                                                      label="Unapproved"
-                                                      value="3"
-                                                      onChange={(e) =>
-                                                        handleApprovedFlagChange(
-                                                          spanIndex,
-                                                          workKind,
-                                                          inspection.inspection_id,
-                                                          parseInt(
-                                                            e.target.value
-                                                          )
-                                                        )
-                                                      }
-                                                      className="text-blue-500 font-medium"
-                                                      style={{
-                                                        accentColor: "blue",
-                                                      }}
-                                                    />
-
-                                                    {/* Approved Option */}
-                                                    <Form.Check
-                                                      type="radio"
-                                                      name={`qc_con_${inspection.inspection_id}`}
-                                                      label="Approved"
-                                                      value="2"
-                                                      onChange={(e) =>
-                                                        handleApprovedFlagChange(
-                                                          spanIndex,
-                                                          workKind,
-                                                          inspection.inspection_id,
-                                                          parseInt(
-                                                            e.target.value
-                                                          )
-                                                        )
-                                                      }
-                                                      className="text-blue-500 font-medium"
-                                                      style={{
-                                                        accentColor: "blue",
-                                                      }}
-                                                    />
-                                                  </div>
-                                                </Form.Group>
                                                 <div className="mb-1">
                                                   <strong>
                                                     Evaluator Remarks:
