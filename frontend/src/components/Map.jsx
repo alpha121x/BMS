@@ -51,8 +51,17 @@ const Map = ({ districtId }) => {
               const bridgeData = await response.json();
         
               if (bridgeData.success) {
-                // Convert data to a serialized JSON string and encode it
-                const serializedBridgeData = encodeURIComponent(JSON.stringify(bridgeData.bridge));
+                const bridgesArray = bridgeData.bridges; // Extract bridges array
+                const bridge = bridgesArray[0]; // Select the first bridge
+
+        
+                if (!bridge) {
+                  console.error("No bridge details found");
+                  return;
+                }
+        
+                // Serialize and encode the bridges array
+                const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
         
                 // Redirect using window.location.href
                 window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
@@ -64,6 +73,7 @@ const Map = ({ districtId }) => {
             }
           }
         };
+        
         
         
 
