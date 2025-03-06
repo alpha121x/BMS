@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import { faUserCircle, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
 
 const Header = () => {
   const location = useLocation();
@@ -65,12 +65,12 @@ const Header = () => {
     <header className="p-1 rounded-lg shadow-lg">
       <div className="flex justify-between items-center mx-2">
         <div className="flex items-center">
-          <img src="/punjab.png" alt="Logo" className="h-[35px] w-[45px]" />
-          <div className="p-1 rounded">
+          <img src="/cnw.jpg" alt="Logo" className="h-[26px]" />
+          <div className="mt-1 ms-2">
             <Link to="/Dashboard" className="no-underline">
-              <h4 className="text-2xl font-bold uppercase">
-                <span className="text-blue-500">C&W BMS - Dashboard</span>
-              </h4>
+              <h5 className="font-bold uppercase">
+                <span className="text-blue-500">C&W BMS- Dashboard</span>
+              </h5>
             </Link>
           </div>
         </div>
@@ -200,23 +200,24 @@ const Header = () => {
             )}
           </div>
 
-
           {/* Profile Dropdown */}
           <div className="relative inline-block text-left" ref={profileRef}>
             <Link
               to="#"
               onClick={toggleProfileDropdown}
-              className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
+              className={`p-1 ms-2 font-semibold transition duration-300 no-underline ${
                 activeTab === "#"
                   ? "bg-blue-500 text-white"
-                  : "hover:bg-green-100 text-blue-500"
+                  : "hover:bg-gray-100 text-blue-500"
               }`}
             >
-              <FontAwesomeIcon icon={faUser} className="mr-2" />
-              {userName}
+              <FontAwesomeIcon icon={faUserCircle} className="mr-2 fs-3" />
             </Link>
             {isProfileDropdownOpen && (
-              <div className="absolute right-8 z-10 mt-2 w-fit bg-white border border-gray-200 rounded-md shadow-lg transition-all duration-200 ease-in-out transform scale-95">
+              <div className="absolute right-0 z-10 mt-2 w-fit bg-white border border-gray-200 rounded-1 shadow-lg transition-all duration-200 ease-in-out transform scale-95">
+                <Link className="flex items-center px-4 py-2 hover:bg-gray-100 no-underline transition duration-200">
+                  <span className="text-capitalize">{userName}</span>
+                </Link>
                 <Link
                   to="#"
                   onClick={(e) => {
