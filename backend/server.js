@@ -1552,9 +1552,15 @@ app.get("/api/get-summary-evaluator", async (req, res) => {
         "inspection_images" AS "PhotoPaths",
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
-      WHERE uu_bms_id = $1 
-	     AND qc_rams = '2'
-      ORDER BY inspection_id DESC;
+     WHERE 
+    "DamageLevelID" IN (4, 5, 6) 
+    AND (
+        surveyed_by = 'RAMS-PITB' 
+        OR 
+        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    ) 
+    AND uu_bms_id = $1  -- ✅ Added condition
+ORDER BY inspection_id DESC;
     `;
 
     const { rows } = await pool.query(query, [bridgeId]);
@@ -2201,67 +2207,24 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
     "MaterialName", 
     "DamageKindName", 
     "DamageLevel", 
+    "DamageLevelID", 
     "Remarks",
     COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
     "ApprovedFlag"
 FROM bms.tbl_inspection_f
-WHERE uu_bms_id = $1 
-  OR surveyed_by = 'RAMS-PITB'
-    AND qc_rams = 2
-  AND "DamageLevelID" IN (4, 5, 6)  
+WHERE 
+    "DamageLevelID" IN (4, 5, 6) 
+    AND (
+        surveyed_by = 'RAMS-PITB' 
+        OR 
+        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    ) 
+    AND uu_bms_id = $1  -- ✅ Added condition
 ORDER BY inspection_id DESC;
     `;
 
-    const approvedQuery = `
-      SELECT 
-         uu_bms_id,
-        inspection_id,
-        qc_rams,
-        qc_remarks_rams,
-        qc_remarks_con,
-        reviewed_by,
-        bridge_name, 
-        "SpanIndex", 
-        "WorkKindName", 
-        "PartsName", 
-        "MaterialName", 
-        "DamageKindName", 
-        "DamageLevel", 
-        "Remarks", 
-        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
-        "ApprovedFlag"
-      FROM bms.tbl_inspection_f
-      WHERE uu_bms_id = $1 
-      ORDER BY inspection_id DESC;
-    `;
-
-    const unapprovedQuery = `
-      SELECT 
-       uu_bms_id,
-        inspection_id,
-        qc_rams,
-        qc_remarks_rams,
-        qc_remarks_con,
-        reviewed_by,
-        bridge_name, 
-        "SpanIndex", 
-        "WorkKindName", 
-        "PartsName", 
-        "MaterialName", 
-        "DamageKindName", 
-        "DamageLevel", 
-        "Remarks", 
-        COALESCE(string_to_array(photopath, ','), '{}') AS "PhotoPaths", 
-        "ApprovedFlag"
-      FROM bms.tbl_inspection_f
-      WHERE uu_bms_id = $1 
-      ORDER BY inspection_id DESC;
-    `;
-
-    const [pendingRows, approvedRows, unapprovedRows] = await Promise.all([
+    const [pendingRows] = await Promise.all([
       pool.query(pendingQuery, [bridgeId]),
-      pool.query(approvedQuery, [bridgeId]),
-      pool.query(unapprovedQuery, [bridgeId]),
     ]);
 
     // Helper function to extract URLs from potentially malformed JSON paths
@@ -2331,8 +2294,6 @@ ORDER BY inspection_id DESC;
       success: true,
       data: {
         pending: formatRows(pendingRows.rows),
-        approved: formatRows(approvedRows.rows),
-        unapproved: formatRows(unapprovedRows.rows),
       },
     });
   } catch (error) {
