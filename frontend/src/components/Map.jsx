@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
+import { useNavigate } from "react-router-dom"; // For navigation
 import { BASE_URL } from "./config";
 
 const Map = ({ districtId }) => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
+  const navigate = useNavigate(); // Use for navigation
 
   useEffect(() => {
     const initializeMap = async () => {
@@ -16,17 +18,15 @@ const Map = ({ districtId }) => {
               "esri/views/MapView",
               "esri/layers/MapImageLayer",
               "esri/widgets/LayerList",
-              "esri/geometry/Extent", // To work with extents
+              "esri/geometry/Extent",
             ],
             { css: true }
           );
 
-        // Initialize Map
         const map = new Map({
           basemap: "gray-vector",
         });
 
-        // Initialize MapView
         const view = new MapView({
           container: mapRef.current,
           map: map,
@@ -36,10 +36,41 @@ const Map = ({ districtId }) => {
 
         viewRef.current = view;
 
-        // Function to get extent by districtId
+        const handlePopupAction = async (event) => {
+          if (event.action.id === "view-details") {
+            const attributes = view.popup.selectedFeature.attributes;
+            const bridgeId = attributes?.uu_bms_id; // Extract Bridge ID
+        
+            if (!bridgeId) {
+              console.error("Bridge ID not found.");
+              return;
+            }
+        
+            try {
+              const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`);
+              const bridgeData = await response.json();
+        
+              if (bridgeData.success) {
+                // Convert data to a serialized JSON string and encode it
+                const serializedBridgeData = encodeURIComponent(JSON.stringify(bridgeData.bridge));
+        
+                // Redirect using window.location.href
+                window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
+              } else {
+                console.error("Bridge details not found");
+              }
+            } catch (error) {
+              console.error("Error fetching bridge details:", error);
+            }
+          }
+        };
+        
+        
+
+        view.popup.on("trigger-action", handlePopupAction);
+
         const getDistrictExtent = async (districtId) => {
           if (districtId === "%") {
-            // Return extent for entire Punjab
             return new Extent({
               xmin: 69.0,
               ymin: 29.5,
@@ -49,9 +80,7 @@ const Map = ({ districtId }) => {
             });
           } else {
             try {
-              const response = await fetch(
-                `${BASE_URL}/api/districtExtent?districtId=${districtId}`
-              );
+              const response = await fetch(`${BASE_URL}/api/districtExtent?districtId=${districtId}`);
               const data = await response.json();
 
               if (data.success && data.district) {
@@ -74,13 +103,11 @@ const Map = ({ districtId }) => {
           }
         };
 
-        // Fetch the extent and zoom to the district
         const extent = await getDistrictExtent(districtId);
         if (extent) {
-          view.extent = extent; // Set the map extent to the district or Punjab
+          view.extent = extent;
         }
 
-        // Define the popup template for bridge information
         const popupTemplate = {
           title: "Bridge Information",
           content: `
@@ -91,30 +118,12 @@ const Map = ({ districtId }) => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <th>Road Name:</th>
-                  <td>{road_name}</td>
-                </tr>
-                <tr>
-                  <th>Reference No:</th>
-                  <td>{uu_bms_id}</td>
-                </tr>
-                <tr>
-                  <th>District:</th>
-                  <td>{district}</td>
-                </tr>
-                <tr>
-                  <th>Inventory Score:</th>
-                  <td>{inventory_score}</td>
-                </tr>
-                <tr>
-                  <th>Inspection Score:</th>
-                  <td>{inspection_score}</td>
-                </tr>
-                <tr>
-                  <th>Budget Cost:</th>
-                  <td>{budget_cost}</td>
-                </tr>
+                <tr><th>Road Name:</th><td>{road_name}</td></tr>
+                <tr><th>Reference No:</th><td>{uu_bms_id}</td></tr>
+                <tr><th>District:</th><td>{district}</td></tr>
+                <tr><th>Inventory Score:</th><td>{inventory_score}</td></tr>
+                <tr><th>Inspection Score:</th><td>{inspection_score}</td></tr>
+                <tr><th>Budget Cost:</th><td>{budget_cost}</td></tr>
                 <tr>
                   <th>Images:</th>
                   <td>
@@ -139,74 +148,25 @@ const Map = ({ districtId }) => {
           ],
         };
 
-        // MapImageLayer with multiple layers by index
         const bridgeLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
           title: "Condition Locations",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            {
-              id: 1, // Districts layer (index 1)
-              title: "Districts",
-              opacity: 0.6,
-              listMode: "show",
-            },
-            {
-              id: 3, // GOOD layer (index 3)
-              title: "Good",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate: popupTemplate,
-            },
-            {
-              id: 4, // FAIR layer (index 4)
-              title: "Fair",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate: popupTemplate,
-            },
-            {
-              id: 5, // POOR layer (index 5)
-              title: "Poor",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate: popupTemplate,
-            },
-            {
-              id: 6, // UNDER CONSTRUCTION layer (index 6)
-              title: "Under Construction",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate: popupTemplate,
-            },
-            {
-              id: 2, // BRIDGES LOCATIONS layer (index 2)
-              title: "Bridge Locations",
-              popupTemplate: popupTemplate,
-            },
+            { id: 1, title: "Districts", opacity: 0.6, listMode: "show" },
+            { id: 3, title: "Good", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 4, title: "Fair", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 5, title: "Poor", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 6, title: "Under Construction", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 2, title: "Bridge Locations", popupTemplate },
           ],
         });
 
-        // Add the Layer to the Map
         map.add(bridgeLayer);
 
-        // Layer List Widget
-        const layerList = new LayerList({
-          view: view,
-          listItemCreatedFunction: (event) => {
-            // Customize Layer List items
-            const item = event.item;
-            if (item.layer === bridgeLayer) {
-              item.panel = {
-                content: "legend",
-                open: true,
-              };
-            }
-          },
-        });
+        const layerList = new LayerList({ view: view });
 
-        // Add Layer List to the view
         view.ui.add(layerList, "top-right");
 
         await view.when();
@@ -223,7 +183,7 @@ const Map = ({ districtId }) => {
         viewRef.current.container = null;
       }
     };
-  }, [districtId]); // Re-run when districtId changes
+  }, [districtId, navigate]);
 
   return (
     <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">

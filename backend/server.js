@@ -1011,6 +1011,7 @@ app.get("/api/bridges", async (req, res) => {
       district = "%",
       structureType = "%",
       bridgeName = "%",
+      bridgeId = "%",
     } = req.query;
 
     let query = `
@@ -1070,6 +1071,16 @@ app.get("/api/bridges", async (req, res) => {
       countParams.push(district);
       paramIndex++;
     }
+
+
+    if (bridgeId !== "%") {
+      query += ` AND uu_bms_id = $${paramIndex}`;
+      countQuery += ` AND uu_bms_id = $${paramIndex}`;
+      queryParams.push(bridgeId);
+      countParams.push(bridgeId);
+      paramIndex++;
+    }
+
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
