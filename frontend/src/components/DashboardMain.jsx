@@ -79,7 +79,7 @@ const DashboardMain = () => {
 
         // Add total count card
         mappedCards.unshift({
-          label: "Total",
+          label: "Total Structures Inventory",
           value: totalCount,
           icon: <SiInstructure />,
           color: "blue",
@@ -118,7 +118,7 @@ const DashboardMain = () => {
 
         // Add total count card
         mappedCards.unshift({
-          label: "Total",
+          label: "Total Inspected Strcutures",
           value: totalCount,
           icon: <SiInstructure />,
           color: "blue",
@@ -132,7 +132,7 @@ const DashboardMain = () => {
   const evaluatedCards = [
     // Add same 3 types here also
     {
-      label: "Total",
+      label: "Total Evaluated Structures",
       value: "0",
       icon: <SiInstructure />,
       color: "blue",
@@ -192,9 +192,6 @@ const DashboardMain = () => {
         <div className="row">
           <div className="col-md-12">
             <div className="mb-2">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Total Structures Inventory
-              </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {structureCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
@@ -203,9 +200,6 @@ const DashboardMain = () => {
             </div>
 
             <div className="mb-2">
-              <h3 className="text-xl font-semibold text-gray-700">
-                 Constuction Type Structures
-              </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {constructionCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
@@ -215,9 +209,6 @@ const DashboardMain = () => {
 
             {/* Inspection Section */}
             <div className="mb-2">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Inspected Structures
-              </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {inspectedCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />
@@ -227,9 +218,6 @@ const DashboardMain = () => {
 
             {/* Evaluation Section */}
             <div className="mb-2">
-              <h3 className="text-xl font-semibold text-gray-700">
-                Evaluated Structures
-              </h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {evaluatedCards.map((card, index) => (
                   <TopCardDashboard key={index} {...card} />

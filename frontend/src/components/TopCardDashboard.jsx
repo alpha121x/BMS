@@ -1,6 +1,6 @@
 import React from 'react'
 
-const TopCardDashboard = ({ label, value, icon, iconSize = 32 }) => {
+const TopCardDashboard = ({ label, value }) => {
   return (
     <div
       className="rounded-1 shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
@@ -11,23 +11,8 @@ const TopCardDashboard = ({ label, value, icon, iconSize = 32 }) => {
         borderRadius: "9px", // Rounded corners
       }}
     >
-      <div className="flex items-center flex-grow text-white">
-        <div
-          className="p-2 rounded-full mr-3 flex items-center justify-center"
-          style={{
-            backgroundColor: "rgb(123, 179, 247)", // Slightly lighter background for the icon
-            width: `${iconSize + 16}px`,
-            height: `${iconSize + 16}px`,
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Add shadow for depth
-          }}
-        >
-          {React.cloneElement(icon, { size: iconSize, color: "#fff" })}{" "}
-          {/* White icon color */}
-        </div>
-        <h3 className="text-xl font-semibold flex-grow text-white">{label}</h3>
-      </div>
-
-      <div className="text-3xl font-bold ml-2 text-white">{value}</div>
+      <h3 className="text-lg font-semibold text-white flex-grow">{label}</h3>
+      <div className="text-2xl font-bold ml-2 text-white">{value}</div>
     </div>
   )
 }
