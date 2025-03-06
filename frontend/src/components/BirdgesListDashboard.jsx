@@ -5,7 +5,6 @@ import { BASE_URL } from "./config";
 import "./BridgeList.css";
 import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
-import FilterComponent from "./FilterComponent";
 import Filters from "./Filters";
 import InventoryInfoDashboard from "./InventoryInfoDashboard"; // Import the InventoryInfo component
 import InspectionListDashboard from "./InspectionListDashboard";
@@ -29,8 +28,8 @@ const BridgesListDashboard = ({
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
-   const [loadingExcel, setLoadingExcel] = useState(false);
-    const [loadingCSV, setLoadingCSV] = useState(false);
+  const [loadingExcel, setLoadingExcel] = useState(false);
+  const [loadingCSV, setLoadingCSV] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
@@ -38,8 +37,8 @@ const BridgesListDashboard = ({
   const itemsPerPage = 10;
 
   useEffect(() => {
-      fetchAllBridges();
-    }, [currentPage, districtId, structureType, bridgeName]); // Re-fetch when username changes
+    fetchAllBridges();
+  }, [currentPage, districtId, structureType, bridgeName]); // Re-fetch when username changes
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -137,7 +136,6 @@ const BridgesListDashboard = ({
     setShowModal(true); // Show the modal
   };
 
-  
   const handleRowClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
     const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
@@ -182,22 +180,25 @@ const BridgesListDashboard = ({
         structureType,
         bridgeName,
       };
-  
+
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadNeww?${queryString}`, {
-        method: "GET",
-      });
-  
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       const csv = Papa.unparse(data.bridges);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
@@ -210,7 +211,7 @@ const BridgesListDashboard = ({
       setLoading(false); // Stop loading
     }
   };
-  
+
   const handleDownloadExcel = async () => {
     setLoading(true); // Start loading
     try {
@@ -219,34 +220,37 @@ const BridgesListDashboard = ({
         structureType,
         bridgeName,
       };
-  
+
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadNeww?${queryString}`, {
-        method: "GET",
-      });
-  
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       // Handle array fields like photos
       data.bridges.forEach((row) => {
         if (Array.isArray(row.photos)) {
           row.photos = row.photos.join(", ") || "No image path";
         }
       });
-  
+
       // Create the worksheet
       const ws = XLSX.utils.json_to_sheet(data.bridges);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
-  
+
       // Download the Excel file
       XLSX.writeFile(wb, "bridges_data.xlsx");
     } catch (error) {
@@ -358,9 +362,7 @@ const BridgesListDashboard = ({
           {!loading && !error && (
             <>
               <div>
-                <Table
-                  className="table table-bordered table-hover table-striped" 
-                >
+                <Table className="table table-bordered table-hover table-striped">
                   <thead>
                     <tr>
                       <th>District</th>
