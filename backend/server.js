@@ -1745,7 +1745,6 @@ app.get("/api/get-summary-rams", async (req, res) => {
 	  AND qc_con = '2'
     AND qc_rams = '0'
 	  AND surveyed_by = 'RAMS-UU'
-    AND evaluation_status = 'draft'
       ORDER BY inspection_id DESC;
     `;
 
@@ -2207,7 +2206,7 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
     "ApprovedFlag"
 FROM bms.tbl_inspection_f
 WHERE uu_bms_id = $1 
-  AND surveyed_by = 'RAMS-PITB'
+  OR surveyed_by = 'RAMS-PITB'
     AND qc_rams = 2
   AND "DamageLevelID" IN (4, 5, 6)  
 ORDER BY inspection_id DESC;
@@ -2233,7 +2232,6 @@ ORDER BY inspection_id DESC;
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
-      AND qc_evaluator = '2'
       ORDER BY inspection_id DESC;
     `;
 
@@ -2257,7 +2255,6 @@ ORDER BY inspection_id DESC;
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
       WHERE uu_bms_id = $1 
-       AND qc_evaluator = '3'
       ORDER BY inspection_id DESC;
     `;
 
