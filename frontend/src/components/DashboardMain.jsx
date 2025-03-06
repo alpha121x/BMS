@@ -232,7 +232,7 @@ const DashboardMain = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-12">
-            <div className="flex justify-start p-1 gap-3 w-50 mt-2">
+            <div className="flex justify-start p-1 gap-3 w-50">
               <button
                 onClick={() => setActiveView("map")}
                 className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
