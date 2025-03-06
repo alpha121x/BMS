@@ -10,7 +10,6 @@ import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
 import TopCardDashboard from "./TopCardDashboard";
-import { icon } from "leaflet";
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
