@@ -61,9 +61,9 @@ const BridgesListNewUpdated = ({
       // Define different URLs based on username
       let url;
       if (username === "consultant") {
-        url = new URL(`${BASE_URL}/api/bridgesNew`);
+        url = new URL(`${BASE_URL}/api/bridgesCon`);
       } else if (username === "rams") {
-        url = new URL(`${BASE_URL}/api/bridgesNew`);
+        url = new URL(`${BASE_URL}/api/bridgesRams`);
       } else if (username === "evaluator") {
         url = new URL(`${BASE_URL}/api/bridgesEvaluator`); // Default for normal users
       } else {

@@ -1,12 +1,14 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useCallback } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import ReportsSummary from "./ReportsSummary";
 
 const InspectionListRams = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
@@ -205,6 +207,7 @@ const InspectionListRams = ({ bridgeId }) => {
   };
 
   const handleDownloadCSV = async (bridgeId) => {
+    setLoading(true); // Start loading
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
@@ -216,13 +219,12 @@ const InspectionListRams = ({ bridgeId }) => {
         !Array.isArray(data.bridges) ||
         data.bridges.length === 0
       ) {
-        console.error("No data to export");
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
 
       const headers = Object.keys(summaryData[0]);
 
@@ -249,12 +251,14 @@ const InspectionListRams = ({ bridgeId }) => {
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error("Error downloading CSV:", error);
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
-  const handleDownloadExcel = async (bridgeId) => {
+  const handleDownloadExcel = async (bridgeId, setLoading) => {
+    setLoading(true); // Start loader
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
@@ -272,18 +276,119 @@ const InspectionListRams = ({ bridgeId }) => {
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0].bridge_name || "bridge_inspection";
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
 
-      const ws = XLSX.utils.json_to_sheet(summaryData);
-      ws["!cols"] = Object.keys(summaryData[0]).map(() => ({ width: 20 }));
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Inspections");
 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+      // Define all columns except images
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+      );
 
-      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: 22,
+      }));
+
+      // Add image columns with increased spacing
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
+      }
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
+      }
+
+      // Define worksheet columns
+      worksheet.columns = columns;
+
+      // Style the header row (first row)
+      worksheet.getRow(1).font = { bold: true, size: 14 }; // Bold text and increased font size
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      }; // Center align text
+      worksheet.getRow(1).height = 25; // Increase row height for better visibility
+
+      // Add data rows without image URLs
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+
+        // Extract & fix image URLs (replacing backslashes with forward slashes)
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+
+        // Add normal data (excluding image URLs)
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
+
+        // Add a row for each entry
+        const rowIndex = worksheet.addRow(rowData).number;
+
+        // **Adjust row height for images to fit properly**
+        worksheet.getRow(rowIndex).height = 90;
+
+        // Function to insert images in the correct locations
+        const insertImage = async (photoUrls, columnOffset, rowHeight) => {
+          for (let j = 0; j < photoUrls.length && j < 5; j++) {
+            try {
+              // Fetch image data from the URL
+              const imgResponse = await fetch(photoUrls[j]);
+              const imgBlob = await imgResponse.blob();
+              const arrayBuffer = await imgBlob.arrayBuffer();
+
+              // Add image to the workbook
+              const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: "jpeg",
+              });
+
+              // **Insert image in the correct column**
+              // - `tl.col`: Column position, starting from normal data columns + offset
+              // - `tl.row`: Row position (adjusted for zero-based index)
+              // - `ext.width`: Width of the inserted image (150px for better visibility)
+              // - `ext.height`: Height of the inserted image (90px for consistency)
+              worksheet.addImage(imageId, {
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
+                ext: { width: 150, height: 90 },
+              });
+            } catch (error) {
+              console.error("Failed to load image:", photoUrls[j], error);
+            }
+          }
+        };
+
+        // Insert Overview Photos (5 max)
+        await insertImage(overviewPhotos, 0, 90);
+
+        // Insert Inspection Photos (5 max)
+        await insertImage(inspectionPhotos, 5, 90);
+      }
+
+      // Save File
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+    } finally {
+      setLoading(false); // Stop loader
     }
   };
 
@@ -347,7 +452,7 @@ const InspectionListRams = ({ bridgeId }) => {
             </button>
             <button
               className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-              onClick={() => handleDownloadExcel(bridgeId)}
+              onClick={() => handleDownloadExcel(bridgeId, setLoading)}
             >
               <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
               Excel
@@ -355,33 +460,13 @@ const InspectionListRams = ({ bridgeId }) => {
           </div>
         </div>
 
-        <div className="summary-section mt-1 mb-1">
-          <h4 className="text-sm font-semibold text-gray-700 mb-1">
-            Reports Summary
-          </h4>
-          <div className="bg-gray-200  mb-2 mt-1  py-2 px-3 rounded-md shadow border">
-            <div className="grid grid-cols-2 gap-y-1 text-sm">
-              <div>
-                <strong>Total Spans:</strong>
-                <p className="text-gray-700">
-                  {getUniqueSpanIndices(summaryData)}
-                </p>
-              </div>
-              <div>
-                <strong>Damage Levels:</strong>
-                <p className="text-gray-700">{getDamageLevel(summaryData)}</p>
-              </div>
-              <div>
-                <strong>Materials Used:</strong>
-                <p className="text-gray-700">{getMaterials(summaryData)}</p>
-              </div>
-              <div>
-                <strong>Work Kind:</strong>
-                <p className="text-gray-700">{getWorkKind(summaryData)}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ReportsSummary
+          summaryData={summaryData}
+          getUniqueSpanIndices={getUniqueSpanIndices}
+          getDamageLevel={getDamageLevel}
+          getMaterials={getMaterials}
+          getWorkKind={getWorkKind}
+        />
 
         {loading && (
           <div
@@ -431,7 +516,8 @@ const InspectionListRams = ({ bridgeId }) => {
           {activeDiv === "pending" && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
-              {pendingData &&
+
+              {pendingData && Object.keys(pendingData).length > 0 ? (
                 Object.keys(pendingData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
                     <div
@@ -442,7 +528,8 @@ const InspectionListRams = ({ bridgeId }) => {
                       <strong>Reports For Span: {spanIndex}</strong>
                       <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                     </div>
-                    {expandedSections[spanIndex] ? (
+
+                    {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(pendingData[spanIndex]).length > 0 ? (
                           Object.keys(pendingData[spanIndex]).map(
@@ -489,7 +576,7 @@ const InspectionListRams = ({ bridgeId }) => {
                                                         cursor: "pointer",
                                                         flexShrink: 0,
                                                       }}
-                                                      loading="lazy" // Lazy loading added
+                                                      loading="lazy"
                                                       onClick={() =>
                                                         handlePhotoClick(
                                                           photoUrl
@@ -526,17 +613,17 @@ const InspectionListRams = ({ bridgeId }) => {
                                             <strong>
                                               Situation Remarks:
                                             </strong>{" "}
-                                            {inspection.Remarks || "N/A"}
-                                            <br />
+                                            {inspection.Remarks || "N/A"} <br />
                                             <strong>
                                               Consultant Remarks:
                                             </strong>{" "}
                                             {inspection.qc_remarks_con || "N/A"}
                                           </div>
+
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
                                               as="textarea"
-                                              rows={3} // You can adjust the number of rows as per your requirement
+                                              rows={3}
                                               placeholder="Rams Remarks"
                                               value={
                                                 inspection.qc_remarks_rams || ""
@@ -557,7 +644,6 @@ const InspectionListRams = ({ bridgeId }) => {
                                               className="mb-2"
                                             >
                                               <div className="flex gap-4">
-                                                {/* Unapproved Option */}
                                                 <Form.Check
                                                   type="radio"
                                                   name={`qc_rams_${inspection.inspection_id}`}
@@ -576,8 +662,6 @@ const InspectionListRams = ({ bridgeId }) => {
                                                     accentColor: "blue",
                                                   }}
                                                 />
-
-                                                {/* Approved Option */}
                                                 <Form.Check
                                                   type="radio"
                                                   name={`qc_rams_${inspection.inspection_id}`}
@@ -616,12 +700,19 @@ const InspectionListRams = ({ bridgeId }) => {
                             )
                           )
                         ) : (
-                          <p>No data available</p>
+                          <p>
+                            No pending records available for Span {spanIndex}
+                          </p>
                         )}
                       </div>
-                    ) : null}
+                    )}
                   </div>
-                ))}
+                ))
+              ) : (
+                <p>
+                  No pending records available.
+                </p>
+              )}
             </div>
           )}
 
@@ -779,7 +870,7 @@ const InspectionListRams = ({ bridgeId }) => {
                   </div>
                 ))
               ) : (
-                <p>No data available</p>
+                <p>No approved records available</p>
               )}
             </div>
           )}
