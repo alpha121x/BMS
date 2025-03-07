@@ -156,23 +156,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }
         />
 
-         {/* Private Route for BridgeWise Score */}
+         {/* Private Route for BridgeInformation */}
          <Route
           path="/BridgeInformation"
           element={
             <PrivateRoute>
               <BridgeInformation />
             </PrivateRoute>
-          }
-        />
-
-         {/* Private Route for BridgeWise Score */}
-         <Route
-          path="/BridgeInformation"
-          element={
-            <PrivateEvaluationRoute>
-              <BridgeInformation />
-            </PrivateEvaluationRoute>
           }
         />
 
