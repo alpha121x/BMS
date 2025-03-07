@@ -87,7 +87,7 @@ const EvaluationMainCon = () => {
       </div>
 
       <div className="mb-2 container-fluid">
-        <Map />
+        <Map districtId={districtId} />
       </div>
 
       {/* Bridges */}
