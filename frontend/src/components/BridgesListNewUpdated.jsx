@@ -66,8 +66,6 @@ const BridgesListNewUpdated = ({
         url = new URL(`${BASE_URL}/api/bridgesRams`);
       } else if (username === "evaluator") {
         url = new URL(`${BASE_URL}/api/bridgesEvaluator`); // Default for normal users
-      } else {
-        url = new URL(`${BASE_URL}/api/bridgesNew`);
       }
 
       // Set query parameters

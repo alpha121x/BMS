@@ -961,6 +961,207 @@ app.get("/api/inspections-export", async (req, res) => {
   }
 });
 
+// Inspection export for consultant
+app.get("/api/inspections-export-con", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    let query = `
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "Reference No:",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
+          md.structure_type, md.road_no, md.road_name, md.road_name_cwd, 
+          md.road_code_cwd, md.route_id, md.survey_id, md.surveyor_name, 
+          md.zone, md.district, md.road_classification, md.road_surface_type, 
+          md.carriageway_type, md.direction, md.visual_condition, md.construction_type, 
+          md.no_of_span, md.span_length_m, md.structure_width_m, md.construction_year, 
+          md.last_maintenance_date, md.data_source, md.date_time, md.remarks,
+          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+          
+          f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", 
+          f."PartsID", f."PartsName", f."MaterialID", f."MaterialName", 
+          f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
+          f.damage_extent, f."Remarks", f.current_date_time, COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
+          f.qc_con,
+
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
+        FROM bms.tbl_bms_master_data md
+        LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+        WHERE f.surveyed_by = 'RAMS-UU' AND f.qc_con = '1'
+      )
+      SELECT * FROM ranked_data WHERE 1=1`;
+
+    const queryParams = [];
+    if (bridgeId && !isNaN(bridgeId)) {
+      query += ` AND "Reference No:" = $1`;
+      queryParams.push(Number(bridgeId));
+    }
+
+    const result = await pool.query(query, queryParams);
+
+    let firstRow = true;
+    const processedData = result.rows.map((row) => {
+      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
+
+      row["Overview Photos"] = row["Overview Photos"]
+        .map((photo) => (photo ? swapDomain(photo) : null))
+        .filter(Boolean);
+
+      if (!firstRow) {
+        row["Overview Photos"] = null;
+      }
+
+      firstRow = false;
+      return row;
+    });
+
+    res.json({ success: true, bridges: processedData });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
+// Inspection export for consultant
+app.get("/api/inspections-export-rams", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    let query = `
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "Reference No:",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
+          md.structure_type, md.road_no, md.road_name, md.road_name_cwd, 
+          md.road_code_cwd, md.route_id, md.survey_id, md.surveyor_name, 
+          md.zone, md.district, md.road_classification, md.road_surface_type, 
+          md.carriageway_type, md.direction, md.visual_condition, md.construction_type, 
+          md.no_of_span, md.span_length_m, md.structure_width_m, md.construction_year, 
+          md.last_maintenance_date, md.data_source, md.date_time, md.remarks,
+          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+          
+          f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", 
+          f."PartsID", f."PartsName", f."MaterialID", f."MaterialName", 
+          f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
+          f.damage_extent, f."Remarks", f.current_date_time, COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
+          f.qc_con,f.qc_rams,
+
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
+        FROM bms.tbl_bms_master_data md
+        LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+        WHERE f.surveyed_by = 'RAMS-UU' AND f.qc_con = '2' AND f.qc_rams = '0'
+      )
+      SELECT * FROM ranked_data WHERE 1=1`;
+
+    const queryParams = [];
+    if (bridgeId && !isNaN(bridgeId)) {
+      query += ` AND "Reference No:" = $1`;
+      queryParams.push(Number(bridgeId));
+    }
+
+    const result = await pool.query(query, queryParams);
+
+    let firstRow = true;
+    const processedData = result.rows.map((row) => {
+      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
+
+      row["Overview Photos"] = row["Overview Photos"]
+        .map((photo) => (photo ? swapDomain(photo) : null))
+        .filter(Boolean);
+
+      if (!firstRow) {
+        row["Overview Photos"] = null;
+      }
+
+      firstRow = false;
+      return row;
+    });
+
+    res.json({ success: true, bridges: processedData });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
+// inspection download for evaluator login
+app.get("/api/inspections-export-evaluator", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    let query = `
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "Reference No:",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
+          md.structure_type, md.road_no, md.road_name, md.road_name_cwd, 
+          md.road_code_cwd, md.route_id, md.survey_id, md.surveyor_name, 
+          md.zone, md.district, md.road_classification, md.road_surface_type, 
+          md.carriageway_type, md.direction, md.visual_condition, md.construction_type, 
+          md.no_of_span, md.span_length_m, md.structure_width_m, md.construction_year, 
+          md.last_maintenance_date, md.data_source, md.date_time, md.remarks,
+          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+          
+          f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", 
+          f."PartsID", f."PartsName", f."MaterialID", f."MaterialName", 
+          f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
+          f.damage_extent, f."Remarks", f.current_date_time, COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
+          f.qc_rams, -- Added qc_rams for filtering
+          
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
+        FROM bms.tbl_bms_master_data md
+        LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+      )
+      SELECT * FROM ranked_data WHERE "DamageLevelID" IN (4, 5, 6)
+        AND (
+          surveyed_by = 'RAMS-PITB' 
+          OR 
+          (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+        )`;
+
+    const queryParams = [];
+    if (bridgeId && !isNaN(bridgeId)) {
+      query += ` AND "Reference No:" = $1`;
+      queryParams.push(Number(bridgeId));
+    }
+
+    const result = await pool.query(query, queryParams);
+
+    let firstRow = true;
+    const processedData = result.rows.map((row) => {
+      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
+
+      // Update Overview Photos using the same logic as PhotoPaths
+      row["Overview Photos"] = row["Overview Photos"]
+        .map((photo) => (photo ? swapDomain(photo) : null))
+        .filter(Boolean);
+
+      if (!firstRow) {
+        row["Overview Photos"] = null;
+      }
+
+      firstRow = false;
+      return row;
+    });
+
+    res.json({ success: true, bridges: processedData });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
+
 // Helper function to extract valid URLs from PhotoPaths
 function extractUrlsFromPath(photoPaths) {
   if (!photoPaths) return [];
@@ -1654,7 +1855,6 @@ app.get("/api/inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 // for evaluator summary data
 app.get("/api/get-summary", async (req, res) => {
