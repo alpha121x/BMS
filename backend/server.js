@@ -1783,6 +1783,7 @@ app.get("/api/inspections", async (req, res) => {
         ins."DamageKindName", 
         ins."DamageLevel", 
         ins."damage_extent",  
+        ins."current_date_time",  
         ins."Remarks", 
         ins.inspection_images AS "PhotoPaths",
         ins."ApprovedFlag"

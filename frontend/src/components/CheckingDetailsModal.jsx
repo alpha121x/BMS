@@ -20,6 +20,14 @@ const CheckingDetailsModal = ({ selectedRow }) => {
           </tr>
           <tr>
             <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+              Elements
+            </th>
+            <td className="border border-gray-200 px-4 py-2">
+              {selectedRow?.PartsName || "N/A"}
+            </td>
+          </tr>
+          <tr>
+            <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
               Damage Kind
             </th>
             <td className="border border-gray-200 px-4 py-2">

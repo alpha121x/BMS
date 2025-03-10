@@ -232,8 +232,8 @@ const CheckingTable = ({districtId, bridgeName}) => {
               <th>Bridge Name</th>
               <th>Work Kind</th>
               <th>Material</th>
-              <th>Parts</th>
-              <th>Status</th>
+              <th>Elements</th>
+              <th>Date Time</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -245,11 +245,7 @@ const CheckingTable = ({districtId, bridgeName}) => {
                   <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
-                  <td>
-                    {row.ApprovedFlag === 0
-                      ? "Unapproved"
-                      : row.ApprovedFlag || "N/A"}
-                  </td>
+                  <td>{row.current_date_time}</td>
                   <td>
                     <Button
                       onClick={() => handleViewClick(row)}
