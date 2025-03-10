@@ -245,7 +245,7 @@ const CheckingTable = ({districtId, bridgeName}) => {
                   <td>{row.WorkKindName || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
-                  <td>{row.current_date_time}</td>
+                  <td>{new Date(row.current_date_time).toLocaleString()  || "N/A"}</td>
                   <td>
                     <Button
                       onClick={() => handleViewClick(row)}
