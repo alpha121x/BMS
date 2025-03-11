@@ -1332,9 +1332,14 @@ function extractUrlsFromPath(photoPaths) {
 
 // Function to swap domain/IP
 function swapDomain(url) {
+  if (!url || typeof url !== "string") return url;
+
+  // Ensure consistent URL format
+  url = url.replace(/\\/g, "/"); // ✅ Convert backslashes to forward slashes
+
   return url.includes("cnw.urbanunit.gov.pk")
     ? url.replace("cnw.urbanunit.gov.pk", "118.103.225.148")
-    : url.replace("118.103.225.148", "cnw.urbanunit.gov.pk");
+    : url;
 }
 
 // bridges list for dashboard main
