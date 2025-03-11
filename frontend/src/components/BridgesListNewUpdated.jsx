@@ -270,7 +270,6 @@ const BridgesListNewUpdated = ({
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0]?.bridge_name || "bridges_data";
 
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Bridges Data");
@@ -367,7 +366,7 @@ const BridgesListNewUpdated = ({
 
       // Save File
       const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
+      saveAs(new Blob([buffer]), `BridgeData.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
