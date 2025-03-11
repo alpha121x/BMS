@@ -1301,20 +1301,24 @@ function extractUrlsFromPath(photoPaths) {
   if (!photoPaths) return [];
 
   try {
-    const parsedData = 
+    const parsedData =
       typeof photoPaths === "string" ? JSON.parse(photoPaths) : photoPaths;
     let urls = [];
 
     function extractFromNested(obj) {
       if (Array.isArray(obj)) {
-        obj.forEach(item => extractFromNested(item));
+        obj.forEach((item) => extractFromNested(item));
       } else if (typeof obj === "object" && obj !== null) {
-        if (obj.path && typeof obj.path === "string" && obj.path.startsWith("http")) {
-          urls.push(swapDomain(obj.path)); // ✅ Apply swapDomain here
+        if (
+          obj.path &&
+          typeof obj.path === "string" &&
+          obj.path.startsWith("http")
+        ) {
+          urls.push(swapDomain(obj.path));
         }
-        Object.values(obj).forEach(value => extractFromNested(value));
+        Object.values(obj).forEach((value) => extractFromNested(value));
       } else if (typeof obj === "string" && obj.startsWith("http")) {
-        urls.push(swapDomain(obj)); // ✅ Apply swapDomain here
+        urls.push(swapDomain(obj));
       }
     }
 
@@ -1328,11 +1332,9 @@ function extractUrlsFromPath(photoPaths) {
 
 // Function to swap domain/IP
 function swapDomain(url) {
-  if (!url || typeof url !== "string") return url;
-
-  return url
-    .replace("cnw.urbanunit.gov.pk", "118.103.225.148")
-    .replace("content2.urbanunit.gov.pk:8083", "118.103.225.148"); // Add replacement for PhotoPaths domain
+  return url.includes("cnw.urbanunit.gov.pk")
+    ? url.replace("cnw.urbanunit.gov.pk", "118.103.225.148")
+    : url.replace("118.103.225.148", "cnw.urbanunit.gov.pk");
 }
 
 // bridges list for dashboard main
