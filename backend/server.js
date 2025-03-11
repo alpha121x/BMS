@@ -1261,9 +1261,9 @@ app.get("/api/inspections-export", async (req, res) => {
         WHERE
          "DamageLevelID" IN (1, 2, 3) 
     AND (
-        surveyed_by = 'RAMS-PITB' 
+        f.surveyed_by = 'RAMS-PITB' 
         OR 
-        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+        (f.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
     ) 
     AND md.uu_bms_id = $1  -- ✅ Added condition
       )
