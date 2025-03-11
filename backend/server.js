@@ -1258,6 +1258,14 @@ app.get("/api/inspections-export", async (req, res) => {
           ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
         FROM bms.tbl_bms_master_data md
         LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+        WHERE
+         "DamageLevelID" IN (1, 2, 3) 
+    AND (
+        surveyed_by = 'RAMS-PITB' 
+        OR 
+        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    ) 
+    AND md.uu_bms_id = $1  -- ✅ Added condition
       )
       SELECT * FROM ranked_data WHERE 1=1`;
 
@@ -2027,7 +2035,14 @@ app.get("/api/get-summary", async (req, res) => {
         "inspection_images" AS "PhotoPaths",
         "ApprovedFlag"
       FROM bms.tbl_inspection_f
-      WHERE uu_bms_id = $1 
+      WHERE
+     "DamageLevelID" IN (1, 2, 3) 
+    AND (
+        surveyed_by = 'RAMS-PITB' 
+        OR 
+        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    ) 
+    AND uu_bms_id = $1  -- ✅ Added condition
       ORDER BY inspection_id DESC;
     `;
 
