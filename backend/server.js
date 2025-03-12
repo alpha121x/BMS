@@ -605,48 +605,60 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
     let query = `
-    SELECT md.uu_bms_id AS "Reference No:",
-     CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name, md.structure_type_id, md.structure_type, 
-           md.road_no, md.road_name_id, md.road_name, md.road_name_cwd, md.road_code_cwd, md.route_id, 
-           md.survey_id, md.pms_start, md.pms_end, md.survey_chainage_start, md.survey_chainage_end, 
-           md.pms_sec_id, md.structure_no, md.surveyor_name, md.zone_id, md.zone, md.district_id, md.district, 
-           md.road_classification_id, md.road_classification, md.road_surface_type_id, md.road_surface_type, 
-           md.carriageway_type_id, md.carriageway_type, md.direction, md.visual_condition, 
-           md.construction_type_id, md.construction_type, md.no_of_span, md.span_length_m, md.structure_width_m, 
-           md.construction_year, md.last_maintenance_date, md.data_source, md.date_time, md.remarks, 
-           f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", f."PartsID", f."PartsName", 
-           f."MaterialID", f."MaterialName", f."DamageKindID", f."DamageKindName", f."DamageLevelID", 
-           f."DamageLevel", f.damage_extent, f."Remarks", f.current_date_time, 
-           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-         COALESCE(string_to_array(f.inspection_images, ','), '{}') AS "Inspection Photos"
-    FROM bms.tbl_bms_master_data md
-    LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-    WHERE 1=1
-    AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
+    WITH ranked_data AS (
+      SELECT md.uu_bms_id AS "Reference No:",
+             CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
+             md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name,
+             md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end,
+             md.survey_chainage_start, md.survey_chainage_end, md.pms_sec_id, md.structure_no,
+             md.surveyor_name, md.zone_id, md.zone, md.district_id, md.district, 
+             md.road_classification_id, md.road_classification, md.road_surface_type_id,
+             md.road_surface_type, md.carriageway_type_id, md.carriageway_type, md.direction,
+             md.visual_condition, md.construction_type_id, md.construction_type, md.no_of_span,
+             md.span_length_m, md.structure_width_m, md.construction_year, md.last_maintenance_date,
+             md.data_source, md.date_time, md.remarks, f.surveyed_by, f."SpanIndex", f."WorkKindID",
+             f."WorkKindName", f."PartsID", f."PartsName", f."MaterialID", f."MaterialName",
+             f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", f.damage_extent,
+             f."Remarks", f.current_date_time,
+             -- Rank each row within the uu_bms_id group
+             ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS row_rank,
+             -- Keep Overview Photos only for the first-ranked row
+             CASE 
+                 WHEN ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) = 1 
+                 THEN ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] 
+                 ELSE NULL 
+             END AS "Overview Photos",
+             COALESCE(string_to_array(f.inspection_images, ','), '{}') AS "Inspection Photos"
+      FROM bms.tbl_bms_master_data md
+      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+      WHERE 1=1
+      AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
+    )
+    SELECT * FROM ranked_data
   `;
 
     const queryParams = [];
     let paramIndex = 1;
 
     if (district !== "%") {
-      query += ` AND md.district_id = $${paramIndex}`;
+      query += ` WHERE district_id = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      query += ` AND bridge_name ILIKE $${paramIndex}`;
       queryParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
     if (structureType !== "%") {
-      query += ` AND md.structure_type_id = $${paramIndex}`;
+      query += ` AND structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       paramIndex++;
     }
 
-    query += ` ORDER BY md.uu_bms_id`;
+    query += ` ORDER BY "Reference No:"`;
 
     const result = await pool.query(query, queryParams);
 
