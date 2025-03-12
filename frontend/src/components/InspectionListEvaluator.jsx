@@ -27,6 +27,10 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [materials, setMaterials] = useState([]);
   const [parts, setParts] = useState([]);
   const [damageKinds, setDamageKinds] = useState([]);
+  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+
+  // Extract username safely
+  const username = userToken?.username;
 
   // Fetch dropdown options from API
   useEffect(() => {
@@ -150,6 +154,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
             district_id: row.district_id,
             inspection_images: row.PhotoPaths,
             qc_remarks_evaluator: evaluatorRemarks,
+            //Span Index
+            SpanIndex: row.SpanIndex,
+            // WorkKind
+            WorkKindID: row.WorkKindID,
+            WorkKindName: row.WorkKindName,
             // Parts (Element)
             PartsID: row.PartsID, 
             PartsName: row.PartsName,
@@ -171,6 +180,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
             // 1st committe remarks
             qc_remarks_con: row.qc_remarks_con,
             qc_remarks_rams: row.qc_remarks_rams,
+            evaluated_by: username,
           };
           
           console.log(updatedData);
@@ -178,7 +188,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       return;
 
       const response = await fetch(`${BASE_URL}/api/insert-inspection-evaluator`, {
-        method: "PUT",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },

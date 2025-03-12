@@ -2787,6 +2787,7 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
     reviewed_by,
     bridge_name, 
     "SpanIndex", 
+    "WorkKindID", 
     "WorkKindName", 
     "WorkKindID",
     "PartsName", 
@@ -3018,7 +3019,7 @@ app.put("/api/update-inspection-rams", async (req, res) => {
 });
 
 // Endpoint to insert inspection data for Evaluator
-app.post("/insert-inspection-evaluator", async (req, res) => {
+app.post("/api/insert-inspection-evaluator", async (req, res) => {
   try {
     const {
       id,
@@ -3050,11 +3051,11 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
         "PartsName",
         "MaterialID",
         "MaterialName",
-        "DamageTypeID",
-        "DamageTypeName",
+        "DamageKindID",
+        "DamageKindName",
         "DamageLevelID",
         "DamageLevel",
-        damage_extent,
+        damage_extent
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *;
     `;
@@ -3065,6 +3066,7 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
       qc_remarks_con,
       qc_remarks_rams,
       qc_remarks_evaluator,
+      evaluated_by,  // ✅ Moved here (before `damage_extent`)
       PartsID,
       PartsName,
       MaterialID,
@@ -3073,8 +3075,7 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
       DamageKindName,
       DamageLevelID,
       DamageLevel,
-      damage_extent,
-      evaluated_by,
+      damage_extent // ✅ No trailing comma
     ];
 
     const result = await pool.query(insertQuery, insertValues);
@@ -3084,6 +3085,7 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 app.get("/api/structure-types", async (req, res) => {
   try {
