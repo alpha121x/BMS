@@ -3035,11 +3035,13 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
       DamageLevel,
       damage_extent,
       evaluated_by,
+      inspection_images,
     } = req.body;
 
     const insertQuery = `
       INSERT INTO bms.tbl_evaluation_f (
         inspection_id,
+        inspection_images,
         qc_remarks_con,
         qc_remarks_rams,
         qc_remarks_evaluator,
@@ -3053,12 +3055,13 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
         "DamageLevelID",
         "DamageLevel",
         damage_extent,
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       RETURNING *;
     `;
 
     const insertValues = [
       id,
+      inspection_images,
       qc_remarks_con,
       qc_remarks_rams,
       qc_remarks_evaluator,

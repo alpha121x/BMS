@@ -147,8 +147,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
           const updatedData = {
             id: row.inspection_id,
+            inspection_images: row.PhotoPaths,
             qc_remarks_evaluator: evaluatorRemarks,
-            qc_evaluator: row.qc_evaluator,
             // Parts (Element)
             PartsID: row.PartsID, 
             PartsName: row.PartsName,
