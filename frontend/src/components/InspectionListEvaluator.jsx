@@ -180,7 +180,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           
       return;
 
-      const response = await fetch(`${BASE_URL}/api/update-inspection-evaluator`, {
+      const response = await fetch(`${BASE_URL}/api/insert-inspection-evaluator`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -890,6 +890,23 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                 <div className="mb-2">
                                                   <strong>Surveyed By:</strong>{" "}
                                                   {inspection.surveyed_by ||
+                                                    "N/A"}
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="row">
+                                              <div className="col-md-6">
+                                                <div className="mb-2">
+                                                  <strong>
+                                                    Consultant Remarks:
+                                                  </strong>{" "}
+                                                  {inspection.qc_remarks_con || "N/A"}
+                                                </div>
+                                              </div>
+                                              <div className="col-md-6">
+                                                <div className="mb-2">
+                                                  <strong>Rams Remarks:</strong>{" "}
+                                                  {inspection.qc_remarks_rams ||
                                                     "N/A"}
                                                 </div>
                                               </div>

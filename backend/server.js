@@ -3017,66 +3017,60 @@ app.put("/api/update-inspection-rams", async (req, res) => {
   }
 });
 
-// Endpoint to update inspection data for Evaluator
-app.put("/api/update-inspection-evaluator", async (req, res) => {
-  const { id, qc_remarks_rams, qc_rams } = req.body;
-
-  if (!id) {
-    return res.status(400).json({ error: "Invalid data: ID is required" });
-  }
-
+// Endpoint to insert inspection data for Evaluator
+app.post("/insert-inspection-evaluator", async (req, res) => {
   try {
-    let query = "UPDATE bms.tbl_inspection_f SET";
-    const values = [];
-    let valueIndex = 1;
+    const {
+      id,
+      qc_remarks_evaluator,
+      PartsID,
+      PartsName,
+      MaterialID,
+      MaterialName,
+      DamageKindID,
+      DamageKindName,
+      DamageLevelID,
+      DamageLevel,
+      damage_extent,
+    } = req.body;
 
-    // Conditionally add fields to update
-    if (qc_remarks_rams !== undefined) {
-      query += ` qc_remarks_rams = $${valueIndex},`;
-      values.push(qc_remarks_rams === null ? null : qc_remarks_rams);
-      valueIndex++;
-    }
+    const insertQuery = `
+      INSERT INTO bms.tbl_evaluation_f (
+        qc_remarks_con,
+        qc_con,
+        "PartsID",
+        "PartsName",
+        "MaterialID",
+        "MaterialName",
+        "DefectTypeID",
+        "DefectTypeName",
+        "SeverityLevelID",
+        "SeverityLevel",
+        defect_extent,
+        InYMD
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+      RETURNING *;
+    `;
 
-    if (qc_rams !== undefined) {
-      query += ` qc_rams = $${valueIndex},`;
-      values.push(qc_rams);
-      valueIndex++;
+    const insertValues = [
+      qc_remarks_evaluator,
+      qc_evaluator,
+      PartsID,
+      PartsName,
+      MaterialID,
+      MaterialName,
+      DamageKindID,
+      DamageKindName,
+      DamageLevelID,
+      DamageLevel,
+      damage_extent,
+    ];
 
-      // Hardcoded evaluation_status based on qc_rams value
-      if (qc_rams === 2) {
-        query += ` evaluation_status = 'approved',`;
-      } else if (qc_rams === 3) {
-        query += ` evaluation_status = 'unapproved',`;
-      }
-    }
-
-    // Always update reviewed_by to 2
-    query += ` reviewed_by = 2,`;
-
-    // If no fields to update, return an error
-    if (values.length === 0) {
-      return res.status(400).json({ error: "No fields provided for update" });
-    }
-
-    // Remove the trailing comma and add the WHERE clause
-    query =
-      query.slice(0, -1) + ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
-    values.push(id);
-
-    // Execute the query
-    const result = await pool.query(query, values);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Inspection not found" });
-    }
-
-    res.status(200).json({
-      message: "Inspection updated successfully",
-      updatedRow: result.rows[0],
-    });
+    const result = await pool.query(insertQuery, insertValues);
+    res.status(201).json({ message: "Evaluation inserted successfully", data: result.rows[0] });
   } catch (error) {
-    console.error("Error updating inspection:", error);
-    res.status(500).json({ error: "Failed to update inspection" });
+    console.error("Error inserting evaluation:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
