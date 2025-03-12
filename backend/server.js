@@ -620,15 +620,9 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
              f."WorkKindName", f."PartsID", f."PartsName", f."MaterialID", f."MaterialName",
              f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", f.damage_extent,
              f."Remarks", f.current_date_time,
-             -- Rank each row within the uu_bms_id group
              ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS row_rank,
-             -- Keep Overview Photos only for the first-ranked row
-             CASE 
-                 WHEN ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) = 1 
-                 THEN ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] 
-                 ELSE NULL 
-             END AS "Overview Photos",
-             COALESCE(string_to_array(f.inspection_images, ','), '{}') AS "Inspection Photos"
+             ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+             COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
       FROM bms.tbl_bms_master_data md
       LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
       WHERE 1=1
@@ -662,9 +656,33 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
 
     const result = await pool.query(query, queryParams);
 
+    // **Track First Row for Each uu_bms_id**
+    let firstRowMap = new Map();
+
+    // **Process Data**
+    const processedData = result.rows.map((row) => {
+      if (!firstRowMap.has(row["Reference No:"])) {
+        firstRowMap.set(row["Reference No:"], true);
+      } else {
+        row["Overview Photos"] = null;
+      }
+
+      // **Fix PhotoPaths**
+      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
+
+      // **Fix Overview Photos (only for first row)**
+      if (row["Overview Photos"]) {
+        row["Overview Photos"] = row["Overview Photos"]
+          .map((photo) => swapDomain(photo))
+          .filter(Boolean);
+      }
+
+      return row;
+    });
+
     res.json({
       success: true,
-      bridges: result.rows,
+      bridges: processedData,
     });
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -674,6 +692,7 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
     });
   }
 });
+
 
 // api for downloadig multipke birdges data export
 app.get("/api/inspections-export-new", async (req, res) => {
@@ -781,141 +800,6 @@ app.get("/api/inspections-export-new", async (req, res) => {
     });
   }
 });
-
-// app.get("/api/inspections-export-new1", async (req, res) => {
-//   try {
-//     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
-
-//     let query = `
-//       WITH ranked_data AS (
-//         SELECT 
-//           md.uu_bms_id AS "Reference No:",
-//           CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
-//           md.structure_type, md.road_no, md.road_name, md.road_name_cwd, 
-//           md.road_code_cwd, md.route_id, md.survey_id, md.surveyor_name, 
-//           md.zone, md.district, md.road_classification, md.road_surface_type, 
-//           md.carriageway_type, md.direction, md.visual_condition, md.construction_type, 
-//           md.no_of_span, md.span_length_m, md.structure_width_m, md.construction_year, 
-//           md.last_maintenance_date, md.data_source, md.date_time, md.remarks,
-//           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS overview_photos,
-
-//           f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", 
-//           f."PartsID", f."PartsName", f."MaterialID", f."MaterialName", 
-//           f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
-//           f.damage_extent, f."Remarks" AS inspection_remarks, f.current_date_time, 
-//           f.inspection_images,
-
-//           ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
-//         FROM bms.tbl_bms_master_data md
-//         LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-//         WHERE 1=1
-//         AND md.uu_bms_id IN (SELECT DISTINCT f.uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
-//     `;
-
-//     const queryParams = [];
-//     let paramIndex = 1;
-
-//     if (district !== "%") {
-//       query += ` AND md.district_id = $${paramIndex}`;
-//       queryParams.push(district);
-//       paramIndex++;
-//     }
-
-//     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-//       query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-//       queryParams.push(`%${bridgeName}%`);
-//       paramIndex++;
-//     }
-
-//     if (structureType !== "%") {
-//       query += ` AND md.structure_type_id = $${paramIndex}`;
-//       queryParams.push(structureType);
-//       paramIndex++;
-//     }
-
-//     query += ` ) SELECT * FROM ranked_data ORDER BY "Reference No:"`;
-
-//     const result = await pool.query(query, queryParams);
-
-//     // Group by bridge
-//     const bridgesMap = new Map();
-
-//     result.rows.forEach((row) => {
-//       const refNo = row["Reference No:"];
-
-//       if (!bridgesMap.has(refNo)) {
-//         // Create a new bridge object if it doesn't exist
-//         bridgesMap.set(refNo, {
-//           "Reference No:": row["Reference No:"],
-//           bridge_name: row.bridge_name,
-//           structure_type: row.structure_type,
-//           road_no: row.road_no,
-//           road_name: row.road_name,
-//           road_name_cwd: row.road_name_cwd,
-//           road_code_cwd: row.road_code_cwd,
-//           route_id: row.route_id,
-//           survey_id: row.survey_id,
-//           surveyor_name: row.surveyor_name,
-//           zone: row.zone,
-//           district: row.district,
-//           road_classification: row.road_classification,
-//           road_surface_type: row.road_surface_type,
-//           carriageway_type: row.carriageway_type,
-//           direction: row.direction,
-//           visual_condition: row.visual_condition,
-//           construction_type: row.construction_type,
-//           no_of_span: row.no_of_span,
-//           span_length_m: row.span_length_m,
-//           structure_width_m: row.structure_width_m,
-//           construction_year: row.construction_year,
-//           last_maintenance_date: row.last_maintenance_date,
-//           data_source: row.data_source,
-//           date_time: row.date_time,
-//           remarks: row.remarks,
-//           "Overview Photos": extractUrlsFromPath(row.overview_photos),
-//           inspections: [],
-//         });
-//       }
-
-//       // Add inspection details to the inspections array
-//       if (row.surveyed_by) {
-//         bridgesMap.get(refNo).inspections.push({
-//           surveyed_by: row.surveyed_by,
-//           SpanIndex: row["SpanIndex"],
-//           WorkKindID: row["WorkKindID"],
-//           WorkKindName: row["WorkKindName"],
-//           PartsID: row["PartsID"],
-//           PartsName: row["PartsName"],
-//           MaterialID: row["MaterialID"],
-//           MaterialName: row["MaterialName"],
-//           DamageKindID: row["DamageKindID"],
-//           DamageKindName: row["DamageKindName"],
-//           DamageLevelID: row["DamageLevelID"],
-//           DamageLevel: row["DamageLevel"],
-//           damage_extent: row.damage_extent,
-//           inspection_remarks: row.inspection_remarks,
-//           current_date_time: row.current_date_time,
-//           "Inspection Photos": extractUrlsFromPath(row.inspection_images),
-//         });
-//       }
-//     });
-
-//     // Convert map values to an array
-//     const bridgesArray = Array.from(bridgesMap.values());
-
-//     res.json({ success: true, bridges: bridgesArray });
-//   } catch (error) {
-//     console.error("Error fetching data:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Error fetching data from the database",
-//     });
-//   }
-// });
-
-
-// inspection download for a specific bridge and dashboard + evaluation module
-
 
 // Inspection export for consultant
 app.get("/api/inspections-export-con", async (req, res) => {
