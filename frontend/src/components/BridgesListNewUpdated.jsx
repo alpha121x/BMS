@@ -272,15 +272,15 @@ const BridgesListNewUpdated = ({
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Bridges Data");
   
-      // Define columns (excluding image fields)
+      // Exclude "row_rank" and image fields
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+        (key) => key !== "row_rank" && key !== "Overview Photos" && key !== "PhotoPaths"
       );
   
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
         key: key,
-        width: Math.min(Math.max(...summaryData.map((row) => (row[key] ? row[key].toString().length : 10)), 10), 30), // Auto-adjust based on content
+        width: Math.min(Math.max(...summaryData.map((row) => (row[key] ? row[key].toString().length : 10)), 10), 30), // Auto-adjust width
       }));
   
       // Add fixed-width image columns
@@ -306,7 +306,7 @@ const BridgesListNewUpdated = ({
         const overviewPhotos = item["Overview Photos"] || [];
         const inspectionPhotos = item["PhotoPaths"] || [];
   
-        // Add normal data
+        // Add normal data, excluding "row_rank"
         const rowData = {};
         columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
   
@@ -353,6 +353,7 @@ const BridgesListNewUpdated = ({
       setLoadingExcel(false);
     }
   };
+  
   
 
   const buttonStyles = {
