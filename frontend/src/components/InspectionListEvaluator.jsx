@@ -149,31 +149,27 @@ const InspectionListEvaluator = ({ bridgeId }) => {
             id: row.inspection_id,
             qc_remarks_evaluator: evaluatorRemarks,
             qc_evaluator: row.qc_evaluator,
-          
             // Parts (Element)
             PartsID: row.PartsID, 
             PartsName: row.PartsName,
-          
             // Material
             MaterialID: row.MaterialID, 
             MaterialName: row.MaterialName,
-          
             // Damage Kind
             DamageKindID: row.DamageKindID, 
             DamageKindName: row.DamageKindName,
-          
             // Damage Level
             DamageLevelID: row.DamageLevelID, 
             DamageLevel: row.DamageLevel,
-          
             // Damage Extent
             damage_extent: row.damage_extent,
-
             // surveyed_by
             surveyed_by: row.surveyed_by,
-
             // situation remarks
             situation_remarks: row.Remarks,
+            // 1st committe remarks
+            qc_remarks_con: row.qc_remarks_con,
+            qc_remarks_rams: row.qc_remarks_rams,
           };
           
           console.log(updatedData);

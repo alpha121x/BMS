@@ -3022,6 +3022,8 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
   try {
     const {
       id,
+      qc_remarks_con,
+      qc_remarks_rams,
       qc_remarks_evaluator,
       PartsID,
       PartsName,
@@ -3032,29 +3034,34 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
       DamageLevelID,
       DamageLevel,
       damage_extent,
+      evaluated_by,
     } = req.body;
 
     const insertQuery = `
       INSERT INTO bms.tbl_evaluation_f (
+        inspection_id,
         qc_remarks_con,
-        qc_con,
+        qc_remarks_rams,
+        qc_remarks_evaluator,
+        evaluated_by,
         "PartsID",
         "PartsName",
         "MaterialID",
         "MaterialName",
-        "DefectTypeID",
-        "DefectTypeName",
-        "SeverityLevelID",
-        "SeverityLevel",
-        defect_extent,
-        InYMD
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+        "DamageTypeID",
+        "DamageTypeName",
+        "DamageLevelID",
+        "DamageLevel",
+        damage_extent,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *;
     `;
 
     const insertValues = [
+      id,
+      qc_remarks_con,
+      qc_remarks_rams,
       qc_remarks_evaluator,
-      qc_evaluator,
       PartsID,
       PartsName,
       MaterialID,
@@ -3064,6 +3071,7 @@ app.post("/insert-inspection-evaluator", async (req, res) => {
       DamageLevelID,
       DamageLevel,
       damage_extent,
+      evaluated_by,
     ];
 
     const result = await pool.query(insertQuery, insertValues);
