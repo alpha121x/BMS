@@ -274,16 +274,16 @@ const BridgesListNewUpdated = ({
   
       // Define columns (excluding image fields)
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "Overview Photos" && key !== "PhotoPaths" // Ensure correct column names
+        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
       );
   
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
         key: key,
-        width: 22,
+        width: Math.min(Math.max(...summaryData.map((row) => (row[key] ? row[key].toString().length : 10)), 10), 30), // Auto-adjust based on content
       }));
   
-      // Add image columns
+      // Add fixed-width image columns
       for (let i = 1; i <= 5; i++) {
         columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 22 });
       }
@@ -304,7 +304,7 @@ const BridgesListNewUpdated = ({
   
         // Extract image URLs correctly
         const overviewPhotos = item["Overview Photos"] || [];
-        const inspectionPhotos = item["PhotoPaths"] || []; // FIXED: Correct API key
+        const inspectionPhotos = item["PhotoPaths"] || [];
   
         // Add normal data
         const rowData = {};
@@ -314,7 +314,7 @@ const BridgesListNewUpdated = ({
         const rowIndex = worksheet.addRow(rowData).number;
         worksheet.getRow(rowIndex).height = 90;
   
-        // Function to insert images (with fixed async handling)
+        // Function to insert images
         const insertImage = async (photoUrls, columnOffset) => {
           for (let j = 0; j < photoUrls.length && j < 5; j++) {
             try {
