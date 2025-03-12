@@ -412,137 +412,7 @@ app.get("/api/inspection-counts-rams", async (req, res) => {
   }
 });
 
-// // Define the API endpoint to get data from `bms.tbl_bms_master_data`
-// app.get("/api/bridgesdownload", async (req, res) => {
-//   try {
-//     const {
-//       district = "%",
-//       structureType,
-//       constructionType,
-//       minBridgeLength,
-//       maxBridgeLength,
-//       minSpanLength,
-//       maxSpanLength,
-//       minYear,
-//       maxYear,
-//     } = req.query;
-
-//     let query = `
-//       SELECT
-//         uu_bms_id,
-//         pms_sec_id,
-//         structure_no,
-//         structure_type_id,
-//         structure_type,
-//         road_name,
-//         road_name_cwd,
-//         route_id,
-//         survey_id,
-//         surveyor_name,
-//         district_id,
-//         district,
-//         road_classification,
-//         road_surface_type,
-//         carriageway_type,
-//         direction,
-//         visual_condition,
-//         construction_type_id,
-//         construction_type,
-//         no_of_span,
-//         span_length_m,
-//         structure_width_m,
-//         construction_year,
-//         last_maintenance_date,
-//         remarks,
-//         is_surveyed,
-//         x_centroid,
-//         y_centroid,
-//         images_spans,
-//         CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
-//         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
-//       FROM bms.tbl_bms_master_data
-//       WHERE 1=1
-//     `;
-
-//     const queryParams = [];
-//     let paramIndex = 1;
-
-//     // Filter by district
-//     if (district !== "%") {
-//       query += ` AND district_id = $${paramIndex}`;
-//       queryParams.push(district);
-//       paramIndex++;
-//     }
-
-//     // Filter by structure type
-//     if (structureType) {
-//       query += ` AND structure_type_id = $${paramIndex}`;
-//       queryParams.push(structureType);
-//       paramIndex++;
-//     }
-
-//     // Filter by construction type
-//     if (constructionType) {
-//       query += ` AND construction_type_id = $${paramIndex}`;
-//       queryParams.push(constructionType);
-//       paramIndex++;
-//     }
-
-//     // Filter by bridge width (min and max)
-//     if (minBridgeLength) {
-//       query += ` AND structure_width_m >= $${paramIndex}`;
-//       queryParams.push(minBridgeLength);
-//       paramIndex++;
-//     }
-//     if (maxBridgeLength) {
-//       query += ` AND structure_width_m <= $${paramIndex}`;
-//       queryParams.push(maxBridgeLength);
-//       paramIndex++;
-//     }
-
-//     // Filter by span length (min and max)
-//     if (minSpanLength) {
-//       query += ` AND span_length_m >= $${paramIndex}`;
-//       queryParams.push(minSpanLength);
-//       paramIndex++;
-//     }
-//     if (maxSpanLength) {
-//       query += ` AND span_length_m <= $${paramIndex}`;
-//       queryParams.push(maxSpanLength);
-//       paramIndex++;
-//     }
-
-//     // Filter by construction year (min and max)
-//     if (minYear) {
-//       query += ` AND construction_year >= $${paramIndex}`;
-//       queryParams.push(minYear);
-//       paramIndex++;
-//     }
-//     if (maxYear) {
-//       query += ` AND construction_year <= $${paramIndex}`;
-//       queryParams.push(maxYear);
-//       paramIndex++;
-//     }
-
-//     // Execute the query without pagination (no OFFSET and LIMIT)
-//     const result = await pool.query(query, queryParams);
-
-//     // Send the result as the response
-//     res.json({
-//       success: true,
-//       bridges: result.rows,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching data:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Error fetching data from the database",
-//     });
-//   }
-// });
-
 // api endpoint for districts extent
-
 app.get("/api/districtExtent", async (req, res) => {
   try {
     const { districtId } = req.query;
@@ -729,7 +599,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
   }
 });
 
-// briges details download for evaluation module
+// briges details download for dashboard and evaluationn
 app.get("/api/bridgesdownloadNeww", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
@@ -792,6 +662,7 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
   }
 });
 
+// api for downloadig multipke birdges data export
 app.get("/api/inspections-export-new", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
@@ -855,7 +726,7 @@ app.get("/api/inspections-export-new", async (req, res) => {
         .filter(Boolean);
 
       if (!firstRow) {
-        row["Reference No:"] = null;
+        row["Reference No:"] = row["Reference No:"];
         row.bridge_name = null;
         row.structure_type = null;
         row.road_no = null;
