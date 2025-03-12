@@ -147,6 +147,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
           const updatedData = {
             id: row.inspection_id,
+            district_id: row.district_id,
             inspection_images: row.PhotoPaths,
             qc_remarks_evaluator: evaluatorRemarks,
             // Parts (Element)
@@ -630,6 +631,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             )}
                                           </div>
                                           <div className="col-md-9">
+                                            <input type="hidden" name="district_id" value={inspection.district_id} />
                                             <div className="row">
                                               <div className="col-md-6">
                                                 <div className="mb-1">
