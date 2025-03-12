@@ -2892,7 +2892,7 @@ ORDER BY inspection_id DESC;
 });
 
 // Endpoint to update inspection data for consultant
-app.put("/api/update-inspection", async (req, res) => {
+app.put("/api/update-inspection-con", async (req, res) => {
   const { id, qc_remarks_con, qc_con } = req.body;
 
   if (!id) {
@@ -2956,6 +2956,69 @@ app.put("/api/update-inspection", async (req, res) => {
 
 // Endpoint to update inspection data for RAMS
 app.put("/api/update-inspection-rams", async (req, res) => {
+  const { id, qc_remarks_rams, qc_rams } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: "Invalid data: ID is required" });
+  }
+
+  try {
+    let query = "UPDATE bms.tbl_inspection_f SET";
+    const values = [];
+    let valueIndex = 1;
+
+    // Conditionally add fields to update
+    if (qc_remarks_rams !== undefined) {
+      query += ` qc_remarks_rams = $${valueIndex},`;
+      values.push(qc_remarks_rams === null ? null : qc_remarks_rams);
+      valueIndex++;
+    }
+
+    if (qc_rams !== undefined) {
+      query += ` qc_rams = $${valueIndex},`;
+      values.push(qc_rams);
+      valueIndex++;
+
+      // Hardcoded evaluation_status based on qc_rams value
+      if (qc_rams === 2) {
+        query += ` evaluation_status = 'approved',`;
+      } else if (qc_rams === 3) {
+        query += ` evaluation_status = 'unapproved',`;
+      }
+    }
+
+    // Always update reviewed_by to 2
+    query += ` reviewed_by = 2,`;
+
+    // If no fields to update, return an error
+    if (values.length === 0) {
+      return res.status(400).json({ error: "No fields provided for update" });
+    }
+
+    // Remove the trailing comma and add the WHERE clause
+    query =
+      query.slice(0, -1) + ` WHERE inspection_id = $${valueIndex} RETURNING *;`;
+    values.push(id);
+
+    // Execute the query
+    const result = await pool.query(query, values);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Inspection not found" });
+    }
+
+    res.status(200).json({
+      message: "Inspection updated successfully",
+      updatedRow: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Error updating inspection:", error);
+    res.status(500).json({ error: "Failed to update inspection" });
+  }
+});
+
+// Endpoint to update inspection data for Evaluator
+app.put("/api/update-inspection-evaluator", async (req, res) => {
   const { id, qc_remarks_rams, qc_rams } = req.body;
 
   if (!id) {

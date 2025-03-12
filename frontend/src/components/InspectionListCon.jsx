@@ -128,7 +128,7 @@ const InspectionListCon = ({ bridgeId }) => {
         qc_con: row.qc_con,
       };
 
-      const response = await fetch(`${BASE_URL}/api/update-inspection`, {
+      const response = await fetch(`${BASE_URL}/api/update-inspection-con`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

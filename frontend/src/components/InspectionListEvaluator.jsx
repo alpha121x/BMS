@@ -145,21 +145,42 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           ? null
           : row.qc_remarks_evaluator;
 
-      const updatedData = {
-        id: row.inspection_id,
-        qc_remarks_evaluator: evaluatorRemarks,
-        qc_evaluator: row.qc_evaluator,
-        PartsName: row.PartsName, // Element
-        MaterialName: row.MaterialName, // Material
-        DamageKindName: row.DamageKindName, // Damage
-        DamageLevel: row.DamageLevel, // Damage Level
-        damage_extent: row.damage_extent, // New field for Damage Extent
-      };
+          const updatedData = {
+            id: row.inspection_id,
+            qc_remarks_evaluator: evaluatorRemarks,
+            qc_evaluator: row.qc_evaluator,
+          
+            // Parts (Element)
+            PartsID: row.PartsID, 
+            PartsName: row.PartsName,
+          
+            // Material
+            MaterialID: row.MaterialID, 
+            MaterialName: row.MaterialName,
+          
+            // Damage Kind
+            DamageKindID: row.DamageKindID, 
+            DamageKindName: row.DamageKindName,
+          
+            // Damage Level
+            DamageLevelID: row.DamageLevelID, 
+            DamageLevel: row.DamageLevel,
+          
+            // Damage Extent
+            damage_extent: row.damage_extent,
 
-      console.log(updatedData);
+            // surveyed_by
+            surveyed_by: row.surveyed_by,
+
+            // situation remarks
+            situation_remarks: row.Remarks,
+          };
+          
+          console.log(updatedData);
+          
       return;
 
-      const response = await fetch(`${BASE_URL}/api/update-inspection`, {
+      const response = await fetch(`${BASE_URL}/api/update-inspection-evaluator`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -205,6 +226,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
   };
+
+
   const handleDownloadCSV = async (bridgeId) => {
     setLoading(true); // Start loading
     try {
@@ -617,17 +640,32 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   <strong>Elements:</strong>
                                                   <Form.Select
                                                     value={
-                                                      inspection.PartsName || ""
+                                                      inspection.PartsID || ""
                                                     }
-                                                    onChange={(e) =>
-                                                      handleFieldChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        "PartsName",
-                                                        e.target.value
-                                                      )
-                                                    }
+                                                    onChange={(e) => {
+                                                      const selectedPart =
+                                                        parts.find(
+                                                          (part) =>
+                                                            part.PartsID ==
+                                                            e.target.value
+                                                        );
+                                                      if (selectedPart) {
+                                                        handleFieldChange(
+                                                          spanIndex,
+                                                          workKind,
+                                                          inspection.inspection_id,
+                                                          "PartsID",
+                                                          selectedPart.PartsID
+                                                        );
+                                                        handleFieldChange(
+                                                          spanIndex,
+                                                          workKind,
+                                                          inspection.inspection_id,
+                                                          "PartsName",
+                                                          selectedPart.PartsName
+                                                        );
+                                                      }
+                                                    }}
                                                     className="form-control-sm ms-1"
                                                   >
                                                     <option value="">
@@ -636,7 +674,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                     {parts.map((part) => (
                                                       <option
                                                         key={part.PartsID}
-                                                        value={part.PartsName}
+                                                        value={part.PartsID}
                                                       >
                                                         {part.PartsName}
                                                       </option>
@@ -649,18 +687,33 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   <strong>Material:</strong>
                                                   <Form.Select
                                                     value={
-                                                      inspection.MaterialName ||
+                                                      inspection.MaterialID ||
                                                       ""
                                                     }
-                                                    onChange={(e) =>
-                                                      handleFieldChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        "MaterialName",
-                                                        e.target.value
-                                                      )
-                                                    }
+                                                    onChange={(e) => {
+                                                      const selectedMaterial =
+                                                        materials.find(
+                                                          (mat) =>
+                                                            mat.MaterialID ==
+                                                            e.target.value
+                                                        );
+                                                      if (selectedMaterial) {
+                                                        handleFieldChange(
+                                                          spanIndex,
+                                                          workKind,
+                                                          inspection.inspection_id,
+                                                          "MaterialID",
+                                                          selectedMaterial.MaterialID
+                                                        );
+                                                        handleFieldChange(
+                                                          spanIndex,
+                                                          workKind,
+                                                          inspection.inspection_id,
+                                                          "MaterialName",
+                                                          selectedMaterial.MaterialName
+                                                        );
+                                                      }
+                                                    }}
                                                     className="form-control-sm ms-1"
                                                   >
                                                     <option value="">
@@ -673,7 +726,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                             material.MaterialID
                                                           }
                                                           value={
-                                                            material.MaterialName
+                                                            material.MaterialID
                                                           }
                                                         >
                                                           {
@@ -694,18 +747,31 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   <strong>Damage:</strong>
                                                   <Form.Select
                                                     value={
-                                                      inspection.DamageKindName ||
+                                                      inspection.DamageKindID ||
                                                       ""
                                                     }
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
+                                                      const selectedDamage =
+                                                        damageKinds.find(
+                                                          (dmg) =>
+                                                            dmg.DamageKindID ==
+                                                            e.target.value
+                                                        );
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "DamageKindID",
+                                                        selectedDamage?.DamageKindID
+                                                      );
                                                       handleFieldChange(
                                                         spanIndex,
                                                         workKind,
                                                         inspection.inspection_id,
                                                         "DamageKindName",
-                                                        e.target.value
-                                                      )
-                                                    }
+                                                        selectedDamage?.DamageKindName
+                                                      );
+                                                    }}
                                                     className="form-control-sm ms-1"
                                                   >
                                                     <option value="">
@@ -718,7 +784,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                             damage.DamageKindID
                                                           }
                                                           value={
-                                                            damage.DamageKindName
+                                                            damage.DamageKindID
                                                           }
                                                         >
                                                           {
@@ -736,18 +802,31 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   <strong>Damage Level:</strong>
                                                   <Form.Select
                                                     value={
-                                                      inspection.DamageLevel ||
+                                                      inspection.DamageLevelID ||
                                                       ""
                                                     }
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
+                                                      const selectedLevel =
+                                                        damageLevels.find(
+                                                          (lvl) =>
+                                                            lvl.DamageLevelID ==
+                                                            e.target.value
+                                                        );
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "DamageLevelID",
+                                                        selectedLevel?.DamageLevelID
+                                                      );
                                                       handleFieldChange(
                                                         spanIndex,
                                                         workKind,
                                                         inspection.inspection_id,
                                                         "DamageLevel",
-                                                        e.target.value
-                                                      )
-                                                    }
+                                                        selectedLevel?.DamageLevel
+                                                      );
+                                                    }}
                                                     className="form-control-sm ms-1"
                                                   >
                                                     <option value="">
@@ -760,7 +839,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                             level.DamageLevelID
                                                           }
                                                           value={
-                                                            level.DamageLevel
+                                                            level.DamageLevelID
                                                           }
                                                         >
                                                           {level.DamageLevel}
