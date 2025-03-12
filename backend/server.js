@@ -1233,6 +1233,7 @@ app.get("/api/inspections-export-evaluator", async (req, res) => {
   }
 });
 
+// export for BMS dashboard bdirges table whole
 app.get("/api/inspections-export", async (req, res) => {
   try {
     const { bridgeId } = req.query;
