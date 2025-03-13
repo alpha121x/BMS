@@ -207,43 +207,54 @@ const BridgesListNewUpdated = ({
   const handleDownloadCSV = async () => {
     setLoadingCSV(true); // Start loading
     try {
-      const params = {
+      // Define the correct URL based on user_type
+      let url;
+      if (user_type === "consultant") {
+        url = new URL(`${BASE_URL}/api/bridgesConDownloadCsv`);
+      } else if (user_type === "rams") {
+        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadCsv`);
+      } else if (user_type === "evaluator") {
+        url = new URL(`${BASE_URL}/api/bridgesEvaluatorDownloadCsv`);
+      }
+  
+      // Set query parameters
+      url.search = new URLSearchParams({
         district: districtId || "%",
-        structureType,
-        bridgeName,
-      };
-
-      const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadNew?${queryString}`,
-        {
-          method: "GET",
-        }
-      );
-
+        structureType : structureType || "%",
+        bridgeName : bridgeName || "%",
+      }).toString();
+  
+      // Fetch data from the selected URL
+      const response = await fetch(url.toString(), { method: "GET" });
+  
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-
+  
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-
+  
+      // Convert JSON data to CSV
       const csv = Papa.unparse(data.bridges);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  
+      // Create a download link and trigger it
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "Bridges_Data.csv";
+      link.download = "Structures_Data.csv";
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
     } finally {
       setLoadingCSV(false); // Stop loading
     }
   };
-
+  
   const handleDownloadExcel = async () => {
     setLoadingExcel(true);
     try {
