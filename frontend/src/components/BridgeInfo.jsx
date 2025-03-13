@@ -29,15 +29,16 @@ const BridgeInfo = () => {
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
   // Extract username safely
-  const username = userToken?.username;
+  const user_type = userToken?.user_type;
+  
 
   // Function to render components based on username
   const renderInspectionList = () => {
-    if (username === "consultant") {
+    if (user_type === "consultant") {
       return <InspectionListCon bridgeId={bridgeData?.uu_bms_id} />;
-    }  else if (username === "rams") {
+    }  else if (user_type === "rams") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
-    } else if (username === "evaluator") {
+    } else if (user_type === "evaluator") {
       return <InspectionListEvaluator bridgeId={bridgeData?.uu_bms_id} />;
     }
     else {
@@ -54,7 +55,7 @@ const BridgeInfo = () => {
     window.location.href = `/EditBridge?data=${serializedBridgeData}`;
   };
 
-  if (!bridgeData || !username) {
+  if (!bridgeData || !userToken) {
     return (
       <div
         className="loader"

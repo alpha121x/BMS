@@ -621,7 +621,7 @@ const InspectionListCon = ({ bridgeId }) => {
                                             </strong>{" "}
                                             {inspection.Remarks || "N/A"}
                                             <br />
-                                            <strong>Surveeyed By</strong>{" "}
+                                            <strong>Surveyed By</strong>{" "}
                                             {inspection.surveyed_by || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">

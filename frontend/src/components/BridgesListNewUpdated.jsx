@@ -354,8 +354,6 @@ const BridgesListNewUpdated = ({
     }
   };
   
-  
-
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",

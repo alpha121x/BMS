@@ -18,15 +18,15 @@ const Evaluation = () => {
 const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
   // Extract username safely
-  const username = userToken?.username;
+  const user_type = userToken?.usertype;
 
    // Function to render components based on username
    const renderEvaComponent = () => {
-    if (username === "consultant") {
+    if (user_type === "consultant") {
       return <EvaluationMainCon/>;
-    } else if (username === "rams") {
+    } else if (user_type === "rams") {
       return <EvaluationMainRams/>;
-    } else if (username === "evaluator") {
+    } else if (user_type === "evaluator") {
       return <EvaluationMain/>;
     }
   };

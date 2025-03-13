@@ -45,7 +45,6 @@ app.post("/api/login", async (req, res) => {
     SELECT id, username, password,phone_num, email, id, is_active
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
-    LIMIT 1
 `;
 
     // Run the query with the provided username
@@ -101,10 +100,9 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password,  phone_num,  email, id, is_active
-    FROM bms.tbl_users
-    WHERE username = $1 AND is_active::boolean = true
-    LIMIT 1
+    SELECT id, user_name, user_password, user_type
+    FROM bms.tbl_users_evaluations
+    WHERE user_name = $1
 `;
 
     // Run the query with the provided username
@@ -118,18 +116,16 @@ app.post("/api/loginEvaluation", async (req, res) => {
     const user = result.rows[0];
 
     // Direct password comparison (In production, use hashed comparison)
-    if (password !== user.password) {
-      return res.status(401).json({ message: "Invalid username or password" });
+    if (password !== user.user_password) {
+      return res.status(401).json({ message: "Invalid password" });
     }
 
     // Generate JWT token
     const token = jwt.sign(
       {
         userId: user.id,
-        username: user.username,
-        role: user.role_id,
-        phoneNum: user.phone_num,
-        email: user.email,
+        username: user.user_name,
+        usertype: user.user_type,
       },
       JWT_SECRET,
       { expiresIn: "1h" }
@@ -139,11 +135,9 @@ app.post("/api/loginEvaluation", async (req, res) => {
     res.json({
       token,
       user: {
-        id: user.id,
-        username: user.username,
-        role: user.role_id,
-        email: user.email,
-        phoneNum: user.phone_num,
+        userId: user.id,
+        username: user.user_name,
+        usertype: user.user_type,
       },
     });
   } catch (error) {
@@ -692,7 +686,6 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
     });
   }
 });
-
 
 // api for downloadig multipke birdges data export
 app.get("/api/inspections-export-new", async (req, res) => {
