@@ -153,10 +153,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
             inspection_id: row.inspection_id,
             district_id: row.district_id,
             inspection_images: row.PhotoPaths,
-            qc_remarks_evaluator: evaluatorRemarks,
+            qc_remarks_evaluator: evaluatorRemarks ? evaluatorRemarks : null,
             // extra details
             uu_bms_id: row.uu_bms_id,
             bridge_name: row.bridge_name,
+            district_id: row.district_id,
             //Span Index
             SpanIndex: row.SpanIndex,
             // WorkKind
@@ -177,7 +178,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
             // Damage Extent
             damage_extent: row.damage_extent,
             // situation remarks
-            situation_remarks: row.Remarks,
+            situation_remarks: row.Remarks ? row.Remarks : null,
             // 1st committe remarks
             qc_remarks_con: row.qc_remarks_con,
             qc_remarks_rams: row.qc_remarks_rams,
@@ -186,7 +187,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           
           console.log(updatedData);
           
-      // return;
+      return;
 
       const response = await fetch(`${BASE_URL}/api/insert-inspection-evaluator`, {
         method: "POST",
