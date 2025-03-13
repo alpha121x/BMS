@@ -215,7 +215,7 @@ const BridgesListNewUpdated = ({
 
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadNew?${queryString}`,
         {
           method: "GET",
         }
@@ -235,7 +235,7 @@ const BridgesListNewUpdated = ({
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "bridges_data.csv";
+      link.download = "Bridges_Data.csv";
       link.click();
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
