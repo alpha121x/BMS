@@ -467,25 +467,46 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
     let query = `
-   SELECT
-        md.uu_bms_id AS "Reference No:",
-        CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
-        md.structure_type, md.road_no, md.road_name, md.road_name_cwd,
-        md.road_code_cwd, md.route_id, md.survey_id, md.surveyor_name,
-        md.zone, md.district, md.road_classification, md.road_surface_type,
-        md.carriageway_type, md.direction, md.visual_condition, md.construction_type,
-        md.no_of_span, md.span_length_m, md.structure_width_m, md.construction_year,
-        md.last_maintenance_date, md.data_source, md.date_time, md.remarks,
-        f."SpanIndex", f."WorkKindName", f."PartsName", 
-        f."MaterialName", f."DamageKindName", 
-        f."DamageLevel", f.damage_extent, f."Remarks", f.current_date_time, 
-        ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-      COALESCE(string_to_array(f.inspection_images, ','), '{}') AS "PhotoPaths"
-    FROM bms.tbl_bms_master_data md
-    LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-    WHERE 1=1
-    AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
-  `;
+      SELECT
+        md.uu_bms_id AS "Reference No",
+        CONCAT(md.pms_sec_id, ',', md.structure_no) AS "Bridge Name",
+        md.structure_type AS "Structure Type",
+        md.road_no AS "Road No",
+        md.road_name AS "Road Name",
+        md.road_name_cwd AS "Road Name CWD",
+        md.road_code_cwd AS "Road Code CWD",
+        md.route_id AS "Route ID",
+        md.survey_id AS "Survey ID",
+        md.surveyor_name AS "Surveyor Name",
+        md.zone AS "Zone",
+        md.district AS "District",
+        md.road_classification AS "Road Classification",
+        md.road_surface_type AS "Road Surface Type",
+        md.carriageway_type AS "Carriageway Type",
+        md.direction AS "Direction",
+        md.visual_condition AS "Visual Condition",
+        md.construction_type AS "Construction Type",
+        md.no_of_span AS "No Of Spans",
+        md.span_length_m AS "Span Length (m)",
+        md.structure_width_m AS "Structure Width (m)",
+        md.construction_year AS "Construction Year",
+        md.last_maintenance_date AS "Last Maintenance Date",
+        md.data_source AS "Data Source",
+        md.date_time AS "Date Time",
+        md.remarks AS "Remarks",
+        f."SpanIndex" AS "Span Index",
+        f."WorkKindName" AS "Work Kind",
+        f."PartsName" AS "Part Name",
+        f."MaterialName" AS "Material Name",
+        f."DamageKindName" AS "Damage Kind",
+        f."DamageLevel" AS "Damage Level",
+        f.damage_extent AS "Damage Extent",
+        f."Remarks" AS "Situation Remarks",
+        f.current_date_time AS "Inspection Date"
+      FROM bms.tbl_bms_master_data md
+      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+      WHERE 1=1
+    `; // 👈 Notice "WHERE 1=1" ensures the next conditions can safely be added
 
     const queryParams = [];
     let paramIndex = 1;
@@ -497,7 +518,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
       queryParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
@@ -508,7 +529,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
       paramIndex++;
     }
 
-    query += ` ORDER BY "Reference No:"`;
+    query += ` ORDER BY "Reference No"`;
 
     const result = await pool.query(query, queryParams);
 
@@ -524,6 +545,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     });
   }
 });
+
 
 // briges details download for dashboard and evaluationn working correctly
 app.get("/api/bridgesdownloadNeww", async (req, res) => {
