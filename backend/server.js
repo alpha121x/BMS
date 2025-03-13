@@ -2540,6 +2540,7 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
    uu_bms_id,
     inspection_id,
     surveyed_by,
+    is_evaluated,
     district_id,
     damage_extent,
     qc_rams,
@@ -2782,9 +2783,15 @@ app.put("/api/update-inspection-rams", async (req, res) => {
 
 // Endpoint to insert inspection data for Evaluator
 app.post("/api/insert-inspection-evaluator", async (req, res) => {
+  const client = await pool.connect();
   try {
     const {
-      id,
+      inspection_id,
+      uu_bms_id,
+      bridge_name,
+      SpanIndex,
+      WorkKindID,
+      WorkKindName,
       qc_remarks_con,
       qc_remarks_rams,
       qc_remarks_evaluator,
@@ -2797,18 +2804,26 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       DamageLevelID,
       DamageLevel,
       damage_extent,
-      evaluated_by,
+      evaluator_id,
       inspection_images,
     } = req.body;
 
+    await client.query("BEGIN"); // Start transaction
+
+    // Insert evaluation data
     const insertQuery = `
-      INSERT INTO bms.tbl_evaluation_f (
+      INSERT INTO bms.tbl_evaluation (
         inspection_id,
-        inspection_images,
+        uu_bms_id,
+        bridge_name,
+        SpanIndex,
+        WorkKindID,
+        WorkKindName,
+    inspection_images,
         qc_remarks_con,
         qc_remarks_rams,
-        qc_remarks_evaluator,
-        evaluated_by,
+        evaluator_remarks,
+        evaluator_id,
         "PartsID",
         "PartsName",
         "MaterialID",
@@ -2823,12 +2838,17 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
     `;
 
     const insertValues = [
-      id,
+      inspection_id,
+      uu_bms_id,
+      bridge_name,
+      SpanIndex,
+      WorkKindID,
+      WorkKindName,
       inspection_images,
       qc_remarks_con,
       qc_remarks_rams,
       qc_remarks_evaluator,
-      evaluated_by,  // ✅ Moved here (before `damage_extent`)
+      evaluator_id,
       PartsID,
       PartsName,
       MaterialID,
@@ -2837,16 +2857,36 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       DamageKindName,
       DamageLevelID,
       DamageLevel,
-      damage_extent // ✅ No trailing comma
+      damage_extent
     ];
 
-    const result = await pool.query(insertQuery, insertValues);
-    res.status(201).json({ message: "Evaluation inserted successfully", data: result.rows[0] });
+    const result = await client.query(insertQuery, insertValues);
+
+    // Update is_evaluated to true in tbl_inspection_f
+    const updateQuery = `
+      UPDATE bms.tbl_inspection_f 
+      SET is_evaluated = TRUE 
+      WHERE inspection_id = $1;
+    `;
+
+    await client.query(updateQuery, [inspection_id]);
+
+    await client.query("COMMIT"); // Commit transaction
+
+    res.status(201).json({
+      message: "Evaluation done successfully",
+      data: result.rows[0],
+    });
+
   } catch (error) {
+    await client.query("ROLLBACK"); // Rollback transaction on error
     console.error("Error inserting evaluation:", error);
     res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    client.release();
   }
 });
+
 
 // api for structure types
 app.get("/api/structure-types", async (req, res) => {

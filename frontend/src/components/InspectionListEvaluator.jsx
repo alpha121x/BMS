@@ -30,7 +30,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
   // Extract username safely
-  const username = userToken?.username;
+  const userId = userToken?.userId;
 
   // Fetch dropdown options from API
   useEffect(() => {
@@ -150,10 +150,13 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           : row.qc_remarks_evaluator;
 
           const updatedData = {
-            id: row.inspection_id,
+            inspection_id: row.inspection_id,
             district_id: row.district_id,
             inspection_images: row.PhotoPaths,
             qc_remarks_evaluator: evaluatorRemarks,
+            // extra details
+            uu_bms_id: row.uu_bms_id,
+            bridge_name: row.bridge_name,
             //Span Index
             SpanIndex: row.SpanIndex,
             // WorkKind
@@ -173,19 +176,17 @@ const InspectionListEvaluator = ({ bridgeId }) => {
             DamageLevel: row.DamageLevel,
             // Damage Extent
             damage_extent: row.damage_extent,
-            // surveyed_by
-            surveyed_by: row.surveyed_by,
             // situation remarks
             situation_remarks: row.Remarks,
             // 1st committe remarks
             qc_remarks_con: row.qc_remarks_con,
             qc_remarks_rams: row.qc_remarks_rams,
-            evaluated_by: username,
+            evaluator_id: userId,
           };
           
           console.log(updatedData);
           
-      return;
+      // return;
 
       const response = await fetch(`${BASE_URL}/api/insert-inspection-evaluator`, {
         method: "POST",
@@ -201,7 +202,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
       Swal.fire({
         title: "Updated!",
-        text: "Your inspection has been updated.",
+        text: "Inspection Updated Successfully.",
         icon: "success",
         confirmButtonColor: "#0D6EFD",
       });
@@ -886,19 +887,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               </div>
                                             </div>
                                             <div className="row">
-                                              <div className="col-md-6">
+                                              <div className="col-md-12">
                                                 <div className="mb-2">
                                                   <strong>
                                                     Situation Remarks:
                                                   </strong>{" "}
                                                   {inspection.Remarks || "N/A"}
-                                                </div>
-                                              </div>
-                                              <div className="col-md-6">
-                                                <div className="mb-2">
-                                                  <strong>Surveyed By:</strong>{" "}
-                                                  {inspection.surveyed_by ||
-                                                    "N/A"}
                                                 </div>
                                               </div>
                                             </div>
