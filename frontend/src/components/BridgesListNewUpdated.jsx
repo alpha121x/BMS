@@ -46,12 +46,12 @@ const BridgesListNewUpdated = ({
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
   // Extract username safely
-  const username = userToken?.username;
+  const user_type = userToken?.usertype;
 
   // Fetch Bridges when filters change
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage, username, districtId, structureType, bridgeName]); // Re-fetch when username changes
+  }, [currentPage, user_type, districtId, structureType, bridgeName]); // Re-fetch when username changes
 
   const fetchAllBridges = async () => {
     setLoading(true);
@@ -60,11 +60,11 @@ const BridgesListNewUpdated = ({
 
       // Define different URLs based on username
       let url;
-      if (username === "consultant") {
+      if (user_type === "consultant") {
         url = new URL(`${BASE_URL}/api/bridgesCon`);
-      } else if (username === "rams") {
+      } else if (user_type === "rams") {
         url = new URL(`${BASE_URL}/api/bridgesRams`);
-      } else if (username === "evaluator") {
+      } else if (user_type === "evaluator") {
         url = new URL(`${BASE_URL}/api/bridgesEvaluator`); // Default for normal users
       }
 

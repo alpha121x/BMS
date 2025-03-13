@@ -2570,7 +2570,8 @@ WHERE
         OR 
         (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
     ) 
-    AND uu_bms_id = $1  -- ✅ Added condition
+    AND uu_bms_id = $1 
+    AND is_evaluated = false
 ORDER BY inspection_id DESC;
     `;
 
@@ -2847,7 +2848,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
   }
 });
 
-
+// api for structure types
 app.get("/api/structure-types", async (req, res) => {
   try {
     const result = await pool.query(
