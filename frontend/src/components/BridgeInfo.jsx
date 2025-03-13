@@ -29,7 +29,7 @@ const BridgeInfo = () => {
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
   // Extract username safely
-  const user_type = userToken?.user_type;
+  const user_type = userToken?.usertype;
   
 
   // Function to render components based on username
@@ -55,7 +55,7 @@ const BridgeInfo = () => {
     window.location.href = `/EditBridge?data=${serializedBridgeData}`;
   };
 
-  if (!bridgeData || !userToken) {
+  if (!bridgeData || !user_type) {
     return (
       <div
         className="loader"
