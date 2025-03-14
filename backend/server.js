@@ -505,7 +505,8 @@ app.get("/api/bridgesConDownloadCsv", async (req, res) => {
         f."surveyed_by" AS "Surveyed By",
         f.current_date_time AS "Inspection Date"
       FROM bms.tbl_bms_master_data md
-      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU'
+      JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU')
+      AND md.uu_bms_id IN (SELECT DISTINCT f.uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
       WHERE 1=1
     `; // 👈 Notice "WHERE 1=1" ensures the next conditions can safely be added
 
@@ -622,6 +623,100 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
     res.json({
       success: true,
       bridges: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
+// briges details download for dashboard and evaluationn working correctly
+app.get("/api/bridgesConExcelDownload", async (req, res) => {
+  try {
+    const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
+
+    let query = `
+    WITH ranked_data AS (
+      SELECT md.uu_bms_id AS "Reference No:",
+             CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
+             md.structure_type_id, md.structure_type, md.road_no, md.road_name_id, md.road_name,
+             md.road_name_cwd, md.road_code_cwd, md.route_id, md.survey_id, md.pms_start, md.pms_end,
+             md.survey_chainage_start, md.survey_chainage_end, md.pms_sec_id, md.structure_no,
+             md.surveyor_name, md.zone_id, md.zone, md.district_id, md.district, 
+             md.road_classification_id, md.road_classification, md.road_surface_type_id,
+             md.road_surface_type, md.carriageway_type_id, md.carriageway_type, md.direction,
+             md.visual_condition, md.construction_type_id, md.construction_type, md.no_of_span,
+             md.span_length_m, md.structure_width_m, md.construction_year, md.last_maintenance_date,
+             md.data_source, md.date_time, md.remarks, f.surveyed_by, f."SpanIndex", f."WorkKindID",
+             f."WorkKindName", f."PartsID", f."PartsName", f."MaterialID", f."MaterialName",
+             f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", f.damage_extent,
+             f."Remarks", f.current_date_time,
+             ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS row_rank,
+             ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+             COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
+      FROM bms.tbl_bms_master_data md
+      JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU')
+      WHERE 1=1
+      AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE f.surveyed_by = 'RAMS-UU')
+    )
+    SELECT * FROM ranked_data
+  `;
+
+    const queryParams = [];
+    let paramIndex = 1;
+
+    if (district !== "%") {
+      query += ` WHERE district_id = $${paramIndex}`;
+      queryParams.push(district);
+      paramIndex++;
+    }
+
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND bridge_name ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
+
+    if (structureType !== "%") {
+      query += ` AND structure_type_id = $${paramIndex}`;
+      queryParams.push(structureType);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY "Reference No:"`;
+
+    const result = await pool.query(query, queryParams);
+
+    // **Track First Row for Each uu_bms_id**
+    let firstRowMap = new Map();
+
+    // **Process Data**
+    const processedData = result.rows.map((row) => {
+      if (!firstRowMap.has(row["Reference No:"])) {
+        firstRowMap.set(row["Reference No:"], true);
+      } else {
+        row["Overview Photos"] = null;
+      }
+
+      // **Fix PhotoPaths**
+      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
+
+      // **Fix Overview Photos (only for first row)**
+      if (row["Overview Photos"]) {
+        row["Overview Photos"] = row["Overview Photos"]
+          .map((photo) => swapDomain(photo))
+          .filter(Boolean);
+      }
+
+      return row;
+    });
+
+    res.json({
+      success: true,
+      bridges: processedData,
     });
   } catch (error) {
     console.error("Error fetching data:", error);
