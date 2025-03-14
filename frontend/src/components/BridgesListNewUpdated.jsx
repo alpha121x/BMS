@@ -256,19 +256,27 @@ const BridgesListNewUpdated = ({
   };
   
   const handleDownloadExcel = async () => {
-    setLoadingExcel(true);
+    setLoadingExcel(true); // Start loading
     try {
-      const params = {
+      // Define the correct URL based on user_type
+      let url;
+      if (user_type === "consultant") {
+        url = new URL(`${BASE_URL}/api/bridgesConDownloadExcel`);
+      } else if (user_type === "rams") {
+        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadExcel`);
+      } else if (user_type === "evaluator") {
+        url = new URL(`${BASE_URL}/api/bridgesEvaluatorDownloadExcel`);
+      }
+  
+      // Set query parameters
+      url.search = new URLSearchParams({
         district: districtId || "%",
-        structureType,
-        bridgeName,
-      };
+        structureType : structureType || "%",
+        bridgeName : bridgeName || "%",
+      }).toString();
   
-      const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadNeww?${queryString}`, {
-        method: "GET",
-      });
-  
+      // Fetch data from the selected URL
+      const response = await fetch(url.toString(), { method: "GET" });
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }

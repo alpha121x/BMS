@@ -549,7 +549,7 @@ app.get("/api/bridgesConDownloadCsv", async (req, res) => {
 });
 
 // bridges details download csv for dashboard and evluation 
-app.get("/api/bridgesdownloadNew", async (req, res) => {
+app.get("/api/bridgesdownloadCsv", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
@@ -634,7 +634,7 @@ app.get("/api/bridgesdownloadNew", async (req, res) => {
 });
 
 // briges details download for dashboard and evaluationn working correctly
-app.get("/api/bridgesConExcelDownload", async (req, res) => {
+app.get("/api/bridgesConDownloadExcel", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
@@ -728,7 +728,7 @@ app.get("/api/bridgesConExcelDownload", async (req, res) => {
 });
 
 // briges details download for dashboard and evaluationn working correctly
-app.get("/api/bridgesdownloadNeww", async (req, res) => {
+app.get("/api/bridgesdownloadExcel", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
@@ -752,7 +752,7 @@ app.get("/api/bridgesdownloadNeww", async (req, res) => {
              ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
              COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
       FROM bms.tbl_bms_master_data md
-      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+      JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
       WHERE 1=1
       AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f)
     )
