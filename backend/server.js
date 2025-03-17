@@ -2970,7 +2970,7 @@ ORDER BY inspection_id DESC;
   }
 });
 
-app.get("/api/get-inspections-evaluator", async (req, res) => {
+app.get("/api/get-inspections-evaluator-new", async (req, res) => {
   try {
     const { bridgeId, userId } = req.query; // Get bridgeId and userId from query parameters
 
