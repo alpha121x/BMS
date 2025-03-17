@@ -2997,11 +2997,11 @@ app.put("/api/update-inspection-con", async (req, res) => {
       values.push(qc_con);
       valueIndex++;
 
-      // Hard-code evaluation_status based on qc_con value
+      // Hard-code inspection_status based on qc_con value
       if (qc_con === 2) {
-        query += ` evaluation_status = 'approved',`;
+        query += ` inspection_status = 'approved',`;
       } else if (qc_con === 3) {
-        query += ` evaluation_status = 'unapproved',`;
+        query += ` inspection_status = 'unapproved',`;
       }
     }
 
@@ -3062,9 +3062,9 @@ app.put("/api/update-inspection-rams", async (req, res) => {
 
       // Hardcoded evaluation_status based on qc_rams value
       if (qc_rams === 2) {
-        query += ` evaluation_status = 'approved',`;
+        query += ` inspection_status = 'approved',`;
       } else if (qc_rams === 3) {
-        query += ` evaluation_status = 'unapproved',`;
+        query += ` inspection_status = 'unapproved',`;
       }
     }
 

@@ -187,7 +187,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           
           console.log(updatedData);
           
-      return;
+      // return;
 
       const response = await fetch(`${BASE_URL}/api/insert-inspection-evaluator`, {
         method: "POST",
