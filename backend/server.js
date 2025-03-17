@@ -2984,8 +2984,7 @@ app.get("/api/get-inspections-evaluator-new", async (req, res) => {
     let queryParams = [bridgeId];
 
     const evaluatorLevel = parseInt(userId);
-    console.log("Evaluator Level:", evaluatorLevel, "Bridge ID:", bridgeId);
-
+   
     if (evaluatorLevel === 1) {
       query = `
         SELECT 
@@ -3102,110 +3101,24 @@ app.get("/api/get-summary-evaluator", async (req, res) => {
     const { bridgeId, userId } = req.query;
 
     if (!bridgeId || !userId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "bridgeId and userId are required" });
+      return res.status(400).json({
+        success: false,
+        message: "bridgeId and userId are required",
+      });
     }
 
-    let query = "";
-    let queryParams = [bridgeId];
     const evaluatorLevel = parseInt(userId);
+    const query = getSummaryQuery(evaluatorLevel, bridgeId);
 
-    switch (evaluatorLevel) {
-      case 1:
-        query = `
-          SELECT * FROM bms.tbl_inspection_f
-          WHERE 
-            uu_bms_id = $1 
-            AND "DamageLevelID" IN (4, 5, 6) 
-            AND (
-                surveyed_by = 'RAMS-PITB' 
-                OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
-            ) 
-            AND is_evaluated = false
-          ORDER BY inspection_id DESC;
-        `;
-        break;
-      case 2:
-        query = `
-          SELECT * FROM bms.tbl_evaluation
-          WHERE 
-            uu_bms_id = $1 
-            AND evaluator_id = '1'
-          ORDER BY inspection_id DESC;
-        `;
-        break;
-      case 3:
-        query = `
-            SELECT * FROM bms.tbl_evaluation
-          WHERE 
-            uu_bms_id = $1 
-            AND evaluator_id = '2'
-          ORDER BY inspection_id DESC;
-        `;
-        break;
-      case 4:
-        query = `
-            SELECT * FROM bms.tbl_evaluation
-          WHERE 
-            uu_bms_id = $1 
-            AND evaluator_id = '3'
-          ORDER BY inspection_id DESC;
-        `;
-        break;
-      case 5:
-        query = `
-           SELECT * FROM bms.tbl_evaluation
-          WHERE 
-            uu_bms_id = $1 
-            AND evaluator_id = '4'
-          ORDER BY inspection_id DESC;
-        `;
-        break;
-      default:
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid evaluator ID" });
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid evaluator ID",
+      });
     }
 
-    const { rows } = await pool.query(query, queryParams);
-
-    const processedData = rows.map((row) => {
-      let extractedPhotoPaths = [];
-      try {
-        if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
-            /\}"/g,
-            "}"
-          );
-          const parsedPhotos = JSON.parse(cleanedJson);
-
-          if (Array.isArray(parsedPhotos)) {
-            parsedPhotos.forEach((item) => {
-              if (item.path) extractedPhotoPaths.push(item.path);
-            });
-          } else if (typeof parsedPhotos === "object") {
-            Object.values(parsedPhotos).forEach((category) => {
-              if (typeof category === "object") {
-                Object.values(category).forEach((imagesArray) => {
-                  if (Array.isArray(imagesArray)) {
-                    extractedPhotoPaths.push(...imagesArray);
-                  }
-                });
-              }
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error parsing PhotoPaths:", error);
-      }
-
-      return {
-        ...row,
-        PhotoPaths: extractedPhotoPaths,
-        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-      };
-    });
+    const { rows } = await pool.query(query.text, query.values);
+    const processedData = rows.map(processSummaryData);
 
     res.status(200).json({ success: true, data: processedData });
   } catch (error) {
@@ -3213,6 +3126,75 @@ app.get("/api/get-summary-evaluator", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+// Function to get summary query by evaluator level
+const getSummaryQuery = (level, bridgeId) => {
+  if (level === 1) {
+    return {
+      text: `
+        SELECT * FROM bms.tbl_inspection_f
+        WHERE uu_bms_id = $1 
+          AND "DamageLevelID" IN (4, 5, 6) 
+          AND (
+              surveyed_by = 'RAMS-PITB' 
+              OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+          ) 
+          AND is_evaluated = false
+        ORDER BY inspection_id DESC;
+      `,
+      values: [bridgeId],
+    };
+  } else if (level >= 2 && level <= 5) {
+    return {
+      text: `
+        SELECT * FROM bms.tbl_evaluation
+        WHERE uu_bms_id = $1 
+          AND evaluator_id = $2
+        ORDER BY inspection_id DESC;
+      `,
+      values: [bridgeId, level - 1], // evaluator_id is 1 for level 2, 2 for level 3, etc.
+    };
+  }
+  return null;
+};
+
+// Function to process summary data
+const processSummaryData = (row) => ({
+  ...row,
+  PhotoPaths: parsePhotoPaths(row.PhotoPaths),
+  ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+});
+
+// Function to parse photo paths safely
+const parsePhotoPaths = (photoData) => {
+  try {
+    if (!photoData) return [];
+
+    const cleanedJson = photoData.replace(/\"\{/g, "{").replace(/\}"/g, "}");
+    const parsedPhotos = JSON.parse(cleanedJson);
+
+    if (Array.isArray(parsedPhotos)) {
+      return parsedPhotos.map((item) => item.path).filter(Boolean);
+    }
+
+    if (typeof parsedPhotos === "object") {
+      return Object.values(parsedPhotos)
+        .flatMap((category) =>
+          typeof category === "object"
+            ? Object.values(category).flatMap((imagesArray) =>
+                Array.isArray(imagesArray) ? imagesArray : []
+              )
+            : []
+        )
+        .filter(Boolean);
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Error parsing PhotoPaths:", error);
+    return [];
+  }
+};
 
 // Endpoint to update inspection data for consultant
 app.put("/api/update-inspection-con", async (req, res) => {

@@ -54,28 +54,28 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
-  // Extract userId safely (now used as evaluator level)
+  // Extract username safely
   const userId = userToken?.userId;
-  
+
   useEffect(() => {
     if (bridgeId && userId) {
       fetchData();
       fetchsummaryData();
     }
   }, [bridgeId, userId]);
-  
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       if (!bridgeId) throw new Error("bridgeId is required");
       if (!userId) throw new Error("userId is required");
-  
+
       const response = await fetch(
         `${BASE_URL}/api/get-inspections-evaluator-new?bridgeId=${bridgeId}&userId=${userId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
-  
+
       const result = await response.json();
       if (result.success) {
         // Generalized function for grouping
@@ -83,15 +83,15 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           return data.reduce((acc, item) => {
             const spanKey = item.SpanIndex || "N/A";
             const workKindKey = item.WorkKindName || "N/A";
-  
+
             if (!acc[spanKey]) acc[spanKey] = {};
             if (!acc[spanKey][workKindKey]) acc[spanKey][workKindKey] = [];
-  
+
             acc[spanKey][workKindKey].push(item);
             return acc;
           }, {});
         };
-  
+
         // Grouping the data separately
         setPendingData(groupBySpanAndWorkKind(result.data));
       } else {
@@ -103,7 +103,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       setLoading(false);
     }
   }, [bridgeId, userId]);
-  
 
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
