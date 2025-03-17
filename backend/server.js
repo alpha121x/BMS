@@ -555,7 +555,7 @@ app.get("/api/bridgesConDownloadExcel", async (req, res) => {
   }
 });
 
-// bridges details download csv for dashboard and evluation 
+// bridges details download csv for dashboard and evluation
 app.get("/api/bridgesConDownloadCsv", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
@@ -736,7 +736,7 @@ app.get("/api/bridgesRamsDownloadExcel", async (req, res) => {
   }
 });
 
-// bridges details download csv for dashboard and evluation 
+// bridges details download csv for dashboard and evluation
 app.get("/api/bridgesRamsDownloadCsv", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
@@ -919,7 +919,7 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
   }
 });
 
-// bridges details download csv for dashboard and evluation 
+// bridges details download csv for dashboard and evluation
 app.get("/api/bridgesdownloadCsv", async (req, res) => {
   try {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
@@ -1049,7 +1049,7 @@ app.get("/api/inspections-export-new", async (req, res) => {
       paramIndex++;
     }
 
-    if (structureType !=="%") {
+    if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       paramIndex++;
@@ -2878,8 +2878,7 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
     "DamageLevel", 
     "DamageLevelID", 
     "Remarks",
-    COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths", 
-    "ApprovedFlag"
+    COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
 FROM bms.tbl_inspection_f
 WHERE 
     "DamageLevelID" IN (4, 5, 6) 
@@ -2956,7 +2955,6 @@ ORDER BY inspection_id DESC;
         return {
           ...row,
           PhotoPaths: extractedUrls,
-          ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
         };
       });
 
@@ -2965,6 +2963,142 @@ ORDER BY inspection_id DESC;
       data: {
         pending: formatRows(pendingRows.rows),
       },
+    });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.get("/api/get-inspections-evaluator", async (req, res) => {
+  try {
+    const { bridgeId, userId } = req.query; // Get bridgeId and userId from query parameters
+
+    if (!bridgeId || !userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "bridgeId and userId are required" });
+    }
+
+    let query = "";
+    let queryParams = [bridgeId];
+
+    // Convert userId to integer (assuming it follows the sequence of evaluators)
+    const evaluatorLevel = parseInt(userId);
+
+    switch (evaluatorLevel) {
+      case 1:
+        query = `
+           SELECT 
+   uu_bms_id,
+    inspection_id,
+    surveyed_by,
+    is_evaluated,
+    district_id,
+    damage_extent,
+    qc_rams,
+    qc_remarks_rams,
+    qc_remarks_con,
+    reviewed_by,
+    bridge_name, 
+    "SpanIndex", 
+    "WorkKindID", 
+    "WorkKindName", 
+    "WorkKindID",
+    "PartsName", 
+    "PartsID", 
+    "MaterialName",
+    "MaterialID", 
+    "DamageKindName", 
+    "DamageKindID",
+    "DamageLevel", 
+    "DamageLevelID", 
+    "Remarks",
+    COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
+FROM bms.tbl_inspection_f
+WHERE 
+    "DamageLevelID" IN (4, 5, 6) 
+    AND (
+        surveyed_by = 'RAMS-PITB' 
+        OR 
+        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    ) 
+    AND uu_bms_id = $1 
+    AND is_evaluated = false
+ORDER BY inspection_id DESC;
+        `;
+        break;
+
+      case 2:
+        query = `
+          SELECT * FROM bms.tbl_evaluation
+          WHERE 
+            uu_bms_id = $1 
+            AND evaluator_id = '1'
+          ORDER BY inspection_id DESC;
+        `;
+        break;
+      case 3:
+        query = `
+            SELECT * FROM bms.tbl_evaluation
+          WHERE 
+            uu_bms_id = $1 
+            AND evaluator_id = '2'
+          ORDER BY inspection_id DESC;
+        `;
+        break;
+      case 4:
+        query = `
+            SELECT * FROM bms.tbl_evaluation
+          WHERE 
+            uu_bms_id = $1 
+            AND evaluator_id = '3'
+          ORDER BY inspection_id DESC;
+        `;
+        break;
+      case 5:
+        query = `
+           SELECT * FROM bms.tbl_evaluation
+          WHERE 
+            uu_bms_id = $1 
+            AND evaluator_id = '4'
+          ORDER BY inspection_id DESC;
+        `;
+        break;
+
+      default:
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid evaluator ID" });
+    }
+
+    const { rows } = await pool.query(query, queryParams);
+
+    // Format PhotoPaths
+    const formatRows = (rows) =>
+      rows.map((row) => {
+        let extractedUrls = [];
+
+        if (Array.isArray(row.PhotoPaths)) {
+          row.PhotoPaths.forEach((pathString) => {
+            extractedUrls = extractedUrls.concat(
+              extractUrlsFromPath(pathString)
+            );
+          });
+        } else if (typeof row.PhotoPaths === "string") {
+          extractedUrls = extractUrlsFromPath(row.PhotoPaths);
+        }
+
+        return {
+          ...row,
+          PhotoPaths: extractedUrls,
+          ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
+        };
+      });
+
+    res.status(200).json({
+      success: true,
+      data: formatRows(rows),
     });
   } catch (error) {
     console.error("Error fetching inspection data:", error);
@@ -3180,7 +3314,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       DamageKindName,
       DamageLevelID,
       DamageLevel,
-      damage_extent
+      damage_extent,
     ];
 
     const result = await client.query(insertQuery, insertValues);
@@ -3200,7 +3334,6 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       message: "Evaluation done successfully",
       data: result.rows[0],
     });
-
   } catch (error) {
     await client.query("ROLLBACK"); // Rollback transaction on error
     console.error("Error inserting evaluation:", error);
@@ -3430,4 +3563,4 @@ app.get("/api/road-surface-types", async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
-});
+});console.log(`Server is running on http://localhost:${port}`);

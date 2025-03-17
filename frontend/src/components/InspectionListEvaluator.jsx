@@ -27,11 +27,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [materials, setMaterials] = useState([]);
   const [parts, setParts] = useState([]);
   const [damageKinds, setDamageKinds] = useState([]);
-  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-
-  // Extract username safely
-  const userId = userToken?.userId;
-
+  
   // Fetch dropdown options from API
   useEffect(() => {
     fetch(`${BASE_URL}/api/damage-levels`)
@@ -55,24 +51,31 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       .catch((err) => console.error("Error fetching damage kinds:", err));
   }, []);
 
+
+  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+
+  // Extract userId safely (now used as evaluator level)
+  const userId = userToken?.userId;
+  
   useEffect(() => {
-    if (bridgeId) {
+    if (bridgeId && userId) {
       fetchData();
       fetchsummaryData();
     }
-  }, [bridgeId]);
-
+  }, [bridgeId, userId]);
+  
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       if (!bridgeId) throw new Error("bridgeId is required");
-
+      if (!userId) throw new Error("userId is required");
+  
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections-evaluator?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-inspections-evaluator-new?bridgeId=${bridgeId}&userId=${userId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
-
+  
       const result = await response.json();
       if (result.success) {
         // Generalized function for grouping
@@ -80,19 +83,17 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           return data.reduce((acc, item) => {
             const spanKey = item.SpanIndex || "N/A";
             const workKindKey = item.WorkKindName || "N/A";
-
+  
             if (!acc[spanKey]) acc[spanKey] = {};
             if (!acc[spanKey][workKindKey]) acc[spanKey][workKindKey] = [];
-
+  
             acc[spanKey][workKindKey].push(item);
             return acc;
           }, {});
         };
-
+  
         // Grouping the data separately
-        setPendingData(groupBySpanAndWorkKind(result.data.pending));
-        setApprovedData(groupBySpanAndWorkKind(result.data.approved));
-        setUnapprovedData(groupBySpanAndWorkKind(result.data.unapproved));
+        setPendingData(groupBySpanAndWorkKind(result.data));
       } else {
         throw new Error("Invalid data format");
       }
@@ -101,7 +102,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
-  }, [bridgeId]);
+  }, [bridgeId, userId]);
+  
 
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
@@ -110,7 +112,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-summary-evaluator?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-summary-evaluator-new?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
