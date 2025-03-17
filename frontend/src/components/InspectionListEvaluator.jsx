@@ -112,7 +112,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       if (!bridgeId) throw new Error("bridgeId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-summary-evaluator-new?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/get-summary-evaluator?bridgeId=${bridgeId}&userId=${userId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
