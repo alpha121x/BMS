@@ -93,7 +93,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         };
 
         // Grouping the data separately
-        setPendingData(groupBySpanAndWorkKind(result.data));
+        setPendingData(groupBySpanAndWorkKind(result.data.pending));
       } else {
         throw new Error("Invalid data format");
       }
@@ -103,6 +103,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       setLoading(false);
     }
   }, [bridgeId, userId]);
+
+  console.log(pendingData);
 
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
