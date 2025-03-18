@@ -104,8 +104,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }
   }, [bridgeId, userId]);
 
-  console.log(pendingData);
-
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -238,7 +236,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const handleSaveChanges = (row) => {
     handleUpdateInspection(row);
   };
-
 
   const handleDownloadCSV = async (bridgeId) => {
     setLoading(true); // Start loading
