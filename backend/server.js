@@ -1138,7 +1138,7 @@ app.get("/api/inspections-export-con", async (req, res) => {
           ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
         FROM bms.tbl_bms_master_data md
         LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-        WHERE f.surveyed_by = 'RAMS-UU' AND f.qc_con = '1'
+        WHERE f.surveyed_by = 'RAMS-UU'
       )
       SELECT * FROM ranked_data WHERE 1=1`;
 
@@ -1203,7 +1203,7 @@ app.get("/api/inspections-export-rams", async (req, res) => {
           ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
         FROM bms.tbl_bms_master_data md
         LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-        WHERE f.surveyed_by = 'RAMS-UU' AND f.qc_con = '2' AND f.qc_rams = '0'
+        WHERE f.surveyed_by = 'RAMS-UU' AND f.qc_con = '2'
       )
       SELECT * FROM ranked_data WHERE 1=1`;
 
