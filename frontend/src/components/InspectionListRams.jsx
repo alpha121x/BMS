@@ -283,7 +283,12 @@ const InspectionListRams = ({ bridgeId }) => {
 
       // Define all columns except images
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "rn" &&
+          key !== "qc_con" &&
+          key !== "qc_rams"
       );
 
       const columns = columnKeys.map((key) => ({
