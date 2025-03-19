@@ -990,16 +990,18 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                               </div>
                                             </div>
                                             <div className="flex justify-end gap-2">
-                                              <Button
-                                                variant="primary"
-                                                onClick={() =>
-                                                  fetchPastEvaluations(
-                                                    inspection.inspection_id
-                                                  )
-                                                }
-                                              >
-                                                View Past Evaluations
-                                              </Button>
+                                              {userId !== 1 && (
+                                                <Button
+                                                  variant="success"
+                                                  onClick={() =>
+                                                    fetchPastEvaluations(
+                                                      inspection.inspection_id
+                                                    )
+                                                  }
+                                                >
+                                                  View Past Evaluations
+                                                </Button>
+                                              )}
 
                                               <Button
                                                 onClick={() =>
