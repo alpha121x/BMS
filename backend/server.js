@@ -3096,51 +3096,62 @@ app.get("/api/get-inspections-evaluator-new", async (req, res) => {
 
 app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
   try {
-    const { bridgeId } = req.query;
+    const { bridgeId, userId } = req.query;
 
-    if (!bridgeId) {
+    if (!bridgeId || !userId) {
       return res
         .status(400)
-        .json({ success: false, message: "bridgeId is required" });
+        .json({ success: false, message: "bridgeId and userId are required" });
     }
 
+    const evaluatorLevel = parseInt(userId);
+
+    if (![1, 2, 3, 4, 5].includes(evaluatorLevel)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid evaluator ID" });
+    }
+
+    // Single query for the requested evaluator
     const query = `
       SELECT 
-        uu_bms_id, inspection_id, surveyed_by, is_evaluated, district_id,
-        damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con,
-        reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
-        "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
-        "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
-        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
-      FROM bms.tbl_inspection_f
-      WHERE 
-        "DamageLevelID" IN (4, 5, 6) 
-        AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
-        AND uu_bms_id = $1 
-        AND is_evaluated = false
-      ORDER BY inspection_id DESC;
+          uu_bms_id, inspection_id, surveyed_by, is_evaluated, district_id,
+          damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con,
+          reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
+          "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
+          "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
+          COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
+        FROM bms.tbl_inspection_f
+        WHERE 
+          "DamageLevelID" IN (4, 5, 6) 
+          AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
+          AND uu_bms_id = $1 
+          AND is_evaluated = false
+        ORDER BY inspection_id DESC;
     `;
 
-    const { rows } = await pool.query(query, [bridgeId]);
+    const result = await pool.query(query, [bridgeId]);
 
-    // Helper function to extract image URLs
-    const extractUrlsFromPath = (path) => {
-      if (!path) return [];
-      const trimmed = path.trim();
+    // Function to extract valid URLs
+    const extractUrlsFromPath = (pathString) => {
+      if (!pathString || typeof pathString !== "string") return [];
 
-      if (trimmed.startsWith("http")) return [trimmed];
+      const trimmedPath = pathString.trim();
+      if (trimmedPath.startsWith("http")) return [trimmedPath];
 
       try {
-        const parsed = JSON.parse(trimmed);
+        const parsed = JSON.parse(trimmedPath);
         const urls = [];
 
         const extractFromNested = (obj) => {
           if (Array.isArray(obj)) {
-            obj.forEach((item) =>
-              typeof item === "string" && item.startsWith("http")
-                ? urls.push(item)
-                : extractFromNested(item)
-            );
+            obj.forEach((item) => {
+              if (typeof item === "string" && item.startsWith("http")) {
+                urls.push(item);
+              } else if (typeof item === "object" && item !== null) {
+                extractFromNested(item);
+              }
+            });
           } else if (typeof obj === "object" && obj !== null) {
             Object.values(obj).forEach((value) => extractFromNested(value));
           }
@@ -3149,20 +3160,35 @@ app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
         extractFromNested(parsed);
         return urls;
       } catch (e) {
-        return trimmed.match(/(http[^"]+\.(jpg|jpeg|png|gif))/g) || [];
+        const urlMatches = trimmedPath.match(/(http[^"]+\.(jpg|jpeg|png|gif))/g);
+        return urlMatches || [];
       }
     };
 
-    // Formatting response data
-    const formattedData = rows.map((row) => ({
-      ...row,
-      PhotoPaths: row.PhotoPaths.flatMap(extractUrlsFromPath),
-    }));
+    // Format the response data
+    const formatRows = (rows) =>
+      rows.map((row) => {
+        let extractedUrls = [];
 
+        if (Array.isArray(row.PhotoPaths)) {
+          row.PhotoPaths.forEach((pathString) => {
+            extractedUrls = extractedUrls.concat(extractUrlsFromPath(pathString));
+          });
+        } else if (typeof row.PhotoPaths === "string") {
+          extractedUrls = extractUrlsFromPath(row.PhotoPaths);
+        }
+
+        return { ...row, PhotoPaths: extractedUrls };
+      });
+
+    // Return only one dataset under `pending`
     res.status(200).json({
       success: true,
-      data: { pending: formattedData },
+      data: {
+        pending: formatRows(result.rows),
+      },
     });
+
   } catch (error) {
     console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
@@ -3201,8 +3227,6 @@ app.get("/api/get-past-evaluations", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
-
 
 app.get("/api/get-summary-evaluator", async (req, res) => {
   try {
