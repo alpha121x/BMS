@@ -51,7 +51,7 @@ const BridgesListNewUpdated = ({
   // Fetch Bridges when filters change
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage, username, districtId, structureType, bridgeName]); // Re-fetch when username changes
+  }, [currentPage, user_type, districtId, structureType, bridgeName]); // Re-fetch when username changes
 
   const fetchAllBridges = async () => {
     setLoading(true);
@@ -60,14 +60,12 @@ const BridgesListNewUpdated = ({
 
       // Define different URLs based on username
       let url;
-      if (username === "consultant") {
-        url = new URL(`${BASE_URL}/api/bridgesNew`);
-      } else if (username === "rams") {
-        url = new URL(`${BASE_URL}/api/bridgesNew`);
-      } else if (username === "evaluator") {
+      if (user_type === "consultant") {
+        url = new URL(`${BASE_URL}/api/bridgesCon`);
+      } else if (user_type === "rams") {
+        url = new URL(`${BASE_URL}/api/bridgesRams`);
+      } else if (user_type === "evaluator") {
         url = new URL(`${BASE_URL}/api/bridgesEvaluator`); // Default for normal users
-      } else {
-        url = new URL(`${BASE_URL}/api/bridgesNew`);
       }
 
       // Set query parameters
@@ -206,7 +204,7 @@ const BridgesListNewUpdated = ({
     return buttons;
   };
 
- const handleDownloadCSV = async () => {
+  const handleDownloadCSV = async () => {
     setLoadingCSV(true); // Start loading
     try {
       // Define the correct URL based on user_type
@@ -374,7 +372,7 @@ const BridgesListNewUpdated = ({
       setLoadingExcel(false);
     }
   };
-
+  
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",
@@ -407,7 +405,7 @@ const BridgesListNewUpdated = ({
             </div>
 
             <Filters
-                districtId={districtId}
+              districtId={districtId}
               setDistrictId={setDistrictId}
               structureType={structureType}
               setStructureType={setStructureType}
@@ -433,13 +431,11 @@ const BridgesListNewUpdated = ({
               >
                 {loadingExcel ? (
                   <>
-                    <FaSpinner className="animate-spin mr-2" /> Downloading
-                    Excel...{" "}
+                    <FaSpinner className="animate-spin mr-2" /> Downloading Excel...{" "}
                   </>
                 ) : (
                   <div className="flex items-center gap-1">
-                    <FaFileExcel />
-                    {loading ? "Downloading Excel..." : "Excel"}
+                    <FaFileExcel /> {loading ? "Downloading Excel..." : "Excel"}
                   </div>
                 )}
               </button>
