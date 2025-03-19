@@ -46,15 +46,12 @@ const BridgesListNewUpdated = ({
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
   // Extract username safely
-  const user_type = userToken?.usertype;
+  const username = userToken?.username;
 
-  const userId = userToken?.userId;
-
- 
   // Fetch Bridges when filters change
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage, user_type, districtId, structureType, bridgeName]); // Re-fetch when username changes
+  }, [currentPage, username, districtId, structureType, bridgeName]); // Re-fetch when username changes
 
   const fetchAllBridges = async () => {
     setLoading(true);
@@ -63,12 +60,14 @@ const BridgesListNewUpdated = ({
 
       // Define different URLs based on username
       let url;
-      if (user_type === "consultant") {
-        url = new URL(`${BASE_URL}/api/bridgesCon`);
-      } else if (user_type === "rams") {
-        url = new URL(`${BASE_URL}/api/bridgesRams`);
-      } else if (user_type === "evaluator") {
+      if (username === "consultant") {
+        url = new URL(`${BASE_URL}/api/bridgesNew`);
+      } else if (username === "rams") {
+        url = new URL(`${BASE_URL}/api/bridgesNew`);
+      } else if (username === "evaluator") {
         url = new URL(`${BASE_URL}/api/bridgesEvaluator`); // Default for normal users
+      } else {
+        url = new URL(`${BASE_URL}/api/bridgesNew`);
       }
 
       // Set query parameters
@@ -78,7 +77,6 @@ const BridgesListNewUpdated = ({
         district: districtId,
         structureType,
         bridgeName,
-        userId,
       }).toString();
 
       const response = await fetch(url);
@@ -211,149 +209,151 @@ const BridgesListNewUpdated = ({
   const handleDownloadCSV = async () => {
     setLoadingCSV(true); // Start loading
     try {
-      // Define the correct URL based on user_type
-      let url;
-      if (user_type === "consultant") {
-        url = new URL(`${BASE_URL}/api/bridgesConDownloadCsv`);
-      } else if (user_type === "rams") {
-        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadCsv`);
-      } else if (user_type === "evaluator") {
-        url = new URL(`${BASE_URL}/api/bridgesEvaluatorDownloadCsv`);
-      }
-  
-      // Set query parameters
-      url.search = new URLSearchParams({
+      const params = {
         district: districtId || "%",
-        structureType : structureType || "%",
-        bridgeName : bridgeName || "%",
-      }).toString();
-  
-      // Fetch data from the selected URL
-      const response = await fetch(url.toString(), { method: "GET" });
-  
+        structureType,
+        bridgeName,
+      };
+
+      const queryString = new URLSearchParams(params).toString();
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
-      // Convert JSON data to CSV
+
       const csv = Papa.unparse(data.bridges);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  
-      // Create a download link and trigger it
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "Structures_Data.csv";
-      document.body.appendChild(link);
+      link.download = "bridges_data.csv";
       link.click();
-      document.body.removeChild(link);
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
     } finally {
       setLoadingCSV(false); // Stop loading
     }
   };
-  
+
   const handleDownloadExcel = async () => {
     setLoadingExcel(true); // Start loading
     try {
-      // Define the correct URL based on user_type
-      let url;
-      if (user_type === "consultant") {
-        url = new URL(`${BASE_URL}/api/bridgesConDownloadExcel`);
-      } else if (user_type === "rams") {
-        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadExcel`);
-      } else if (user_type === "evaluator") {
-        url = new URL(`${BASE_URL}/api/bridgesEvaluatorDownloadExcel`);
-      }
-  
-      // Set query parameters
-      url.search = new URLSearchParams({
+      const params = {
         district: districtId || "%",
-        structureType : structureType || "%",
-        bridgeName : bridgeName || "%",
-      }).toString();
-  
-      // Fetch data from the selected URL
-      const response = await fetch(url.toString(), { method: "GET" });
+        structureType,
+        bridgeName,
+      };
+
+      const queryString = new URLSearchParams(params).toString();
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export-new?${queryString}`,
+        { method: "GET" }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.bridge_name || "bridges_data";
+
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Bridges Data");
-  
-      // Exclude "row_rank" and image fields
+
+      // Define columns excluding image fields
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "row_rank" && key !== "Overview Photos" && key !== "PhotoPaths"
+        (key) => key !== "Overview Photos" && key !== "Inspection Photos"
       );
-  
+
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
         key: key,
-        width: Math.min(Math.max(...summaryData.map((row) => (row[key] ? row[key].toString().length : 10)), 10), 30), // Auto-adjust width
+        width: 22,
       }));
-  
-      // Add fixed-width image columns
+
+      // Add image columns
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 22 });
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
       }
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 22 });
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
       }
-  
+
       worksheet.columns = columns;
-  
+
       // Style header row
       worksheet.getRow(1).font = { bold: true, size: 14 };
-      worksheet.getRow(1).alignment = { vertical: "middle", horizontal: "center" };
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
       worksheet.getRow(1).height = 25;
-  
-      // Process Rows
+
+      // Insert rows with images
       for (let i = 0; i < summaryData.length; i++) {
         const item = summaryData[i];
-  
-        // Extract image URLs correctly
-        const overviewPhotos = item["Overview Photos"] || [];
-        const inspectionPhotos = item["PhotoPaths"] || [];
-  
-        // Add normal data, excluding "row_rank"
+
+        // Extract & fix image URLs
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+        const inspectionPhotos = (item["Inspection Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+
+        // Add normal data (excluding image URLs)
         const rowData = {};
         columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
-  
+
         // Insert row
         const rowIndex = worksheet.addRow(rowData).number;
+
+        // Set row height for images
         worksheet.getRow(rowIndex).height = 90;
-  
+
         // Function to insert images
         const insertImage = async (photoUrls, columnOffset) => {
           for (let j = 0; j < photoUrls.length && j < 5; j++) {
             try {
               const imgResponse = await fetch(photoUrls[j]);
-              if (!imgResponse.ok) continue;
-  
               const imgBlob = await imgResponse.blob();
               const arrayBuffer = await imgBlob.arrayBuffer();
-  
+
               const imageId = workbook.addImage({
                 buffer: arrayBuffer,
                 extension: "jpeg",
               });
-  
+
               worksheet.addImage(imageId, {
-                tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 },
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
                 ext: { width: 150, height: 90 },
               });
             } catch (error) {
@@ -361,14 +361,15 @@ const BridgesListNewUpdated = ({
             }
           }
         };
-  
+
+        // Insert images
         await insertImage(overviewPhotos, 0);
         await insertImage(inspectionPhotos, 5);
       }
-  
+
       // Save File
       const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), `BridgeData.xlsx`);
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
@@ -376,7 +377,7 @@ const BridgesListNewUpdated = ({
       setLoadingExcel(false);
     }
   };
-  
+
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",
@@ -409,7 +410,7 @@ const BridgesListNewUpdated = ({
             </div>
 
             <Filters
-              districtId={districtId}
+                districtId={districtId}
               setDistrictId={setDistrictId}
               structureType={structureType}
               setStructureType={setStructureType}
@@ -435,11 +436,13 @@ const BridgesListNewUpdated = ({
               >
                 {loadingExcel ? (
                   <>
-                    <FaSpinner className="animate-spin mr-2" /> Downloading Excel...{" "}
+                    <FaSpinner className="animate-spin mr-2" /> Downloading
+                    Excel...{" "}
                   </>
                 ) : (
                   <div className="flex items-center gap-1">
-                    <FaFileExcel /> {loading ? "Downloading Excel..." : "Excel"}
+                    <FaFileExcel />
+                    {loading ? "Downloading Excel..." : "Excel"}
                   </div>
                 )}
               </button>

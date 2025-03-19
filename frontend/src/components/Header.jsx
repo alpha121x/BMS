@@ -1,19 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserCircle, faSignOutAlt } from "@fortawesome/free-solid-svg-icons";
+import "./Header.css";
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const activeTab = location.pathname;
+
   const [isReportsDropdownOpen, setIsReportsDropdownOpen] = useState(false);
   const [isSetupDropdownOpen, setIsSetupDropdownOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-
-  const reportsRef = useRef(null);
-  const setupRef = useRef(null);
-  const profileRef = useRef(null);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -26,215 +24,60 @@ const Header = () => {
   const userToken = JSON.parse(localStorage.getItem("user"));
   const userName = userToken?.username;
 
-  const isReportsActive = activeTab.startsWith("/Reports");
-  const isSetupActive = activeTab.startsWith("/Setup");
-
-  const toggleReportsDropdown = () => {
-    setIsReportsDropdownOpen((prev) => !prev);
-  };
-
-  const toggleSetupDropdown = () => {
-    setIsSetupDropdownOpen((prev) => !prev);
-  };
-
-  const toggleProfileDropdown = () => {
-    setIsProfileDropdownOpen((prev) => !prev);
-  };
-
-  const handleClickOutside = (event) => {
-    // Close dropdowns if clicked outside
-    if (reportsRef.current && !reportsRef.current.contains(event.target)) {
-      setIsReportsDropdownOpen(false);
-    }
-    if (setupRef.current && !setupRef.current.contains(event.target)) {
-      setIsSetupDropdownOpen(false);
-    }
-    if (profileRef.current && !profileRef.current.contains(event.target)) {
-      setIsProfileDropdownOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   return (
-    <header className="p-1 rounded-lg shadow-lg">
-      <div className="flex justify-between items-center mx-2">
-        <div className="flex items-center">
-          <img src="/cnw.jpg" alt="Logo" className="h-[26px]" />
-          <div className="mt-1 ms-2">
-            <Link to="/Dashboard" className="no-underline">
-              <h5 className="font-bold uppercase">
-                <span className="text-blue-500">C&W BMS- Dashboard</span>
-              </h5>
-            </Link>
-          </div>
-        </div>
+      <Navbar bg="light" expand="lg" className="shadow-sm border-bottom border-2 fixed-top" >
+        <Container fluid>
+          <Navbar.Brand as={Link} to="/Dashboard" className="d-flex align-items-center">
+            <img src="/cnw.jpg" alt="Logo" style={{ height: "26px" }} className="me-2" />
+            <span className="fw-bold text-uppercase" style={{color:"#005d7f"}}>C&W Bridge Management System</span>
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav"   />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto">
+              <Nav.Link
+                  as={Link}
+                  to="/Dashboard"
+                  className={activeTab === "/Dashboard" ? "bg-custom-active text-white active" : "hover-bg-custom-active"}
+                  style={{ backgroundColor: activeTab === "/Dashboard" ? "#005d7f" : "transparent", color: activeTab === "/Dashboard" ? "#fff" : "#000" }}
+              >
+                Dashboard
+              </Nav.Link>
+              <Nav.Link
+                  as={Link}
+                  to="/BridgeWiseScore"
+                  className={activeTab === "/BridgeWiseScore" ? "bg-custom-active text-white active" : "hover-bg-custom-active"}
+                  style={{ backgroundColor: activeTab === "/BridgeWiseScore" ? "#005d7f" : "transparent", color: activeTab === "/BridgeWiseScore" ? "#fff" : "#000" }}
+              >
+                Bridge Wise Score
+              </Nav.Link>
 
-        <nav className="flex space-x-2 items-center">
-          <Link
-            to="/Dashboard"
-            className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
-              activeTab === "/Dashboard"
-                ? "bg-blue-500 text-white"
-                : "hover:bg-green-100 text-blue-500"
-            }`}
-          >
-            Dashboard
-          </Link>
+              <NavDropdown title="Reports" show={isReportsDropdownOpen} onMouseEnter={() => setIsReportsDropdownOpen(true)} onMouseLeave={() => setIsReportsDropdownOpen(false)}>
+                <NavDropdown.Item as={Link} to="/Reports/BridgeListing">Bridge Wise Listing</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/Reports/CategorySummary">Category Wise Summary</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/Reports/DistrictCategory">District Wise Category</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/Reports/BridgeCategory">Bridge Wise Category</NavDropdown.Item>
+              </NavDropdown>
 
-          <Link
-            to="/BridgeWiseScore"
-            className={`py-2 px-4 rounded font-bold transition duration-300 no-underline ${
-              activeTab === "/BridgeWiseScore"
-                ? "bg-blue-500 text-white"
-                : "hover:bg-green-100 text-blue-500"
-            }`}
-          >
-            Bridge Wise Score
-          </Link>
+              <NavDropdown title="Setup Listing" show={isSetupDropdownOpen} onMouseEnter={() => setIsSetupDropdownOpen(true)} onMouseLeave={() => setIsSetupDropdownOpen(false)}>
+                <NavDropdown.Item as={Link} to="/SetupListing/DamageRanks">Damage Ranks</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/SetupListing/Elements">Elements</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/SetupListing/DamageTypes">Damage Types</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/SetupListing/RoadClassifications">Road Classifications</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/SetupListing/CarriagewayTypes">Carriageway Types</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/SetupListing/BridgeAgeFactors">Bridge Age Factors</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/SetupListing/FactorCrossings">Factors for Crossings</NavDropdown.Item>
+              </NavDropdown>
 
-          {/* Reports Dropdown */}
-          <div className="relative" ref={reportsRef}>
-            <button
-              onClick={toggleReportsDropdown}
-              className={`py-2 px-4 rounded font-bold transition duration-300 ${
-                isReportsActive
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-green-100 text-blue-500"
-              }`}
-            >
-              Reports
-            </button>
-            {isReportsDropdownOpen && (
-              <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
-                <Link
-                  to="/Reports/BridgeListing"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Bridge Wise Listing
-                </Link>
-                <Link
-                  to="/Reports/CategorySummary"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Category Wise Summary
-                </Link>
-                <Link
-                  to="/Reports/DistrictCategory"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  District Wise Category
-                </Link>
-                <Link
-                  to="/Reports/BridgeCategory"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Bridge Wise Category
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Setup Dropdown */}
-          <div className="relative" ref={setupRef}>
-            <button
-              onClick={toggleSetupDropdown}
-              className={`py-2 px-4 rounded font-bold transition duration-300 ${
-                isSetupActive
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-green-100 text-blue-500"
-              }`}
-            >
-              Setup Listing
-            </button>
-            {isSetupDropdownOpen && (
-              <div className="absolute mt-2 w-48 bg-white text-gray-700 border rounded-md shadow-lg z-20">
-                <Link
-                  to="/SetupListing/DamageRanks"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Damage Ranks
-                </Link>
-                <Link
-                  to="/SetupListing/Elements"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Elements
-                </Link>
-                <Link
-                  to="/SetupListing/DamageTypes"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Damage Types
-                </Link>
-                <Link
-                  to="/SetupListing/RoadClassifications"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Road Classifications
-                </Link>
-                <Link
-                  to="/SetupListing/CarriagewayTypes"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Carriageway Types
-                </Link>
-                <Link
-                  to="/SetupListing/BridgeAgeFactors"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Bridge Age Factors
-                </Link>
-                <Link
-                  to="/SetupListing/FactorCrossings"
-                  className="flex px-4 py-2 hover:bg-gray-200 no-underline"
-                >
-                  Factors for Crossings
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Profile Dropdown */}
-          <div className="relative inline-block text-left" ref={profileRef}>
-            <Link
-              to="#"
-              onClick={toggleProfileDropdown}
-              className={`p-1 ms-2 font-semibold transition duration-300 no-underline ${
-                activeTab === "#"
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-100 text-blue-500"
-              }`}
-            >
-              <FontAwesomeIcon icon={faUserCircle} className="mr-2 fs-3" />
-            </Link>
-            {isProfileDropdownOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-fit bg-white border border-gray-200 rounded-1 shadow-lg transition-all duration-200 ease-in-out transform scale-95">
-                <Link className="flex items-center px-4 py-2 hover:bg-gray-100 no-underline transition duration-200">
-                  <span className="text-capitalize">{userName}</span>
-                </Link>
-                <Link
-                  to="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleLogout();
-                  }}
-                  className="flex items-center px-4 py-2 text-red-600 hover:bg-green-100 no-underline transition duration-200"
-                >
-                  <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
-                  Logout
-                </Link>
-              </div>
-            )}
-          </div>
-        </nav>
-      </div>
-    </header>
+              <NavDropdown title={<FontAwesomeIcon icon={faUserCircle} size="lg" />} align="end">
+                <NavDropdown.Item>{userName}</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleLogout}>
+                  <FontAwesomeIcon icon={faSignOutAlt} className="me-2" /> Logout
+                </NavDropdown.Item>
+              </NavDropdown>
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
   );
 };
 

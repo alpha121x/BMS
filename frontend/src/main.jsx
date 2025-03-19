@@ -2,32 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './index.css';
-import LoginEvaluation from './LoginEvaluation'; // Login Component for Evaluation
 import Login from './Login'; // Main Login Component
 import Dashboard from './Dashboard'; // Dashboard Component
 import Reports from './Reports'; // Reports Component
 import SetupListing from './SetupListing'; // SetupListing Component
-import Evaluation from './Evaluation'; // Evaluation Module Component
-import EditInspection from './EditInspection';
-import EditBridge from './EditIBridge';
-import BridgeInfo from './components/BridgeInfo';
 import BridgeInfoDashboard from './components/BridgeinfoDashboard';
-import EditInspectionNew from './EditInspectionNew';
 import BridgeWiseScore from './components/BridgeWiseScore';
 import BridgeInformation from './components/BridgeInformation';
-import BridgeInformationCon from './components/BridgeInformationCon';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') == "true";
   return isAuthenticated ? children : <Navigate to="/" />;
-};
-
-// Always redirect to the login page for Evaluation Module
-const PrivateEvaluationRoute = ({ children }) => {
-  const isAuthenticated = localStorage.getItem("isEvaluationAuthenticated") == "true";
-  // If authenticated, allow access to Evaluation, otherwise redirect to loginEvaluation
-  return isAuthenticated ? children : <Navigate to="/loginEvaluation" />;
 };
 
 
@@ -84,69 +70,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }
         />
 
-        {/* Login Route for Evaluation Module */}
-        <Route path="/loginEvaluation" element={<LoginEvaluation />} />
-
-        {/* Private Route for Evaluation Module - Always Redirects to Login */}
-        <Route
-          path="/Evaluation/*"
-          element={
-            <PrivateEvaluationRoute>
-              <Evaluation />
-            </PrivateEvaluationRoute>
-          }
-        />
-
-         {/* Private Route for EditInspection */}
-         <Route
-          path="/EditInspectionNew"
-          element={
-            <PrivateRoute>
-              <EditInspectionNew />
-            </PrivateRoute>
-          }
-        />
-
-           {/* Private Route for EditInspection */}
-           <Route
-          path="/EditInspection"
-          element={
-            <PrivateRoute>
-              <EditInspection />
-            </PrivateRoute>
-          }
-        />
-
-          {/* Private Route for EditBridge */}
-          <Route
-          path="/EditBridge"
-          element={
-            <PrivateRoute>
-              <EditBridge />
-            </PrivateRoute>
-          }
-        />
-
-         {/* Private Route for BridgeInfo */}
-         <Route
-          path="/BridgeInfo"
-          element={
-            <PrivateRoute>
-              <BridgeInfo />
-            </PrivateRoute>
-          }
-        />
-
-          {/* Private Route for BridgeInfo */}
-          <Route
-          path="/BridgeInfoEvaluation"
-          element={
-            <PrivateEvaluationRoute>
-              <BridgeInfo />
-            </PrivateEvaluationRoute>
-          }
-        />
-
           {/* Private Route for BridgeWise Score */}
           <Route
           path="/BridgeWiseScore"
@@ -157,27 +80,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }
         />
 
-         {/* Private Route for BridgeInformation */}
+         {/* Private Route for BridgeWise Score */}
          <Route
           path="/BridgeInformation"
-          element={
-            <PrivateRoute>
-              <BridgeInformation />
-            </PrivateRoute>
-          }
-        />
-
-         {/* Private Route for BridgeInformation */}
-         <Route
-          path="/BridgeInformationCon"
-          element={
-              <BridgeInformationCon />
-          }
-        />
-
-         {/* Private Route for BridgeInformation */}
-         <Route
-          path="/BridgeInformationRams"
           element={
             <PrivateRoute>
               <BridgeInformation />

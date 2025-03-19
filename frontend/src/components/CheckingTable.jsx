@@ -4,6 +4,9 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
 import Papa from "papaparse";
+import Filters from "./Filters.jsx";
+import {FaFileCsv, FaFileExcel} from "react-icons/fa6";
+import {FaSpinner} from "react-icons/fa";
 
 const CheckingTable = ({districtId, bridgeName}) => {
   const [tableData, setTableData] = useState([]);
@@ -182,110 +185,118 @@ const CheckingTable = ({districtId, bridgeName}) => {
   };
 
   return (
-    <div
-      className="card p-2 rounded-lg text-black"
-      style={{
-        background: "#FFFFFF",
-        border: "2px solid #60A5FA",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-        position: "relative",
-      }}
-    >
-      <div className="card-body pb-0">
-        <div className="text-2xl font-bold">Individual Bridge Inspections</div>
-        <div className="text-sm font-medium mt-1 text-gray-700 mb-1">
-          Total Records: {tableData.length || 0}
-        </div>
+      <div className="card p-0 rounded-0 text-black"
+           style={{
+             background: "#FFFFFF",
+             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+             position: "relative",
+           }}
+      >
+          <div className="card-header rounded-0 p-2 " style={{background: "#005D7F", color: "#fff"}}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
+                <h5 className="mb-0 me-5">Inspections</h5>
+                <h6 className="mb-0" id="structure-heading">
+                  Inspections Count:
+                  <span className="badge text-white ms-2" style={{background: "#009CB8"}}>
+                  <h6 className="mb-0">{tableData.length || 0}</h6>
+                </span>
+                </h6>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                    className="btn text-white"
+                    onClick={handleDownloadCSV}
+                    disabled={loading}
+                >
+                  <div className="flex items-center gap-1">
+                    <FaFileCsv/>
+                    {loading ? "Downloading CSV..." : "CSV"}
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
 
-        {/* Download CSV Button */}
-        <Button
-          variant="primary"
-          onClick={handleDownloadCSV}
-          style={{ marginBottom: "16px" }}
-        >
-          Download CSV
-        </Button>
-
-        {loading && (
-          <div
-            className="loader"
-            style={{
-              border: "8px solid #f3f3f3",
-              borderTop: "8px solid #3498db",
-              borderRadius: "50%",
-              width: "80px",
-              height: "80px",
-              animation: "spin 1s linear infinite",
-              margin: "auto",
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: "999",
-            }}
-          />
-        )}
-
-        <Table className="table table-striped table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>Bridge Name</th>
-              <th>Work Kind</th>
-              <th>Material</th>
-              <th>Elements</th>
-              <th>Date Time</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((row, index) => (
-                <tr key={index}>
-                  <td>{row.bridge_name || "N/A"}</td>
-                  <td>{row.WorkKindName || "N/A"}</td>
-                  <td>{row.MaterialName || "N/A"}</td>
-                  <td>{row.PartsName || "N/A"}</td>
-                  <td>{new Date(row.current_date_time).toLocaleString()  || "N/A"}</td>
-                  <td>
-                    <Button
-                      onClick={() => handleViewClick(row)}
-                      style={{
-                        backgroundColor: "#60A5FA",
-                        border: "none",
-                        color: "white",
-                      }}
-                    >
-                      View
-                    </Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center">
-                  No data available
-                </td>
-              </tr>
+          <div className="card-body p-0 pb-2">
+            {loading && (
+                <div
+                    className="loader"
+                    style={{
+                      border: "8px solid #f3f3f3",
+                      borderTop: "8px solid #3498db",
+                      borderRadius: "50%",
+                      width: "80px",
+                      height: "80px",
+                      animation: "spin 1s linear infinite",
+                      margin: "auto",
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: "999",
+                    }}
+                />
             )}
-          </tbody>
-        </Table>
 
-        <div className="d-flex justify-content-center align-items-center">
-          {renderPaginationButtons()}
+            <Table className="table table-striped table-bordered table-hover" style={{fontSize:".9rem"}}>
+              <thead>
+              <tr>
+                <th>Bridge Name</th>
+                <th>Work Kind</th>
+                <th>Material</th>
+                <th>Parts</th>
+                <th>Status</th>
+                <th>Details</th>
+              </tr>
+              </thead>
+              <tbody>
+              {currentData.length > 0 ? (
+                  currentData.map((row, index) => (
+                      <tr key={index}>
+                        <td>{row.bridge_name || "N/A"}</td>
+                        <td>{row.WorkKindName || "N/A"}</td>
+                        <td>{row.MaterialName || "N/A"}</td>
+                        <td>{row.PartsName || "N/A"}</td>
+                        <td>
+                          {row.ApprovedFlag === 0
+                              ? "Unapproved"
+                              : row.ApprovedFlag || "N/A"}
+                        </td>
+                        <td>
+                          <button className="bg-[#009CB8] text-white px-2 py-1 rounded-1 hover:bg-[#005D7F]"
+                              onClick={() => handleViewClick(row)}>
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                  ))
+              ) : (
+                  <tr>
+                    <td colSpan="7" className="text-center">
+                      No data available
+                    </td>
+                  </tr>
+              )}
+              </tbody>
+            </Table>
+
+            <div className="d-flex justify-content-center align-items-center">
+              {renderPaginationButtons()}
+            </div>
+          </div>
+
+          {/* Modal for viewing more details */}
+          <Modal show={showModal} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Inspection Details</Modal.Title>
+            </Modal.Header>
+
+            {/* Passing selectedRow as a prop to CheckingDetailsModal */}
+            <CheckingDetailsModal selectedRow={selectedRow}/>
+          </Modal>
         </div>
-      </div>
+        );
+        };
 
-      {/* Modal for viewing more details */}
-      <Modal show={showModal} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Inspection Details</Modal.Title>
-        </Modal.Header>
-
-        {/* Passing selectedRow as a prop to CheckingDetailsModal */}
-        <CheckingDetailsModal selectedRow={selectedRow} />
-      </Modal>
-    </div>
-  );
-};
-
-export default CheckingTable;
+        export default CheckingTable;

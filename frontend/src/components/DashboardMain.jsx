@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Map from "./Map";
-import BridgesListDashboard from "./BirdgesListDashboard";
+import BridgesListDashboard from "./BridgesListDashboard";
 import CheckingTable from "./CheckingTable";
 import Graph from "./Graph";
 import { FaBridge } from "react-icons/fa6";
@@ -10,6 +10,7 @@ import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
 import TopCardDashboard from "./TopCardDashboard";
+import Filters from "./Filters";
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -59,10 +60,12 @@ const DashboardMain = () => {
           BRIDGE: {
             label: "PC Bridge",
             icon: <FaBridge />,
+
           },
           UNDERPASS: {
             label: "Underpass",
             icon: <FaRoadBridge />,
+
           },
         };
 
@@ -72,7 +75,7 @@ const DashboardMain = () => {
             label: structureMap[typeKey]?.label || item.structure_type,
             value: item.count || "N/A",
             icon: structureMap[typeKey]?.icon || <SiInstructure />, // Fallback icon
-            color: "blue",
+            color: "#005D7F",
           };
         });
 
@@ -81,7 +84,7 @@ const DashboardMain = () => {
           label: "Total Structures Inventory",
           value: totalCount,
           icon: <SiInstructure />,
-          color: "blue",
+          color: "#005D7F",
         });
 
         setStructureCards(mappedCards);
@@ -111,7 +114,7 @@ const DashboardMain = () => {
             label: inspectionMap[typeKey]?.label || item.structure_type,
             value: item.count || "N/A",
             icon: inspectionMap[typeKey]?.icon || <SiInstructure />, // Default icon
-            color: "blue",
+            color: "#3B9996",
           };
         });
 
@@ -120,7 +123,7 @@ const DashboardMain = () => {
           label: "Total Inspected Strcutures",
           value: totalCount,
           icon: <SiInstructure />,
-          color: "blue",
+          color: "#3B9996",
         });
 
         setInspectedCards(mappedCards);
@@ -134,25 +137,25 @@ const DashboardMain = () => {
       label: "Total Evaluated Structures",
       value: "0",
       icon: <SiInstructure />,
-      color: "blue",
+      color: "#88b9b8",
     },
     {
       label: "Culvert",
       value: "0",
       icon: <LuConstruction />,
-      color: "blue",
+      color: "#88b9b8",
     },
     {
       label: "PC Bridge",
       value: "0",
       icon: <FaBridge />,
-      color: "blue",
+      color: "#88b9b8",
     },
     {
       label: "Underpass",
       value: "0",
       icon: <FaRoadBridge />,
-      color: "blue",
+      color: "#88b9b8",
     },
   ];
 
@@ -162,144 +165,216 @@ const DashboardMain = () => {
       label: "Deck Slab Bridges",
       value: "0",
       icon: <FaBridge />,
-      color: "blue",
+      color: "#009DB9",
     },
     {
       label: "Girder Bridges",
       value: "0",
       icon: <FaBridge />,
-      color: "blue",
+      color: "#009DB9",
     },
     {
       label: "Arch & Others",
       value: "0",
       icon: <GiArchBridge />,
-      color: "blue",
+      color: "#009DB9",
     },
     {
       label: "Culverts (Box & Pipes)",
       value: "0",
       icon: <LuConstruction />,
-      color: "blue",
+      color: "#009DB9",
     },
   ];
 
   return (
-    <section className="bg-gray-100 min-h-screen">
-      {/* Structure Section */}
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="mb-2">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                {structureCards.map((card, index) => (
-                  <TopCardDashboard key={index} {...card} />
-                ))}
-              </div>
-            </div>
-
-            <div className="mb-2">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                {constructionCards.map((card, index) => (
-                  <TopCardDashboard key={index} {...card} />
-                ))}
-              </div>
-            </div>
-
-            {/* Inspection Section */}
-            <div className="mb-2">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                {inspectedCards.map((card, index) => (
-                  <TopCardDashboard key={index} {...card} />
-                ))}
-              </div>
-            </div>
-
-            {/* Evaluation Section */}
-            <div className="mb-2">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                {evaluatedCards.map((card, index) => (
-                  <TopCardDashboard key={index} {...card} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Toggle Buttons */}
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="flex justify-start p-1 gap-3 w-50">
-              <button
-                onClick={() => setActiveView("map")}
-                className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
-                  activeView === "map"
-                    ? "bg-blue-600 text-white shadow-lg transform scale-105"
-                    : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                }`}
-              >
-                Map View
-              </button>
-              <button
-                onClick={() => setActiveView("graph")}
-                className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
-                  activeView === "graph"
-                    ? "bg-blue-600 text-white shadow-lg transform scale-105"
-                    : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                }`}
-              >
-                Graph View
-              </button>
-            </div>
-
-            {/* Content Container */}
-            <div>
-              {activeView === "map" ? (
-                <div className="mt-1">
-                  <Map districtId={districtId} />
+      <section className="min-h-screen">
+        {/* Structure Section */}
+        <div className="container-fluid mt-[65px]">
+          <div className="row g-2">
+            <div className="col-md-10">
+              <div className="row g-2">
+                <div className="col-md-4">
+                  <div className="mb-2">
+                    {/* Only One Card Displaying Total and Three Counts */}
+                    <TopCardDashboard
+                        totalLabel="Inventory Structures"
+                        totalValue={structureCards[0]?.value} // Assuming first item contains the total
+                        color="#005D7F"
+                        items={[
+                          {label: "Culvert", value: structureCards[1]?.value, icon: <LuConstruction/>},
+                          {label: "PC Bridge", value: structureCards[2]?.value, icon: <FaBridge/>},
+                          {label: "Underpass", value: structureCards[3]?.value, icon: <FaRoadBridge/>},
+                        ]}
+                    />
+                  </div>
                 </div>
-              ) : (
-                <div className="mt-1">
-                  <Graph />
+                <div className="col-md-4">
+                  <div className="mb-2">
+                    {/* Only One Card Displaying Total and Three Counts */}
+                    <TopCardDashboard
+                        totalLabel="Inspected Structures"
+                        totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
+                        color="#009DB9"
+                        items={[
+                          {label: "Culvert", value: inspectedCards[1]?.value, icon: <LuConstruction/>},
+                          {label: "PC Bridge", value: inspectedCards[2]?.value, icon: <FaBridge/>},
+                          {label: "Underpass", value: inspectedCards[3]?.value, icon: <FaRoadBridge/>},
+                        ]}
+                    />
+                  </div>
                 </div>
-              )}
+                <div className="col-md-4">
+                  <div className="mb-2">
+                    {/* Only One Card Displaying Total and Three Counts */}
+                    <TopCardDashboard
+                        totalLabel="Evaluated Structures"
+                        totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
+                        color="#3B9996"
+                        items={[
+                          {label: "Culvert", value: evaluatedCards[1]?.value, icon: <LuConstruction/>},
+                          {label: "PC Bridge", value: evaluatedCards[2]?.value, icon: <FaBridge/>},
+                          {label: "Underpass", value: evaluatedCards[3]?.value, icon: <FaRoadBridge/>},
+                        ]}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-2 bg-[#8CC5C4] p-2 rounded-1">
+              <Filters
+                  districtId={districtId}
+                  setDistrictId={setDistrictId}
+                  structureType={structureType}
+                  setStructureType={setStructureType}
+                  bridgeName={bridgeName}
+                  setBridgeName={setBridgeName}
+                  // fetchAllBridges={fetchAllBridges} // Search triggered manually
+                  flexDirection="flex-col"
+                  padding="p-1"
+              />
+            </div>
+
+
+            {/*<div className="mb-2">*/}
+            {/*  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">*/}
+            {/*    {constructionCards.map((card, index) => (*/}
+            {/*      <TopCardDashboard key={index} {...card} />*/}
+            {/*    ))}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+
+            {/*/!* Inspection Section *!/*/}
+            {/*<div className="mb-2">*/}
+            {/*  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">*/}
+            {/*    {inspectedCards.map((card, index) => (*/}
+            {/*      <TopCardDashboard key={index} {...card} />*/}
+            {/*    ))}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+
+            {/*/!* Evaluation Section *!/*/}
+            {/*<div className="mb-2">*/}
+            {/*  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">*/}
+            {/*    {evaluatedCards.map((card, index) => (*/}
+            {/*      <TopCardDashboard key={index} {...card} />*/}
+            {/*    ))}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+
+          </div>
+        </div>
+
+        {/* Toggle Buttons */}
+        <div className="container-fluid">
+          <div className="row mt-2">
+            <div className="col-md-12">
+              {/* Navigation Buttons */}
+              <div className="flex justify-start pb-0 gap-2 w-75">
+                <button
+                    onClick={() => setActiveView("map")}
+                    className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                        activeView === "map" ? "bg-[#005D7F] text-white" : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                    }`}
+                >
+                  Map View Analysis
+                </button>
+                <button
+                    onClick={() => setActiveView("graph")}
+                    className={`px-8 py-2 text-lg font-semibold rounded-0 ${
+                        activeView === "graph" ? "bg-[#005D7F] text-white" : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                    }`}
+                >
+                  Graph View Analysis
+                </button>
+                <button
+                    onClick={() => setActiveView("inventory")}
+                    className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                        activeView === "inventory" ? "bg-[#005D7F] text-white" : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                    }`}
+                >
+                  Inventory
+                </button>
+                <button
+                    onClick={() => setActiveView("inspections")}
+                    className={`px-8 py-2 text-lg font-semibold rounded-0 ${
+                        activeView === "inspections" ? "bg-[#005D7F] text-white" : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                    }`}
+                >
+                  Inspections
+                </button>
+              </div>
+
+              {/* Content Container */}
+              <div className="mt-0">
+                {activeView === "map" && <Map districtId={districtId}/>}
+                {activeView === "graph" && <Graph/>}
+                {activeView === "inventory" && (
+                    <BridgesListDashboard
+                        districtId={districtId}
+                        setDistrictId={setDistrictId}
+                        structureType={structureType}
+                        setStructureType={setStructureType}
+                        bridgeName={bridgeName}
+                        setBridgeName={setBridgeName}
+                    />
+                )}
+                {activeView === "inspections" && <CheckingTable districtId={districtId} bridgeName={bridgeName}/>}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Bridges List */}
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-12">
-            <BridgesListDashboard
-              districtId={districtId}
-              setDistrictId={setDistrictId}
-              structureType={structureType}
-              setStructureType={setStructureType}
-              bridgeName={bridgeName}
-              setBridgeName={setBridgeName}
-            />
+        {/* Bridges List */}
+        {/*<div className="container-fluid">*/}
+        {/*  <div className="row">*/}
+        {/*    <div className="col-md-12">*/}
+        {/*      <BridgesListDashboard*/}
+        {/*          districtId={districtId}*/}
+        {/*          setDistrictId={setDistrictId}*/}
+        {/*          structureType={structureType}*/}
+        {/*          setStructureType={setStructureType}*/}
+        {/*          bridgeName={bridgeName}*/}
+        {/*          setBridgeName={setBridgeName}*/}
+        {/*      />*/}
 
-            <div className="mt-2">
-              <CheckingTable districtId={districtId} bridgeName={bridgeName} />
-            </div>
-          </div>
-        </div>
-      </div>
+        {/*      <div className="mt-2">*/}
+        {/*        <CheckingTable districtId={districtId} bridgeName={bridgeName}/>*/}
+        {/*      </div>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
 
-      {/* Back to Top Button */}
-      {showBackToTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed bottom-5 right-5 bg-blue-500 text-white rounded-full p-3 shadow-lg hover:bg-blue-600 focus:outline-none w-12 h-12 flex items-center justify-center"
-        >
-          ↑
-        </button>
-      )}
-    </section>
+        {/* Back to Top Button */}
+        {showBackToTop && (
+            <button
+                onClick={scrollToTop}
+                className="fixed bottom-5 right-5 bg-blue-500 text-white rounded-full p-3 shadow-lg hover:bg-blue-600 focus:outline-none w-12 h-12 flex items-center justify-center"
+            >
+              ↑
+            </button>
+        )}
+      </section>
   );
 };
 

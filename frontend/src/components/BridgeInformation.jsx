@@ -20,7 +20,7 @@ const BridgeInfoDashboard = () => {
   }, [location]);
 
   const handleBackClick = () => {
-    navigate("/Dashboard");
+    navigate("/BridgeWiseScore");
   };
 
   return (

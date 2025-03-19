@@ -196,7 +196,7 @@ const Map = ({ districtId }) => {
   }, [districtId, navigate]);
 
   return (
-    <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
+    <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{border: "1px solid #005D7F"}}>
       <div ref={mapRef} className="map-container" style={{ height: "500px" }} />
     </div>
   );

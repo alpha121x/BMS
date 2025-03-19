@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BASE_URL } from "./config";
 import { FaSearch } from "react-icons/fa";
 
-const Filters = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName }) => {
+const Filters = ({ districtId, setDistrictId, structureType, setStructureType, bridgeName, setBridgeName, flexDirection, padding }) => {
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
 
@@ -36,27 +36,29 @@ const Filters = ({ districtId, setDistrictId, structureType, setStructureType, b
   };
 
   return (
-    <div className="flex items-center gap-2 justify-between">
-      <select className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-        value={tempDistrictId} onChange={(e) => setTempDistrictId(e.target.value)}>
-        <option value="%">--Select District--</option>
-        {districts.map(d => <option key={d.id} value={d.id}>{d.district}</option>)}
-      </select>
+      <div className={`flex ${flexDirection} items-center gap-2 jus justify-center`}>
+        <select className={`w-full border border-[#3B82F6] rounded-1 ${padding} text-gray-400`}
+                value={tempDistrictId} onChange={(e) => setTempDistrictId(e.target.value)}>
+          <option value="%">Select District</option>
+          {districts.map(d => <option key={d.id} value={d.id}>{d.district}</option>)}
+        </select>
 
-      <select className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-        value={tempStructureType} onChange={(e) => setTempStructureType(e.target.value)}>
-        <option value="%">--Select Structure Type--</option>
-        {structureTypes.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}
-      </select>
+        <select className={`w-full border border-[#3B82F6] rounded-1 ${padding} text-gray-400`}
+                value={tempStructureType} onChange={(e) => setTempStructureType(e.target.value)}>
+          <option value="%">Select Structure Type</option>
+          {structureTypes.map(type => <option key={type.id} value={type.id}>{type.name}</option>)}
+        </select>
 
-      <input type="text" className="w-full border border-[#3B82F6] rounded p-1 bg-gray-200"
-        placeholder="Search Bridge Name..."
-        value={tempBridgeName} onChange={(e) => setTempBridgeName(e.target.value)} />
+        <input type="text" className={`w-full border border-[#3B82F6] rounded-1 ${padding} text-gray-500`}
+               placeholder="Search Bridge Name..."
+               value={tempBridgeName} onChange={(e) => setTempBridgeName(e.target.value)}/>
 
-      <button onClick={handleSearch} className="p-2 bg-[#3B82F6] text-white rounded hover:bg-blue-700">
-        <FaSearch />
-      </button>
-    </div>
+        <button onClick={handleSearch} className="w-full bg-[#005D7F] text-white rounded hover:bg-[#005D7F] flex items-center justify-center"
+                style={{padding: '10px 20px'}}>
+          <FaSearch/>
+        </button>
+
+      </div>
   );
 };
 

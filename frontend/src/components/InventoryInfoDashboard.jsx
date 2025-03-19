@@ -61,7 +61,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
               { label: "Longitude", field: "x_centroid" },
               { label: "Situation Remarks", field: "remarks" },
               { label: "Data Source", field: "data_source" },
-              { label: "Date", field: "date_time" },
+              { label: "Initial Survey Date", field: "date_time" },
             ].map(({ label, field }, index) => (
               <Col key={index} md={3}>
                 <Form.Group>
