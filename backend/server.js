@@ -2113,7 +2113,6 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
   }
 });
 
-
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
   try {
@@ -3088,6 +3087,81 @@ app.get("/api/get-inspections-evaluator-new", async (req, res) => {
       data: {
         pending: formatRows(rows), // Returning formatted rows inside 'pending' array
       },
+    });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    if (!bridgeId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "bridgeId is required" });
+    }
+
+    const query = `
+      SELECT 
+        uu_bms_id, inspection_id, surveyed_by, is_evaluated, district_id,
+        damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con,
+        reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
+        "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
+        "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
+        COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
+      FROM bms.tbl_inspection_f
+      WHERE 
+        "DamageLevelID" IN (4, 5, 6) 
+        AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
+        AND uu_bms_id = $1 
+        AND is_evaluated = false
+      ORDER BY inspection_id DESC;
+    `;
+
+    const { rows } = await pool.query(query, [bridgeId]);
+
+    // Helper function to extract image URLs
+    const extractUrlsFromPath = (path) => {
+      if (!path) return [];
+      const trimmed = path.trim();
+
+      if (trimmed.startsWith("http")) return [trimmed];
+
+      try {
+        const parsed = JSON.parse(trimmed);
+        const urls = [];
+
+        const extractFromNested = (obj) => {
+          if (Array.isArray(obj)) {
+            obj.forEach((item) =>
+              typeof item === "string" && item.startsWith("http")
+                ? urls.push(item)
+                : extractFromNested(item)
+            );
+          } else if (typeof obj === "object" && obj !== null) {
+            Object.values(obj).forEach((value) => extractFromNested(value));
+          }
+        };
+
+        extractFromNested(parsed);
+        return urls;
+      } catch (e) {
+        return trimmed.match(/(http[^"]+\.(jpg|jpeg|png|gif))/g) || [];
+      }
+    };
+
+    // Formatting response data
+    const formattedData = rows.map((row) => ({
+      ...row,
+      PhotoPaths: row.PhotoPaths.flatMap(extractUrlsFromPath),
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: { pending: formattedData },
     });
   } catch (error) {
     console.error("Error fetching inspection data:", error);

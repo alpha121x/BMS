@@ -58,11 +58,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const userId = userToken?.userId;
 
   useEffect(() => {
-    if (bridgeId && userId) {
+    if (bridgeId) {
       fetchData();
       fetchsummaryData();
     }
-  }, [bridgeId, userId]);
+  }, [bridgeId]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -72,7 +72,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       if (!userId) throw new Error("userId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections-evaluator-new?bridgeId=${bridgeId}&userId=${userId}`
+        `${BASE_URL}/api/get-inspections-evaluatorNew?bridgeId=${bridgeId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -102,7 +102,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
-  }, [bridgeId, userId]);
+  }, [bridgeId]);
 
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
