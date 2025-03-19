@@ -1987,132 +1987,6 @@ SELECT
   }
 });
 
-app.get("/api/bridgesEvaluatorNew", async (req, res) => {
-  try {
-    const {
-      set = 0,
-      limit = 10,
-      district = "%",
-      structureType = "%",
-      bridgeName = "%",
-      userId = req.query.userId ? parseInt(req.query.userId, 10) : 1,
-    } = req.query;
-
-    let query = "";
-    let countQuery = "";
-    const queryParams = [];
-    const countParams = [];
-    let paramIndex = 1;
-
-    if (userId === 1) {
-      // Query for Evaluator Level 1 (based on `tbl_inspection_f`)
-      query = `
-        SELECT 
-          uu_bms_id, surveyed_by, pms_sec_id, structure_no, structure_type_id, structure_type, 
-          road_name, road_name_cwd, route_id, survey_id, surveyor_name, district_id, district, 
-          road_classification, road_surface_type, carriageway_type, direction, visual_condition, 
-          construction_type_id, construction_type, no_of_span, data_source, date_time, span_length_m, 
-          structure_width_m, construction_year, last_maintenance_date, remarks, is_surveyed, 
-          x_centroid, y_centroid, images_spans,
-          CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
-          ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
-        FROM bms.tbl_bms_master_data
-        WHERE uu_bms_id IN (
-          SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f 
-          WHERE "DamageLevelID" IN (4, 5, 6)
-            AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2))
-            AND is_evaluated = false
-        )`;
-
-      countQuery = `
-        SELECT COUNT(*) AS totalCount FROM bms.tbl_bms_master_data
-        WHERE uu_bms_id IN (
-          SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f 
-          WHERE "DamageLevelID" IN (4, 5, 6)
-            AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2))
-        )`;
-
-    } else if ([2, 3, 4, 5].includes(userId)) {
-      // Query for Evaluator Levels 2-5 (based on `tbl_evaluation`)
-      query = `
-        SELECT 
-          uu_bms_id, surveyed_by, pms_sec_id, structure_no, structure_type_id, structure_type, 
-          road_name, road_name_cwd, route_id, survey_id, surveyor_name, district_id, district, 
-          road_classification, road_surface_type, carriageway_type, direction, visual_condition, 
-          construction_type_id, construction_type, no_of_span, data_source, date_time, span_length_m, 
-          structure_width_m, construction_year, last_maintenance_date, remarks, is_surveyed, 
-          x_centroid, y_centroid, images_spans,
-          CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
-          ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
-        FROM bms.tbl_bms_master_data
-        WHERE uu_bms_id IN (
-          SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation
-          WHERE evaluator_id = $1
-        )`;
-
-      countQuery = `
-        SELECT COUNT(*) AS totalCount FROM bms.tbl_bms_master_data
-        WHERE uu_bms_id IN (
-          SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation
-          WHERE evaluator_id = $1
-        )`;
-
-      queryParams.push(userId);
-      countParams.push(userId);
-      paramIndex++;
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid evaluator ID",
-      });
-    }
-
-    // Additional Filters (Common for both queries)
-    if (district !== "%") {
-      query += ` AND district_id = $${paramIndex}`;
-      countQuery += ` AND district_id = $${paramIndex}`;
-      queryParams.push(district);
-      countParams.push(district);
-      paramIndex++;
-    }
-
-    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
-      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridgeName}%`);
-      countParams.push(`%${bridgeName}%`);
-      paramIndex++;
-    }
-
-    if (structureType !== "%") {
-      query += ` AND structure_type_id = $${paramIndex}`;
-      countQuery += ` AND structure_type_id = $${paramIndex}`;
-      queryParams.push(structureType);
-      countParams.push(structureType);
-      paramIndex++;
-    }
-
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
-    queryParams.push(parseInt(set, 10), parseInt(limit, 10));
-
-    // Execute Queries
-    const result = await pool.query(query, queryParams);
-    const countResult = await pool.query(countQuery, countParams);
-
-    res.json({
-      success: true,
-      bridges: result.rows,
-      totalCount: parseInt(countResult.rows[0].totalcount, 10),
-    });
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching data from the database",
-    });
-  }
-});
-
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
   try {
@@ -3127,10 +3001,11 @@ app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
           AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
           AND uu_bms_id = $1 
           AND is_evaluated = false
+          AND evaluator_id != $2 - $2 is userID??
         ORDER BY inspection_id DESC;
     `;
 
-    const result = await pool.query(query, [bridgeId]);
+    const result = await pool.query(query, [bridgeId, userId]);
 
     // Function to extract valid URLs
     const extractUrlsFromPath = (pathString) => {
