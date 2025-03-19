@@ -2989,23 +2989,23 @@ app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
     // Single query for the requested evaluator
     const query = `
       SELECT 
-          uu_bms_id, inspection_id, surveyed_by, is_evaluated, district_id,
-          damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con,
-          reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
-          "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
-          "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
-          COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
-        FROM bms.tbl_inspection_f
-        WHERE 
-          "DamageLevelID" IN (4, 5, 6) 
-          AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
-          AND uu_bms_id = $1 
-          AND is_evaluated = false
-          AND evaluator_id != $2 - $2 is userID??
-        ORDER BY inspection_id DESC;
+    uu_bms_id, inspection_id, surveyed_by, is_evaluated, district_id,
+    damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con,evaluator_id,
+    reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
+    "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
+    "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
+    COALESCE(string_to_array(NULLIF(inspection_images, ''), ','), '{}') AS "PhotoPaths"
+FROM bms.tbl_inspection_f
+WHERE 
+    "DamageLevelID" IN (4, 5, 6) 
+    AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
+    AND uu_bms_id = $1 
+    AND (evaluator_id IS NULL OR evaluator_id != $2)  -- Fix for NULL issue
+ORDER BY inspection_id DESC;
     `;
 
     const result = await pool.query(query, [bridgeId, userId]);
+
 
     // Function to extract valid URLs
     const extractUrlsFromPath = (pathString) => {
@@ -3404,12 +3404,12 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
 
     // Update is_evaluated to true in tbl_inspection_f
     const updateQuery = `
-      UPDATE bms.tbl_inspection_f 
-      SET is_evaluated = TRUE 
-      WHERE inspection_id = $1;
+     UPDATE bms.tbl_inspection_f 
+  SET is_evaluated = TRUE, evaluator_id = $2
+  WHERE inspection_id = $1;
     `;
 
-    await client.query(updateQuery, [inspection_id]);
+    await client.query(updateQuery, [inspection_id, evaluator_id]);
 
     await client.query("COMMIT"); // Commit transaction
 
