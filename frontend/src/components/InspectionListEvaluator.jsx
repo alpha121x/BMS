@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import ReportsSummary from "./ReportsSummary";
+import PastEvaluationsModal from "./PastEvaluationModal";
 
 const InspectionListEvaluator = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
@@ -23,11 +24,51 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedInspectionId, setSelectedInspectionId] = useState(null);
+  const [evaluationData, setEvaluationData] = useState([]);
   const [damageLevels, setDamageLevels] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [parts, setParts] = useState([]);
   const [damageKinds, setDamageKinds] = useState([]);
-  
+
+  // Function to fetch past evaluations
+  const fetchPastEvaluations = async (inspectionId) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/api/get-past-evaluations?inspectionId=${inspectionId}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setEvaluationData(data.data);
+        setShowModal(true); // Show modal after data is loaded
+      } else {
+        setError(data.message || "Failed to fetch evaluations");
+      }
+    } catch (err) {
+      setError("Error fetching data. Please try again.");
+    }
+
+    setLoading(false);
+  };
+
+  // Function to handle modal visibility and API call
+  const handleShowModal = (inspectionId) => {
+    setSelectedInspectionId(inspectionId);
+    setShowModal(true);
+    fetchPastEvaluations(inspectionId); // Fetch past evaluations
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedInspectionId(null);
+    setEvaluationData([]); // Reset data on close
+  };
+
   // Fetch dropdown options from API
   useEffect(() => {
     fetch(`${BASE_URL}/api/damage-levels`)
@@ -50,7 +91,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       .then((data) => setDamageKinds(data))
       .catch((err) => console.error("Error fetching damage kinds:", err));
   }, []);
-
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
@@ -150,53 +190,56 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           ? null
           : row.qc_remarks_evaluator;
 
-          const updatedData = {
-            inspection_id: row.inspection_id,
-            district_id: row.district_id,
-            inspection_images: row.PhotoPaths,
-            qc_remarks_evaluator: evaluatorRemarks ? evaluatorRemarks : null,
-            // extra details
-            uu_bms_id: row.uu_bms_id,
-            bridge_name: row.bridge_name,
-            district_id: row.district_id,
-            //Span Index
-            SpanIndex: row.SpanIndex,
-            // WorkKind
-            WorkKindID: row.WorkKindID,
-            WorkKindName: row.WorkKindName,
-            // Parts (Element)
-            PartsID: row.PartsID, 
-            PartsName: row.PartsName,
-            // Material
-            MaterialID: row.MaterialID, 
-            MaterialName: row.MaterialName,
-            // Damage Kind
-            DamageKindID: row.DamageKindID, 
-            DamageKindName: row.DamageKindName,
-            // Damage Level
-            DamageLevelID: row.DamageLevelID, 
-            DamageLevel: row.DamageLevel,
-            // Damage Extent
-            damage_extent: row.damage_extent,
-            // situation remarks
-            situation_remarks: row.Remarks ? row.Remarks : null,
-            // 1st committe remarks
-            qc_remarks_con: row.qc_remarks_con,
-            qc_remarks_rams: row.qc_remarks_rams,
-            evaluator_id: userId,
-          };
-          
-          console.log(updatedData);
-          
+      const updatedData = {
+        inspection_id: row.inspection_id,
+        district_id: row.district_id,
+        inspection_images: row.PhotoPaths,
+        qc_remarks_evaluator: evaluatorRemarks ? evaluatorRemarks : null,
+        // extra details
+        uu_bms_id: row.uu_bms_id,
+        bridge_name: row.bridge_name,
+        district_id: row.district_id,
+        //Span Index
+        SpanIndex: row.SpanIndex,
+        // WorkKind
+        WorkKindID: row.WorkKindID,
+        WorkKindName: row.WorkKindName,
+        // Parts (Element)
+        PartsID: row.PartsID,
+        PartsName: row.PartsName,
+        // Material
+        MaterialID: row.MaterialID,
+        MaterialName: row.MaterialName,
+        // Damage Kind
+        DamageKindID: row.DamageKindID,
+        DamageKindName: row.DamageKindName,
+        // Damage Level
+        DamageLevelID: row.DamageLevelID,
+        DamageLevel: row.DamageLevel,
+        // Damage Extent
+        damage_extent: row.damage_extent,
+        // situation remarks
+        situation_remarks: row.Remarks ? row.Remarks : null,
+        // 1st committe remarks
+        qc_remarks_con: row.qc_remarks_con,
+        qc_remarks_rams: row.qc_remarks_rams,
+        evaluator_id: userId,
+      };
+
+      console.log(updatedData);
+
       // return;
 
-      const response = await fetch(`${BASE_URL}/api/insert-inspection-evaluator`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedData),
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/insert-inspection-evaluator`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to update inspection");
 
@@ -643,7 +686,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                             )}
                                           </div>
                                           <div className="col-md-9">
-                                            <input type="hidden" name="district_id" value={inspection.district_id} />
+                                            <input
+                                              type="hidden"
+                                              name="district_id"
+                                              value={inspection.district_id}
+                                            />
                                             <div className="row">
                                               <div className="col-md-6">
                                                 <div className="mb-1">
@@ -903,7 +950,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                   <strong>
                                                     Consultant Remarks:
                                                   </strong>{" "}
-                                                  {inspection.qc_remarks_con || "N/A"}
+                                                  {inspection.qc_remarks_con ||
+                                                    "N/A"}
                                                 </div>
                                               </div>
                                               <div className="col-md-6">
@@ -941,7 +989,18 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                                                 </div>
                                               </div>
                                             </div>
-                                            <div className="text-end">
+                                            <div className="flex justify-end gap-2">
+                                              <Button
+                                                variant="primary"
+                                                onClick={() =>
+                                                  fetchPastEvaluations(
+                                                    inspection.inspection_id
+                                                  )
+                                                }
+                                              >
+                                                View Past Evaluations
+                                              </Button>
+
                                               <Button
                                                 onClick={() =>
                                                   handleSaveChanges(inspection)
@@ -993,6 +1052,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
               )}
             </Modal.Body>
           </Modal>
+
+          <PastEvaluationsModal
+            show={handleShowModal}
+            onHide={handleCloseModal}
+            evaluations={evaluationData}
+          />
         </div>
       </div>
     </div>

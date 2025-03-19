@@ -3169,6 +3169,41 @@ app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
   }
 });
 
+app.get("/api/get-past-evaluations", async (req, res) => {
+  try {
+    const { inspectionId } = req.query;
+
+    if (!inspectionId) {
+      return res.status(400).json({
+        success: false,
+        message: "inspectionId is required",
+      });
+    }
+
+    const query = `
+        SELECT 
+          uu_bms_id, evaluator_id, inspection_id, district_id, damage_extent, qc_remarks_rams,
+          qc_remarks_con, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
+          "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
+          "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
+          COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
+        FROM bms.tbl_evaluation
+        WHERE 
+          uu_bms_id = $1
+        ORDER BY inspection_id DESC;
+    `;
+
+    const { rows } = await pool.query(query, [inspectionId]);
+
+    res.status(200).json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Error fetching past evaluations:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+
+
 app.get("/api/get-summary-evaluator", async (req, res) => {
   try {
     const { bridgeId, userId } = req.query;
