@@ -36,6 +36,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const fetchPastEvaluations = async (inspectionId) => {
     setLoading(true);
     setError(null);
+    setShowModal(true); // Open modal immediately
 
     try {
       const response = await fetch(
@@ -45,7 +46,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
       if (data.success) {
         setEvaluationData(data.data);
-        setShowModal(true); // Show modal after data is loaded
       } else {
         setError(data.message || "Failed to fetch evaluations");
       }
@@ -1054,7 +1054,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           </Modal>
 
           <PastEvaluationsModal
-            show={handleShowModal}
+            show={showModal}
             onHide={handleCloseModal}
             evaluations={evaluationData}
           />
