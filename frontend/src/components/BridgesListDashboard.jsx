@@ -3,15 +3,15 @@ import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
-import * as XLSX from "xlsx"; // Excel library
 import Papa from "papaparse"; // Import papaparse
-import Filters from "./Filters";
 import InventoryInfoDashboard from "./InventoryInfoDashboard"; // Import the InventoryInfo component
 import InspectionListDashboard from "./InspectionListDashboard";
 import MapModal from "./MapModal"; // Adjust the import path as needed
 import { FaSpinner } from "react-icons/fa";
 import { FaFileCsv } from "react-icons/fa6";
 import { FaFileExcel } from "react-icons/fa6";
+import Swal from "sweetalert2";
+import ExcelJS from "exceljs";
 
 const BridgesListDashboard = ({
   districtId,
@@ -178,22 +178,25 @@ const BridgesListDashboard = ({
         structureType,
         bridgeName,
       };
-  
+
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadNeww?${queryString}`, {
-        method: "GET",
-      });
-  
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       const csv = Papa.unparse(data.bridges);
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
@@ -206,7 +209,7 @@ const BridgesListDashboard = ({
       setLoading(false); // Stop loading
     }
   };
-  
+
   const handleDownloadExcel = async () => {
     setLoading(true); // Start loading
     try {
@@ -215,34 +218,37 @@ const BridgesListDashboard = ({
         structureType,
         bridgeName,
       };
-  
+
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadNeww?${queryString}`, {
-        method: "GET",
-      });
-  
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        {
+          method: "GET",
+        }
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-  
+
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-  
+
       // Handle array fields like photos
       data.bridges.forEach((row) => {
         if (Array.isArray(row.photos)) {
           row.photos = row.photos.join(", ") || "No image path";
         }
       });
-  
+
       // Create the worksheet
       const ws = XLSX.utils.json_to_sheet(data.bridges);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
-  
+
       // Download the Excel file
       XLSX.writeFile(wb, "bridges_data.xlsx");
     } catch (error) {
