@@ -15,11 +15,8 @@ import { FaFileExcel } from "react-icons/fa6";
 
 const BridgesListDashboard = ({
   districtId,
-  setDistrictId,
   structureType,
-  setStructureType,
   bridgeName,
-  setBridgeName,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
