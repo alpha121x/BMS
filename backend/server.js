@@ -531,14 +531,7 @@ app.get("/api/bridgesConDownloadExcel", async (req, res) => {
 
       // **Fix PhotoPaths**
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
-      // **Fix Overview Photos (only for first row)**
-      if (row["Overview Photos"]) {
-        row["Overview Photos"] = row["Overview Photos"]
-          .map((photo) => swapDomain(photo))
-          .filter(Boolean);
-      }
-
+      
       return row;
     });
 
@@ -712,13 +705,6 @@ app.get("/api/bridgesRamsDownloadExcel", async (req, res) => {
 
       // **Fix PhotoPaths**
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
-      // **Fix Overview Photos (only for first row)**
-      if (row["Overview Photos"]) {
-        row["Overview Photos"] = row["Overview Photos"]
-          .map((photo) => swapDomain(photo))
-          .filter(Boolean);
-      }
 
       return row;
     });
@@ -895,13 +881,6 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
 
       // **Fix PhotoPaths**
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
-      // **Fix Overview Photos (only for first row)**
-      if (row["Overview Photos"]) {
-        row["Overview Photos"] = row["Overview Photos"]
-          .map((photo) => swapDomain(photo))
-          .filter(Boolean);
-      }
 
       return row;
     });
@@ -1309,11 +1288,6 @@ app.get("/api/inspections-export-evaluator", async (req, res) => {
     const processedData = result.rows.map((row) => {
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
 
-      // Update Overview Photos using the same logic as PhotoPaths
-      row["Overview Photos"] = row["Overview Photos"]
-        .map((photo) => (photo ? swapDomain(photo) : null))
-        .filter(Boolean);
-
       if (!firstRow) {
         row["Overview Photos"] = null;
       }
@@ -1380,11 +1354,6 @@ app.get("/api/inspections-export", async (req, res) => {
     let firstRow = true;
     const processedData = result.rows.map((row) => {
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
-      // Update Overview Photos using the same logic as PhotoPaths
-      row["Overview Photos"] = row["Overview Photos"]
-        .map((photo) => (photo ? swapDomain(photo) : null))
-        .filter(Boolean);
 
       if (!firstRow) {
         row["Overview Photos"] = null;
