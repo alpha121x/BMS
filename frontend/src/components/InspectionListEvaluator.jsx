@@ -166,7 +166,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
-  }, [bridgeId]);
+  }, [bridgeId, userId]);
 
   const handleUpdateInspection = async (row) => {
     try {

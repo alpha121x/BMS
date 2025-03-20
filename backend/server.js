@@ -2183,105 +2183,6 @@ app.get("/api/get-summary", async (req, res) => {
 });
 
 // for consultant summary data
-app.get("/api/get-summary-evaluator", async (req, res) => {
-  try {
-    const { bridgeId } = req.query;
-
-    if (!bridgeId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "uu_bms_id is required" });
-    }
-
-    const query = `
-      SELECT 
-        uu_bms_id,
-        surveyed_by,
-        damage_extent,
-        inspection_id,
-        qc_con,
-        qc_remarks_con,
-        reviewed_by,
-        bridge_name, 
-        "SpanIndex", 
-        "WorkKindName", 
-        "PartsName", 
-        "MaterialName", 
-        "DamageKindName", 
-        "DamageLevel", 
-        "Remarks", 
-        "inspection_images" AS "PhotoPaths",
-        "ApprovedFlag"
-      FROM bms.tbl_inspection_f
-     WHERE 
-    "DamageLevelID" IN (4, 5, 6) 
-    AND (
-        surveyed_by = 'RAMS-PITB' 
-        OR 
-        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
-    ) 
-    AND uu_bms_id = $1  -- ✅ Added condition
-ORDER BY inspection_id DESC;
-    `;
-
-    const { rows } = await pool.query(query, [bridgeId]);
-
-    if (rows.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Inspection not found" });
-    }
-
-    // Process PhotoPaths for all rows
-    const processedData = rows.map((row) => {
-      let extractedPhotoPaths = [];
-
-      try {
-        if (row.PhotoPaths) {
-          // Clean JSON if wrapped in quotes
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
-            /\}\"/g,
-            "}"
-          );
-          const parsedPhotos = JSON.parse(cleanedJson);
-
-          if (Array.isArray(parsedPhotos)) {
-            // Case 1: Array of objects with "path" keys
-            parsedPhotos.forEach((item) => {
-              if (item.path) extractedPhotoPaths.push(item.path);
-            });
-          } else if (typeof parsedPhotos === "object") {
-            // Case 2: Nested object with image paths
-            Object.values(parsedPhotos).forEach((category) => {
-              if (typeof category === "object") {
-                Object.values(category).forEach((imagesArray) => {
-                  if (Array.isArray(imagesArray)) {
-                    extractedPhotoPaths.push(...imagesArray);
-                  }
-                });
-              }
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error parsing PhotoPaths:", error);
-      }
-
-      return {
-        ...row,
-        PhotoPaths: extractedPhotoPaths, // Flattened array of image paths
-        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-      };
-    });
-
-    res.status(200).json({ success: true, data: processedData });
-  } catch (error) {
-    console.error("Error fetching inspection data:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// for consultant summary data
 app.get("/api/get-summary-con", async (req, res) => {
   try {
     const { bridgeId } = req.query;
@@ -2466,6 +2367,124 @@ app.get("/api/get-summary-rams", async (req, res) => {
     });
 
     res.status(200).json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+app.get("/api/get-summary-evaluator", async (req, res) => {
+  try {
+    const { bridgeId, userId } = req.query;
+
+    if (!bridgeId || !userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "bridgeId and userId are required" });
+    }
+
+    const evaluatorLevel = parseInt(userId);
+
+    if (![1, 2, 3, 4, 5].includes(evaluatorLevel)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid evaluator ID" });
+    }
+
+    // Define condition based on evaluator ID
+    let evaluationCondition = "";
+    switch (evaluatorLevel) {
+      case 1:
+        evaluationCondition = `evaluator_id ILIKE '%0%'`; // E1
+        break;
+      case 2:
+        evaluationCondition = `evaluator_id NOT ILIKE '%2%'`; // E2
+        break;
+      case 3:
+        evaluationCondition = `evaluator_id NOT ILIKE '%3%'`; // E3
+        break;
+      case 4:
+        evaluationCondition = `evaluator_id NOT ILIKE '%4%'`; // E4
+        break;
+      case 5:
+        evaluationCondition = `evaluator_id = '1,2,3,4' AND evaluator_id NOT ILIKE '%5%'`; // E5
+        break;
+    }
+
+    // SQL query
+    const query = `
+      SELECT 
+        uu_bms_id, inspection_id, surveyed_by, district_id,
+        damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con, evaluator_id,
+        reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
+        "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
+        "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
+        COALESCE(string_to_array(NULLIF(inspection_images, ''), ','), '{}') AS "PhotoPaths"
+      FROM bms.tbl_inspection_f
+      WHERE 
+        "DamageLevelID" IN (4, 5, 6) 
+        AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
+        AND uu_bms_id = $1  
+        AND ${evaluationCondition}  -- Corrected condition
+      ORDER BY inspection_id DESC;
+    `;
+
+    const result = await pool.query(query, [bridgeId]);
+
+    // Function to extract valid URLs
+    const extractUrlsFromPath = (pathString) => {
+      if (!pathString || typeof pathString !== "string") return [];
+      const trimmedPath = pathString.trim();
+      if (trimmedPath.startsWith("http")) return [trimmedPath];
+
+      try {
+        const parsed = JSON.parse(trimmedPath);
+        const urls = [];
+
+        const extractFromNested = (obj) => {
+          if (Array.isArray(obj)) {
+            obj.forEach((item) => {
+              if (typeof item === "string" && item.startsWith("http")) {
+                urls.push(item);
+              } else if (typeof item === "object" && item !== null) {
+                extractFromNested(item);
+              }
+            });
+          } else if (typeof obj === "object" && obj !== null) {
+            Object.values(obj).forEach((value) => extractFromNested(value));
+          }
+        };
+
+        extractFromNested(parsed);
+        return urls;
+      } catch (e) {
+        const urlMatches = trimmedPath.match(/(http[^"]+\.(jpg|jpeg|png|gif))/g);
+        return urlMatches || [];
+      }
+    };
+
+    // Format the response data
+    const formatRows = (rows) =>
+      rows.map((row) => {
+        let extractedUrls = [];
+
+        if (Array.isArray(row.PhotoPaths)) {
+          row.PhotoPaths.forEach((pathString) => {
+            extractedUrls = extractedUrls.concat(extractUrlsFromPath(pathString));
+          });
+        } else if (typeof row.PhotoPaths === "string") {
+          extractedUrls = extractUrlsFromPath(row.PhotoPaths);
+        }
+
+        return { ...row, PhotoPaths: extractedUrls };
+      });
+
+    // Return only one dataset under `pending`
+    res.status(200).json({
+      success: true,
+      data: formatRows(result.rows)
+    });
+
   } catch (error) {
     console.error("Error fetching inspection data:", error);
     res.status(500).json({ success: false, message: "Server error" });
@@ -2993,106 +3012,6 @@ app.get("/api/get-past-evaluations", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
-app.get("/api/get-summary-evaluator", async (req, res) => {
-  try {
-    const { bridgeId, userId } = req.query;
-
-    if (!bridgeId || !userId) {
-      return res.status(400).json({
-        success: false,
-        message: "bridgeId and userId are required",
-      });
-    }
-
-    const evaluatorLevel = parseInt(userId);
-    const query = getSummaryQuery(evaluatorLevel, bridgeId);
-
-    if (!query) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid evaluator ID",
-      });
-    }
-
-    const { rows } = await pool.query(query.text, query.values);
-    const processedData = rows.map(processSummaryData);
-
-    res.status(200).json({ success: true, data: processedData });
-  } catch (error) {
-    console.error("Error fetching summary data:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// Function to get summary query by evaluator level
-const getSummaryQuery = (level, bridgeId) => {
-  if (level === 1) {
-    return {
-      text: `
-        SELECT * FROM bms.tbl_inspection_f
-        WHERE uu_bms_id = $1 
-          AND "DamageLevelID" IN (4, 5, 6) 
-          AND (
-              surveyed_by = 'RAMS-PITB' 
-              OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
-          ) 
-          AND is_evaluated = false
-        ORDER BY inspection_id DESC;
-      `,
-      values: [bridgeId],
-    };
-  } else if (level >= 2 && level <= 5) {
-    return {
-      text: `
-        SELECT * FROM bms.tbl_evaluation
-        WHERE uu_bms_id = $1 
-          AND evaluator_id = $2
-        ORDER BY inspection_id DESC;
-      `,
-      values: [bridgeId, level - 1], // evaluator_id is 1 for level 2, 2 for level 3, etc.
-    };
-  }
-  return null;
-};
-
-// Function to process summary data
-const processSummaryData = (row) => ({
-  ...row,
-  PhotoPaths: parsePhotoPaths(row.PhotoPaths),
-  ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
-});
-
-// Function to parse photo paths safely
-const parsePhotoPaths = (photoData) => {
-  try {
-    if (!photoData) return [];
-
-    const cleanedJson = photoData.replace(/\"\{/g, "{").replace(/\}"/g, "}");
-    const parsedPhotos = JSON.parse(cleanedJson);
-
-    if (Array.isArray(parsedPhotos)) {
-      return parsedPhotos.map((item) => item.path).filter(Boolean);
-    }
-
-    if (typeof parsedPhotos === "object") {
-      return Object.values(parsedPhotos)
-        .flatMap((category) =>
-          typeof category === "object"
-            ? Object.values(category).flatMap((imagesArray) =>
-                Array.isArray(imagesArray) ? imagesArray : []
-              )
-            : []
-        )
-        .filter(Boolean);
-    }
-
-    return [];
-  } catch (error) {
-    console.error("Error parsing PhotoPaths:", error);
-    return [];
-  }
-};
 
 // Endpoint to update inspection data for consultant
 app.put("/api/update-inspection-con", async (req, res) => {
