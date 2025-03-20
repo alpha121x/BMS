@@ -40,7 +40,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
     try {
       const response = await fetch(
-        `/api/get-past-evaluations?inspectionId=${inspectionId}`
+        `${BASE_URL}/api/get-past-evaluations?inspectionId=${inspectionId}`
       );
       const data = await response.json();
 

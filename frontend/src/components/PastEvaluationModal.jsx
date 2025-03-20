@@ -12,7 +12,13 @@ const PastEvaluationsModal = ({ show, onHide, evaluations }) => {
             <thead>
               <tr>
                 <th>#</th>
+                <th>Evaluated By</th>
                 <th>Bridge Name</th>
+                <th>Span Index</th>
+                <th>Work Kind</th>
+                <th>Parts Name</th>
+                <th>Material Name</th>
+                <th>Damage Kind</th>
                 <th>Damage Level</th>
                 <th>Damage Extent</th>
                 <th>QC Remarks (RAMS)</th>
@@ -24,9 +30,15 @@ const PastEvaluationsModal = ({ show, onHide, evaluations }) => {
               {evaluations.map((evalData, index) => (
                 <tr key={index}>
                   <td>{index + 1}</td>
+                  <td>{"Evaluator"}{evalData.evaluator_id}</td>
                   <td>{evalData.bridge_name}</td>
+                  <td>{evalData.SpanIndex}</td>
+                  <td>{evalData.WorkKindName}</td>
+                  <td>{evalData.PartsName}</td>
+                  <td>{evalData.MaterialName}</td>
+                  <td>{evalData.DamageKindName}</td>
                   <td>{evalData.DamageLevel}</td>
-                  <td>{evalData.damage_extent}</td>
+                  <td>{evalData.damage_extent || "N/A"}</td>
                   <td>{evalData.qc_remarks_rams || "N/A"}</td>
                   <td>{evalData.qc_remarks_con || "N/A"}</td>
                   <td>{evalData.Remarks || "No remarks"}</td>

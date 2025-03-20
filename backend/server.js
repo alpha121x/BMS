@@ -3108,7 +3108,7 @@ app.get("/api/get-past-evaluations", async (req, res) => {
           COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
         FROM bms.tbl_evaluation
         WHERE 
-          uu_bms_id = $1
+          inspection_id = $1
         ORDER BY inspection_id DESC;
     `;
 
@@ -3435,6 +3435,30 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
 
     // Special condition: If evaluator_id == 5, also insert into tbl_evaluation_f
     if (evaluator_id == "5") {
+      const insertSpecialValues = [
+        inspection_id,
+        uu_bms_id,
+        bridge_name,
+        district_id,
+        SpanIndex,
+        WorkKindID,
+        WorkKindName,
+        inspection_images,
+        qc_remarks_con,
+        qc_remarks_rams,
+        qc_remarks_evaluator, // Fix: Correct column match
+        situation_remarks, // Fix: Ensure correct column order
+        PartsID,
+        PartsName,
+        MaterialID,
+        MaterialName,
+        DamageKindID,
+        DamageKindName,
+        DamageLevelID,
+        DamageLevel,
+        damage_extent,
+      ];
+    
       const insertSpecialQuery = `
         INSERT INTO bms.tbl_evaluation_f (
           inspection_id,
@@ -3447,7 +3471,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
           inspection_images,
           qc_remarks_con,
           qc_remarks_rams,
-          evaluator_final_remarks,
+          evaluator_final_remarks,  -- Fix: Correct column match
           "Remarks",
           "PartsID",
           "PartsName",
@@ -3460,9 +3484,10 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
           damage_extent
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21);
       `;
-
-      await client.query(insertSpecialQuery, insertValues);
+    
+      await client.query(insertSpecialQuery, insertSpecialValues);
     }
+    
 
     await client.query("COMMIT"); // Commit transaction
 
