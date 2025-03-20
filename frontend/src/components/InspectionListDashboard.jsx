@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import { faFileCsv, faFileExcel, faAnglesRight } from "@fortawesome/free-solid-svg-icons";
 
 const InspectionList = ({ bridgeId }) => {
   const [inspectionData, setInspectionData] = useState([]);
@@ -215,32 +215,29 @@ const InspectionList = ({ bridgeId }) => {
 
   return (
     <div
-      className="card p-2 rounded-lg text-black"
+      className="card p-0 rounded-1"
       style={{
-        background: "#FFFFFF",
-        border: "2px solid #60A5FA",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-        position: "relative",
+        // background: "#FFFFFF",
+        // border: "1px solid #005D7F",
+        // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        // position: "relative",
       }}
     >
-      <div className="card-body pb-0">
-        <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
-          <h6
-            className="card-title text-lg font-semibold pb-2"
-            style={{ fontSize: "1.25rem" }}
-          >
+      <div className="card-body p-2">
+        <div className="d-flex mb-4 justify-content-between items-center bg-[#009DB9] text-[#fff] p-2 rounded-1">
+          <h5 className="card-title font-semibold pb-0 mb-0">
             Condition Assessment Reports
-          </h6>
-          <div className="d-flex gap-3">
+          </h5>
+          <div className="d-flex gap-2">
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
+              className="bg-[#005D7F] text-white px-3 py-1 rounded-1"
               onClick={() => handleDownloadCSV(bridgeId)}
             >
               <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
               CSV
             </button>
             <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
+              className="bg-[#005D7F] text-white px-3 py-1 rounded-1"
               onClick={() => handleDownloadExcel(bridgeId)}
             >
               <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
@@ -250,29 +247,41 @@ const InspectionList = ({ bridgeId }) => {
         </div>
 
         <div className="summary-section mt-1 mb-1">
-          <h4 className="text-sm font-semibold text-gray-700 mb-1">
+          <h5 className="font-semibold text-gray-700 mb-2">
             Reports Summary
-          </h4>
-          <div className="bg-gray-200  mb-2 mt-1  py-2 px-3 rounded-md shadow border">
-            <div className="grid grid-cols-2 gap-y-1 text-sm">
+          </h5>
+          <div className="bg-gray-300  mb-3 mt-1  p-3 rounded-1">
+            <div className="grid grid-cols-2 gap-y-2 text-sm">
               <div>
-                <strong>Total Spans:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
+                  <strong className="-mt-1">Total Spans:</strong>
+                </div>
                 <p className="text-gray-700">
                   {getUniqueSpanIndices(inspectionData)}
                 </p>
               </div>
               <div>
-                <strong>Damage Levels:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1"/>
+                  <strong className="-mt-1">Damage Levels:</strong>
+                </div>
                 <p className="text-gray-700">
                   {getDamageLevel(inspectionData)}
                 </p>
               </div>
               <div>
-                <strong>Materials Used:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1"/>
+                  <strong className="-mt-1">Materials Used:</strong>
+                </div>
                 <p className="text-gray-700">{getMaterials(inspectionData)}</p>
               </div>
               <div>
-                <strong>Work Kind:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1"/>
+                  <strong className="-mt-1">Work Kind:</strong>
+                </div>
                 <p className="text-gray-700">{getWorkKind(inspectionData)}</p>
               </div>
             </div>
@@ -280,53 +289,53 @@ const InspectionList = ({ bridgeId }) => {
         </div>
 
         {loading && (
-          <div
-            className="loader"
-            style={{
-              border: "8px solid #f3f3f3",
-              borderTop: "8px solid #3498db",
-              borderRadius: "50%",
-              width: "80px",
-              height: "80px",
-              animation: "spin 1s linear infinite",
-              margin: "auto",
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: "999",
+            <div
+                className="loader"
+                style={{
+                  border: "8px solid #f3f3f3",
+                  borderTop: "8px solid #3498db",
+                  borderRadius: "50%",
+                  width: "80px",
+                  height: "80px",
+                  animation: "spin 1s linear infinite",
+                  margin: "auto",
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: "999",
             }}
           />
         )}
 
         <div className="inspection-cards-container">
           {Object.keys(groupedData).map((spanIndex) => (
-            <div key={spanIndex} className="card mb-4">
+            <div key={spanIndex} className="card mb-2 border-0">
               {/* Span Index Dropdown */}
               <div
-                className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
+                className="p-1 d-flex justify-content-between align-items-center bg-[#005D7F] text-[#fff]"
                 style={{ cursor: "pointer" }}
                 onClick={() => toggleAccordion(spanIndex)}
               >
-                <h5 className="mb-0">{`Reeports For Span: ${spanIndex}`}</h5>
-                <span>{openAccordions[spanIndex] ? "▼" : "▶"}</span>
+                <h6 className="mb-0">{`Reports For Span: ${spanIndex}`}</h6>
+                <span className="">{openAccordions[spanIndex] ? "▼" : "▶"}</span>
               </div>
 
               {/* Content - Only visible if expanded */}
               {openAccordions[spanIndex] && (
-                <div className="card-body">
+                <div className="card-body p-0">
                   {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                    <div key={workKind} className="card mb-4 border shadow-sm">
-                      <div className="card-header bg-secondary text-white fw-bold">
+                    <div key={workKind} className="card mb-2 mt-0 border-0">
+                      <div className="rounded-0 p-1 bg-[#009DB9] text-[#fff]">
                         {workKind}
                       </div>
 
-                      <div className="card-body p-3">
+                      <div className="card-body p-0 rounded-0">
                         {groupedData[spanIndex][workKind]?.map((inspection) => (
                           <div
                             key={inspection.id}
-                            className="mb-4 p-4 border rounded shadow-sm"
-                            style={{ backgroundColor: "#CFE2FF" }}
+                            className="mb-2 p-4 border-0 rounded-0 shadow-sm"
+                            style={{ backgroundColor: "#c8e4e3" }}
                           >
                             <div className="row">
                               {/* Photos Column */}

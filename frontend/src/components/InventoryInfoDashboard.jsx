@@ -23,15 +23,16 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
   return (
     <div className="container">
       <div
-        className="card p-3"
+        className="card p-2 border-0"
         style={{
-          background: "#FFFFFF",
-          border: "2px solid #60A5FA",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-          position: "relative",
+          // background: "#fff",
+          // border: "1px solid #60A5FA",
+          // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          // position: "relative",
+          // borderRadius:"3px"
         }}
       >
-        <h5 className="card-title font-semibold pb-2">Inventory Info</h5>
+        <h5 className="card-title font-semibold pb-2 bg-[#3B9996] text-white p-2 rounded-1">Inventory Info</h5>
         <Form>
           <Row>
             {[
@@ -70,21 +71,21 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
                     type="text"
                     value={inventoryData?.[field] || ""}
                     readOnly
-                    style={{ padding: "8px", fontSize: "14px" }}
+                    style={{ padding: "6px", fontSize: "13px" }}
                   />
                 </Form.Group>
               </Col>
             ))}
           </Row>
-            
+
           <Form.Group>
             <Form.Label className="custom-label">Select Span</Form.Label>
             <Form.Select
               value={selectedSpan}
               onChange={handleSpanSelect}
-              style={{ padding: "8px", fontSize: "14px" }}
+              style={{ padding: "6px", fontSize: "13px" }}
             >
-              <option value="">-- Select Span --</option>
+              <option value="">Select Span</option>
               {spanIndexes.map((span) => (
                 <option key={span} value={span}>
                   Span {span}
@@ -120,7 +121,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
           )}
 
           <Form.Group>
-            <Form.Label className="custom-label">Photos</Form.Label>
+            <Form.Label className="custom-label bg-[#3B9996] text-white p-1 rounded-1 w-full">Photos</Form.Label>
             <div className="d-flex flex-wrap">
               {photos.length > 0 ? (
                 photos.map((photo, index) => (
