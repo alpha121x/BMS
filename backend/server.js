@@ -1267,7 +1267,7 @@ app.get("/api/inspections-export-evaluator", async (req, res) => {
           
           ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
         FROM bms.tbl_bms_master_data md
-        LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+        RIGHT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
       )
       SELECT * FROM ranked_data WHERE "DamageLevelID" IN (4, 5, 6)
         AND (
@@ -2841,134 +2841,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
   }
 });
 
-// For Evaluator inspection
-app.get("/api/get-inspections-evaluator-new", async (req, res) => {
-  try {
-    const { bridgeId, userId } = req.query;
-
-    if (!bridgeId || !userId) {
-      return res
-        .status(400)
-        .json({ success: false, message: "bridgeId and userId are required" });
-    }
-
-    let query = "";
-    let queryParams = [bridgeId];
-
-    const evaluatorLevel = parseInt(userId);
-   
-    if (evaluatorLevel === 1) {
-      query = `
-        SELECT 
-          uu_bms_id, inspection_id, surveyed_by, is_evaluated, district_id,
-          damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con,
-          reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
-          "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
-          "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
-          COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
-        FROM bms.tbl_inspection_f
-        WHERE 
-          "DamageLevelID" IN (4, 5, 6) 
-          AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
-          AND uu_bms_id = $1 
-          AND is_evaluated = false
-        ORDER BY inspection_id DESC;
-      `;
-    } else if ([2, 3, 4, 5].includes(evaluatorLevel)) {
-      query = `
-        SELECT 
-          uu_bms_id, evaluator_id, inspection_id, district_id, damage_extent, qc_remarks_rams,
-          qc_remarks_con, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
-          "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
-          "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
-          COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
-        FROM bms.tbl_evaluation
-        WHERE 
-          uu_bms_id = $1 
-          AND evaluator_id = $2
-        ORDER BY inspection_id DESC;
-      `;
-      queryParams.push(userId - 1); // Evaluator ID should be userId - 1
-    } else {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid evaluator ID" });
-    }
-
-    const { rows } = await pool.query(query, queryParams);
-
-    // Helper function to process image URLs
-    const extractUrlsFromPath = (pathString) => {
-      if (!pathString || typeof pathString !== "string") return [];
-
-      const trimmedPath = pathString.trim();
-
-      if (trimmedPath.startsWith("http")) {
-        return [trimmedPath];
-      }
-
-      try {
-        const parsed = JSON.parse(trimmedPath);
-        const urls = [];
-
-        const extractFromNested = (obj) => {
-          if (Array.isArray(obj)) {
-            obj.forEach((item) => {
-              if (typeof item === "string" && item.startsWith("http")) {
-                urls.push(item);
-              } else if (typeof item === "object" && item !== null) {
-                extractFromNested(item);
-              }
-            });
-          } else if (typeof obj === "object" && obj !== null) {
-            Object.values(obj).forEach((value) => extractFromNested(value));
-          }
-        };
-
-        extractFromNested(parsed);
-        return urls;
-      } catch (e) {
-        const urlMatches = trimmedPath.match(
-          /(http[^"]+\.(jpg|jpeg|png|gif))/g
-        );
-        return urlMatches || [];
-      }
-    };
-
-    // Format the response data
-    const formatRows = (rows) =>
-      rows.map((row) => {
-        let extractedUrls = [];
-
-        if (Array.isArray(row.PhotoPaths)) {
-          row.PhotoPaths.forEach((pathString) => {
-            extractedUrls = extractedUrls.concat(
-              extractUrlsFromPath(pathString)
-            );
-          });
-        } else if (typeof row.PhotoPaths === "string") {
-          extractedUrls = extractUrlsFromPath(row.PhotoPaths);
-        }
-
-        return {
-          ...row,
-          PhotoPaths: extractedUrls,
-        };
-      });
-
-    res.status(200).json({
-      success: true,
-      data: {
-        pending: formatRows(rows), // Returning formatted rows inside 'pending' array
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching inspection data:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
+app.get("/api/get-inspections-evaluator", async (req, res) => {
   try {
     const { bridgeId, userId } = req.query;
 

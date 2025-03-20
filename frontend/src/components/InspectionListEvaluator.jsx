@@ -112,7 +112,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       if (!userId) throw new Error("userId is required");
 
       const response = await fetch(
-        `${BASE_URL}/api/get-inspections-evaluatorNew?bridgeId=${bridgeId}&userId=${userId}`
+        `${BASE_URL}/api/get-inspections-evaluator?bridgeId=${bridgeId}&userId=${userId}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -284,7 +284,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     setLoading(true); // Start loading
     try {
       const response = await fetch(
-        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/inspections-export-evalutor?bridgeId=${bridgeId}`
       );
       const data = await response.json();
 
