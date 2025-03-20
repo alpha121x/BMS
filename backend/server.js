@@ -2084,11 +2084,16 @@ app.get("/api/inspections", async (req, res) => {
         ins."current_date_time",  
         ins."Remarks", 
         ins.inspection_images AS "PhotoPaths",
-        ins."ApprovedFlag"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id"
       WHERE 1=1
+      AND ins."DamageLevelID" IN (1, 2, 3) 
+    AND (
+        ins.surveyed_by = 'RAMS-PITB' 
+        OR 
+        (ins.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    ) 
     `;
 
     const queryParams = [];

@@ -246,7 +246,7 @@ const CheckingTable = ({districtId, bridgeName}) => {
                 <th>Work Kind</th>
                 <th>Material</th>
                 <th>Parts</th>
-                <th>Status</th>
+                <th>Date Time</th>
                 <th>Details</th>
               </tr>
               </thead>
@@ -258,11 +258,7 @@ const CheckingTable = ({districtId, bridgeName}) => {
                         <td>{row.WorkKindName || "N/A"}</td>
                         <td>{row.MaterialName || "N/A"}</td>
                         <td>{row.PartsName || "N/A"}</td>
-                        <td>
-                          {row.ApprovedFlag === 0
-                              ? "Unapproved"
-                              : row.ApprovedFlag || "N/A"}
-                        </td>
+                        <td>{row.current_date_time ? new Date(row.current_date_time).toLocaleString() : "N/A"}</td>
                         <td>
                           <button className="bg-[#009CB8] text-white px-2 py-1 rounded-1 hover:bg-[#005D7F]"
                               onClick={() => handleViewClick(row)}>
