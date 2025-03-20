@@ -19,6 +19,8 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
   const [summaryData, setsummaryData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingCsv, setLoadingCsv] = useState(false);
+  const [loadingExcel, setLoadingExcel] = useState(false);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
   const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
@@ -280,11 +282,11 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     handleUpdateInspection(row);
   };
 
-  const handleDownloadCSV = async (bridgeId) => {
-    setLoading(true); // Start loading
+  const handleDownloadCSV = async (bridgeId, setLoadingCsv) => {
+    setLoadingCsv(true); // Start loading
     try {
       const response = await fetch(
-        `${BASE_URL}/api/inspections-export-evalutor?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/inspections-export-evaluator?bridgeId=${bridgeId}`
       );
       const data = await response.json();
 
@@ -327,12 +329,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } catch (error) {
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
     } finally {
-      setLoading(false); // Stop loading
+      setLoadingCsv(false); // Stop loading
     }
   };
 
-  const handleDownloadExcel = async (bridgeId, setLoading) => {
-    setLoading(true); // Start loader
+  const handleDownloadExcel = async (bridgeId, setLoadingExcel) => {
+    setLoadingExcel(true); // Start loader
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export-evaluator?bridgeId=${bridgeId}`
@@ -462,7 +464,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-      setLoading(false); // Stop loader
+      setLoadingExcel(false); // Stop loader
     }
   };
 
@@ -548,22 +550,26 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           <div className="d-flex gap-3">
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
-              onClick={() => handleDownloadCSV(bridgeId)}
+              onClick={() => handleDownloadCSV(bridgeId, setLoadingCsv)}
             >
-              <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-              CSV
+              {loadingCsv ? (
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+              ) : (
+                <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+              )}
+              {loadingCsv ? "Processing..." : "Csv"}
             </button>
             <button
               className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700 flex items-center justify-center"
-              onClick={() => handleDownloadExcel(bridgeId, setLoading)}
+              onClick={() => handleDownloadExcel(bridgeId, setLoadingExcel)}
               disabled={loading}
             >
-              {loading ? (
+              {loadingExcel ? (
                 <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
               ) : (
                 <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
               )}
-              {loading ? "Processing..." : "Excel"}
+              {loadingExcel ? "Processing..." : "Excel"}
             </button>
           </div>
         </div>

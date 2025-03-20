@@ -198,7 +198,7 @@ const InspectionListCon = ({ bridgeId }) => {
     setLoading(true); // Start loading
     try {
       const response = await fetch(
-        `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
+        `${BASE_URL}/api/inspections-export-con?bridgeId=${bridgeId}`
       );
       const data = await response.json();
 

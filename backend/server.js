@@ -1118,33 +1118,63 @@ app.get("/api/inspections-export-con", async (req, res) => {
 
     let query = `
       WITH ranked_data AS (
-        SELECT 
-          md.uu_bms_id AS "Reference No:",
-          CONCAT(md.pms_sec_id, ',', md.structure_no) AS bridge_name,
-          md.structure_type, md.road_no, md.road_name, md.road_name_cwd, 
-          md.road_code_cwd, md.route_id, md.survey_id, md.surveyor_name, 
-          md.zone, md.district, md.road_classification, md.road_surface_type, 
-          md.carriageway_type, md.direction, md.visual_condition, md.construction_type, 
-          md.no_of_span, md.span_length_m, md.structure_width_m, md.construction_year, 
-          md.last_maintenance_date, md.data_source, md.date_time, md.remarks,
-          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-          
-          f.surveyed_by, f."SpanIndex", f."WorkKindID", f."WorkKindName", 
-          f."PartsID", f."PartsName", f."MaterialID", f."MaterialName", 
-          f."DamageKindID", f."DamageKindName", f."DamageLevelID", f."DamageLevel", 
-          f.damage_extent, f."Remarks", f.current_date_time, COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
-          f.qc_con,
+    SELECT 
+        md.uu_bms_id AS "REFERENCE NO",
+        CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
+        md.structure_type AS "STRUCTURE TYPE",
+        md.road_no AS "ROAD NO",
+        md.road_name AS "ROAD NAME",
+        md.road_name_cwd AS "ROAD NAME CWD",
+        md.road_code_cwd AS "ROAD CODE CWD",
+        md.route_id AS "ROUTE ID",
+        md.survey_id AS "SURVEY ID",
+        md.surveyor_name AS "SURVEYOR NAME",
+        md.zone AS "ZONE",
+        md.district AS "DISTRICT",
+        md.road_classification AS "ROAD CLASSIFICATION",
+        md.road_surface_type AS "ROAD SURFACE TYPE",
+        md.carriageway_type AS "CARRIAGEWAY TYPE",
+        md.direction AS "DIRECTION",
+        md.visual_condition AS "VISUAL CONDITION",
+        md.construction_type AS "CONSTRUCTION TYPE",
+        md.no_of_span AS "NO OF SPANS",
+        md.span_length_m AS "SPAN LENGTH (M)",
+        md.structure_width_m AS "STRUCTURE WIDTH (M)",
+        md.construction_year AS "CONSTRUCTION YEAR",
+        md.last_maintenance_date AS "LAST MAINTENANCE DATE",
+        md.data_source AS "DATA SOURCE",
+        md.date_time AS "DATE TIME",
+        md.remarks AS "REMARKS",
+        ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "OVERVIEW PHOTOS",
+        
+        f.surveyed_by AS "SURVEYED BY",
+        f."SpanIndex" AS "SPAN INDEX",
+        f."WorkKindID" AS "WORK KIND ID",
+        f."WorkKindName" AS "WORK KIND NAME",
+        f."PartsID" AS "PARTS ID",
+        f."PartsName" AS "PARTS NAME",
+        f."MaterialID" AS "MATERIAL ID",
+        f."MaterialName" AS "MATERIAL NAME",
+        f."DamageKindID" AS "DAMAGE KIND ID",
+        f."DamageKindName" AS "DAMAGE KIND NAME",
+        f."DamageLevelID" AS "DAMAGE LEVEL ID",
+        f."DamageLevel" AS "DAMAGE LEVEL",
+        f.damage_extent AS "DAMAGE EXTENT",
+        f."Remarks" AS "INSPECTION REMARKS",
+        f.current_date_time AS "INSPECTION DATE",
+        COALESCE(f.inspection_images, '[]') AS "PHOTOPATHS",
 
-          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS rn
-        FROM bms.tbl_bms_master_data md
-        LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
-        WHERE f.surveyed_by = 'RAMS-UU'
-      )
-      SELECT * FROM ranked_data WHERE 1=1`;
+        ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS "RN"
+    FROM bms.tbl_bms_master_data md
+    LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+    WHERE f.surveyed_by = 'RAMS-UU'
+)
+SELECT * FROM ranked_data WHERE 1=1`;
+
 
     const queryParams = [];
     if (bridgeId && !isNaN(bridgeId)) {
-      query += ` AND "Reference No:" = $1`;
+      query += ` AND "REFERENCE NO" = $1`;
       queryParams.push(Number(bridgeId));
     }
 
@@ -1152,14 +1182,14 @@ app.get("/api/inspections-export-con", async (req, res) => {
 
     let firstRow = true;
     const processedData = result.rows.map((row) => {
-      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
+      row.PHOTOPATHS = extractUrlsFromPath(row.PHOTOPATHS);
 
-      row["Overview Photos"] = row["Overview Photos"]
+      row["OVERVIEW PHOTOS"] = row["OVERVIEW PHOTOS"]
         .map((photo) => (photo ? swapDomain(photo) : null))
         .filter(Boolean);
 
       if (!firstRow) {
-        row["Overview Photos"] = null;
+        row["OVERVIEW PHOTOS"] = null;
       }
 
       firstRow = false;
