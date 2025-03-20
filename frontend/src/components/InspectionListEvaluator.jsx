@@ -34,18 +34,17 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [parts, setParts] = useState([]);
   const [damageKinds, setDamageKinds] = useState([]);
 
-  // Function to fetch past evaluations
-  const fetchPastEvaluations = async (inspectionId) => {
+  const fetchPastEvaluations = async (inspectionId, userId) => {
     setLoading(true);
     setError(null);
     setShowModal(true); // Open modal immediately
-
+  
     try {
       const response = await fetch(
-        `${BASE_URL}/api/get-past-evaluations?inspectionId=${inspectionId}`
+        `${BASE_URL}/api/get-past-evaluations?inspectionId=${inspectionId}&userId=${userId}`
       );
       const data = await response.json();
-
+  
       if (data.success) {
         setEvaluationData(data.data);
       } else {
@@ -54,15 +53,16 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } catch (err) {
       setError("Error fetching data. Please try again.");
     }
-
+  
     setLoading(false);
   };
+  
 
   // Function to handle modal visibility and API call
   const handleShowModal = (inspectionId) => {
     setSelectedInspectionId(inspectionId);
     setShowModal(true);
-    fetchPastEvaluations(inspectionId); // Fetch past evaluations
+    fetchPastEvaluations(inspectionId, userId); // Fetch past evaluations
   };
 
   const handleCloseModal = () => {

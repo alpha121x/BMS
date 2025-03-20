@@ -3012,16 +3012,16 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
 
 app.get("/api/get-past-evaluations", async (req, res) => {
   try {
-    const { inspectionId } = req.query;
+    const { inspectionId, userId } = req.query;
 
-    if (!inspectionId) {
+    if (!inspectionId || !userId) {
       return res.status(400).json({
         success: false,
-        message: "inspectionId is required",
+        message: "inspectionId and userId are required",
       });
     }
 
-    const query = `
+    let query = `
         SELECT 
           uu_bms_id, evaluator_id, inspection_id, district_id, damage_extent, qc_remarks_rams,
           qc_remarks_con, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
@@ -3029,10 +3029,21 @@ app.get("/api/get-past-evaluations", async (req, res) => {
           "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
           COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"
         FROM bms.tbl_evaluation
-        WHERE 
-          inspection_id = $1
-        ORDER BY inspection_id DESC;
+        WHERE inspection_id = $1
     `;
+
+    // Apply condition based on userId
+    if (userId == 2) {
+      query += ` AND evaluator_id = '1'`;
+    } else if (userId == 3) {
+      query += ` AND evaluator_id IN ('1', '2')`;
+    } else if (userId == 4) {
+      query += ` AND evaluator_id IN ('1', '2', '3')`;
+    } else if (userId == 5) {
+      query += ` AND evaluator_id IN ('1', '2', '3', '4')`;
+    }
+
+    query += ` ORDER BY inspection_id DESC;`;
 
     const { rows } = await pool.query(query, [inspectionId]);
 
