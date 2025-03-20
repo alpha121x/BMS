@@ -245,7 +245,7 @@ const CheckingTable = ({districtId, bridgeName}) => {
                 <th>Bridge Name</th>
                 <th>Work Kind</th>
                 <th>Material</th>
-                <th>Parts</th>
+                <th>Element</th>
                 <th>Date Time</th>
                 <th>Details</th>
               </tr>

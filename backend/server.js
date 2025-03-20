@@ -2083,7 +2083,7 @@ app.get("/api/inspections", async (req, res) => {
         ins."damage_extent",  
         ins."current_date_time",  
         ins."Remarks", 
-        ins.inspection_images AS "PhotoPaths",
+        ins.inspection_images AS "PhotoPaths"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id"
