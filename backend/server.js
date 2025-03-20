@@ -1145,7 +1145,7 @@ app.get("/api/inspections-export-con", async (req, res) => {
         md.data_source AS "DATA SOURCE",
         md.date_time AS "DATE TIME",
         md.remarks AS "REMARKS",
-        ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "OVERVIEW PHOTOS",
+        ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
         
         f.surveyed_by AS "SURVEYED BY",
         f."SpanIndex" AS "SPAN INDEX",
@@ -1162,7 +1162,7 @@ app.get("/api/inspections-export-con", async (req, res) => {
         f.damage_extent AS "DAMAGE EXTENT",
         f."Remarks" AS "INSPECTION REMARKS",
         f.current_date_time AS "INSPECTION DATE",
-        COALESCE(f.inspection_images, '[]') AS "PHOTOPATHS",
+        COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
 
         ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS "RN"
     FROM bms.tbl_bms_master_data md
@@ -1182,14 +1182,14 @@ SELECT * FROM ranked_data WHERE 1=1`;
 
     let firstRow = true;
     const processedData = result.rows.map((row) => {
-      row.PHOTOPATHS = extractUrlsFromPath(row.PHOTOPATHS);
+      row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
 
-      row["OVERVIEW PHOTOS"] = row["OVERVIEW PHOTOS"]
+      row["Overview Photos"] = row["Overview Photos"]
         .map((photo) => (photo ? swapDomain(photo) : null))
         .filter(Boolean);
 
       if (!firstRow) {
-        row["OVERVIEW PHOTOS"] = null;
+        row["Overview Photos"] = null;
       }
 
       firstRow = false;
