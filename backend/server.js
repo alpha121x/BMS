@@ -2986,31 +2986,49 @@ app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
         .json({ success: false, message: "Invalid evaluator ID" });
     }
 
-    // Single query for the requested evaluator
+    // Define condition based on evaluator ID
+    let evaluationCondition = "";
+    switch (evaluatorLevel) {
+      case 1:
+        evaluationCondition = `evaluator_id ILIKE '%0%'`; // E1
+        break;
+      case 2:
+        evaluationCondition = `evaluator_id NOT ILIKE '%2%'`; // E2
+        break;
+      case 3:
+        evaluationCondition = `evaluator_id NOT ILIKE '%3%'`; // E3
+        break;
+      case 4:
+        evaluationCondition = `evaluator_id NOT ILIKE '%4%'`; // E4
+        break;
+      case 5:
+        evaluationCondition = `evaluator_id = '1234' AND evaluator_id NOT ILIKE '%5%'`; // E5
+        break;
+    }
+
+    // SQL query
     const query = `
       SELECT 
-    uu_bms_id, inspection_id, surveyed_by, is_evaluated, district_id,
-    damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con,evaluator_id,
-    reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
-    "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
-    "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
-    COALESCE(string_to_array(NULLIF(inspection_images, ''), ','), '{}') AS "PhotoPaths"
-FROM bms.tbl_inspection_f
-WHERE 
-    "DamageLevelID" IN (4, 5, 6) 
-    AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
-    AND uu_bms_id = $1 
-    AND (evaluator_id IS NULL OR evaluator_id != $2)  -- Fix for NULL issue
-ORDER BY inspection_id DESC;
+        uu_bms_id, inspection_id, surveyed_by, district_id,
+        damage_extent, qc_rams, qc_remarks_rams, qc_remarks_con, evaluator_id,
+        reviewed_by, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
+        "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
+        "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
+        COALESCE(string_to_array(NULLIF(inspection_images, ''), ','), '{}') AS "PhotoPaths"
+      FROM bms.tbl_inspection_f
+      WHERE 
+        "DamageLevelID" IN (4, 5, 6) 
+        AND ("surveyed_by" = 'RAMS-PITB' OR ("surveyed_by" = 'RAMS-UU' AND qc_rams = 2))
+        AND uu_bms_id = $1  
+        AND ${evaluationCondition}  -- Corrected condition
+      ORDER BY inspection_id DESC;
     `;
 
-    const result = await pool.query(query, [bridgeId, userId]);
-
+    const result = await pool.query(query, [bridgeId]);
 
     // Function to extract valid URLs
     const extractUrlsFromPath = (pathString) => {
       if (!pathString || typeof pathString !== "string") return [];
-
       const trimmedPath = pathString.trim();
       if (trimmedPath.startsWith("http")) return [trimmedPath];
 
@@ -3069,6 +3087,7 @@ ORDER BY inspection_id DESC;
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 app.get("/api/get-past-evaluations", async (req, res) => {
   try {
@@ -3404,9 +3423,13 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
 
     // Update is_evaluated to true in tbl_inspection_f
     const updateQuery = `
-     UPDATE bms.tbl_inspection_f 
-  SET is_evaluated = TRUE, evaluator_id = $2
-  WHERE inspection_id = $1;
+   UPDATE bms.tbl_inspection_f 
+    SET evaluator_id = 
+    CASE 
+        WHEN evaluator_id = '0' OR evaluator_id IS NULL OR evaluator_id = '' THEN $2 
+        ELSE evaluator_id || ',' || $2 
+    END
+    WHERE inspection_id = $1;
     `;
 
     await client.query(updateQuery, [inspection_id, evaluator_id]);

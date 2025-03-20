@@ -102,7 +102,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       fetchData();
       fetchsummaryData();
     }
-  }, [bridgeId]);
+  }, [bridgeId, userId]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -142,7 +142,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } finally {
       setLoading(false);
     }
-  }, [bridgeId]);
+  }, [bridgeId, userId]);
 
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
