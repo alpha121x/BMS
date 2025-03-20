@@ -1146,7 +1146,6 @@ app.get("/api/inspections-export-con", async (req, res) => {
         md.date_time AS "DATE TIME",
         md.remarks AS "REMARKS",
         ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-        
         f.surveyed_by AS "SURVEYED BY",
         f."SpanIndex" AS "SPAN INDEX",
         f."WorkKindID" AS "WORK KIND ID",
@@ -1183,10 +1182,6 @@ SELECT * FROM ranked_data WHERE 1=1`;
     let firstRow = true;
     const processedData = result.rows.map((row) => {
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
-      row["Overview Photos"] = row["Overview Photos"]
-        .map((photo) => (photo ? swapDomain(photo) : null))
-        .filter(Boolean);
 
       if (!firstRow) {
         row["Overview Photos"] = null;
@@ -1248,10 +1243,6 @@ app.get("/api/inspections-export-rams", async (req, res) => {
     let firstRow = true;
     const processedData = result.rows.map((row) => {
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
-      row["Overview Photos"] = row["Overview Photos"]
-        .map((photo) => (photo ? swapDomain(photo) : null))
-        .filter(Boolean);
 
       if (!firstRow) {
         row["Overview Photos"] = null;
@@ -1431,11 +1422,11 @@ function extractUrlsFromPath(photoPaths) {
           typeof obj.path === "string" &&
           obj.path.startsWith("http")
         ) {
-          urls.push(swapDomain(obj.path));
+          urls.push(obj.path);
         }
         Object.values(obj).forEach((value) => extractFromNested(value));
       } else if (typeof obj === "string" && obj.startsWith("http")) {
-        urls.push(swapDomain(obj));
+        urls.push(obj);
       }
     }
 
