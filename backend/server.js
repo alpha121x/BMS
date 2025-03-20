@@ -3002,7 +3002,7 @@ app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
         evaluationCondition = `evaluator_id NOT ILIKE '%4%'`; // E4
         break;
       case 5:
-        evaluationCondition = `evaluator_id = '1234' AND evaluator_id NOT ILIKE '%5%'`; // E5
+        evaluationCondition = `evaluator_id = '1,2,3,4' AND evaluator_id NOT ILIKE '%5%'`; // E5
         break;
     }
 
@@ -3087,7 +3087,6 @@ app.get("/api/get-inspections-evaluatorNew", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 app.get("/api/get-past-evaluations", async (req, res) => {
   try {
@@ -3365,7 +3364,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
 
     await client.query("BEGIN"); // Start transaction
 
-    // Insert evaluation data
+    // Insert evaluation data into tbl_evaluation
     const insertQuery = `
       INSERT INTO bms.tbl_evaluation (
         inspection_id,
@@ -3421,18 +3420,49 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
 
     const result = await client.query(insertQuery, insertValues);
 
-    // Update is_evaluated to true in tbl_inspection_f
+    // Update evaluator_id in tbl_inspection_f
     const updateQuery = `
-   UPDATE bms.tbl_inspection_f 
-    SET evaluator_id = 
-    CASE 
-        WHEN evaluator_id = '0' OR evaluator_id IS NULL OR evaluator_id = '' THEN $2 
-        ELSE evaluator_id || ',' || $2 
-    END
-    WHERE inspection_id = $1;
+      UPDATE bms.tbl_inspection_f 
+      SET evaluator_id = 
+        CASE 
+          WHEN evaluator_id = '0' OR evaluator_id IS NULL OR evaluator_id = '' THEN $2 
+          ELSE evaluator_id || ',' || $2 
+        END
+      WHERE inspection_id = $1;
     `;
 
     await client.query(updateQuery, [inspection_id, evaluator_id]);
+
+    // Special condition: If evaluator_id == 5, also insert into tbl_evaluation_f
+    if (evaluator_id == "5") {
+      const insertSpecialQuery = `
+        INSERT INTO bms.tbl_evaluation_f (
+          inspection_id,
+          uu_bms_id,
+          bridge_name,
+          district_id,
+          "SpanIndex",
+          "WorkKindID",
+          "WorkKindName",
+          inspection_images,
+          qc_remarks_con,
+          qc_remarks_rams,
+          evaluator_final_remarks,
+          "Remarks",
+          "PartsID",
+          "PartsName",
+          "MaterialID",
+          "MaterialName",
+          "DamageKindID",
+          "DamageKindName",
+          "DamageLevelID",
+          "DamageLevel",
+          damage_extent
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21);
+      `;
+
+      await client.query(insertSpecialQuery, insertValues);
+    }
 
     await client.query("COMMIT"); // Commit transaction
 
