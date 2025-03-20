@@ -28,7 +28,7 @@ const Header = () => {
       <Navbar bg="light" expand="lg" className="shadow-sm border-bottom border-2 fixed-top" >
         <Container fluid>
           <Navbar.Brand as={Link} to="/Dashboard" className="d-flex align-items-center">
-            <img src="/cnw.jpg" alt="Logo" style={{ height: "26px" }} className="me-2" />
+            <img src="/cnw.jpg" alt="Logo" style={{ height: "26px" }} className="mx-2" />
             <span className="fw-bold text-uppercase" style={{color:"#005d7f"}}>C&W Bridge Management System</span>
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav"   />
