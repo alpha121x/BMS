@@ -16,6 +16,7 @@ import EditInspectionNew from './EditInspectionNew';
 import BridgeWiseScore from './components/BridgeWiseScore';
 import BridgeInformation from './components/BridgeInformation';
 import BridgeInformationCon from './components/BridgeInformationCon';
+import BridgeInformationRams from './components/BridgeInformationRams';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -180,7 +181,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           path="/BridgeInformationRams"
           element={
             <PrivateRoute>
-              <BridgeInformation />
+              <BridgeInformationRams />
             </PrivateRoute>
           }
         />
