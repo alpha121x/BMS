@@ -101,7 +101,7 @@ const EvaluationMain = () => {
   
           // Add total count card
           mappedCards.unshift({
-            label: "Total Inspected Strcutures",
+            label: "Total Evaluated Strcutures",
             value: totalCount,
             icon: <SiInstructure />,
             color: "#3B9996",
