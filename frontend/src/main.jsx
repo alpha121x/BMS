@@ -8,11 +8,9 @@ import Dashboard from './Dashboard'; // Dashboard Component
 import Reports from './Reports'; // Reports Component
 import SetupListing from './SetupListing'; // SetupListing Component
 import Evaluation from './Evaluation'; // Evaluation Module Component
-import EditInspection from './EditInspection';
 import EditBridge from './EditIBridge';
 import BridgeInfo from './components/BridgeInfo';
 import BridgeInfoDashboard from './components/BridgeinfoDashboard';
-import EditInspectionNew from './EditInspectionNew';
 import BridgeWiseScore from './components/BridgeWiseScore';
 import BridgeInformation from './components/BridgeInformation';
 import BridgeInformationCon from './components/BridgeInformationCon';
@@ -95,26 +93,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <PrivateEvaluationRoute>
               <Evaluation />
             </PrivateEvaluationRoute>
-          }
-        />
-
-         {/* Private Route for EditInspection */}
-         <Route
-          path="/EditInspectionNew"
-          element={
-            <PrivateRoute>
-              <EditInspectionNew />
-            </PrivateRoute>
-          }
-        />
-
-           {/* Private Route for EditInspection */}
-           <Route
-          path="/EditInspection"
-          element={
-            <PrivateRoute>
-              <EditInspection />
-            </PrivateRoute>
           }
         />
 

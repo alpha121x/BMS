@@ -173,7 +173,7 @@ const BridgesListDashboard = ({
   };
 
   const handleDownloadCSV = async () => {
-    setLoading(true); // Start loading
+    setLoadingCSV(true); // Start loading
     try {
       const params = {
         district: districtId || "%",
@@ -208,12 +208,12 @@ const BridgesListDashboard = ({
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
     } finally {
-      setLoading(false); // Stop loading
+      setLoadingCSV(false); // Stop loading
     }
   };
 
   const handleDownloadExcel = async () => {
-    setLoading(true); // Start loading
+    setLoadingExcel(true); // Start loading
     try {
       const params = {
         district: districtId || "%",
@@ -256,7 +256,7 @@ const BridgesListDashboard = ({
     } catch (error) {
       Swal.fire("Error!", "Failed to download Excel file", "error");
     } finally {
-      setLoading(false); // Stop loading
+      setLoadingExcel(false); // Stop loading
     }
   };
 
