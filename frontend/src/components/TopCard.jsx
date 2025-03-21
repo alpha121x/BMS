@@ -1,6 +1,12 @@
 import React from "react";
 
 const TopCard = ({ label, value, icon, iconSize = 32 }) => {
+  const addCommas = (x) => {
+    if (!x) return "N/A";
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+};
   return (
     <div className="col-md-3">
       <div
@@ -30,7 +36,7 @@ const TopCard = ({ label, value, icon, iconSize = 32 }) => {
           </h3>
         </div>
 
-        <div className="text-3xl font-bold ml-2 text-white">{value}</div>
+        <div className="text-3xl font-bold ml-2 text-white">{addCommas(value)}</div>
       </div>
     </div>
   );
