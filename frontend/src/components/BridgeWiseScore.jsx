@@ -230,18 +230,21 @@ const BridgeWiseScore = () => {
     <>
       <Header />
 
-      <section className="container p-3" style={{marginTop:"70px",backgroundColor:"#F2F2F2"}}>
+      <section
+        className="container p-3"
+        style={{ marginTop: "70px", backgroundColor: "#F2F2F2" }}
+      >
         <div className="row">
           <div className="col-md-12">
             <Filters
-                districtId={districtId}
-                setDistrictId={setDistrictId}
-                structureType={structureType}
-                setStructureType={setStructureType}
-                bridgeName={bridgeName}
-                setBridgeName={setBridgeName}
-                flexDirection="flex-row"
-                padding="p-2"
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
+              flexDirection="flex-row"
+              padding="p-2"
             />
           </div>
         </div>
@@ -250,25 +253,36 @@ const BridgeWiseScore = () => {
       <section className="container p-2 mt-[20px] bg-gray-200 items-center">
         <div className="row">
           <div className="col-md-12">
-            <div className="card-header rounded-0 p-2" style={{background: "#005D7F", color: "#fff"}}>
-
+            <div
+              className="card-header rounded-0 p-2"
+              style={{ background: "#005D7F", color: "#fff" }}
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center justify-between gap-4">
                   <h5 className="mb-0">Bridge Wise Score</h5>
                   <h6 className="mb-0" id="structure-heading">
                     Structure Counts:
-                    <span className="badge text-white ms-2" style={{background: "#009CB8"}}>
-                    <h6 className="mb-0">{bridgeCount || 0}</h6>
-                  </span>
+                    <span
+                      className="badge text-white ms-2"
+                      style={{ background: "#009CB8" }}
+                    >
+                      <h6 className="mb-0">{bridgeCount || 0}</h6>
+                    </span>
                   </h6>
                 </div>
                 <div className="flex gap-2">
-                  <button className="btn text-white" onClick={handleDownloadCSV}>
-                    <FontAwesomeIcon icon={faFileCsv} className="mr-2"/>
+                  <button
+                    className="btn text-white"
+                    onClick={handleDownloadCSV}
+                  >
+                    <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
                     CSV
                   </button>
-                  <button className="btn text-white" onClick={handleDownloadExcel}>
-                    <FontAwesomeIcon icon={faFileExcel} className="mr-2"/>
+                  <button
+                    className="btn text-white"
+                    onClick={handleDownloadExcel}
+                  >
+                    <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
                     Excel
                   </button>
                 </div>
@@ -276,28 +290,31 @@ const BridgeWiseScore = () => {
             </div>
             <div className="card-body p-0 pb-2">
               {loading ? (
-                  <div
-                      style={{
-                        border: "8px solid #f3f3f3",
-                        borderTop: "8px solid #3498db",
-                        borderRadius: "50%",
-                        width: "80px",
-                        height: "80px",
-                        animation: "spin 1s linear infinite",
-                        margin: "auto",
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        zIndex: 999,
-                      }}
-                  />
+                <div
+                  style={{
+                    border: "8px solid #f3f3f3",
+                    borderTop: "8px solid #3498db",
+                    borderRadius: "50%",
+                    width: "80px",
+                    height: "80px",
+                    animation: "spin 1s linear infinite",
+                    margin: "auto",
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 999,
+                  }}
+                />
               ) : error ? (
-                  <p className="text-danger">{error}</p>
+                <p className="text-danger">{error}</p>
               ) : (
-                  <>
-                    <Table className="table table-bordered table-hover table-striped table-responsive" style={{fontSize:"14px"}}>
-                      <thead>
+                <>
+                  <Table
+                    className="table table-bordered table-hover table-striped table-responsive"
+                    style={{ fontSize: "14px" }}
+                  >
+                    <thead>
                       <tr>
                         <th>Bridge Name</th>
                         <th>District</th>
@@ -307,46 +324,76 @@ const BridgeWiseScore = () => {
                         <th>BPI</th>
                         <th>Bridge Information</th>
                       </tr>
-                      </thead>
-                      <tbody>
+                    </thead>
+                    <tbody>
                       {currentData.length > 0 ? (
-                          currentData.map((row, index) => (
-                              <tr key={index}>
-                                <td>{row.bridge_name || "N/A"}</td>
-                                <td>{row.district || "N/A"}</td>
-                                <td>{row.total_damage_score || "N/A"}</td>
-                                <td>{row.critical_damage_score || "N/A"}</td>
-                                <td>{row.average_damage_score || "N/A"}</td>
-                                <td>{row.bridge_performance_index || "N/A"}</td>
-                                <td className="text-center">
-                                  <button onClick={() => handleClick(row)} className="btn btn-sm" style={{backgroundColor:"#3B9996" , color:"white"}}>
-                                    Bridge Info
-                                  </button>
-                                </td>
-                              </tr>
-                          ))
-                      ) : (
-                          <tr>
-                            <td colSpan="5" className="text-center">
-                              No data available
+                        currentData.map((row, index) => (
+                          <tr key={index}>
+                            <td>{row.bridge_name || "N/A"}</td>
+                            <td>{row.district || "N/A"}</td>
+                            <td>
+                              {row.total_damage_score
+                                ? parseFloat(row.total_damage_score).toFixed(2)
+                                : "N/A"}
+                            </td>
+                            <td>
+                              {row.critical_damage_score
+                                ? parseFloat(row.critical_damage_score).toFixed(
+                                    2
+                                  )
+                                : "N/A"}
+                            </td>
+                            <td>
+                              {row.average_damage_score
+                                ? parseFloat(row.average_damage_score).toFixed(
+                                    2
+                                  )
+                                : "N/A"}
+                            </td>
+
+                            <td>
+                              {row.bridge_performance_index
+                                ? parseFloat(
+                                    row.bridge_performance_index
+                                  ).toFixed(2)
+                                : "N/A"}
+                            </td>
+                            <td className="text-center">
+                              <button
+                                onClick={() => handleClick(row)}
+                                className="btn btn-sm"
+                                style={{
+                                  backgroundColor: "#3B9996",
+                                  color: "white",
+                                }}
+                              >
+                                Bridge Info
+                              </button>
                             </td>
                           </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" className="text-center">
+                            No data available
+                          </td>
+                        </tr>
                       )}
-                      </tbody>
-                    </Table>
+                    </tbody>
+                  </Table>
 
-                    {/* Pagination Section */}
-                    <div className="d-flex justify-content-center align-items-center mt-3">
-                      {renderPaginationButtons()}
-                    </div>
-                  </>
+                  {/* Pagination Section */}
+                  <div className="d-flex justify-content-center align-items-center mt-3">
+                    {renderPaginationButtons()}
+                  </div>
+                </>
               )}
             </div>
           </div>
         </div>
       </section>
 
-      <Footer/>
+      <Footer />
     </>
   );
 };
