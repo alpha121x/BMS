@@ -3111,7 +3111,7 @@ app.get("/api/get-past-evaluations", async (req, res) => {
     let query = `
         SELECT 
           uu_bms_id, evaluator_id, inspection_id, district_id, damage_extent, qc_remarks_rams,
-          qc_remarks_con, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
+          evaluator_remarks,qc_remarks_con, bridge_name, "SpanIndex", "WorkKindID", "WorkKindName",
           "PartsName", "PartsID", "MaterialName", "MaterialID", "DamageKindName",
           "DamageKindID", "DamageLevel", "DamageLevelID", "Remarks",
           COALESCE(string_to_array(inspection_images, ','), '{}') AS "PhotoPaths"

@@ -13,6 +13,7 @@ const PastEvaluationsModal = ({ show, onHide, evaluations }) => {
               <tr>
                 <th>#</th>
                 <th>Evaluated By</th>
+                <th>Evaluator Remarks</th>
                 <th>Bridge Name</th>
                 <th>Span Index</th>
                 <th>Work Kind</th>
@@ -31,6 +32,7 @@ const PastEvaluationsModal = ({ show, onHide, evaluations }) => {
                 <tr key={index}>
                   <td>{index + 1}</td>
                   <td>{"Evaluator"}{evalData.evaluator_id}</td>
+                  <td>{evalData.evaluator_remarks}</td>
                   <td>{evalData.bridge_name}</td>
                   <td>{evalData.SpanIndex}</td>
                   <td>{evalData.WorkKindName}</td>
