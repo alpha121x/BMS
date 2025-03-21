@@ -22,6 +22,8 @@ const DashboardMain = () => {
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
+  const [evaluatedCards, setEvaluatedCards] = useState([]);
+
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -131,33 +133,44 @@ const DashboardMain = () => {
       .catch((error) => console.error("Error fetching structure data:", error));
   }, []);
 
-  const evaluatedCards = [
-    // Add same 3 types here also
-    {
-      label: "Total Evaluated Structures",
-      value: "0",
-      icon: <SiInstructure />,
-      color: "#88b9b8",
-    },
-    {
-      label: "Culvert",
-      value: "0",
-      icon: <LuConstruction />,
-      color: "#88b9b8",
-    },
-    {
-      label: "PC Bridge",
-      value: "0",
-      icon: <FaBridge />,
-      color: "#88b9b8",
-    },
-    {
-      label: "Underpass",
-      value: "0",
-      icon: <FaRoadBridge />,
-      color: "#88b9b8",
-    },
-  ];
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/structure-counts-evaluated`)
+      .then((response) => response.json())
+      .then((data) => {
+        const totalCount = data.totalStructureCount || "N/A";
+
+        // Create a structure for inspection types
+        const evaluatedMap = {
+          CULVERT: { label: "Culvert", icon: <LuConstruction /> },
+          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
+          UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
+          // Add any other inspection types as needed
+        };
+
+        // Map the response to the expected format for inspection data
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase(); // Normalize case
+
+          return {
+            label: evaluatedMap[typeKey]?.label || item.structure_type,
+            value: item.count || "N/A",
+            icon: evaluatedMap[typeKey]?.icon || <SiInstructure />, // Default icon
+            color: "#3B9996",
+          };
+        });
+
+        // Add total count card
+        mappedCards.unshift({
+          label: "Total Inspected Strcutures",
+          value: totalCount,
+          icon: <SiInstructure />,
+          color: "#3B9996",
+        });
+
+        setEvaluatedCards(mappedCards);
+      })
+      .catch((error) => console.error("Error fetching structure data:", error));
+  }, []);
 
   const constructionCards = [
     // Add same 3 types here also
@@ -217,8 +230,8 @@ const DashboardMain = () => {
                         totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
                         color="#009DB9"
                         items={[
-                          {label: "Culvert", value: inspectedCards[1]?.value, icon: <LuConstruction/>},
-                          {label: "PC Bridge", value: inspectedCards[2]?.value, icon: <FaBridge/>},
+                          {label: "Culvert", value: inspectedCards[2]?.value, icon: <LuConstruction/>},
+                          {label: "PC Bridge", value: inspectedCards[1]?.value, icon: <FaBridge/>},
                           {label: "Underpass", value: inspectedCards[3]?.value, icon: <FaRoadBridge/>},
                         ]}
                     />
@@ -232,8 +245,8 @@ const DashboardMain = () => {
                         totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
                         color="#3B9996"
                         items={[
-                          {label: "Culvert", value: evaluatedCards[1]?.value, icon: <LuConstruction/>},
-                          {label: "PC Bridge", value: evaluatedCards[2]?.value, icon: <FaBridge/>},
+                          {label: "Culvert", value: evaluatedCards[2]?.value, icon: <LuConstruction/>},
+                          {label: "PC Bridge", value: evaluatedCards[1]?.value, icon: <FaBridge/>},
                           {label: "Underpass", value: evaluatedCards[3]?.value, icon: <FaRoadBridge/>},
                         ]}
                     />

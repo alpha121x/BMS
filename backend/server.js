@@ -340,6 +340,43 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
   }
 });
 
+// API endpoint to get counts for inspected structures
+app.get("/api/structure-counts-evaluated", async (req, res) => {
+  try {
+    const query = `
+      WITH inspected_structures AS (
+        SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation_f
+      )
+      SELECT 
+        m.structure_type, 
+        COUNT(*) AS count
+      FROM bms.tbl_bms_master_data m
+      JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
+      GROUP BY m.structure_type
+      ORDER BY count DESC;
+    `;
+
+    const totalQuery = `
+      SELECT COUNT(*) AS total_count
+      FROM bms.tbl_bms_master_data m
+      JOIN (
+        SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation_f
+      ) i ON m.uu_bms_id = i.uu_bms_id;
+    `;
+
+    const structureTypeCounts = await pool.query(query);
+    const totalStructureCount = await pool.query(totalQuery);
+
+    res.json({
+      structureTypeCounts: structureTypeCounts.rows,
+      totalStructureCount: totalStructureCount.rows[0]?.total_count || 0,
+    });
+  } catch (err) {
+    console.error("Error executing query", err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // counts for Con
 app.get("/api/inspection-counts-con", async (req, res) => {
   try {
