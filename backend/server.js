@@ -1057,9 +1057,7 @@ WITH ranked_data AS (
     f.damage_extent AS "DAMAGE EXTENT",
     f."Remarks" AS "SITUATION REMARKS",
     f.current_date_time AS "INSPECTION DATE",
-    ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK",
-    ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-    COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
+    ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK"
   FROM bms.tbl_bms_master_data md
   JOIN bms.tbl_inspection_f f 
   ON md.uu_bms_id = f.uu_bms_id
