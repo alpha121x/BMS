@@ -640,6 +640,7 @@ app.get("/api/bridgesConDownloadCsv", async (req, res) => {
         md.data_source AS "Data Source",
         md.date_time AS "Date Time",
         md.remarks AS "Remarks",
+        f.district_id AS "DISTRICT ID",
         f."SpanIndex" AS "Span Index",
         f."WorkKindName" AS "Work Kind",
         f."PartsName" AS "Part Name",
@@ -660,7 +661,7 @@ app.get("/api/bridgesConDownloadCsv", async (req, res) => {
     let paramIndex = 1;
 
     if (district !== "%") {
-      query += ` AND md.district_id = $${paramIndex}`;
+      query += ` AND "DISTRICT ID" = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
     }
@@ -733,6 +734,7 @@ app.get("/api/bridgesRamsDownloadExcel", async (req, res) => {
         md.date_time AS "DATE TIME",
         md.remarks AS "REMARKS",
         f.surveyed_by AS "SURVEYED BY",
+        f.district_id AS "DISTRICT ID",
         f."SpanIndex" AS "SPAN INDEX",
         f."WorkKindName" AS "WORK KIND NAME",
         f."PartsName" AS "PARTS NAME",
@@ -863,7 +865,7 @@ app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {
                   ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
                   COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
               FROM bms.tbl_inspection_f f  
-              RIGHT JOIN bms.tbl_bms_master_data md  
+              JOIN bms.tbl_bms_master_data md  
                   ON md.uu_bms_id = f.uu_bms_id  
               WHERE f."DamageLevelID" IN (4, 5, 6)  
               AND (
@@ -923,7 +925,6 @@ app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {
   } 
 });
 
-
 // bridges details download csv for dashboard and evluation
 app.get("/api/bridgesRamsDownloadCsv", async (req, res) => {
   try {
@@ -968,7 +969,7 @@ app.get("/api/bridgesRamsDownloadCsv", async (req, res) => {
         f."surveyed_by" AS "Surveyed By",
         f.current_date_time AS "Inspection Date"
       FROM bms.tbl_bms_master_data md
-      RIGHT JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0')
+      JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0')
       AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0')
       WHERE 1=1
     `; // 👈 Notice "WHERE 1=1" ensures the next conditions can safely be added
@@ -1060,7 +1061,7 @@ WITH ranked_data AS (
     ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
     COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
   FROM bms.tbl_bms_master_data md
-  INNER JOIN bms.tbl_inspection_f f 
+  JOIN bms.tbl_inspection_f f 
   ON md.uu_bms_id = f.uu_bms_id
   WHERE f."DamageLevelID" IN (4, 5, 6)
     AND (f.surveyed_by = 'RAMS-PITB' OR f.surveyed_by = 'RAMS-UU' AND f.qc_rams = 2)
@@ -1089,7 +1090,7 @@ SELECT * FROM ranked_data`;
       paramIndex++;
     }
 
-    query += ` ORDER BY "Reference No"`;
+    query += ` ORDER BY "REFERENCE NO"`;
 
     const result = await pool.query(query, queryParams);
 
