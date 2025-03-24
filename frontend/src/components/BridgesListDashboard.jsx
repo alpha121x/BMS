@@ -213,51 +213,115 @@ const BridgesListDashboard = ({
   const handleDownloadExcel = async () => {
     setLoading(true); // Start loading
     try {
+      // Define query parameters
       const params = {
         district: districtId || "%",
-        structureType,
-        bridgeName,
+        structureType: structureType || "%",
+        bridgeName: bridgeName || "%",
       };
-
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadExcel?${queryString}`,
-        {
-          method: "GET",
-        }
-      );
-
+  
+      // Fetch data from the same API endpoint
+      const response = await fetch(`${BASE_URL}/api/bridgesdownloadExcel?${queryString}`, {
+        method: "GET",
+      });
+  
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-
+  
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
-
-      // Handle array fields like photos
-      data.bridges.forEach((row) => {
-        if (Array.isArray(row.photos)) {
-          row.photos = row.photos.join(", ") || "No image path";
-        }
-      });
-
-      // Create the worksheet
-      const ws = XLSX.utils.json_to_sheet(data.bridges);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
-
-      // Download the Excel file
-      XLSX.writeFile(wb, "Bridges_Data.xlsx");
+  
+      const summaryData = data.bridges;
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Bridges Data");
+  
+      // Exclude "row_rank" and image fields
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) => key !== "ROW RANK" && key !== "Overview Photos" && key !== "PhotoPaths"
+      );
+  
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: Math.min(Math.max(...summaryData.map((row) => (row[key] ? row[key].toString().length : 10)), 10), 30), // Auto-adjust width
+      }));
+  
+      // Add fixed-width image columns
+      for (let i = 1; i <= 5; i++) {
+        columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 22 });
+      }
+      for (let i = 1; i <= 5; i++) {
+        columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 22 });
+      }
+  
+      worksheet.columns = columns;
+  
+      // Style header row
+      worksheet.getRow(1).font = { bold: true, size: 14 };
+      worksheet.getRow(1).alignment = { vertical: "middle", horizontal: "center" };
+      worksheet.getRow(1).height = 25;
+  
+      // Process Rows
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+  
+        // Extract image URLs correctly
+        const overviewPhotos = item["Overview Photos"] || [];
+        const inspectionPhotos = item["PhotoPaths"] || [];
+  
+        // Add normal data, excluding "row_rank"
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
+  
+        // Insert row
+        const rowIndex = worksheet.addRow(rowData).number;
+        worksheet.getRow(rowIndex).height = 90;
+  
+        // Function to insert images
+        const insertImage = async (photoUrls, columnOffset) => {
+          for (let j = 0; j < photoUrls.length && j < 5; j++) {
+            try {
+              const imgResponse = await fetch(photoUrls[j]);
+              if (!imgResponse.ok) continue;
+  
+              const imgBlob = await imgResponse.blob();
+              const arrayBuffer = await imgBlob.arrayBuffer();
+  
+              const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: "jpeg",
+              });
+  
+              worksheet.addImage(imageId, {
+                tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 },
+                ext: { width: 150, height: 90 },
+              });
+            } catch (error) {
+              console.error("Failed to load image:", photoUrls[j], error);
+            }
+          }
+        };
+  
+        await insertImage(overviewPhotos, 0);
+        await insertImage(inspectionPhotos, 5);
+      }
+  
+      // Save File
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `BridgeData.xlsx`);
     } catch (error) {
-      Swal.fire("Error!", "Failed to download Excel file", "error");
+      console.error("Error downloading Excel:", error);
+      Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
-
+  
   const buttonStyles = {
     margin: "0 6px",
     padding: "4px 8px",

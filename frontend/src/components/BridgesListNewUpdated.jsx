@@ -293,7 +293,7 @@ const BridgesListNewUpdated = ({
   
       // Exclude "row_rank" and image fields
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "row_rank" && key !== "Overview Photos" && key !== "PhotoPaths"
+        (key) => key !== "ROW RANK" && key !== "Overview Photos" && key !== "PhotoPaths"
       );
   
       const columns = columnKeys.map((key) => ({
