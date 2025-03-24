@@ -183,7 +183,7 @@ const BridgesListDashboard = ({
 
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadCsv?${queryString}`,
         {
           method: "GET",
         }
@@ -203,7 +203,7 @@ const BridgesListDashboard = ({
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "bridges_data.csv";
+      link.download = "Bridges_Data.csv";
       link.click();
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
@@ -223,7 +223,7 @@ const BridgesListDashboard = ({
 
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadNeww?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadExcel?${queryString}`,
         {
           method: "GET",
         }
@@ -252,7 +252,7 @@ const BridgesListDashboard = ({
       XLSX.utils.book_append_sheet(wb, ws, "Bridges Data");
 
       // Download the Excel file
-      XLSX.writeFile(wb, "bridges_data.xlsx");
+      XLSX.writeFile(wb, "Bridges_Data.xlsx");
     } catch (error) {
       Swal.fire("Error!", "Failed to download Excel file", "error");
     } finally {
