@@ -605,13 +605,13 @@ const BridgesListNewUpdated = ({
             <Modal.Title>Inspection Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedBridge && username === "consultant" && (
+            {selectedBridge && user_type === "consultant" && (
               <InspectionListCon bridgeId={selectedBridge.uu_bms_id} />
             )}
-            {selectedBridge && username === "rams" && (
+            {selectedBridge && user_type === "rams" && (
               <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />
             )}
-            {selectedBridge && username === "evaluator" && (
+            {selectedBridge && user_type === "evaluator" && (
               <InspectionListEvaluator bridgeId={selectedBridge.uu_bms_id} />
             )}
           </Modal.Body>
