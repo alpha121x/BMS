@@ -3,7 +3,6 @@ import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
-// import BridgesList from "./BridgesList";
 import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
