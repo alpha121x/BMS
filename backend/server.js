@@ -814,109 +814,115 @@ app.get("/api/bridgesRamsDownloadExcel", async (req, res) => {
 });
 
 // briges details download for dashboard and evaluationn working correctly
-app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {
-  try {
-    const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
+app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {   
+  try {     
+      const { district = "%", structureType = "%", bridgeName = "%" } = req.query;      
 
-    let query = `
-    WITH ranked_data AS (
-      SELECT 
-        md.uu_bms_id AS "REFERENCE NO",
-        CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
-        md.structure_type_id AS "STRUCTURE TYPE ID",
-        md.structure_type AS "STRUCTURE TYPE",
-        md.road_no AS "ROAD NO",
-        md.road_name AS "ROAD NAME",
-        md.road_name_cwd AS "ROAD NAME CWD",
-        md.road_code_cwd AS "ROAD CODE CWD",
-        md.route_id AS "ROUTE ID",
-        md.survey_id AS "SURVEY ID",
-        md.surveyor_name AS "SURVEYOR NAME",
-        md.zone AS "ZONE",
-        md.district AS "DISTRICT",
-        md.road_classification AS "ROAD CLASSIFICATION",
-        md.road_surface_type AS "ROAD SURFACE TYPE",
-        md.carriageway_type AS "CARRIAGEWAY TYPE",
-        md.direction AS "DIRECTION",
-        md.visual_condition AS "VISUAL CONDITION",
-        md.construction_type AS "CONSTRUCTION TYPE",
-        md.no_of_span AS "NO OF SPAN",
-        md.span_length_m AS "SPAN LENGTH (M)",
-        md.structure_width_m AS "STRUCTURE WIDTH (M)",
-        md.construction_year AS "CONSTRUCTION YEAR",
-        md.last_maintenance_date AS "LAST MAINTENANCE DATE",
-        md.data_source AS "DATA SOURCE",
-        md.date_time AS "DATE TIME",
-        md.remarks AS "REMARKS",
-        f.surveyed_by AS "SURVEYED BY",
-        f."SpanIndex" AS "SPAN INDEX",
-        f."WorkKindName" AS "WORK KIND NAME",
-        f."PartsName" AS "PARTS NAME",
-        f."MaterialName" AS "MATERIAL NAME",
-        f."DamageKindName" AS "DAMAGE KIND NAME",
-        f."DamageLevel" AS "DAMAGE LEVEL",
-        f.damage_extent AS "DAMAGE EXTENT",
-        f."Remarks" AS "SITUATION REMARKS",
-        f.current_date_time AS "INSPECTION DATE",
-        ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK",
-        ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-        COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
-      FROM bms.tbl_bms_master_data md
-      INNER JOIN bms.tbl_inspection_f f 
-      ON md.uu_bms_id = f.uu_bms_id
-      WHERE f."DamageLevelID" IN (4, 5, 6)
-      AND (f.surveyed_by = 'RAMS-PITB' OR f.surveyed_by = 'RAMS-UU' AND f.qc_rams = 2)
-    )
-    SELECT * FROM ranked_data`;
+      let query = `
+          WITH ranked_data AS (
+              SELECT  
+                  f.uu_bms_id AS "REFERENCE NO",
+                  CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
+                  md.structure_type_id AS "STRUCTURE TYPE ID",
+                  md.structure_type AS "STRUCTURE TYPE",
+                  md.road_no AS "ROAD NO",
+                  md.road_name AS "ROAD NAME",
+                  md.road_name_cwd AS "ROAD NAME CWD",
+                  md.road_code_cwd AS "ROAD CODE CWD",
+                  md.route_id AS "ROUTE ID",
+                  md.survey_id AS "SURVEY ID",
+                  md.surveyor_name AS "SURVEYOR NAME",
+                  md.zone AS "ZONE",
+                  md.district AS "DISTRICT",
+                  md.road_classification AS "ROAD CLASSIFICATION",
+                  md.road_surface_type AS "ROAD SURFACE TYPE",
+                  md.carriageway_type AS "CARRIAGEWAY TYPE",
+                  md.direction AS "DIRECTION",
+                  md.visual_condition AS "VISUAL CONDITION",
+                  md.construction_type AS "CONSTRUCTION TYPE",
+                  md.no_of_span AS "NO OF SPAN",
+                  md.span_length_m AS "SPAN LENGTH (M)",
+                  md.structure_width_m AS "STRUCTURE WIDTH (M)",
+                  md.construction_year AS "CONSTRUCTION YEAR",
+                  md.last_maintenance_date AS "LAST MAINTENANCE DATE",
+                  md.data_source AS "DATA SOURCE",
+                  md.date_time AS "DATE TIME",
+                  md.remarks AS "REMARKS",
+                  f.surveyed_by AS "SURVEYED BY",
+                  f.district_id AS "DISTRICT ID",  -- Apply district filter on this
+                  f."SpanIndex" AS "SPAN INDEX",
+                  f."WorkKindName" AS "WORK KIND NAME",
+                  f."PartsName" AS "PARTS NAME",
+                  f."MaterialName" AS "MATERIAL NAME",
+                  f."DamageKindName" AS "DAMAGE KIND NAME",
+                  f."DamageLevel" AS "DAMAGE LEVEL",
+                  f.damage_extent AS "DAMAGE EXTENT",
+                  f."Remarks" AS "SITUATION REMARKS",
+                  f.current_date_time AS "INSPECTION DATE",
+                  ROW_NUMBER() OVER (PARTITION BY f.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK",
+                  ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+                  COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
+              FROM bms.tbl_inspection_f f  
+              RIGHT JOIN bms.tbl_bms_master_data md  
+                  ON md.uu_bms_id = f.uu_bms_id  
+              WHERE f."DamageLevelID" IN (4, 5, 6)  
+              AND (
+                  f.surveyed_by = 'RAMS-PITB'  
+                  OR (f.surveyed_by = 'RAMS-UU' AND f.qc_rams = 2)
+              )
+          )  
+          SELECT * FROM ranked_data`;
 
-    const queryParams = [];
-    let paramIndex = 1;
+      const queryParams = [];     
+      let paramIndex = 1;      
 
-    if (district !== "%") {
-      query += ` WHERE "DISTRICT" = $${paramIndex}`;
-      queryParams.push(district);
-      paramIndex++;
-    }
+      if (district !== "%") {       
+          query += ` WHERE "DISTRICT ID" = $${paramIndex}`;       
+          queryParams.push(district);       
+          paramIndex++;     
+      }      
 
-    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` AND "BRIDGE NAME" ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridgeName}%`);
-      paramIndex++;
-    }
+      if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {       
+          query += ` AND "BRIDGE NAME" ILIKE $${paramIndex}`;       
+          queryParams.push(`%${bridgeName}%`);       
+          paramIndex++;     
+      }      
 
-    if (structureType !== "%") {
-      query += ` AND "STRUCTURE TYPE ID" = $${paramIndex}`;
-      queryParams.push(structureType);
-      paramIndex++;
-    }
+      if (structureType !== "%") {       
+          query += ` AND "STRUCTURE TYPE ID" = $${paramIndex}`;       
+          queryParams.push(structureType);       
+          paramIndex++;     
+      }      
 
-    query += ` ORDER BY "REFERENCE NO"`;
+      query += ` ORDER BY "REFERENCE NO"`;      
 
-    const result = await pool.query(query, queryParams);
+      const result = await pool.query(query, queryParams);      
 
-    let firstRowMap = new Map();
-    const processedData = result.rows.map((row) => {
-      if (!firstRowMap.has(row["REFERENCE NO"])) {
-        firstRowMap.set(row["REFERENCE NO"], true);
-      } else {
-        row["Overview Photos"] = null;
-      }
-      row["PhotoPaths"] = extractUrlsFromPath(row["PhotoPaths"]);
-      return row;
-    });
+      let firstRowMap = new Map();     
+      const processedData = result.rows.map((row) => {       
+          if (!firstRowMap.has(row["REFERENCE NO"])) {         
+              firstRowMap.set(row["REFERENCE NO"], true);       
+          } else {         
+              row["Overview Photos"] = null;       
+          }       
+          row["PhotoPaths"] = extractUrlsFromPath(row["PhotoPaths"]);       
+          return row;     
+      });      
 
-    res.json({
-      success: true,
-      bridges: processedData,
-    });
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching data from the database",
-    });
-  }
+      res.json({       
+          success: true,       
+          bridges: processedData,     
+      });   
+
+  } catch (error) {     
+      console.error("Error fetching data:", error);     
+      res.status(500).json({       
+          success: false,       
+          message: "Error fetching data from the database",     
+      });   
+  } 
 });
+
 
 // bridges details download csv for dashboard and evluation
 app.get("/api/bridgesRamsDownloadCsv", async (req, res) => {
