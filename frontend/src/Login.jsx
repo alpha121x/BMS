@@ -100,7 +100,7 @@ const Login = () => {
               <p className="fs-6">
                 The BMS Software is a specialized tool developed to support the
                 comprehensive management of bridge infrastructure.It is specifically designed to help engineers, 
-                inspectors, and maintenance planners streamline the following critical activities: 
+                inspectors, and maintenance planners streamline the critical activities.
               </p>
               
               <p className="mt-5 fs-6">
