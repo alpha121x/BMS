@@ -19,7 +19,7 @@ const FactorCrossings = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${BASE_URL}/api/road-classifications`);
+      const response = await fetch(`${BASE_URL}/api/factor-crossings`);
       if (!response.ok) throw new Error("Failed to fetch data");
       const result = await response.json();
     
@@ -154,7 +154,7 @@ const FactorCrossings = () => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">Damage Type</h6>
+        <h6 className="card-title text-lg font-semibold pb-2">Factors for Crossings List</h6>
 
         {loading && (
           <div
@@ -180,8 +180,8 @@ const FactorCrossings = () => {
           <thead>
             <tr>
               <th>Sr. No.</th>
-              <th>BridgeAgeFactorID</th>
-              <th>BridgeAgeFactorName</th>
+              <th>Factor for Crossing ID</th>
+              <th>Factor for Crossing</th>
               <th>Factor Value</th>
               <th>Status</th>
               <th>Creation Date</th>
@@ -193,9 +193,12 @@ const FactorCrossings = () => {
               currentData.map((row, index) => (
                 <tr key={index}>
                   <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-                  <td>{row.id || "N/A"}</td>
-                  <td>{row.road_classification || "N/A"}</td>
-                  <td>{row.weight || "0"}</td>
+                  <td>{row.BridgeUnderSituationID || "N/A"}</td>
+                  <td>{row.BridgeUnderSituationName || "N/A"}</td>
+                  <td>{row.BridgeUnderSituationFactorValue || "0"}</td>
+                  <td>{row.DeleteFlag === 0 ? "Active" : "Deleted"}</td>
+                  <td>{new Date(row.InYMD).toLocaleDateString()}</td>
+                  <td>{new Date(row.UpYMD).toLocaleDateString()}</td>
                 </tr>
               ))
             ) : (
