@@ -177,7 +177,7 @@ const Elements = () => {
           />
         )}
 
-        <Table className="custom-table">
+        <Table className="table table-striped table-hover table-sm">
           <thead>
             <tr>
               <th>Sr. No.</th>
