@@ -178,7 +178,7 @@ const DamageRanksTable = () => {
           />
         )}
 
-        <Table bordered className="custom-table">
+        <Table bordered className="table table-striped table-hover table-sm">
           <thead>
             <tr>
               <th>Sr. No.</th>
