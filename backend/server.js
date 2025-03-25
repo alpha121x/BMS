@@ -3738,7 +3738,7 @@ app.get("/api/structure-types", async (req, res) => {
 app.get("/api/carriageway-types", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, carriageway_type FROM bms.tbl_carriageway_types"
+      "SELECT id, carriageway_type, weight FROM bms.tbl_carriageway_types"
     );
     res.json(result.rows);
   } catch (err) {
@@ -3915,7 +3915,7 @@ app.get("/api/visual-conditions", async (req, res) => {
 app.get("/api/road-classifications", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, road_classification FROM bms.tbl_road_classifications"
+      "SELECT id, road_classification, weight FROM bms.tbl_road_classifications"
     );
     res.json(result.rows);
   } catch (error) {
@@ -3938,6 +3938,20 @@ app.get("/api/road-surface-types", async (req, res) => {
 });
 
 // API for Factor Crossing
+app.get("/api/factor-crossings", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT "BridgeUnderSituationID", "BridgeUnderSituationName", "DeleteFlag", "InYMD", "UpYMD", "BridgeUnderSituationFactorValue"
+	FROM bms.tbl_bridge_under_situation`
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching road surface types:", error);
+    res.status(500).json({ error: "Failed to fetch road surface types" });
+  }
+});
+
+// API for Age factors
 app.get("/api/age-factors", async (req, res) => {
   try {
     const result = await pool.query(
