@@ -278,57 +278,31 @@ app.get("/api/bms-score-export", async (req, res) => {
 // API endpoint to get counts for structure types and total "Arch" construction types
 app.get("/api/structure-counts", async (req, res) => {
   try {
-    // 1. Count of each structure_type
-    const structureTypeCounts = await pool.query(`
+    const { district } = req.query; // Receive district parameter
+    const districtFilter = district ? `WHERE district_id = $1` : ""; 
+    const params = district ? [district] : [];
+
+    // 1. Count of each structure_type with district filter
+    const structureTypeCounts = await pool.query(
+      `
       SELECT structure_type, COUNT(*) AS count
       FROM bms.tbl_bms_master_data
+      ${districtFilter}
       GROUP BY structure_type
       ORDER BY count DESC;
-    `);
+      `,
+      params
+    );
 
     // 2. Total count of all records (for structure_type)
-    const totalStructureCount = await pool.query(`
+    const totalStructureCount = await pool.query(
+      `
       SELECT COUNT(*) AS total_count
-      FROM bms.tbl_bms_master_data;
-    `);
-
-    // Return all the counts as a single JSON response
-    res.json({
-      structureTypeCounts: structureTypeCounts.rows,
-      totalStructureCount: totalStructureCount.rows[0].total_count,
-    });
-  } catch (err) {
-    console.error("Error executing query", err.stack);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// API endpoint to get counts for inspected structures
-app.get("/api/structure-counts-inspected", async (req, res) => {
-  try {
-    const query = `
-      WITH inspected_structures AS (
-        SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f
-      )
-      SELECT 
-        m.structure_type, 
-        COUNT(*) AS count
-      FROM bms.tbl_bms_master_data m
-      JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
-      GROUP BY m.structure_type
-      ORDER BY count DESC;
-    `;
-
-    const totalQuery = `
-      SELECT COUNT(*) AS total_count
-      FROM bms.tbl_bms_master_data m
-      JOIN (
-        SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f
-      ) i ON m.uu_bms_id = i.uu_bms_id;
-    `;
-
-    const structureTypeCounts = await pool.query(query);
-    const totalStructureCount = await pool.query(totalQuery);
+      FROM bms.tbl_bms_master_data
+      ${districtFilter};
+      `,
+      params
+    );
 
     res.json({
       structureTypeCounts: structureTypeCounts.rows,
@@ -341,17 +315,65 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 });
 
 // API endpoint to get counts for inspected structures
-app.get("/api/structure-counts-evaluated", async (req, res) => {
+app.get("/api/structure-counts-inspected", async (req, res) => {
   try {
+    const { district } = req.query;
+    const districtFilter = district ? `AND m.district_code = $1` : "";
+    const params = district ? [district] : [];
+
     const query = `
       WITH inspected_structures AS (
-        SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation_f
+        SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f
       )
       SELECT 
         m.structure_type, 
         COUNT(*) AS count
       FROM bms.tbl_bms_master_data m
       JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
+      WHERE 1=1 ${districtFilter}
+      GROUP BY m.structure_type
+      ORDER BY count DESC;
+    `;
+
+    const totalQuery = `
+      SELECT COUNT(*) AS total_count
+      FROM bms.tbl_bms_master_data m
+      JOIN (
+        SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f
+      ) i ON m.uu_bms_id = i.uu_bms_id
+      WHERE 1=1 ${districtFilter};
+    `;
+
+    const structureTypeCounts = await pool.query(query, params);
+    const totalStructureCount = await pool.query(totalQuery, params);
+
+    res.json({
+      structureTypeCounts: structureTypeCounts.rows,
+      totalStructureCount: totalStructureCount.rows[0]?.total_count || 0,
+    });
+  } catch (err) {
+    console.error("Error executing query", err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// API endpoint to get counts for evaluated structures
+app.get("/api/structure-counts-evaluated", async (req, res) => {
+  try {
+    const { district } = req.query;
+    const districtFilter = district ? `AND m.district_code = $1` : "";
+    const params = district ? [district] : [];
+
+    const query = `
+      WITH evaluated_structures AS (
+        SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation_f
+      )
+      SELECT 
+        m.structure_type, 
+        COUNT(*) AS count
+      FROM bms.tbl_bms_master_data m
+      JOIN evaluated_structures i ON m.uu_bms_id = i.uu_bms_id
+      WHERE 1=1 ${districtFilter}
       GROUP BY m.structure_type
       ORDER BY count DESC;
     `;
@@ -361,11 +383,12 @@ app.get("/api/structure-counts-evaluated", async (req, res) => {
       FROM bms.tbl_bms_master_data m
       JOIN (
         SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation_f
-      ) i ON m.uu_bms_id = i.uu_bms_id;
+      ) i ON m.uu_bms_id = i.uu_bms_id
+      WHERE 1=1 ${districtFilter};
     `;
 
-    const structureTypeCounts = await pool.query(query);
-    const totalStructureCount = await pool.query(totalQuery);
+    const structureTypeCounts = await pool.query(query, params);
+    const totalStructureCount = await pool.query(totalQuery, params);
 
     res.json({
       structureTypeCounts: structureTypeCounts.rows,
