@@ -3965,6 +3965,20 @@ app.get("/api/age-factors", async (req, res) => {
   }
 });
 
+// API for Bridge Dimentions
+app.get("/api/dimentions", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT "BridgeDimensionID", "BridgeDimensionName", "BridgeDimensionWeight", "BridgeDimensionNote", "DeleteFlag", "InYMD", "UpYMD"
+	FROM bms.tbl_bridge_dimensions`
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching road surface types:", error);
+    res.status(500).json({ error: "Failed to fetch road surface types" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

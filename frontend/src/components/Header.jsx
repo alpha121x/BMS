@@ -66,6 +66,7 @@ const Header = () => {
                 <NavDropdown.Item as={Link} to="/SetupListing/CarriagewayTypes">Carriageway Types</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/SetupListing/BridgeAgeFactors">Bridge Age Factors</NavDropdown.Item>
                 <NavDropdown.Item as={Link} to="/SetupListing/FactorCrossings">Factors for Crossings</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/SetupListing/BridgeDimentions">Dimentions</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title={<FontAwesomeIcon icon={faUserCircle} size="lg" />} align="end">
