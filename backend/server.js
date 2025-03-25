@@ -3937,6 +3937,20 @@ app.get("/api/road-surface-types", async (req, res) => {
   }
 });
 
+// API for Factor Crossing
+app.get("/api/age-factors", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT "BridgeAgeFactorID", "BridgeAgeFactorName", "DeleteFlag", "InYMD", "UpYMD", "BridgeAgeFactorValue"
+	FROM bms.tbl_bridge_age_factors`
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error fetching road surface types:", error);
+    res.status(500).json({ error: "Failed to fetch road surface types" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
