@@ -3846,7 +3846,7 @@ app.get("/api/damage-levels", async (req, res) => {
 app.get("/api/damage-kinds", async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT "DamageKindID", "DamageKindName" FROM bms.tbl_damage_kinds'
+      'SELECT  "DamageKindID", "DamageKindName", "DeleteFlag", "InYMD", "UpYMD", "DamageKindWeightage" FROM bms.tbl_damage_kinds'
     );
 
     res.json(result.rows);
