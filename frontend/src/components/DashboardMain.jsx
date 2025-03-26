@@ -45,132 +45,108 @@ const DashboardMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+
   useEffect(() => {
-    // Fetch data from API
-    fetch(`${BASE_URL}/api/structure-counts`)
+    fetch(`${BASE_URL}/api/structure-counts?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
-        // Extract total structure count
         const totalCount = data.totalStructureCount || "N/A";
-
-        // Map the response to the expected format
+  
         const structureMap = {
-          CULVERT: {
-            label: "Culvert",
-            icon: <LuConstruction />,
-          },
-          BRIDGE: {
-            label: "PC Bridge",
-            icon: <FaBridge />,
-
-          },
-          UNDERPASS: {
-            label: "Underpass",
-            icon: <FaRoadBridge />,
-
-          },
+          CULVERT: { label: "Culvert", icon: <LuConstruction /> },
+          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
+          UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
         };
-
+  
         const mappedCards = data.structureTypeCounts.map((item) => {
-          const typeKey = item.structure_type.toUpperCase(); // Normalize case
+          const typeKey = item.structure_type.toUpperCase();
           return {
             label: structureMap[typeKey]?.label || item.structure_type,
             value: item.count || "N/A",
-            icon: structureMap[typeKey]?.icon || <SiInstructure />, // Fallback icon
+            icon: structureMap[typeKey]?.icon || <SiInstructure />,
             color: "#005D7F",
           };
         });
-
-        // Add total count card
+  
         mappedCards.unshift({
           label: "Total Structures Inventory",
           value: totalCount,
           icon: <SiInstructure />,
           color: "#005D7F",
         });
-
+  
         setStructureCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
-  }, []);
-
+  }, [districtId]);
+  
   useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts-inspected`)
+    fetch(`${BASE_URL}/api/structure-counts-inspected?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
         const totalCount = data.totalStructureCount || "N/A";
-
-        // Create a structure for inspection types
+  
         const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
           BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
-          // Add any other inspection types as needed
         };
-
-        // Map the response to the expected format for inspection data
+  
         const mappedCards = data.structureTypeCounts.map((item) => {
-          const typeKey = item.structure_type.toUpperCase(); // Normalize case
-
+          const typeKey = item.structure_type.toUpperCase();
           return {
             label: inspectionMap[typeKey]?.label || item.structure_type,
             value: item.count || "N/A",
-            icon: inspectionMap[typeKey]?.icon || <SiInstructure />, // Default icon
+            icon: inspectionMap[typeKey]?.icon || <SiInstructure />,
             color: "#3B9996",
           };
         });
-
-        // Add total count card
+  
         mappedCards.unshift({
-          label: "Total Inspected Strcutures",
+          label: "Total Inspected Structures",
           value: totalCount,
           icon: <SiInstructure />,
           color: "#3B9996",
         });
-
+  
         setInspectedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
-  }, []);
-
+  }, [districtId]);
+  
   useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts-evaluated`)
+    fetch(`${BASE_URL}/api/structure-counts-evaluated?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
         const totalCount = data.totalStructureCount || "N/A";
-
-        // Create a structure for inspection types
+  
         const evaluatedMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
           BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
-          // Add any other inspection types as needed
         };
-
-        // Map the response to the expected format for inspection data
+  
         const mappedCards = data.structureTypeCounts.map((item) => {
-          const typeKey = item.structure_type.toUpperCase(); // Normalize case
-
+          const typeKey = item.structure_type.toUpperCase();
           return {
             label: evaluatedMap[typeKey]?.label || item.structure_type,
             value: item.count || "N/A",
-            icon: evaluatedMap[typeKey]?.icon || <SiInstructure />, // Default icon
+            icon: evaluatedMap[typeKey]?.icon || <SiInstructure />,
             color: "#3B9996",
           };
         });
-
-        // Add total count card
+  
         mappedCards.unshift({
-          label: "Total Inspected Strcutures",
+          label: "Total Evaluated Structures",
           value: totalCount,
           icon: <SiInstructure />,
           color: "#3B9996",
         });
-
+  
         setEvaluatedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
-  }, []);
+  }, [districtId]);
 
   const constructionCards = [
     // Add same 3 types here also

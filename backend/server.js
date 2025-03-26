@@ -278,11 +278,15 @@ app.get("/api/bms-score-export", async (req, res) => {
 // API endpoint to get counts for structure types and total "Arch" construction types
 app.get("/api/structure-counts", async (req, res) => {
   try {
-    const { district } = req.query; // Receive district parameter
-    const districtFilter = district ? `WHERE district_id = $1` : ""; 
-    const params = district ? [district] : [];
+    const { district } = req.query;
+    const params = [];
+    let districtFilter = "";
 
-    // 1. Count of each structure_type with district filter
+    if (district && district !== "%") {
+      districtFilter = "WHERE district_id = $1";
+      params.push(district);
+    }
+
     const structureTypeCounts = await pool.query(
       `
       SELECT structure_type, COUNT(*) AS count
@@ -294,7 +298,6 @@ app.get("/api/structure-counts", async (req, res) => {
       params
     );
 
-    // 2. Total count of all records (for structure_type)
     const totalStructureCount = await pool.query(
       `
       SELECT COUNT(*) AS total_count
@@ -318,8 +321,13 @@ app.get("/api/structure-counts", async (req, res) => {
 app.get("/api/structure-counts-inspected", async (req, res) => {
   try {
     const { district } = req.query;
-    const districtFilter = district ? `AND m.district_code = $1` : "";
-    const params = district ? [district] : [];
+    const params = [];
+    let districtFilter = "";
+
+    if (district && district !== "%") {
+      districtFilter = "AND m.district_id = $1";
+      params.push(district);
+    }
 
     const query = `
       WITH inspected_structures AS (
@@ -361,8 +369,13 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
 app.get("/api/structure-counts-evaluated", async (req, res) => {
   try {
     const { district } = req.query;
-    const districtFilter = district ? `AND m.district_code = $1` : "";
-    const params = district ? [district] : [];
+    const params = [];
+    let districtFilter = "";
+
+    if (district && district !== "%") {
+      districtFilter = "AND m.district_id = $1";
+      params.push(district);
+    }
 
     const query = `
       WITH evaluated_structures AS (
@@ -839,11 +852,11 @@ app.get("/api/bridgesRamsDownloadExcel", async (req, res) => {
 });
 
 // briges details download for dashboard and evaluationn working correctly
-app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {   
-  try {     
-      const { district = "%", structureType = "%", bridgeName = "%" } = req.query;      
+app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {
+  try {
+    const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
-      let query = `
+    let query = `
           WITH ranked_data AS (
               SELECT  
                   f.uu_bms_id AS "REFERENCE NO",
@@ -898,54 +911,53 @@ app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {
           )  
           SELECT * FROM ranked_data`;
 
-      const queryParams = [];     
-      let paramIndex = 1;      
+    const queryParams = [];
+    let paramIndex = 1;
 
-      if (district !== "%") {       
-          query += ` WHERE "DISTRICT ID" = $${paramIndex}`;       
-          queryParams.push(district);       
-          paramIndex++;     
-      }      
+    if (district !== "%") {
+      query += ` WHERE "DISTRICT ID" = $${paramIndex}`;
+      queryParams.push(district);
+      paramIndex++;
+    }
 
-      if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {       
-          query += ` AND "BRIDGE NAME" ILIKE $${paramIndex}`;       
-          queryParams.push(`%${bridgeName}%`);       
-          paramIndex++;     
-      }      
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND "BRIDGE NAME" ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
-      if (structureType !== "%") {       
-          query += ` AND "STRUCTURE TYPE ID" = $${paramIndex}`;       
-          queryParams.push(structureType);       
-          paramIndex++;     
-      }      
+    if (structureType !== "%") {
+      query += ` AND "STRUCTURE TYPE ID" = $${paramIndex}`;
+      queryParams.push(structureType);
+      paramIndex++;
+    }
 
-      query += ` ORDER BY "REFERENCE NO"`;      
+    query += ` ORDER BY "REFERENCE NO"`;
 
-      const result = await pool.query(query, queryParams);      
+    const result = await pool.query(query, queryParams);
 
-      let firstRowMap = new Map();     
-      const processedData = result.rows.map((row) => {       
-          if (!firstRowMap.has(row["REFERENCE NO"])) {         
-              firstRowMap.set(row["REFERENCE NO"], true);       
-          } else {         
-              row["Overview Photos"] = null;       
-          }       
-          row["PhotoPaths"] = extractUrlsFromPath(row["PhotoPaths"]);       
-          return row;     
-      });      
+    let firstRowMap = new Map();
+    const processedData = result.rows.map((row) => {
+      if (!firstRowMap.has(row["REFERENCE NO"])) {
+        firstRowMap.set(row["REFERENCE NO"], true);
+      } else {
+        row["Overview Photos"] = null;
+      }
+      row["PhotoPaths"] = extractUrlsFromPath(row["PhotoPaths"]);
+      return row;
+    });
 
-      res.json({       
-          success: true,       
-          bridges: processedData,     
-      });   
-
-  } catch (error) {     
-      console.error("Error fetching data:", error);     
-      res.status(500).json({       
-          success: false,       
-          message: "Error fetching data from the database",     
-      });   
-  } 
+    res.json({
+      success: true,
+      bridges: processedData,
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
 });
 
 // bridges details download csv for dashboard and evluation
@@ -1088,7 +1100,6 @@ WITH ranked_data AS (
     AND (f.surveyed_by = 'RAMS-PITB' OR f.surveyed_by = 'RAMS-UU' AND f.qc_rams = 2)
 )
 SELECT * FROM ranked_data`;
-
 
     const queryParams = [];
     let paramIndex = 1;
