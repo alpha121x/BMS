@@ -2,7 +2,7 @@ import React from "react";
 
 const TopCardDashboard = ({ totalLabel, totalValue, color, items }) => {
     const addCommas = (x) => {
-        if (!x) return "N/A";
+        if (!x) return "0";
         var parts = x.toString().split(".");
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         return parts.join(".");
