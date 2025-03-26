@@ -154,7 +154,7 @@ const RoadClassifications = () => {
       }}
     >
       <div className="card-body pb-0">
-        <h6 className="card-title text-lg font-semibold pb-2">Damage Type</h6>
+        <h6 className="card-title text-lg font-semibold pb-2">Road Classfications</h6>
 
         {loading && (
           <div
