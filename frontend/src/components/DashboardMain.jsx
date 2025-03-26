@@ -50,7 +50,7 @@ const DashboardMain = () => {
     fetch(`${BASE_URL}/api/structure-counts?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
-        const totalCount = data.totalStructureCount || "N/A";
+        const totalCount = data.totalStructureCount || "0";
   
         const structureMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
@@ -62,7 +62,7 @@ const DashboardMain = () => {
           const typeKey = item.structure_type.toUpperCase();
           return {
             label: structureMap[typeKey]?.label || item.structure_type,
-            value: item.count || "N/A",
+            value: item.count || "0",
             icon: structureMap[typeKey]?.icon || <SiInstructure />,
             color: "#005D7F",
           };
@@ -84,7 +84,7 @@ const DashboardMain = () => {
     fetch(`${BASE_URL}/api/structure-counts-inspected?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
-        const totalCount = data.totalStructureCount || "N/A";
+        const totalCount = data.totalStructureCount || "0";
   
         const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
@@ -96,7 +96,7 @@ const DashboardMain = () => {
           const typeKey = item.structure_type.toUpperCase();
           return {
             label: inspectionMap[typeKey]?.label || item.structure_type,
-            value: item.count || "N/A",
+            value: item.count || "0",
             icon: inspectionMap[typeKey]?.icon || <SiInstructure />,
             color: "#3B9996",
           };
@@ -118,7 +118,7 @@ const DashboardMain = () => {
     fetch(`${BASE_URL}/api/structure-counts-evaluated?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
-        const totalCount = data.totalStructureCount || "N/A";
+        const totalCount = data.totalStructureCount || "0";
   
         const evaluatedMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
@@ -130,7 +130,7 @@ const DashboardMain = () => {
           const typeKey = item.structure_type.toUpperCase();
           return {
             label: evaluatedMap[typeKey]?.label || item.structure_type,
-            value: item.count || "N/A",
+            value: item.count || "0",
             icon: evaluatedMap[typeKey]?.icon || <SiInstructure />,
             color: "#3B9996",
           };
