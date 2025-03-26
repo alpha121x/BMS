@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
 const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {

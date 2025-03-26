@@ -161,6 +161,9 @@ const BridgesListDashboard = ({
       latitude: bridge.y_centroid, // y_centroid is latitude
       longitude: bridge.x_centroid, // x_centroid is longitude
       name: bridge.BridgeName, // Optional: Add a name for the marker label
+      bridgeName: `${bridge.pms_sec_id} - ${bridge.structure_no}`, // Combine pms_sec_id and structure_no
+      district: bridge.district,
+      road: bridge.road_name,
     });
     setShowMapModal(true);
   };
@@ -575,6 +578,9 @@ const BridgesListDashboard = ({
                       location={selectedLocation}
                       onClose={handleCloseMapModal}
                       markerLabel={selectedLocation?.name || "Bridge Location"}
+                      bridgeName={selectedLocation?.bridgeName}
+                      district={selectedLocation?.district}
+                      road={selectedLocation?.road}
                     />
                   )}
                 </Modal.Body>

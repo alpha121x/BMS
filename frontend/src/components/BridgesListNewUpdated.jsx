@@ -630,11 +630,12 @@ const BridgesListNewUpdated = ({
           <Modal.Body>
             {selectedLocation && (
               <MapModal
-                location={selectedLocation}
-                markerLabel={selectedLocation?.name || "Bridge Location"}
-                bridgeName={selectedLocation?.bridgeName}
-                district={selectedLocation?.district}
-                road={selectedLocation?.road}
+              location={selectedLocation}
+                      onClose={handleCloseMapModal}
+                      markerLabel={selectedLocation?.name || "Bridge Location"}
+                      bridgeName={selectedLocation?.bridgeName}
+                      district={selectedLocation?.district}
+                      road={selectedLocation?.road}
               />
             )}
           </Modal.Body>
