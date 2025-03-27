@@ -302,7 +302,15 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       const summaryData = data.bridges;
       const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
 
-      const headers = Object.keys(summaryData[0]);
+      const headers = Object.keys(summaryData[0]).filter(
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "qc_rams" &&
+          key !== "rn" &&
+          key !== "surveyed_by"
+      );
+      
 
       const csvContent =
         "data:text/csv;charset=utf-8," +

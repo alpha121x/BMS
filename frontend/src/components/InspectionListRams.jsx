@@ -226,7 +226,14 @@ const InspectionListRams = ({ bridgeId }) => {
       const summaryData = data.bridges;
       const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
 
-      const headers = Object.keys(summaryData[0]);
+      const headers = Object.keys(summaryData[0]).filter(
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "qc_rams" &&
+          key !== "RN" &&
+          key !== "SURVEYED BY"
+      );
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
@@ -286,9 +293,9 @@ const InspectionListRams = ({ bridgeId }) => {
         (key) =>
           key !== "Overview Photos" &&
           key !== "PhotoPaths" &&
-          key !== "rn" &&
+          key !== "RN" &&
           key !== "qc_con" &&
-          key !== "qc_rams"
+          key !== "qc_rams" && key !== "SURVEYED BY" 
       );
 
       const columns = columnKeys.map((key) => ({
