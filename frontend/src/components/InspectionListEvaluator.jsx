@@ -359,8 +359,9 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
       // Define all columns except images
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "Overview Photos" && key !== "PhotoPaths"
+        (key) => key !== "Overview Photos" && key !== "PhotoPaths" && key !== "qc_rams" && key !== "rn" && key !== "surveyed_by" 
       );
+      
 
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
