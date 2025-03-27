@@ -1681,7 +1681,7 @@ app.get("/api/inspections-export-evaluator", async (req, res) => {
         FROM bms.tbl_bms_master_data md
         RIGHT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
       )
-      SELECT * FROM ranked_data WHERE "DamageLevelID" IN (4, 5, 6)
+      SELECT * FROM ranked_data WHERE f."DamageLevelID" IN (4, 5, 6)
         AND (
           surveyed_by = 'RAMS-PITB' 
           OR 
