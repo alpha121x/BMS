@@ -1345,7 +1345,6 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
   }
 });
 
-
 // Inspection export for consultant
 app.get("/api/inspections-export-con", async (req, res) => {
   try {
