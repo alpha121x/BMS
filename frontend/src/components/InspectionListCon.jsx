@@ -219,7 +219,6 @@ const InspectionListCon = ({ bridgeId }) => {
         (key) =>
           key !== "Overview Photos" &&
           key !== "PhotoPaths" &&
-          key !== "qc_rams" &&
           key !== "RN" &&
           key !== "SURVEYED BY"
       );

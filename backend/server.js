@@ -1391,7 +1391,7 @@ app.get("/api/inspections-export-con", async (req, res) => {
           f.damage_extent AS "DAMAGE EXTENT",
           f."Remarks" AS "INSPECTION REMARKS",
           f.current_date_time AS "INSPECTION DATE",
-          f.qc_con AS "Consultant Status",
+          f.qc_con AS "qc_con",
           COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
 
           ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS "RN"
@@ -1412,33 +1412,38 @@ app.get("/api/inspections-export-con", async (req, res) => {
 
     let firstRow = true;
     const processedData = result.rows.map((row) => {
-      // Map qc_con to readable string
+      // Convert qc_con numeric value to readable label
+      let status = "Unknown";
       switch (row.qc_con) {
         case 1:
-          row.qc_con = "Pending";
+          status = "Pending";
           break;
         case 2:
-          row.qc_con = "Approved";
+          status = "Approved";
           break;
         case 3:
-          row.qc_con = "Unapproved";
+          status = "Unapproved";
           break;
-        default:
-          row.qc_con = "Unknown";
       }
-
-      // Handle images
+    
+      // Add new field with proper name
+      row["Consultant Status"] = status;
+    
+      // Optionally remove original key
+      delete row.qc_con;
+    
+      // Handle image URL conversion
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
+    
       // Remove overview photos from other than first
       if (!firstRow) {
         row["Overview Photos"] = null;
       }
       firstRow = false;
-
+    
       return row;
     });
-
+    
     res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -1497,6 +1502,7 @@ app.get("/api/inspections-export-rams", async (req, res) => {
         f."DamageLevelID" AS "DAMAGE LEVEL ID",
         f."DamageLevel" AS "DAMAGE LEVEL",
         f.damage_extent AS "DAMAGE EXTENT",
+        f.qc_rams AS qc_rams,
         f."Remarks" AS "INSPECTION REMARKS",
         f.current_date_time AS "INSPECTION DATE",
         COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
@@ -1518,15 +1524,33 @@ app.get("/api/inspections-export-rams", async (req, res) => {
 
     let firstRow = true;
     const processedData = result.rows.map((row) => {
+      // --- Handle QC RAMS status conversion ---
+      let ramsStatus = "Unknown";
+      switch (row.qc_rams) {
+        case 0:
+          ramsStatus = "Pending";
+          break;
+        case 2:
+          ramsStatus = "Approved";
+          break;
+        case 3:
+          ramsStatus = "Unapproved";
+          break;
+      }
+      row["RAMS Status"] = ramsStatus;
+      delete row.qc_rams;
+    
+      // --- Handle Photos ---
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-
+    
       if (!firstRow) {
         row["Overview Photos"] = null;
       }
-
       firstRow = false;
+    
       return row;
     });
+    
 
     res.json({ success: true, bridges: processedData });
   } catch (error) {

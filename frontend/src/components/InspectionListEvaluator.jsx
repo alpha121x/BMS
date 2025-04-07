@@ -306,7 +306,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         (key) =>
           key !== "Overview Photos" &&
           key !== "PhotoPaths" &&
-          key !== "qc_rams" &&
           key !== "rn" &&
           key !== "surveyed_by"
       );
