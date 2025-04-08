@@ -78,6 +78,7 @@ const InspectionListCon = ({ bridgeId }) => {
     }
   }, [bridgeId]);
 
+
   const fetchsummaryData = useCallback(async () => {
     setLoading(true);
     setError(null);
