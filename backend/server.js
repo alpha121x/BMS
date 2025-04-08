@@ -2459,35 +2459,50 @@ app.get("/api/get-summary", async (req, res) => {
     }
 
     const query = `
-      SELECT 
-        uu_bms_id,
-        surveyed_by,
-        damage_extent,
-        inspection_id,
-        qc_con,
-        qc_remarks_con,
-        reviewed_by,
-        bridge_name, 
-        "SpanIndex", 
-        "WorkKindName", 
-        "PartsName", 
-        "MaterialName", 
-        "DamageKindName", 
-        "DamageLevel", 
-        "Remarks", 
-        "inspection_images" AS "PhotoPaths",
-        "ApprovedFlag"
-      FROM bms.tbl_inspection_f
-      WHERE
-     "DamageLevelID" IN (1, 2, 3) 
-    AND (
-        surveyed_by = 'RAMS-PITB' 
-        OR 
-        (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
-    ) 
-    AND uu_bms_id = $1  -- ✅ Added condition
-      ORDER BY inspection_id DESC;
-    `;
+    SELECT 
+      uu_bms_id,
+      damage_extent,
+      inspection_id,
+      bridge_name, 
+      "SpanIndex", 
+      "WorkKindName", 
+      "PartsName", 
+      "MaterialName", 
+      "DamageKindName", 
+      "DamageLevel", 
+      "Remarks", 
+      "inspection_images" AS "PhotoPaths"
+    FROM bms.tbl_inspection_f
+    WHERE
+      "DamageLevelID" IN (1, 2, 3)
+      AND (
+        surveyed_by = 'RAMS-PITB'
+        OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+      )
+      AND uu_bms_id = $1
+  
+    UNION ALL
+  
+    SELECT 
+      uu_bms_id,
+      NULL AS damage_extent,
+      NULL AS inspection_id,
+      NULL AS bridge_name,
+      NULL AS "SpanIndex",
+      NULL AS "WorkKindName",
+      NULL AS "PartsName",
+      NULL AS "MaterialName",
+      NULL AS "DamageKindName",
+      NULL AS "DamageLevel",
+      "Remarks",
+      inspection_images AS "PhotoPaths"
+    FROM bms.tbl_evaluation_f
+    WHERE uu_bms_id = $1
+  
+    ORDER BY inspection_id DESC NULLS LAST;
+  `;
+  
+
 
     const { rows } = await pool.query(query, [bridgeId]);
 
@@ -2535,7 +2550,6 @@ app.get("/api/get-summary", async (req, res) => {
       return {
         ...row,
         PhotoPaths: extractedPhotoPaths, // Flattened array of image paths
-        ApprovedFlag: row.ApprovedFlag === 1 ? "Approved" : "Unapproved",
       };
     });
 
