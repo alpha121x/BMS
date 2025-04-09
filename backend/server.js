@@ -4076,6 +4076,68 @@ app.get('/api/material-damage-chart', async (req, res) => {
   }
 });
 
+// api for bridge damage levels vs work knds
+app.get('/api/workkind-damage-chart', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT "WorkKindName" AS work_kind, "DamageLevelID" AS damage_level, COUNT(*) AS count
+      FROM bms.tbl_inspection_f
+      WHERE "DamageLevelID" IN (2,3,4,5)
+      GROUP BY "WorkKindName", "DamageLevelID"
+      ORDER BY "WorkKindName", "DamageLevelID"
+    `);
+
+    const rows = result.rows;
+    const workKinds = [];
+    const levels = {
+      2: 'I',
+      3: 'II',
+      4: 'III',
+      5: 'IV'
+    };
+
+    const chartData = {
+      I: {},
+      II: {},
+      III: {},
+      IV: {}
+    };
+
+    rows.forEach(row => {
+      const kind = row.work_kind;
+      const level = levels[row.damage_level];
+      const count = parseInt(row.count);
+
+      if (!workKinds.includes(kind)) {
+        workKinds.push(kind);
+        Object.keys(chartData).forEach(lvl => {
+          chartData[lvl][kind] = 0;
+        });
+      }
+
+      chartData[level][kind] = count;
+    });
+
+    const final = {
+      categories: workKinds,
+      series: Object.entries(chartData).map(([lvl, obj]) => ({
+        name: `Damage Level ${lvl}`,
+        data: workKinds.map(kind => obj[kind]),
+        color: lvl === 'I' ? '#0000FF'
+              : lvl === 'II' ? '#FFA500'
+              : lvl === 'III' ? '#808080'
+              : '#FFFF00'
+      }))
+    };
+
+    res.json(final);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+
 
 
 app.listen(port, () => {

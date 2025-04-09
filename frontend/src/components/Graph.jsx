@@ -191,69 +191,43 @@ const Graph = () => {
       });
   }, []);
 
-  const elementCategoryDamagesOptions = {
-    chart: {
-      type: "bar",
-      height: 400,
-    },
-    title: {
-      text: "Element category wise damages",
-    },
-    xAxis: {
-      categories: [
-        "Superstructure",
-        "Substructure(Pier)",
-        "Substructure(Abutment)",
-        "Substructure(Foundation)",
-        "Bearing",
-        "Road surface",
-        "Drainage system",
-        "Attachment",
-        "Wing wall",
-        "Box Culvert",
-      ],
-      title: {
-        text: "Work Kind",
-      },
-    },
-    yAxis: {
-      min: 0,
-      title: {
-        text: "Category",
-      },
-      max: 3750,
-    },
-    legend: {
-      reversed: true,
-    },
-    plotOptions: {
-      series: {
-        stacking: "normal",
-      },
-    },
-    series: [
-      {
-        name: "Number of Damages IV",
-        data: [286, 128, 72, 27, 33, 414, 75, 9, 152, 0],
-        color: "#FFFF00",
-      },
-      {
-        name: "Number of Damages III",
-        data: [490, 282, 189, 17, 24, 578, 248, 15, 196, 0],
-        color: "#808080",
-      },
-      {
-        name: "Number of Damages II",
-        data: [1247, 1173, 752, 45, 71, 2091, 654, 76, 878, 1],
-        color: "#FFA500",
-      },
-      {
-        name: "Number of Damages I",
-        data: [282, 331, 235, 12, 18, 389, 84, 27, 198, 0],
-        color: "#0000FF",
-      }
-    ],
-};
+  const [elementCategoryDamagesOptions, setElementCategoryDamagesOptions] = useState({
+    chart: { type: "bar", height: 800 },
+    title: { text: "Element Category-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
+    xAxis: { categories: [], title: { text: "Work Kind" } },
+    yAxis: { min: 0, title: { text: "Number of Damages" } },
+    legend: { reversed: true },
+    plotOptions: { series: { stacking: "normal" } },
+    series: [],
+  });
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/workkind-damage-chart`) // Replace with your actual API
+      .then((res) => res.json())
+      .then((data) => {
+        // destructure API response
+        const { categories, series } = data;
+
+        setElementCategoryDamagesOptions({
+          chart: { type: "bar", height: 800 },
+          title: { text: "Element Category-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
+          xAxis: {
+            categories: categories,
+            title: { text: "Work Kind" },
+          },
+          yAxis: {
+            min: 0,
+            title: { text: "Number of Damages" },
+          },
+          legend: { reversed: true },
+          plotOptions: { series: { stacking: "normal" } },
+          series: series,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching bridge damage levels:", error);
+      });
+  }, []);
 
   const bridgeLengthOptions = {
     chart: {
