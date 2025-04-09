@@ -4015,6 +4015,68 @@ app.get('/api/damage-chart', async (req, res) => {
   }
 });
 
+// api for bridge damage levels vs material knds
+app.get('/api/material-damage-chart', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT "MaterialName" AS material, "DamageLevelID" AS damage_level, COUNT(*) AS count
+      FROM bms.tbl_inspection_f
+      WHERE "DamageLevelID" IN (2,3,4,5)
+      GROUP BY "MaterialName", "DamageLevelID"
+      ORDER BY "MaterialName", "DamageLevelID"
+    `);
+
+    const rows = result.rows;
+    const materials = [];
+    const levels = {
+      2: 'I',
+      3: 'II',
+      4: 'III',
+      5: 'IV'
+    };
+
+    const chartData = {
+      I: {},
+      II: {},
+      III: {},
+      IV: {}
+    };
+
+    rows.forEach(row => {
+      const material = row.material;
+      const level = levels[row.damage_level];
+      const count = parseInt(row.count);
+
+      if (!materials.includes(material)) {
+        materials.push(material);
+        Object.keys(chartData).forEach(lvl => {
+          chartData[lvl][material] = 0;
+        });
+      }
+
+      chartData[level][material] = count;
+    });
+
+    const final = {
+      categories: materials,
+      series: Object.entries(chartData).map(([lvl, obj]) => ({
+        name: `Damage Level ${lvl}`,
+        data: materials.map(material => obj[material]),
+        color: lvl === 'I' ? '#0000FF'
+              : lvl === 'II' ? '#FFA500'
+              : lvl === 'III' ? '#808080'
+              : '#FFFF00'
+      }))
+    };
+
+    res.json(final);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

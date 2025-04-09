@@ -153,93 +153,43 @@ const Graph = () => {
       });
   }, []);
 
-  const materialElementDamagesOptions = {
-    chart: {
-      type: "bar",
-      height: 800,
-    },
-    title: {
-      text: "Material Element Damages",
-      style: {
-        fontSize: "16px",
-        fontWeight: "bold",
-      },
-    },
-    xAxis: {
-      categories: [
-        "Superstructure",
-        "Concrete",
-        "Other",
-        "Substructure(Pier) - Steel",
-        "Concrete",
-        "Other",
-        "Masonry/brick",
-        "Substructure(Abutment) - Steel",
-        "Concrete",
-        "Other",
-        "Masonry/brick",
-        "Substructure(Foundation) - Concrete",
-        "Other",
-        "Bearing - Steel",
-        "Concrete",
-        "Other",
-        "Rubber",
-        "Road surface - Steel",
-        "Concrete",
-        "Rubber",
-        "Asphalt",
-        "Other",
-        "Drainage system - Steel",
-        "Vinyl chloride",
-        "Other",
-        "Attachment - Steel",
-        "Vinyl chloride",
-        "Other",
-        "Wing wall - Concrete",
-        "Other",
-        "Box Culvert - Other",
-      ],
-      title: {
-        text: "Elements",
-      },
-    },
-    yAxis: {
-      min: 0,
-      title: {
-        text: "Number of Damages",
-      },
-    },
-    legend: {
-      reversed: true,
-    },
-    plotOptions: {
-      series: {
-        stacking: "normal",
-      },
-    },
-    series: [
-      {
-        name: "Bridges Damage Level I",
-        data: [6, 263, 13, 0, 160, 149, 1, 5, 7, 10, 3, 2, 46, 164, 0],
-        color: "#1E40AF", // Blue
-      },
-      {
-        name: "Bridges Damage Level II",
-        data: [87, 1087, 73, 5, 442, 601, 2, 16, 29, 13, 3, 0, 312, 817, 1],
-        color: "#F59E0B", // Orange
-      },
-      {
-        name: "Bridges Damage Level III",
-        data: [5, 464, 21, 1, 153, 101, 0, 6, 11, 13, 0, 0, 106, 204, 0],
-        color: "#6B7280", // Gray
-      },
-      {
-        name: "Bridges Damage Level IV",
-        data: [35, 236, 15, 0, 65, 53, 0, 20, 5, 7, 0, 0, 72, 166, 0],
-        color: "#FFD700", // Yellow
-      },
-    ],
-  };
+  const [materialElementDamagesOptions, setMaterialElementDamagesOptions] = useState({
+    chart: { type: "bar", height: 800 },
+    title: { text: "Material Element-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
+    xAxis: { categories: [], title: { text: "Elements" } },
+    yAxis: { min: 0, title: { text: "Number of Damages" } },
+    legend: { reversed: true },
+    plotOptions: { series: { stacking: "normal" } },
+    series: [],
+  });
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/material-damage-chart`) // Replace with your actual API
+      .then((res) => res.json())
+      .then((data) => {
+        // destructure API response
+        const { categories, series } = data;
+
+        setMaterialElementDamagesOptions({
+          chart: { type: "bar", height: 800 },
+          title: { text: "Material Element-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
+          xAxis: {
+            categories: categories,
+            title: { text: "Elements" },
+          },
+          yAxis: {
+            min: 0,
+            title: { text: "Number of Damages" },
+          },
+          legend: { reversed: true },
+          plotOptions: { series: { stacking: "normal" } },
+          series: series,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching bridge damage levels:", error);
+      });
+  }, []);
 
   const elementCategoryDamagesOptions = {
     chart: {
