@@ -1,6 +1,7 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import { BASE_URL } from "../components/config";
 
 const Graph = () => {
   // Previous pie chart configurations remain the same
@@ -45,21 +46,38 @@ const Graph = () => {
     ],
   };
 
-  const structureTypesOptions = {
+  const [structureTypesOptions, setStructureTypesOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Type of Structures" },
-    series: [
-      {
-        name: "Count",
-        data: [
-          { name: "Underpass", y: 9, color: "#FE8F67" },
-          { name: "Bridge", y: 1396, color: "#6D68DE" },
-          { name: "Culvert", y: 17263, color: "#19FB8B" },
-          { name: "Other", y: 37, color: "#60C3FE" },
-        ],
-      },
-    ],
-  };
+    series: [{ name: "Count", data: [] }],
+  });
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/structure-counts`) // Replace with your actual API
+      .then((res) => res.json())
+      .then((data) => {
+        const colorMap = {
+          CULVERT: "#19FB8B",
+          BRIDGE: "#6D68DE",
+          UNDERPASS: "#FE8F67",
+        };
+
+        const formattedData = data.structureTypeCounts.map((item) => ({
+          name: item.structure_type.charAt(0).toUpperCase() + item.structure_type.slice(1).toLowerCase(),
+          y: parseInt(item.count),
+          color: colorMap[item.structure_type] || "#999999", // fallback color
+        }));
+
+        setStructureTypesOptions({
+          chart: { type: "pie" },
+          title: { text: "Type of Structures" },
+          series: [{ name: "Count", data: formattedData }],
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching structure types:", error);
+      });
+  }, []);
 
   const crossingTypesOptions = {
     chart: { type: "pie" },
