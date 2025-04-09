@@ -3950,6 +3950,72 @@ app.get("/api/dimentions", async (req, res) => {
   }
 });
 
+
+// api for bridge damage levels vs damage knds
+app.get('/api/damage-chart', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT "DamageKindName" AS damage_kind, "DamageLevelID" AS damage_level, COUNT(*) AS count
+      FROM bms.tbl_inspection_f
+      WHERE "DamageLevelID" IN (2,3,4,5)
+      GROUP BY "DamageKindName", "DamageLevelID"
+      ORDER BY "DamageKindName", "DamageLevelID"
+    `);
+
+    const rows = result.rows;
+    const damageKinds = [];
+    const levels = {
+      2: 'I',
+      3: 'II',
+      4: 'III',
+      5: 'IV'
+    };
+
+    const chartData = {
+      I: {},
+      II: {},
+      III: {},
+      IV: {}
+    };
+
+    // Fill chartData
+    rows.forEach(row => {
+      const kind = row.damage_kind;
+      const level = levels[row.damage_level];
+      const count = parseInt(row.count);
+
+      if (!damageKinds.includes(kind)) {
+        damageKinds.push(kind);
+        // initialize all levels for that kind
+        Object.keys(chartData).forEach(lvl => {
+          chartData[lvl][kind] = 0;
+        });
+      }
+
+      chartData[level][kind] = count;
+    });
+
+    // Prepare final series
+    const final = {
+      categories: damageKinds,
+      series: Object.entries(chartData).map(([lvl, obj]) => ({
+        name: `Damage Level ${lvl}`,
+        data: damageKinds.map(kind => obj[kind]),
+        color: lvl === 'I' ? '#0000FF'
+              : lvl === 'II' ? '#FFA500'
+              : lvl === 'III' ? '#808080'
+              : '#FFFF00'
+      }))
+    };
+
+    res.json(final);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
