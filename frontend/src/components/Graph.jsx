@@ -79,25 +79,39 @@ const Graph = () => {
       });
   }, []);
 
-  const crossingTypesOptions = {
+  const [crossingTypesOptions, setCrossingTypesOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Crossing Types" },
-    series: [
-      {
-        name: "Factor value",
-        data: [
-          { name: "Water channel", y: 0.02, color: "#45C8FF" },
-          { name: "Irrigation channel", y: 0.02, color: "#6D68DE" },
-          { name: "River", y: 0.02, color: "#19FB8B" },
-          { name: "Highway", y: 0.03, color: "#FF6347" },
-          { name: "General road", y: 0.03, color: "#6B8ABC" },
-          { name: "Train track", y: 0.03, color: "#D568FB" },
-          { name: "Building", y: 0.25, color: "#47F9E3" },
-          { name: "Other (Note)", y: 0.01, color: "#FF645B" },
-        ],
-      },
-    ],
-  };
+    series: [{ name: "Factor Value", data: [] }],
+  });
+  
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/crossing-types-chart`)
+      .then((res) => res.json())
+      .then((data) => {
+        const colorPalette = [
+          "#45C8FF", "#6D68DE", "#19FB8B", "#FF6347",
+          "#6B8ABC", "#D568FB", "#47F9E3", "#FF645B",
+          "#FFD700", "#ADFF2F",
+        ];
+  
+        const formattedData = data.map((item, index) => ({
+          name: item.name,
+          y: parseFloat(item.y),
+          color: colorPalette[index % colorPalette.length],
+        }));
+  
+        setCrossingTypesOptions({
+          chart: { type: "pie" },
+          title: { text: "Crossing Types" },
+          series: [{ name: "Factor Value", data: formattedData }],
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching crossing types chart:", error);
+      });
+  }, []);
+  
 
   const planAScoreOptions = {
     chart: { type: "pie" },

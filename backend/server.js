@@ -4137,6 +4137,29 @@ app.get('/api/workkind-damage-chart', async (req, res) => {
   }
 });
 
+// api for crossing types chart
+app.get('/api/crossing-types-chart', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT "BridgeUnderSituationName" AS name, 
+             "BridgeUnderSituationFactorValue" AS value
+      FROM bms.tbl_bridge_under_situation
+      WHERE "DeleteFlag" = 0
+    `);
+
+    const chartData = result.rows.map(row => ({
+      name: row.name,
+      y: parseFloat(row.value),
+    }));
+
+    res.json(chartData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+
 
 
 
