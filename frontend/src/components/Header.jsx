@@ -90,6 +90,24 @@ const Header = () => {
               Bridge Wise Score
             </Nav.Link>
 
+            <Nav.Link
+              as={Link}
+              to="/CostEstimation"
+              className={
+                activeTab === "/CostEstimation"
+                  ? "bg-custom-active text-white active"
+                  : "hover-bg-custom-active"
+              }
+              style={{
+                backgroundColor:
+                  activeTab === "/CostEstimation" ? "#005d7f" : "transparent",
+                color: activeTab === "/CostEstimation" ? "#fff" : "#000",
+              }}
+            >
+              Cost Estimation
+            </Nav.Link>
+
+
             <NavDropdown
               title="Reports"
               show={isReportsDropdownOpen}
