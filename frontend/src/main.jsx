@@ -15,7 +15,7 @@ import BridgeWiseScore from './components/BridgeWiseScore';
 import BridgeInformation from './components/BridgeInformation';
 import BridgeInformationCon from './components/BridgeInformationCon';
 import BridgeInformationRams from './components/BridgeInformationRams';
-import CostEstimation from './CostEstimation';
+import CostEstimation from './components/CostEstimation';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {

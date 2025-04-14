@@ -22,11 +22,9 @@ const Header = () => {
   };
 
   const handleDownloadApk = () => {
-    const apkUrl = "https://example.com/path/to/your/apkfile.apk"; // Replace with your APK URL
+    const apkUrl = "http://cnw.urbanunit.gov.pk/cnw_links/"; // Replace with your APK URL
     const link = document.createElement("a");
     link.href = apkUrl;
-    link.setAttribute("download", "app.apk"); // Set the desired file name
-    link.click();
   };
 
   const userToken = JSON.parse(localStorage.getItem("user"));
