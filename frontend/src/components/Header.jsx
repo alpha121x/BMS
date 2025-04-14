@@ -22,10 +22,10 @@ const Header = () => {
   };
 
   const handleDownloadApk = () => {
-    const apkUrl = "http://cnw.urbanunit.gov.pk/cnw_links/"; // Replace with your APK URL
-    const link = document.createElement("a");
-    link.href = apkUrl;
+    const apkUrl = "http://cnw.urbanunit.gov.pk/cnw_links/versions.html";
+    window.open(apkUrl, "_blank"); // opens in a new tab
   };
+  
 
   const userToken = JSON.parse(localStorage.getItem("user"));
   const userName = userToken?.username;
@@ -168,7 +168,7 @@ const Header = () => {
               <NavDropdown.Item>{userName}</NavDropdown.Item>
               <NavDropdown.Item onClick={handleDownloadApk}>
                 <FontAwesomeIcon icon={faDownload} className="me-2" />
-                Download Latest Apk
+                Download BMS Apks
               </NavDropdown.Item>
 
               <NavDropdown.Item onClick={handleLogout}>
