@@ -21,11 +21,12 @@ const BridgeWiseScore = () => {
   const [structureType, setStructureType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
 
-  const handleClick = () => {
+  const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
     const editUrl = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
-    window.location.href = editUrl; // Navigate to the new page
+    window.location.href = editUrl;
   };
+  
 
   useEffect(() => {
     fetchData(); // Fetch data whenever currentPage changes
