@@ -1838,12 +1838,14 @@ app.get("/api/bridges", async (req, res) => {
         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
+    AND is_active = true
     `;
 
     let countQuery = `
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data
       WHERE 1=1
+      AND is_active = true
     `;
 
     const queryParams = [];
@@ -1953,6 +1955,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
 	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
+    AND is_active = true
     `;
 
     let countQuery = `
@@ -1960,6 +1963,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1
       AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
+    AND is_active = true
     `;
 
     const queryParams = [];
@@ -2061,6 +2065,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
 	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
+    AND is_active = true
     `;
 
     let countQuery = `
@@ -2068,6 +2073,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1
       AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
+    AND is_active = true
     `;
 
     const queryParams = [];
@@ -2169,6 +2175,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
 	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0')
+    AND is_active = true
     `;
 
     let countQuery = `
@@ -2176,6 +2183,7 @@ SELECT
       FROM bms.tbl_bms_master_data
       WHERE 1=1
       AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0')
+      AND is_active = true
     `;
 
     const queryParams = [];
@@ -2282,6 +2290,7 @@ SELECT
         OR 
         (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
     ) )
+    AND is_active = true
     `;
 
     let countQuery = `
@@ -2294,6 +2303,7 @@ SELECT
         OR 
         (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
     ) )
+        AND is_active = true
     `;
 
     const queryParams = [];
@@ -4158,10 +4168,6 @@ app.get('/api/crossing-types-chart', async (req, res) => {
     res.status(500).json({ error: 'Server Error' });
   }
 });
-
-
-
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
