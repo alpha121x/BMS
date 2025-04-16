@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Form, Modal } from "react-bootstrap";
 import "../index.css";
 
@@ -6,19 +6,67 @@ const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedSpan, setSelectedSpan] = useState("");
+  const [parsedSpanPhotos, setParsedSpanPhotos] = useState({});
+  const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
+  
   const photos = inventoryData?.photos || [];
-  const spanphotos = inventoryData?.images_spans || [];
+  
+  useEffect(() => {
+    if (inventoryData?.images_spans) {
+      try {
+        const parsed = JSON.parse(inventoryData.images_spans);
+        setParsedSpanPhotos(parsed);
+      } catch (error) {
+        console.error("Error parsing span photos:", error);
+      }
+    }
+  }, [inventoryData]);
+
+  useEffect(() => {
+    if (selectedSpan && parsedSpanPhotos) {
+      const spanKey = `Span_${selectedSpan}`;
+      const spanData = parsedSpanPhotos[spanKey];
+      
+      if (spanData) {
+        // Convert the object of photo arrays to a flat array
+        const photos = Object.values(spanData).flat();
+        setCurrentSpanPhotos(photos);
+      } else {
+        setCurrentSpanPhotos([]);
+      }
+    } else {
+      setCurrentSpanPhotos([]);
+    }
+  }, [selectedSpan, parsedSpanPhotos]);
+
   const spanIndexes = Array.from(
     { length: inventoryData?.no_of_span || 0 },
     (_, i) => i + 1
   );
 
-  const handleSpanSelect = (e) => setSelectedSpan(e.target.value);
+  const handleSpanSelect = (e) => {
+    setSelectedSpan(e.target.value);
+  };
+
   const handlePhotoClick = (photo) => {
     setSelectedPhoto(photo);
     setShowPhotoModal(true);
   };
+
   const closeModal = () => setShowPhotoModal(false);
+
+  // Get photos for the selected span
+  const getSpanPhotos = () => {
+    if (!selectedSpan) return [];
+    
+    const spanKey = `Span_${selectedSpan}`;
+    const spanData = parsedSpanPhotos[spanKey];
+    
+    if (!spanData) return [];
+    
+    // Convert the object of photo arrays to a flat array
+    return Object.values(spanData).flat();
+  };
 
   return (
     <div className="container">
@@ -76,7 +124,7 @@ const InventoryInfo = ({ inventoryData }) => {
               </Col>
             ))}
           </Row>
-            
+
           <Form.Group>
             <Form.Label className="custom-label">Select Span</Form.Label>
             <Form.Select
@@ -85,8 +133,8 @@ const InventoryInfo = ({ inventoryData }) => {
               style={{ padding: "8px", fontSize: "14px" }}
             >
               <option value="">-- Select Span --</option>
-              {spanIndexes.map((span) => (
-                <option key={span} value={span}>
+              {spanIndexes.map((span, index) => (
+                <option key={index} value={span}>
                   Span {span}
                 </option>
               ))}
@@ -95,21 +143,23 @@ const InventoryInfo = ({ inventoryData }) => {
 
           {selectedSpan && (
             <Form.Group>
-              <Form.Label className="custom-label">Photos for Span {selectedSpan}</Form.Label>
+              <Form.Label className="custom-label">
+                Photos for Span {selectedSpan}
+              </Form.Label>
               <div className="d-flex flex-wrap">
-                {spanphotos[selectedSpan]?.length > 0 ? (
-                  spanphotos[selectedSpan].map((photo, index) => (
+                {currentSpanPhotos.length > 0 ? (
+                  currentSpanPhotos.map((photo, index) => (
                     <img
                       key={index}
-                      src={photo.fileName}
-                      alt={`Span Photo ${index + 1}`}
+                      src={photo}
+                      alt={`Photo ${index + 1} for Span ${selectedSpan}`}
                       className="img-thumbnail m-1"
                       style={{
                         width: "80px",
                         height: "80px",
                         cursor: "pointer",
                       }}
-                      onClick={() => handlePhotoClick(photo.fileName)}
+                      onClick={() => handlePhotoClick(photo)}
                     />
                   ))
                 ) : (
