@@ -1226,7 +1226,7 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
     }
 
     if (structureType !== "%") {
-      query += ` AND md.structure_type = $${paramIndex}`;
+      query += ` AND md.structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       paramIndex++;
     }
@@ -1407,10 +1407,12 @@ app.get("/api/inspections-export-con", async (req, res) => {
     `;
 
     const queryParams = [];
-    if (bridgeId && !isNaN(bridgeId)) {
+
+    if (bridgeId && bridgeId.trim() !== "") {
       query += ` AND "REFERENCE NO" = $1`;
-      queryParams.push(Number(bridgeId));
+      queryParams.push(bridgeId.trim());
     }
+    
 
     const result = await pool.query(query, queryParams);
 
@@ -1519,9 +1521,9 @@ app.get("/api/inspections-export-rams", async (req, res) => {
       SELECT * FROM ranked_data WHERE 1=1`;
 
     const queryParams = [];
-    if (bridgeId && !isNaN(bridgeId)) {
+    if (bridgeId && bridgeId.trim() !== "") {
       query += ` AND "REFERENCE NO" = $1`;
-      queryParams.push(Number(bridgeId));
+      queryParams.push(bridgeId.trim());
     }
 
     const result = await pool.query(query, queryParams);
@@ -1622,9 +1624,10 @@ app.get("/api/inspections-export-evaluator", async (req, res) => {
       WHERE (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2))`; 
 
     const queryParams = [];
-    if (bridgeId && !isNaN(bridgeId)) {
+
+    if (bridgeId && bridgeId.trim() !== "") {
       query += ` AND "REFERENCE NO" = $1`;
-      queryParams.push(Number(bridgeId));
+      queryParams.push(bridgeId.trim());
     }
 
     const result = await pool.query(query, queryParams);
