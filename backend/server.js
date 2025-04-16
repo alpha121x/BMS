@@ -2029,7 +2029,10 @@ app.get("/api/bridgesCon", async (req, res) => {
 
     let query = `
 SELECT 
-        uu_bms_id, surveyed_by,
+        is_active,
+        raw_id,
+        uu_bms_id, 
+        surveyed_by,
         pms_sec_id, 
         structure_no, 
         structure_type_id, 
@@ -2050,7 +2053,7 @@ SELECT
         construction_type, 
         no_of_span,
         data_source, 
-        date_time, 
+        data_date_time, 
         span_length_m, 
         structure_width_m, 
         construction_year, 
@@ -2104,7 +2107,7 @@ SELECT
       paramIndex++;
     }
 
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
+    query += ` ORDER BY data_date_time DESC OFFSET $${paramIndex} LIMIT $${
       paramIndex + 1
     }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
