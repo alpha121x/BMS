@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Form, Modal } from "react-bootstrap";
+import { Row, Col, Form, Modal, Spinner, ProgressBar } from "react-bootstrap";
 import "../index.css";
+
 
 const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -8,6 +9,9 @@ const InventoryInfo = ({ inventoryData }) => {
   const [selectedSpan, setSelectedSpan] = useState("");
   const [parsedSpanPhotos, setParsedSpanPhotos] = useState({});
   const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [loadedImages, setLoadedImages] = useState(0);
+  const [totalImages, setTotalImages] = useState(0);
   
   const photos = inventoryData?.photos || [];
   
@@ -30,12 +34,40 @@ const InventoryInfo = ({ inventoryData }) => {
       if (spanData) {
         // Convert the object of photo arrays to a flat array
         const photos = Object.values(spanData).flat();
-        setCurrentSpanPhotos(photos);
+        setTotalImages(photos.length);
+        setLoadedImages(0);
+        setLoadingPhotos(true);
+        
+        // Preload images
+        const loadImages = async () => {
+          const imagePromises = photos.map(photo => {
+            return new Promise((resolve) => {
+              const img = new Image();
+              img.src = photo;
+              img.onload = () => {
+                setLoadedImages(prev => prev + 1);
+                resolve();
+              };
+              img.onerror = () => {
+                setLoadedImages(prev => prev + 1);
+                resolve();
+              };
+            });
+          });
+          
+          await Promise.all(imagePromises);
+          setCurrentSpanPhotos(photos);
+          setLoadingPhotos(false);
+        };
+        
+        loadImages();
       } else {
         setCurrentSpanPhotos([]);
+        setLoadingPhotos(false);
       }
     } else {
       setCurrentSpanPhotos([]);
+      setLoadingPhotos(false);
     }
   }, [selectedSpan, parsedSpanPhotos]);
 
@@ -55,19 +87,7 @@ const InventoryInfo = ({ inventoryData }) => {
 
   const closeModal = () => setShowPhotoModal(false);
 
-  // Get photos for the selected span
-  const getSpanPhotos = () => {
-    if (!selectedSpan) return [];
-    
-    const spanKey = `Span_${selectedSpan}`;
-    const spanData = parsedSpanPhotos[spanKey];
-    
-    if (!spanData) return [];
-    
-    // Convert the object of photo arrays to a flat array
-    return Object.values(spanData).flat();
-  };
-
+  
   return (
     <div className="container">
       <div
@@ -146,26 +166,42 @@ const InventoryInfo = ({ inventoryData }) => {
               <Form.Label className="custom-label">
                 Photos for Span {selectedSpan}
               </Form.Label>
-              <div className="d-flex flex-wrap">
-                {currentSpanPhotos.length > 0 ? (
-                  currentSpanPhotos.map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo}
-                      alt={`Photo ${index + 1} for Span ${selectedSpan}`}
-                      className="img-thumbnail m-1"
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handlePhotoClick(photo)}
-                    />
-                  ))
-                ) : (
-                  <p>No photos available for this span.</p>
-                )}
-              </div>
+              {loadingPhotos ? (
+                <div className="text-center py-3">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                  <div className="mt-2">
+                    Loading images... ({loadedImages}/{totalImages})
+                  </div>
+                  <ProgressBar 
+                    now={(loadedImages / totalImages) * 100} 
+                    label={`${Math.round((loadedImages / totalImages) * 100)}%`}
+                    className="mt-2"
+                  />
+                </div>
+              ) : (
+                <div className="d-flex flex-wrap">
+                  {currentSpanPhotos.length > 0 ? (
+                    currentSpanPhotos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={`Photo ${index + 1} for Span ${selectedSpan}`}
+                        className="img-thumbnail m-1"
+                        style={{
+                          width: "80px",
+                          height: "80px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handlePhotoClick(photo)}
+                      />
+                    ))
+                  ) : (
+                    <p>No photos available for this span.</p>
+                  )}
+                </div>
+              )}
             </Form.Group>
           )}
 
