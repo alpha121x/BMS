@@ -1,13 +1,76 @@
-import React, { useState } from "react";
-import { Row, Col, Form, Modal } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Row, Col, Form, Modal, Spinner, ProgressBar } from "react-bootstrap";
 import "../index.css";
 
 const InventoryInfoDashboard = ({ inventoryData }) => {
+  console.log("Inventory Data:", inventoryData);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedSpan, setSelectedSpan] = useState("");
+  const [parsedSpanPhotos, setParsedSpanPhotos] = useState({});
+  const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [loadedImages, setLoadedImages] = useState(0);
+  const [totalImages, setTotalImages] = useState(0);
+
   const photos = inventoryData?.photos || [];
-  const spanphotos = inventoryData?.images_spans || [];
+
+  useEffect(() => {
+    if (inventoryData?.images_spans) {
+      try {
+        const parsed = JSON.parse(inventoryData.images_spans);
+        setParsedSpanPhotos(parsed);
+      } catch (error) {
+        console.error("Error parsing span photos:", error);
+      }
+    }
+  }, [inventoryData]);
+
+  useEffect(() => {
+    if (selectedSpan && parsedSpanPhotos) {
+      const spanKey = `Span_${selectedSpan}`;
+      const spanData = parsedSpanPhotos[spanKey];
+
+      if (spanData) {
+        // Convert the object of photo arrays to a flat array
+        const photos = Object.values(spanData).flat();
+        setTotalImages(photos.length);
+        setLoadedImages(0);
+        setLoadingPhotos(true);
+
+        // Preload images
+        const loadImages = async () => {
+          const imagePromises = photos.map((photo) => {
+            return new Promise((resolve) => {
+              const img = new Image();
+              img.src = photo;
+              img.onload = () => {
+                setLoadedImages((prev) => prev + 1);
+                resolve();
+              };
+              img.onerror = () => {
+                setLoadedImages((prev) => prev + 1);
+                resolve();
+              };
+            });
+          });
+
+          await Promise.all(imagePromises);
+          setCurrentSpanPhotos(photos);
+          setLoadingPhotos(false);
+        };
+
+        loadImages();
+      } else {
+        setCurrentSpanPhotos([]);
+        setLoadingPhotos(false);
+      }
+    } else {
+      setCurrentSpanPhotos([]);
+      setLoadingPhotos(false);
+    }
+  }, [selectedSpan, parsedSpanPhotos]);
+
   const spanIndexes = Array.from(
     { length: inventoryData?.no_of_span || 0 },
     (_, i) => i + 1
@@ -24,15 +87,19 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
     <div className="container">
       <div
         className="card p-2 border-0"
-        style={{
-          // background: "#fff",
-          // border: "1px solid #60A5FA",
-          // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-          // position: "relative",
-          // borderRadius:"3px"
-        }}
+        style={
+          {
+            // background: "#fff",
+            // border: "1px solid #60A5FA",
+            // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            // position: "relative",
+            // borderRadius:"3px"
+          }
+        }
       >
-        <h5 className="card-title font-semibold pb-2 bg-[#3B9996] text-white p-2 rounded-1">Inventory Info</h5>
+        <h5 className="card-title font-semibold pb-2 bg-[#3B9996] text-white p-2 rounded-1">
+          Inventory Info
+        </h5>
         <Form>
           <Row>
             {[
@@ -83,11 +150,11 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
             <Form.Select
               value={selectedSpan}
               onChange={handleSpanSelect}
-              style={{ padding: "6px", fontSize: "13px" }}
+              style={{ padding: "8px", fontSize: "14px" }}
             >
-              <option value="">Select Span</option>
-              {spanIndexes.map((span) => (
-                <option key={span} value={span}>
+              <option value="">-- Select Span --</option>
+              {spanIndexes.map((span, index) => (
+                <option key={index} value={span}>
                   Span {span}
                 </option>
               ))}
@@ -96,32 +163,52 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
 
           {selectedSpan && (
             <Form.Group>
-              <Form.Label className="custom-label">Photos for Span {selectedSpan}</Form.Label>
-              <div className="d-flex flex-wrap">
-                {spanphotos[selectedSpan]?.length > 0 ? (
-                  spanphotos[selectedSpan].map((photo, index) => (
-                    <img
-                      key={index}
-                      src={photo.fileName}
-                      alt={`Span Photo ${index + 1}`}
-                      className="img-thumbnail m-1"
-                      style={{
-                        width: "80px",
-                        height: "80px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handlePhotoClick(photo.fileName)}
-                    />
-                  ))
-                ) : (
-                  <p>No photos available for this span.</p>
-                )}
-              </div>
+              <Form.Label className="custom-label">
+                Photos for Span {selectedSpan}
+              </Form.Label>
+              {loadingPhotos ? (
+                <div className="text-center py-3">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                  <div className="mt-2">
+                    Loading images... ({loadedImages}/{totalImages})
+                  </div>
+                  <ProgressBar
+                    now={(loadedImages / totalImages) * 100}
+                    label={`${Math.round((loadedImages / totalImages) * 100)}%`}
+                    className="mt-2"
+                  />
+                </div>
+              ) : (
+                <div className="d-flex flex-wrap">
+                  {currentSpanPhotos.length > 0 ? (
+                    currentSpanPhotos.map((photo, index) => (
+                      <img
+                        key={index}
+                        src={photo}
+                        alt={`Photo ${index + 1} for Span ${selectedSpan}`}
+                        className="img-thumbnail m-1"
+                        style={{
+                          width: "80px",
+                          height: "80px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handlePhotoClick(photo)}
+                      />
+                    ))
+                  ) : (
+                    <p>No photos available for this span.</p>
+                  )}
+                </div>
+              )}
             </Form.Group>
           )}
 
           <Form.Group>
-            <Form.Label className="custom-label bg-[#3B9996] text-white p-1 rounded-1 w-full">Photos</Form.Label>
+            <Form.Label className="custom-label bg-[#3B9996] text-white p-1 rounded-1 w-full">
+              Photos
+            </Form.Label>
             <div className="d-flex flex-wrap">
               {photos.length > 0 ? (
                 photos.map((photo, index) => (
