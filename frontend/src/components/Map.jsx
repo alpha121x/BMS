@@ -151,7 +151,7 @@ const Map = ({ districtId }) => {
           `,
           actions: [
             {
-              title: "View Details",
+              title: "View Bridge Details",
               id: "view-details",
               className: "esri-popup__button--primary",
             },
