@@ -9,6 +9,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
   const [selectedSpan, setSelectedSpan] = useState("");
   const [parsedSpanPhotos, setParsedSpanPhotos] = useState({});
   const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
+  const [overviewPhotos, setOverviewPhotos] = useState([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
   const [loadedImages, setLoadedImages] = useState(0);
   const [totalImages, setTotalImages] = useState(0);
@@ -20,8 +21,45 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
       try {
         const parsed = JSON.parse(inventoryData.images_spans);
         setParsedSpanPhotos(parsed);
+
+        // Extract Overview photos if available
+        if (parsed["Overview"]) {
+          const overviewPhotos = Object.values(parsed["Overview"]).flat();
+          setTotalImages(overviewPhotos.length);
+          setLoadedImages(0);
+          setLoadingPhotos(true);
+
+          // Preload overview images
+          const loadImages = async () => {
+            const imagePromises = overviewPhotos.map((photo) => {
+              return new Promise((resolve) => {
+                const img = new Image();
+                img.src = photo;
+                img.onload = () => {
+                  setLoadedImages((prev) => prev + 1);
+                  resolve();
+                };
+                img.onerror = () => {
+                  setLoadedImages((prev) => prev + 1);
+                  resolve();
+                };
+              });
+            });
+
+            await Promise.all(imagePromises);
+            setOverviewPhotos(overviewPhotos);
+            setLoadingPhotos(false);
+          };
+
+          loadImages();
+        } else {
+          setOverviewPhotos([]);
+          setLoadingPhotos(false);
+        }
       } catch (error) {
         console.error("Error parsing span photos:", error);
+        setOverviewPhotos([]);
+        setLoadingPhotos(false);
       }
     }
   }, [inventoryData]);
@@ -38,7 +76,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
         setLoadedImages(0);
         setLoadingPhotos(true);
 
-        // Preload images
+        // Preload span images
         const loadImages = async () => {
           const imagePromises = photos.map((photo) => {
             return new Promise((resolve) => {
@@ -144,6 +182,44 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
               </Col>
             ))}
           </Row>
+
+          <Form.Group>
+            <Form.Label className="custom-label bg-[#3B9996] text-white p-1 rounded-1 w-full">
+              Overview Photos
+            </Form.Label>
+            {loadingPhotos && overviewPhotos.length > 0 ? (
+              <div className="text-center py-3">
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+                <div className="mt-2">
+                  Loading images... ({loadedImages}/{totalImages})
+                </div>
+                <ProgressBar
+                  now={(loadedImages / totalImages) * 100}
+                  label={`${Math.round((loadedImages / totalImages) * 100)}%`}
+                  className="mt-2"
+                />
+              </div>
+            ) : (
+              <div className="d-flex flex-wrap">
+                {overviewPhotos.length > 0 ? (
+                  overviewPhotos.map((photo, index) => (
+                    <img
+                      key={index}
+                      src={photo}
+                      alt={`Overview Photo ${index + 1}`}
+                      className="img-thumbnail m-1"
+                      style={{ width: "80px", height: "80px", cursor: "pointer" }}
+                      onClick={() => handlePhotoClick(photo)}
+                    />
+                  ))
+                ) : (
+                  <span>No overview photos available</span>
+                )}
+              </div>
+            )}
+          </Form.Group>
 
           <Form.Group>
             <Form.Label className="custom-label">Select Span</Form.Label>
