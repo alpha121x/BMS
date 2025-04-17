@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Row, Col, Form, Modal, Spinner, ProgressBar } from "react-bootstrap";
+import { Row, Col, Form, Modal, Spinner } from "react-bootstrap";
 import "../index.css";
-
 
 const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -9,17 +8,24 @@ const InventoryInfo = ({ inventoryData }) => {
   const [selectedSpan, setSelectedSpan] = useState("");
   const [parsedSpanPhotos, setParsedSpanPhotos] = useState({});
   const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
-  const [loadingPhotos, setLoadingPhotos] = useState(false);
-  const [loadedImages, setLoadedImages] = useState(0);
-  const [totalImages, setTotalImages] = useState(0);
-  
+  const [overviewPhotos, setOverviewPhotos] = useState([]);
+  const [loadingSpanPhotos, setLoadingSpanPhotos] = useState(false);
+
   const photos = inventoryData?.photos || [];
-  
+
   useEffect(() => {
     if (inventoryData?.images_spans) {
       try {
         const parsed = JSON.parse(inventoryData.images_spans);
         setParsedSpanPhotos(parsed);
+
+        // Extract Overview photos if available (only once on mount)
+        if (parsed["Overview"]) {
+          const overviewPhotos = Object.values(parsed["Overview"]).flat();
+          setOverviewPhotos(overviewPhotos);
+        } else {
+          setOverviewPhotos([]);
+        }
       } catch (error) {
         console.error("Error parsing span photos:", error);
       }
@@ -30,44 +36,35 @@ const InventoryInfo = ({ inventoryData }) => {
     if (selectedSpan && parsedSpanPhotos) {
       const spanKey = `Span_${selectedSpan}`;
       const spanData = parsedSpanPhotos[spanKey];
-      
+
       if (spanData) {
-        // Convert the object of photo arrays to a flat array
+        setLoadingSpanPhotos(true);
         const photos = Object.values(spanData).flat();
-        setTotalImages(photos.length);
-        setLoadedImages(0);
-        setLoadingPhotos(true);
-        
-        // Preload images
+
+        // Preload span images
         const loadImages = async () => {
-          const imagePromises = photos.map(photo => {
+          const imagePromises = photos.map((photo) => {
             return new Promise((resolve) => {
               const img = new Image();
               img.src = photo;
-              img.onload = () => {
-                setLoadedImages(prev => prev + 1);
-                resolve();
-              };
-              img.onerror = () => {
-                setLoadedImages(prev => prev + 1);
-                resolve();
-              };
+              img.onload = resolve;
+              img.onerror = resolve; // Resolve even if image fails to load
             });
           });
-          
+
           await Promise.all(imagePromises);
           setCurrentSpanPhotos(photos);
-          setLoadingPhotos(false);
+          setLoadingSpanPhotos(false);
         };
-        
+
         loadImages();
       } else {
         setCurrentSpanPhotos([]);
-        setLoadingPhotos(false);
+        setLoadingSpanPhotos(false);
       }
     } else {
       setCurrentSpanPhotos([]);
-      setLoadingPhotos(false);
+      setLoadingSpanPhotos(false);
     }
   }, [selectedSpan, parsedSpanPhotos]);
 
@@ -87,7 +84,6 @@ const InventoryInfo = ({ inventoryData }) => {
 
   const closeModal = () => setShowPhotoModal(false);
 
-  
   return (
     <div className="container">
       <div
@@ -146,6 +142,26 @@ const InventoryInfo = ({ inventoryData }) => {
           </Row>
 
           <Form.Group>
+            <Form.Label className="custom-label">Overview Photos</Form.Label>
+            <div className="d-flex flex-wrap">
+              {overviewPhotos.length > 0 ? (
+                overviewPhotos.map((photo, index) => (
+                  <img
+                    key={index}
+                    src={photo}
+                    alt={`Overview Photo ${index + 1}`}
+                    className="img-thumbnail m-1"
+                    style={{ width: "80px", height: "80px", cursor: "pointer" }}
+                    onClick={() => handlePhotoClick(photo)}
+                  />
+                ))
+              ) : (
+                <span>No overview photos available</span>
+              )}
+            </div>
+          </Form.Group>
+
+          <Form.Group>
             <Form.Label className="custom-label">Select Span</Form.Label>
             <Form.Select
               value={selectedSpan}
@@ -166,19 +182,11 @@ const InventoryInfo = ({ inventoryData }) => {
               <Form.Label className="custom-label">
                 Photos for Span {selectedSpan}
               </Form.Label>
-              {loadingPhotos ? (
+              {loadingSpanPhotos ? (
                 <div className="text-center py-3">
                   <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>
                   </Spinner>
-                  <div className="mt-2">
-                    Loading images... ({loadedImages}/{totalImages})
-                  </div>
-                  <ProgressBar 
-                    now={(loadedImages / totalImages) * 100} 
-                    label={`${Math.round((loadedImages / totalImages) * 100)}%`}
-                    className="mt-2"
-                  />
                 </div>
               ) : (
                 <div className="d-flex flex-wrap">
