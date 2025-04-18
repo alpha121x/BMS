@@ -3,7 +3,6 @@ import { Row, Col, Form, Modal, Spinner, ProgressBar } from "react-bootstrap";
 import "../index.css";
 
 const InventoryInfoDashboard = ({ inventoryData }) => {
-  console.log("Inventory Data:", inventoryData);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedSpan, setSelectedSpan] = useState("");

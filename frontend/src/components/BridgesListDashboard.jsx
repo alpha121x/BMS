@@ -12,6 +12,8 @@ import { FaFileCsv } from "react-icons/fa6";
 import { FaFileExcel } from "react-icons/fa6";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
+import "leaflet/dist/leaflet.css";
+
 
 const BridgesListDashboard = ({
   districtId,

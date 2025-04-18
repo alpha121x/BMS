@@ -19,6 +19,8 @@ import { FaFileExcel } from "react-icons/fa6";
 import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
+import "leaflet/dist/leaflet.css";
+
 
 const BridgesListNewUpdated = ({
   districtId,
