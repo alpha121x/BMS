@@ -170,7 +170,7 @@ const Map = ({ districtId }) => {
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            { id: 1, title: "Districts", opacity: 0.6, listMode: "show" },
+            { id: 1, title: "Districts", opacity: 0.6, listMode: "hide" },
             {
               id: 3,
               title: "Good",
@@ -199,7 +199,7 @@ const Map = ({ districtId }) => {
               listMode: "show",
               popupTemplate,
             },
-            { id: 2, title: "Bridge Locations", popupTemplate },
+            { id: 2, title: "Bridge Locations", listMode:"hide", popupTemplate },
           ],
         });
 
