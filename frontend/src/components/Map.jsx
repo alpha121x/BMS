@@ -164,12 +164,12 @@ const Map = ({ districtId }) => {
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            { id: 1, title: "Districts", opacity: 0.6, listMode: "show" },
+            { id: 1, title: "Districts", opacity: 0.6, listMode: "hide" },
             { id: 3, title: "Good", opacity: 0.6, listMode: "show", popupTemplate },
             { id: 4, title: "Fair", opacity: 0.6, listMode: "show", popupTemplate },
             { id: 5, title: "Poor", opacity: 0.6, listMode: "show", popupTemplate },
             { id: 6, title: "Under Construction", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 2, title: "Bridge Locations", popupTemplate },
+            { id: 2, title: "Bridge Locations", listMode:"hide", popupTemplate },
           ],
         });
 
