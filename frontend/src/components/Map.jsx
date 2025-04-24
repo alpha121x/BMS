@@ -160,7 +160,7 @@ const Map = ({ districtId }) => {
 
         const bridgeLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Condition Locations",
+          title: "Bridges Locations",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
