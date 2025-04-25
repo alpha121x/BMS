@@ -11,13 +11,13 @@ const Map = ({ districtId }) => {
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, LayerList, Extent] =
+        const [Map, MapView, MapImageLayer, Legend, Extent] =
           await loadModules(
             [
               "esri/Map",
               "esri/views/MapView",
               "esri/layers/MapImageLayer",
-              "esri/widgets/LayerList",
+              "esri/widgets/Legend",
               "esri/geometry/Extent",
             ],
             { css: true }
@@ -35,11 +35,7 @@ const Map = ({ districtId }) => {
         });
 
         viewRef.current = view;
-        const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
-        // Extract username safely
-        const username = userToken?.username;
-        
         const handlePopupAction = async (event) => {
           if (event.action.id === "view-details") {
             const attributes = view.popup.selectedFeature.attributes;
@@ -66,12 +62,8 @@ const Map = ({ districtId }) => {
                 // Serialize and encode the bridges array
                 const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
         
-                // Check username before redirecting
-                if (username === "consultant") { // Replace "specificUser" with the required username
-                  window.location.href = `/BridgeInformationCon?bridgeData=${serializedBridgeData}`;
-                } else if (username === "rams") {
-                  window.location.href = `/BridgeInformationRams?bridgeData=${serializedBridgeData}`;
-                }
+                // Redirect using window.location.href
+                window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
               } else {
                 console.error("Bridge details not found");
               }
@@ -80,7 +72,7 @@ const Map = ({ districtId }) => {
             }
           }
         };
-        
+
         view.popup.on("trigger-action", handlePopupAction);
 
         const getDistrictExtent = async (districtId) => {
@@ -94,9 +86,7 @@ const Map = ({ districtId }) => {
             });
           } else {
             try {
-              const response = await fetch(
-                `${BASE_URL}/api/districtExtent?districtId=${districtId}`
-              );
+              const response = await fetch(`${BASE_URL}/api/districtExtent?districtId=${districtId}`);
               const data = await response.json();
 
               if (data.success && data.district) {
@@ -157,7 +147,7 @@ const Map = ({ districtId }) => {
           `,
           actions: [
             {
-              title: "View Details",
+              title: "View Bridge Details",
               id: "view-details",
               className: "esri-popup__button--primary",
             },
@@ -166,48 +156,32 @@ const Map = ({ districtId }) => {
 
         const bridgeLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Condition Locations",
+          title: "Bridge Conditions",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
             { id: 1, title: "Districts", opacity: 0.6, listMode: "hide" },
-            {
-              id: 3,
-              title: "Good",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate,
-            },
-            {
-              id: 4,
-              title: "Fair",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate,
-            },
-            {
-              id: 5,
-              title: "Poor",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate,
-            },
-            {
-              id: 6,
-              title: "Under Construction",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate,
-            },
-            { id: 2, title: "Bridge Locations", listMode:"hide", popupTemplate },
+            { id: 3, title: "Good", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 4, title: "Fair", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 5, title: "Poor", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 6, title: "Under Construction", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 2, title: "Bridge Locations", listMode: "hide", popupTemplate },
           ],
         });
 
         map.add(bridgeLayer);
 
-        const layerList = new LayerList({ view: view });
-
-        view.ui.add(layerList, "top-right");
+        // Add Legend widget to the top-right
+        const legend = new Legend({
+          view: view,
+          layerInfos: [
+            {
+              layer: bridgeLayer,
+              title: "Bridge Conditions",
+            },
+          ],
+        });
+        view.ui.add(legend, "top-right");
 
         await view.when();
         console.log("EzriMap is ready.");
@@ -226,7 +200,7 @@ const Map = ({ districtId }) => {
   }, [districtId, navigate]);
 
   return (
-    <div className="bg-white border-2 border-blue-400 p-2 rounded-lg shadow-md">
+    <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{ border: "1px solid #005D7F" }}>
       <div ref={mapRef} className="map-container" style={{ height: "500px" }} />
     </div>
   );
