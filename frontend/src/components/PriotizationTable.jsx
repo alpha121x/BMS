@@ -5,23 +5,22 @@ import { BASE_URL } from "./config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
-import Filters from "./Filters";
 
 const PriotizationTable = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
-  const [districtId, setDistrictId] = useState("%");
-  const [structureType, setStructureType] = useState("%");
-  const [bridgeName, setBridgeName] = useState("");
 
   // Dummy data based on the provided table
   const dummyData = [
-    { category: "Good", GroupA: "N.A", GroupB: "N.A", GroupC: "N.A", GroupD: "N.A" },
+    {
+      category: "Good",
+      GroupA: "N.A",
+      GroupB: "N.A",
+      GroupC: "N.A",
+      GroupD: "N.A",
+    },
     { category: "Fair", GroupA: 9, GroupB: 10, GroupC: 11, GroupD: 12 },
     { category: "Poor", GroupA: 5, GroupB: 6, GroupC: 7, GroupD: 8 },
     { category: "Severe", GroupA: 1, GroupB: 2, GroupC: 3, GroupD: 4 },
@@ -30,11 +29,9 @@ const PriotizationTable = () => {
   useEffect(() => {
     setBridgeScoreData(dummyData);
     setBridgeCount(dummyData.length);
-    setTotalItems(dummyData.length);
     setLoading(false);
   }, []);
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
   const currentData = bridgeScoreData;
 
   const handleDownloadCSV = () => {
@@ -48,7 +45,9 @@ const PriotizationTable = () => {
       [
         ["Category", "Group A", "Group B", "Group C", "Group D"].join(","),
         ...bridgeScoreData.map((row) =>
-          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(",")
+          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(
+            ","
+          )
         ),
       ].join("\n");
 
@@ -71,7 +70,10 @@ const PriotizationTable = () => {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Condition");
 
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
     const blob = new Blob([excelBuffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
@@ -101,126 +103,144 @@ const PriotizationTable = () => {
 
   return (
     <>
+      {/* Table Section Centered in Viewport */}
       <section
-        className="container p-4 mt-[80px] bg-gray-200 rounded-0"
-        style={{ backgroundColor: "#F2F2F2" }}
+        className="d-flex justify-content-center align-items-center"
+        style={{
+          minHeight: "90vh", // Full viewport height
+          backgroundColor: "#F2F2F2",
+          padding: "20px",
+        }}
       >
-        <div className="row">
-          <div className="col-md-12">
-            <Filters
-              districtId={districtId}
-              setDistrictId={setDistrictId}
-              structureType={structureType}
-              setStructureType={setStructureType}
-              bridgeName={bridgeName}
-              setBridgeName={setBridgeName}
-              flexDirection="flex-row"
-              padding="p-2"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="container p-2 bg-gray-200 items-center">
-        <div className="row w-100">
-          <div className="col-md-12">
-            <div
-              className="card-header rounded-0 p-2"
-              style={{ background: "#005D7F", color: "#fff" }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center justify-between gap-4">
-                  <h5 className="mb-0">Bridge Condition Summary</h5>
-                  <h6 className="mb-0" id="structure-heading">
-                    Category Counts:
-                    <span
-                      className="badge text-white ms-2"
-                      style={{ background: "#009CB8" }}
-                    >
-                      <h6 className="mb-0">{bridgeCount || 0}</h6>
-                    </span>
-                  </h6>
-                </div>
-                <div className="flex gap-2">
-                  <button className="btn text-white" onClick={handleDownloadCSV}>
-                    <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-                    CSV
-                  </button>
-                  <button className="btn text-white" onClick={handleDownloadExcel}>
-                    <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-                    Excel
-                  </button>
-                </div>
+        <div className="w-100" style={{ maxWidth: "1000px" }}>
+          <div
+            className="card-header rounded-0 p-2"
+            style={{ background: "#005D7F", color: "#fff" }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
+                <h5 className="mb-0">Bridge Condition Summary</h5>
+                <h6 className="mb-0" id="structure-heading">
+                  Category Counts:
+                  <span
+                    className="badge text-white ms-2"
+                    style={{ background: "#009CB8" }}
+                  >
+                    <h6 className="mb-0">{bridgeCount || 0}</h6>
+                  </span>
+                </h6>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  className="btn text-white"
+                  onClick={handleDownloadCSV}
+                >
+                  <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+                  CSV
+                </button>
+                <button
+                  className="btn text-white"
+                  onClick={handleDownloadExcel}
+                >
+                  <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+                  Excel
+                </button>
               </div>
             </div>
-            <div className="card-body p-0 pb-2">
-              {loading ? (
-                <div
+          </div>
+          <div className="card-body p-0 pb-2">
+            {loading ? (
+              <div
+                style={{
+                  border: "8px solid #f3f3f3",
+                  borderTop: "8px solid #3498db",
+                  borderRadius: "50%",
+                  width: "80px",
+                  height: "80px",
+                  animation: "spin 1s linear infinite",
+                  margin: "auto",
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 999,
+                }}
+              />
+            ) : error ? (
+              <p className="text-danger">{error}</p>
+            ) : (
+              <>
+                <Table
+                  className="table table-bordered table-hover table-striped"
                   style={{
-                    border: "8px solid #f3f3f3",
-                    borderTop: "8px solid #3498db",
-                    borderRadius: "50%",
-                    width: "80px",
-                    height: "80px",
-                    animation: "spin 1s linear infinite",
-                    margin: "auto",
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 999,
+                    fontSize: "24px", // Increased font size
                   }}
-                />
-              ) : error ? (
-                <p className="text-danger">{error}</p>
-              ) : (
-                <>
-                  <Table
-                    className="table table-bordered table-hover table-striped table-responsive"
-                    style={{
-                      fontSize: "20px",
-                    }}
-                  >
-                    <thead>
-                      <tr>
-                        <th style={{ textAlign: "center", padding: "10px" }}>Category</th>
-                        <th style={{ textAlign: "center", padding: "10px" }}>Group A</th>
-                        <th style={{ textAlign: "center", padding: "10px" }}>Group B</th>
-                        <th style={{ textAlign: "center", padding: "10px" }}>Group C</th>
-                        <th style={{ textAlign: "center", padding: "10px" }}>Group D</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentData.length > 0 ? (
-                        currentData.map((row, index) => (
-                          <tr key={index} style={{ height: "50px" }}>
-                            <td
-                              style={{
-                                textAlign: "center",
-                                padding: "10px",
-                                ...getCategoryStyle(row.category),
-                              }}
-                            >
-                              {row.category}
-                            </td>
-                            <td style={{ textAlign: "center", padding: "10px" }}>{row.GroupA}</td>
-                            <td style={{ textAlign: "center", padding: "10px" }}>{row.GroupB}</td>
-                            <td style={{ textAlign: "center", padding: "10px" }}>{row.GroupC}</td>
-                            <td style={{ textAlign: "center", padding: "10px" }}>{row.GroupD}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" className="text-center">
-                            No data available
+                >
+                  <thead>
+                    <tr>
+                      <th style={{ textAlign: "center", padding: "15px" }}>
+                        Category
+                      </th>
+                      <th style={{ textAlign: "center", padding: "15px" }}>
+                        Group A
+                      </th>
+                      <th style={{ textAlign: "center", padding: "15px" }}>
+                        Group B
+                      </th>
+                      <th style={{ textAlign: "center", padding: "15px" }}>
+                        Group C
+                      </th>
+                      <th style={{ textAlign: "center", padding: "15px" }}>
+                        Group D
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentData.length > 0 ? (
+                      currentData.map((row, index) => (
+                        <tr key={index} style={{ height: "70px" }}>
+                          <td
+                            style={{
+                              textAlign: "center",
+                              padding: "15px",
+                              ...getCategoryStyle(row.category),
+                            }}
+                          >
+                            {row.category}
+                          </td>
+                          <td
+                            style={{ textAlign: "center", padding: "15px" }}
+                          >
+                            {row.GroupA}
+                          </td>
+                          <td
+                            style={{ textAlign: "center", padding: "15px" }}
+                          >
+                            {row.GroupB}
+                          </td>
+                          <td
+                            style={{ textAlign: "center", padding: "15px" }}
+                          >
+                            {row.GroupC}
+                          </td>
+                          <td
+                            style={{ textAlign: "center", padding: "15px" }}
+                          >
+                            {row.GroupD}
                           </td>
                         </tr>
-                      )}
-                    </tbody>
-                  </Table>
-                </>
-              )}
-            </div>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="text-center">
+                          No data available
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              </>
+            )}
           </div>
         </div>
       </section>

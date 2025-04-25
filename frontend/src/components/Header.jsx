@@ -88,7 +88,7 @@ const Header = () => {
               Bridge Wise Score
             </Nav.Link>
 
-            <Nav.Link
+            {/* <Nav.Link
               as={Link}
               to="/CostEstimation"
               className={
@@ -103,7 +103,7 @@ const Header = () => {
               }}
             >
               Cost Estimation
-            </Nav.Link>
+            </Nav.Link> */}
 
 
             <NavDropdown
@@ -115,7 +115,7 @@ const Header = () => {
               <NavDropdown.Item as={Link} to="/Reports/Priortization">
                 Priortization Table  
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/Reports/BridgeListing">
+              {/* <NavDropdown.Item as={Link} to="/Reports/BridgeListing">
                 Bridge Wise Listing
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/Reports/CategorySummary">
@@ -126,7 +126,7 @@ const Header = () => {
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/Reports/BridgeCategory">
                 Bridge Wise Category
-              </NavDropdown.Item>
+              </NavDropdown.Item> */}
             </NavDropdown>
 
             <NavDropdown
