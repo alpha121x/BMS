@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import Header from "./Header";
-import Footer from "./Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
@@ -85,11 +83,26 @@ const PriotizationTable = () => {
     document.body.removeChild(link);
   };
 
+  // Function to determine the background color based on the category
+  const getCategoryStyle = (category) => {
+    switch (category) {
+      case "Good":
+        return { backgroundColor: "#28a745", color: "white" };
+      case "Fair":
+        return { backgroundColor: "#ffc107", color: "black" };
+      case "Poor":
+        return { backgroundColor: "#fd7e14", color: "white" };
+      case "Severe":
+        return { backgroundColor: "#dc3545", color: "white" };
+      default:
+        return {};
+    }
+  };
 
   return (
     <>
       <section
-        className="container p-3 mt-[80px]  bg-gray-200 rounded-0"
+        className="container p-4 mt-[80px] bg-gray-200 rounded-0"
         style={{ backgroundColor: "#F2F2F2" }}
       >
         <div className="row">
@@ -165,7 +178,7 @@ const PriotizationTable = () => {
                   <Table
                     className="table table-bordered table-hover table-striped table-responsive"
                     style={{
-                      fontSize: "20px", // Slightly smaller font size
+                      fontSize: "20px",
                     }}
                   >
                     <thead>
@@ -181,7 +194,15 @@ const PriotizationTable = () => {
                       {currentData.length > 0 ? (
                         currentData.map((row, index) => (
                           <tr key={index} style={{ height: "50px" }}>
-                            <td style={{ textAlign: "center", padding: "10px" }}>{row.category}</td>
+                            <td
+                              style={{
+                                textAlign: "center",
+                                padding: "10px",
+                                ...getCategoryStyle(row.category),
+                              }}
+                            >
+                              {row.category}
+                            </td>
                             <td style={{ textAlign: "center", padding: "10px" }}>{row.GroupA}</td>
                             <td style={{ textAlign: "center", padding: "10px" }}>{row.GroupB}</td>
                             <td style={{ textAlign: "center", padding: "10px" }}>{row.GroupC}</td>
