@@ -138,13 +138,6 @@ const PriotizationTable = () => {
                   <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
                   CSV
                 </button>
-                <button
-                  className="btn text-white"
-                  onClick={handleDownloadExcel}
-                >
-                  <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-                  Excel
-                </button>
               </div>
             </div>
           </div>
