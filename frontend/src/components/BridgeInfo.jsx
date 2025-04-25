@@ -106,7 +106,6 @@ const BridgeInfo = () => {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={handleEditClick}
                   className="bg-[#5C636A] hover:bg-slate-400 text-white px-4 py-2 rounded-md flex items-center gap-2"
                 >
                   <PencilIcon className="h-5 w-5" /> Edit
