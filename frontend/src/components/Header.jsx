@@ -112,6 +112,9 @@ const Header = () => {
               onMouseEnter={() => setIsReportsDropdownOpen(true)}
               onMouseLeave={() => setIsReportsDropdownOpen(false)}
             >
+              <NavDropdown.Item as={Link} to="/Reports/Priortization">
+                Priortization Table  
+              </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/Reports/BridgeListing">
                 Bridge Wise Listing
               </NavDropdown.Item>
