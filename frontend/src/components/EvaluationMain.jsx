@@ -59,7 +59,7 @@ const EvaluationMain = () => {
         });
   
         mappedCards.unshift({
-          label: "Total Inspected Structures",
+          label: "Inspected Structures",
           value: totalCount,
           icon: <SiInstructure />,
           color: "#3B9996",
@@ -93,7 +93,7 @@ const EvaluationMain = () => {
         });
   
         mappedCards.unshift({
-          label: "Total Evaluated Structures",
+          label: "Evaluated Structures",
           value: totalCount,
           icon: <SiInstructure />,
           color: "#3B9996",
