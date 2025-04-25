@@ -11,13 +11,14 @@ const Map = ({ districtId }) => {
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, LayerList, Extent] =
+        const [Map, MapView, MapImageLayer, LayerList, Legend, Extent] =
           await loadModules(
             [
               "esri/Map",
               "esri/views/MapView",
               "esri/layers/MapImageLayer",
               "esri/widgets/LayerList",
+              "esri/widgets/Legend",
               "esri/geometry/Extent",
             ],
             { css: true }
@@ -53,7 +54,6 @@ const Map = ({ districtId }) => {
               if (bridgeData.success) {
                 const bridgesArray = bridgeData.bridges; // Extract bridges array
                 const bridge = bridgesArray[0]; // Select the first bridge
-
         
                 if (!bridge) {
                   console.error("No bridge details found");
@@ -73,9 +73,6 @@ const Map = ({ districtId }) => {
             }
           }
         };
-        
-        
-        
 
         view.popup.on("trigger-action", handlePopupAction);
 
@@ -160,7 +157,7 @@ const Map = ({ districtId }) => {
 
         const bridgeLayer = new MapImageLayer({
           url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Bridges Locations",
+          title: "Bridge Conditions",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
@@ -169,15 +166,26 @@ const Map = ({ districtId }) => {
             { id: 4, title: "Fair", opacity: 0.6, listMode: "show", popupTemplate },
             { id: 5, title: "Poor", opacity: 0.6, listMode: "show", popupTemplate },
             { id: 6, title: "Under Construction", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 2, title: "Bridge Locations", listMode:"hide", popupTemplate },
+            { id: 2, title: "Bridge Locations", listMode: "hide", popupTemplate },
           ],
         });
 
         map.add(bridgeLayer);
 
         const layerList = new LayerList({ view: view });
-
         view.ui.add(layerList, "top-right");
+
+        // Add Legend widget
+        const legend = new Legend({
+          view: view,
+          layerInfos: [
+            {
+              layer: bridgeLayer,
+              title: "Bridge Conditions",
+            },
+          ],
+        });
+        view.ui.add(legend, "bottom-right");
 
         await view.when();
         console.log("EzriMap is ready.");
@@ -196,7 +204,7 @@ const Map = ({ districtId }) => {
   }, [districtId, navigate]);
 
   return (
-    <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{border: "1px solid #005D7F"}}>
+    <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{ border: "1px solid #005D7F" }}>
       <div ref={mapRef} className="map-container" style={{ height: "500px" }} />
     </div>
   );
