@@ -11,13 +11,12 @@ const Map = ({ districtId }) => {
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, LayerList, Legend, Extent] =
+        const [Map, MapView, MapImageLayer, Legend, Extent] =
           await loadModules(
             [
               "esri/Map",
               "esri/views/MapView",
               "esri/layers/MapImageLayer",
-              "esri/widgets/LayerList",
               "esri/widgets/Legend",
               "esri/geometry/Extent",
             ],
@@ -172,10 +171,7 @@ const Map = ({ districtId }) => {
 
         map.add(bridgeLayer);
 
-        const layerList = new LayerList({ view: view });
-        view.ui.add(layerList, "top-right");
-
-        // Add Legend widget
+        // Add Legend widget to the top-right
         const legend = new Legend({
           view: view,
           layerInfos: [
@@ -185,7 +181,7 @@ const Map = ({ districtId }) => {
             },
           ],
         });
-        view.ui.add(legend, "bottom-right");
+        view.ui.add(legend, "top-right");
 
         await view.when();
         console.log("EzriMap is ready.");
