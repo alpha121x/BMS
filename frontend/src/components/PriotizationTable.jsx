@@ -60,30 +60,6 @@ const PriotizationTable = () => {
     document.body.removeChild(link);
   };
 
-  const handleDownloadExcel = () => {
-    if (!bridgeScoreData.length) {
-      console.warn("No data available for Excel download.");
-      return;
-    }
-
-    const worksheet = XLSX.utils.json_to_sheet(bridgeScoreData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Condition");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Bridge_Condition_Summary.xlsx";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   // Function to determine the background color based on the category
   const getCategoryStyle = (category) => {
