@@ -95,7 +95,7 @@ const PriotizationTable = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center justify-between gap-4">
-                <h5 className="mb-0">Bridge Condition Summary</h5>
+                <h5 className="mb-0">Bridge Priortization Table</h5>
                 {/* <h6 className="mb-0" id="structure-heading">
                   Category Counts:
                   <span
