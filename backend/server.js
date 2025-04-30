@@ -290,7 +290,7 @@ app.get("/api/structure-counts", async (req, res) => {
     const structureTypeCounts = await pool.query(
       `
       SELECT structure_type, COUNT(*) AS count
-      FROM bms.tbl_bms_master_data
+      FROM bms.tbl_bms_master_data WHERE is_active = true
       ${districtFilter}
       GROUP BY structure_type
       ORDER BY count DESC;
@@ -301,7 +301,7 @@ app.get("/api/structure-counts", async (req, res) => {
     const totalStructureCount = await pool.query(
       `
       SELECT COUNT(*) AS total_count
-      FROM bms.tbl_bms_master_data
+      FROM bms.tbl_bms_master_data WHERE is_active = true
       ${districtFilter};
       `,
       params
