@@ -586,6 +586,7 @@ app.get("/api/bridgesConDownloadExcel", async (req, res) => {
         FROM bms.tbl_bms_master_data md
         JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU'
         WHERE 1=1
+        AND is_active = true
     `;
 
     const queryParams = [];
