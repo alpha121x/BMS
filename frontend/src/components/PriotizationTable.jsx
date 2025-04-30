@@ -193,7 +193,7 @@ const PrioritizationTable = () => {
       {/* Modal for Bridge Details */}
       <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
         <Modal.Header closeButton>
-          <Modal.Title>Bridge Details - {selectedTitle}</Modal.Title>
+          <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {modalData.length > 0 ? (
