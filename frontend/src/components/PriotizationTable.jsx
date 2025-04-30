@@ -6,7 +6,13 @@ import { faFileCsv } from "@fortawesome/free-solid-svg-icons";
 
 // Dummy data for the main table
 const dummyData = [
-  { category: "Good", GroupA: "N.A", GroupB: "N.A", GroupC: "N.A", GroupD: "N.A" },
+  {
+    category: "Good",
+    GroupA: "N.A",
+    GroupB: "N.A",
+    GroupC: "N.A",
+    GroupD: "N.A",
+  },
   { category: "Fair", GroupA: 9, GroupB: 10, GroupC: 11, GroupD: 12 },
   { category: "Poor", GroupA: 5, GroupB: 6, GroupC: 7, GroupD: 8 },
   { category: "Severe", GroupA: 1, GroupB: 2, GroupC: 3, GroupD: 4 },
@@ -14,19 +20,78 @@ const dummyData = [
 
 // Dummy bridge details for each category-group combination
 const dummyBridgeDetails = {
-  "Fair-GroupA": [
-    { id: 1, name: "Bridge 1", location: "Location A" },
-    { id: 2, name: "Bridge 2", location: "Location B" },
+  GroupA: [
+    {
+      id: 1,
+      district: "District A",
+      roadName: "Road Alpha",
+      structureType: "Suspension",
+      name: "Bridge 1",
+      dateTime: "2024-04-01 10:00 AM",
+    },
+    {
+      id: 2,
+      district: "District A",
+      roadName: "Road Beta",
+      structureType: "Beam",
+      name: "Bridge 2",
+      dateTime: "2024-04-02 02:30 PM",
+    },
   ],
-  "Fair-GroupB": [
-    { id: 3, name: "Bridge 3", location: "Location C" },
-    { id: 4, name: "Bridge 4", location: "Location D" },
+  GroupB: [
+    {
+      id: 3,
+      district: "District B",
+      roadName: "Road Gamma",
+      structureType: "Arch",
+      name: "Bridge 3",
+      dateTime: "2024-04-03 11:15 AM",
+    },
+    {
+      id: 4,
+      district: "District B",
+      roadName: "Road Delta",
+      structureType: "Beam",
+      name: "Bridge 4",
+      dateTime: "2024-04-04 01:00 PM",
+    },
   ],
-  "Poor-GroupC": [
-    { id: 5, name: "Bridge 5", location: "Location E" },
-    { id: 6, name: "Bridge 6", location: "Location F" },
+  GroupC: [
+    {
+      id: 5,
+      district: "District C",
+      roadName: "Road Theta",
+      structureType: "Truss",
+      name: "Bridge 5",
+      dateTime: "2024-04-05 09:45 AM",
+    },
+    {
+      id: 6,
+      district: "District C",
+      roadName: "Road Lambda",
+      structureType: "Slab",
+      name: "Bridge 6",
+      dateTime: "2024-04-06 03:10 PM",
+    },
   ],
-  // Add more combinations as needed
+  GroupD: [
+    {
+      id: 7,
+      district: "District D",
+      roadName: "Road Sigma",
+      structureType: "Suspension",
+      name: "Bridge 1",
+      dateTime: "2024-04-07 08:30 AM",
+    },
+    {
+      id: 8,
+      district: "District D",
+      roadName: "Road Omega",
+      structureType: "Beam",
+      name: "Bridge 2",
+      dateTime: "2024-04-08 12:00 PM",
+    },
+  ],
 };
 
 const PrioritizationTable = () => {
@@ -54,14 +119,16 @@ const PrioritizationTable = () => {
       [
         ["Category", "Group A", "Group B", "Group C", "Group D"].join(","),
         ...bridgeScoreData.map((row) =>
-          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(",")
+          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(
+            ","
+          )
         ),
       ].join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Bridge_Condition_Summary.csv");
+    link.setAttribute("download", "Bridges_Category_Summary.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -83,8 +150,19 @@ const PrioritizationTable = () => {
   };
 
   const handleCellClick = (category, group) => {
-    const key = `${category}-${group}`;
+    const selectedValue = bridgeScoreData.find(
+      (row) => row.category === category
+    )?.[group];
+
+    if (selectedValue === "N.A") {
+      // Don't show modal for "N.A"
+      return;
+    }
+
+    // Construct the key for fetching dummy details if needed
+    const key = group;
     const data = dummyBridgeDetails[key] || [];
+
     setModalData(data);
     setSelectedTitle(`${category} - ${group}`);
     setShowModal(true);
@@ -174,7 +252,7 @@ const PrioritizationTable = () => {
                             textAlign: "center",
                             padding: "15px",
                             cursor: "pointer",
-                            textDecoration: "underline",
+                            textDecoration: "none",
                           }}
                           onClick={() => handleCellClick(row.category, group)}
                         >
@@ -191,7 +269,12 @@ const PrioritizationTable = () => {
       </section>
 
       {/* Modal for Bridge Details */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        size="lg"
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
         </Modal.Header>
@@ -200,17 +283,21 @@ const PrioritizationTable = () => {
             <Table bordered hover>
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>District</th>
+                  <th>Road Name</th>
+                  <th>Structure Type</th>
                   <th>Bridge Name</th>
-                  <th>Location</th>
+                  <th>Date Time</th>
                 </tr>
               </thead>
               <tbody>
-                {modalData.map((bridge) => (
-                  <tr key={bridge.id}>
-                    <td>{bridge.id}</td>
+                {modalData.map((bridge, idx) => (
+                  <tr key={idx}>
+                    <td>{bridge.district}</td>
+                    <td>{bridge.roadName}</td>
+                    <td>{bridge.structureType}</td>
                     <td>{bridge.name}</td>
-                    <td>{bridge.location}</td>
+                    <td>{bridge.dateTime}</td>
                   </tr>
                 ))}
               </tbody>
