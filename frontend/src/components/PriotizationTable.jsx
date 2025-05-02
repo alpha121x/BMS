@@ -157,7 +157,7 @@ const PrioritizationTable = () => {
       <Row className="justify-content-center">
         <Col md={8}>
           <div className="card shadow-sm border-0" ref={tableRef}>
-            <div className="card-header bg-primary text-white p-2 d-flex justify-content-between align-items-center">
+            <div className="card-header border-1 text-white p-2 d-flex justify-content-between align-items-center">
               <h5 className="mb-0 text-black">Bridge Prioritization Table</h5>
               <Button variant="light" onClick={handleDownloadCSV}>
                 <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
