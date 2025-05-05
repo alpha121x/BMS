@@ -584,9 +584,8 @@ app.get("/api/bridgesConDownloadExcel", async (req, res) => {
           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
           COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
         FROM bms.tbl_bms_master_data md
-        JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU'
+        JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND md.is_active = true
         WHERE 1=1
-        AND is_active = true
     `;
 
     const queryParams = [];
@@ -614,20 +613,14 @@ app.get("/api/bridgesConDownloadExcel", async (req, res) => {
 
     const result = await pool.query(query, queryParams);
 
-    // **Track First Row for Each uu_bms_id**
     let firstRowMap = new Map();
-
-    // **Process Data**
     const processedData = result.rows.map((row) => {
       if (!firstRowMap.has(row["REFERENCE NO"])) {
         firstRowMap.set(row["REFERENCE NO"], true);
       } else {
         row["Overview Photos"] = null;
       }
-
-      // **Fix Photo Paths**
       row["PhotoPaths"] = extractUrlsFromPath(row["PhotoPaths"]);
-
       return row;
     });
 
@@ -689,10 +682,10 @@ app.get("/api/bridgesConDownloadCsv", async (req, res) => {
         f."surveyed_by" AS "Surveyed By",
         f.current_date_time AS "Inspection Date"
       FROM bms.tbl_bms_master_data md
-      JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU')
+      JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND md.is_active = true)
       AND md.uu_bms_id IN (SELECT DISTINCT f.uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
       WHERE 1=1
-    `; // 👈 Notice "WHERE 1=1" ensures the next conditions can safely be added
+    `;
 
     const queryParams = [];
     let paramIndex = 1;
@@ -738,64 +731,63 @@ app.get("/api/bridgesRamsDownloadExcel", async (req, res) => {
     const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
 
     let query = `
-    WITH ranked_data AS (
-      SELECT 
-        md.uu_bms_id AS "REFERENCE NO",
-        CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
-        md.structure_type_id AS "STRUCTURE TYPE ID",
-        md.structure_type AS "STRUCTURE TYPE",
-        md.road_no AS "ROAD NO",
-        md.road_name_id AS "ROAD NAME ID",
-        md.road_name AS "ROAD NAME",
-        md.road_name_cwd AS "ROAD NAME CWD",
-        md.road_code_cwd AS "ROAD CODE CWD",
-        md.route_id AS "ROUTE ID",
-        md.survey_id AS "SURVEY ID",
-        md.pms_sec_id AS "PMS SEC ID",
-        md.structure_no AS "STRUCTURE NO",
-        md.surveyor_name AS "SURVEYOR NAME",
-        md.zone AS "ZONE",
-        md.district AS "DISTRICT",
-        md.road_classification AS "ROAD CLASSIFICATION",
-        md.road_surface_type AS "ROAD SURFACE TYPE",
-        md.carriageway_type AS "CARRIAGEWAY TYPE",
-        md.direction AS "DIRECTION",
-        md.visual_condition AS "VISUAL CONDITION",
-        md.construction_type AS "CONSTRUCTION TYPE",
-        md.no_of_span AS "NO OF SPAN",
-        md.span_length_m AS "SPAN LENGTH (M)",
-        md.structure_width_m AS "STRUCTURE WIDTH (M)",
-        md.construction_year AS "CONSTRUCTION YEAR",
-        md.last_maintenance_date AS "LAST MAINTENANCE DATE",
-        md.data_source AS "DATA SOURCE",
-        md.date_time AS "DATE TIME",
-        md.remarks AS "REMARKS",
-        f.surveyed_by AS "SURVEYED BY",
-        f.district_id AS "DISTRICT ID",
-        f."SpanIndex" AS "SPAN INDEX",
-        f."WorkKindName" AS "WORK KIND NAME",
-        f."PartsName" AS "PARTS NAME",
-        f."MaterialName" AS "MATERIAL NAME",
-        f."DamageKindName" AS "DAMAGE KIND NAME",
-        f."DamageLevel" AS "DAMAGE LEVEL",
-        f.damage_extent AS "DAMAGE EXTENT",
-        f."Remarks" AS "SITUATION REMARKS",
-        f.current_date_time AS "INSPECTION DATE",
-        ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK",
-        ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
-        COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
-      FROM bms.tbl_bms_master_data md
-      JOIN bms.tbl_inspection_f f 
-      ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND qc_rams = '0')
-      WHERE 1=1
-      AND md.uu_bms_id IN (
-        SELECT DISTINCT f.uu_bms_id 
-        FROM bms.tbl_inspection_f 
-        WHERE surveyed_by = 'RAMS-UU' AND qc_rams = '0'
-      )
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "REFERENCE NO",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
+          md.structure_type_id AS "STRUCTURE TYPE ID",
+          md.structure_type AS "STRUCTURE TYPE",
+          md.road_no AS "ROAD NO",
+          md.road_name_id AS "ROAD NAME ID",
+          md.road_name AS "ROAD NAME",
+          md.road_name_cwd AS "ROAD NAME CWD",
+          md.road_code_cwd AS "ROAD CODE CWD",
+          md.route_id AS "ROUTE ID",
+          md.survey_id AS "SURVEY ID",
+          md.pms_sec_id AS "PMS SEC ID",
+          md.structure_no AS "STRUCTURE NO",
+          md.surveyor_name AS "SURVEYOR NAME",
+          md.zone AS "ZONE",
+          md.district AS "DISTRICT",
+          md.road_classification AS "ROAD CLASSIFICATION",
+          md.road_surface_type AS "ROAD SURFACE TYPE",
+          md.carriageway_type AS "CARRIAGEWAY TYPE",
+          md.direction AS "DIRECTION",
+          md.visual_condition AS "VISUAL CONDITION",
+          md.construction_type AS "CONSTRUCTION TYPE",
+          md.no_of_span AS "NO OF SPAN",
+          md.span_length_m AS "SPAN LENGTH (M)",
+          md.structure_width_m AS "STRUCTURE WIDTH (M)",
+          md.construction_year AS "CONSTRUCTION YEAR",
+          md.last_maintenance_date AS "LAST MAINTENANCE DATE",
+          md.data_source AS "DATA SOURCE",
+          md.date_time AS "DATE TIME",
+          md.remarks AS "REMARKS",
+          f.surveyed_by AS "SURVEYED BY",
+          f.district_id AS "DISTRICT ID",
+          f."SpanIndex" AS "SPAN INDEX",
+          f."WorkKindName" AS "WORK KIND NAME",
+          f."PartsName" AS "PARTS NAME",
+          f."MaterialName" AS "MATERIAL NAME",
+          f."DamageKindName" AS "DAMAGE KIND NAME",
+          f."DamageLevel" AS "DAMAGE LEVEL",
+          f.damage_extent AS "DAMAGE EXTENT",
+          f."Remarks" AS "SITUATION REMARKS",
+          f.current_date_time AS "INSPECTION DATE",
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK",
+          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+          COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
+        FROM bms.tbl_bms_master_data md
+        JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND qc_rams = '0' AND md.is_active = true)
+        WHERE 1=1
+        AND md.uu_bms_id IN (
+          SELECT DISTINCT f.uu_bms_id 
+          FROM bms.tbl_inspection_f 
+          WHERE surveyed_by = 'RAMS-UU' AND qc_rams = '0'
+        )
     )
     SELECT * FROM ranked_data
-  `;
+    `;
 
     const queryParams = [];
     let paramIndex = 1;
@@ -822,20 +814,14 @@ app.get("/api/bridgesRamsDownloadExcel", async (req, res) => {
 
     const result = await pool.query(query, queryParams);
 
-    // **Track First Row for Each uu_bms_id**
     let firstRowMap = new Map();
-
-    // **Process Data**
     const processedData = result.rows.map((row) => {
       if (!firstRowMap.has(row["REFERENCE NO"])) {
         firstRowMap.set(row["REFERENCE NO"], true);
       } else {
         row["Overview Photos"] = null;
       }
-
-      // **Fix Photo Paths**
       row["PhotoPaths"] = extractUrlsFromPath(row["PhotoPaths"]);
-
       return row;
     });
 
@@ -896,10 +882,10 @@ app.get("/api/bridgesRamsDownloadCsv", async (req, res) => {
         f."surveyed_by" AS "Surveyed By",
         f.current_date_time AS "Inspection Date"
       FROM bms.tbl_bms_master_data md
-      JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0')
+      JOIN bms.tbl_inspection_f f ON (md.uu_bms_id = f.uu_bms_id AND f.surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0' AND md.is_active = true)
       AND md.uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0')
       WHERE 1=1
-    `; // 👈 Notice "WHERE 1=1" ensures the next conditions can safely be added
+    `;
 
     const queryParams = [];
     let paramIndex = 1;
@@ -992,8 +978,7 @@ app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {
             ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
             COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
         FROM bms.tbl_inspection_f f  
-        JOIN bms.tbl_bms_master_data md  
-          ON md.uu_bms_id = f.uu_bms_id  
+        JOIN bms.tbl_bms_master_data md ON md.uu_bms_id = f.uu_bms_id AND md.is_active = true
         WHERE f."DamageLevelID" IN (4, 5, 6)  
           AND (
               f.surveyed_by = 'RAMS-PITB'  
@@ -1038,7 +1023,6 @@ app.get("/api/bridgesEvalDownloadExcel", async (req, res) => {
       success: true,
       bridges: processedData,
     });
-
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({
@@ -1057,53 +1041,52 @@ app.get("/api/bridgesEvalDownloadCsv", async (req, res) => {
     let paramIndex = 1;
 
     let query = `
-WITH ranked_data AS (
-  SELECT 
-    md.uu_bms_id AS "REFERENCE NO",
-    CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
-    md.structure_type_id AS "STRUCTURE TYPE ID",
-    md.structure_type AS "STRUCTURE TYPE",
-    md.road_no AS "ROAD NO",
-    md.road_name AS "ROAD NAME",
-    md.road_name_cwd AS "ROAD NAME CWD",
-    md.road_code_cwd AS "ROAD CODE CWD",
-    md.route_id AS "ROUTE ID",
-    md.survey_id AS "SURVEY ID",
-    md.surveyor_name AS "SURVEYOR NAME",
-    md.zone AS "ZONE",
-    md.district AS "DISTRICT",
-    md.road_classification AS "ROAD CLASSIFICATION",
-    md.road_surface_type AS "ROAD SURFACE TYPE",
-    md.carriageway_type AS "CARRIAGEWAY TYPE",
-    md.direction AS "DIRECTION",
-    md.visual_condition AS "VISUAL CONDITION",
-    md.construction_type AS "CONSTRUCTION TYPE",
-    md.no_of_span AS "NO OF SPAN",
-    md.span_length_m AS "SPAN LENGTH (M)",
-    md.structure_width_m AS "STRUCTURE WIDTH (M)",
-    md.construction_year AS "CONSTRUCTION YEAR",
-    md.last_maintenance_date AS "LAST MAINTENANCE DATE",
-    md.data_source AS "DATA SOURCE",
-    md.date_time AS "DATE TIME",
-    md.remarks AS "REMARKS",
-    f.surveyed_by AS "SURVEYED BY",
-    f."SpanIndex" AS "SPAN INDEX",
-    f."WorkKindName" AS "WORK KIND NAME",
-    f."PartsName" AS "PARTS NAME",
-    f."MaterialName" AS "MATERIAL NAME",
-    f."DamageKindName" AS "DAMAGE KIND NAME",
-    f."DamageLevel" AS "DAMAGE LEVEL",
-    f.damage_extent AS "DAMAGE EXTENT",
-    f."Remarks" AS "SITUATION REMARKS",
-    f.current_date_time AS "INSPECTION DATE",
-    ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK"
-  FROM bms.tbl_bms_master_data md
-  JOIN bms.tbl_inspection_f f 
-    ON md.uu_bms_id = f.uu_bms_id
-  WHERE f."DamageLevelID" IN (4, 5, 6)
-    AND (f.surveyed_by = 'RAMS-PITB' OR (f.surveyed_by = 'RAMS-UU' AND f.qc_rams = 2))`;
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "REFERENCE NO",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
+          md.structure_type_id AS "STRUCTURE TYPE ID",
+          md.structure_type AS "STRUCTURE TYPE",
+          md.road_no AS "ROAD NO",
+          md.road_name AS "ROAD NAME",
+          md.road_name_cwd AS "ROAD NAME CWD",
+          md.road_code_cwd AS "ROAD CODE CWD",
+          md.route_id AS "ROUTE ID",
+          md.survey_id AS "SURVEY ID",
+          md.surveyor_name AS "SURVEYOR NAME",
+          md.zone AS "ZONE",
+          md.district AS "DISTRICT",
+          md.road_classification AS "ROAD CLASSIFICATION",
+          md.road_surface_type AS "ROAD SURFACE TYPE",
+          md.carriageway_type AS "CARRIAGEWAY TYPE",
+          md.direction AS "DIRECTION",
+          md.visual_condition AS "VISUAL CONDITION",
+          md.construction_type AS "CONSTRUCTION TYPE",
+          md.no_of_span AS "NO OF SPAN",
+          md.span_length_m AS "SPAN LENGTH (M)",
+          md.structure_width_m AS "STRUCTURE WIDTH (M)",
+          md.construction_year AS "CONSTRUCTION YEAR",
+          md.last_maintenance_date AS "LAST MAINTENANCE DATE",
+          md.data_source AS "DATA SOURCE",
+          md.date_time AS "DATE TIME",
+          md.remarks AS "REMARKS",
+          f.surveyed_by AS "SURVEYED BY",
+          f."SpanIndex" AS "SPAN INDEX",
+          f."WorkKindName" AS "WORK KIND NAME",
+          f."PartsName" AS "PARTS NAME",
+          f."MaterialName" AS "MATERIAL NAME",
+          f."DamageKindName" AS "DAMAGE KIND NAME",
+          f."DamageLevel" AS "DAMAGE LEVEL",
+          f.damage_extent AS "DAMAGE EXTENT",
+          f."Remarks" AS "SITUATION REMARKS",
+          f.current_date_time AS "INSPECTION DATE",
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK"
+        FROM bms.tbl_bms_master_data md
+        JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND md.is_active = true
+        WHERE f."DamageLevelID" IN (4, 5, 6)
+          AND (f.surveyed_by = 'RAMS-PITB' OR (f.surveyed_by = 'RAMS-UU' AND f.qc_rams = 2))
+    `;
 
-    // Inject filters inside CTE
     if (district !== "%") {
       query += ` AND md.district_id = $${paramIndex}`;
       queryParams.push(district);
@@ -1122,13 +1105,12 @@ WITH ranked_data AS (
       paramIndex++;
     }
 
-    // Close CTE and do final SELECT
     query += `
-)
-SELECT * FROM ranked_data
-WHERE "ROW RANK" = 1
-ORDER BY "REFERENCE NO";
-`;
+      )
+      SELECT * FROM ranked_data
+      WHERE "ROW RANK" = 1
+      ORDER BY "REFERENCE NO";
+    `;
 
     const result = await pool.query(query, queryParams);
 
@@ -1207,7 +1189,7 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
           ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
           COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
         FROM bms.tbl_bms_master_data md
-        JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+        JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND md.is_active = true
         WHERE 1=1
     `;
 
@@ -1309,9 +1291,9 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
         f."Remarks" AS "Situation Remarks",
         f.current_date_time AS "Inspection Date"
       FROM bms.tbl_bms_master_data md
-      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND md.is_active = true
       WHERE 1=1
-    `; // 👈 Notice "WHERE 1=1" ensures the next conditions can safely be added
+    `;
 
     const queryParams = [];
     let paramIndex = 1;

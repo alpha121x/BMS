@@ -460,7 +460,7 @@ const BridgesListDashboard = ({
                             {bridge.pms_sec_id || "N/A"},{" "}
                             {bridge.structure_no || "N/A"}
                           </td>
-                          <td>{bridge.date_time}</td>
+                          <td>{bridge.data_date_time ? new Date(bridge.data_date_time).toLocaleString() : 'N/A'}</td>
                           <td>
                             <div className="flex space-x-2 justify-center">
                               {/* Button for Bridge Inventory Info */}
