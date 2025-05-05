@@ -223,7 +223,7 @@ const InventoryInfo = ({ inventoryData }) => {
           )}
 
           <Form.Group>
-            <Form.Label className="custom-label">Photos</Form.Label>
+            <Form.Label className="custom-label">Initial Photos</Form.Label>
             <div className="d-flex flex-wrap">
               {photos.length > 0 ? (
                 photos.map((photo, index) => (

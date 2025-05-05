@@ -291,7 +291,7 @@ const InventoryInfoDashboard = ({ inventoryData }) => {
 
           <Form.Group>
             <Form.Label className="custom-label bg-[#3B9996] text-white p-1 rounded-1 w-full">
-              Photos
+             Initial Photos
             </Form.Label>
             <div className="d-flex flex-wrap">
               {photos.length > 0 ? (
