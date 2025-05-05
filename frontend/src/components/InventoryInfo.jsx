@@ -98,47 +98,56 @@ const InventoryInfo = ({ inventoryData }) => {
         <h5 className="card-title font-semibold pb-2">Inventory Info</h5>
         <Form>
           <Row>
-            {[
-              { label: "Bridge Name", field: "bridge_name" },
-              { label: "Structure Type", field: "structure_type" },
-              { label: "Construction Year", field: "construction_year" },
-              { label: "District", field: "district" },
-              { label: "Road Name", field: "road_name" },
-              { label: "Road Name CWD", field: "road_name_cwd" },
-              { label: "Construction Type", field: "construction_type" },
-              { label: "Survey ID", field: "survey_id" },
-              { label: "Surveyor Name", field: "surveyor_name" },
-              { label: "Road Classification", field: "road_classification" },
-              { label: "Carriageway Type", field: "carriageway_type" },
-              { label: "Road Surface Type", field: "road_surface_type" },
-              { label: "Visual Condition", field: "visual_condition" },
-              { label: "Direction", field: "direction" },
-              {
-                label: "Last Maintenance Date",
-                field: "last_maintenance_date",
-                type: "date",
-              },
-              { label: "Width Structure", field: "structure_width_m" },
-              { label: "Span Length", field: "span_length_m" },
-              { label: "No of Spans", field: "no_of_span" },
-              { label: "Latitude", field: "y_centroid" },
-              { label: "Longitude", field: "x_centroid" },
-              { label: "Remarks", field: "remarks" },
-              { label: "Data Source", field: "data_source" },
-              { label: "Date", field: "date_time" },
-            ].map(({ label, field }, index) => (
-              <Col key={index} md={3}>
-                <Form.Group>
-                  <Form.Label className="custom-label">{label}</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={inventoryData?.[field] || ""}
-                    readOnly
-                    style={{ padding: "8px", fontSize: "14px" }}
-                  />
-                </Form.Group>
-              </Col>
-            ))}
+          {[
+  { label: "Bridge Name", field: "bridge_name" },
+  { label: "Structure Type", field: "structure_type" },
+  { label: "Construction Year", field: "construction_year" },
+  { label: "District", field: "district" },
+  { label: "Road Name", field: "road_name" },
+  { label: "Road Name CWD", field: "road_name_cwd" },
+  { label: "Construction Type", field: "construction_type" },
+  { label: "Survey ID", field: "survey_id" },
+  { label: "Surveyor Name", field: "surveyor_name" },
+  { label: "Road Classification", field: "road_classification" },
+  { label: "Carriageway Type", field: "carriageway_type" },
+  { label: "Road Surface Type", field: "road_surface_type" },
+  { label: "Visual Condition", field: "visual_condition" },
+  { label: "Direction", field: "direction" },
+  {
+    label: "Last Maintenance Date",
+    field: "last_maintenance_date",
+    type: "date",
+  },
+  { label: "Width Structure", field: "structure_width_m" },
+  { label: "Span Length", field: "span_length_m" },
+  { label: "No of Spans", field: "no_of_span" },
+  { label: "Latitude", field: "y_centroid" },
+  { label: "Longitude", field: "x_centroid" },
+  { label: "Remarks", field: "remarks" },
+  { label: "Data Source", field: "data_source" },
+  { label: "Date", field: "data_date_time", type: "date" }, // <- Add type
+].map(({ label, field, type }, index) => {
+  let value = inventoryData?.[field] || "";
+  if (type === "date" && value) {
+    const dateObj = new Date(value);
+    value = isNaN(dateObj) ? value : dateObj.toLocaleString(); // Fallback to raw if invalid
+  }
+
+  return (
+    <Col key={index} md={3}>
+      <Form.Group>
+        <Form.Label className="custom-label">{label}</Form.Label>
+        <Form.Control
+          type="text"
+          value={value}
+          readOnly
+          style={{ padding: "8px", fontSize: "14px" }}
+        />
+      </Form.Group>
+    </Col>
+  );
+})}
+
           </Row>
 
           <Form.Group>
