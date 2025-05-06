@@ -1792,7 +1792,7 @@ app.get("/api/bridges", async (req, res) => {
 
     let query = `
       SELECT 
-       is_active,
+        is_active,
         raw_id,
         uu_bms_id, 
         surveyed_by,
@@ -1830,7 +1830,6 @@ app.get("/api/bridges", async (req, res) => {
         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
-	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
     AND is_active = true
     `;
 
