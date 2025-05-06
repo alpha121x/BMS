@@ -62,7 +62,6 @@ const PrioritizationTable = () => {
   const [chartHeight, setChartHeight] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('Severe'); // Default to Severe as per screenshot
   const tableRef = useRef(null);
-  const [selectedRows, setSelectedRows] = useState([]);
 
   // DataTable columns configuration
   const columns = [
@@ -91,17 +90,6 @@ const PrioritizationTable = () => {
       name: 'Date Time',
       selector: row => row.dateTime,
       sortable: true,
-    },
-    {
-      name: 'Actions',
-      cell: row => (
-        <Button variant="info" size="sm" onClick={() => handleViewDetails(row)}>
-          <FontAwesomeIcon icon={faEye} /> Details
-        </Button>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
     },
   ];
 
@@ -307,23 +295,6 @@ const PrioritizationTable = () => {
     });
     return details;
   };
-
-  const handleViewDetails = (row) => {
-    setModalData([row]);
-    setSelectedTitle(`${row.district} - ${row.name}`);
-    setShowModal(true);
-  };
-
-  const handleRowSelected = (state) => {
-    setSelectedRows(state.selectedRows);
-  };
-
-  const expandableRowComponent = ({ data }) => (
-    <div style={{ padding: '10px', backgroundColor: '#f8f9fa' }}>
-      <p><strong>ID:</strong> {data.id}</p>
-      <p><strong>Raw Date:</strong> {data.dateTime.split(',')[0]}</p>
-    </div>
-  );
 
   return (
     <Container fluid className="py-2 bg-light mt-5">
