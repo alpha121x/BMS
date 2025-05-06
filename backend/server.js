@@ -256,8 +256,10 @@ app.get('/api/bms_matrix', async (req, res) => {
         structure_type, 
         structure_no, 
         date_time, 
-        damagecategory
+        damagecategory,
+        category
       FROM bms.tbl_bms_matrix
+      WHERE category IS NOT NULL AND category != ''
     `;
     const result = await pool.query(query);
     res.status(200).json(result.rows);

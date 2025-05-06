@@ -3,8 +3,30 @@ import { Button, Table, Modal, Container, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import Highcharts from 'highcharts';
-import Map from './Map'; // Assuming you have a Map component
-import { BASE_URL } from './config'; // Adjust the import based on your project structure
+import DataTable from 'react-data-table-component';
+import { BASE_URL } from './config';
+
+// Utility function to convert Excel serial date to human-readable date
+const excelSerialToDate = (serial) => {
+  if (!serial || isNaN(serial)) return 'Invalid Date';
+  // Excel epoch: January 1, 1900
+  // JavaScript epoch: January 1, 1970
+  // Difference: 25569 days (includes Excel's leap year bug for 1900)
+  const excelEpochOffset = 25569;
+  const secondsInDay = 86400;
+  const utcDate = new Date((serial - excelEpochOffset) * secondsInDay * 1000);
+  // Adjust for timezone offset to get the correct date
+  const offsetDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60 * 1000);
+  return offsetDate.toLocaleString('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+};
 
 const PrioritizationTable = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
@@ -17,12 +39,41 @@ const PrioritizationTable = () => {
   const [selectedCategory, setSelectedCategory] = useState('Good');
   const tableRef = useRef(null);
 
+  // DataTable columns configuration
+  const columns = [
+    {
+      name: 'District',
+      selector: row => row.district,
+      sortable: true,
+    },
+    {
+      name: 'Road Name',
+      selector: row => row.roadName,
+      sortable: true,
+    },
+    {
+      name: 'Structure Type',
+      selector: row => row.structureType,
+      sortable: true,
+    },
+    {
+      name: 'Bridge Name',
+      selector: row => row.name,
+      sortable: true,
+    },
+    {
+      name: 'Date Time',
+      selector: row => row.dateTime,
+      sortable: true,
+    },
+  ];
+
   // Fetch data from the API using fetch
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-       const response = await fetch(`${BASE_URL}/api/bms_matrix`); // Adjust the endpoint as needed
+        const response = await fetch(`${BASE_URL}/api/bms_matrix`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -30,9 +81,9 @@ const PrioritizationTable = () => {
 
         // Process data to match dummyData structure
         const categories = ['Good', 'Fair', 'Poor', 'Severe'];
-        const groups = ['GroupA', 'GroupB', 'GroupC', 'GroupD']; // Map to district_id or other grouping
+        const groups = ['GroupA', 'GroupB', 'GroupC', 'GroupD'];
         const districtMapping = {
-          1: 'GroupA', // Example: district_id 1 maps to GroupA
+          1: 'GroupA',
           2: 'GroupB',
           3: 'GroupC',
           4: 'GroupD',
@@ -42,7 +93,7 @@ const PrioritizationTable = () => {
         const scoreData = categories.map(category => {
           const row = { category };
           groups.forEach(group => {
-            row[group] = 'N.A'; // Default value
+            row[group] = 'N.A';
           });
           return row;
         });
@@ -57,8 +108,8 @@ const PrioritizationTable = () => {
 
         // Process raw data
         rawData.forEach(item => {
-          const group = districtMapping[item.district_id] || 'GroupA'; // Map district_id to group
-          const category = item.damagecategory; // Assuming damagecategory is the field
+          const group = districtMapping[item.district_id] || 'GroupA';
+          const category = item.damagecategory;
 
           // Update bridgeScoreData
           const row = scoreData.find(r => r.category === category);
@@ -66,7 +117,7 @@ const PrioritizationTable = () => {
             row[group] = row[group] === 'N.A' ? 1 : row[group] + 1;
           }
 
-          // Update bridgeDetails
+          // Update bridgeDetails with converted date_time
           if (details[group]) {
             details[group].push({
               id: item.uu_bms_id,
@@ -74,7 +125,7 @@ const PrioritizationTable = () => {
               roadName: item.road_name,
               structureType: item.structure_type,
               name: item.structure_no,
-              dateTime: item.date_time,
+              dateTime: excelSerialToDate(parseFloat(item.date_time)),
               category: item.damagecategory,
             });
           }
@@ -333,36 +384,18 @@ const PrioritizationTable = () => {
                 </div>
               </div>
               <div className="card-body p-0">
-                <Table bordered hover striped className="mb-0">
-                  <thead>
-                    <tr>
-                      <th>District</th>
-                      <th>Road Name</th>
-                      <th>Structure Type</th>
-                      <th>Bridge Name</th>
-                      <th>Date Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBridgeDetails().length > 0 ? (
-                      filteredBridgeDetails().map((bridge, idx) => (
-                        <tr key={idx}>
-                          <td>{bridge.district}</td>
-                          <td>{bridge.roadName}</td>
-                          <td>{bridge.structureType}</td>
-                          <td>{bridge.name}</td>
-                          <td>{bridge.dateTime}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="text-center">
-                          No bridges found for this category.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
+                <DataTable
+                  columns={columns}
+                  data={filteredBridgeDetails()}
+                  pagination
+                  paginationPerPage={10}
+                  paginationRowsPerPageOptions={[10, 25, 50]}
+                  highlightOnHover
+                  striped
+                  noDataComponent="No bridges found for this category."
+                  progressPending={loading}
+                  progressComponent={<div className="spinner-border mx-auto my-3" role="status"><span className="visually-hidden">Loading...</span></div>}
+                />
               </div>
             </div>
           </Col>
