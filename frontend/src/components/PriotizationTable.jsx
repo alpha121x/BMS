@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button, Table, Modal, Container, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileCsv, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
 import Highcharts from 'highcharts';
 import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
@@ -59,9 +59,10 @@ const PrioritizationTable = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState('');
-  const [chartHeight, setChartHeight] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('Severe'); // Default to Severe as per screenshot
+  const [chartHeight, setChartHeight] = useState(300); // Default height
+  const [selectedCategory, setSelectedCategory] = useState('Severe');
   const tableRef = useRef(null);
+  const chartRef = useRef(null); // Ref to store the chart instance
 
   // DataTable columns configuration
   const columns = [
@@ -118,7 +119,7 @@ const PrioritizationTable = () => {
     },
   };
 
-  // Fetch data from the API using fetch
+  // Fetch data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -178,48 +179,6 @@ const PrioritizationTable = () => {
         setBridgeScoreData(scoreData);
         setBridgeDetails(details);
         setLoading(false);
-
-        if (tableRef.current) {
-          const tableHeight = tableRef.current.getBoundingClientRect().height;
-          setChartHeight(tableHeight);
-        }
-
-        const chartData = scoreData.map(row => ({
-          name: row.category,
-          y: Object.values(row)
-            .slice(1)
-            .reduce((sum, val) => sum + (val === 'N.A' ? 0 : parseInt(val)), 0),
-          color: getCategoryColor(row.category),
-        }));
-
-        Highcharts.chart('chart-container', {
-          chart: { type: 'pie', height: chartHeight },
-          title: { text: 'Bridge Counts by Category', align: 'center' },
-          series: [{
-            name: 'Categories',
-            data: chartData,
-            size: '60%',
-            dataLabels: {
-              enabled: true,
-              distance: 30,
-              format: '{point.name}: {point.y}',
-              style: { fontSize: '12px' },
-            },
-          }],
-          legend: {
-            align: 'center',
-            verticalAlign: 'bottom',
-            layout: 'horizontal',
-            itemStyle: { fontSize: '12px' },
-          },
-          plotOptions: {
-            pie: {
-              allowPointSelect: true,
-              cursor: 'pointer',
-              showInLegend: true,
-            },
-          },
-        });
       } catch (error) {
         console.error('Error fetching data:', error);
         setLoading(false);
@@ -227,7 +186,82 @@ const PrioritizationTable = () => {
     };
 
     fetchData();
-  }, [chartHeight]);
+  }, []);
+
+  // Update chart height when tableRef is available
+  useEffect(() => {
+    if (tableRef.current) {
+      const tableHeight = tableRef.current.getBoundingClientRect().height;
+      setChartHeight(tableHeight || 300); // Fallback to 300px if height is 0
+    }
+  }, [loading, bridgeScoreData]); // Recompute height when data loads
+
+  // Initialize or update Highcharts pie chart
+  useEffect(() => {
+    if (!bridgeScoreData.length || loading) return; // Wait for data to load
+
+    const chartData = bridgeScoreData.map(row => ({
+      name: row.category,
+      y: Object.values(row)
+        .slice(1)
+        .reduce((sum, val) => sum + (val === 'N.A' ? 0 : parseInt(val)), 0),
+      color: getCategoryColor(row.category),
+    })).filter(item => item.y > 0); // Filter out categories with zero counts
+
+    console.log('Chart Data:', chartData); // Debug log to verify data
+
+    // Destroy existing chart if it exists
+    if (chartRef.current) {
+      chartRef.current.destroy();
+    }
+
+    // Create new chart
+    const chartContainer = document.getElementById('chart-container');
+    if (chartContainer) {
+      chartRef.current = Highcharts.chart('chart-container', {
+        chart: {
+          type: 'pie',
+          height: chartHeight || 300, // Use chartHeight with fallback
+        },
+        title: {
+          text: 'Bridge Counts by Category',
+          align: 'center',
+        },
+        series: [{
+          name: 'Categories',
+          data: chartData.length ? chartData : [{ name: 'No Data', y: 1, color: '#cccccc' }], // Fallback for empty data
+          size: '60%',
+          dataLabels: {
+            enabled: true,
+            distance: 30,
+            format: '{point.name}: {point.y}',
+            style: { fontSize: '12px' },
+          },
+        }],
+        legend: {
+          align: 'center',
+          verticalAlign: 'bottom',
+          layout: 'horizontal',
+          itemStyle: { fontSize: '12px' },
+        },
+        plotOptions: {
+          pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            showInLegend: true,
+          },
+        },
+      });
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
+    };
+  }, [bridgeScoreData, chartHeight, loading]); // Re-render chart when data or height changes
 
   const getCategoryStyle = (category) => {
     switch (category) {
@@ -343,7 +377,7 @@ const PrioritizationTable = () => {
         <Col md={4} className="d-flex align-items-center">
           <div className="card shadow-sm border-1 w-100">
             <div className="card-body p-2">
-              <div id="chart-container"></div>
+              <div id="chart-container" style={{ minHeight: '300px' }}></div>
             </div>
           </div>
         </Col>
