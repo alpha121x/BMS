@@ -1,21 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Button, Table, Modal, Container, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
+import { faFileCsv, faEye } from '@fortawesome/free-solid-svg-icons';
 import Highcharts from 'highcharts';
 import DataTable from 'react-data-table-component';
+import styled from 'styled-components';
 import { BASE_URL } from './config';
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
   if (!serial || isNaN(serial)) return 'Invalid Date';
-  // Excel epoch: January 1, 1900
-  // JavaScript epoch: January 1, 1970
-  // Difference: 25569 days (includes Excel's leap year bug for 1900)
   const excelEpochOffset = 25569;
   const secondsInDay = 86400;
   const utcDate = new Date((serial - excelEpochOffset) * secondsInDay * 1000);
-  // Adjust for timezone offset to get the correct date
   const offsetDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60 * 1000);
   return offsetDate.toLocaleString('en-US', {
     year: 'numeric',
@@ -28,6 +25,33 @@ const excelSerialToDate = (serial) => {
   });
 };
 
+// Styled components for custom table styling
+const StyledDataTable = styled(DataTable)`
+  .rdt_Table {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .rdt_TableHeadRow {
+    background-color: #f8f9fa;
+    font-weight: bold;
+  }
+
+  .rdt_TableRow {
+    transition: background-color 0.2s;
+    &:hover {
+      background-color: #f1f3f5 !important;
+    }
+  }
+
+  .rdt_Pagination {
+    background-color: #ffffff;
+    border-top: 1px solid #dee2e6;
+    padding: 10px;
+  }
+`;
+
 const PrioritizationTable = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [bridgeDetails, setBridgeDetails] = useState({});
@@ -36,8 +60,9 @@ const PrioritizationTable = () => {
   const [modalData, setModalData] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState('');
   const [chartHeight, setChartHeight] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('Good');
+  const [selectedCategory, setSelectedCategory] = useState('Severe'); // Default to Severe as per screenshot
   const tableRef = useRef(null);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   // DataTable columns configuration
   const columns = [
@@ -45,6 +70,7 @@ const PrioritizationTable = () => {
       name: 'District',
       selector: row => row.district,
       sortable: true,
+      cell: row => <span style={{ color: getCategoryColor(row.category) }}>{row.district}</span>,
     },
     {
       name: 'Road Name',
@@ -66,7 +92,43 @@ const PrioritizationTable = () => {
       selector: row => row.dateTime,
       sortable: true,
     },
+    {
+      name: 'Actions',
+      cell: row => (
+        <Button variant="info" size="sm" onClick={() => handleViewDetails(row)}>
+          <FontAwesomeIcon icon={faEye} /> Details
+        </Button>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
   ];
+
+  // Custom styles for conditional formatting
+  const customStyles = {
+    rows: {
+      style: {
+        minHeight: '50px',
+        backgroundColor: (row) => getRowBackgroundColor(row.category),
+      },
+    },
+    headCells: {
+      style: {
+        paddingLeft: '8px',
+        paddingRight: '8px',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        backgroundColor: '#e9ecef',
+      },
+    },
+    cells: {
+      style: {
+        paddingLeft: '8px',
+        paddingRight: '8px',
+      },
+    },
+  };
 
   // Fetch data from the API using fetch
   useEffect(() => {
@@ -79,7 +141,6 @@ const PrioritizationTable = () => {
         }
         const rawData = await response.json();
 
-        // Process data to match dummyData structure
         const categories = ['Good', 'Fair', 'Poor', 'Severe'];
         const groups = ['GroupA', 'GroupB', 'GroupC', 'GroupD'];
         const districtMapping = {
@@ -89,7 +150,6 @@ const PrioritizationTable = () => {
           4: 'GroupD',
         };
 
-        // Initialize bridgeScoreData
         const scoreData = categories.map(category => {
           const row = { category };
           groups.forEach(group => {
@@ -98,7 +158,6 @@ const PrioritizationTable = () => {
           return row;
         });
 
-        // Initialize bridgeDetails
         const details = {
           GroupA: [],
           GroupB: [],
@@ -106,18 +165,15 @@ const PrioritizationTable = () => {
           GroupD: [],
         };
 
-        // Process raw data
         rawData.forEach(item => {
           const group = districtMapping[item.district_id] || 'GroupA';
           const category = item.damagecategory;
 
-          // Update bridgeScoreData
           const row = scoreData.find(r => r.category === category);
           if (row) {
             row[group] = row[group] === 'N.A' ? 1 : row[group] + 1;
           }
 
-          // Update bridgeDetails with converted date_time
           if (details[group]) {
             details[group].push({
               id: item.uu_bms_id,
@@ -135,13 +191,11 @@ const PrioritizationTable = () => {
         setBridgeDetails(details);
         setLoading(false);
 
-        // Set chart height
         if (tableRef.current) {
           const tableHeight = tableRef.current.getBoundingClientRect().height;
           setChartHeight(tableHeight);
         }
 
-        // Create Highcharts pie chart
         const chartData = scoreData.map(row => ({
           name: row.category,
           y: Object.values(row)
@@ -151,36 +205,24 @@ const PrioritizationTable = () => {
         }));
 
         Highcharts.chart('chart-container', {
-          chart: {
-            type: 'pie',
-            height: chartHeight,
-          },
-          title: {
-            text: 'Bridge Counts by Category',
-            align: 'center',
-          },
-          series: [
-            {
-              name: 'Categories',
-              data: chartData,
-              size: '60%',
-              dataLabels: {
-                enabled: true,
-                distance: 30,
-                format: '{point.name}: {point.y}',
-                style: {
-                  fontSize: '12px',
-                },
-              },
+          chart: { type: 'pie', height: chartHeight },
+          title: { text: 'Bridge Counts by Category', align: 'center' },
+          series: [{
+            name: 'Categories',
+            data: chartData,
+            size: '60%',
+            dataLabels: {
+              enabled: true,
+              distance: 30,
+              format: '{point.name}: {point.y}',
+              style: { fontSize: '12px' },
             },
-          ],
+          }],
           legend: {
             align: 'center',
             verticalAlign: 'bottom',
             layout: 'horizontal',
-            itemStyle: {
-              fontSize: '12px',
-            },
+            itemStyle: { fontSize: '12px' },
           },
           plotOptions: {
             pie: {
@@ -201,31 +243,31 @@ const PrioritizationTable = () => {
 
   const getCategoryStyle = (category) => {
     switch (category) {
-      case 'Good':
-        return { backgroundColor: '#28a745', color: 'white' };
-      case 'Fair':
-        return { backgroundColor: '#ffc107', color: 'black' };
-      case 'Poor':
-        return { backgroundColor: '#fd7e14', color: 'white' };
-      case 'Severe':
-        return { backgroundColor: '#dc3545', color: 'white' };
-      default:
-        return {};
+      case 'Good': return { backgroundColor: '#28a745', color: 'white' };
+      case 'Fair': return { backgroundColor: '#ffc107', color: 'black' };
+      case 'Poor': return { backgroundColor: '#fd7e14', color: 'white' };
+      case 'Severe': return { backgroundColor: '#dc3545', color: 'white' };
+      default: return {};
     }
   };
 
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'Good':
-        return '#28a745';
-      case 'Fair':
-        return '#ffc107';
-      case 'Poor':
-        return '#fd7e14';
-      case 'Severe':
-        return '#dc3545';
-      default:
-        return '#000000';
+      case 'Good': return '#28a745';
+      case 'Fair': return '#ffc107';
+      case 'Poor': return '#fd7e14';
+      case 'Severe': return '#dc3545';
+      default: return '#000000';
+    }
+  };
+
+  const getRowBackgroundColor = (category) => {
+    switch (category) {
+      case 'Good': return '#e6f3e6';
+      case 'Fair': return '#fff3cd';
+      case 'Poor': return '#ffe4cc';
+      case 'Severe': return '#f8d7da';
+      default: return '#ffffff';
     }
   };
 
@@ -234,16 +276,10 @@ const PrioritizationTable = () => {
       console.warn('No data available for CSV download.');
       return;
     }
-
-    const csvContent =
-      'data:text/csv;charset=utf-8,' +
-      [
-        ['Category', 'Group A', 'Group B', 'Group C', 'Group D'].join(','),
-        ...bridgeScoreData.map(row =>
-          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(','),
-        ),
-      ].join('\n');
-
+    const csvContent = 'data:text/csv;charset=utf-8,' + [
+      ['Category', 'Group A', 'Group B', 'Group C', 'Group D'].join(','),
+      ...bridgeScoreData.map(row => [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(',')),
+    ].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -260,10 +296,8 @@ const PrioritizationTable = () => {
   const filteredBridgeDetails = () => {
     const selectedRow = bridgeScoreData.find(row => row.category === selectedCategory);
     if (!selectedRow) return [];
-
     const groups = ['GroupA', 'GroupB', 'GroupC', 'GroupD'];
     const details = [];
-
     groups.forEach(group => {
       if (selectedRow[group] !== 'N.A') {
         const groupDetails = bridgeDetails[group] || [];
@@ -271,9 +305,25 @@ const PrioritizationTable = () => {
         details.push(...filteredDetails);
       }
     });
-
     return details;
   };
+
+  const handleViewDetails = (row) => {
+    setModalData([row]);
+    setSelectedTitle(`${row.district} - ${row.name}`);
+    setShowModal(true);
+  };
+
+  const handleRowSelected = (state) => {
+    setSelectedRows(state.selectedRows);
+  };
+
+  const expandableRowComponent = ({ data }) => (
+    <div style={{ padding: '10px', backgroundColor: '#f8f9fa' }}>
+      <p><strong>ID:</strong> {data.id}</p>
+      <p><strong>Raw Date:</strong> {data.dateTime.split(',')[0]}</p>
+    </div>
+  );
 
   return (
     <Container fluid className="py-2 bg-light mt-5">
@@ -283,8 +333,7 @@ const PrioritizationTable = () => {
             <div className="card-header border-1 text-white p-2 d-flex justify-content-between align-items-center">
               <h5 className="mb-0 text-black">Bridge Prioritization Table</h5>
               <Button variant="light" onClick={handleDownloadCSV}>
-                <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-                CSV
+                <FontAwesomeIcon icon={faFileCsv} className="mr-2" /> CSV
               </Button>
             </div>
             <div className="card-body p-0">
@@ -310,9 +359,7 @@ const PrioritizationTable = () => {
                           {row.category}
                         </td>
                         {['GroupA', 'GroupB', 'GroupC', 'GroupD'].map(group => (
-                          <td key={group} className="text-center">
-                            {row[group]}
-                          </td>
+                          <td key={group} className="text-center">{row[group]}</td>
                         ))}
                       </tr>
                     ))}
@@ -384,9 +431,10 @@ const PrioritizationTable = () => {
                 </div>
               </div>
               <div className="card-body p-0">
-                <DataTable
+                <StyledDataTable
                   columns={columns}
                   data={filteredBridgeDetails()}
+                  customStyles={customStyles}
                   pagination
                   paginationPerPage={10}
                   paginationRowsPerPageOptions={[10, 25, 50]}
