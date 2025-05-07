@@ -62,6 +62,7 @@ const PrioritizationTable = () => {
   const [selectedTitle, setSelectedTitle] = useState('');
   const [chartHeight, setChartHeight] = useState(300); // Default height
   const [selectedCategory, setSelectedCategory] = useState('Severe');
+  const [activeTab, setActiveTab] = useState('table'); // State to manage Table/Map tabs
   const tableRef = useRef(null);
   const chartRef = useRef(null); // Ref to store the chart instance
 
@@ -353,6 +354,11 @@ const PrioritizationTable = () => {
 
   const handleTabClick = (category) => {
     setSelectedCategory(category);
+    setActiveTab('table'); // Reset to table view when selecting a category
+  };
+
+  const handleViewTabChange = (key) => {
+    setActiveTab(key);
   };
 
   const filteredBridgeDetails = () => {
@@ -477,31 +483,35 @@ const PrioritizationTable = () => {
                       {category}
                     </Button>
                   ))}
+                  <Button
+                    variant={activeTab === 'map' ? 'primary' : 'outline-primary'}
+                    onClick={() => handleViewTabChange('map')}
+                    className="mx-1"
+                  >
+                    Map
+                  </Button>
                 </div>
               </div>
               <div className="card-body p-0">
-                <StyledDataTable
-                  columns={columns}
-                  data={filteredBridgeDetails()}
-                  customStyles={customStyles}
-                  pagination
-                  paginationPerPage={10}
-                  paginationRowsPerPageOptions={[10, 25, 50]}
-                  highlightOnHover
-                  striped
-                  noDataComponent="No bridges found for this category."
-                  progressPending={loading}
-                  progressComponent={<div className="spinner-border mx-auto my-3" role="status"><span className="visually-hidden">Loading...</span></div>}
-                />
+                {activeTab === 'table' ? (
+                  <StyledDataTable
+                    columns={columns}
+                    data={filteredBridgeDetails()}
+                    customStyles={customStyles}
+                    pagination
+                    paginationPerPage={10}
+                    paginationRowsPerPageOptions={[10, 25, 50]}
+                    highlightOnHover
+                    striped
+                    noDataComponent="No bridges found for this category."
+                    progressPending={loading}
+                    progressComponent={<div className="spinner-border mx-auto my-3" role="status"><span className="visually-hidden">Loading...</span></div>}
+                  />
+                ) : (
+                  <Map />
+                )}
               </div>
             </div>
-          </Col>
-        </Row>
-      </Container>
-      <Container fluid className="py-2 bg-light mt-3">
-        <Row className="justify-content-center">
-          <Col md={12}>
-               <Map/>
           </Col>
         </Row>
       </Container>
