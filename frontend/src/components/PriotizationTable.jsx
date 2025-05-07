@@ -1,27 +1,29 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Button, Table, Modal, Container, Row, Col } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileCsv } from '@fortawesome/free-solid-svg-icons';
-import Highcharts from 'highcharts';
-import DataTable from 'react-data-table-component';
-import styled from 'styled-components';
-import { BASE_URL } from './config';
+import React, { useEffect, useState, useRef } from "react";
+import { Button, Table, Modal, Container, Row, Col } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileCsv } from "@fortawesome/free-solid-svg-icons";
+import Highcharts from "highcharts";
+import DataTable from "react-data-table-component";
+import styled from "styled-components";
+import { BASE_URL } from "./config";
 import Map from "./Map";
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
-  if (!serial || isNaN(serial)) return 'Invalid Date';
+  if (!serial || isNaN(serial)) return "Invalid Date";
   const excelEpochOffset = 25569;
   const secondsInDay = 86400;
   const utcDate = new Date((serial - excelEpochOffset) * secondsInDay * 1000);
-  const offsetDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60 * 1000);
-  return offsetDate.toLocaleString('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
+  const offsetDate = new Date(
+    utcDate.getTime() + utcDate.getTimezoneOffset() * 60 * 1000
+  );
+  return offsetDate.toLocaleString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
     hour12: true,
   });
 };
@@ -59,39 +61,43 @@ const PrioritizationTable = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState([]);
-  const [selectedTitle, setSelectedTitle] = useState('');
+  const [selectedTitle, setSelectedTitle] = useState("");
   const [chartHeight, setChartHeight] = useState(300); // Default height
-  const [selectedCategory, setSelectedCategory] = useState('Severe');
-  const [activeTab, setActiveTab] = useState('table'); // State to manage Table/Map tabs
+  const [selectedCategory, setSelectedCategory] = useState("Severe");
+  const [activeTab, setActiveTab] = useState("table"); // State to manage Table/Map tabs
   const tableRef = useRef(null);
   const chartRef = useRef(null); // Ref to store the chart instance
 
   // DataTable columns configuration
   const columns = [
     {
-      name: 'District',
-      selector: row => row.district,
+      name: "District",
+      selector: (row) => row.district,
       sortable: true,
-      cell: row => <span style={{ color: getCategoryColor(row.category) }}>{row.district}</span>,
+      cell: (row) => (
+        <span style={{ color: getCategoryColor(row.category) }}>
+          {row.district}
+        </span>
+      ),
     },
     {
-      name: 'Road Name',
-      selector: row => row.roadName,
-      sortable: true,
-    },
-    {
-      name: 'Structure Type',
-      selector: row => row.structureType,
-      sortable: true,
-    },
-    {
-      name: 'Bridge Name',
-      selector: row => row.name,
+      name: "Road Name",
+      selector: (row) => row.roadName,
       sortable: true,
     },
     {
-      name: 'Date Time',
-      selector: row => row.dateTime,
+      name: "Structure Type",
+      selector: (row) => row.structureType,
+      sortable: true,
+    },
+    {
+      name: "Bridge Name",
+      selector: (row) => row.name,
+      sortable: true,
+    },
+    {
+      name: "Date Time",
+      selector: (row) => row.dateTime,
       sortable: true,
     },
   ];
@@ -100,23 +106,23 @@ const PrioritizationTable = () => {
   const customStyles = {
     rows: {
       style: {
-        minHeight: '50px',
+        minHeight: "50px",
         backgroundColor: (row) => getRowBackgroundColor(row.category),
       },
     },
     headCells: {
       style: {
-        paddingLeft: '8px',
-        paddingRight: '8px',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        backgroundColor: '#e9ecef',
+        paddingLeft: "8px",
+        paddingRight: "8px",
+        fontSize: "14px",
+        fontWeight: "bold",
+        backgroundColor: "#e9ecef",
       },
     },
     cells: {
       style: {
-        paddingLeft: '8px',
-        paddingRight: '8px',
+        paddingLeft: "8px",
+        paddingRight: "8px",
       },
     },
   };
@@ -132,19 +138,19 @@ const PrioritizationTable = () => {
         }
         const rawData = await response.json();
 
-        const categories = ['Good', 'Fair', 'Poor', 'Severe'];
-        const groups = ['GroupA', 'GroupB', 'GroupC', 'GroupD'];
+        const categories = ["Good", "Fair", "Poor", "Severe"];
+        const groups = ["GroupA", "GroupB", "GroupC", "GroupD"];
         const districtMapping = {
-          1: 'GroupA',
-          2: 'GroupB',
-          3: 'GroupC',
-          4: 'GroupD',
+          1: "GroupA",
+          2: "GroupB",
+          3: "GroupC",
+          4: "GroupD",
         };
 
-        const scoreData = categories.map(category => {
+        const scoreData = categories.map((category) => {
           const row = { category };
-          groups.forEach(group => {
-            row[group] = 'N.A';
+          groups.forEach((group) => {
+            row[group] = "N.A";
           });
           return row;
         });
@@ -156,13 +162,13 @@ const PrioritizationTable = () => {
           GroupD: [],
         };
 
-        rawData.forEach(item => {
-          const group = districtMapping[item.district_id] || 'GroupA';
+        rawData.forEach((item) => {
+          const group = districtMapping[item.district_id] || "GroupA";
           const category = item.damagecategory;
 
-          const row = scoreData.find(r => r.category === category);
+          const row = scoreData.find((r) => r.category === category);
           if (row) {
-            row[group] = row[group] === 'N.A' ? 1 : row[group] + 1;
+            row[group] = row[group] === "N.A" ? 1 : row[group] + 1;
           }
 
           if (details[group]) {
@@ -182,7 +188,7 @@ const PrioritizationTable = () => {
         setBridgeDetails(details);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
@@ -202,18 +208,20 @@ const PrioritizationTable = () => {
   useEffect(() => {
     if (!bridgeScoreData.length || loading) return; // Wait for data to load
 
-    const chartData = bridgeScoreData.map(row => ({
-      name: row.category,
-      y: Object.values(row)
-        .slice(1)
-        .reduce((sum, val) => sum + (val === 'N.A' ? 0 : parseInt(val)), 0),
-      color: getCategoryColor(row.category),
-    })).filter(item => item.y > 0); // Filter out categories with zero counts
+    const chartData = bridgeScoreData
+      .map((row) => ({
+        name: row.category,
+        y: Object.values(row)
+          .slice(1)
+          .reduce((sum, val) => sum + (val === "N.A" ? 0 : parseInt(val)), 0),
+        color: getCategoryColor(row.category),
+      }))
+      .filter((item) => item.y > 0); // Filter out categories with zero counts
 
     // Calculate total counts
     const totalCount = chartData.reduce((sum, item) => sum + item.y, 0);
 
-    console.log('Chart Data:', chartData); // Debug log to verify data
+    console.log("Chart Data:", chartData); // Debug log to verify data
 
     // Destroy existing chart if it exists
     if (chartRef.current) {
@@ -221,38 +229,42 @@ const PrioritizationTable = () => {
     }
 
     // Create new chart
-    const chartContainer = document.getElementById('chart-container');
+    const chartContainer = document.getElementById("chart-container");
     if (chartContainer) {
-      chartRef.current = Highcharts.chart('chart-container', {
+      chartRef.current = Highcharts.chart("chart-container", {
         chart: {
-          type: 'pie',
+          type: "pie",
           height: chartHeight || 300, // Use chartHeight with fallback
         },
         title: {
           text: `Bridge Counts by Category (Total: ${totalCount})`,
-          align: 'center',
+          align: "center",
         },
-        series: [{
-          name: 'Categories',
-          data: chartData.length ? chartData : [{ name: 'No Data', y: 1, color: '#cccccc' }], // Fallback for empty data
-          size: '60%',
-          dataLabels: {
-            enabled: true,
-            distance: 30,
-            format: '{point.name}: {point.y}',
-            style: { fontSize: '12px' },
+        series: [
+          {
+            name: "Categories",
+            data: chartData.length
+              ? chartData
+              : [{ name: "No Data", y: 1, color: "#cccccc" }], // Fallback for empty data
+            size: "60%",
+            dataLabels: {
+              enabled: true,
+              distance: 30,
+              format: "{point.name}: {point.y}",
+              style: { fontSize: "12px" },
+            },
           },
-        }],
+        ],
         legend: {
-          align: 'center',
-          verticalAlign: 'bottom',
-          layout: 'horizontal',
-          itemStyle: { fontSize: '12px' },
+          align: "center",
+          verticalAlign: "bottom",
+          layout: "horizontal",
+          itemStyle: { fontSize: "12px" },
         },
         plotOptions: {
           pie: {
             allowPointSelect: true,
-            cursor: 'pointer',
+            cursor: "pointer",
             showInLegend: true,
           },
         },
@@ -271,128 +283,107 @@ const PrioritizationTable = () => {
   // Function to get color based on category
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'Good':
-        return '#28a745'; // Green
-      case 'Fair':
-        return '#ffc107'; // Yellow
-      case 'Poor':
-        return '#fd7e14'; // Orange
-      case 'Severe':
-        return '#dc3545'; // Red
+      case "Good":
+        return "#28a745"; // Green
+      case "Fair":
+        return "#ffc107"; // Yellow
+      case "Poor":
+        return "#fd7e14"; // Orange
+      case "Severe":
+        return "#dc3545"; // Red
       default:
-        return '#ffffff'; // White for N.A
+        return "#ffffff"; // White for N.A
     }
   };
 
-  // Improved function to get cell color based on actual values
-const getCellColor = (category, value) => {
-  if (value === 'N.A') return '#f8f9fa'; // Light gray for N/A values
+  const getCellColor = (category, value, groupIndex) => {
+    if (value === "N.A") return "#f8f9fa"; // Light gray for N.A
   
-  // Define base colors for each category
-  const categoryBaseColors = {
-    Good: '#28a745',    // Green
-    Fair: '#ffc107',    // Yellow
-    Poor: '#fd7e14',    // Orange
-    Severe: '#dc3545'   // Red
+    const shades = categoryGroupColors[category];
+    return shades?.[groupIndex] || "#ffffff";
   };
-  
-  // Find the maximum value for this category across all groups
-  const rowData = bridgeScoreData.find(row => row.category === category);
-  if (!rowData) return categoryBaseColors[category];
-  
-  const validValues = ['GroupA', 'GroupB', 'GroupC', 'GroupD']
-    .map(group => rowData[group])
-    .filter(v => v !== 'N.A')
-    .map(v => parseInt(v, 10));
-  
-  const maxValue = Math.max(...validValues);
-  if (maxValue <= 0) return categoryBaseColors[category];
-  
-  // Convert value to number for comparison
-  const numValue = parseInt(value, 10);
-  
-  // Calculate opacity based on the value relative to the max value in that category
-  // Higher values get more intense colors (less transparency)
-  const opacity = 0.3 + (0.7 * (numValue / maxValue));
-  
-  // Convert base color to RGB for opacity adjustment
-  const hexToRgb = (hex) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
-  };
-  
-  const baseColor = hexToRgb(categoryBaseColors[category]);
-  if (!baseColor) return categoryBaseColors[category];
-  
-  // Calculate the blended color with white based on opacity
-  const r = Math.round(baseColor.r * opacity + 255 * (1 - opacity));
-  const g = Math.round(baseColor.g * opacity + 255 * (1 - opacity));
-  const b = Math.round(baseColor.b * opacity + 255 * (1 - opacity));
-  
-  return `rgb(${r}, ${g}, ${b})`;
-};
 
-// Alternative approach using CSS HSL color model for more natural gradients
-const getCellColorHSL = (category, value) => {
-  if (value === 'N.A') return '#f8f9fa'; // Light gray for N/A values
   
-  // Define HSL values for each category (hue, saturation)
-  const categoryHSL = {
-    Good: [120, 60],    // Green hue
-    Fair: [45, 100],    // Yellow hue
-    Poor: [30, 100],    // Orange hue
-    Severe: [0, 100]    // Red hue
+  const categoryGroupColors = {
+    Good: ["#218838", "#28a745", "#5ec17a", "#c8e6c9"],     // Dark → Light green
+    Fair: ["#e0a800", "#ffc107", "#ffda66", "#fff3cd"],     // Dark → Light yellow
+    Poor: ["#d85f00", "#fd7e14", "#ffa25c", "#ffe5d0"],     // Dark → Light orange
+    Severe: ["#bd2130", "#dc3545", "#e4606d", "#f8d7da"],   // Dark → Light red
   };
   
-  // Find the maximum value for this category across all groups
-  const rowData = bridgeScoreData.find(row => row.category === category);
-  if (!rowData) return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
   
-  const validValues = ['GroupA', 'GroupB', 'GroupC', 'GroupD']
-    .map(group => rowData[group])
-    .filter(v => v !== 'N.A')
-    .map(v => parseInt(v, 10));
   
-  const maxValue = Math.max(...validValues);
-  if (maxValue <= 0) return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
-  
-  // Convert value to number for comparison
-  const numValue = parseInt(value, 10);
-  
-  // Calculate lightness - higher values get darker colors (lower lightness)
-  // Range from 85% (very light) to 40% (more saturated)
-  const lightness = 85 - (45 * (numValue / maxValue));
-  
-  return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, ${lightness}%)`;
-};
+
+  // Alternative approach using CSS HSL color model for more natural gradients
+  const getCellColorHSL = (category, value) => {
+    if (value === "N.A") return "#f8f9fa"; // Light gray for N/A values
+
+    // Define HSL values for each category (hue, saturation)
+    const categoryHSL = {
+      Good: [120, 60], // Green hue
+      Fair: [45, 100], // Yellow hue
+      Poor: [30, 100], // Orange hue
+      Severe: [0, 100], // Red hue
+    };
+
+    // Find the maximum value for this category across all groups
+    const rowData = bridgeScoreData.find((row) => row.category === category);
+    if (!rowData)
+      return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
+
+    const validValues = ["GroupA", "GroupB", "GroupC", "GroupD"]
+      .map((group) => rowData[group])
+      .filter((v) => v !== "N.A")
+      .map((v) => parseInt(v, 10));
+
+    const maxValue = Math.max(...validValues);
+    if (maxValue <= 0)
+      return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
+
+    // Convert value to number for comparison
+    const numValue = parseInt(value, 10);
+
+    // Calculate lightness - higher values get darker colors (lower lightness)
+    // Range from 85% (very light) to 40% (more saturated)
+    const lightness = 85 - 45 * (numValue / maxValue);
+
+    return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, ${lightness}%)`;
+  };
 
   const getRowBackgroundColor = (category) => {
     switch (category) {
-      case 'Good': return '#e6f3e6';
-      case 'Fair': return '#fff3cd';
-      case 'Poor': return '#ffe4cc';
-      case 'Severe': return '#f8d7da';
-      default: return '#ffffff';
+      case "Good":
+        return "#e6f3e6";
+      case "Fair":
+        return "#fff3cd";
+      case "Poor":
+        return "#ffe4cc";
+      case "Severe":
+        return "#f8d7da";
+      default:
+        return "#ffffff";
     }
   };
 
   const handleDownloadCSV = () => {
     if (!bridgeScoreData.length) {
-      console.warn('No data available for CSV download.');
+      console.warn("No data available for CSV download.");
       return;
     }
-    const csvContent = 'data:text/csv;charset=utf-8,' + [
-      ['Category', 'Group A', 'Group B', 'Group C', 'Group D'].join(','),
-      ...bridgeScoreData.map(row => [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(',')),
-    ].join('\n');
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [
+        ["Category", "Group A", "Group B", "Group C", "Group D"].join(","),
+        ...bridgeScoreData.map((row) =>
+          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(
+            ","
+          )
+        ),
+      ].join("\n");
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', 'Bridges_Category_Summary.csv');
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "Bridges_Category_Summary.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -400,7 +391,7 @@ const getCellColorHSL = (category, value) => {
 
   const handleTabClick = (category) => {
     setSelectedCategory(category);
-    setActiveTab('table'); // Reset to table view when selecting a category
+    setActiveTab("table"); // Reset to table view when selecting a category
   };
 
   const handleViewTabChange = (key) => {
@@ -408,14 +399,18 @@ const getCellColorHSL = (category, value) => {
   };
 
   const filteredBridgeDetails = () => {
-    const selectedRow = bridgeScoreData.find(row => row.category === selectedCategory);
+    const selectedRow = bridgeScoreData.find(
+      (row) => row.category === selectedCategory
+    );
     if (!selectedRow) return [];
-    const groups = ['GroupA', 'GroupB', 'GroupC', 'GroupD'];
+    const groups = ["GroupA", "GroupB", "GroupC", "GroupD"];
     const details = [];
-    groups.forEach(group => {
-      if (selectedRow[group] !== 'N.A') {
+    groups.forEach((group) => {
+      if (selectedRow[group] !== "N.A") {
         const groupDetails = bridgeDetails[group] || [];
-        const filteredDetails = groupDetails.filter(detail => detail.category === selectedCategory);
+        const filteredDetails = groupDetails.filter(
+          (detail) => detail.category === selectedCategory
+        );
         details.push(...filteredDetails);
       }
     });
@@ -449,21 +444,24 @@ const getCellColorHSL = (category, value) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {bridgeScoreData.map((row, index) => (
-                      <tr key={index}>
-                        <td className="text-center">{row.category}</td>
-                        {['GroupA', 'GroupB', 'GroupC', 'GroupD'].map(group => (
-                          <td
-                            key={group}
-                            className="text-center"
-                            style={{ backgroundColor: getCellColor(row.category, row[group]) }}
-                          >
-                            {row[group]}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
+  {bridgeScoreData.map((row, rowIndex) => (
+    <tr key={rowIndex}>
+      <td className="text-center">{row.category}</td>
+      {["GroupA", "GroupB", "GroupC", "GroupD"].map((group, groupIndex) => (
+        <td
+          key={group}
+          className="text-center"
+          style={{
+            backgroundColor: getCellColor(row.category, row[group], groupIndex),
+          }}
+        >
+          {row[group]}
+        </td>
+      ))}
+    </tr>
+  ))}
+</tbody>
+
                 </Table>
               )}
             </div>
@@ -472,13 +470,18 @@ const getCellColorHSL = (category, value) => {
         <Col md={4} className="d-flex align-items-center">
           <div className="card shadow-sm border-1 w-100">
             <div className="card-body p-2">
-              <div id="chart-container" style={{ minHeight: '300px' }}></div>
+              <div id="chart-container" style={{ minHeight: "300px" }}></div>
             </div>
           </div>
         </Col>
       </Row>
 
-      <Modal show={showModal} onHide={() => setShowModal(false)} size="lg" centered>
+      <Modal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        size="lg"
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
         </Modal.Header>
@@ -518,10 +521,14 @@ const getCellColorHSL = (category, value) => {
             <div className="card shadow-sm border-0">
               <div className="card-header border-1 p-2 d-flex justify-content-between align-items-center">
                 <div>
-                  {['Good', 'Fair', 'Poor', 'Severe'].map(category => (
+                  {["Good", "Fair", "Poor", "Severe"].map((category) => (
                     <Button
                       key={category}
-                      variant={selectedCategory === category ? 'primary' : 'outline-primary'}
+                      variant={
+                        selectedCategory === category
+                          ? "primary"
+                          : "outline-primary"
+                      }
                       onClick={() => handleTabClick(category)}
                       className="mx-1"
                     >
@@ -529,8 +536,10 @@ const getCellColorHSL = (category, value) => {
                     </Button>
                   ))}
                   <Button
-                    variant={activeTab === 'map' ? 'primary' : 'outline-primary'}
-                    onClick={() => handleViewTabChange('map')}
+                    variant={
+                      activeTab === "map" ? "primary" : "outline-primary"
+                    }
+                    onClick={() => handleViewTabChange("map")}
                     className="mx-1"
                   >
                     Map
@@ -538,7 +547,7 @@ const getCellColorHSL = (category, value) => {
                 </div>
               </div>
               <div className="card-body p-0">
-                {activeTab === 'table' ? (
+                {activeTab === "table" ? (
                   <StyledDataTable
                     columns={columns}
                     data={filteredBridgeDetails()}
@@ -550,7 +559,14 @@ const getCellColorHSL = (category, value) => {
                     striped
                     noDataComponent="No bridges found for this category."
                     progressPending={loading}
-                    progressComponent={<div className="spinner-border mx-auto my-3" role="status"><span className="visually-hidden">Loading...</span></div>}
+                    progressComponent={
+                      <div
+                        className="spinner-border mx-auto my-3"
+                        role="status"
+                      >
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    }
                   />
                 ) : (
                   <Map />
