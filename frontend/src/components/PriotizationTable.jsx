@@ -6,7 +6,7 @@ import Highcharts from "highcharts";
 import DataTable from "react-data-table-component";
 import styled from "styled-components";
 import { BASE_URL } from "./config";
-import Map from "./Map";
+import PrioritizationMap from "./PriortizationMap"; // Import the map component
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -532,7 +532,7 @@ const PrioritizationTable = () => {
                     }
                   />
                 ) : (
-                  <Map />
+                  <PrioritizationMap />
                 )}
               </div>
             </div>
