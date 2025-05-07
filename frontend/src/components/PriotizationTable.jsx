@@ -456,7 +456,7 @@ const getCellColorHSL = (category, value) => {
                           <td
                             key={group}
                             className="text-center"
-                            style={{ backgroundColor: getCellColorHSL(row.category, row[group]) }}
+                            style={{ backgroundColor: getCellColor(row.category, row[group]) }}
                           >
                             {row[group]}
                           </td>
