@@ -12,7 +12,7 @@ const EsriMap = () => {
       .then(([Map, MapView, MapImageLayer]) => {
         // Initialize the map
         const map = new Map({
-          basemap: 'topo-vector', // You can change this to 'streets', 'satellite', etc.
+          basemap: 'gray-vector', // You can change this to 'streets', 'satellite', etc.
         });
 
         // Add the ArcGIS MapImageLayer for the dynamic map service
@@ -25,11 +25,13 @@ const EsriMap = () => {
 
         // Create a MapView
         const view = new MapView({
-          container: mapRef.current, // Reference to the DOM element
-          map: map,
-          center: [73.0479, 31.3753], // Center on Punjab, Pakistan (adjust as needed)
-          zoom: 7, // Adjust zoom level as needed
-        });
+            container: mapRef.current,
+            map: map,
+            center: [72.7097, 31.1704],
+            zoom: 6,
+          });
+  
+          viewRef.current = view;
 
         // Cleanup on component unmount
         return () => {
