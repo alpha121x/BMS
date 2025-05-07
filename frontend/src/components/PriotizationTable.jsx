@@ -6,6 +6,7 @@ import Highcharts from 'highcharts';
 import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
 import { BASE_URL } from './config';
+import Map from "./Map";
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -263,23 +264,62 @@ const PrioritizationTable = () => {
     };
   }, [bridgeScoreData, chartHeight, loading]); // Re-render chart when data or height changes
 
-  const getCategoryStyle = (category) => {
+  // Function to get color based on category (not value)
+  const getCategoryColor = (category) => {
     switch (category) {
-      case 'Good': return { backgroundColor: '#28a745', color: 'white' };
-      case 'Fair': return { backgroundColor: '#ffc107', color: 'black' };
-      case 'Poor': return { backgroundColor: '#fd7e14', color: 'white' };
-      case 'Severe': return { backgroundColor: '#dc3545', color: 'white' };
-      default: return {};
+      case 'Good':
+        return '#28a745'; // Green
+      case 'Fair':
+        return '#ffc107'; // Yellow
+      case 'Poor':
+        return '#fd7e14'; // Orange
+      case 'Severe':
+        return '#dc3545'; // Red
+      default:
+        return '#ffffff'; // White for N.A
     }
   };
 
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case 'Good': return '#28a745';
-      case 'Fair': return '#ffc107';
-      case 'Poor': return '#fd7e14';
-      case 'Severe': return '#dc3545';
-      default: return '#000000';
+  // Function to get cell color based on category and value range
+  const getCellColor = (category, value) => {
+    if (value === 'N.A') return '#ffffff'; // White for N/A values
+
+    const numericValue = parseInt(value);
+    const categoryData = bridgeScoreData.find(row => row.category === category);
+    const values = ['GroupA', 'GroupB', 'GroupC', 'GroupD']
+      .map(group => categoryData[group] === 'N.A' ? 0 : parseInt(categoryData[group]))
+      .filter(val => val > 0);
+    const maxValue = Math.max(...values);
+    const minValue = Math.min(...values);
+
+    if (maxValue === minValue) return getBaseColor(category); // Use base color if all values are the same
+
+    // Define four color levels for each category
+    const colorLevels = {
+      Good: ['#006400', '#228B22', '#32CD32', '#90EE90'], // Dark Green to Light Green
+      Fair: ['#FFA500', '#FFD700', '#FFFF00', '#FFFFE0'], // Dark Orange to Light Yellow
+      Poor: ['#FF4500', '#FF8C00', '#FFA500', '#FFE4B5'], // Dark Red-Orange to Light Peach
+      Severe: ['#8B0000', '#DC143C', '#FF0000', '#FFA07A'] // Dark Red to Light Salmon
+    };
+
+    const baseColor = getBaseColor(category);
+    const colors = colorLevels[category] || [baseColor, baseColor, baseColor, baseColor];
+    const range = maxValue - minValue;
+    const valuePosition = (numericValue - minValue) / (range || 1);
+
+    if (valuePosition >= 0.75) return colors[0]; // Highest 25%
+    if (valuePosition >= 0.5) return colors[1];  // Middle-High 25%
+    if (valuePosition >= 0.25) return colors[2]; // Middle-Low 25%
+    return colors[3]; // Lowest 25%
+
+    function getBaseColor(cat) {
+      switch (cat) {
+        case 'Good': return '#28a745';
+        case 'Fair': return '#ffc107';
+        case 'Poor': return '#fd7e14';
+        case 'Severe': return '#dc3545';
+        default: return '#ffffff';
+      }
     }
   };
 
@@ -360,11 +400,15 @@ const PrioritizationTable = () => {
                   <tbody>
                     {bridgeScoreData.map((row, index) => (
                       <tr key={index}>
-                        <td className="text-center" style={getCategoryStyle(row.category)}>
-                          {row.category}
-                        </td>
+                        <td className="text-center">{row.category}</td>
                         {['GroupA', 'GroupB', 'GroupC', 'GroupD'].map(group => (
-                          <td key={group} className="text-center">{row[group]}</td>
+                          <td
+                            key={group}
+                            className="text-center"
+                            style={{ backgroundColor: getCellColor(row.category, row[group]) }}
+                          >
+                            {row[group]}
+                          </td>
                         ))}
                       </tr>
                     ))}
@@ -451,6 +495,13 @@ const PrioritizationTable = () => {
                 />
               </div>
             </div>
+          </Col>
+        </Row>
+      </Container>
+      <Container fluid className="py-2 bg-light mt-3">
+        <Row className="justify-content-center">
+          <Col md={12}>
+               <Map/>
           </Col>
         </Row>
       </Container>
