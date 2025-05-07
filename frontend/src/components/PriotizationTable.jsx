@@ -210,6 +210,9 @@ const PrioritizationTable = () => {
       color: getCategoryColor(row.category),
     })).filter(item => item.y > 0); // Filter out categories with zero counts
 
+    // Calculate total counts
+    const totalCount = chartData.reduce((sum, item) => sum + item.y, 0);
+
     console.log('Chart Data:', chartData); // Debug log to verify data
 
     // Destroy existing chart if it exists
@@ -226,7 +229,7 @@ const PrioritizationTable = () => {
           height: chartHeight || 300, // Use chartHeight with fallback
         },
         title: {
-          text: 'Bridge Counts by Category',
+          text: `Bridge Counts by Category (Total: ${totalCount})`,
           align: 'center',
         },
         series: [{
