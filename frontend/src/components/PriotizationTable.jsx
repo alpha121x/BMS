@@ -297,57 +297,15 @@ const PrioritizationTable = () => {
   };
 
   const getCellColor = (category, value, groupIndex) => {
-    if (value === "N.A") return "#f8f9fa"; // Light gray for N.A
-  
     const shades = categoryGroupColors[category];
     return shades?.[groupIndex] || "#ffffff";
   };
 
-  
   const categoryGroupColors = {
-    Good: ["#218838", "#28a745", "#5ec17a", "#c8e6c9"],     // Dark → Light green
-    Fair: ["#e0a800", "#ffc107", "#ffda66", "#fff3cd"],     // Dark → Light yellow
-    Poor: ["#d85f00", "#fd7e14", "#ffa25c", "#ffe5d0"],     // Dark → Light orange
-    Severe: ["#bd2130", "#dc3545", "#e4606d", "#f8d7da"],   // Dark → Light red
-  };
-  
-  
-  
-
-  // Alternative approach using CSS HSL color model for more natural gradients
-  const getCellColorHSL = (category, value) => {
-    if (value === "N.A") return "#f8f9fa"; // Light gray for N/A values
-
-    // Define HSL values for each category (hue, saturation)
-    const categoryHSL = {
-      Good: [120, 60], // Green hue
-      Fair: [45, 100], // Yellow hue
-      Poor: [30, 100], // Orange hue
-      Severe: [0, 100], // Red hue
-    };
-
-    // Find the maximum value for this category across all groups
-    const rowData = bridgeScoreData.find((row) => row.category === category);
-    if (!rowData)
-      return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
-
-    const validValues = ["GroupA", "GroupB", "GroupC", "GroupD"]
-      .map((group) => rowData[group])
-      .filter((v) => v !== "N.A")
-      .map((v) => parseInt(v, 10));
-
-    const maxValue = Math.max(...validValues);
-    if (maxValue <= 0)
-      return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
-
-    // Convert value to number for comparison
-    const numValue = parseInt(value, 10);
-
-    // Calculate lightness - higher values get darker colors (lower lightness)
-    // Range from 85% (very light) to 40% (more saturated)
-    const lightness = 85 - 45 * (numValue / maxValue);
-
-    return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, ${lightness}%)`;
+    Good: ["#218838", "#28a745", "#5ec17a", "#c8e6c9"], // Dark → Light green
+    Fair: ["#e0a800", "#ffc107", "#ffda66", "#fff3cd"], // Dark → Light yellow
+    Poor: ["#d85f00", "#fd7e14", "#ffa25c", "#ffe5d0"], // Dark → Light orange
+    Severe: ["#bd2130", "#dc3545", "#e4606d", "#f8d7da"], // Dark → Light red
   };
 
   const getRowBackgroundColor = (category) => {
@@ -444,24 +402,29 @@ const PrioritizationTable = () => {
                     </tr>
                   </thead>
                   <tbody>
-  {bridgeScoreData.map((row, rowIndex) => (
-    <tr key={rowIndex}>
-      <td className="text-center">{row.category}</td>
-      {["GroupA", "GroupB", "GroupC", "GroupD"].map((group, groupIndex) => (
-        <td
-          key={group}
-          className="text-center"
-          style={{
-            backgroundColor: getCellColor(row.category, row[group], groupIndex),
-          }}
-        >
-          {row[group]}
-        </td>
-      ))}
-    </tr>
-  ))}
-</tbody>
-
+                    {bridgeScoreData.map((row, rowIndex) => (
+                      <tr key={rowIndex}>
+                        <td className="text-center">{row.category}</td>
+                        {["GroupA", "GroupB", "GroupC", "GroupD"].map(
+                          (group, groupIndex) => (
+                            <td
+                              key={group}
+                              className="text-center"
+                              style={{
+                                backgroundColor: getCellColor(
+                                  row.category,
+                                  row[group],
+                                  groupIndex
+                                ),
+                              }}
+                            >
+                              {row[group]}
+                            </td>
+                          )
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
                 </Table>
               )}
             </div>
