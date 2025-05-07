@@ -268,7 +268,7 @@ const PrioritizationTable = () => {
     };
   }, [bridgeScoreData, chartHeight, loading]); // Re-render chart when data or height changes
 
-  // Function to get color based on category (not value)
+  // Function to get color based on category
   const getCategoryColor = (category) => {
     switch (category) {
       case 'Good':
@@ -284,48 +284,91 @@ const PrioritizationTable = () => {
     }
   };
 
-  // Function to get cell color based on category and value range
-  const getCellColor = (category, value) => {
-    if (value === 'N.A') return '#ffffff'; // White for N/A values
-
-    const numericValue = parseInt(value);
-    const categoryData = bridgeScoreData.find(row => row.category === category);
-    const values = ['GroupA', 'GroupB', 'GroupC', 'GroupD']
-      .map(group => categoryData[group] === 'N.A' ? 0 : parseInt(categoryData[group]))
-      .filter(val => val > 0);
-    const maxValue = Math.max(...values);
-    const minValue = Math.min(...values);
-
-    if (maxValue === minValue) return getBaseColor(category); // Use base color if all values are the same
-
-    // Define four color levels for each category
-    const colorLevels = {
-      Good: ['#006400', '#228B22', '#32CD32', '#90EE90'], // Dark Green to Light Green
-      Fair: ['#FFA500', '#FFD700', '#FFFF00', '#FFFFE0'], // Dark Orange to Light Yellow
-      Poor: ['#FF4500', '#FF8C00', '#FFA500', '#FFE4B5'], // Dark Red-Orange to Light Peach
-      Severe: ['#8B0000', '#DC143C', '#FF0000', '#FFA07A'] // Dark Red to Light Salmon
-    };
-
-    const baseColor = getBaseColor(category);
-    const colors = colorLevels[category] || [baseColor, baseColor, baseColor, baseColor];
-    const range = maxValue - minValue;
-    const valuePosition = (numericValue - minValue) / (range || 1);
-
-    if (valuePosition >= 0.75) return colors[0]; // Highest 25%
-    if (valuePosition >= 0.5) return colors[1];  // Middle-High 25%
-    if (valuePosition >= 0.25) return colors[2]; // Middle-Low 25%
-    return colors[3]; // Lowest 25%
-
-    function getBaseColor(cat) {
-      switch (cat) {
-        case 'Good': return '#28a745';
-        case 'Fair': return '#ffc107';
-        case 'Poor': return '#fd7e14';
-        case 'Severe': return '#dc3545';
-        default: return '#ffffff';
-      }
-    }
+  // Improved function to get cell color based on actual values
+const getCellColor = (category, value) => {
+  if (value === 'N.A') return '#f8f9fa'; // Light gray for N/A values
+  
+  // Define base colors for each category
+  const categoryBaseColors = {
+    Good: '#28a745',    // Green
+    Fair: '#ffc107',    // Yellow
+    Poor: '#fd7e14',    // Orange
+    Severe: '#dc3545'   // Red
   };
+  
+  // Find the maximum value for this category across all groups
+  const rowData = bridgeScoreData.find(row => row.category === category);
+  if (!rowData) return categoryBaseColors[category];
+  
+  const validValues = ['GroupA', 'GroupB', 'GroupC', 'GroupD']
+    .map(group => rowData[group])
+    .filter(v => v !== 'N.A')
+    .map(v => parseInt(v, 10));
+  
+  const maxValue = Math.max(...validValues);
+  if (maxValue <= 0) return categoryBaseColors[category];
+  
+  // Convert value to number for comparison
+  const numValue = parseInt(value, 10);
+  
+  // Calculate opacity based on the value relative to the max value in that category
+  // Higher values get more intense colors (less transparency)
+  const opacity = 0.3 + (0.7 * (numValue / maxValue));
+  
+  // Convert base color to RGB for opacity adjustment
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  };
+  
+  const baseColor = hexToRgb(categoryBaseColors[category]);
+  if (!baseColor) return categoryBaseColors[category];
+  
+  // Calculate the blended color with white based on opacity
+  const r = Math.round(baseColor.r * opacity + 255 * (1 - opacity));
+  const g = Math.round(baseColor.g * opacity + 255 * (1 - opacity));
+  const b = Math.round(baseColor.b * opacity + 255 * (1 - opacity));
+  
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+// Alternative approach using CSS HSL color model for more natural gradients
+const getCellColorHSL = (category, value) => {
+  if (value === 'N.A') return '#f8f9fa'; // Light gray for N/A values
+  
+  // Define HSL values for each category (hue, saturation)
+  const categoryHSL = {
+    Good: [120, 60],    // Green hue
+    Fair: [45, 100],    // Yellow hue
+    Poor: [30, 100],    // Orange hue
+    Severe: [0, 100]    // Red hue
+  };
+  
+  // Find the maximum value for this category across all groups
+  const rowData = bridgeScoreData.find(row => row.category === category);
+  if (!rowData) return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
+  
+  const validValues = ['GroupA', 'GroupB', 'GroupC', 'GroupD']
+    .map(group => rowData[group])
+    .filter(v => v !== 'N.A')
+    .map(v => parseInt(v, 10));
+  
+  const maxValue = Math.max(...validValues);
+  if (maxValue <= 0) return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, 50%)`;
+  
+  // Convert value to number for comparison
+  const numValue = parseInt(value, 10);
+  
+  // Calculate lightness - higher values get darker colors (lower lightness)
+  // Range from 85% (very light) to 40% (more saturated)
+  const lightness = 85 - (45 * (numValue / maxValue));
+  
+  return `hsl(${categoryHSL[category][0]}, ${categoryHSL[category][1]}%, ${lightness}%)`;
+};
 
   const getRowBackgroundColor = (category) => {
     switch (category) {
@@ -378,7 +421,6 @@ const PrioritizationTable = () => {
     });
     return details;
   };
-
   return (
     <Container fluid className="py-2 bg-light mt-5">
       <Row className="justify-content-center">
@@ -414,7 +456,7 @@ const PrioritizationTable = () => {
                           <td
                             key={group}
                             className="text-center"
-                            style={{ backgroundColor: getCellColor(row.category, row[group]) }}
+                            style={{ backgroundColor: getCellColorHSL(row.category, row[group]) }}
                           >
                             {row[group]}
                           </td>
