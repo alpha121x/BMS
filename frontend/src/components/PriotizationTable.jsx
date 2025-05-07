@@ -380,20 +380,20 @@ const PrioritizationTable = () => {
     <Container fluid className="py-2 bg-light mt-5">
       <Row className="justify-content-center">
         <Col md={8}>
-          <div className="card shadow-sm border-0" ref={tableRef}>
+          <div className="card shadow-sm border-1" ref={tableRef}>
             <div className="card-header border-1 text-white p-2 d-flex justify-content-between align-items-center">
               <h5 className="mb-0 text-black">Bridge Prioritization Table</h5>
               <Button variant="light" onClick={handleDownloadCSV}>
                 <FontAwesomeIcon icon={faFileCsv} className="mr-2" /> CSV
               </Button>
             </div>
-            <div className="card-body p-0">
+            <div className="card-body p-5">
               {loading ? (
                 <div className="spinner-border mx-auto my-3" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
               ) : (
-                <Table bordered hover striped className="mb-0">
+                <Table bordered hover striped className="mb-0 p-2">
                   <thead>
                     <tr>
                       <th className="text-center">Category</th>
