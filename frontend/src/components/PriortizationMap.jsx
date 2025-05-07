@@ -92,14 +92,11 @@ const EsriMap = () => {
         // Add the legend to the top-right corner
         view.ui.add(legend, "top-right");
 
-        // Apply custom styles to make the legend small
-        legend.container.style.maxWidth = "200px";
-        legend.container.style.maxHeight = "150px";
-        legend.container.style.overflow = "auto";
-        legend.container.style.fontSize = "12px";
-        legend.container.style.backgroundColor = "white";
-        legend.container.style.padding = "10px";
-        legend.container.style.boxShadow = "0 1px 5px rgba(0,0,0,0.2)";
+       // Apply custom styles to make the legend small
+       legend.container.style.maxWidth = '200px'; // Limit width
+       legend.container.style.maxHeight = '150px'; // Limit height
+       legend.container.style.overflow = 'auto'; // Add scroll if content overflows
+       legend.container.style.fontSize = '12px'; // Smaller font size
 
         // Cleanup on component unmount
         return () => {
