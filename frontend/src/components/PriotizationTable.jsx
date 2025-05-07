@@ -63,8 +63,8 @@ const PrioritizationTable = () => {
   const [modalData, setModalData] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState("");
   const [chartHeight, setChartHeight] = useState(300); // Default height
-  const [selectedCategory, setSelectedCategory] = useState("Severe");
-  const [activeTab, setActiveTab] = useState("table"); // State to manage Table/Map tabs
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [activeTab, setActiveTab] = useState("map"); // State to manage Table/Map tabs
   const tableRef = useRef(null);
   const chartRef = useRef(null); // Ref to store the chart instance
 
