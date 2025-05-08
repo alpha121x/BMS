@@ -25,7 +25,7 @@ const EsriMap = () => {
         // Define a popup template for the layer
         const popupTemplate = {
           title: "Bridge Details",
-          content: `
+          content: ` 
             <div style="margin-bottom: 20px;">
               <b>Road Name:</b> {road_name}<br/>
               <b>District:</b> {district}<br/>
@@ -55,8 +55,17 @@ const EsriMap = () => {
           ],
         });
 
-        // Add the layer to the map
+        const divisionBoundaryLayer = new MapImageLayer({
+          url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/DB_CNW_RAMS_public/MapServer",
+          title: "Punjab Division Boundary",
+          sublayers: [
+            { id: 5, title: "Punjab Division Boundary", popupTemplate: popupTemplate },
+          ],
+        });
+
+        // Add the layers to the map
         map.add(mapServiceLayer);
+        map.add(divisionBoundaryLayer); // Add the new layer
 
         // Create a MapView
         const view = new MapView({
@@ -92,6 +101,14 @@ const EsriMap = () => {
                   (sublayer) => !sublayer.isGroupLayer
                 ) || [],
             },
+            {
+              layer: divisionBoundaryLayer,
+              title: "Punjab Division Boundary",
+              sublayers:
+                divisionBoundaryLayer.sublayers?.filter(
+                  (sublayer) => !sublayer.isGroupLayer
+                ) || [],
+            },
           ],
           container: document.createElement("div"),
         });
@@ -99,11 +116,11 @@ const EsriMap = () => {
         // Add the legend to the top-right corner
         view.ui.add(legend, "top-right");
 
-       // Apply custom styles to make the legend small
-       legend.container.style.maxWidth = '200px'; // Limit width
-       legend.container.style.maxHeight = '150px'; // Limit height
-       legend.container.style.overflow = 'auto'; // Add scroll if content overflows
-       legend.container.style.fontSize = '12px'; // Smaller font size
+        // Apply custom styles to make the legend small
+        legend.container.style.maxWidth = '200px'; // Limit width
+        legend.container.style.maxHeight = '150px'; // Limit height
+        legend.container.style.overflow = 'auto'; // Add scroll if content overflows
+        legend.container.style.fontSize = '12px'; // Smaller font size
 
         // Cleanup on component unmount
         return () => {

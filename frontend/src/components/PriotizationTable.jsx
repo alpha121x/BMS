@@ -221,7 +221,7 @@ const PrioritizationTable = () => {
     // Calculate total counts
     const totalCount = chartData.reduce((sum, item) => sum + item.y, 0);
 
-    console.log("Chart Data:", chartData); // Debug log to verify data
+    // console.log("Chart Data:", chartData); // Debug log to verify data
 
     // Destroy existing chart if it exists
     if (chartRef.current) {
