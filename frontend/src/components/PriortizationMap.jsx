@@ -13,10 +13,18 @@ const EsriMap = () => {
         "esri/views/MapView",
         "esri/layers/MapImageLayer",
         "esri/widgets/Legend",
+        "esri/identity/IdentityManager", // Add IdentityManager for authentication
       ],
       { css: true }
     )
-      .then(([Map, MapView, MapImageLayer, Legend]) => {
+      .then(([Map, MapView, MapImageLayer, Legend, IdentityManager]) => {
+        // Register the token with IdentityManager (preferred method)
+        const token = "your-token-here"; // Replace with the token you obtained
+        IdentityManager.registerToken({
+          server: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services",
+          token: token,
+        });
+
         // Initialize the map
         const map = new Map({
           basemap: "gray-vector",
@@ -25,7 +33,7 @@ const EsriMap = () => {
         // Define a popup template for the layer
         const popupTemplate = {
           title: "Bridge Details",
-          content: ` 
+          content: `
             <div style="margin-bottom: 20px;">
               <b>Road Name:</b> {road_name}<br/>
               <b>District:</b> {district}<br/>
@@ -56,7 +64,7 @@ const EsriMap = () => {
         });
 
         const divisionBoundaryLayer = new MapImageLayer({
-          url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/DB_CNW_RAMS_public/MapServer",
+          url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_road_Damage_catagory/MapServer",
           title: "Punjab Division Boundary",
           sublayers: [
             { id: 5, title: "Punjab Division Boundary", popupTemplate: popupTemplate },
@@ -65,7 +73,7 @@ const EsriMap = () => {
 
         // Add the layers to the map
         map.add(mapServiceLayer);
-        map.add(divisionBoundaryLayer); // Add the new layer
+        map.add(divisionBoundaryLayer);
 
         // Create a MapView
         const view = new MapView({
@@ -117,10 +125,10 @@ const EsriMap = () => {
         view.ui.add(legend, "top-right");
 
         // Apply custom styles to make the legend small
-        legend.container.style.maxWidth = '200px'; // Limit width
-        legend.container.style.maxHeight = '150px'; // Limit height
-        legend.container.style.overflow = 'auto'; // Add scroll if content overflows
-        legend.container.style.fontSize = '12px'; // Smaller font size
+        legend.container.style.maxWidth = "200px";
+        legend.container.style.maxHeight = "150px";
+        legend.container.style.overflow = "auto";
+        legend.container.style.fontSize = "12px";
 
         // Cleanup on component unmount
         return () => {
