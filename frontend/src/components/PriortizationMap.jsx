@@ -24,14 +24,21 @@ const EsriMap = () => {
 
         // Define a popup template for the layer
         const popupTemplate = {
-          title: "Bridge/Road Details",
+          title: "Bridge Details",
           content: `
-            <div>
-             <b>Road Name:</b> {road_name}<br/>
+            <div style="margin-bottom: 20px;">
+              <b>Road Name:</b> {road_name}<br/>
               <b>District:</b> {district}<br/>
               <b>Structure Type:</b> {structure_type}<br/>
               <b>Damage Category:</b> {damagecategory}<br/>
               <b>Damage Score:</b> {damagescore}
+            </div>
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+              <img src="https://via.placeholder.com/100" alt="Damage Image 1" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="https://via.placeholder.com/100" alt="Damage Image 2" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="https://via.placeholder.com/100" alt="Damage Image 3" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="https://via.placeholder.com/100" alt="Damage Image 4" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="https://via.placeholder.com/100" alt="Damage Image 5" style="width: 18%; height: auto; object-fit: cover;">
             </div>
           `,
         };
