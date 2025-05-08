@@ -64,10 +64,10 @@ const EsriMap = () => {
         });
 
         const divisionBoundaryLayer = new MapImageLayer({
-          url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/DB_CNW_RAMS_public/MapServer",
+          url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_road_Damage_catagory/MapServer",
           title: "Punjab Division Boundary",
           sublayers: [
-            { id: 5, title: "Punjab Division Boundary", popupTemplate: popupTemplate },
+            { id: 5, title: "Punjab Division Boundary" },
           ],
         });
 
