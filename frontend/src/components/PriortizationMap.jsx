@@ -34,11 +34,11 @@ const EsriMap = () => {
               <b>Damage Score:</b> {damagescore}
             </div>
             <div style="display: flex; justify-content: space-between; gap: 10px;">
-              <img src="https://via.placeholder.com/100" alt="Damage Image 1" style="width: 18%; height: auto; object-fit: cover;">
-              <img src="https://via.placeholder.com/100" alt="Damage Image 2" style="width: 18%; height: auto; object-fit: cover;">
-              <img src="https://via.placeholder.com/100" alt="Damage Image 3" style="width: 18%; height: auto; object-fit: cover;">
-              <img src="https://via.placeholder.com/100" alt="Damage Image 4" style="width: 18%; height: auto; object-fit: cover;">
-              <img src="https://via.placeholder.com/100" alt="Damage Image 5" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="{image_1}" alt="Overview Image 1" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="{image_2}" alt="Overview Image 2" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="{image_3}" alt="Overview Image 3" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="{image_4}" alt="Overview Image 4" style="width: 18%; height: auto; object-fit: cover;">
+              <img src="{image_5}" alt="Overview Image 5" style="width: 18%; height: auto; object-fit: cover;">
             </div>
           `,
         };
