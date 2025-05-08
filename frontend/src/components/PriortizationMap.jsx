@@ -67,7 +67,7 @@ const EsriMap = () => {
           url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_road_Damage_catagory/MapServer",
           title: "Punjab Division Boundary",
           sublayers: [
-            { id: 5, title: "Punjab Division Boundary" },
+            { id: 5, title: "Division Layer" },
           ],
         });
 
@@ -106,14 +106,6 @@ const EsriMap = () => {
               title: "Bridge Categories",
               sublayers:
                 mapServiceLayer.sublayers?.filter(
-                  (sublayer) => !sublayer.isGroupLayer
-                ) || [],
-            },
-            {
-              layer: divisionBoundaryLayer,
-              title: "Punjab Division Boundary",
-              sublayers:
-                divisionBoundaryLayer.sublayers?.filter(
                   (sublayer) => !sublayer.isGroupLayer
                 ) || [],
             },
