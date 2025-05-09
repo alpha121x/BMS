@@ -335,6 +335,49 @@ app.get('/api/bms-cost', async (req, res) => {
   }
 });
 
+// API endpoint to fetch data from bms.tbl_bms_cost
+app.get('/api/bms-cost-export', async (req, res) => {
+  try {
+    let { district, structureType, bridgeName } = req.query;
+
+    // Default filter values
+    district = district || "%";
+    structureType = structureType || "%";
+    bridgeName = bridgeName ? `%${bridgeName}%` : "%";
+
+    const query = `
+      SELECT 
+        c.uu_bms_id, 
+        m.district, 
+        m.road_name, 
+        m.structure_type, 
+        m.pms_sec_id, 
+        CONCAT(m.pms_sec_id, ', ', m.structure_no) AS bridge_name,
+        c.cost_million
+      FROM bms.tbl_bms_cost c
+      JOIN bms.tbl_bms_master_data m
+        ON c.uu_bms_id = m.uu_bms_id
+      WHERE 
+        m.district::TEXT LIKE $1
+        AND m.structure_type::TEXT LIKE $2
+        AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $3
+      ORDER BY c.uu_bms_id
+    `;
+
+    const values = [district, structureType, bridgeName];
+    const result = await pool.query(query, values);
+
+    res.json({
+      success: true,
+      totalRecords: result.rowCount,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error('Error executing export query:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // API Endpoint for Exporting Full BMS Data (No Limits)
 app.get("/api/bms-score-export", async (req, res) => {
   try {

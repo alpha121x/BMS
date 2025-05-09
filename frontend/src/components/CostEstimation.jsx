@@ -66,7 +66,7 @@ const CostEstimation = () => {
 
   const handleDownloadCSV = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/bms-score-export`);
+      const response = await fetch(`${BASE_URL}/api/bms-cost-export`);
       const { data } = await response.json();
 
       if (!data.length) {
@@ -85,7 +85,7 @@ const CostEstimation = () => {
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "Bridge_Wise_Score.csv");
+      link.setAttribute("download", "Bridge_Cost.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -98,7 +98,7 @@ const CostEstimation = () => {
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/bms-score-export`);
+      const response = await fetch(`${BASE_URL}/api/bms-cost-export`);
       const { data } = await response.json();
 
       if (!data.length) {
@@ -120,7 +120,7 @@ const CostEstimation = () => {
       });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "Bridge_Wise_Score.xlsx";
+      link.download = "Bridges_Cost.xlsx";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -325,7 +325,7 @@ const CostEstimation = () => {
                             <td>{row.road_name || "N/A"}</td>
                             <td>{row.structure_type || "N/A"}</td>
                             <td>{row.bridge_name || "N/A"}</td>
-                            <td>{row.cost_million || "N/A"}</td>
+                          <td className="font-bold">{row.cost_million || "N/A"}</td>
                           </tr>
                         ))
                       ) : (
