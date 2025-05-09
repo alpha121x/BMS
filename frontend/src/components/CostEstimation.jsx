@@ -26,7 +26,6 @@ const CostEstimation = () => {
     const editUrl = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
     window.location.href = editUrl;
   };
-  
 
   useEffect(() => {
     fetchData(); // Fetch data whenever currentPage changes
@@ -262,7 +261,7 @@ const CostEstimation = () => {
                 <div className="flex items-center justify-between gap-4">
                   <h5 className="mb-0">Cost Estimation</h5>
                   <h6 className="mb-0" id="structure-heading">
-                     Records:
+                    Records:
                     <span
                       className="badge text-white ms-2"
                       style={{ background: "#009CB8" }}
@@ -317,48 +316,22 @@ const CostEstimation = () => {
                   >
                     <thead>
                       <tr>
-                        <th>Bridge Name</th>
                         <th>District</th>
-                        <th>Total Damage Score</th>
-                        <th>Critical Damage Score</th>
-                        <th>Average Damage Score</th>
-                        <th>BPI</th>
-                        <th>Bridge Information</th>
+                        <th>Road Name</th>
+                        <th>Structure Type</th>
+                        <th>Bridge Name</th>
+                        <th>Cost Estimation(Millions)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {currentData.length > 0 ? (
                         currentData.map((row, index) => (
                           <tr key={index}>
-                            <td>{row.bridge_name || "N/A"}</td>
                             <td>{row.district || "N/A"}</td>
-                            <td>
-                              {row.total_damage_score
-                                ? parseFloat(row.total_damage_score).toFixed(2)
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {row.critical_damage_score
-                                ? parseFloat(row.critical_damage_score).toFixed(
-                                    2
-                                  )
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {row.average_damage_score
-                                ? parseFloat(row.average_damage_score).toFixed(
-                                    2
-                                  )
-                                : "N/A"}
-                            </td>
-
-                            <td>
-                              {row.bridge_performance_index
-                                ? parseFloat(
-                                    row.bridge_performance_index
-                                  ).toFixed(2)
-                                : "N/A"}
-                            </td>
+                            <td>{row.road_name || "N/A"}</td>
+                            <td>{row.structure_type || "N/A"}</td>
+                            <td>{row.bridge_name || "N/A"}</td>
+                            <td>{row.cost_estimation || "N/A"}</td>
                             <td className="text-center">
                               <button
                                 onClick={() => handleClick(row)}
