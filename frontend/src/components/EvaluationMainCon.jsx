@@ -34,7 +34,7 @@ const EvaluationMainCon = () => {
           label: "Pending Records",
           value: data.pending || "N/A",
           icon: <FaClipboardList />,
-          color: "#005D7F",
+          color: "#33B1C7",
         },
         {
           label: "Approved Records",
