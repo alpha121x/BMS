@@ -395,29 +395,21 @@ const BridgesListNewUpdated = ({
           position: "relative",
         }}
       >
-        <div className="card-header p-2 " style={{ background: "#CFE2FF" }}>
+        <div className="card-header p-2 " style={{ background: "#005D7F" }}>
           <div className="flex items-center justify-between">
-            <div>
+          <div className="flex items-center justify-between text-white">
+              <h5 className="mb-0 me-5">Inventory</h5>
               <h6 className="mb-0" id="structure-heading">
-                Structure Counts:
-                <span className="badge text-bg-success ms-2">
+                Structures Count:
+                <span className="badge text-white ms-2" style={{background: "#009CB8"}}>
                   <h6 className="mb-0">{bridgeCount || 0}</h6>
                 </span>
               </h6>
             </div>
-
-            <Filters
-              districtId={districtId}
-              setDistrictId={setDistrictId}
-              structureType={structureType}
-              setStructureType={setStructureType}
-              bridgeName={bridgeName}
-              setBridgeName={setBridgeName}
-            />
-
+            
             <div className="flex items-center gap-1">
               <button
-                className="btn btn-outline-primary"
+                className="btn text-white"
                 onClick={handleDownloadCSV}
                 disabled={loadingCSV}
               >
@@ -427,7 +419,7 @@ const BridgesListNewUpdated = ({
                 </div>
               </button>
               <button
-                className="btn btn-outline-success"
+                className="btn text-white"
                 onClick={handleDownloadExcel}
                 disabled={loadingExcel}
               >

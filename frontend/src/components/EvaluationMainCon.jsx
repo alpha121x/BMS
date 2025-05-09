@@ -74,34 +74,30 @@ const EvaluationMainCon = () => {
 
   return (
     <section className="min-h-screen">
- 
       {/* Structure Section */}
       <div className="container-fluid mt-2">
-        <div className="row g-2">
-          <div className="col-md-10">
-            <div className="row g-2">
-              <div className="col-md-6">
-                <div className="mb-2">
-                  <TopCardsCon inspectedCards={inspectedCards} />
+            <div className="row g-1">
+                <div className="col-md-12 d-flex gap-4  justify-content-start align-items-start">
+                    <div className="d-flex gap-2">
+                        <div>
+                            <TopCardsCon inspectedCards={inspectedCards} />
+                        </div>
+                    </div>
+                    <div className="bg-[#8CC5C4] p-3 rounded-1">
+                        <Filters
+                            districtId={districtId}
+                            setDistrictId={setDistrictId}
+                            structureType={structureType}
+                            setStructureType={setStructureType}
+                            bridgeName={bridgeName}
+                            setBridgeName={setBridgeName}
+                            flexDirection="flex-col"
+                            padding="p-0"
+                        />
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
-          <div className="col-md-2 bg-[#8CC5C4] p-2 rounded-1">
-            <Filters
-              districtId={districtId}
-              setDistrictId={setDistrictId}
-              structureType={structureType}
-              setStructureType={setStructureType}
-              bridgeName={bridgeName}
-              setBridgeName={setBridgeName}
-              // fetchAllBridges={fetchAllBridges} // Search triggered manually
-              flexDirection="flex-col"
-              padding="p-1"
-            />
-          </div>
         </div>
-      </div>
 
       {/* <div className="mb-2 container-fluid">
         <Map districtId={districtId} />
