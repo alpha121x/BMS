@@ -269,6 +269,25 @@ app.get('/api/bms_matrix', async (req, res) => {
   }
 });
 
+// API endpoint to fetch data from bms.tbl_bms_cost
+app.get('/api/bms_cost', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        uu_bms_id, 
+        cost_million
+      FROM bms.tbl_bms_cost
+      ORDER BY uu_bms_id
+    `;
+    const result = await pool.query(query);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // API Endpoint for Exporting Full BMS Data (No Limits)
 app.get("/api/bms-score-export", async (req, res) => {
   try {
