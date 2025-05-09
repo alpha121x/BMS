@@ -2172,7 +2172,7 @@ SELECT
         construction_type, 
         no_of_span,
         data_source, 
-        date_time, 
+        data_date_time, 
         span_length_m, 
         structure_width_m, 
         construction_year, 
