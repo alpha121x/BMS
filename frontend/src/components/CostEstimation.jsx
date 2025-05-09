@@ -307,7 +307,6 @@ const CostEstimation = () => {
                     <thead>
                       <tr>
                         <th>District</th>
-                        {/* <th>Road Name</th> */}
                         <th>Structure Type</th>
                         <th>Bridge Name</th>
                         <th>Cost (Millions)</th>
@@ -318,7 +317,6 @@ const CostEstimation = () => {
                         currentData.map((row, index) => (
                           <tr key={index}>
                             <td>{row.district || "N/A"}</td>
-                            {/* <td>{row.road_name || "N/A"}</td> */}
                             <td>{row.structure_type || "N/A"}</td>
                             <td>{row.bridge_name || "N/A"}</td>
                           <td className="font-bold">{row.cost_million || "N/A"}</td>

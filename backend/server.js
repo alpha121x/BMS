@@ -272,23 +272,19 @@ app.get('/api/bms-matrix', async (req, res) => {
 // API endpoint to fetch data from bms.tbl_bms_cost
 app.get('/api/bms-cost', async (req, res) => {
   try {
-    let { page, limit, district, structureType, bridgeName } = req.query;
+    let { page, limit, district, bridgeName } = req.query;
 
-    // Default values
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
 
-    // Default filter values
     district = district || "%";
-    structureType = structureType || "%";
     bridgeName = bridgeName ? `%${bridgeName}%` : "%";
 
     const query = `
       SELECT 
         c.uu_bms_id, 
         m.district, 
-        m.road_name, 
         m.structure_type, 
         m.pms_sec_id, 
         CONCAT(m.pms_sec_id, ', ', m.structure_no) AS bridge_name,
@@ -298,17 +294,16 @@ app.get('/api/bms-cost', async (req, res) => {
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 
         m.district::TEXT LIKE $1
-        AND m.structure_type::TEXT LIKE $2
-        AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $3
+        AND m.structure_type = 'BRIDGE'
+        AND m.is_active = true
+        AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
       ORDER BY c.uu_bms_id
-      LIMIT $4 OFFSET $5
+      LIMIT $3 OFFSET $4
     `;
 
-    const values = [district, structureType, bridgeName, limit, offset];
-
+    const values = [district, bridgeName, limit, offset];
     const result = await pool.query(query, values);
 
-    // Count query for total records
     const countQuery = `
       SELECT COUNT(*) AS total
       FROM bms.tbl_bms_cost c
@@ -316,11 +311,12 @@ app.get('/api/bms-cost', async (req, res) => {
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 
         m.district::TEXT LIKE $1
-        AND m.structure_type::TEXT LIKE $2
-        AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $3
+        AND m.structure_type = 'BRIDGE'
+        AND m.is_active = true
+        AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
     `;
 
-    const countResult = await pool.query(countQuery, values.slice(0, 3));
+    const countResult = await pool.query(countQuery, values.slice(0, 2));
     const totalRecords = parseInt(countResult.rows[0].total);
 
     res.json({
@@ -335,14 +331,13 @@ app.get('/api/bms-cost', async (req, res) => {
   }
 });
 
+
 // API endpoint to fetch data from bms.tbl_bms_cost
 app.get('/api/bms-cost-export', async (req, res) => {
   try {
-    let { district, structureType, bridgeName } = req.query;
+    let { district, bridgeName } = req.query;
 
-    // Default filter values
     district = district || "%";
-    structureType = structureType || "%";
     bridgeName = bridgeName ? `%${bridgeName}%` : "%";
 
     const query = `
@@ -359,12 +354,13 @@ app.get('/api/bms-cost-export', async (req, res) => {
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 
         m.district::TEXT LIKE $1
-        AND m.structure_type::TEXT LIKE $2
-        AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $3
+        AND m.structure_type = 'BRIDGE'
+        AND m.is_active = true
+        AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
       ORDER BY c.uu_bms_id
     `;
 
-    const values = [district, structureType, bridgeName];
+    const values = [district, bridgeName];
     const result = await pool.query(query, values);
 
     res.json({
@@ -377,6 +373,7 @@ app.get('/api/bms-cost-export', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // API Endpoint for Exporting Full BMS Data (No Limits)
 app.get("/api/bms-score-export", async (req, res) => {
