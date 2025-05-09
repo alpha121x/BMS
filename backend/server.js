@@ -295,7 +295,6 @@ app.get('/api/bms-cost', async (req, res) => {
       WHERE 
         m.district::TEXT LIKE $1
         AND m.structure_type = 'BRIDGE'
-        AND m.is_active = true
         AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
       ORDER BY c.uu_bms_id
       LIMIT $3 OFFSET $4
@@ -312,7 +311,6 @@ app.get('/api/bms-cost', async (req, res) => {
       WHERE 
         m.district::TEXT LIKE $1
         AND m.structure_type = 'BRIDGE'
-        AND m.is_active = true
         AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
     `;
 
@@ -355,7 +353,6 @@ app.get('/api/bms-cost-export', async (req, res) => {
       WHERE 
         m.district::TEXT LIKE $1
         AND m.structure_type = 'BRIDGE'
-        AND m.is_active = true
         AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
       ORDER BY c.uu_bms_id
     `;
