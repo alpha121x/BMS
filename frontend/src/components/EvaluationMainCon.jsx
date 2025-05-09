@@ -5,6 +5,11 @@ import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
 import Map from "./MapEval";
 import { FaClipboardCheck, FaClipboardList } from "react-icons/fa";
+import TopCardsCon from "./TopCardsCon";
+import Filters from "./Filters";
+import { FaBridge } from "react-icons/fa6";
+import { FaRoadBridge } from "react-icons/fa6";
+import { LuConstruction } from "react-icons/lu";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -13,13 +18,15 @@ const EvaluationMainCon = () => {
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
-
+  const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
 
   const fetchInspectionCounts = async () => {
     if (!districtId) return; // Avoid unnecessary API calls
 
     try {
-      const response = await fetch(`${BASE_URL}/api/inspection-counts-con?districtId=${districtId}`);
+      const response = await fetch(
+        `${BASE_URL}/api/inspection-counts-con?districtId=${districtId}`
+      );
       const data = await response.json();
 
       setInspectedCards([
@@ -65,43 +72,99 @@ const EvaluationMainCon = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-
   return (
-    <section className="bg-gray-100 min-h-screen">
-      {/* Evaluation Section */}
-      <div className="mb-2">
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-md-12">
-              <h5 className="font-semibold text-gray-700">
-                Consultant Records
-              </h5>
+    <section className="min-h-screen">
+ 
+      {/* Structure Section */}
+      <div className="container-fluid mt-2">
+        <div className="row g-2">
+          <div className="col-md-10">
+            <div className="row g-2">
+              <div className="col-md-6">
+                <div className="mb-2">
+                  <TopCardsCon inspectedCards={inspectedCards} />
+                </div>
+              </div>
             </div>
           </div>
-          <div className="row gx-2">
-            {inspectedCards.map((card, index) => (
-              <TopCard key={index} {...card} />
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-2 container-fluid">
-        <Map districtId={districtId} />
-      </div>
-
-      {/* Bridges */}
-      <div className="container-fluid">
-        <div className="row">
-          <div className="col-md-12">
-            <BridgesListNewUpdated
+          <div className="col-md-2 bg-[#8CC5C4] p-2 rounded-1">
+            <Filters
               districtId={districtId}
               setDistrictId={setDistrictId}
               structureType={structureType}
               setStructureType={setStructureType}
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
+              // fetchAllBridges={fetchAllBridges} // Search triggered manually
+              flexDirection="flex-col"
+              padding="p-1"
             />
+          </div>
+        </div>
+      </div>
+
+      {/* <div className="mb-2 container-fluid">
+        <Map districtId={districtId} />
+      </div> */}
+
+      {/* Bridges */}
+      {/* <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-12"> */}
+      {/* <BridgesListNewUpdated
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
+            /> */}
+      {/* </div>
+        </div>
+      </div> */}
+
+      {/* Toggle Buttons */}
+      <div className="container-fluid">
+        <div className="row mt-2">
+          <div className="col-md-12">
+            {/* Navigation Buttons */}
+            <div className="flex justify-start pb-0 gap-2 w-75">
+              <button
+                onClick={() => setActiveView("map")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "map"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Map View Analysis
+              </button>
+              <button
+                onClick={() => setActiveView("inventory")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "inventory"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Bridges List
+              </button>
+            </div>
+
+            {/* Content Container */}
+            <div className="mt-0">
+              {activeView === "map" && <Map districtId={districtId} />}
+              {activeView === "inventory" && (
+                <BridgesListNewUpdated
+                  districtId={districtId}
+                  setDistrictId={setDistrictId}
+                  structureType={structureType}
+                  setStructureType={setStructureType}
+                  bridgeName={bridgeName}
+                  setBridgeName={setBridgeName}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
