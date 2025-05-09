@@ -132,7 +132,7 @@ const PrioritizationTable = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${BASE_URL}/api/bms_matrix`);
+        const response = await fetch(`${BASE_URL}/api/bms-matrix`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

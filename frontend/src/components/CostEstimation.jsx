@@ -21,12 +21,6 @@ const CostEstimation = () => {
   const [structureType, setStructureType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
 
-  const handleClick = (bridge) => {
-    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-    const editUrl = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
-    window.location.href = editUrl;
-  };
-
   useEffect(() => {
     fetchData(); // Fetch data whenever currentPage changes
   }, [currentPage, districtId, structureType, bridgeName]);
@@ -36,7 +30,7 @@ const CostEstimation = () => {
     setError(null);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
+        `${BASE_URL}/api/bms-cost?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -320,7 +314,7 @@ const CostEstimation = () => {
                         <th>Road Name</th>
                         <th>Structure Type</th>
                         <th>Bridge Name</th>
-                        <th>Cost Estimation(Millions)</th>
+                        <th>Cost (Millions)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -331,19 +325,7 @@ const CostEstimation = () => {
                             <td>{row.road_name || "N/A"}</td>
                             <td>{row.structure_type || "N/A"}</td>
                             <td>{row.bridge_name || "N/A"}</td>
-                            <td>{row.cost_estimation || "N/A"}</td>
-                            <td className="text-center">
-                              <button
-                                onClick={() => handleClick(row)}
-                                className="btn btn-sm"
-                                style={{
-                                  backgroundColor: "#3B9996",
-                                  color: "white",
-                                }}
-                              >
-                                Bridge Info
-                              </button>
-                            </td>
+                            <td>{row.cost_million || "N/A"}</td>
                           </tr>
                         ))
                       ) : (
