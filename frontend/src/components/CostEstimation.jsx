@@ -9,7 +9,7 @@ import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
 import Filters from "./Filters";
 
-const BridgeWiseScore = () => {
+const CostEstimation = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -260,9 +260,9 @@ const BridgeWiseScore = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center justify-between gap-4">
-                  <h5 className="mb-0">Bridge Wise Score</h5>
+                  <h5 className="mb-0">Cost Estimation</h5>
                   <h6 className="mb-0" id="structure-heading">
-                    Structure Counts:
+                     Records:
                     <span
                       className="badge text-white ms-2"
                       style={{ background: "#009CB8" }}
@@ -393,10 +393,8 @@ const BridgeWiseScore = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </>
   );
 };
 
-export default BridgeWiseScore;
+export default CostEstimation;
