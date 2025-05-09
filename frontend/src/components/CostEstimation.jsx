@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import Header from "./Header";
-import Footer from "./Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
@@ -222,11 +220,9 @@ const CostEstimation = () => {
 
   return (
     <>
-      <Header />
-
       <section
         className="container p-3"
-        style={{ marginTop: "70px", backgroundColor: "#F2F2F2" }}
+        style={{ marginTop: "50px", backgroundColor: "#F2F2F2" }}
       >
         <div className="row">
           <div className="col-md-12">
@@ -244,7 +240,7 @@ const CostEstimation = () => {
         </div>
       </section>
 
-      <section className="container p-2 mt-[20px] bg-gray-200 items-center">
+      <section className="container p-2 mt-0 bg-gray-200 items-center">
         <div className="row">
           <div className="col-md-12">
             <div
