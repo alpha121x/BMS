@@ -13,7 +13,7 @@ const CostEstimation = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showMap, setShowMap] = useState(false); // New state for toggling map/table
+  const [showMap, setShowMap] = useState(false); // State for toggling map/table
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
@@ -237,16 +237,26 @@ const CostEstimation = () => {
       </section>
 
       <section className="container p-2 mt-0 bg-gray-200 items-center">
-        {/* Toggle Button */}
+        {/* Two Separate Buttons */}
         <div className="d-flex justify-content-start mt-2 mb-2">
           <Button
-            onClick={() => setShowMap(!showMap)}
+            onClick={() => setShowMap(false)}
+            style={{
+              backgroundColor: "#005D7F",
+              borderColor: "#005D7F",
+              marginRight: "10px",
+            }}
+          >
+            Show Table
+          </Button>
+          <Button
+            onClick={() => setShowMap(true)}
             style={{
               backgroundColor: "#005D7F",
               borderColor: "#005D7F",
             }}
           >
-            {showMap ? "Show Table" : "Show Map"}
+            Show Map
           </Button>
         </div>
         <div className="row">
