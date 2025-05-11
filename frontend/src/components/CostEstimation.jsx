@@ -6,12 +6,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
 import Filters from "./Filters";
+import CostMap from "./CostMap";
 
 const CostEstimation = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showMap, setShowMap] = useState(false); // New state for toggling map/table
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
@@ -20,7 +22,7 @@ const CostEstimation = () => {
   const [bridgeName, setBridgeName] = useState("");
 
   useEffect(() => {
-    fetchData(); // Fetch data whenever currentPage changes
+    fetchData();
   }, [currentPage, districtId, structureType, bridgeName]);
 
   const fetchData = async () => {
@@ -48,7 +50,7 @@ const CostEstimation = () => {
   };
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const currentData = bridgeScoreData; // Since data is already paginated from API
+  const currentData = bridgeScoreData;
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -72,12 +74,11 @@ const CostEstimation = () => {
         return;
       }
 
-      // Convert JSON to CSV format
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
-          Object.keys(data[0]).join(","), // CSV Headers
-          ...data.map((row) => Object.values(row).join(",")), // CSV Rows
+          Object.keys(data[0]).join(","),
+          ...data.map((row) => Object.values(row).join(",")),
         ].join("\n");
 
       const encodedUri = encodeURI(csvContent);
@@ -87,8 +88,6 @@ const CostEstimation = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // console.log("CSV file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading CSV:", error);
     }
@@ -108,7 +107,6 @@ const CostEstimation = () => {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
 
-      // Create a Blob and trigger the download
       const excelBuffer = XLSX.write(workbook, {
         bookType: "xlsx",
         type: "array",
@@ -122,8 +120,6 @@ const CostEstimation = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // console.log("Excel file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading Excel:", error);
     }
@@ -241,6 +237,18 @@ const CostEstimation = () => {
       </section>
 
       <section className="container p-2 mt-0 bg-gray-200 items-center">
+        {/* Toggle Button */}
+        <div className="d-flex justify-content-start mt-2 mb-2">
+          <Button
+            onClick={() => setShowMap(!showMap)}
+            style={{
+              backgroundColor: "#005D7F",
+              borderColor: "#005D7F",
+            }}
+          >
+            {showMap ? "Show Table" : "Show Map"}
+          </Button>
+        </div>
         <div className="row">
           <div className="col-md-12">
             <div
@@ -298,6 +306,8 @@ const CostEstimation = () => {
                 />
               ) : error ? (
                 <p className="text-danger">{error}</p>
+              ) : showMap ? (
+                <CostMap />
               ) : (
                 <>
                   <Table
@@ -319,7 +329,9 @@ const CostEstimation = () => {
                             <td>{row.district || "N/A"}</td>
                             <td>{row.structure_type || "N/A"}</td>
                             <td>{row.bridge_name || "N/A"}</td>
-                          <td className="font-bold">{row.cost_million || "N/A"}</td>
+                            <td className="font-bold">
+                              {row.cost_million || "N/A"}
+                            </td>
                           </tr>
                         ))
                       ) : (
