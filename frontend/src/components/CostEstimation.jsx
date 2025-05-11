@@ -214,6 +214,19 @@ const CostEstimation = () => {
     return buttons;
   };
 
+  // Define styles for active and inactive buttons
+  const activeButtonStyle = {
+    backgroundColor: "#003F5C", // Darker shade for active button
+    borderColor: "#003F5C",
+    marginRight: "10px",
+  };
+
+  const inactiveButtonStyle = {
+    backgroundColor: "#B5DCF3", // Original color for inactive button
+    borderColor: "#B5DCF3",
+    marginRight: "10px",
+  };
+
   return (
     <>
       <section
@@ -237,24 +250,17 @@ const CostEstimation = () => {
       </section>
 
       <section className="container p-2 mt-0 bg-gray-200 items-center">
-        {/* Two Separate Buttons */}
+        {/* Two Separate Buttons with Active/Inactive Styling */}
         <div className="d-flex justify-content-start mt-2 mb-2">
           <Button
             onClick={() => setShowMap(false)}
-            style={{
-              backgroundColor: "#005D7F",
-              borderColor: "#005D7F",
-              marginRight: "10px",
-            }}
+            style={showMap ? inactiveButtonStyle : activeButtonStyle}
           >
             Show Table
           </Button>
           <Button
             onClick={() => setShowMap(true)}
-            style={{
-              backgroundColor: "#005D7F",
-              borderColor: "#005D7F",
-            }}
+            style={showMap ? activeButtonStyle : inactiveButtonStyle}
           >
             Show Map
           </Button>
