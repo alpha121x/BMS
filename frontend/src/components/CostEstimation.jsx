@@ -219,12 +219,15 @@ const CostEstimation = () => {
     backgroundColor: "#003F5C", // Darker shade for active button
     borderColor: "#003F5C",
     marginRight: "10px",
+    cursor: "pointer",
   };
 
   const inactiveButtonStyle = {
     backgroundColor: "#B5DCF3", // Original color for inactive button
     borderColor: "#B5DCF3",
     marginRight: "10px",
+    color: "#000", // Change text color to black for inactive button
+    cursor: "pointer",
   };
 
   return (
