@@ -4,15 +4,16 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileCsv, faFileExcel, faAnglesRight } from "@fortawesome/free-solid-svg-icons";
+import { faFileCsv, faFileExcel, faAnglesRight, faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import PropTypes from "prop-types";
 
 const InspectionList = ({ bridgeId }) => {
   const [inspectionData, setInspectionData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [openAccordions, setOpenAccordions] = useState({});
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   const toggleAccordion = (spanIndex) => {
@@ -26,7 +27,7 @@ const InspectionList = ({ bridgeId }) => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId]); // Refetch when inspectionType changes
+  }, [bridgeId]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -56,19 +57,34 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  const handlePhotoClick = (photo) => {
-    setSelectedPhoto(photo);
-    setShowPhotoModal(true);
+  const handlePhotoClick = (photos, clickedIndex) => {
+    if (Array.isArray(photos) && photos.length > 0) {
+      setSelectedPhotos(photos);
+      setCurrentPhotoIndex(clickedIndex);
+      setShowPhotoModal(true);
+    }
+  };
+
+  const handlePreviousPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === 0 ? selectedPhotos.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === selectedPhotos.length - 1 ? 0 : prevIndex + 1
+    );
   };
 
   const handleClosePhotoModal = () => {
     setShowPhotoModal(false);
+    setSelectedPhotos([]);
+    setCurrentPhotoIndex(0);
   };
 
-  // download csv
   const handleDownloadCSV = async (bridgeId) => {
     try {
-      // Fetch data from the API
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
       );
@@ -84,17 +100,14 @@ const InspectionList = ({ bridgeId }) => {
         return;
       }
 
-      const inspectiondata = data.bridges; // Extract full data
+      const inspectiondata = data.bridges;
       const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
-
-      // Extract headers dynamically from the first row
       const headers = Object.keys(inspectiondata[0]);
 
-      // Generate CSV content
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
-          headers.join(","), // Dynamic Headers
+          headers.join(","),
           ...inspectiondata.map((row) =>
             headers
               .map((key) =>
@@ -106,11 +119,10 @@ const InspectionList = ({ bridgeId }) => {
           ),
         ].join("\n");
 
-      // Create CSV file and trigger download
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${bridgeName.replace(/\s+/g, "_")}.csv`); // Replace spaces with underscores
+      link.setAttribute("download", `${bridgeName.replace(/\s+/g, "_")}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -120,10 +132,8 @@ const InspectionList = ({ bridgeId }) => {
     }
   };
 
-  // download excel
   const handleDownloadExcel = async (bridgeId) => {
     try {
-      // Fetch data from the API
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
       );
@@ -139,21 +149,16 @@ const InspectionList = ({ bridgeId }) => {
         return;
       }
 
-      const inspectiondata = data.bridges; // Extract full data
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection"; // Use bridge_name dynamically
+      const inspectiondata = data.bridges;
+      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
 
-      // Convert JSON to worksheet
       const ws = XLSX.utils.json_to_sheet(inspectiondata);
-
-      // Set column widths automatically based on data
       ws["!cols"] = Object.keys(inspectiondata[0]).map(() => ({ width: 20 }));
 
-      // Create a new workbook and append the worksheet
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inspections");
 
-      // Generate and trigger file download
-      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`); // Replaces spaces with underscores
+      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
@@ -161,44 +166,28 @@ const InspectionList = ({ bridgeId }) => {
   };
 
   const getDamageLevel = (data) => {
-    const damageLevels = [...new Set(data.map((item) => item.DamageLevel))]; // Get unique damage levels
-    return damageLevels.join(", "); // Join levels with commas
+    const damageLevels = [...new Set(data.map((item) => item.DamageLevel))];
+    return damageLevels.join(", ");
   };
 
   const getMaterials = (data) => {
-    const materials = [...new Set(data.map((item) => item.MaterialName))]; // Get unique materials
-    return materials.join(", "); // Join materials with commas
+    const materials = [...new Set(data.map((item) => item.MaterialName))];
+    return materials.join(", ");
   };
 
   const getWorkKind = (data) => {
-    const workKinds = [...new Set(data.map((item) => item.WorkKindName))]; // Get unique work kinds
-    return workKinds.join(", "); // Join work kinds with commas
-  };
-
-  const getApprovalStatus = (data) => {
-    const approved = data.filter(
-      (item) => item.approved_by_consultant === "1"
-    ).length;
-    const unapproved = data.filter(
-      (item) => item.approved_by_consultant === "0"
-    ).length;
-    return `Approved: ${approved}, Unapproved: ${unapproved}`;
+    const workKinds = [...new Set(data.map((item) => item.WorkKindName))];
+    return workKinds.join(", ");
   };
 
   const getUniqueSpanIndices = (data) => {
-    // Extracting all SpanIndex values from the data
     const spanIndices = data.map((item) => item.SpanIndex);
-
-    // Using Set to filter out duplicates and get unique values
-    const uniqueSpanIndices = [...new Set(spanIndices)];
-
-    return uniqueSpanIndices.length; // Return the count of unique span indices
+    return [...new Set(spanIndices)].length;
   };
 
-  // Group the inspection data by SpanIndex and then by WorkKind
   const groupedData = inspectionData.reduce((acc, row) => {
-    const spanKey = row.SpanIndex || "N/A";
-    const workKindKey = row.WorkKindName || "N/A";
+    const spanKey = row.SpanIndex ?? "N/A";
+    const workKindKey = row.WorkKindName ?? "N/A";
 
     if (!acc[spanKey]) {
       acc[spanKey] = {};
@@ -213,16 +202,128 @@ const InspectionList = ({ bridgeId }) => {
     return acc;
   }, {});
 
+  useEffect(() => {
+    console.log("groupedData:", groupedData);
+    Object.keys(groupedData).forEach((spanIndex) => {
+      Object.keys(groupedData[spanIndex]).forEach((workKind) => {
+        groupedData[spanIndex][workKind].forEach((inspection, index) => {
+          if (!inspection.id) {
+            console.warn(
+              `Missing inspection id at spanIndex: ${spanIndex}, workKind: ${workKind}, index: ${index}`,
+              inspection
+            );
+          }
+        });
+      });
+    });
+  }, [groupedData]);
+
+  const inspectionCards = Object.keys(groupedData).length ? (
+    Object.keys(groupedData).map((spanIndex) => (
+      <div key={spanIndex} className="card mb-2 border-0">
+        <div
+          className="p-1 d-flex justify-content-between align-items-center bg-[#005D7F] text-[#fff]"
+          style={{ cursor: "pointer" }}
+          onClick={() => toggleAccordion(spanIndex)}
+        >
+          <h6 className="mb-0">{`Reports For Span: ${spanIndex}`}</h6>
+          <span className="">{openAccordions[spanIndex] ? "▼" : "▶"}</span>
+        </div>
+
+        {openAccordions[spanIndex] && (
+          <div className="card-body p-0">
+            {Object.keys(groupedData[spanIndex]).map((workKind) => (
+              <div
+                key={`${spanIndex}-${workKind}`}
+                className="card mb-2 mt-0 border-0"
+              >
+                <div className="rounded-0 p-1 bg-[#009DB9] text-[#fff]">
+                  {workKind}
+                </div>
+
+                <div className="card-body p-0 rounded-0">
+                  {groupedData[spanIndex][workKind]?.map((inspection, index) => (
+                    <div
+                      key={
+                        inspection.id ||
+                        `inspection-${spanIndex}-${workKind}-${index}`
+                      }
+                      className="mb-2 p-4 border-0 rounded-0 shadow-sm"
+                      style={{ backgroundColor: "#c8e4e3" }}
+                    >
+                      <div className="row">
+                        <div className="col-md-3">
+                          {inspection.PhotoPaths?.length > 0 && (
+                            <div
+                              className="d-flex gap-2"
+                              style={{
+                                overflowX: "auto",
+                                whiteSpace: "nowrap",
+                                display: "flex",
+                                paddingBottom: "5px",
+                              }}
+                            >
+                              {inspection.PhotoPaths.map((photo, i) => (
+                                <img
+                                  key={`photo-${inspection.id}-${i}`}
+                                  src={photo}
+                                  alt={`Photo ${i + 1}`}
+                                  className="img-fluid rounded border"
+                                  loading="lazy"
+                                  style={{
+                                    width: "80px",
+                                    height: "80px",
+                                    objectFit: "cover",
+                                    cursor: "pointer",
+                                    flexShrink: 0,
+                                  }}
+                                  onClick={() =>
+                                    handlePhotoClick(inspection.PhotoPaths, i)
+                                  }
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="col-md-9">
+                          <div className="row g-3">
+                            <div className="col-md-6">
+                              <strong>Parts:</strong>{" "}
+                              {inspection.PartsName || "N/A"} <br />
+                              <strong>Material:</strong>{" "}
+                              {inspection.MaterialName || "N/A"}
+                            </div>
+                            <div className="col-md-6">
+                              <strong>Damage:</strong>{" "}
+                              {inspection.DamageKindName || "N/A"} <br />
+                              <strong>Level:</strong>{" "}
+                              {inspection.DamageLevel || "N/A"}
+                            </div>
+                            <div className="col-12">
+                              <strong>Situation Remarks:</strong>{" "}
+                              <span className="text-muted">
+                                {inspection.Remarks || "N/A"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ))
+  ) : (
+    <p>No inspection data available.</p>
+  );
+
   return (
-    <div
-      className="card p-0 rounded-1"
-      style={{
-        // background: "#FFFFFF",
-        // border: "1px solid #005D7F",
-        // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-        // position: "relative",
-      }}
-    >
+    <div className="card p-0 rounded-1">
       <div className="card-body p-2">
         <div className="d-flex mb-4 justify-content-between items-center bg-[#009DB9] text-[#fff] p-2 rounded-1">
           <h5 className="card-title font-semibold pb-0 mb-0">
@@ -247,10 +348,8 @@ const InspectionList = ({ bridgeId }) => {
         </div>
 
         <div className="summary-section mt-1 mb-1">
-          <h5 className="font-semibold text-gray-700 mb-2">
-            Reports Summary
-          </h5>
-          <div className="bg-gray-300  mb-3 mt-1  p-3 rounded-1">
+          <h5 className="font-semibold text-gray-700 mb-2">Reports Summary</h5>
+          <div className="bg-gray-300 mb-3 mt-1 p-3 rounded-1">
             <div className="grid grid-cols-2 gap-y-2 text-sm">
               <div>
                 <div className="flex">
@@ -263,7 +362,7 @@ const InspectionList = ({ bridgeId }) => {
               </div>
               <div>
                 <div className="flex">
-                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1"/>
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
                   <strong className="-mt-1">Damage Levels:</strong>
                 </div>
                 <p className="text-gray-700">
@@ -272,14 +371,14 @@ const InspectionList = ({ bridgeId }) => {
               </div>
               <div>
                 <div className="flex">
-                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1"/>
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
                   <strong className="-mt-1">Materials Used:</strong>
                 </div>
                 <p className="text-gray-700">{getMaterials(inspectionData)}</p>
               </div>
               <div>
                 <div className="flex">
-                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1"/>
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
                   <strong className="-mt-1">Work Kind:</strong>
                 </div>
                 <p className="text-gray-700">{getWorkKind(inspectionData)}</p>
@@ -288,151 +387,87 @@ const InspectionList = ({ bridgeId }) => {
           </div>
         </div>
 
-        {loading && (
+        <div className="inspection-cards-container">
+          {loading ? (
             <div
-                className="loader"
-                style={{
-                  border: "8px solid #f3f3f3",
-                  borderTop: "8px solid #3498db",
-                  borderRadius: "50%",
-                  width: "80px",
-                  height: "80px",
-                  animation: "spin 1s linear infinite",
-                  margin: "auto",
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  zIndex: "999",
-            }}
-          />
-        )}
-
-    <div className="inspection-cards-container">
-  {Object.keys(groupedData).map((spanIndex) => (
-    <div key={spanIndex} className="card mb-2 border-0">
-      {/* Span Index Dropdown */}
-      <div
-        className="p-1 d-flex justify-content-between align-items-center bg-[#005D7F] text-[#fff]"
-        style={{ cursor: "pointer" }}
-        onClick={() => toggleAccordion(spanIndex)}
-      >
-        <h6 className="mb-0">{`Reports For Span: ${spanIndex}`}</h6>
-        <span className="">{openAccordions[spanIndex] ? "▼" : "▶"}</span>
-      </div>
-
-      {/* Content - Only visible if expanded */}
-      {openAccordions[spanIndex] && (
-        <div className="card-body p-0">
-          {Object.keys(groupedData[spanIndex]).map((workKind) => (
-            <div key={`${spanIndex}-${workKind}`} className="card mb-2 mt-0 border-0">
-              <div className="rounded-0 p-1 bg-[#009DB9] text-[#fff]">
-                {workKind}
-              </div>
-
-              <div className="card-body p-0 rounded-0">
-                {groupedData[spanIndex][workKind]?.map((inspection, index) => (
-                  <div
-                    key={inspection.id || `inspection-${spanIndex}-${workKind}-${index}`}
-                    className="mb-2 p-4 border-0 rounded-0 shadow-sm"
-                    style={{ backgroundColor: "#c8e4e3" }}
+              className="loader"
+              style={{
+                border: "8px solid #f3f3f3",
+                borderTop: "8px solid #3498db",
+                borderRadius: "50%",
+                width: "80px",
+                height: "80px",
+                animation: "spin 1s linear infinite",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: "999",
+              }}
+            />
+          ) : error ? (
+            <p className="text-danger">Error: {error}</p>
+          ) : (
+            inspectionCards
+          )}
+          <Modal
+            show={showPhotoModal}
+            onHide={handleClosePhotoModal}
+            centered
+            size="lg"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Photo {currentPhotoIndex + 1} of {selectedPhotos.length}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body className="text-center">
+              {selectedPhotos.length > 0 && (
+                <div className="d-flex align-items-center justify-content-center">
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handlePreviousPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="mr-3"
                   >
-                    <div className="row">
-                      {/* Photos Column */}
-                      <div className="col-md-3">
-                        {inspection.PhotoPaths?.length > 0 && (
-                          <div
-                            className="d-flex gap-2"
-                            style={{
-                              overflowX: "auto",
-                              whiteSpace: "nowrap",
-                              display: "flex",
-                              paddingBottom: "5px",
-                            }}
-                          >
-                            {inspection.PhotoPaths.map((photo, i) => (
-                              <img
-                                key={`photo-${inspection.id}-${i}`}
-                                src={photo}
-                                alt={`Photo ${i + 1}`}
-                                className="img-fluid rounded border"
-                                loading="lazy"
-                                style={{
-                                  width: "80px",
-                                  height: "80px",
-                                  objectFit: "cover",
-                                  cursor: "pointer",
-                                  flexShrink: 0,
-                                }}
-                                onClick={() => handlePhotoClick(photo)}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Details Column */}
-                      <div className="col-md-9">
-                        <div className="row g-3">
-                          <div className="col-md-6">
-                            <strong>Parts:</strong>{" "}
-                            {inspection.PartsName || "N/A"} <br />
-                            <strong>Material:</strong>{" "}
-                            {inspection.MaterialName || "N/A"}
-                          </div>
-                          <div className="col-md-6">
-                            <strong>Damage:</strong>{" "}
-                            {inspection.DamageKindName || "N/A"} <br />
-                            <strong>Level:</strong>{" "}
-                            {inspection.DamageLevel || "N/A"}
-                          </div>
-                          <div className="col-12">
-                            <strong>Situation Remarks:</strong>{" "}
-                            <span className="text-muted">
-                              {inspection.Remarks || "N/A"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                    <FontAwesomeIcon icon={faArrowLeft} />
+                  </Button>
+                  <img
+                    src={selectedPhotos[currentPhotoIndex]}
+                    alt={`Photo ${currentPhotoIndex + 1}`}
+                    className="img-fluid rounded border"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "70vh",
+                      objectFit: "contain",
+                    }}
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handleNextPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="ml-3"
+                  >
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button>
+                </div>
+              )}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClosePhotoModal}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
-      )}
-    </div>
-  ))}
-
-  {/* Move Modal outside the loop */}
-  <Modal
-    show={showPhotoModal}
-    onHide={handleClosePhotoModal}
-    centered
-    size="lg"
-  >
-    <Modal.Header closeButton>
-      <Modal.Title>Enlarged Photo</Modal.Title>
-    </Modal.Header>
-    <Modal.Body className="text-center">
-      {selectedPhoto && (
-        <img
-          src={selectedPhoto}
-          alt="Enlarged"
-          className="img-fluid rounded border"
-          style={{
-            maxWidth: "100%",
-            maxHeight: "80vh",
-          }}
-        />
-      )}
-    </Modal.Body>
-  </Modal>
-</div>
       </div>
     </div>
   );
+};
+
+InspectionList.propTypes = {
+  bridgeId: PropTypes.string.isRequired,
 };
 
 export default InspectionList;
