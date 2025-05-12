@@ -8,6 +8,8 @@ import {
   faFileCsv,
   faFileExcel,
   faSpinner,
+  faArrowLeft,
+  faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
@@ -23,8 +25,9 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const [loadingExcel, setLoadingExcel] = useState(false);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
-  const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [activeDiv, setActiveDiv] = useState("pending");
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedInspectionId, setSelectedInspectionId] = useState(null);
@@ -37,14 +40,14 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   const fetchPastEvaluations = async (inspectionId, userId) => {
     setLoading(true);
     setError(null);
-    setShowModal(true); // Open modal immediately
-  
+    setShowModal(true);
+
     try {
       const response = await fetch(
         `${BASE_URL}/api/get-past-evaluations?inspectionId=${inspectionId}&userId=${userId}`
       );
       const data = await response.json();
-  
+
       if (data.success) {
         setEvaluationData(data.data);
       } else {
@@ -53,25 +56,22 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } catch (err) {
       setError("Error fetching data. Please try again.");
     }
-  
+
     setLoading(false);
   };
-  
 
-  // Function to handle modal visibility and API call
   const handleShowModal = (inspectionId) => {
     setSelectedInspectionId(inspectionId);
     setShowModal(true);
-    fetchPastEvaluations(inspectionId, userId); // Fetch past evaluations
+    fetchPastEvaluations(inspectionId, userId);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedInspectionId(null);
-    setEvaluationData([]); // Reset data on close
+    setEvaluationData([]);
   };
 
-  // Fetch dropdown options from API
   useEffect(() => {
     fetch(`${BASE_URL}/api/damage-levels`)
       .then((res) => res.json())
@@ -95,8 +95,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   }, []);
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-
-  // Extract username safely
   const userId = userToken?.userId;
 
   useEffect(() => {
@@ -120,7 +118,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
 
       const result = await response.json();
       if (result.success) {
-        // Generalized function for grouping
         const groupBySpanAndWorkKind = (data) => {
           return data.reduce((acc, item) => {
             const spanKey = item.SpanIndex || "N/A";
@@ -134,7 +131,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           }, {});
         };
 
-        // Grouping the data separately
         setPendingData(groupBySpanAndWorkKind(result.data.pending));
       } else {
         throw new Error("Invalid data format");
@@ -197,40 +193,26 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         district_id: row.district_id,
         inspection_images: row.PhotoPaths,
         qc_remarks_evaluator: evaluatorRemarks ? evaluatorRemarks : null,
-        // extra details
         uu_bms_id: row.uu_bms_id,
         bridge_name: row.bridge_name,
         district_id: row.district_id,
-        //Span Index
         SpanIndex: row.SpanIndex,
-        // WorkKind
         WorkKindID: row.WorkKindID,
         WorkKindName: row.WorkKindName,
-        // Parts (Element)
         PartsID: row.PartsID,
         PartsName: row.PartsName,
-        // Material
         MaterialID: row.MaterialID,
         MaterialName: row.MaterialName,
-        // Damage Kind
         DamageKindID: row.DamageKindID,
         DamageKindName: row.DamageKindName,
-        // Damage Level
         DamageLevelID: row.DamageLevelID,
         DamageLevel: row.DamageLevel,
-        // Damage Extent
         damage_extent: row.damage_extent,
-        // situation remarks
         situation_remarks: row.Remarks ? row.Remarks : null,
-        // 1st committe remarks
         qc_remarks_con: row.qc_remarks_con,
         qc_remarks_rams: row.qc_remarks_rams,
         evaluator_id: userId,
       };
-
-      console.log(updatedData);
-
-      // return;
 
       const response = await fetch(
         `${BASE_URL}/api/insert-inspection-evaluator`,
@@ -283,7 +265,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
   };
 
   const handleDownloadCSV = async (bridgeId, setLoadingCsv) => {
-    setLoadingCsv(true); // Start loading
+    setLoadingCsv(true);
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export-evaluator?bridgeId=${bridgeId}`
@@ -309,7 +291,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           key !== "rn" &&
           key !== "surveyed_by"
       );
-      
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
@@ -336,12 +317,12 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     } catch (error) {
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
     } finally {
-      setLoadingCsv(false); // Stop loading
+      setLoadingCsv(false);
     }
   };
 
   const handleDownloadExcel = async (bridgeId, setLoadingExcel) => {
-    setLoadingExcel(true); // Start loader
+    setLoadingExcel(true);
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export-evaluator?bridgeId=${bridgeId}`
@@ -364,11 +345,14 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Inspections");
 
-      // Define all columns except images
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "Overview Photos" && key !== "PhotoPaths" && key !== "qc_rams" && key !== "rn" && key !== "surveyed_by" 
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "qc_rams" &&
+          key !== "rn" &&
+          key !== "surveyed_by"
       );
-      
 
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
@@ -376,7 +360,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         width: 22,
       }));
 
-      // Add image columns with increased spacing
       for (let i = 1; i <= 5; i++) {
         columns.push({
           header: `Overview Photo ${i}`,
@@ -392,22 +375,18 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         });
       }
 
-      // Define worksheet columns
       worksheet.columns = columns;
 
-      // Style the header row (first row)
-      worksheet.getRow(1).font = { bold: true, size: 14 }; // Bold text and increased font size
+      worksheet.getRow(1).font = { bold: true, size: 14 };
       worksheet.getRow(1).alignment = {
         vertical: "middle",
         horizontal: "center",
-      }; // Center align text
-      worksheet.getRow(1).height = 25; // Increase row height for better visibility
+      };
+      worksheet.getRow(1).height = 25;
 
-      // Add data rows without image URLs
       for (let i = 0; i < summaryData.length; i++) {
         const item = summaryData[i];
 
-        // Extract & fix image URLs (replacing backslashes with forward slashes)
         const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
           url.replace(/\\/g, "/")
         );
@@ -415,36 +394,25 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           url.replace(/\\/g, "/")
         );
 
-        // Add normal data (excluding image URLs)
         const rowData = {};
         columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
 
-        // Add a row for each entry
         const rowIndex = worksheet.addRow(rowData).number;
 
-        // **Adjust row height for images to fit properly**
         worksheet.getRow(rowIndex).height = 90;
 
-        // Function to insert images in the correct locations
         const insertImage = async (photoUrls, columnOffset, rowHeight) => {
           for (let j = 0; j < photoUrls.length && j < 5; j++) {
             try {
-              // Fetch image data from the URL
               const imgResponse = await fetch(photoUrls[j]);
               const imgBlob = await imgResponse.blob();
               const arrayBuffer = await imgBlob.arrayBuffer();
 
-              // Add image to the workbook
               const imageId = workbook.addImage({
                 buffer: arrayBuffer,
                 extension: "jpeg",
               });
 
-              // **Insert image in the correct column**
-              // - `tl.col`: Column position, starting from normal data columns + offset
-              // - `tl.row`: Row position (adjusted for zero-based index)
-              // - `ext.width`: Width of the inserted image (150px for better visibility)
-              // - `ext.height`: Height of the inserted image (90px for consistency)
               worksheet.addImage(imageId, {
                 tl: {
                   col: columnKeys.length + columnOffset + j,
@@ -458,31 +426,44 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           }
         };
 
-        // Insert Overview Photos (5 max)
         await insertImage(overviewPhotos, 0, 90);
-
-        // Insert Inspection Photos (5 max)
         await insertImage(inspectionPhotos, 5, 90);
       }
 
-      // Save File
       const buffer = await workbook.xlsx.writeBuffer();
       saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-      setLoadingExcel(false); // Stop loader
+      setLoadingExcel(false);
     }
   };
 
-  const handlePhotoClick = (photo) => {
-    setSelectedPhoto(photo);
-    setShowPhotoModal(true);
+  const handlePhotoClick = (photos, clickedIndex) => {
+    if (Array.isArray(photos) && photos.length > 0) {
+      setSelectedPhotos(photos);
+      setCurrentPhotoIndex(clickedIndex);
+      setShowPhotoModal(true);
+    }
+  };
+
+  const handlePreviousPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === 0 ? selectedPhotos.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === selectedPhotos.length - 1 ? 0 : prevIndex + 1
+    );
   };
 
   const handleClosePhotoModal = () => {
     setShowPhotoModal(false);
+    setSelectedPhotos([]);
+    setCurrentPhotoIndex(0);
   };
 
   const getDamageLevel = (data) => {
@@ -547,6 +528,55 @@ const InspectionListEvaluator = ({ bridgeId }) => {
         position: "relative",
       }}
     >
+      <style>
+        {`
+          .custom-modal .modal-dialog {
+            max-width: 90vw;
+            width: 100%;
+          }
+          .custom-modal .modal-content {
+            max-height: 90vh;
+            overflow: hidden;
+          }
+          .custom-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+          }
+          .custom-modal .image-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-height: 60vh;
+          }
+          .custom-modal .modal-image {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+          }
+          .custom-modal .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            padding: 8px 12px;
+            font-size: 1.2rem;
+          }
+          .custom-modal .prev-button {
+            left: 10px;
+          }
+          .custom-modal .next-button {
+            right: 10px;
+          }
+        `}
+      </style>
       <div className="card-body pb-0">
         <div className="d-flex mb-2 justify-content-between items-center p-3 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
@@ -620,7 +650,6 @@ const InspectionListEvaluator = ({ bridgeId }) => {
           </Button>
         </div>
         <div className="border rounded p-3 shadow-lg mt-2">
-          {/* Reports Section */}
           {activeDiv === "pending" && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
@@ -638,403 +667,367 @@ const InspectionListEvaluator = ({ bridgeId }) => {
                     {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(pendingData[spanIndex]).length > 0 ? (
-                          Object.keys(pendingData[spanIndex]).map(
-                            (workKind) => (
-                              <div
-                                key={`workKind-${spanIndex}-${workKind}`}
-                                className="mb-4"
-                              >
-                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                                  {workKind}
-                                </div>
-                                <div className="mt-2">
-                                  {pendingData[spanIndex][workKind].map(
-                                    (inspection) => (
-                                      <div
-                                        key={`inspection-${inspection.inspection_id}`}
-                                        className="border rounded p-4 shadow-sm mb-3"
-                                        style={{ backgroundColor: "#CFE2FF" }}
-                                      >
-                                        <div className="row">
-                                          <div className="col-md-3">
-                                            {inspection.PhotoPaths?.length >
-                                              0 && (
-                                              <div
-                                                className="d-flex gap-2"
-                                                style={{
-                                                  overflowX: "auto",
-                                                  whiteSpace: "nowrap",
-                                                  display: "flex",
-                                                  paddingBottom: "5px",
-                                                }}
-                                              >
-                                                {inspection.PhotoPaths.map(
-                                                  (photoUrl, index) => (
-                                                    <img
-                                                      key={`photo-${inspection.id}-${index}`}
-                                                      src={photoUrl}
-                                                      alt={`Photo ${index + 1}`}
-                                                      className="img-fluid rounded border"
-                                                      style={{
-                                                        width: "80px",
-                                                        height: "80px",
-                                                        objectFit: "cover",
-                                                        cursor: "pointer",
-                                                        flexShrink: 0,
-                                                      }}
-                                                      loading="lazy"
-                                                      onClick={() =>
-                                                        handlePhotoClick(
-                                                          photoUrl
-                                                        )
-                                                      }
-                                                      onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src =
-                                                          "/placeholder-image.png";
-                                                      }}
-                                                    />
-                                                  )
-                                                )}
+                          Object.keys(pendingData[spanIndex]).map((workKind) => (
+                            <div
+                              key={`workKind-${spanIndex}-${workKind}`}
+                              className="mb-4"
+                            >
+                              <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                {workKind}
+                              </div>
+                              <div className="mt-2">
+                                {pendingData[spanIndex][workKind].map(
+                                  (inspection) => (
+                                    <div
+                                      key={`inspection-${inspection.inspection_id}`}
+                                      className="border rounded p-4 shadow-sm mb-3"
+                                      style={{ backgroundColor: "#CFE2FF" }}
+                                    >
+                                      <div className="row">
+                                        <div className="col-md-3">
+                                          {inspection.PhotoPaths?.length > 0 && (
+                                            <div
+                                              className="d-flex gap-2"
+                                              style={{
+                                                overflowX: "auto",
+                                                whiteSpace: "nowrap",
+                                                display: "flex",
+                                                paddingBottom: "5px",
+                                              }}
+                                            >
+                                              {inspection.PhotoPaths.map(
+                                                (photoUrl, index) => (
+                                                  <img
+                                                    key={`photo-${inspection.id}-${index}`}
+                                                    src={photoUrl}
+                                                    alt={`Photo ${index + 1}`}
+                                                    className="img-fluid rounded border"
+                                                    style={{
+                                                      width: "80px",
+                                                      height: "80px",
+                                                      objectFit: "cover",
+                                                      cursor: "pointer",
+                                                      flexShrink: 0,
+                                                    }}
+                                                    loading="lazy"
+                                                    onClick={() =>
+                                                      handlePhotoClick(
+                                                        inspection.PhotoPaths,
+                                                        index
+                                                      )
+                                                    }
+                                                    onError={(e) => {
+                                                      e.target.onerror = null;
+                                                      e.target.src =
+                                                        "/placeholder-image.png";
+                                                    }}
+                                                  />
+                                                )
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                        <div className="col-md-9">
+                                          <input
+                                            type="hidden"
+                                            name="district_id"
+                                            value={inspection.district_id}
+                                          />
+                                          <div className="row">
+                                            <div className="col-md-6">
+                                              <div className="mb-1">
+                                                <strong>Elements:</strong>
+                                                <Form.Select
+                                                  value={inspection.PartsID || ""}
+                                                  onChange={(e) => {
+                                                    const selectedPart =
+                                                      parts.find(
+                                                        (part) =>
+                                                          part.PartsID ==
+                                                          e.target.value
+                                                      );
+                                                    if (selectedPart) {
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "PartsID",
+                                                        selectedPart.PartsID
+                                                      );
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "PartsName",
+                                                        selectedPart.PartsName
+                                                      );
+                                                    }
+                                                  }}
+                                                  className="form-control-sm ms-1"
+                                                >
+                                                  <option value="">
+                                                    Select Element
+                                                  </option>
+                                                  {parts.map((part) => (
+                                                    <option
+                                                      key={part.PartsID}
+                                                      value={part.PartsID}
+                                                    >
+                                                      {part.PartsName}
+                                                    </option>
+                                                  ))}
+                                                </Form.Select>
                                               </div>
-                                            )}
+                                            </div>
+                                            <div className="col-md-6">
+                                              <div className="mb-1">
+                                                <strong>Material:</strong>
+                                                <Form.Select
+                                                  value={
+                                                    inspection.MaterialID || ""
+                                                  }
+                                                  onChange={(e) => {
+                                                    const selectedMaterial =
+                                                      materials.find(
+                                                        (mat) =>
+                                                          mat.MaterialID ==
+                                                          e.target.value
+                                                      );
+                                                    if (selectedMaterial) {
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "MaterialID",
+                                                        selectedMaterial.MaterialID
+                                                      );
+                                                      handleFieldChange(
+                                                        spanIndex,
+                                                        workKind,
+                                                        inspection.inspection_id,
+                                                        "MaterialName",
+                                                        selectedMaterial.MaterialName
+                                                      );
+                                                    }
+                                                  }}
+                                                  className="form-control-sm ms-1"
+                                                >
+                                                  <option value="">
+                                                    Select Material
+                                                  </option>
+                                                  {materials.map((material) => (
+                                                    <option
+                                                      key={material.MaterialID}
+                                                      value={material.MaterialID}
+                                                    >
+                                                      {material.MaterialName}
+                                                    </option>
+                                                  ))}
+                                                </Form.Select>
+                                              </div>
+                                            </div>
                                           </div>
-                                          <div className="col-md-9">
-                                            <input
-                                              type="hidden"
-                                              name="district_id"
-                                              value={inspection.district_id}
-                                            />
-                                            <div className="row">
-                                              <div className="col-md-6">
-                                                <div className="mb-1">
-                                                  <strong>Elements:</strong>
-                                                  <Form.Select
-                                                    value={
-                                                      inspection.PartsID || ""
-                                                    }
-                                                    onChange={(e) => {
-                                                      const selectedPart =
-                                                        parts.find(
-                                                          (part) =>
-                                                            part.PartsID ==
-                                                            e.target.value
-                                                        );
-                                                      if (selectedPart) {
-                                                        handleFieldChange(
-                                                          spanIndex,
-                                                          workKind,
-                                                          inspection.inspection_id,
-                                                          "PartsID",
-                                                          selectedPart.PartsID
-                                                        );
-                                                        handleFieldChange(
-                                                          spanIndex,
-                                                          workKind,
-                                                          inspection.inspection_id,
-                                                          "PartsName",
-                                                          selectedPart.PartsName
-                                                        );
-                                                      }
-                                                    }}
-                                                    className="form-control-sm ms-1"
-                                                  >
-                                                    <option value="">
-                                                      Select Element
-                                                    </option>
-                                                    {parts.map((part) => (
-                                                      <option
-                                                        key={part.PartsID}
-                                                        value={part.PartsID}
-                                                      >
-                                                        {part.PartsName}
-                                                      </option>
-                                                    ))}
-                                                  </Form.Select>
-                                                </div>
-                                              </div>
-                                              <div className="col-md-6">
-                                                <div className="mb-1">
-                                                  <strong>Material:</strong>
-                                                  <Form.Select
-                                                    value={
-                                                      inspection.MaterialID ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) => {
-                                                      const selectedMaterial =
-                                                        materials.find(
-                                                          (mat) =>
-                                                            mat.MaterialID ==
-                                                            e.target.value
-                                                        );
-                                                      if (selectedMaterial) {
-                                                        handleFieldChange(
-                                                          spanIndex,
-                                                          workKind,
-                                                          inspection.inspection_id,
-                                                          "MaterialID",
-                                                          selectedMaterial.MaterialID
-                                                        );
-                                                        handleFieldChange(
-                                                          spanIndex,
-                                                          workKind,
-                                                          inspection.inspection_id,
-                                                          "MaterialName",
-                                                          selectedMaterial.MaterialName
-                                                        );
-                                                      }
-                                                    }}
-                                                    className="form-control-sm ms-1"
-                                                  >
-                                                    <option value="">
-                                                      Select Material
-                                                    </option>
-                                                    {materials.map(
-                                                      (material) => (
-                                                        <option
-                                                          key={
-                                                            material.MaterialID
-                                                          }
-                                                          value={
-                                                            material.MaterialID
-                                                          }
-                                                        >
-                                                          {
-                                                            material.MaterialName
-                                                          }
-                                                        </option>
-                                                      )
-                                                    )}
-                                                  </Form.Select>
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="row">
-                                              <div className="col-md-6">
-                                                {" "}
-                                                {/* Damage Kind Dropdown */}
-                                                <div className="mb-1">
-                                                  <strong>Damage:</strong>
-                                                  <Form.Select
-                                                    value={
-                                                      inspection.DamageKindID ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) => {
-                                                      const selectedDamage =
-                                                        damageKinds.find(
-                                                          (dmg) =>
-                                                            dmg.DamageKindID ==
-                                                            e.target.value
-                                                        );
-                                                      handleFieldChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        "DamageKindID",
-                                                        selectedDamage?.DamageKindID
+                                          <div className="row">
+                                            <div className="col-md-6">
+                                              <div className="mb-1">
+                                                <strong>Damage:</strong>
+                                                <Form.Select
+                                                  value={
+                                                    inspection.DamageKindID || ""
+                                                  }
+                                                  onChange={(e) => {
+                                                    const selectedDamage =
+                                                      damageKinds.find(
+                                                        (dmg) =>
+                                                          dmg.DamageKindID ==
+                                                          e.target.value
                                                       );
-                                                      handleFieldChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        "DamageKindName",
-                                                        selectedDamage?.DamageKindName
-                                                      );
-                                                    }}
-                                                    className="form-control-sm ms-1"
-                                                  >
-                                                    <option value="">
-                                                      Select Damage
+                                                    handleFieldChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      "DamageKindID",
+                                                      selectedDamage?.DamageKindID
+                                                    );
+                                                    handleFieldChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      "DamageKindName",
+                                                      selectedDamage?.DamageKindName
+                                                    );
+                                                  }}
+                                                  className="form-control-sm ms-1"
+                                                >
+                                                  <option value="">
+                                                    Select Damage
+                                                  </option>
+                                                  {damageKinds.map((damage) => (
+                                                    <option
+                                                      key={damage.DamageKindID}
+                                                      value={damage.DamageKindID}
+                                                    >
+                                                      {damage.DamageKindName}
                                                     </option>
-                                                    {damageKinds.map(
-                                                      (damage) => (
-                                                        <option
-                                                          key={
-                                                            damage.DamageKindID
-                                                          }
-                                                          value={
-                                                            damage.DamageKindID
-                                                          }
-                                                        >
-                                                          {
-                                                            damage.DamageKindName
-                                                          }
-                                                        </option>
-                                                      )
-                                                    )}
-                                                  </Form.Select>
-                                                </div>
+                                                  ))}
+                                                </Form.Select>
                                               </div>
-                                              <div className="col-md-6">
-                                                {/* Damage Level Dropdown */}
-                                                <div className="mb-1">
-                                                  <strong>Damage Level:</strong>
-                                                  <Form.Select
-                                                    value={
-                                                      inspection.DamageLevelID ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) => {
-                                                      const selectedLevel =
-                                                        damageLevels.find(
-                                                          (lvl) =>
-                                                            lvl.DamageLevelID ==
-                                                            e.target.value
-                                                        );
-                                                      handleFieldChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        "DamageLevelID",
-                                                        selectedLevel?.DamageLevelID
+                                            </div>
+                                            <div className="col-md-6">
+                                              <div className="mb-1">
+                                                <strong>Damage Level:</strong>
+                                                <Form.Select
+                                                  value={
+                                                    inspection.DamageLevelID || ""
+                                                  }
+                                                  onChange={(e) => {
+                                                    const selectedLevel =
+                                                      damageLevels.find(
+                                                        (lvl) =>
+                                                          lvl.DamageLevelID ==
+                                                          e.target.value
                                                       );
-                                                      handleFieldChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        "DamageLevel",
-                                                        selectedLevel?.DamageLevel
-                                                      );
-                                                    }}
-                                                    className="form-control-sm ms-1"
-                                                  >
-                                                    <option value="">
-                                                      Select Damage Level
+                                                    handleFieldChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      "DamageLevelID",
+                                                      selectedLevel?.DamageLevelID
+                                                    );
+                                                    handleFieldChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      "DamageLevel",
+                                                      selectedLevel?.DamageLevel
+                                                    );
+                                                  }}
+                                                  className="form-control-sm ms-1"
+                                                >
+                                                  <option value="">
+                                                    Select Damage Level
+                                                  </option>
+                                                  {damageLevels.map((level) => (
+                                                    <option
+                                                      key={level.DamageLevelID}
+                                                      value={level.DamageLevelID}
+                                                    >
+                                                      {level.DamageLevel}
                                                     </option>
-                                                    {damageLevels.map(
-                                                      (level) => (
-                                                        <option
-                                                          key={
-                                                            level.DamageLevelID
-                                                          }
-                                                          value={
-                                                            level.DamageLevelID
-                                                          }
-                                                        >
-                                                          {level.DamageLevel}
-                                                        </option>
-                                                      )
-                                                    )}
-                                                  </Form.Select>
-                                                </div>
+                                                  ))}
+                                                </Form.Select>
                                               </div>
                                             </div>
-                                            <div className="row">
-                                              <div className="col-md-12">
-                                                <div className="mb-1">
-                                                  <strong>
-                                                    Damage Extent:
-                                                  </strong>
-                                                  <Form.Control
-                                                    type="text"
-                                                    placeholder="%"
-                                                    value={
-                                                      inspection.damage_extent ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      handleFieldChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        "damage_extent",
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                    className="form-control-sm ms-1"
-                                                  />
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="row">
-                                              <div className="col-md-12">
-                                                <div className="mb-2">
-                                                  <strong>
-                                                    Situation Remarks:
-                                                  </strong>{" "}
-                                                  {inspection.Remarks || "N/A"}
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="row">
-                                              <div className="col-md-6">
-                                                <div className="mb-2">
-                                                  <strong>
-                                                    Consultant Remarks:
-                                                  </strong>{" "}
-                                                  {inspection.qc_remarks_con ||
-                                                    "N/A"}
-                                                </div>
-                                              </div>
-                                              <div className="col-md-6">
-                                                <div className="mb-2">
-                                                  <strong>Rams Remarks:</strong>{" "}
-                                                  {inspection.qc_remarks_rams ||
-                                                    "N/A"}
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="row">
-                                              <div className="col-md-12 d-flex flex-column justify-content-between">
-                                                <div className="mb-1">
-                                                  <strong>
-                                                    Evaluator Remarks:
-                                                  </strong>
-                                                  <Form.Control
-                                                    as="textarea"
-                                                    rows={3}
-                                                    placeholder="Evaluator Remarks"
-                                                    value={
-                                                      inspection.qc_remarks_evaluator ||
-                                                      ""
-                                                    }
-                                                    onChange={(e) =>
-                                                      handleEvalRemarksChange(
-                                                        spanIndex,
-                                                        workKind,
-                                                        inspection.inspection_id,
-                                                        e.target.value
-                                                      )
-                                                    }
-                                                    className="mb-2"
-                                                  />
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <div className="flex justify-end gap-2">
-                                              {userId !== 1 && (
-                                                <Button
-                                                  variant="success"
-                                                  onClick={() =>
-                                                    fetchPastEvaluations(
-                                                      inspection.inspection_id
+                                          </div>
+                                          <div className="row">
+                                            <div className="col-md-12">
+                                              <div className="mb-1">
+                                                <strong>Damage Extent:</strong>
+                                                <Form.Control
+                                                  type="text"
+                                                  placeholder="%"
+                                                  value={
+                                                    inspection.damage_extent || ""
+                                                  }
+                                                  onChange={(e) =>
+                                                    handleFieldChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      "damage_extent",
+                                                      e.target.value
                                                     )
                                                   }
-                                                >
-                                                  View Past Evaluations
-                                                </Button>
-                                              )}
-
-                                              <Button
-                                                onClick={() =>
-                                                  handleSaveChanges(inspection)
-                                                }
-                                                className="bg-[#CFE2FF]"
-                                              >
-                                                Save Changes
-                                              </Button>
+                                                  className="form-control-sm ms-1"
+                                                />
+                                              </div>
                                             </div>
+                                          </div>
+                                          <div className="row">
+                                            <div className="col-md-12">
+                                              <div className="mb-2">
+                                                <strong>
+                                                  Situation Remarks:
+                                                </strong>{" "}
+                                                {inspection.Remarks || "N/A"}
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div className="row">
+                                            <div className="col-md-6">
+                                              <div className="mb-2">
+                                                <strong>
+                                                  Consultant Remarks:
+                                                </strong>{" "}
+                                                {inspection.qc_remarks_con ||
+                                                  "N/A"}
+                                              </div>
+                                            </div>
+                                            <div className="col-md-6">
+                                              <div className="mb-2">
+                                                <strong>Rams Remarks:</strong>{" "}
+                                                {inspection.qc_remarks_rams ||
+                                                  "N/A"}
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div className="row">
+                                            <div className="col-md-12 d-flex flex-column justify-content-between">
+                                              <div className="mb-1">
+                                                <strong>
+                                                  Evaluator Remarks:
+                                                </strong>
+                                                <Form.Control
+                                                  as="textarea"
+                                                  rows={3}
+                                                  placeholder="Evaluator Remarks"
+                                                  value={
+                                                    inspection.qc_remarks_evaluator ||
+                                                    ""
+                                                  }
+                                                  onChange={(e) =>
+                                                    handleEvalRemarksChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                  className="mb-2"
+                                                />
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div className="flex justify-end gap-2">
+                                            {userId !== 1 && (
+                                              <Button
+                                                variant="success"
+                                                onClick={() =>
+                                                  fetchPastEvaluations(
+                                                    inspection.inspection_id
+                                                  )
+                                                }
+                                              >
+                                                View Past Evaluations
+                                              </Button>
+                                            )}
+                                            <Button
+                                              onClick={() =>
+                                                handleSaveChanges(inspection)
+                                              }
+                                              className="bg-[#CFE2FF]"
+                                            >
+                                              Save Changes
+                                            </Button>
                                           </div>
                                         </div>
                                       </div>
-                                    )
-                                  )}
-                                </div>
+                                    </div>
+                                  )
+                                )}
                               </div>
-                            )
-                          )
+                            </div>
+                          ))
                         ) : (
                           <p>No pending records found.</p>
                         )}
@@ -1047,28 +1040,55 @@ const InspectionListEvaluator = ({ bridgeId }) => {
               )}
             </div>
           )}
-
           <Modal
             show={showPhotoModal}
             onHide={handleClosePhotoModal}
             centered
             size="lg"
+            className="custom-modal"
           >
             <Modal.Header closeButton>
-              <Modal.Title>Enlarged Photo</Modal.Title>
+              <Modal.Title>
+                Photo {currentPhotoIndex + 1} of {selectedPhotos.length}
+              </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="text-center">
-              {selectedPhoto && (
-                <img
-                  src={selectedPhoto}
-                  alt="Enlarged"
-                  className="img-fluid rounded border"
-                  style={{ maxWidth: "100%", maxHeight: "80vh" }}
-                />
+            <Modal.Body>
+              {selectedPhotos.length > 0 && (
+                <div className="image-container">
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handlePreviousPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="nav-button prev-button"
+                  >
+                    <FontAwesomeIcon icon={faArrowLeft} />
+                  </Button>
+                  <img
+                    src={selectedPhotos[currentPhotoIndex]}
+                    alt={`Photo ${currentPhotoIndex + 1}`}
+                    className="modal-image"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/placeholder-image.png";
+                    }}
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handleNextPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="nav-button next-button"
+                  >
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button>
+                </div>
               )}
             </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClosePhotoModal}>
+                Close
+              </Button>
+            </Modal.Footer>
           </Modal>
-
           <PastEvaluationsModal
             show={showModal}
             onHide={handleCloseModal}
