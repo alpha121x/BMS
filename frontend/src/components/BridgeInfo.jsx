@@ -80,7 +80,7 @@ const BridgeInfo = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <HeaderEvaluation className="mb-1" />
-      <main className="flex-grow p-1">
+      <main className="flex-grow p-1 mt-5">
         <section className="bg-gray-100 min-h-screen">
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
             <div className="bg-[#CFE2FF] text-grey p-3 rounded-md shadow-md flex items-center justify-between">

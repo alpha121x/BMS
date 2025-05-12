@@ -4,7 +4,12 @@ import { Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFileCsv,
+  faFileExcel,
+  faArrowLeft,
+  faArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -18,8 +23,9 @@ const InspectionListRams = ({ bridgeId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedSections, setExpandedSections] = useState({});
-  const [activeDiv, setActiveDiv] = useState("pending"); // Default to Pending Reports
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [activeDiv, setActiveDiv] = useState("pending");
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   useEffect(() => {
@@ -42,7 +48,6 @@ const InspectionListRams = ({ bridgeId }) => {
 
       const result = await response.json();
       if (result.success) {
-        // Generalized function for grouping
         const groupBySpanAndWorkKind = (data) => {
           return data.reduce((acc, item) => {
             const spanKey = item.SpanIndex || "N/A";
@@ -56,7 +61,6 @@ const InspectionListRams = ({ bridgeId }) => {
           }, {});
         };
 
-        // Grouping the data separately
         setPendingData(groupBySpanAndWorkKind(result.data.pending));
         setApprovedData(groupBySpanAndWorkKind(result.data.approved));
         setUnapprovedData(groupBySpanAndWorkKind(result.data.unapproved));
@@ -94,18 +98,34 @@ const InspectionListRams = ({ bridgeId }) => {
     }
   }, [bridgeId]);
 
-  const handlePhotoClick = (photo) => {
-    setSelectedPhoto(photo);
-    setShowPhotoModal(true);
+  const handlePhotoClick = (photos, clickedIndex) => {
+    if (Array.isArray(photos) && photos.length > 0) {
+      setSelectedPhotos(photos);
+      setCurrentPhotoIndex(clickedIndex);
+      setShowPhotoModal(true);
+    }
+  };
+
+  const handlePreviousPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === 0 ? selectedPhotos.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === selectedPhotos.length - 1 ? 0 : prevIndex + 1
+    );
   };
 
   const handleClosePhotoModal = () => {
     setShowPhotoModal(false);
+    setSelectedPhotos([]);
+    setCurrentPhotoIndex(0);
   };
 
   const handleUpdateInspection = async (row) => {
     try {
-      // Show confirmation alert using SweetAlert2
       const { isConfirmed } = await Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
@@ -118,25 +138,18 @@ const InspectionListRams = ({ bridgeId }) => {
 
       if (!isConfirmed) {
         console.log("Update cancelled by user.");
-        return; // Exit if the user cancels the update
+        return;
       }
 
-      console.log("Updating inspection", row);
-
-      // Allow empty remarks (send as null if empty)
       const ramsRemarks =
         row.qc_remarks_rams?.trim() === "" ? null : row.qc_remarks_rams;
 
-      // Prepare the updated row with ConsultantRemarks and approval status
       const updatedData = {
         id: row.inspection_id,
-        qc_remarks_rams: ramsRemarks, // Can be empty (null)
+        qc_remarks_rams: ramsRemarks,
         qc_rams: row.qc_rams,
       };
 
-      console.log(updatedData);
-
-      // Call the API to update the database
       const response = await fetch(`${BASE_URL}/api/update-inspection-rams`, {
         method: "PUT",
         headers: {
@@ -147,19 +160,16 @@ const InspectionListRams = ({ bridgeId }) => {
 
       if (!response.ok) throw new Error("Failed to update inspection");
 
-      // Refetch data to reflect changes
       fetchData();
 
-      // Show success alert after updating
       Swal.fire({
         title: "Updated!",
         text: "Your inspection has been updated.",
         icon: "success",
-        confirmButtonColor: "#0D6EFD", // Custom OK button color
+        confirmButtonColor: "#0D6EFD",
       });
     } catch (error) {
       setError(error.message);
-      // Show error alert if the update fails
       Swal.fire("Error!", error.message, "error");
     }
   };
@@ -207,7 +217,7 @@ const InspectionListRams = ({ bridgeId }) => {
   };
 
   const handleDownloadCSV = async (bridgeId) => {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export-rams?bridgeId=${bridgeId}`
@@ -259,12 +269,12 @@ const InspectionListRams = ({ bridgeId }) => {
     } catch (error) {
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   const handleDownloadExcel = async (bridgeId, setLoading) => {
-    setLoading(true); // Start loader
+    setLoading(true);
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export-rams?bridgeId=${bridgeId}`
@@ -287,14 +297,14 @@ const InspectionListRams = ({ bridgeId }) => {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Inspections");
 
-      // Define all columns except images
       const columnKeys = Object.keys(summaryData[0]).filter(
         (key) =>
           key !== "Overview Photos" &&
           key !== "PhotoPaths" &&
           key !== "RN" &&
           key !== "qc_con" &&
-          key !== "qc_rams" && key !== "SURVEYED BY" 
+          key !== "qc_rams" &&
+          key !== "SURVEYED BY"
       );
 
       const columns = columnKeys.map((key) => ({
@@ -303,7 +313,6 @@ const InspectionListRams = ({ bridgeId }) => {
         width: 22,
       }));
 
-      // Add image columns with increased spacing
       for (let i = 1; i <= 5; i++) {
         columns.push({
           header: `Overview Photo ${i}`,
@@ -319,22 +328,18 @@ const InspectionListRams = ({ bridgeId }) => {
         });
       }
 
-      // Define worksheet columns
       worksheet.columns = columns;
 
-      // Style the header row (first row)
-      worksheet.getRow(1).font = { bold: true, size: 14 }; // Bold text and increased font size
+      worksheet.getRow(1).font = { bold: true, size: 14 };
       worksheet.getRow(1).alignment = {
         vertical: "middle",
         horizontal: "center",
-      }; // Center align text
-      worksheet.getRow(1).height = 25; // Increase row height for better visibility
+      };
+      worksheet.getRow(1).height = 25;
 
-      // Add data rows without image URLs
       for (let i = 0; i < summaryData.length; i++) {
         const item = summaryData[i];
 
-        // Extract & fix image URLs (replacing backslashes with forward slashes)
         const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
           url.replace(/\\/g, "/")
         );
@@ -342,36 +347,25 @@ const InspectionListRams = ({ bridgeId }) => {
           url.replace(/\\/g, "/")
         );
 
-        // Add normal data (excluding image URLs)
         const rowData = {};
         columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
 
-        // Add a row for each entry
         const rowIndex = worksheet.addRow(rowData).number;
 
-        // **Adjust row height for images to fit properly**
         worksheet.getRow(rowIndex).height = 90;
 
-        // Function to insert images in the correct locations
         const insertImage = async (photoUrls, columnOffset, rowHeight) => {
           for (let j = 0; j < photoUrls.length && j < 5; j++) {
             try {
-              // Fetch image data from the URL
               const imgResponse = await fetch(photoUrls[j]);
               const imgBlob = await imgResponse.blob();
               const arrayBuffer = await imgBlob.arrayBuffer();
 
-              // Add image to the workbook
               const imageId = workbook.addImage({
                 buffer: arrayBuffer,
                 extension: "jpeg",
               });
 
-              // **Insert image in the correct column**
-              // - `tl.col`: Column position, starting from normal data columns + offset
-              // - `tl.row`: Row position (adjusted for zero-based index)
-              // - `ext.width`: Width of the inserted image (150px for better visibility)
-              // - `ext.height`: Height of the inserted image (90px for consistency)
               worksheet.addImage(imageId, {
                 tl: {
                   col: columnKeys.length + columnOffset + j,
@@ -385,21 +379,17 @@ const InspectionListRams = ({ bridgeId }) => {
           }
         };
 
-        // Insert Overview Photos (5 max)
         await insertImage(overviewPhotos, 0, 90);
-
-        // Insert Inspection Photos (5 max)
         await insertImage(inspectionPhotos, 5, 90);
       }
 
-      // Save File
       const buffer = await workbook.xlsx.writeBuffer();
       saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-      setLoading(false); // Stop loader
+      setLoading(false);
     }
   };
 
@@ -445,6 +435,55 @@ const InspectionListRams = ({ bridgeId }) => {
         position: "relative",
       }}
     >
+      <style>
+        {`
+          .custom-modal .modal-dialog {
+            max-width: 90vw;
+            width: 100%;
+          }
+          .custom-modal .modal-content {
+            max-height: 90vh;
+            overflow: hidden;
+          }
+          .custom-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+          }
+          .custom-modal .image-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-height: 60vh;
+          }
+          .custom-modal .modal-image {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+          }
+          .custom-modal .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            padding: 8px 12px;
+            font-size: 1.2rem;
+          }
+          .custom-modal .prev-button {
+            left: 10px;
+          }
+          .custom-modal .next-button {
+            right: 10px;
+          }
+        `}
+      </style>
       <div className="card-body pb-0">
         <div className="d-flex mb-2 justify-content-between items-center p-3 bg-[#CFE2FF] rounded-lg shadow-md">
           <h6
@@ -523,11 +562,9 @@ const InspectionListRams = ({ bridgeId }) => {
           </Button>
         </div>
         <div className="border rounded p-3 shadow-lg mt-2">
-          {/* Reports Section */}
           {activeDiv === "pending" && (
             <div className="mb-4">
               <h5>Pending Reports</h5>
-
               {pendingData && Object.keys(pendingData).length > 0 ? (
                 Object.keys(pendingData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
@@ -539,7 +576,6 @@ const InspectionListRams = ({ bridgeId }) => {
                       <strong>Reports For Span: {spanIndex}</strong>
                       <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                     </div>
-
                     {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(pendingData[spanIndex]).length > 0 ? (
@@ -590,7 +626,8 @@ const InspectionListRams = ({ bridgeId }) => {
                                                       loading="lazy"
                                                       onClick={() =>
                                                         handlePhotoClick(
-                                                          photoUrl
+                                                          inspection.PhotoPaths,
+                                                          index
                                                         )
                                                       }
                                                       onError={(e) => {
@@ -604,7 +641,6 @@ const InspectionListRams = ({ bridgeId }) => {
                                               </div>
                                             )}
                                           </div>
-
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
                                             {inspection.PartsName || "N/A"}{" "}
@@ -630,7 +666,6 @@ const InspectionListRams = ({ bridgeId }) => {
                                             </strong>{" "}
                                             {inspection.qc_remarks_con || "N/A"}
                                           </div>
-
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
                                             <Form.Control
                                               as="textarea"
@@ -649,7 +684,6 @@ const InspectionListRams = ({ bridgeId }) => {
                                               }
                                               className="mb-2"
                                             />
-
                                             <Form.Group
                                               controlId={`qc_con_${inspection.inspection_id}`}
                                               className="mb-2"
@@ -720,34 +754,59 @@ const InspectionListRams = ({ bridgeId }) => {
                   </div>
                 ))
               ) : (
-                <p>
-                  No pending records available.
-                </p>
+                <p>No pending records available.</p>
               )}
             </div>
           )}
-
           <Modal
             show={showPhotoModal}
             onHide={handleClosePhotoModal}
             centered
             size="lg"
+            className="custom-modal"
           >
             <Modal.Header closeButton>
-              <Modal.Title>Enlarged Photo</Modal.Title>
+              <Modal.Title>
+                Photo {currentPhotoIndex + 1} of {selectedPhotos.length}
+              </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="text-center">
-              {selectedPhoto && (
-                <img
-                  src={selectedPhoto}
-                  alt="Enlarged"
-                  className="img-fluid rounded border"
-                  style={{ maxWidth: "100%", maxHeight: "80vh" }}
-                />
+            <Modal.Body>
+              {selectedPhotos.length > 0 && (
+                <div className="image-container">
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handlePreviousPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="nav-button prev-button"
+                  >
+                    <FontAwesomeIcon icon={faArrowLeft} />
+                  </Button>
+                  <img
+                    src={selectedPhotos[currentPhotoIndex]}
+                    alt={`Photo ${currentPhotoIndex + 1}`}
+                    className="modal-image"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/placeholder-image.png";
+                    }}
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handleNextPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="nav-button next-button"
+                  >
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button>
+                </div>
               )}
             </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClosePhotoModal}>
+                Close
+              </Button>
+            </Modal.Footer>
           </Modal>
-
           {activeDiv === "approved" && (
             <div className="mb-4">
               <h5>Approved Reports</h5>
@@ -809,10 +868,11 @@ const InspectionListRams = ({ bridgeId }) => {
                                                         cursor: "pointer",
                                                         flexShrink: 0,
                                                       }}
-                                                      loading="lazy" // Lazy loading added
+                                                      loading="lazy"
                                                       onClick={() =>
                                                         handlePhotoClick(
-                                                          photoUrl
+                                                          inspection.PhotoPaths,
+                                                          index
                                                         )
                                                       }
                                                       onError={(e) => {
@@ -826,7 +886,6 @@ const InspectionListRams = ({ bridgeId }) => {
                                               </div>
                                             )}
                                           </div>
-
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
                                             {inspection.PartsName || "N/A"}{" "}
@@ -885,11 +944,9 @@ const InspectionListRams = ({ bridgeId }) => {
               )}
             </div>
           )}
-
           {activeDiv === "unapproved" && (
             <div className="mb-4">
               <h5>Unapproved Reports</h5>
-
               {unapprovedData && Object.keys(unapprovedData).length > 0 ? (
                 Object.keys(unapprovedData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
@@ -901,7 +958,6 @@ const InspectionListRams = ({ bridgeId }) => {
                       <strong>Reports For Span: {spanIndex}</strong>
                       <span>{expandedSections[spanIndex] ? "▼" : "▶"}</span>
                     </div>
-
                     {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(unapprovedData[spanIndex]).length > 0 ? (
@@ -953,10 +1009,11 @@ const InspectionListRams = ({ bridgeId }) => {
                                                           cursor: "pointer",
                                                           flexShrink: 0,
                                                         }}
-                                                        loading="lazy" // Lazy loading added
+                                                        loading="lazy"
                                                         onClick={() =>
                                                           handlePhotoClick(
-                                                            photoUrl
+                                                            inspection.PhotoPaths,
+                                                            index
                                                           )
                                                         }
                                                         onError={(e) => {
@@ -971,7 +1028,6 @@ const InspectionListRams = ({ bridgeId }) => {
                                                 </div>
                                               )}
                                             </div>
-
                                             <div className="col-md-6">
                                               <strong>Parts:</strong>{" "}
                                               {inspection.PartsName || "N/A"}{" "}
