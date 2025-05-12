@@ -2,14 +2,24 @@ import React, { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileCsv, faFileExcel, faAnglesRight, faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import PropTypes from "prop-types";
+import {
+  faFileCsv,
+  faFileExcel,
+  faAnglesRight,
+  faArrowLeft,
+  faArrowRight,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 const InspectionList = ({ bridgeId }) => {
   const [inspectionData, setInspectionData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingCsv, setLoadingCsv] = useState(false);
+  const [loadingExcel, setLoadingExcel] = useState(false);
   const [error, setError] = useState(null);
   const [openAccordions, setOpenAccordions] = useState({});
   const [selectedPhotos, setSelectedPhotos] = useState([]);
@@ -83,7 +93,8 @@ const InspectionList = ({ bridgeId }) => {
     setCurrentPhotoIndex(0);
   };
 
-  const handleDownloadCSV = async (bridgeId) => {
+  const handleDownloadCSV = async (bridgeId, setLoadingCsv) => {
+    setLoadingCsv(true);
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
@@ -95,20 +106,26 @@ const InspectionList = ({ bridgeId }) => {
         !Array.isArray(data.bridges) ||
         data.bridges.length === 0
       ) {
-        console.error("No data to export");
         Swal.fire("Error!", "No data available for export", "error");
         return;
       }
 
-      const inspectiondata = data.bridges;
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
-      const headers = Object.keys(inspectiondata[0]);
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
+
+      const headers = Object.keys(summaryData[0]).filter(
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "RN" &&
+          key !== "SURVEYED BY"
+      );
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
           headers.join(","),
-          ...inspectiondata.map((row) =>
+          ...summaryData.map((row) =>
             headers
               .map((key) =>
                 String(row[key]).includes(",")
@@ -127,12 +144,14 @@ const InspectionList = ({ bridgeId }) => {
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error("Error downloading CSV:", error);
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
+    } finally {
+      setLoadingCsv(false);
     }
   };
 
-  const handleDownloadExcel = async (bridgeId) => {
+  const handleDownloadExcel = async (bridgeId, setLoadingExcel) => {
+    setLoadingExcel(true);
     try {
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
@@ -149,19 +168,105 @@ const InspectionList = ({ bridgeId }) => {
         return;
       }
 
-      const inspectiondata = data.bridges;
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
 
-      const ws = XLSX.utils.json_to_sheet(inspectiondata);
-      ws["!cols"] = Object.keys(inspectiondata[0]).map(() => ({ width: 20 }));
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Inspections");
 
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "RN" &&
+          key !== "qc_con" &&
+          key !== "qc_rams" &&
+          key !== "SURVEYED BY"
+      );
 
-      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: 22,
+      }));
+
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
+      }
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
+      }
+
+      worksheet.columns = columns;
+
+      worksheet.getRow(1).font = { bold: true, size: 14 };
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getRow(1).height = 25;
+
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+
+        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
+          url.replace(/\\/g, "/")
+        );
+
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
+
+        const rowIndex = worksheet.addRow(rowData).number;
+
+        worksheet.getRow(rowIndex).height = 90;
+
+        const insertImage = async (photoUrls, columnOffset, rowHeight) => {
+          for (let j = 0; j < photoUrls.length && j < 5; j++) {
+            try {
+              const imgResponse = await fetch(photoUrls[j]);
+              const imgBlob = await imgResponse.blob();
+              const arrayBuffer = await imgBlob.arrayBuffer();
+
+              const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: "jpeg",
+              });
+
+              worksheet.addImage(imageId, {
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
+                ext: { width: 150, height: 90 },
+              });
+            } catch (error) {
+              console.error("Failed to load image:", photoUrls[j], error);
+            }
+          }
+        };
+
+        await insertImage(overviewPhotos, 0, 90);
+        await insertImage(inspectionPhotos, 5, 90);
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+    } finally {
+      setLoadingExcel(false);
     }
   };
 
@@ -203,16 +308,10 @@ const InspectionList = ({ bridgeId }) => {
   }, {});
 
   useEffect(() => {
-    console.log("groupedData:", groupedData);
+    // console.log("groupedData:", groupedData);
     Object.keys(groupedData).forEach((spanIndex) => {
       Object.keys(groupedData[spanIndex]).forEach((workKind) => {
         groupedData[spanIndex][workKind].forEach((inspection, index) => {
-          if (!inspection.id) {
-            console.warn(
-              `Missing inspection id at spanIndex: ${spanIndex}, workKind: ${workKind}, index: ${index}`,
-              inspection
-            );
-          }
         });
       });
     });
@@ -242,75 +341,77 @@ const InspectionList = ({ bridgeId }) => {
                 </div>
 
                 <div className="card-body p-0 rounded-0">
-                  {groupedData[spanIndex][workKind]?.map((inspection, index) => (
-                    <div
-                      key={
-                        inspection.id ||
-                        `inspection-${spanIndex}-${workKind}-${index}`
-                      }
-                      className="mb-2 p-4 border-0 rounded-0 shadow-sm"
-                      style={{ backgroundColor: "#c8e4e3" }}
-                    >
-                      <div className="row">
-                        <div className="col-md-3">
-                          {inspection.PhotoPaths?.length > 0 && (
-                            <div
-                              className="d-flex gap-2"
-                              style={{
-                                overflowX: "auto",
-                                whiteSpace: "nowrap",
-                                display: "flex",
-                                paddingBottom: "5px",
-                              }}
-                            >
-                              {inspection.PhotoPaths.map((photo, i) => (
-                                <img
-                                  key={`photo-${inspection.id}-${i}`}
-                                  src={photo}
-                                  alt={`Photo ${i + 1}`}
-                                  className="img-fluid rounded border"
-                                  loading="lazy"
-                                  style={{
-                                    width: "80px",
-                                    height: "80px",
-                                    objectFit: "cover",
-                                    cursor: "pointer",
-                                    flexShrink: 0,
-                                  }}
-                                  onClick={() =>
-                                    handlePhotoClick(inspection.PhotoPaths, i)
-                                  }
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                  {groupedData[spanIndex][workKind]?.map(
+                    (inspection, index) => (
+                      <div
+                        key={
+                          inspection.id ||
+                          `inspection-${spanIndex}-${workKind}-${index}`
+                        }
+                        className="mb-2 p-4 border-0 rounded-0 shadow-sm"
+                        style={{ backgroundColor: "#c8e4e3" }}
+                      >
+                        <div className="row">
+                          <div className="col-md-3">
+                            {inspection.PhotoPaths?.length > 0 && (
+                              <div
+                                className="d-flex gap-2"
+                                style={{
+                                  overflowX: "auto",
+                                  whiteSpace: "nowrap",
+                                  display: "flex",
+                                  paddingBottom: "5px",
+                                }}
+                              >
+                                {inspection.PhotoPaths.map((photo, i) => (
+                                  <img
+                                    key={`photo-${inspection.id}-${i}`}
+                                    src={photo}
+                                    alt={`Photo ${i + 1}`}
+                                    className="img-fluid rounded border"
+                                    loading="lazy"
+                                    style={{
+                                      width: "80px",
+                                      height: "80px",
+                                      objectFit: "cover",
+                                      cursor: "pointer",
+                                      flexShrink: 0,
+                                    }}
+                                    onClick={() =>
+                                      handlePhotoClick(inspection.PhotoPaths, i)
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
 
-                        <div className="col-md-9">
-                          <div className="row g-3">
-                            <div className="col-md-6">
-                              <strong>Parts:</strong>{" "}
-                              {inspection.PartsName || "N/A"} <br />
-                              <strong>Material:</strong>{" "}
-                              {inspection.MaterialName || "N/A"}
-                            </div>
-                            <div className="col-md-6">
-                              <strong>Damage:</strong>{" "}
-                              {inspection.DamageKindName || "N/A"} <br />
-                              <strong>Level:</strong>{" "}
-                              {inspection.DamageLevel || "N/A"}
-                            </div>
-                            <div className="col-12">
-                              <strong>Situation Remarks:</strong>{" "}
-                              <span className="text-muted">
-                                {inspection.Remarks || "N/A"}
-                              </span>
+                          <div className="col-md-9">
+                            <div className="row g-3">
+                              <div className="col-md-6">
+                                <strong>Parts:</strong>{" "}
+                                {inspection.PartsName || "N/A"} <br />
+                                <strong>Material:</strong>{" "}
+                                {inspection.MaterialName || "N/A"}
+                              </div>
+                              <div className="col-md-6">
+                                <strong>Damage:</strong>{" "}
+                                {inspection.DamageKindName || "N/A"} <br />
+                                <strong>Level:</strong>{" "}
+                                {inspection.DamageLevel || "N/A"}
+                              </div>
+                              <div className="col-12">
+                                <strong>Situation Remarks:</strong>{" "}
+                                <span className="text-muted">
+                                  {inspection.Remarks || "N/A"}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
             ))}
@@ -378,20 +479,28 @@ const InspectionList = ({ bridgeId }) => {
           <h5 className="card-title font-semibold pb-0 mb-0">
             Condition Assessment Reports
           </h5>
-          <div className="d-flex gap-2">
+          <div className="d-flex gap-3">
             <button
               className="bg-[#005D7F] text-white px-3 py-1 rounded-1"
-              onClick={() => handleDownloadCSV(bridgeId)}
+              onClick={() => handleDownloadCSV(bridgeId, setLoadingCsv)}
             >
-              <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-              CSV
+              {loadingCsv ? (
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+              ) : (
+                <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+              )}
+              {loadingCsv ? "Processing..." : "Csv"}
             </button>
             <button
               className="bg-[#005D7F] text-white px-3 py-1 rounded-1"
-              onClick={() => handleDownloadExcel(bridgeId)}
+              onClick={() => handleDownloadExcel(bridgeId, setLoadingExcel)}
             >
-              <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-              Excel
+              {loadingExcel ? (
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+              ) : (
+                <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+              )}
+              {loadingExcel ? "Processing..." : "Excel"}
             </button>
           </div>
         </div>
@@ -511,8 +620,8 @@ const InspectionList = ({ bridgeId }) => {
   );
 };
 
-InspectionList.propTypes = {
-  bridgeId: PropTypes.string.isRequired,
-};
+// InspectionList.propTypes = {
+//   bridgeId: PropTypes.string.isRequired,
+// };
 
 export default InspectionList;
