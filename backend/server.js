@@ -493,6 +493,73 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
   }
 });
 
+// API endpoint to get counts for inspected structures
+app.get("/api/structure-counts-inspected-eval", async (req, res) => {
+  try {
+    const { district } = req.query;
+    const params = [];
+    let districtFilter = "";
+
+    if (district && district !== "%") {
+      districtFilter = "AND m.district_id = $1";
+      params.push(district);
+    }
+
+    const query = `
+      WITH inspected_structures AS (
+        SELECT DISTINCT uu_bms_id 
+        FROM bms.tbl_inspection_f 
+        WHERE "DamageLevelID" IN (4, 5, 6)
+        AND (
+          surveyed_by = 'RAMS-PITB' 
+          OR 
+          (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+        )
+      )
+      SELECT 
+        m.structure_type, 
+        COUNT(*) AS count
+      FROM bms.tbl_bms_master_data m
+      JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
+      WHERE 1=1 
+        ${districtFilter}
+        AND m.is_active = true
+      GROUP BY m.structure_type
+      ORDER BY count DESC;
+    `;
+
+    const totalQuery = `
+      WITH inspected_structures AS (
+        SELECT DISTINCT uu_bms_id 
+        FROM bms.tbl_inspection_f 
+        WHERE "DamageLevelID" IN (4, 5, 6)
+        AND (
+          surveyed_by = 'RAMS-PITB' 
+          OR 
+          (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+        )
+      )
+      SELECT COUNT(*) AS total_count
+      FROM bms.tbl_bms_master_data m
+      JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
+      WHERE 1=1 
+        ${districtFilter}
+        AND m.is_active = true;
+    `;
+
+    const structureTypeCounts = await pool.query(query, params);
+    const totalStructureCount = await pool.query(totalQuery, params);
+
+    res.json({
+      structureTypeCounts: structureTypeCounts.rows,
+      totalStructureCount: totalStructureCount.rows[0]?.total_count || 0,
+    });
+  } catch (err) {
+    console.error("Error executing query", err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // API endpoint to get counts for evaluated structures
 app.get("/api/structure-counts-evaluated", async (req, res) => {
   try {
@@ -4074,7 +4141,6 @@ app.get("/api/dimentions", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch road surface types" });
   }
 });
-
 
 // api for bridge damage levels vs damage knds
 app.get('/api/damage-chart', async (req, res) => {
