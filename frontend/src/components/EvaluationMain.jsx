@@ -5,13 +5,13 @@ import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
-import TopCard from "./TopCard";
+import TopCardDashboard from "./TopCardDashboard"; // Import TopCardDashboard
+import Filters from "./Filters"; // Import Filters component
 
 const EvaluationMain = () => {
   const [districtId, setDistrictId] = useState("%");
   const [structureType, setStructureType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
-  // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [evaluatedCards, setEvaluatedCards] = useState([]);
@@ -41,13 +41,13 @@ const EvaluationMain = () => {
       .then((response) => response.json())
       .then((data) => {
         const totalCount = data.totalStructureCount || "0";
-  
+
         const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
           BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
         };
-  
+
         const mappedCards = data.structureTypeCounts.map((item) => {
           const typeKey = item.structure_type.toUpperCase();
           return {
@@ -57,31 +57,31 @@ const EvaluationMain = () => {
             color: "#3B9996",
           };
         });
-  
+
         mappedCards.unshift({
           label: "Inspected Structures",
           value: totalCount,
           icon: <SiInstructure />,
           color: "#3B9996",
         });
-  
+
         setInspectedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
   }, [districtId]);
-  
+
   useEffect(() => {
     fetch(`${BASE_URL}/api/structure-counts-evaluated?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
         const totalCount = data.totalStructureCount || "0";
-  
+
         const evaluatedMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
           BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
         };
-  
+
         const mappedCards = data.structureTypeCounts.map((item) => {
           const typeKey = item.structure_type.toUpperCase();
           return {
@@ -91,52 +91,97 @@ const EvaluationMain = () => {
             color: "#3B9996",
           };
         });
-  
+
         mappedCards.unshift({
           label: "Evaluated Structures",
           value: totalCount,
           icon: <SiInstructure />,
           color: "#3B9996",
         });
-  
+
         setEvaluatedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
   }, [districtId]);
-  
 
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
-      <div className="mb-2">
-        <div className="container-fluid mt-[65px]">
-          <div className="row">
-            <div className="col-md-12">
-              <h5 className="font-semibold text-gray-700">
-                Inspected Structures
-              </h5>
+      <div className="container-fluid mt-[65px]">
+        <div className="row g-2">
+          <div className="col-md-10">
+            <div className="row g-2">
+              <div className="col-md-4">
+                <div className="mb-2">
+                  {/* Only One Card Displaying Total and Three Counts */}
+                  <TopCardDashboard
+                    totalLabel="Inspected Structures"
+                    totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
+                    color="#009DB9"
+                    items={[
+                      {
+                        label: "Culvert",
+                        value: inspectedCards[2]?.value,
+                        icon: <LuConstruction />,
+                      },
+                      {
+                        label: "PC Bridge",
+                        value: inspectedCards[1]?.value,
+                        icon: <FaBridge />,
+                      },
+                      {
+                        label: "Underpass",
+                        value: inspectedCards[3]?.value,
+                        icon: <FaRoadBridge />,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-2">
+                  {/* Only One Card Displaying Total and Three Counts */}
+                  <TopCardDashboard
+                    totalLabel="Evaluated Structures"
+                    totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
+                    color="#3B9996"
+                    items={[
+                      {
+                        label: "Culvert",
+                        value: evaluatedCards[2]?.value,
+                        icon: <LuConstruction />,
+                      },
+                      {
+                        label: "PC Bridge",
+                        value: evaluatedCards[1]?.value,
+                        icon: <FaBridge />,
+                      },
+                      {
+                        label: "Underpass",
+                        value: evaluatedCards[3]?.value,
+                        icon: <FaRoadBridge />,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="col-md-2 bg-[#8CC5C4] p-2 rounded-1">
+                <Filters
+                  districtId={districtId}
+                  setDistrictId={setDistrictId}
+                  structureType={structureType}
+                  setStructureType={setStructureType}
+                  bridgeName={bridgeName}
+                  setBridgeName={setBridgeName}
+                  // fetchAllBridges={fetchAllBridges} // Search triggered manually
+                  flexDirection="flex-col"
+                  padding="p-1"
+                />
+              </div>
             </div>
-          </div>
-          <div className="row gx-2">
-            {inspectedCards.map((card, index) => (
-              <TopCard key={index} {...card} />
-            ))}
-          </div>
-          <div className="row">
-            <div className="col-md-12">
-              <h5 className="font-semibold text-gray-700">
-                Evaluated Structures
-              </h5>
-            </div>
-          </div>
-          <div className="row gx-2">
-            {evaluatedCards.map((card, index) => (
-              <TopCard key={index} {...card} />
-            ))}
           </div>
         </div>
       </div>
-
       {/* Bridges */}
       <div className="container-fluid">
         <div className="row">
