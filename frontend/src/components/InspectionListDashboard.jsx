@@ -324,6 +324,55 @@ const InspectionList = ({ bridgeId }) => {
 
   return (
     <div className="card p-0 rounded-1">
+      <style>
+        {`
+          .custom-modal .modal-dialog {
+            max-width: 90vw;
+            width: 100%;
+          }
+          .custom-modal .modal-content {
+            max-height: 90vh;
+            overflow: hidden;
+          }
+          .custom-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+          }
+          .custom-modal .image-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-height: 60vh;
+          }
+          .custom-modal .modal-image {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+          }
+          .custom-modal .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            padding: 8px 12px;
+            font-size: 1.2rem;
+          }
+          .custom-modal .prev-button {
+            left: 10px;
+          }
+          .custom-modal .next-button {
+            right: 10px;
+          }
+        `}
+      </style>
       <div className="card-body p-2">
         <div className="d-flex mb-4 justify-content-between items-center bg-[#009DB9] text-[#fff] p-2 rounded-1">
           <h5 className="card-title font-semibold pb-0 mb-0">
@@ -416,38 +465,34 @@ const InspectionList = ({ bridgeId }) => {
             onHide={handleClosePhotoModal}
             centered
             size="lg"
+            className="custom-modal"
           >
             <Modal.Header closeButton>
               <Modal.Title>
                 Photo {currentPhotoIndex + 1} of {selectedPhotos.length}
               </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="text-center">
+            <Modal.Body>
               {selectedPhotos.length > 0 && (
-                <div className="d-flex align-items-center justify-content-center">
+                <div className="image-container">
                   <Button
                     variant="outline-secondary"
                     onClick={handlePreviousPhoto}
                     disabled={selectedPhotos.length <= 1}
-                    className="mr-3"
+                    className="nav-button prev-button"
                   >
                     <FontAwesomeIcon icon={faArrowLeft} />
                   </Button>
                   <img
                     src={selectedPhotos[currentPhotoIndex]}
                     alt={`Photo ${currentPhotoIndex + 1}`}
-                    className="img-fluid rounded border"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "70vh",
-                      objectFit: "contain",
-                    }}
+                    className="modal-image"
                   />
                   <Button
                     variant="outline-secondary"
                     onClick={handleNextPhoto}
                     disabled={selectedPhotos.length <= 1}
-                    className="ml-3"
+                    className="nav-button next-button"
                   >
                     <FontAwesomeIcon icon={faArrowRight} />
                   </Button>
