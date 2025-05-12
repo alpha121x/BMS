@@ -308,127 +308,128 @@ const InspectionList = ({ bridgeId }) => {
           />
         )}
 
-        <div className="inspection-cards-container">
-          {Object.keys(groupedData).map((spanIndex) => (
-            <div key={spanIndex} className="card mb-2 border-0">
-              {/* Span Index Dropdown */}
-              <div
-                className="p-1 d-flex justify-content-between align-items-center bg-[#005D7F] text-[#fff]"
-                style={{ cursor: "pointer" }}
-                onClick={() => toggleAccordion(spanIndex)}
-              >
-                <h6 className="mb-0">{`Reports For Span: ${spanIndex}`}</h6>
-                <span className="">{openAccordions[spanIndex] ? "▼" : "▶"}</span>
+    <div className="inspection-cards-container">
+  {Object.keys(groupedData).map((spanIndex) => (
+    <div key={spanIndex} className="card mb-2 border-0">
+      {/* Span Index Dropdown */}
+      <div
+        className="p-1 d-flex justify-content-between align-items-center bg-[#005D7F] text-[#fff]"
+        style={{ cursor: "pointer" }}
+        onClick={() => toggleAccordion(spanIndex)}
+      >
+        <h6 className="mb-0">{`Reports For Span: ${spanIndex}`}</h6>
+        <span className="">{openAccordions[spanIndex] ? "▼" : "▶"}</span>
+      </div>
+
+      {/* Content - Only visible if expanded */}
+      {openAccordions[spanIndex] && (
+        <div className="card-body p-0">
+          {Object.keys(groupedData[spanIndex]).map((workKind) => (
+            <div key={`${spanIndex}-${workKind}`} className="card mb-2 mt-0 border-0">
+              <div className="rounded-0 p-1 bg-[#009DB9] text-[#fff]">
+                {workKind}
               </div>
 
-              {/* Content - Only visible if expanded */}
-              {openAccordions[spanIndex] && (
-                <div className="card-body p-0">
-                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                    <div key={workKind} className="card mb-2 mt-0 border-0">
-                      <div className="rounded-0 p-1 bg-[#009DB9] text-[#fff]">
-                        {workKind}
+              <div className="card-body p-0 rounded-0">
+                {groupedData[spanIndex][workKind]?.map((inspection, index) => (
+                  <div
+                    key={inspection.id || `inspection-${spanIndex}-${workKind}-${index}`}
+                    className="mb-2 p-4 border-0 rounded-0 shadow-sm"
+                    style={{ backgroundColor: "#c8e4e3" }}
+                  >
+                    <div className="row">
+                      {/* Photos Column */}
+                      <div className="col-md-3">
+                        {inspection.PhotoPaths?.length > 0 && (
+                          <div
+                            className="d-flex gap-2"
+                            style={{
+                              overflowX: "auto",
+                              whiteSpace: "nowrap",
+                              display: "flex",
+                              paddingBottom: "5px",
+                            }}
+                          >
+                            {inspection.PhotoPaths.map((photo, i) => (
+                              <img
+                                key={`photo-${inspection.id}-${i}`}
+                                src={photo}
+                                alt={`Photo ${i + 1}`}
+                                className="img-fluid rounded border"
+                                loading="lazy"
+                                style={{
+                                  width: "80px",
+                                  height: "80px",
+                                  objectFit: "cover",
+                                  cursor: "pointer",
+                                  flexShrink: 0,
+                                }}
+                                onClick={() => handlePhotoClick(photo)}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      <div className="card-body p-0 rounded-0">
-                        {groupedData[spanIndex][workKind]?.map((inspection) => (
-                          <div
-                            key={inspection.id}
-                            className="mb-2 p-4 border-0 rounded-0 shadow-sm"
-                            style={{ backgroundColor: "#c8e4e3" }}
-                          >
-                            <div className="row">
-                              {/* Photos Column */}
-                              <div className="col-md-3">
-                                {inspection.PhotoPaths?.length > 0 && (
-                                  <div
-                                    className="d-flex gap-2"
-                                    style={{
-                                      overflowX: "auto",
-                                      whiteSpace: "nowrap",
-                                      display: "flex",
-                                      paddingBottom: "5px",
-                                    }}
-                                  >
-                                    {inspection.PhotoPaths.map((photo, i) => (
-                                      <img
-                                        key={`photo-${inspection.id}-${i}`}
-                                        src={photo}
-                                        alt={`Photo ${i + 1}`}
-                                        className="img-fluid rounded border"
-                                        loading="lazy"
-                                        style={{
-                                          width: "80px",
-                                          height: "80px",
-                                          objectFit: "cover",
-                                          cursor: "pointer",
-                                          flexShrink: 0,
-                                        }}
-                                        onClick={() => handlePhotoClick(photo)}
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Details Column */}
-                              <div className="col-md-9">
-                                <div className="row g-3">
-                                  <div className="col-md-6">
-                                    <strong>Parts:</strong>{" "}
-                                    {inspection.PartsName || "N/A"} <br />
-                                    <strong>Material:</strong>{" "}
-                                    {inspection.MaterialName || "N/A"}
-                                  </div>
-                                  <div className="col-md-6">
-                                    <strong>Damage:</strong>{" "}
-                                    {inspection.DamageKindName || "N/A"} <br />
-                                    <strong>Level:</strong>{" "}
-                                    {inspection.DamageLevel || "N/A"}
-                                  </div>
-                                  <div className="col-12">
-                                    <strong>Situation Remarks:</strong>{" "}
-                                    <span className="text-muted">
-                                      {inspection.Remarks || "N/A"}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <Modal
-                                show={showPhotoModal}
-                                onHide={handleClosePhotoModal}
-                                centered
-                                size="lg"
-                              >
-                                <Modal.Header closeButton>
-                                  <Modal.Title>Enlarged Photo</Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body className="text-center">
-                                  {selectedPhoto && (
-                                    <img
-                                      src={selectedPhoto}
-                                      alt="Enlarged"
-                                      className="img-fluid rounded border"
-                                      style={{
-                                        maxWidth: "100%",
-                                        maxHeight: "80vh",
-                                      }}
-                                    />
-                                  )}
-                                </Modal.Body>
-                              </Modal>
-                            </div>
+                      {/* Details Column */}
+                      <div className="col-md-9">
+                        <div className="row g-3">
+                          <div className="col-md-6">
+                            <strong>Parts:</strong>{" "}
+                            {inspection.PartsName || "N/A"} <br />
+                            <strong>Material:</strong>{" "}
+                            {inspection.MaterialName || "N/A"}
                           </div>
-                        ))}
+                          <div className="col-md-6">
+                            <strong>Damage:</strong>{" "}
+                            {inspection.DamageKindName || "N/A"} <br />
+                            <strong>Level:</strong>{" "}
+                            {inspection.DamageLevel || "N/A"}
+                          </div>
+                          <div className="col-12">
+                            <strong>Situation Remarks:</strong>{" "}
+                            <span className="text-muted">
+                              {inspection.Remarks || "N/A"}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
+      )}
+    </div>
+  ))}
+
+  {/* Move Modal outside the loop */}
+  <Modal
+    show={showPhotoModal}
+    onHide={handleClosePhotoModal}
+    centered
+    size="lg"
+  >
+    <Modal.Header closeButton>
+      <Modal.Title>Enlarged Photo</Modal.Title>
+    </Modal.Header>
+    <Modal.Body className="text-center">
+      {selectedPhoto && (
+        <img
+          src={selectedPhoto}
+          alt="Enlarged"
+          className="img-fluid rounded border"
+          style={{
+            maxWidth: "100%",
+            maxHeight: "80vh",
+          }}
+        />
+      )}
+    </Modal.Body>
+  </Modal>
+</div>
       </div>
     </div>
   );
