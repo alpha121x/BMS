@@ -229,7 +229,7 @@ const InspectionListRams = ({ bridgeId }) => {
         !Array.isArray(data.bridges) ||
         data.bridges.length === 0
       ) {
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
 
@@ -287,7 +287,7 @@ const InspectionListRams = ({ bridgeId }) => {
         data.bridges.length === 0
       ) {
         console.error("No data to export");
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
 

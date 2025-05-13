@@ -2701,7 +2701,7 @@ app.get("/api/get-summary", async (req, res) => {
     if (rows.length === 0) {
       return res
         .status(404)
-        .json({ success: false, message: "Inspection not found" });
+        .json({ success: false, message: "No inspection data available" });
     }
 
     // Process PhotoPaths for all rows
@@ -2794,7 +2794,7 @@ app.get("/api/get-summary-con", async (req, res) => {
     if (rows.length === 0) {
       return res
         .status(404)
-        .json({ success: false, message: "Inspection not found" });
+        .json({ success: false, message: "No inspection data available" });
     }
 
     // Process PhotoPaths for all rows
@@ -2891,7 +2891,7 @@ app.get("/api/get-summary-rams", async (req, res) => {
     if (rows.length === 0) {
       return res
         .status(404)
-        .json({ success: false, message: "Inspection not found" });
+        .json({ success: false, message: "No inspection data available" });
     }
 
     // Process PhotoPaths for all rows
@@ -3643,7 +3643,7 @@ app.put("/api/update-inspection-con", async (req, res) => {
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Inspection not found" });
+      return res.status(404).json({ error: "No inspection data available" });
     }
 
     res.status(200).json({
@@ -3699,7 +3699,7 @@ app.put("/api/update-inspection-rams", async (req, res) => {
     const result = await pool.query(query, values);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Inspection not found" });
+      return res.status(404).json({ error: "No inspection data available" });
     }
 
     res.status(200).json({

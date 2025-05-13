@@ -198,7 +198,7 @@ const BridgesListDashboard = ({
 
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
 
@@ -237,7 +237,7 @@ const BridgesListDashboard = ({
   
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
   

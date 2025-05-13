@@ -42,6 +42,7 @@ const InspectionList = ({ bridgeId }) => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+
     try {
       if (!bridgeId) {
         throw new Error("bridgeId is required");
@@ -51,9 +52,13 @@ const InspectionList = ({ bridgeId }) => {
         `${BASE_URL}/api/get-summary?bridgeId=${bridgeId}`
       );
 
-      if (!response.ok) throw new Error("Failed to fetch data");
-
+      // Try to parse error response body
       const result = await response.json();
+
+      if (!response.ok) {
+        // Show API response error if available
+        throw new Error(result.message || "Failed to fetch data");
+      }
 
       if (Array.isArray(result.data)) {
         setInspectionData(result.data);
@@ -61,7 +66,8 @@ const InspectionList = ({ bridgeId }) => {
         throw new Error("Invalid data format");
       }
     } catch (error) {
-      setError(error.message);
+      console.error("API Error:", error); // for debugging
+      setError(error.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -106,7 +112,7 @@ const InspectionList = ({ bridgeId }) => {
         !Array.isArray(data.bridges) ||
         data.bridges.length === 0
       ) {
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
 
@@ -164,7 +170,7 @@ const InspectionList = ({ bridgeId }) => {
         data.bridges.length === 0
       ) {
         console.error("No data to export");
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
 
@@ -311,8 +317,7 @@ const InspectionList = ({ bridgeId }) => {
     // console.log("groupedData:", groupedData);
     Object.keys(groupedData).forEach((spanIndex) => {
       Object.keys(groupedData[spanIndex]).forEach((workKind) => {
-        groupedData[spanIndex][workKind].forEach((inspection, index) => {
-        });
+        groupedData[spanIndex][workKind].forEach((inspection, index) => {});
       });
     });
   }, [groupedData]);
@@ -564,9 +569,11 @@ const InspectionList = ({ bridgeId }) => {
                 zIndex: "999",
               }}
             />
-          ) : error ? (
-            <p className="text-danger">Error: {error}</p>
-          ) : (
+         ) : error ? (
+        <p className="text-danger">{error}</p>
+      ) : inspectionData.length === 0 ? (
+        <p>No inspection data available.</p>
+      ) : (
             inspectionCards
           )}
           <Modal
