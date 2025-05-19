@@ -160,8 +160,8 @@ const BridgesListDashboard = ({
 
   const handleZoomToBridge = (bridge) => {
     setSelectedLocation({
-      latitude: bridge.y_centroid, // y_centroid is latitude
-      longitude: bridge.x_centroid, // x_centroid is longitude
+      latitude: bridge.x_centroid, // y_centroid is latitude
+      longitude: bridge.y_centroid, // x_centroid is longitude
       name: bridge.BridgeName, // Optional: Add a name for the marker label
       bridgeName: `${bridge.pms_sec_id} - ${bridge.structure_no}`, // Combine pms_sec_id and structure_no
       district: bridge.district,
