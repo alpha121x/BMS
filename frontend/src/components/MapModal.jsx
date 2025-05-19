@@ -1,15 +1,30 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { useEffect } from "react";
-import "leaflet/dist/leaflet.css"; // Ensure this is imported
+import "leaflet/dist/leaflet.css"; // Ensure Leaflet CSS is imported
 
 const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {
-  if (!location) return null;
+  // Check if location exists and has valid coordinates
+  if (!location || !location.latitude || !location.longitude) {
+    console.error("Invalid location data:", location);
+    return <div className="modal-overlay">Error: Invalid location data</div>;
+  }
 
-  // Correct the coordinates
-  const { latitude: rawLat, longitude: rawLon } = location;
-  const latitude = rawLon; // Swap if needed
-  const longitude = rawLat;
-  console.log("Corrected:", latitude, longitude);
+  // Use the coordinates as provided (no swapping unless confirmed necessary)
+  const { latitude, longitude } = location;
+  
+  // Validate that coordinates are numbers and within valid ranges
+  const lat = parseFloat(latitude);
+  const lon = parseFloat(longitude);
+  if (
+    isNaN(lat) || isNaN(lon) ||
+    lat < -90 || lat > 90 ||
+    lon < -180 || lon > 180
+  ) {
+    console.error("Invalid coordinates:", latitude, longitude);
+    return <div className="modal-overlay">Error: Invalid coordinates</div>;
+  }
+
+  console.log("Map coordinates:", lat, lon);
 
   const InvalidateMapSize = () => {
     const map = useMap();
@@ -28,14 +43,14 @@ const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {
       <div className="modal-content">
         <div className="bridge-details">
           <p>
-            <strong>Bridge:</strong> {bridgeName} <br />
-            <strong>District:</strong> {district} <br />
-            <strong>Road:</strong> {road}
+            <strong>Bridge:</strong> {bridgeName || "Unknown"} <br />
+            <strong>District:</strong> {district || "Unknown"} <br />
+            <strong>Road:</strong> {road || "Unknown"}
           </p>
         </div>
         <div style={{ height: "400px", width: "100%" }}>
           <MapContainer
-            center={[latitude, longitude]}
+            center={[lat, lon]}
             zoom={13}
             style={{ height: "100%", width: "100%" }}
           >
@@ -44,7 +59,7 @@ const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
-            <Marker position={[latitude, longitude]}>
+            <Marker position={[lat, lon]}>
               <Popup>{markerLabel || "Location"}</Popup>
             </Marker>
           </MapContainer>
