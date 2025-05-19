@@ -7,8 +7,8 @@ const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {
 
   // Correct the coordinates
   const { latitude: rawLat, longitude: rawLon } = location;
-  const latitude = rawLat; // Swap if needed
-  const longitude = rawLon;
+  const latitude = rawLon; // Swap if needed
+  const longitude = rawLat;
   console.log("Corrected:", latitude, longitude);
 
   const InvalidateMapSize = () => {
