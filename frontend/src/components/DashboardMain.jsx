@@ -243,34 +243,6 @@ const DashboardMain = () => {
                   padding="p-1"
               />
             </div>
-
-
-            {/*<div className="mb-2">*/}
-            {/*  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">*/}
-            {/*    {constructionCards.map((card, index) => (*/}
-            {/*      <TopCardDashboard key={index} {...card} />*/}
-            {/*    ))}*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-
-            {/*/!* Inspection Section *!/*/}
-            {/*<div className="mb-2">*/}
-            {/*  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">*/}
-            {/*    {inspectedCards.map((card, index) => (*/}
-            {/*      <TopCardDashboard key={index} {...card} />*/}
-            {/*    ))}*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-
-            {/*/!* Evaluation Section *!/*/}
-            {/*<div className="mb-2">*/}
-            {/*  <div className="grid grid-cols-1 md:grid-cols-4 gap-2">*/}
-            {/*    {evaluatedCards.map((card, index) => (*/}
-            {/*      <TopCardDashboard key={index} {...card} />*/}
-            {/*    ))}*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-
           </div>
         </div>
 
@@ -333,26 +305,6 @@ const DashboardMain = () => {
             </div>
           </div>
         </div>
-
-        {/* Bridges List */}
-        {/*<div className="container-fluid">*/}
-        {/*  <div className="row">*/}
-        {/*    <div className="col-md-12">*/}
-        {/*      <BridgesListDashboard*/}
-        {/*          districtId={districtId}*/}
-        {/*          setDistrictId={setDistrictId}*/}
-        {/*          structureType={structureType}*/}
-        {/*          setStructureType={setStructureType}*/}
-        {/*          bridgeName={bridgeName}*/}
-        {/*          setBridgeName={setBridgeName}*/}
-        {/*      />*/}
-
-        {/*      <div className="mt-2">*/}
-        {/*        <CheckingTable districtId={districtId} bridgeName={bridgeName}/>*/}
-        {/*      </div>*/}
-        {/*    </div>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
 
         {/* Back to Top Button */}
         {showBackToTop && (
