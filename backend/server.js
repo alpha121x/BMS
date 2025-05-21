@@ -2663,6 +2663,142 @@ SELECT
   }
 });
 
+app.get("/api/bridgesEvaluatorNew", async (req, res) => {
+  try {
+    const {
+      set = 0,
+      limit = 10,
+      district = "%",
+      structureType = "%",
+      bridgeName = "%",
+    } = req.query;
+
+    let query = `
+      WITH inspection_counts AS (
+        SELECT 
+          uu_bms_id,
+          COUNT(*) AS total_inspections,
+          SUM(CASE WHEN reviewed_by = '2' 
+                   AND "DamageLevelID" IN (4, 5, 6) 
+                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+                   THEN 1 ELSE 0 END) AS reviewed_inspections
+        FROM bms.tbl_inspection_f
+        GROUP BY uu_bms_id
+        HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '2' 
+                                   AND "DamageLevelID" IN (4, 5, 6) 
+                                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+                                   THEN 1 ELSE 0 END)
+      )
+      SELECT 
+        b.uu_bms_id, 
+        b.surveyed_by,
+        b.pms_sec_id, 
+        b.structure_no, 
+        b.structure_type_id, 
+        b.structure_type, 
+        b.road_name, 
+        b.road_name_cwd, 
+        b.route_id, 
+        b.survey_id, 
+        b.surveyor_name, 
+        b.district_id, 
+        b.district, 
+        b.road_classification, 
+        b.road_surface_type, 
+        b.carriageway_type, 
+        b.direction, 
+        b.visual_condition, 
+        b.construction_type_id, 
+        b.construction_type, 
+        b.no_of_span,
+        b.data_source, 
+        b.date_time, 
+        b.span_length_m, 
+        b.structure_width_m, 
+        b.construction_year, 
+        b.last_maintenance_date, 
+        b.remarks, 
+        b.is_surveyed, 
+        b.x_centroid, 
+        b.y_centroid, 
+        b.images_spans,
+        CONCAT(b.pms_sec_id, ',', b.structure_no) AS bridge_name,
+        ARRAY[b.image_1, b.image_2, b.image_3, b.image_4, b.image_5] AS photos
+      FROM bms.tbl_bms_master_data b
+      INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
+      WHERE b.is_active = true
+    `;
+
+    let countQuery = `
+      WITH inspection_counts AS (
+        SELECT 
+          uu_bms_id,
+          COUNT(*) AS total_inspections,
+          SUM(CASE WHEN reviewed_by = '2' 
+                   AND "DamageLevelID" IN (4, 5, 6) 
+                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+                   THEN 1 ELSE 0 END) AS reviewed_inspections
+        FROM bms.tbl_inspection_f
+        GROUP BY uu_bms_id
+        HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '2' 
+                                   AND "DamageLevelID" IN (4, 5, 6) 
+                                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+                                   THEN 1 ELSE 0 END)
+      )
+      SELECT COUNT(*) AS totalCount
+      FROM bms.tbl_bms_master_data b
+      INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
+      WHERE b.is_active = true
+    `;
+
+    const queryParams = [];
+    const countParams = [];
+    let paramIndex = 1;
+
+    if (district !== "%") {
+      query += ` AND b.district_id = $${paramIndex}`;
+      countQuery += ` AND b.district_id = $${paramIndex}`;
+      queryParams.push(district);
+      countParams.push(district);
+      paramIndex++;
+    }
+
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
+
+    if (structureType !== "%") {
+      query += ` AND b.structure_type_id = $${paramIndex}`;
+      countQuery += ` AND b.structure_type_id = $${paramIndex}`;
+      queryParams.push(structureType);
+      countParams.push(structureType);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    queryParams.push(parseInt(set, 10), parseInt(limit, 10));
+
+    const result = await pool.query(query, queryParams);
+    const countResult = await pool.query(countQuery, countParams);
+
+    res.json({
+      success: true,
+      bridges: result.rows,
+      totalCount: parseInt(countResult.rows[0].totalcount, 10),
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
   try {
@@ -3868,6 +4004,17 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
 
     await client.query("BEGIN"); // Start transaction
 
+    // Validate inspection_id exists in tbl_inspection_f
+    const checkInspectionQuery = `
+      SELECT COUNT(*) AS count
+      FROM bms.tbl_inspection_f
+      WHERE inspection_id = $1
+    `;
+    const checkResult = await client.query(checkInspectionQuery, [inspection_id]);
+    if (parseInt(checkResult.rows[0].count, 10) === 0) {
+      throw new Error("Invalid inspection_id: No matching record in tbl_inspection_f");
+    }
+
     // Insert evaluation data into tbl_evaluation
     const insertQuery = `
       INSERT INTO bms.tbl_evaluation (
@@ -3924,21 +4071,21 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
 
     const result = await client.query(insertQuery, insertValues);
 
-    // Update evaluator_id in tbl_inspection_f
+    // Update evaluator_id in tbl_inspection_f (set directly instead of appending)
     const updateQuery = `
       UPDATE bms.tbl_inspection_f 
-      SET evaluator_id = 
-        CASE 
-          WHEN evaluator_id = '0' OR evaluator_id IS NULL OR evaluator_id = '' THEN $2 
-          ELSE evaluator_id || ',' || $2 
-        END
-      WHERE inspection_id = $1;
+      SET evaluator_id = $2
+      WHERE inspection_id = $1
+      RETURNING evaluator_id;
     `;
 
-    await client.query(updateQuery, [inspection_id, evaluator_id]);
+    const updateResult = await client.query(updateQuery, [inspection_id, evaluator_id]);
+    if (updateResult.rowCount === 0) {
+      throw new Error("Failed to update evaluator_id in tbl_inspection_f");
+    }
 
-    // Special condition: If evaluator_id == 5, also insert into tbl_evaluation_f
-    if (evaluator_id == "5") {
+    // Special condition: If evaluator_id == '5', also insert into tbl_evaluation_f
+    if (evaluator_id === "5") {
       const insertSpecialValues = [
         inspection_id,
         uu_bms_id,
@@ -3950,8 +4097,8 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
         inspection_images,
         qc_remarks_con,
         qc_remarks_rams,
-        qc_remarks_evaluator, // Fix: Correct column match
-        situation_remarks, // Fix: Ensure correct column order
+        qc_remarks_evaluator,
+        situation_remarks,
         PartsID,
         PartsName,
         MaterialID,
@@ -3975,7 +4122,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
           inspection_images,
           qc_remarks_con,
           qc_remarks_rams,
-          evaluator_final_remarks,  -- Fix: Correct column match
+          evaluator_final_remarks,
           "Remarks",
           "PartsID",
           "PartsName",
@@ -4000,8 +4147,8 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
     });
   } catch (error) {
     await client.query("ROLLBACK"); // Rollback transaction on error
-    console.error("Error inserting evaluation:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error inserting evaluation:", error.message);
+    res.status(500).json({ error: `Internal Server Error: ${error.message}` });
   } finally {
     client.release();
   }
