@@ -2663,141 +2663,141 @@ SELECT
   }
 });
 
-app.get("/api/bridgesEvaluatorNew", async (req, res) => {
-  try {
-    const {
-      set = 0,
-      limit = 10,
-      district = "%",
-      structureType = "%",
-      bridgeName = "%",
-    } = req.query;
+// app.get("/api/bridgesEvaluatorNew", async (req, res) => {
+//   try {
+//     const {
+//       set = 0,
+//       limit = 10,
+//       district = "%",
+//       structureType = "%",
+//       bridgeName = "%",
+//     } = req.query;
 
-    let query = `
-      WITH inspection_counts AS (
-        SELECT 
-          uu_bms_id,
-          COUNT(*) AS total_inspections,
-          SUM(CASE WHEN reviewed_by = '2' 
-                   AND "DamageLevelID" IN (4, 5, 6) 
-                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
-                   THEN 1 ELSE 0 END) AS reviewed_inspections
-        FROM bms.tbl_inspection_f
-        GROUP BY uu_bms_id
-        HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '2' 
-                                   AND "DamageLevelID" IN (4, 5, 6) 
-                                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
-                                   THEN 1 ELSE 0 END)
-      )
-      SELECT 
-        b.uu_bms_id, 
-        b.surveyed_by,
-        b.pms_sec_id, 
-        b.structure_no, 
-        b.structure_type_id, 
-        b.structure_type, 
-        b.road_name, 
-        b.road_name_cwd, 
-        b.route_id, 
-        b.survey_id, 
-        b.surveyor_name, 
-        b.district_id, 
-        b.district, 
-        b.road_classification, 
-        b.road_surface_type, 
-        b.carriageway_type, 
-        b.direction, 
-        b.visual_condition, 
-        b.construction_type_id, 
-        b.construction_type, 
-        b.no_of_span,
-        b.data_source, 
-        b.date_time, 
-        b.span_length_m, 
-        b.structure_width_m, 
-        b.construction_year, 
-        b.last_maintenance_date, 
-        b.remarks, 
-        b.is_surveyed, 
-        b.x_centroid, 
-        b.y_centroid, 
-        b.images_spans,
-        CONCAT(b.pms_sec_id, ',', b.structure_no) AS bridge_name,
-        ARRAY[b.image_1, b.image_2, b.image_3, b.image_4, b.image_5] AS photos
-      FROM bms.tbl_bms_master_data b
-      INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
-      WHERE b.is_active = true
-    `;
+//     let query = `
+//       WITH inspection_counts AS (
+//         SELECT 
+//           uu_bms_id,
+//           COUNT(*) AS total_inspections,
+//           SUM(CASE WHEN reviewed_by = '2' 
+//                    AND "DamageLevelID" IN (4, 5, 6) 
+//                    AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+//                    THEN 1 ELSE 0 END) AS reviewed_inspections
+//         FROM bms.tbl_inspection_f
+//         GROUP BY uu_bms_id
+//         HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '2' 
+//                                    AND "DamageLevelID" IN (4, 5, 6) 
+//                                    AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+//                                    THEN 1 ELSE 0 END)
+//       )
+//       SELECT 
+//         b.uu_bms_id, 
+//         b.surveyed_by,
+//         b.pms_sec_id, 
+//         b.structure_no, 
+//         b.structure_type_id, 
+//         b.structure_type, 
+//         b.road_name, 
+//         b.road_name_cwd, 
+//         b.route_id, 
+//         b.survey_id, 
+//         b.surveyor_name, 
+//         b.district_id, 
+//         b.district, 
+//         b.road_classification, 
+//         b.road_surface_type, 
+//         b.carriageway_type, 
+//         b.direction, 
+//         b.visual_condition, 
+//         b.construction_type_id, 
+//         b.construction_type, 
+//         b.no_of_span,
+//         b.data_source, 
+//         b.date_time, 
+//         b.span_length_m, 
+//         b.structure_width_m, 
+//         b.construction_year, 
+//         b.last_maintenance_date, 
+//         b.remarks, 
+//         b.is_surveyed, 
+//         b.x_centroid, 
+//         b.y_centroid, 
+//         b.images_spans,
+//         CONCAT(b.pms_sec_id, ',', b.structure_no) AS bridge_name,
+//         ARRAY[b.image_1, b.image_2, b.image_3, b.image_4, b.image_5] AS photos
+//       FROM bms.tbl_bms_master_data b
+//       INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
+//       WHERE b.is_active = true
+//     `;
 
-    let countQuery = `
-      WITH inspection_counts AS (
-        SELECT 
-          uu_bms_id,
-          COUNT(*) AS total_inspections,
-          SUM(CASE WHEN reviewed_by = '2' 
-                   AND "DamageLevelID" IN (4, 5, 6) 
-                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
-                   THEN 1 ELSE 0 END) AS reviewed_inspections
-        FROM bms.tbl_inspection_f
-        GROUP BY uu_bms_id
-        HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '2' 
-                                   AND "DamageLevelID" IN (4, 5, 6) 
-                                   AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
-                                   THEN 1 ELSE 0 END)
-      )
-      SELECT COUNT(*) AS totalCount
-      FROM bms.tbl_bms_master_data b
-      INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
-      WHERE b.is_active = true
-    `;
+//     let countQuery = `
+//       WITH inspection_counts AS (
+//         SELECT 
+//           uu_bms_id,
+//           COUNT(*) AS total_inspections,
+//           SUM(CASE WHEN reviewed_by = '2' 
+//                    AND "DamageLevelID" IN (4, 5, 6) 
+//                    AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+//                    THEN 1 ELSE 0 END) AS reviewed_inspections
+//         FROM bms.tbl_inspection_f
+//         GROUP BY uu_bms_id
+//         HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '2' 
+//                                    AND "DamageLevelID" IN (4, 5, 6) 
+//                                    AND (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = '2')) 
+//                                    THEN 1 ELSE 0 END)
+//       )
+//       SELECT COUNT(*) AS totalCount
+//       FROM bms.tbl_bms_master_data b
+//       INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
+//       WHERE b.is_active = true
+//     `;
 
-    const queryParams = [];
-    const countParams = [];
-    let paramIndex = 1;
+//     const queryParams = [];
+//     const countParams = [];
+//     let paramIndex = 1;
 
-    if (district !== "%") {
-      query += ` AND b.district_id = $${paramIndex}`;
-      countQuery += ` AND b.district_id = $${paramIndex}`;
-      queryParams.push(district);
-      countParams.push(district);
-      paramIndex++;
-    }
+//     if (district !== "%") {
+//       query += ` AND b.district_id = $${paramIndex}`;
+//       countQuery += ` AND b.district_id = $${paramIndex}`;
+//       queryParams.push(district);
+//       countParams.push(district);
+//       paramIndex++;
+//     }
 
-    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
-      countQuery += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridgeName}%`);
-      countParams.push(`%${bridgeName}%`);
-      paramIndex++;
-    }
+//     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+//       query += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+//       countQuery += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+//       queryParams.push(`%${bridgeName}%`);
+//       countParams.push(`%${bridgeName}%`);
+//       paramIndex++;
+//     }
 
-    if (structureType !== "%") {
-      query += ` AND b.structure_type_id = $${paramIndex}`;
-      countQuery += ` AND b.structure_type_id = $${paramIndex}`;
-      queryParams.push(structureType);
-      countParams.push(structureType);
-      paramIndex++;
-    }
+//     if (structureType !== "%") {
+//       query += ` AND b.structure_type_id = $${paramIndex}`;
+//       countQuery += ` AND b.structure_type_id = $${paramIndex}`;
+//       queryParams.push(structureType);
+//       countParams.push(structureType);
+//       paramIndex++;
+//     }
 
-    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
-    queryParams.push(parseInt(set, 10), parseInt(limit, 10));
+//     query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+//     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
-    const result = await pool.query(query, queryParams);
-    const countResult = await pool.query(countQuery, countParams);
+//     const result = await pool.query(query, queryParams);
+//     const countResult = await pool.query(countQuery, countParams);
 
-    res.json({
-      success: true,
-      bridges: result.rows,
-      totalCount: parseInt(countResult.rows[0].totalcount, 10),
-    });
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching data from the database",
-    });
-  }
-});
+//     res.json({
+//       success: true,
+//       bridges: result.rows,
+//       totalCount: parseInt(countResult.rows[0].totalcount, 10),
+//     });
+//   } catch (error) {
+//     console.error("Error fetching data:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Error fetching data from the database",
+//     });
+//   }
+// });
 
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
