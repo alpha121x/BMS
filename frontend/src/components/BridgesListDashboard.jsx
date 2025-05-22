@@ -18,8 +18,17 @@ import FilterComponent from "./FilterComponent";
 
 const BridgesListDashboard = ({
   districtId,
+  setDistrictId,
   structureType,
+  setStructureType,
   bridgeName,
+  setBridgeName,
+  bridgeLength,
+  setBridgeLength,
+  category,
+  setCategory,
+  age,
+  setAge,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -362,15 +371,6 @@ const BridgesListDashboard = ({
               </h6>
             </div>
 
-            {/*<Filters*/}
-            {/*    districtId={districtId}*/}
-            {/*    setDistrictId={setDistrictId}*/}
-            {/*    structureType={structureType}*/}
-            {/*    setStructureType={setStructureType}*/}
-            {/*    bridgeName={bridgeName}*/}
-            {/*    setBridgeName={setBridgeName}*/}
-            {/*    fetchAllBridges={fetchAllBridges} // Search triggered manually*/}
-            {/*/>*/}
 
             <FilterComponent />
 
