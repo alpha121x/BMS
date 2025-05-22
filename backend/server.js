@@ -2474,6 +2474,7 @@ app.get("/api/bridges", async (req, res) => {
       limit = 10,
       district = "%",
       structureType = "%",
+      constructionType = "%",
       bridgeName = "%",
     } = req.query;
 
@@ -2550,6 +2551,14 @@ app.get("/api/bridges", async (req, res) => {
     if (structureType !== "%") {
       query += ` AND structure_type_id = $${paramIndex}`;
       countQuery += ` AND structure_type_id = $${paramIndex}`;
+      queryParams.push(structureType);
+      countParams.push(structureType);
+      paramIndex++;
+    }
+
+    if (structureType !== "%") {
+      query += ` AND construction_type_id = $${paramIndex}`;
+      countQuery += ` AND construction_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       countParams.push(structureType);
       paramIndex++;
