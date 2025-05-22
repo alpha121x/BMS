@@ -313,38 +313,38 @@ const BridgesListDashboard = ({
     {
       name: "Action",
       cell: (row) => (
-        <div className="flex space-x-2 justify-center">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewInventory(row);
-            }}
-            className="bg-[#009CB8] text-white px-2 py-1 rounded-1 hover:bg-[#007485]"
-            style={{ minWidth: "80px" }}
-          >
-            Inventory Info
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewInspection(row);
-            }}
-            className="bg-[#3B9895] text-white px-2 py-1 rounded-1 hover:bg-[#2d7270]"
-            style={{ minWidth: "80px" }}
-          >
-            Inspection Info
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleZoomToBridge(row);
-            }}
-            className="bg-[#88B9B8] text-white px-2 py-1 rounded-1 hover:bg-[#6a8f8f]"
-            style={{ minWidth: "80px" }}
-          >
-            Zoom To
-          </button>
-        </div>
+       <div className="flex space-x-2 justify-center">
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleViewInventory(row);
+    }}
+    className="bg-[#009CB8] text-white px-1 py-0.5 rounded-1 hover:bg-[#007485]"
+    style={{ minWidth: "60px", fontSize: "12px" }} // Reduced minWidth and added smaller font size
+  >
+    Inventory Info
+  </button>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleViewInspection(row);
+    }}
+    className="bg-[#3B9895] text-white px-1 py-0.5 rounded-1 hover:bg-[#2d7270]"
+    style={{ minWidth: "60px", fontSize: "12px" }}
+  >
+    Inspection Info
+  </button>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      handleZoomToBridge(row);
+    }}
+    className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
+    style={{ minWidth: "60px", fontSize: "12px" }}
+  >
+    Zoom To
+  </button>
+</div>
       ),
       ignoreRowClick: true,
       button: true,
