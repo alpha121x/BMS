@@ -21,8 +21,9 @@ const DashboardMain = () => {
   const [age, setAge] = useState("");
   const [underFacility, setUnderFacility] = useState("%"); // New filter state
   const [roadClassification, setRoadClassification] = useState("%"); // New filter state
+  const [spanLength, setSpanLength] = useState("%");
 
-  console.log(roadClassification);
+  // console.log(roadClassification);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -355,6 +356,8 @@ const DashboardMain = () => {
                   setUnderFacility={setUnderFacility}
                   roadClassification={roadClassification}
                   setRoadClassification={setRoadClassification}
+                  spanLength={spanLength}
+                  setSpanLength={setSpanLength}
                 />
               )}
               {activeView === "inspections" && (

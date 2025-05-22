@@ -31,6 +31,8 @@ const BridgesListDashboard = ({
   setUnderFacility,
   roadClassification,
   setRoadClassification,
+  spanLength,
+  setSpanLength,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -77,6 +79,7 @@ const BridgesListDashboard = ({
         age,
         underFacility,
         roadClassification,
+        spanLength,
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -149,6 +152,7 @@ const BridgesListDashboard = ({
         age: age || "%",
         underFacility: underFacility || "%",
         roadClassification: roadClassification || "%",
+        spanLength: spanLength || "%",
       };
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
@@ -189,6 +193,7 @@ const BridgesListDashboard = ({
         age: age || "%",
         underFacility: underFacility || "%",
         roadClassification: roadClassification || "%",
+        spanLength: spanLength || "%",
       };
       const queryString = new URLSearchParams(params).toString();
 
@@ -492,6 +497,8 @@ const BridgesListDashboard = ({
               setUnderFacility={setUnderFacility}
               roadClassification={roadClassification}
               setRoadClassification={setRoadClassification}
+              spanLength={spanLength}
+              setSpanLength={setSpanLength}
               onApplyFilters={() => fetchAllBridges(currentPage)}
             />
 

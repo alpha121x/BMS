@@ -2478,6 +2478,7 @@ app.get("/api/bridges", async (req, res) => {
       roadClassification = "%",
       bridgeName = "%",
       bridgeLength,
+      spanLength, // Add spanLength as a query parameter
     } = req.query;
 
     let query = `
@@ -2567,7 +2568,7 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-     if (roadClassification !== "%") {
+    if (roadClassification !== "%") {
       query += ` AND road_classification_id = $${paramIndex}`;
       countQuery += ` AND road_classification_id = $${paramIndex}`;
       queryParams.push(roadClassification);
@@ -2598,9 +2599,31 @@ app.get("/api/bridges", async (req, res) => {
       }
     }
 
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
-      paramIndex + 1
-    }`;
+    // Add spanLength filter
+    if (spanLength && spanLength !== "%") {
+      if (spanLength.startsWith("<")) {
+        query += ` AND span_length_m < $${paramIndex}`;
+        countQuery += ` AND span_length_m < $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        countParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      } else if (spanLength.includes("-")) {
+        const [min, max] = spanLength.split("-").map(parseFloat);
+        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        queryParams.push(min, max);
+        countParams.push(min, max);
+        paramIndex += 2;
+      } else if (spanLength.startsWith(">")) {
+        query += ` AND span_length_m > $${paramIndex}`;
+        countQuery += ` AND span_length_m > $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        countParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      }
+    }
+
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);

@@ -9,19 +9,21 @@ const FilterComponent = ({
   age,
   setAge,
   underFacility,
-  setUnderFacility, // New prop
+  setUnderFacility,
   roadClassification,
-  setRoadClassification, // New prop
+  setRoadClassification,
+  spanLength, // New prop
+  setSpanLength, // New prop
   onApplyFilters,
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
-  const [roadClassifications, setRoadClassifications] = useState([]); // New state for road classifications
+  const [roadClassifications, setRoadClassifications] = useState([]);
   const [localConstructionType, setLocalConstructionType] = useState(constructionType || "%");
   const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "%");
   const [localAge, setLocalAge] = useState(age || "%");
-  const [localSpanLength, setLocalSpanLength] = useState("%");
-  const [localUnderfacility, setLocalUnderfacility] = useState(underFacility || "%"); // New state
-  const [localRoadClassification, setLocalRoadClassification] = useState(roadClassification || "%"); // New state
+  const [localSpanLength, setLocalSpanLength] = useState(spanLength || "%"); // Initialize with prop
+  const [localUnderFacility, setLocalUnderFacility] = useState(underFacility || "%");
+  const [localRoadClassification, setLocalRoadClassification] = useState(roadClassification || "%");
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -42,7 +44,7 @@ const FilterComponent = ({
         setRoadClassifications(
           roadClassificationData.map((classification) => ({
             id: classification.id,
-            name: classification.road_classification, // Use road_classification as the display name
+            name: classification.road_classification,
           }))
         );
       } catch (error) {
@@ -54,7 +56,7 @@ const FilterComponent = ({
   }, []);
 
   const handleChange = (setter) => (e) => {
-    setter(e.target.value); // Update local state only
+    setter(e.target.value);
   };
 
   const handleApply = () => {
@@ -62,8 +64,9 @@ const FilterComponent = ({
     setConstructionType(localConstructionType);
     setBridgeLength(localBridgeLength);
     setAge(localAge);
-    setUnderFacility(localUnderfacility); // Update underfacility state
-    setRoadClassification(localRoadClassification); // Update road classification state
+    setUnderFacility(localUnderFacility);
+    setRoadClassification(localRoadClassification);
+    setSpanLength(localSpanLength); // Update spanLength in parent state
     if (onApplyFilters) {
       onApplyFilters();
     }
@@ -146,16 +149,16 @@ const FilterComponent = ({
           </select>
         </div>
 
-        {/* Underfacility Filter */}
+        {/* UnderFacility Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="underfacility" className="block text-white font-medium mb-1 text-xs">
-            Underfacility
+          <label htmlFor="under_facility" className="block text-white font-medium mb-1 text-xs">
+            Under Facility
           </label>
           <select
-            id="underfacility"
+            id="under_facility"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
-            value={localUnderfacility}
-            onChange={handleChange(setLocalUnderfacility)}
+            value={localUnderFacility}
+            onChange={handleChange(setLocalUnderFacility)}
           >
             <option value="%">All</option>
             <option value="Yes">Yes</option>
@@ -189,7 +192,7 @@ const FilterComponent = ({
             onClick={handleApply}
             className="bg-blue-100 text-white mt-[20px] rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
           >
-          <span className="ml-1">🔍</span>
+            <span className="ml-1">🔍</span>
           </button>
         </div>
       </div>
