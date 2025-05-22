@@ -16,6 +16,7 @@ import BridgeInformation from './components/BridgeInformation';
 import BridgeInformationCon from './components/BridgeInformationCon';
 import BridgeInformationRams from './components/BridgeInformationRams';
 import CostEstimation from './components/CostEstimation';
+import PriortizationTable from './components/PriotizationTable';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -146,6 +147,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               </PrivateRoute>
           }
         />
+
+           {/* Private Route for Cost Estimation */}
+          <Route
+          path="/Priortization"
+          element={
+            <PrivateRoute>
+              <PriortizationTable  />
+              </PrivateRoute>
+          }
+        />
+
+
          {/* Private Route for BridgeInformation */}
          <Route
           path="/BridgeInformation"

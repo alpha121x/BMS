@@ -7,6 +7,8 @@ import DataTable from "react-data-table-component";
 import styled from "styled-components";
 import { BASE_URL } from "./config";
 import PrioritizationMap from "./PriortizationMap"; // Import the map component
+import Header from "./Header"; // Import the header component
+import Footer from "./Footer"; // Import the footer component
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -375,7 +377,9 @@ const PrioritizationTable = () => {
     return details;
   };
   return (
-    <Container fluid className="py-2 bg-light mt-5">
+    <>
+    <Header/>
+    <Container fluid className="py-2 bg-light mt-[55px]">
       <Row className="justify-content-center">
         <Col md={8}>
           <div className="card shadow-sm border-1" ref={tableRef}>
@@ -540,6 +544,8 @@ const PrioritizationTable = () => {
         </Row>
       </Container>
     </Container>
+    <Footer/>
+    </>
   );
 };
 
