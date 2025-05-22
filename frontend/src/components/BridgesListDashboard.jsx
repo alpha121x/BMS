@@ -395,6 +395,8 @@ const BridgesListDashboard = ({
                     <th>District</th>
                     <th>Road Name</th>
                     <th>Structure Type</th>
+                    <th>Construction Type</th>
+                    <th>Road Classification</th>
                     <th>Bridge Name</th>
                     <th>Date Time</th>
                     <th className="text-center">Action</th>
@@ -407,6 +409,8 @@ const BridgesListDashboard = ({
                         <td>{bridge.district || "N/A"}</td>
                         <td className="truncate-text" title={bridge.road_name || "N/A"}>{bridge.road_name || "N/A"}</td>
                         <td>{bridge.structure_type || "N/A"}</td>
+                        <td>{bridge.construction_type || "N/A"}</td>
+                        <td>{bridge.road_classification|| "N/A"}</td>
                         <td>{bridge.pms_sec_id || "N/A"}, {bridge.structure_no || "N/A"}</td>
                         <td>{bridge.data_date_time ? new Date(bridge.data_date_time).toLocaleString() : 'N/A'}</td>
                         <td>
