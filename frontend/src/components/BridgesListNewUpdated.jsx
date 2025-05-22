@@ -67,7 +67,7 @@ const BridgesListNewUpdated = ({
       } else if (user_type === "rams") {
         url = new URL(`${BASE_URL}/api/bridgesRamsNew`);
       } else if (user_type === "evaluator") {
-        url = new URL(`${BASE_URL}/api/bridgesEvaluator`); // Default for normal users
+        url = new URL(`${BASE_URL}/api/bridgesEvaluatorNew`); // Default for normal users
       }
 
       // Set query parameters
@@ -214,7 +214,7 @@ const BridgesListNewUpdated = ({
       if (user_type === "consultant") {
         url = new URL(`${BASE_URL}/api/bridgesConDownloadCsv`);
       } else if (user_type === "rams") {
-        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadCsv`);
+        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadCsvNew`);
       } else if (user_type === "evaluator") {
         url = new URL(`${BASE_URL}/api/bridgesEvalDownloadCsv`);
       }
@@ -265,7 +265,7 @@ const BridgesListNewUpdated = ({
       if (user_type === "consultant") {
         url = new URL(`${BASE_URL}/api/bridgesConDownloadExcel`);
       } else if (user_type === "rams") {
-        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadExcel`);
+        url = new URL(`${BASE_URL}/api/bridgesRamsDownloadExcelNew`);
       } else if (user_type === "evaluator") {
         url = new URL(`${BASE_URL}/api/bridgesEvalDownloadExcel`);
       }
