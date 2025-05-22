@@ -15,6 +15,7 @@ import Filters from "./Filters";
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
   const [structureType, setStructureType] = useState("%");
+  const [constructionType, setConstructionType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
   const [bridgeLength, setBridgeLength] = useState("");
   const [category, setCategory] = useState("");
@@ -339,6 +340,8 @@ const DashboardMain = () => {
                   setDistrictId={setDistrictId}
                   structureType={structureType}
                   setStructureType={setStructureType}
+                  constructionType={constructionType}
+                  setConstructionType={setConstructionType}
                   bridgeName={bridgeName}
                   setBridgeName={setBridgeName}
                   bridgeLength={bridgeLength}

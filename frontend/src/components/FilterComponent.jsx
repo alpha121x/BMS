@@ -2,16 +2,20 @@ import { useState, useEffect } from "react";
 import { BASE_URL } from "./config";
 
 const FilterComponent = ({
-  setBridgeLength,
+  districtId,
+  structureType,
+  bridgeName,
+  constructionType,
   setConstructionType,
+  bridgeLength,
+  setBridgeLength,
+  category,
   setCategory,
+  age,
   setAge,
+  onApplyFilters,
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
-  const [bridgeLength, setBridgeLengthState] = useState("");
-  const [constructionType, setConstructionTypeState] = useState("");
-  const [category, setCategoryState] = useState("");
-  const [age, setAgeState] = useState("");
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -37,8 +41,20 @@ const FilterComponent = ({
 
   const handleChange = (setter) => (e) => setter(e.target.value);
 
+  const handleApply = () => {
+    // Update parent state with current values
+    setBridgeLength(bridgeLength);
+    setConstructionType(constructionType);
+    setCategory(category);
+    setAge(age);
+    // Trigger the refetch in the parent
+    if (onApplyFilters) {
+      onApplyFilters();
+    }
+  };
+
   return (
-    <div className="p-2  text-white shadow-sm rounded-lg">
+    <div className="p-2  text-white rounded-lg">
       <div className="flex flex-nowrap gap-1 items-center">
         {/* Construction Type Filter */}
         <div className="flex-1 min-w-[100px]">
@@ -52,7 +68,7 @@ const FilterComponent = ({
             id="construction-type"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={constructionType}
-            onChange={handleChange(setConstructionTypeState)}
+            onChange={handleChange(setConstructionType)}
           >
             <option value="%">All</option>
             {constructionTypes.map((type) => (
@@ -75,7 +91,7 @@ const FilterComponent = ({
             id="category-filter"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={category}
-            onChange={handleChange(setCategoryState)}
+            onChange={handleChange(setCategory)}
           >
             <option value="%">All</option>
             <option value="GOOD">I</option>
@@ -98,7 +114,7 @@ const FilterComponent = ({
             type="number"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={bridgeLength}
-            onChange={handleChange(setBridgeLengthState)}
+            onChange={handleChange(setBridgeLength)}
             placeholder="Length"
           />
         </div>
@@ -115,7 +131,7 @@ const FilterComponent = ({
             id="age"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={age}
-            onChange={handleChange(setAgeState)}
+            onChange={handleChange(setAge)}
           >
             <option value="%">All</option>
             {/* Options to be filled later */}
@@ -125,15 +141,10 @@ const FilterComponent = ({
         {/* Apply Button with Search Icon */}
         <div className="flex items-center">
           <button
-            onClick={() => {
-              setBridgeLength(bridgeLength);
-              setConstructionType(constructionType);
-              setCategory(category);
-              setAge(age);
-            }}
-            className="bg-blue-100 text-white rounded-md mt-3 px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
+            onClick={handleApply}
+            className="bg-blue-100 mt-[20px]  text-white rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
           >
-            <span>🔍</span>
+            <span className="ml-1">🔍</span>
           </button>
         </div>
       </div>

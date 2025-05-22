@@ -18,11 +18,10 @@ import FilterComponent from "./FilterComponent";
 
 const BridgesListDashboard = ({
   districtId,
-  setDistrictId,
   structureType,
-  setStructureType,
   bridgeName,
-  setBridgeName,
+  constructionType,
+  setConstructionType,
   bridgeLength,
   setBridgeLength,
   category,
@@ -47,7 +46,7 @@ const BridgesListDashboard = ({
 
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage, districtId, structureType, bridgeName]);
+  }, [currentPage, districtId, structureType, constructionType,  bridgeName, bridgeLength, category, age]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -61,7 +60,11 @@ const BridgesListDashboard = ({
         limit,
         district: districtId,
         structureType,
+        constructionType,
         bridgeName,
+        bridgeLength,
+        category,
+        age,
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -187,7 +190,11 @@ const BridgesListDashboard = ({
       const params = {
         district: districtId || "%",
         structureType,
+        constructionType,
         bridgeName,
+        bridgeLength,
+        category,
+        age,
       };
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(`${BASE_URL}/api/bridgesdownloadCsv?${queryString}`, { method: "GET" });
@@ -219,7 +226,11 @@ const BridgesListDashboard = ({
       const params = {
         district: districtId || "%",
         structureType: structureType || "%",
+        constructionType: constructionType || "%",
         bridgeName: bridgeName || "%",
+        bridgeLength: bridgeLength || "",
+        category: category || "%",
+        age: age || "%",
       };
       const queryString = new URLSearchParams(params).toString();
 
@@ -328,6 +339,8 @@ const BridgesListDashboard = ({
             </div>
 
             <FilterComponent
+              constructionType={constructionType}
+              setConstructionType={setConstructionType}
               bridgeLength={bridgeLength}
               setBridgeLength={setBridgeLength}
               category={category}
