@@ -38,14 +38,12 @@ const BridgesListDashboard = ({
   const [selectedBridge, setSelectedBridge] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
-  const [filteredData, setFilteredData] = useState([]); // New state for filtered data
   const [loading, setLoading] = useState(true);
   const [loadingExcel, setLoadingExcel] = useState(false);
   const [loadingCSV, setLoadingCSV] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
-  const [searchQuery, setSearchQuery] = useState(""); // New state for search input
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -78,27 +76,12 @@ const BridgesListDashboard = ({
 
       const data = await response.json();
       setTableData(data.bridges || []);
-      setFilteredData(data.bridges || []); // Initialize filtered data with full dataset
       setBridgeCount(data.totalCount || 0);
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Handle search input change
-  const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    const filtered = tableData.filter((bridge) =>
-      Object.values(bridge).some((value) =>
-        value &&
-        value.toString().toLowerCase().includes(query)
-      )
-    );
-    setFilteredData(filtered);
   };
 
   const handleViewInventory = (bridge) => {
@@ -366,6 +349,7 @@ const BridgesListDashboard = ({
       ignoreRowClick: true,
       button: true,
       grow: 2,
+      minWidth: "240px",
     },
   ];
 
@@ -396,7 +380,6 @@ const BridgesListDashboard = ({
     table: {
       style: {
         width: "100%",
-        minWidth: "1000px",
         border: "1px solid #dee2e6",
       },
     },
@@ -405,25 +388,15 @@ const BridgesListDashboard = ({
         minHeight: "auto",
       },
     },
+    pagination: {
+      style: {
+        borderTop: "1px solid #dee2e6",
+        padding: "10px",
+        display: "flex",
+        justifyContent: "center",
+      },
+    },
   };
-
-  // Search input component
-  const SearchComponent = ({ onFilter }) => (
-    <div style={{ padding: "10px", display: "flex", justifyContent: "flex-end" }}>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchQuery}
-        onChange={handleSearch}
-        style={{
-          padding: "5px",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-          width: "200px",
-        }}
-      />
-    </div>
-  );
 
   return (
     <>
@@ -483,7 +456,7 @@ const BridgesListDashboard = ({
           </div>
         </div>
 
-        <div className="card-body p-0 pb-2" style={{ width: "100%", overflowX: "auto" }}>
+        <div className="card-body p-2" style={{ width: "100%" }}>
           {loading && (
             <div
               style={{
@@ -509,10 +482,10 @@ const BridgesListDashboard = ({
             <>
               <DataTable
                 columns={columns}
-                data={filteredData} // Use filtered data instead of tableData
+                data={tableData}
                 pagination
                 paginationServer
-                paginationTotalRows={bridgeCount} // Note: This should ideally be updated server-side for accurate count
+                paginationTotalRows={bridgeCount}
                 paginationDefaultPage={currentPage}
                 paginationPerPage={itemsPerPage}
                 onChangePage={(page) => setCurrentPage(page)}
@@ -522,8 +495,7 @@ const BridgesListDashboard = ({
                 highlightOnHover
                 pointerOnHover
                 fixedHeader
-                subHeader // Enable subheader
-                subHeaderComponent={<SearchComponent onFilter={handleSearch} />} // Add search input
+                responsive
               />
 
               <Modal show={showModal} onHide={handleCloseModal} size="lg" centered className="custom-modal">
