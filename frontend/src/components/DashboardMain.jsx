@@ -18,8 +18,9 @@ const DashboardMain = () => {
   const [constructionType, setConstructionType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
   const [bridgeLength, setBridgeLength] = useState("");
-  const [category, setCategory] = useState("");
   const [age, setAge] = useState("");
+
+  console.log(constructionType);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);

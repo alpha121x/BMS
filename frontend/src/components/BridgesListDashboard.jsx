@@ -46,7 +46,7 @@ const BridgesListDashboard = ({
 
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage, districtId, structureType, constructionType,  bridgeName, bridgeLength, category, age]);
+  }, [currentPage, districtId, structureType, constructionType,  bridgeName, bridgeLength, age]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -63,7 +63,6 @@ const BridgesListDashboard = ({
         constructionType,
         bridgeName,
         bridgeLength,
-        category,
         age,
       };
 
@@ -193,7 +192,6 @@ const BridgesListDashboard = ({
         constructionType,
         bridgeName,
         bridgeLength,
-        category,
         age,
       };
       const queryString = new URLSearchParams(params).toString();
@@ -229,7 +227,6 @@ const BridgesListDashboard = ({
         constructionType: constructionType || "%",
         bridgeName: bridgeName || "%",
         bridgeLength: bridgeLength || "",
-        category: category || "%",
         age: age || "%",
       };
       const queryString = new URLSearchParams(params).toString();

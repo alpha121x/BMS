@@ -2,20 +2,18 @@ import { useState, useEffect } from "react";
 import { BASE_URL } from "./config";
 
 const FilterComponent = ({
-  districtId,
-  structureType,
-  bridgeName,
   constructionType,
   setConstructionType,
   bridgeLength,
   setBridgeLength,
-  category,
-  setCategory,
   age,
   setAge,
   onApplyFilters,
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
+  const [localConstructionType, setLocalConstructionType] = useState(constructionType || "%");
+  const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "");
+  const [localAge, setLocalAge] = useState(age || "%");
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -39,14 +37,16 @@ const FilterComponent = ({
     fetchFilters();
   }, []);
 
-  const handleChange = (setter) => (e) => setter(e.target.value);
+  const handleChange = (setter) => (e) => {
+    setter(e.target.value); // Update local state only
+  };
 
   const handleApply = () => {
-    // Update parent state with current values
-    setBridgeLength(bridgeLength);
-    setConstructionType(constructionType);
-    setCategory(category);
-    setAge(age);
+    // Update parent state with local values
+    setConstructionType(localConstructionType);
+    setBridgeLength(localBridgeLength);
+    setCategory(localCategory);
+    setAge(localAge);
     // Trigger the refetch in the parent
     if (onApplyFilters) {
       onApplyFilters();
@@ -67,8 +67,8 @@ const FilterComponent = ({
           <select
             id="construction-type"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
-            value={constructionType}
-            onChange={handleChange(setConstructionType)}
+            value={localConstructionType}
+            onChange={handleChange(setLocalConstructionType)}
           >
             <option value="%">All</option>
             {constructionTypes.map((type) => (
@@ -76,28 +76,6 @@ const FilterComponent = ({
                 {type.name}
               </option>
             ))}
-          </select>
-        </div>
-
-        {/* Category Filter */}
-        <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="category-filter"
-            className="block text-white font-medium mb-1 text-xs"
-          >
-            Category
-          </label>
-          <select
-            id="category-filter"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
-            value={category}
-            onChange={handleChange(setCategory)}
-          >
-            <option value="%">All</option>
-            <option value="GOOD">I</option>
-            <option value="FAIR">II</option>
-            <option value="POOR">III</option>
-            <option value="UNDER CONSTRUCTION">IV</option>
           </select>
         </div>
 
@@ -113,8 +91,8 @@ const FilterComponent = ({
             id="bridge-length"
             type="number"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
-            value={bridgeLength}
-            onChange={handleChange(setBridgeLength)}
+            value={localBridgeLength}
+            onChange={handleChange(setLocalBridgeLength)}
             placeholder="Length"
           />
         </div>
@@ -130,8 +108,8 @@ const FilterComponent = ({
           <select
             id="age"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
-            value={age}
-            onChange={handleChange(setAge)}
+            value={localAge}
+            onChange={handleChange(setLocalAge)}
           >
             <option value="%">All</option>
             {/* Options to be filled later */}
@@ -142,9 +120,9 @@ const FilterComponent = ({
         <div className="flex items-center">
           <button
             onClick={handleApply}
-            className="bg-blue-100 mt-[20px]  text-white rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
+            className="bg-blue-100 text-white mt-[20px] rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
           >
-            <span className="ml-1">🔍</span>
+          <span className="ml-1">🔍</span>
           </button>
         </div>
       </div>

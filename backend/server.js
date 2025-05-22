@@ -2518,7 +2518,7 @@ app.get("/api/bridges", async (req, res) => {
         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
-    AND is_active = true
+      AND is_active = true
     `;
 
     let countQuery = `
@@ -2556,11 +2556,11 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-    if (structureType !== "%") {
+    if (constructionType !== "%") {
       query += ` AND construction_type_id = $${paramIndex}`;
       countQuery += ` AND construction_type_id = $${paramIndex}`;
-      queryParams.push(structureType);
-      countParams.push(structureType);
+      queryParams.push(constructionType);
+      countParams.push(constructionType);
       paramIndex++;
     }
 
@@ -2585,7 +2585,6 @@ app.get("/api/bridges", async (req, res) => {
     });
   }
 });
-
 // bridges list for evaluation module
 app.get("/api/bridgesNew", async (req, res) => {
   try {
