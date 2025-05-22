@@ -48,7 +48,17 @@ const BridgesListDashboard = ({
 
   useEffect(() => {
     fetchAllBridges(currentPage);
-  }, [currentPage, districtId, structureType, constructionType, bridgeName, bridgeLength, age, underFacility, roadClassification]);
+  }, [
+    currentPage,
+    districtId,
+    structureType,
+    constructionType,
+    bridgeName,
+    bridgeLength,
+    age,
+    underFacility,
+    roadClassification,
+  ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -141,7 +151,10 @@ const BridgesListDashboard = ({
         roadClassification: roadClassification || "%",
       };
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadCsv?${queryString}`, { method: "GET" });
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadCsv?${queryString}`,
+        { method: "GET" }
+      );
 
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -179,7 +192,10 @@ const BridgesListDashboard = ({
       };
       const queryString = new URLSearchParams(params).toString();
 
-      const response = await fetch(`${BASE_URL}/api/bridgesdownloadExcel?${queryString}`, { method: "GET" });
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesdownloadExcel?${queryString}`,
+        { method: "GET" }
+      );
 
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -194,26 +210,48 @@ const BridgesListDashboard = ({
       const worksheet = workbook.addWorksheet("Bridges Data");
 
       const columnKeys = Object.keys(summaryData[0]).filter(
-        (key) => key !== "ROW RANK" && key !== "Overview Photos" && key !== "PhotoPaths"
+        (key) =>
+          key !== "ROW RANK" &&
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths"
       );
 
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
         key: key,
-        width: Math.min(Math.max(...summaryData.map((row) => (row[key] ? row[key].toString().length : 10)), 10), 30),
+        width: Math.min(
+          Math.max(
+            ...summaryData.map((row) =>
+              row[key] ? row[key].toString().length : 10
+            ),
+            10
+          ),
+          30
+        ),
       }));
 
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 22 });
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
       }
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 22 });
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
       }
 
       worksheet.columns = columns;
 
       worksheet.getRow(1).font = { bold: true, size: 14 };
-      worksheet.getRow(1).alignment = { vertical: "middle", horizontal: "center" };
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
       worksheet.getRow(1).height = 25;
 
       for (let i = 0; i < summaryData.length; i++) {
@@ -233,8 +271,17 @@ const BridgesListDashboard = ({
               if (!imgResponse.ok) continue;
               const imgBlob = await imgResponse.blob();
               const arrayBuffer = await imgBlob.arrayBuffer();
-              const imageId = workbook.addImage({ buffer: arrayBuffer, extension: "jpeg" });
-              worksheet.addImage(imageId, { tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 }, ext: { width: 150, height: 90 } });
+              const imageId = workbook.addImage({
+                buffer: arrayBuffer,
+                extension: "jpeg",
+              });
+              worksheet.addImage(imageId, {
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
+                ext: { width: 150, height: 90 },
+              });
             } catch (error) {
               console.error("Failed to load image:", photoUrls[j], error);
             }
@@ -298,14 +345,18 @@ const BridgesListDashboard = ({
     },
     {
       name: "Bridge Name",
-      selector: (row) => `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
+      selector: (row) =>
+        `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
       sortable: true,
       wrap: true,
       grow: 1,
     },
     {
       name: "Date Time",
-      selector: (row) => (row.data_date_time ? new Date(row.data_date_time).toLocaleString() : "N/A"),
+      selector: (row) =>
+        row.data_date_time
+          ? new Date(row.data_date_time).toLocaleString()
+          : "N/A",
       sortable: true,
       wrap: true,
       grow: 1.5,
@@ -313,38 +364,38 @@ const BridgesListDashboard = ({
     {
       name: "Action",
       cell: (row) => (
-       <div className="flex space-x-2 justify-center">
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      handleViewInventory(row);
-    }}
-    className="bg-[#009CB8] text-white px-1 py-0.5 rounded-1 hover:bg-[#007485]"
-    style={{ minWidth: "60px", fontSize: "12px" }} // Reduced minWidth and added smaller font size
-  >
-    Inventory Info
-  </button>
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      handleViewInspection(row);
-    }}
-    className="bg-[#3B9895] text-white px-1 py-0.5 rounded-1 hover:bg-[#2d7270]"
-    style={{ minWidth: "60px", fontSize: "12px" }}
-  >
-    Inspection Info
-  </button>
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      handleZoomToBridge(row);
-    }}
-    className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
-    style={{ minWidth: "60px", fontSize: "12px" }}
-  >
-    Zoom To
-  </button>
-</div>
+        <div className="flex space-x-2 justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInventory(row);
+            }}
+            className="bg-[#009CB8] text-white px-1 py-0.5 rounded-1 hover:bg-[#007485]"
+            style={{ minWidth: "60px", fontSize: "12px" }} // Reduced minWidth and added smaller font size
+          >
+            Inventory Info
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInspection(row);
+            }}
+            className="bg-[#3B9895] text-white px-1 py-0.5 rounded-1 hover:bg-[#2d7270]"
+            style={{ minWidth: "60px", fontSize: "12px" }}
+          >
+            Inspection Info
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomToBridge(row);
+            }}
+            className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
+            style={{ minWidth: "60px", fontSize: "12px" }}
+          >
+            Zoom To
+          </button>
+        </div>
       ),
       ignoreRowClick: true,
       button: true,
@@ -405,15 +456,26 @@ const BridgesListDashboard = ({
       </div>
       <div
         className="card p-0 rounded-0 text-black"
-        style={{ background: "#FFFFFF", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", position: "relative", width: "100%" }}
+        style={{
+          background: "#FFFFFF",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          position: "relative",
+          width: "100%",
+        }}
       >
-        <div className="card-header rounded-0 p-2" style={{ background: "#005D7F", color: "#fff" }}>
+        <div
+          className="card-header rounded-0 p-2"
+          style={{ background: "#005D7F", color: "#fff" }}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-between">
               <h5 className="mb-0 me-5">Inventory</h5>
               <h6 className="mb-0" id="structure-heading">
                 Structures Count:
-                <span className="badge text-white ms-2" style={{ background: "#009CB8" }}>
+                <span
+                  className="badge text-white ms-2"
+                  style={{ background: "#009CB8" }}
+                >
                   <h6 className="mb-0">{bridgeCount || 0}</h6>
                 </span>
               </h6>
@@ -434,16 +496,25 @@ const BridgesListDashboard = ({
             />
 
             <div className="flex items-center gap-1">
-              <button className="btn text-white" onClick={handleDownloadCSV} disabled={loadingCSV}>
+              <button
+                className="btn text-white"
+                onClick={handleDownloadCSV}
+                disabled={loadingCSV}
+              >
                 <div className="flex items-center gap-1">
                   <FaFileCsv />
                   {loadingCSV ? "Downloading CSV..." : "CSV"}
                 </div>
               </button>
-              <button className="btn text-white" onClick={handleDownloadExcel} disabled={loadingExcel}>
+              <button
+                className="btn text-white"
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+              >
                 {loadingExcel ? (
                   <>
-                    <FaSpinner className="animate-spin mr-2" /> Downloading Excel...
+                    <FaSpinner className="animate-spin mr-2" /> Downloading
+                    Excel...
                   </>
                 ) : (
                   <div className="flex items-center gap-1">
@@ -476,7 +547,11 @@ const BridgesListDashboard = ({
             />
           )}
 
-          {error && <div className="text-danger text-center"><strong>Error:</strong> {error}</div>}
+          {error && (
+            <div className="text-danger text-center">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
 
           {!loading && !error && (
             <>
@@ -491,29 +566,91 @@ const BridgesListDashboard = ({
                 onChangePage={(page) => setCurrentPage(page)}
                 onRowClicked={(row) => handleRowClick(row)}
                 customStyles={customStyles}
-                noDataComponent={<div className="text-center p-4">No data available</div>}
+                noDataComponent={
+                  <div className="text-center p-4">No data available</div>
+                }
                 highlightOnHover
                 pointerOnHover
                 fixedHeader
                 responsive
               />
 
-              <Modal show={showModal} onHide={handleCloseModal} size="lg" centered className="custom-modal">
-                <Modal.Header closeButton><Modal.Title>Bridge Inventory Details</Modal.Title></Modal.Header>
-                <Modal.Body>{selectedBridge && <InventoryInfoDashboard inventoryData={selectedBridge} />}</Modal.Body>
-                <Modal.Footer><Button variant="secondary" onClick={handleCloseModal}>Close</Button></Modal.Footer>
+              <Modal
+                show={showModal}
+                onHide={handleCloseModal}
+                size="lg"
+                centered
+                className="custom-modal"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Bridge Inventory Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <InventoryInfoDashboard inventoryData={selectedBridge} />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
               </Modal>
 
-              <Modal show={showInspectionModal} onHide={handleCloseInspectionModal} size="lg" centered className="custom-modal">
-                <Modal.Header closeButton><Modal.Title>Inspection Details</Modal.Title></Modal.Header>
-                <Modal.Body>{selectedBridge && <InspectionListDashboard bridgeId={selectedBridge.uu_bms_id} />}</Modal.Body>
-                <Modal.Footer><Button variant="secondary" onClick={handleCloseInspectionModal}>Close</Button></Modal.Footer>
+              <Modal
+                show={showInspectionModal}
+                onHide={handleCloseInspectionModal}
+                size="lg"
+                centered
+                className="custom-modal"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Inspection Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <InspectionListDashboard
+                      bridgeId={selectedBridge.uu_bms_id}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="secondary"
+                    onClick={handleCloseInspectionModal}
+                  >
+                    Close
+                  </Button>
+                </Modal.Footer>
               </Modal>
 
-              <Modal show={showMapModal} onHide={handleCloseMapModal} size="lg" centered className="custom-modal">
-                <Modal.Header closeButton><Modal.Title>Bridge Location on Map</Modal.Title></Modal.Header>
-                <Modal.Body>{selectedLocation && <MapModal location={selectedLocation} onClose={handleCloseMapModal} markerLabel={selectedLocation?.name || "Bridge Location"} bridgeName={selectedLocation?.bridgeName} district={selectedLocation?.district} road={selectedLocation?.road} />}</Modal.Body>
-                <Modal.Footer><Button variant="secondary" onClick={handleCloseMapModal}>Close</Button></Modal.Footer>
+              <Modal
+                show={showMapModal}
+                onHide={handleCloseMapModal}
+                size="lg"
+                centered
+                className="custom-modal"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Bridge Location on Map</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedLocation && (
+                    <MapModal
+                      location={selectedLocation}
+                      onClose={handleCloseMapModal}
+                      markerLabel={selectedLocation?.name || "Bridge Location"}
+                      bridgeName={selectedLocation?.bridgeName}
+                      district={selectedLocation?.district}
+                      road={selectedLocation?.road}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseMapModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
               </Modal>
             </>
           )}
