@@ -60,6 +60,7 @@ const BridgesListDashboard = ({
     age,
     underFacility,
     roadClassification,
+    spanLength,
   ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -74,7 +75,7 @@ const BridgesListDashboard = ({
         district: districtId,
         structureType,
         constructionType,
-        bridgeName,
+        bridgeName, // Removed searchQuery, using bridgeName directly
         bridgeLength,
         age,
         underFacility,
@@ -147,7 +148,7 @@ const BridgesListDashboard = ({
         district: districtId || "%",
         structureType: structureType || "%",
         constructionType: constructionType || "%",
-        bridgeName: bridgeName || "%",
+        bridgeName: bridgeName || "%", // Removed searchQuery
         bridgeLength: bridgeLength || "",
         age: age || "%",
         underFacility: underFacility || "%",
@@ -188,7 +189,7 @@ const BridgesListDashboard = ({
         district: districtId || "%",
         structureType: structureType || "%",
         constructionType: constructionType || "%",
-        bridgeName: bridgeName || "%",
+        bridgeName: bridgeName || "%", // Removed searchQuery
         bridgeLength: bridgeLength || "",
         age: age || "%",
         underFacility: underFacility || "%",
@@ -369,14 +370,14 @@ const BridgesListDashboard = ({
     {
       name: "Action",
       cell: (row) => (
-        <div className="flex space-x-2 justify-center">
+        <div className="flex space-x-2 justify-center" style={{ minWidth: "240px" }}>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleViewInventory(row);
             }}
             className="bg-[#009CB8] text-white px-1 py-0.5 rounded-1 hover:bg-[#007485]"
-            style={{ minWidth: "60px", fontSize: "12px" }} // Reduced minWidth and added smaller font size
+            style={{ fontSize: "12px" }}
           >
             Inventory Info
           </button>
@@ -386,7 +387,7 @@ const BridgesListDashboard = ({
               handleViewInspection(row);
             }}
             className="bg-[#3B9895] text-white px-1 py-0.5 rounded-1 hover:bg-[#2d7270]"
-            style={{ minWidth: "60px", fontSize: "12px" }}
+            style={{ fontSize: "12px" }}
           >
             Inspection Info
           </button>
@@ -396,16 +397,14 @@ const BridgesListDashboard = ({
               handleZoomToBridge(row);
             }}
             className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
-            style={{ minWidth: "60px", fontSize: "12px" }}
+            style={{ fontSize: "12px" }}
           >
             Zoom To
           </button>
         </div>
       ),
       ignoreRowClick: true,
-      button: true,
       grow: 2,
-      minWidth: "240px",
     },
   ];
 
