@@ -2475,6 +2475,7 @@ app.get("/api/bridges", async (req, res) => {
       district = "%",
       structureType = "%",
       constructionType = "%",
+      roadClassification = "%",
       bridgeName = "%",
       bridgeLength,
     } = req.query;
@@ -2497,6 +2498,7 @@ app.get("/api/bridges", async (req, res) => {
         district_id, 
         district, 
         road_classification, 
+        road_classification_id,
         road_surface_type, 
         carriageway_type, 
         direction, 
@@ -2562,6 +2564,14 @@ app.get("/api/bridges", async (req, res) => {
       countQuery += ` AND construction_type_id = $${paramIndex}`;
       queryParams.push(constructionType);
       countParams.push(constructionType);
+      paramIndex++;
+    }
+
+     if (roadClassification !== "%") {
+      query += ` AND road_classification_id = $${paramIndex}`;
+      countQuery += ` AND road_classification_id = $${paramIndex}`;
+      queryParams.push(roadClassification);
+      countParams.push(roadClassification);
       paramIndex++;
     }
 

@@ -8,8 +8,8 @@ const FilterComponent = ({
   setBridgeLength,
   age,
   setAge,
-  underfacility,
-  setUnderfacility, // New prop
+  underFacility,
+  setUnderFacility, // New prop
   roadClassification,
   setRoadClassification, // New prop
   onApplyFilters,
@@ -20,7 +20,7 @@ const FilterComponent = ({
   const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "%");
   const [localAge, setLocalAge] = useState(age || "%");
   const [localSpanLength, setLocalSpanLength] = useState("%");
-  const [localUnderfacility, setLocalUnderfacility] = useState(underfacility || "%"); // New state
+  const [localUnderfacility, setLocalUnderfacility] = useState(underFacility || "%"); // New state
   const [localRoadClassification, setLocalRoadClassification] = useState(roadClassification || "%"); // New state
 
   useEffect(() => {
@@ -62,7 +62,7 @@ const FilterComponent = ({
     setConstructionType(localConstructionType);
     setBridgeLength(localBridgeLength);
     setAge(localAge);
-    setUnderfacility(localUnderfacility); // Update underfacility state
+    setUnderFacility(localUnderfacility); // Update underfacility state
     setRoadClassification(localRoadClassification); // Update road classification state
     if (onApplyFilters) {
       onApplyFilters();

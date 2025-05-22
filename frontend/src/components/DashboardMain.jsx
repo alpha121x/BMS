@@ -22,7 +22,7 @@ const DashboardMain = () => {
   const [underFacility, setUnderFacility] = useState("%"); // New filter state
   const [roadClassification, setRoadClassification] = useState("%"); // New filter state
 
-  // console.log(bridgeLength);
+  console.log(roadClassification);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
