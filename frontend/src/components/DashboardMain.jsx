@@ -20,7 +20,7 @@ const DashboardMain = () => {
   const [bridgeLength, setBridgeLength] = useState("");
   const [age, setAge] = useState("");
 
-  console.log(constructionType);
+  console.log(bridgeLength);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
