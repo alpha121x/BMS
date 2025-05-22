@@ -346,9 +346,6 @@ const DashboardMain = () => {
                   bridgeName={bridgeName}
                   setBridgeName={setBridgeName}
                   bridgeLength={bridgeLength}
-                  setBridgeLength={setBridgeLength}
-                  category={category}
-                  setCategory={setCategory}
                   age={age}
                   setAge={setAge}
                 />

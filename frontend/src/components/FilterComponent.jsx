@@ -12,8 +12,9 @@ const FilterComponent = ({
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
   const [localConstructionType, setLocalConstructionType] = useState(constructionType || "%");
-  const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "");
+  const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "%");
   const [localAge, setLocalAge] = useState(age || "%");
+  const [localSpanLength, setLocalSpanLength] = useState("%");
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -45,8 +46,8 @@ const FilterComponent = ({
     // Update parent state with local values
     setConstructionType(localConstructionType);
     setBridgeLength(localBridgeLength);
-    setCategory(localCategory);
     setAge(localAge);
+    // Note: No setCategory provided in props, so removed from handleApply
     // Trigger the refetch in the parent
     if (onApplyFilters) {
       onApplyFilters();
@@ -87,14 +88,40 @@ const FilterComponent = ({
           >
             Bridge Length (m)
           </label>
-          <input
+          <select
             id="bridge-length"
-            type="number"
             className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localBridgeLength}
             onChange={handleChange(setLocalBridgeLength)}
-            placeholder="Length"
-          />
+          >
+            <option value="%">All</option>
+            <option value="<6">Less than 6 m</option>
+            <option value="6-20">6 to 20 m</option>
+            <option value="20-50">20 to 50 m</option>
+            <option value=">50">Greater than 50 m</option>
+          </select>
+        </div>
+
+        {/* Span Length Filter */}
+        <div className="flex-1 min-w-[100px]">
+          <label
+            htmlFor="span-length"
+            className="block text-white font-medium mb-1 text-xs"
+          >
+            Span Length (m)
+          </label>
+          <select
+            id="span-length"
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
+            value={localSpanLength}
+            onChange={handleChange(setLocalSpanLength)}
+          >
+            <option value="%">All</option>
+            <option value="<5">Less than 5 m</option>
+            <option value="5-15">5 to 15 m</option>
+            <option value="15-30">15 to 30 m</option>
+            <option value=">30">Greater than 30 m</option>
+          </select>
         </div>
 
         {/* Age Filter */}
@@ -120,7 +147,7 @@ const FilterComponent = ({
         <div className="flex items-center">
           <button
             onClick={handleApply}
-            className="bg-blue-100 text-white mt-[20px] rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
+            className="bg-blue-500 mt-[20px] text-white rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
           >
           <span className="ml-1">🔍</span>
           </button>

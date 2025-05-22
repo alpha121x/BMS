@@ -24,8 +24,6 @@ const BridgesListDashboard = ({
   setConstructionType,
   bridgeLength,
   setBridgeLength,
-  category,
-  setCategory,
   age,
   setAge,
 }) => {
@@ -340,8 +338,6 @@ const BridgesListDashboard = ({
               setConstructionType={setConstructionType}
               bridgeLength={bridgeLength}
               setBridgeLength={setBridgeLength}
-              category={category}
-              setCategory={setCategory}
               age={age}
               setAge={setAge}
               onApplyFilters={fetchAllBridges}
