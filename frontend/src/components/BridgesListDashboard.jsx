@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table, Modal } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import "./BridgeList.css";
@@ -8,13 +8,14 @@ import InventoryInfoDashboard from "./InventoryInfoDashboard";
 import InspectionListDashboard from "./InspectionListDashboard";
 import MapModal from "./MapModal";
 import { FaSpinner } from "react-icons/fa";
-import { FaFileCsv } from "react-icons/fa6";
-import { FaFileExcel } from "react-icons/fa6";
+import { FaFileCsv, FaFileExcel } from "react-icons/fa6";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import "leaflet/dist/leaflet.css";
 import Map from "./Map";
 import FilterComponent from "./FilterComponent";
+import DataTable from "react-data-table-component";
+import { saveAs } from "file-saver";
 
 const BridgesListDashboard = ({
   districtId,
@@ -37,25 +38,25 @@ const BridgesListDashboard = ({
   const [selectedBridge, setSelectedBridge] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]); // New state for filtered data
   const [loading, setLoading] = useState(true);
   const [loadingExcel, setLoadingExcel] = useState(false);
   const [loadingCSV, setLoadingCSV] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  const [searchQuery, setSearchQuery] = useState(""); // New state for search input
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetchAllBridges();
-  }, [currentPage, districtId, structureType, constructionType,  bridgeName, bridgeLength, age, underFacility, roadClassification]);
+    fetchAllBridges(currentPage);
+  }, [currentPage, districtId, structureType, constructionType, bridgeName, bridgeLength, age, underFacility, roadClassification]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
     try {
       const set = (page - 1) * limit;
 
-      // Construct the URL with filters
       const url = new URL(`${BASE_URL}/api/bridges`);
       const params = {
         set,
@@ -77,8 +78,8 @@ const BridgesListDashboard = ({
 
       const data = await response.json();
       setTableData(data.bridges || []);
+      setFilteredData(data.bridges || []); // Initialize filtered data with full dataset
       setBridgeCount(data.totalCount || 0);
-      setTotalPages(Math.ceil((data.totalCount || 0) / limit));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -86,62 +87,18 @@ const BridgesListDashboard = ({
     }
   };
 
-  const handlePageChange = (pageNumber) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-    }
-  };
+  // Handle search input change
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
 
-  const renderPaginationButtons = () => {
-    const buttons = [];
-    const pageRange = 3;
-
-    buttons.push(
-      <Button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        key="prev"
-        style={buttonStyles}
-      >
-        «
-      </Button>
+    const filtered = tableData.filter((bridge) =>
+      Object.values(bridge).some((value) =>
+        value &&
+        value.toString().toLowerCase().includes(query)
+      )
     );
-
-    for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - pageRange && i <= currentPage + pageRange)
-      ) {
-        buttons.push(
-          <Button
-            key={i}
-            onClick={() => handlePageChange(i)}
-            style={{
-              ...buttonStyles,
-              backgroundColor: currentPage === i ? "#3B82F6" : "#60A5FA",
-            }}
-          >
-            {i}
-          </Button>
-        );
-      } else if (buttons[buttons.length - 1].key !== "ellipsis") {
-        buttons.push(<span key="ellipsis">...</span>);
-      }
-    }
-
-    buttons.push(
-      <Button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        key="next"
-        style={buttonStyles}
-      >
-        »
-      </Button>
-    );
-
-    return buttons;
+    setFilteredData(filtered);
   };
 
   const handleViewInventory = (bridge) => {
@@ -315,22 +272,168 @@ const BridgesListDashboard = ({
     }
   };
 
-  const buttonStyles = {
-    margin: "0 6px",
-    padding: "4px 8px",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "12px",
-    cursor: "pointer",
+  const columns = [
+    {
+      name: "District",
+      selector: (row) => row.district || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
+      name: "Road Name",
+      selector: (row) => row.road_name || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1.5,
+      cell: (row) => (
+        <div className="truncate-text" title={row.road_name || "N/A"}>
+          {row.road_name || "N/A"}
+        </div>
+      ),
+    },
+    {
+      name: "Structure Type",
+      selector: (row) => row.structure_type || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
+      name: "Construction Type",
+      selector: (row) => row.construction_type || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
+      name: "Road Classification",
+      selector: (row) => row.road_classification || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
+      name: "Bridge Name",
+      selector: (row) => `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
+      name: "Date Time",
+      selector: (row) => (row.data_date_time ? new Date(row.data_date_time).toLocaleString() : "N/A"),
+      sortable: true,
+      wrap: true,
+      grow: 1.5,
+    },
+    {
+      name: "Action",
+      cell: (row) => (
+        <div className="flex space-x-2 justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInventory(row);
+            }}
+            className="bg-[#009CB8] text-white px-2 py-1 rounded-1 hover:bg-[#007485]"
+            style={{ minWidth: "80px" }}
+          >
+            Inventory Info
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInspection(row);
+            }}
+            className="bg-[#3B9895] text-white px-2 py-1 rounded-1 hover:bg-[#2d7270]"
+            style={{ minWidth: "80px" }}
+          >
+            Inspection Info
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomToBridge(row);
+            }}
+            className="bg-[#88B9B8] text-white px-2 py-1 rounded-1 hover:bg-[#6a8f8f]"
+            style={{ minWidth: "80px" }}
+          >
+            Zoom To
+          </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      button: true,
+      grow: 2,
+    },
+  ];
+
+  const customStyles = {
+    headCells: {
+      style: {
+        backgroundColor: "#005D7F",
+        color: "#fff",
+        fontSize: "14px",
+        fontWeight: "bold",
+        border: "1px solid #dee2e6",
+      },
+    },
+    cells: {
+      style: {
+        fontSize: "13px",
+        border: "1px solid #dee2e6",
+      },
+    },
+    rows: {
+      style: {
+        "&:hover": {
+          backgroundColor: "#f1f5f9",
+          cursor: "pointer",
+        },
+      },
+    },
+    table: {
+      style: {
+        width: "100%",
+        minWidth: "1000px",
+        border: "1px solid #dee2e6",
+      },
+    },
+    header: {
+      style: {
+        minHeight: "auto",
+      },
+    },
   };
+
+  // Search input component
+  const SearchComponent = ({ onFilter }) => (
+    <div style={{ padding: "10px", display: "flex", justifyContent: "flex-end" }}>
+      <input
+        type="text"
+        placeholder="Search..."
+        value={searchQuery}
+        onChange={handleSearch}
+        style={{
+          padding: "5px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+          width: "200px",
+        }}
+      />
+    </div>
+  );
 
   return (
     <>
       <div>
         <Map districtId={districtId} />
       </div>
-      <div className="card p-0 rounded-0 text-black" style={{ background: "#FFFFFF", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", position: "relative" }}>
+      <div
+        className="card p-0 rounded-0 text-black"
+        style={{ background: "#FFFFFF", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", position: "relative", width: "100%" }}
+      >
         <div className="card-header rounded-0 p-2" style={{ background: "#005D7F", color: "#fff" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center justify-between">
@@ -354,7 +457,7 @@ const BridgesListDashboard = ({
               setUnderFacility={setUnderFacility}
               roadClassification={roadClassification}
               setRoadClassification={setRoadClassification}
-              onApplyFilters={fetchAllBridges}
+              onApplyFilters={() => fetchAllBridges(currentPage)}
             />
 
             <div className="flex items-center gap-1">
@@ -380,53 +483,48 @@ const BridgesListDashboard = ({
           </div>
         </div>
 
-        <div className="card-body p-0 pb-2">
+        <div className="card-body p-0 pb-2" style={{ width: "100%", overflowX: "auto" }}>
           {loading && (
-            <div style={{ border: "8px solid #f3f3f3", borderTop: "8px solid #3498db", borderRadius: "50%", width: "80px", height: "80px", animation: "spin 1s linear infinite", margin: "auto", position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 999 }} />
+            <div
+              style={{
+                border: "8px solid #f3f3f3",
+                borderTop: "8px solid #3498db",
+                borderRadius: "50%",
+                width: "80px",
+                height: "80px",
+                animation: "spin 1s linear infinite",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 999,
+              }}
+            />
           )}
 
           {error && <div className="text-danger text-center"><strong>Error:</strong> {error}</div>}
 
           {!loading && !error && (
             <>
-              <Table className="table table-bordered table-hover table-striped" style={{ fontSize: ".9rem" }}>
-                <thead>
-                  <tr>
-                    <th>District</th>
-                    <th>Road Name</th>
-                    <th>Structure Type</th>
-                    <th>Construction Type</th>
-                    <th>Road Classification</th>
-                    <th>Bridge Name</th>
-                    <th>Date Time</th>
-                    <th className="text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tableData.length > 0 ? (
-                    tableData.map((bridge, index) => (
-                      <tr key={index} onClick={() => handleRowClick(bridge)} className="hover-row">
-                        <td>{bridge.district || "N/A"}</td>
-                        <td className="truncate-text" title={bridge.road_name || "N/A"}>{bridge.road_name || "N/A"}</td>
-                        <td>{bridge.structure_type || "N/A"}</td>
-                        <td>{bridge.construction_type || "N/A"}</td>
-                        <td>{bridge.road_classification|| "N/A"}</td>
-                        <td>{bridge.pms_sec_id || "N/A"}, {bridge.structure_no || "N/A"}</td>
-                        <td>{bridge.data_date_time ? new Date(bridge.data_date_time).toLocaleString() : 'N/A'}</td>
-                        <td>
-                          <div className="flex space-x-2 justify-center">
-                            <button onClick={(e) => { e.stopPropagation(); handleViewInventory(bridge); }} className="bg-[#009CB8] text-white px-2 py-1 rounded-1 hover:bg-[#007485]" style={{ minWidth: "80px" }}>Inventory Info</button>
-                            <button onClick={(e) => { e.stopPropagation(); handleViewInspection(bridge); }} className="bg-[#3B9895] text-white px-2 py-1 rounded-1 hover:bg-[#2d7270]" style={{ minWidth: "80px" }}>Inspection Info</button>
-                            <button onClick={(e) => { e.stopPropagation(); handleZoomToBridge(bridge); }} className="bg-[#88B9B8] text-white px-2 py-1 rounded-1 hover:bg-[#6a8f8f]" style={{ minWidth: "80px" }}>Zoom To</button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr><td colSpan="6" className="text-center">No data available</td></tr>
-                  )}
-                </tbody>
-              </Table>
+              <DataTable
+                columns={columns}
+                data={filteredData} // Use filtered data instead of tableData
+                pagination
+                paginationServer
+                paginationTotalRows={bridgeCount} // Note: This should ideally be updated server-side for accurate count
+                paginationDefaultPage={currentPage}
+                paginationPerPage={itemsPerPage}
+                onChangePage={(page) => setCurrentPage(page)}
+                onRowClicked={(row) => handleRowClick(row)}
+                customStyles={customStyles}
+                noDataComponent={<div className="text-center p-4">No data available</div>}
+                highlightOnHover
+                pointerOnHover
+                fixedHeader
+                subHeader // Enable subheader
+                subHeaderComponent={<SearchComponent onFilter={handleSearch} />} // Add search input
+              />
 
               <Modal show={showModal} onHide={handleCloseModal} size="lg" centered className="custom-modal">
                 <Modal.Header closeButton><Modal.Title>Bridge Inventory Details</Modal.Title></Modal.Header>
@@ -445,8 +543,6 @@ const BridgesListDashboard = ({
                 <Modal.Body>{selectedLocation && <MapModal location={selectedLocation} onClose={handleCloseMapModal} markerLabel={selectedLocation?.name || "Bridge Location"} bridgeName={selectedLocation?.bridgeName} district={selectedLocation?.district} road={selectedLocation?.road} />}</Modal.Body>
                 <Modal.Footer><Button variant="secondary" onClick={handleCloseMapModal}>Close</Button></Modal.Footer>
               </Modal>
-
-              <div className="d-flex justify-content-center align-items-center mt-3">{renderPaginationButtons()}</div>
             </>
           )}
         </div>
