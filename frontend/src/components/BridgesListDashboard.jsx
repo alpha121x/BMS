@@ -14,7 +14,7 @@ import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import "leaflet/dist/leaflet.css";
 import Map from "./Map"; // Adjust the import path as needed
-import FilterComponent from "./FilterComponent"; // Adjust the import path as needed
+import FilterComponent from "./FilterComponent";
 
 const BridgesListDashboard = ({
   districtId,
