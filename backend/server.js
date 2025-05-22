@@ -2476,6 +2476,7 @@ app.get("/api/bridges", async (req, res) => {
       structureType = "%",
       constructionType = "%",
       bridgeName = "%",
+      bridgeLength,
     } = req.query;
 
     let query = `
@@ -2562,6 +2563,29 @@ app.get("/api/bridges", async (req, res) => {
       queryParams.push(constructionType);
       countParams.push(constructionType);
       paramIndex++;
+    }
+
+    if (bridgeLength !== "%") {
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND structure_width_m < $${paramIndex}`;
+        countQuery += ` AND structure_width_m < $${paramIndex}`;
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+        countParams.push(parseFloat(bridgeLength.substring(1)));
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength.split("-").map(parseFloat);
+        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        queryParams.push(min, max);
+        countParams.push(min, max);
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND structure_width_m > $${paramIndex}`;
+        countQuery += ` AND structure_width_m > $${paramIndex}`;
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+        countParams.push(parseFloat(bridgeLength.substring(1)));
+        paramIndex++;
+      }
     }
 
     query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
