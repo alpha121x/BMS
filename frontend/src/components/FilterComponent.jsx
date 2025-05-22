@@ -8,26 +8,41 @@ const FilterComponent = ({
   setBridgeLength,
   age,
   setAge,
+  underfacility,
+  setUnderfacility, // New prop
+  roadClassification,
+  setRoadClassification, // New prop
   onApplyFilters,
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
+  const [roadClassifications, setRoadClassifications] = useState([]); // New state for road classifications
   const [localConstructionType, setLocalConstructionType] = useState(constructionType || "%");
   const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "%");
   const [localAge, setLocalAge] = useState(age || "%");
   const [localSpanLength, setLocalSpanLength] = useState("%");
+  const [localUnderfacility, setLocalUnderfacility] = useState(underfacility || "%"); // New state
+  const [localRoadClassification, setLocalRoadClassification] = useState(roadClassification || "%"); // New state
 
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const constructionTypeResponse = await fetch(
-          `${BASE_URL}/api/construction-types`
-        );
+        // Fetch construction types
+        const constructionTypeResponse = await fetch(`${BASE_URL}/api/construction-types`);
         const constructionTypeData = await constructionTypeResponse.json();
-
         setConstructionTypes(
           constructionTypeData.map((type) => ({
             id: type.id,
             name: type.construction_type || type.name,
+          }))
+        );
+
+        // Fetch road classifications
+        const roadClassificationResponse = await fetch(`${BASE_URL}/api/road-classifications`);
+        const roadClassificationData = await roadClassificationResponse.json();
+        setRoadClassifications(
+          roadClassificationData.map((classification) => ({
+            id: classification.id,
+            name: classification.road_classification, // Use road_classification as the display name
           }))
         );
       } catch (error) {
@@ -47,22 +62,19 @@ const FilterComponent = ({
     setConstructionType(localConstructionType);
     setBridgeLength(localBridgeLength);
     setAge(localAge);
-    // Note: No setCategory provided in props, so removed from handleApply
-    // Trigger the refetch in the parent
+    setUnderfacility(localUnderfacility); // Update underfacility state
+    setRoadClassification(localRoadClassification); // Update road classification state
     if (onApplyFilters) {
       onApplyFilters();
     }
   };
 
   return (
-    <div className="p-2  text-white rounded-lg">
+    <div className="p-2 text-white rounded-lg">
       <div className="flex flex-nowrap gap-1 items-center">
         {/* Construction Type Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="construction-type"
-            className="block text-white font-medium mb-1 text-xs"
-          >
+          <label htmlFor="construction-type" className="block text-white font-medium mb-1 text-xs">
             Construction Type
           </label>
           <select
@@ -82,10 +94,7 @@ const FilterComponent = ({
 
         {/* Bridge Length Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="bridge-length"
-            className="block text-white font-medium mb-1 text-xs"
-          >
+          <label htmlFor="bridge-length" className="block text-white font-medium mb-1 text-xs">
             Bridge Length (m)
           </label>
           <select
@@ -104,10 +113,7 @@ const FilterComponent = ({
 
         {/* Span Length Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="span-length"
-            className="block text-white font-medium mb-1 text-xs"
-          >
+          <label htmlFor="span-length" className="block text-white font-medium mb-1 text-xs">
             Span Length (m)
           </label>
           <select
@@ -126,10 +132,7 @@ const FilterComponent = ({
 
         {/* Age Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="age"
-            className="block text-white font-medium mb-1 text-xs"
-          >
+          <label htmlFor="age" className="block text-white font-medium mb-1 text-xs">
             Age
           </label>
           <select
@@ -143,11 +146,48 @@ const FilterComponent = ({
           </select>
         </div>
 
+        {/* Underfacility Filter */}
+        <div className="flex-1 min-w-[100px]">
+          <label htmlFor="underfacility" className="block text-white font-medium mb-1 text-xs">
+            Underfacility
+          </label>
+          <select
+            id="underfacility"
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
+            value={localUnderfacility}
+            onChange={handleChange(setLocalUnderfacility)}
+          >
+            <option value="%">All</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+
+        {/* Road Classification Filter */}
+        <div className="flex-1 min-w-[100px]">
+          <label htmlFor="road-classification" className="block text-white font-medium mb-1 text-xs">
+            Road Classification
+          </label>
+          <select
+            id="road-classification"
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
+            value={localRoadClassification}
+            onChange={handleChange(setLocalRoadClassification)}
+          >
+            <option value="%">All</option>
+            {roadClassifications.map((classification) => (
+              <option key={classification.id} value={classification.id}>
+                {classification.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Apply Button with Search Icon */}
         <div className="flex items-center">
           <button
             onClick={handleApply}
-            className="bg-blue-500 mt-[20px] text-white rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
+            className="bg-blue-100 text-white mt-[20px] rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
           >
           <span className="ml-1">🔍</span>
           </button>

@@ -26,6 +26,10 @@ const BridgesListDashboard = ({
   setBridgeLength,
   age,
   setAge,
+  underFacility,
+  setUnderFacility,
+  roadClassification,
+  setRoadClassification,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -44,7 +48,7 @@ const BridgesListDashboard = ({
 
   useEffect(() => {
     fetchAllBridges();
-  }, [currentPage, districtId, structureType, constructionType,  bridgeName, bridgeLength, age]);
+  }, [currentPage, districtId, structureType, constructionType,  bridgeName, bridgeLength, age, underFacility, roadClassification]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
@@ -62,6 +66,8 @@ const BridgesListDashboard = ({
         bridgeName,
         bridgeLength,
         age,
+        underFacility,
+        roadClassification,
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -186,11 +192,13 @@ const BridgesListDashboard = ({
     try {
       const params = {
         district: districtId || "%",
-        structureType,
-        constructionType,
-        bridgeName,
-        bridgeLength,
-        age,
+        structureType: structureType || "%",
+        constructionType: constructionType || "%",
+        bridgeName: bridgeName || "%",
+        bridgeLength: bridgeLength || "",
+        age: age || "%",
+        underFacility: underFacility || "%",
+        roadClassification: roadClassification || "%",
       };
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(`${BASE_URL}/api/bridgesdownloadCsv?${queryString}`, { method: "GET" });
@@ -226,6 +234,8 @@ const BridgesListDashboard = ({
         bridgeName: bridgeName || "%",
         bridgeLength: bridgeLength || "",
         age: age || "%",
+        underFacility: underFacility || "%",
+        roadClassification: roadClassification || "%",
       };
       const queryString = new URLSearchParams(params).toString();
 
@@ -340,6 +350,10 @@ const BridgesListDashboard = ({
               setBridgeLength={setBridgeLength}
               age={age}
               setAge={setAge}
+              underFacility={underFacility}
+              setUnderFacility={setUnderFacility}
+              roadClassification={roadClassification}
+              setRoadClassification={setRoadClassification}
               onApplyFilters={fetchAllBridges}
             />
 

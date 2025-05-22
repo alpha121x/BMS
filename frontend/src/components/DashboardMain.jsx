@@ -19,8 +19,10 @@ const DashboardMain = () => {
   const [bridgeName, setBridgeName] = useState("");
   const [bridgeLength, setBridgeLength] = useState("");
   const [age, setAge] = useState("");
+  const [underFacility, setUnderFacility] = useState("%"); // New filter state
+  const [roadClassification, setRoadClassification] = useState("%"); // New filter state
 
-  console.log(bridgeLength);
+  // console.log(bridgeLength);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -349,6 +351,10 @@ const DashboardMain = () => {
                   setBridgeLength={setBridgeLength}
                   age={age}
                   setAge={setAge}
+                  underFacility={underFacility}
+                  setUnderFacility={setUnderFacility}
+                  roadClassification={roadClassification}
+                  setRoadClassification={setRoadClassification}
                 />
               )}
               {activeView === "inspections" && (
