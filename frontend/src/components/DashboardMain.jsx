@@ -19,7 +19,7 @@ const DashboardMain = () => {
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
+  const [activeView, setActiveView] = useState("inventory"); // 'map' or 'graph'
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [evaluatedCards, setEvaluatedCards] = useState([]);
@@ -252,14 +252,14 @@ const DashboardMain = () => {
             <div className="col-md-12">
               {/* Navigation Buttons */}
               <div className="flex justify-start pb-0 gap-2 w-75">
-                <button
+                {/* <button
                     onClick={() => setActiveView("map")}
                     className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                         activeView === "map" ? "bg-[#005D7F] text-white" : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
                     }`}
                 >
                   Map View Analysis
-                </button>
+                </button> */}
                 <button
                     onClick={() => setActiveView("graph")}
                     className={`px-8 py-2 text-lg font-semibold rounded-0 ${
@@ -288,7 +288,7 @@ const DashboardMain = () => {
 
               {/* Content Container */}
               <div className="mt-0">
-                {activeView === "map" && <Map districtId={districtId}/>}
+                {/* {activeView === "map" && <Map districtId={districtId}/>} */}
                 {activeView === "graph" && <Graph/>}
                 {activeView === "inventory" && (
                     <BridgesListDashboard

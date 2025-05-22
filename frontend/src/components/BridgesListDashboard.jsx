@@ -13,7 +13,8 @@ import { FaFileExcel } from "react-icons/fa6";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import "leaflet/dist/leaflet.css";
-
+import Map from "./Map"; // Adjust the import path as needed
+import FilterComponent from "./FilterComponent"; // Adjust the import path as needed
 
 const BridgesListDashboard = ({
   districtId,
@@ -339,6 +340,9 @@ const BridgesListDashboard = ({
 
   return (
     <>
+    <div>
+      <Map districtId={districtId}/>
+    </div>
       <div className="card p-0 rounded-0 text-black"
         style={{
           background: "#FFFFFF",
@@ -367,6 +371,8 @@ const BridgesListDashboard = ({
             {/*    setBridgeName={setBridgeName}*/}
             {/*    fetchAllBridges={fetchAllBridges} // Search triggered manually*/}
             {/*/>*/}
+
+            <FilterComponent />
 
             <div className="flex items-center gap-1">
               <button
