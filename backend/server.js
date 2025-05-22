@@ -2466,7 +2466,7 @@ function swapDomain(url) {
     : url;
 }
 
-// bridges list for dashboard mainn
+// bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
   try {
     const {
@@ -2476,7 +2476,6 @@ app.get("/api/bridges", async (req, res) => {
       structureType = "%",
       constructionType = "%",
       bridgeName = "%",
-      bridgeLength = "%", // New query parameter for length_of_bridge
     } = req.query;
 
     let query = `
@@ -2516,8 +2515,7 @@ app.get("/api/bridges", async (req, res) => {
         y_centroid, 
         images_spans,
         CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
-        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos,
-        length_of_bridge // Added to the SELECT clause
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
       AND is_active = true
@@ -2564,29 +2562,6 @@ app.get("/api/bridges", async (req, res) => {
       queryParams.push(constructionType);
       countParams.push(constructionType);
       paramIndex++;
-    }
-
-    if (bridgeLength !== "%") {
-      if (bridgeLength.startsWith("<")) {
-        query += ` AND length_of_bridge < $${paramIndex}`;
-        countQuery += ` AND length_of_bridge < $${paramIndex}`;
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-        countParams.push(parseFloat(bridgeLength.substring(1)));
-        paramIndex++;
-      } else if (bridgeLength.includes("-")) {
-        const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND length_of_bridge BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        countQuery += ` AND length_of_bridge BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        queryParams.push(min, max);
-        countParams.push(min, max);
-        paramIndex += 2;
-      } else if (bridgeLength.startsWith(">")) {
-        query += ` AND length_of_bridge > $${paramIndex}`;
-        countQuery += ` AND length_of_bridge > $${paramIndex}`;
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-        countParams.push(parseFloat(bridgeLength.substring(1)));
-        paramIndex++;
-      }
     }
 
     query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
