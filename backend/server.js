@@ -3414,6 +3414,7 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
         b.no_of_span,
         b.data_source, 
         b.date_time, 
+        b.data_date_time,
         b.span_length_m, 
         b.structure_width_m, 
         b.construction_year, 
