@@ -133,13 +133,16 @@ const InventoryInfo = ({ inventoryData }) => {
           overall_bridge_condition: selectedCondition,
         };
 
-        const response = await fetch(`${BASE_URL}/api/update-overall-condition/${inventoryData.uu_bms_id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        });
+        const response = await fetch(
+          `${BASE_URL}/api/update-overall-condition/${inventoryData.uu_bms_id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to update overall bridge condition");
@@ -160,13 +163,29 @@ const InventoryInfo = ({ inventoryData }) => {
   const getConditionStyle = (condition) => {
     switch (condition.toLowerCase()) {
       case "good":
-        return { backgroundColor: "#9FD585", color: "black", fontWeight: "bold" };
+        return {
+          backgroundColor: "#9FD585",
+          color: "black",
+          fontWeight: "bold",
+        };
       case "fair":
-        return { backgroundColor: "#FFD685", color: "black", fontWeight: "bold" };
+        return {
+          backgroundColor: "#FFD685",
+          color: "black",
+          fontWeight: "bold",
+        };
       case "poor":
-        return { backgroundColor: "#FF8585", color: "black", fontWeight: "bold" };
+        return {
+          backgroundColor: "#FF8585",
+          color: "black",
+          fontWeight: "bold",
+        };
       case "under construction":
-        return { backgroundColor: "#DBDBDB", color: "black", fontWeight: "bold" };
+        return {
+          backgroundColor: "#DBDBDB",
+          color: "black",
+          fontWeight: "bold",
+        };
       default:
         return {};
     }
@@ -329,47 +348,60 @@ const InventoryInfo = ({ inventoryData }) => {
             </div>
           </Form.Group>
 
-          {/* Overall Bridge Condition Dropdown with API Data */}
+          {/* Overall Bridge Condition Card */}
           <Col md={6}>
-            <Form.Group>
-              <Form.Label
-                className="custom-label"
-                style={{ fontWeight: "bold", color: "#1E3A8A" }}
-              >
-                Overall Bridge Condition
-              </Form.Label>
-              {loadingConditions ? (
-                <div className="text-center py-2">
-                  <Spinner animation="border" size="sm" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </Spinner>
-                </div>
-              ) : (
-                <Form.Select
-                  value={overallCondition}
-                  onChange={handleConditionSelect}
-                  style={{ padding: "8px", fontSize: "14px", fontWeight: "bold" }}
+            <div
+              className="card p-3 mt-3"
+              style={{
+                background: "#CFE2FF",
+                border: "2px solid #60A5FA",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              }}
+            >
+              <Form.Group>
+                <Form.Label
+                  className="custom-label"
+                  style={{ fontWeight: "bold", color: "#1E3A8A" }}
                 >
-                  <option value="">-- Select Condition --</option>
-                  {visualConditions.map((condition) => (
-                    <option
-                      key={condition.id}
-                      value={condition.visual_condition}
-                      style={getConditionStyle(condition.visual_condition)}
-                    >
-                      {condition.visual_condition}
-                    </option>
-                  ))}
-                </Form.Select>
-              )}
-              {/* Display success or error message */}
-              {updateSuccess && (
-                <div className="text-success mt-2">{updateSuccess}</div>
-              )}
-              {updateError && (
-                <div className="text-danger mt-2">{updateError}</div>
-              )}
-            </Form.Group>
+                  Overall Bridge Condition
+                </Form.Label>
+                {loadingConditions ? (
+                  <div className="text-center py-2">
+                    <Spinner animation="border" size="sm" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                  </div>
+                ) : (
+                  <Form.Select
+                    value={overallCondition}
+                    onChange={handleConditionSelect}
+                    style={{
+                      padding: "8px",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <option value="">-- Select Condition --</option>
+                    {visualConditions.map((condition) => (
+                      <option
+                        key={condition.id}
+                        value={condition.visual_condition}
+                        style={getConditionStyle(condition.visual_condition)}
+                      >
+                        {condition.visual_condition}
+                      </option>
+                    ))}
+                  </Form.Select>
+                )}
+                {/* Display success or error message */}
+                {updateSuccess && (
+                  <div className="text-success mt-2">{updateSuccess}</div>
+                )}
+                {updateError && (
+                  <div className="text-danger mt-2">{updateError}</div>
+                )}
+              </Form.Group>
+            </div>
           </Col>
         </Form>
       </div>
