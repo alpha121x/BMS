@@ -1817,7 +1817,14 @@ app.get("/api/bridgesEvalDownloadCsvNew", async (req, res) => {
 // briges details download excel for dashboard and evaluationn working correctly
 app.get("/api/bridgesdownloadExcel", async (req, res) => {
   try {
-    const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
+    const {
+       district = "%",
+      structureType = "%",
+      constructionType = "%",
+      roadClassification = "%",
+      bridgeName = "%",
+      bridgeLength,
+      spanLength,  } = req.query;
 
     let query = `
       WITH ranked_data AS (
@@ -1901,6 +1908,64 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
       paramIndex++;
     }
 
+
+      if (constructionType !== "%") {
+      query += ` AND md.construction_type_id = $${paramIndex}`;
+     
+      queryParams.push(constructionType);
+      
+      paramIndex++;
+    }
+
+    if (roadClassification !== "%") {
+      query += ` AND md.road_classification_id = $${paramIndex}`;
+    
+      queryParams.push(roadClassification);
+     
+      paramIndex++;
+    }
+
+    if (bridgeLength !== "%") {
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND md.structure_width_m < $${paramIndex}`;
+    
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+     
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength.split("-").map(parseFloat);
+        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+      
+        queryParams.push(min, max);
+    
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND md.structure_width_m > $${paramIndex}`;
+       
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+      
+        paramIndex++;
+      }
+    }
+
+    // Add spanLength filter
+    if (spanLength && spanLength !== "%") {
+      if (spanLength.startsWith("<")) {
+        query += ` AND md.span_length_m < $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      } else if (spanLength.includes("-")) {
+        const [min, max] = spanLength.split("-").map(parseFloat);
+        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        queryParams.push(min, max);
+        paramIndex += 2;
+      } else if (spanLength.startsWith(">")) {
+        query += ` AND md.span_length_m > $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      }
+    }
+
     query += ` ORDER BY "REFERENCE NO" ) SELECT * FROM ranked_data;`;
 
     const result = await pool.query(query, queryParams);
@@ -1938,7 +2003,15 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
 // bridges details download csv for dashboard and evluation
 app.get("/api/bridgesdownloadCsv", async (req, res) => {
   try {
-    const { district = "%", structureType = "%", bridgeName = "%" } = req.query;
+    const {
+      district = "%",
+      structureType = "%",
+      constructionType = "%",
+      roadClassification = "%",
+      bridgeName = "%",
+      bridgeLength,
+      spanLength, 
+    } = req.query;
 
     let query = `
       SELECT
@@ -1978,7 +2051,7 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
         f."Remarks" AS "Situation Remarks",
         f.current_date_time AS "Inspection Date"
       FROM bms.tbl_bms_master_data md
-      LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND md.is_active = true
+      JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND md.is_active = true
       WHERE 1=1
     `;
 
@@ -2001,6 +2074,63 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
       query += ` AND md.structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       paramIndex++;
+    }
+
+     if (constructionType !== "%") {
+      query += ` AND md.construction_type_id = $${paramIndex}`;
+     
+      queryParams.push(constructionType);
+      
+      paramIndex++;
+    }
+
+    if (roadClassification !== "%") {
+      query += ` AND md.road_classification_id = $${paramIndex}`;
+    
+      queryParams.push(roadClassification);
+     
+      paramIndex++;
+    }
+
+    if (bridgeLength !== "%") {
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND md.structure_width_m < $${paramIndex}`;
+    
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+     
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength.split("-").map(parseFloat);
+        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+      
+        queryParams.push(min, max);
+    
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND md.structure_width_m > $${paramIndex}`;
+       
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+      
+        paramIndex++;
+      }
+    }
+
+    // Add spanLength filter
+    if (spanLength && spanLength !== "%") {
+      if (spanLength.startsWith("<")) {
+        query += ` AND md.span_length_m < $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      } else if (spanLength.includes("-")) {
+        const [min, max] = spanLength.split("-").map(parseFloat);
+        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        queryParams.push(min, max);
+        paramIndex += 2;
+      } else if (spanLength.startsWith(">")) {
+        query += ` AND md.span_length_m > $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      }
     }
 
     query += ` ORDER BY "Reference No"`;
