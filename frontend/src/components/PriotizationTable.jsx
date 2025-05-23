@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button, Table, Modal, Container, Row, Col } from "react-bootstrap";
+import { Button, Table, Modal, Form, Container, Row, Col } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv } from "@fortawesome/free-solid-svg-icons";
 import Highcharts from "highcharts";
 import DataTable from "react-data-table-component";
 import styled from "styled-components";
 import { BASE_URL } from "./config";
-import PrioritizationMap from "./PriortizationMap"; // Import the map component
-import Header from "./Header"; // Import the header component
-import Footer from "./Footer"; // Import the footer component
+import PrioritizationMap from "./PriortizationMap";
+import Header from "./Header";
+import Footer from "./Footer";
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -64,11 +64,12 @@ const PrioritizationTable = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [selectedTitle, setSelectedTitle] = useState("");
-  const [chartHeight, setChartHeight] = useState(300); // Default height
+  const [chartHeight, setChartHeight] = useState(300);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [activeTab, setActiveTab] = useState("map"); // State to manage Table/Map tabs
+  const [activeTab, setActiveTab] = useState("map");
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
   const tableRef = useRef(null);
-  const chartRef = useRef(null); // Ref to store the chart instance
+  const chartRef = useRef(null);
 
   // DataTable columns configuration
   const columns = [
@@ -202,13 +203,13 @@ const PrioritizationTable = () => {
   useEffect(() => {
     if (tableRef.current) {
       const tableHeight = tableRef.current.getBoundingClientRect().height;
-      setChartHeight(tableHeight || 300); // Fallback to 300px if height is 0
+      setChartHeight(tableHeight || 300);
     }
-  }, [loading, bridgeScoreData]); // Recompute height when data loads
+  }, [loading, bridgeScoreData]);
 
   // Initialize or update Highcharts pie chart
   useEffect(() => {
-    if (!bridgeScoreData.length || loading) return; // Wait for data to load
+    if (!bridgeScoreData.length || loading) return;
 
     const chartData = bridgeScoreData
       .map((row) => ({
@@ -218,25 +219,20 @@ const PrioritizationTable = () => {
           .reduce((sum, val) => sum + (val === "N.A" ? 0 : parseInt(val)), 0),
         color: getCategoryColor(row.category),
       }))
-      .filter((item) => item.y > 0); // Filter out categories with zero counts
+      .filter((item) => item.y > 0);
 
-    // Calculate total counts
     const totalCount = chartData.reduce((sum, item) => sum + item.y, 0);
 
-    // console.log("Chart Data:", chartData); // Debug log to verify data
-
-    // Destroy existing chart if it exists
     if (chartRef.current) {
       chartRef.current.destroy();
     }
 
-    // Create new chart
     const chartContainer = document.getElementById("chart-container");
     if (chartContainer) {
       chartRef.current = Highcharts.chart("chart-container", {
         chart: {
           type: "pie",
-          height: chartHeight || 300, // Use chartHeight with fallback
+          height: chartHeight || 300,
         },
         title: {
           text: `Bridge Counts by Category (Total: ${totalCount})`,
@@ -247,7 +243,7 @@ const PrioritizationTable = () => {
             name: "Categories",
             data: chartData.length
               ? chartData
-              : [{ name: "No Data", y: 1, color: "#cccccc" }], // Fallback for empty data
+              : [{ name: "No Data", y: 1, color: "#cccccc" }],
             size: "60%",
             dataLabels: {
               enabled: true,
@@ -273,28 +269,27 @@ const PrioritizationTable = () => {
       });
     }
 
-    // Cleanup on unmount
     return () => {
       if (chartRef.current) {
         chartRef.current.destroy();
         chartRef.current = null;
       }
     };
-  }, [bridgeScoreData, chartHeight, loading]); // Re-render chart when data or height changes
+  }, [bridgeScoreData, chartHeight, loading]);
 
   // Function to get color based on category
   const getCategoryColor = (category) => {
     switch (category) {
       case "Good":
-        return "#28a745"; // Green
+        return "#28a745";
       case "Fair":
-        return "#ffc107"; // Yellow
+        return "#ffc107";
       case "Poor":
-        return "#fd7e14"; // Orange
+        return "#fd7e14";
       case "Severe":
-        return "#dc3545"; // Red
+        return "#dc3545";
       default:
-        return "#ffffff"; // White for N.A
+        return "#ffffff";
     }
   };
 
@@ -304,10 +299,10 @@ const PrioritizationTable = () => {
   };
 
   const categoryGroupColors = {
-    Good: ["#218838", "#28a745", "#5ec17a", "#c8e6c9"], // Dark → Light green
-    Fair: ["#e0a800", "#ffc107", "#ffda66", "#fff3cd"], // Dark → Light yellow
-    Poor: ["#d85f00", "#fd7e14", "#ffa25c", "#ffe5d0"], // Dark → Light orange
-    Severe: ["#bd2130", "#dc3545", "#e4606d", "#f8d7da"], // Dark → Light red
+    Good: ["#218838", "#28a745", "#5ec17a", "#c8e6c9"],
+    Fair: ["#e0a800", "#ffc107", "#ffda66", "#fff3cd"],
+    Poor: ["#d85f00", "#fd7e14", "#ffa25c", "#ffe5d0"],
+    Severe: ["#bd2130", "#dc3545", "#e4606d", "#f8d7da"],
   };
 
   const getRowBackgroundColor = (category) => {
@@ -335,9 +330,7 @@ const PrioritizationTable = () => {
       [
         ["Category", "Group A", "Group B", "Group C", "Group D"].join(","),
         ...bridgeScoreData.map((row) =>
-          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(
-            ","
-          )
+          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(",")
         ),
       ].join("\n");
     const encodedUri = encodeURI(csvContent);
@@ -351,7 +344,7 @@ const PrioritizationTable = () => {
 
   const handleTabClick = (category) => {
     setSelectedCategory(category);
-    setActiveTab("table"); // Reset to table view when selecting a category
+    setActiveTab("table");
   };
 
   const handleViewTabChange = (key) => {
@@ -376,175 +369,206 @@ const PrioritizationTable = () => {
     });
     return details;
   };
+
+  // Handle search input
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Filter data based on search term
+  const filteredData = filteredBridgeDetails().filter((row) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (row.district || "").toLowerCase().includes(searchLower) ||
+      (row.roadName || "").toLowerCase().includes(searchLower) ||
+      (row.structureType || "").toLowerCase().includes(searchLower) ||
+      (row.name || "").toLowerCase().includes(searchLower) ||
+      (row.dateTime || "").toLowerCase().includes(searchLower)
+    );
+  });
+
   return (
     <>
-    <Header/>
-    <Container fluid className="py-2 bg-light mt-[55px]">
-      <Row className="justify-content-center">
-        <Col md={8}>
-          <div className="card shadow-sm border-1" ref={tableRef}>
-            <div className="card-header border-1 text-white p-2 d-flex justify-content-between align-items-center">
-              <h5 className="mb-0 text-black">Bridge Prioritization Table</h5>
-              <Button variant="light" onClick={handleDownloadCSV}>
-                <FontAwesomeIcon icon={faFileCsv} className="mr-2" /> CSV
-              </Button>
-            </div>
-            <div className="card-body p-5">
-              {loading ? (
-                <div className="spinner-border mx-auto my-3" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              ) : (
-                <Table bordered hover striped className="mb-0 p-2">
-                  <thead>
-                    <tr>
-                      <th className="text-center">Category</th>
-                      <th className="text-center">Group A</th>
-                      <th className="text-center">Group B</th>
-                      <th className="text-center">Group C</th>
-                      <th className="text-center">Group D</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bridgeScoreData.map((row, rowIndex) => (
-                      <tr key={rowIndex}>
-                        <td className="text-center">{row.category}</td>
-                        {["GroupA", "GroupB", "GroupC", "GroupD"].map(
-                          (group, groupIndex) => (
-                            <td
-                              key={group}
-                              className="text-center"
-                              style={{
-                                backgroundColor: getCellColor(
-                                  row.category,
-                                  row[group],
-                                  groupIndex
-                                ),
-                              }}
-                            >
-                              {row[group]}
-                            </td>
-                          )
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </div>
-          </div>
-        </Col>
-        <Col md={4} className="d-flex align-items-center">
-          <div className="card shadow-sm border-1 w-100">
-            <div className="card-body p-2">
-              <div id="chart-container" style={{ minHeight: "300px" }}></div>
-            </div>
-          </div>
-        </Col>
-      </Row>
-
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        size="lg"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {modalData.length > 0 ? (
-            <Table bordered hover>
-              <thead>
-                <tr>
-                  <th>District</th>
-                  <th>Road Name</th>
-                  <th>Structure Type</th>
-                  <th>Bridge Name</th>
-                  <th>Date Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {modalData.map((bridge, idx) => (
-                  <tr key={idx}>
-                    <td>{bridge.district}</td>
-                    <td>{bridge.roadName}</td>
-                    <td>{bridge.structureType}</td>
-                    <td>{bridge.name}</td>
-                    <td>{bridge.dateTime}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          ) : (
-            <p>No bridges found for this group.</p>
-          )}
-        </Modal.Body>
-      </Modal>
-
-      <Container fluid className="py-2 bg-light mt-3">
+      <Header />
+      <Container fluid className="py-2 bg-light mt-[55px]">
         <Row className="justify-content-center">
-          <Col md={12}>
-            <div className="card shadow-sm border-0">
-              <div className="card-header border-1 p-2 d-flex justify-content-between align-items-center">
-                <div>
-                  {["Good", "Fair", "Poor", "Severe"].map((category) => (
-                    <Button
-                      key={category}
-                      variant={
-                        selectedCategory === category
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      onClick={() => handleTabClick(category)}
-                      className="mx-1"
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                  <Button
-                    variant={
-                      activeTab === "map" ? "primary" : "outline-primary"
-                    }
-                    onClick={() => handleViewTabChange("map")}
-                    className="mx-1"
-                  >
-                    Map
-                  </Button>
-                </div>
+          <Col md={8}>
+            <div className="card shadow-sm border-1" ref={tableRef}>
+              <div className="card-header border-1 text-white p-2 d-flex justify-content-between align-items-center">
+                <h5 className="mb-0 text-black">Bridge Prioritization Table</h5>
+                <Button variant="light" onClick={handleDownloadCSV}>
+                  <FontAwesomeIcon icon={faFileCsv} className="mr-2" /> CSV
+                </Button>
               </div>
-              <div className="card-body p-0">
-                {activeTab === "table" ? (
-                  <StyledDataTable
-                    columns={columns}
-                    data={filteredBridgeDetails()}
-                    customStyles={customStyles}
-                    pagination
-                    paginationPerPage={10}
-                    paginationRowsPerPageOptions={[10, 25, 50]}
-                    highlightOnHover
-                    striped
-                    noDataComponent="No bridges found for this category."
-                    progressPending={loading}
-                    progressComponent={
-                      <div
-                        className="spinner-border mx-auto my-3"
-                        role="status"
-                      >
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                    }
-                  />
+              <div className="card-body p-5">
+                {loading ? (
+                  <div className="spinner-border mx-auto my-3" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
                 ) : (
-                  <PrioritizationMap />
+                  <Table bordered hover striped className="mb-0 p-2">
+                    <thead>
+                      <tr>
+                        <th className="text-center">Category</th>
+                        <th className="text-center">Group A</th>
+                        <th className="text-center">Group B</th>
+                        <th className="text-center">Group C</th>
+                        <th className="text-center">Group D</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bridgeScoreData.map((row, rowIndex) => (
+                        <tr key={rowIndex}>
+                          <td className="text-center">{row.category}</td>
+                          {["GroupA", "GroupB", "GroupC", "GroupD"].map(
+                            (group, groupIndex) => (
+                              <td
+                                key={group}
+                                className="text-center"
+                                style={{
+                                  backgroundColor: getCellColor(
+                                    row.category,
+                                    row[group],
+                                    groupIndex
+                                  ),
+                                }}
+                              >
+                                {row[group]}
+                              </td>
+                            )
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
                 )}
               </div>
             </div>
           </Col>
+          <Col md={4} className="d-flex align-items-center">
+            <div className="card shadow-sm border-1 w-100">
+              <div className="card-body p-2">
+                <div id="chart-container" style={{ minHeight: "300px" }}></div>
+              </div>
+            </div>
+          </Col>
         </Row>
+
+        <Modal
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          size="lg"
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {modalData.length > 0 ? (
+              <Table bordered hover>
+                <thead>
+                  <tr>
+                    <th>District</th>
+                    <th>Road Name</th>
+                    <th>Structure Type</th>
+                    <th>Bridge Name</th>
+                    <th>Date Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {modalData.map((bridge, idx) => (
+                    <tr key={idx}>
+                      <td>{bridge.district}</td>
+                      <td>{bridge.roadName}</td>
+                      <td>{bridge.structureType}</td>
+                      <td>{bridge.name}</td>
+                      <td>{bridge.dateTime}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            ) : (
+              <p>No bridges found for this group.</p>
+            )}
+          </Modal.Body>
+        </Modal>
+
+        <Container fluid className="py-2 bg-light mt-3">
+          <Row className="justify-content-center">
+            <Col md={12}>
+              <div className="card shadow-sm border-0">
+                <div className="card-header border-1 p-2 d-flex justify-content-between align-items-center">
+                  <div>
+                    {["Good", "Fair", "Poor", "Severe"].map((category) => (
+                      <Button
+                        key={category}
+                        variant={
+                          selectedCategory === category
+                            ? "primary"
+                            : "outline-primary"
+                        }
+                        onClick={() => handleTabClick(category)}
+                        className="mx-1"
+                      >
+                        {category}
+                      </Button>
+                    ))}
+                    <Button
+                      variant={activeTab === "map" ? "primary" : "outline-primary"}
+                      onClick={() => handleViewTabChange("map")}
+                      className="mx-1"
+                    >
+                      Map
+                    </Button>
+                  </div>
+                </div>
+                <div className="card-body p-0">
+                  {activeTab === "table" && (
+                    <>
+                      {/* Search Input */}
+                      <div className="p-3">
+                        <Form.Control
+                          type="text"
+                          placeholder="Search bridges..."
+                          value={searchTerm}
+                          onChange={handleSearch}
+                          style={{ maxWidth: "300px", marginBottom: "10px" }}
+                        />
+                      </div>
+                      <StyledDataTable
+                        columns={columns}
+                        data={filteredData}
+                        customStyles={customStyles}
+                        pagination
+                        paginationPerPage={10}
+                        paginationRowsPerPageOptions={[10, 25, 50]}
+                        highlightOnHover
+                        striped
+                        noDataComponent={
+                          searchTerm
+                            ? "No matching bridges found."
+                            : "No bridges found for this category."
+                        }
+                        progressPending={loading}
+                        progressComponent={
+                          <div
+                            className="spinner-border mx-auto my-3"
+                            role="status"
+                          >
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        }
+                      />
+                    </>
+                  )}
+                  {activeTab === "map" && <PrioritizationMap />}
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
       </Container>
-    </Container>
-    <Footer/>
+      <Footer />
     </>
   );
 };
