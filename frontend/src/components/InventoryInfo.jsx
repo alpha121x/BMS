@@ -10,8 +10,39 @@ const InventoryInfo = ({ inventoryData }) => {
   const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
   const [overviewPhotos, setOverviewPhotos] = useState([]);
   const [loadingSpanPhotos, setLoadingSpanPhotos] = useState(false);
+  const [overallCondition, setOverallCondition] = useState("");
+  const [visualConditions, setVisualConditions] = useState([]); // New state for API data
+  const [loadingConditions, setLoadingConditions] = useState(false); // New state for loading
 
   const photos = inventoryData?.photos || [];
+
+  // Fetch Visual Conditions from API
+  useEffect(() => {
+    const fetchVisualConditions = async () => {
+      setLoadingConditions(true);
+      try {
+        const response = await fetch("/api/visual-conditions");
+        if (!response.ok) {
+          throw new Error("Failed to fetch visual conditions");
+        }
+        const data = await response.json();
+        setVisualConditions(data); // Assuming data is an array of { id, visual_condition }
+      } catch (error) {
+        console.error("Error fetching visual conditions:", error);
+        // Fallback to default options if API fails
+        setVisualConditions([
+          { id: 1, visual_condition: "Excellent" },
+          { id: 2, visual_condition: "Good" },
+          { id: 3, visual_condition: "Fair" },
+          { id: 4, visual_condition: "Poor" },
+        ]);
+      } finally {
+        setLoadingConditions(false);
+      }
+    };
+
+    fetchVisualConditions();
+  }, []);
 
   useEffect(() => {
     if (inventoryData?.images_spans) {
@@ -19,7 +50,6 @@ const InventoryInfo = ({ inventoryData }) => {
         const parsed = JSON.parse(inventoryData.images_spans);
         setParsedSpanPhotos(parsed);
 
-        // Extract Overview photos if available (only once on mount)
         if (parsed["Overview"]) {
           const overviewPhotos = Object.values(parsed["Overview"]).flat();
           setOverviewPhotos(overviewPhotos);
@@ -41,14 +71,13 @@ const InventoryInfo = ({ inventoryData }) => {
         setLoadingSpanPhotos(true);
         const photos = Object.values(spanData).flat();
 
-        // Preload span images
         const loadImages = async () => {
           const imagePromises = photos.map((photo) => {
             return new Promise((resolve) => {
               const img = new Image();
               img.src = photo;
               img.onload = resolve;
-              img.onerror = resolve; // Resolve even if image fails to load
+              img.onerror = resolve;
             });
           });
 
@@ -84,6 +113,26 @@ const InventoryInfo = ({ inventoryData }) => {
 
   const closeModal = () => setShowPhotoModal(false);
 
+  const handleConditionSelect = (e) => {
+    setOverallCondition(e.target.value);
+  };
+
+  // Map visual conditions to colors
+  const getConditionStyle = (condition) => {
+    switch (condition.toLowerCase()) {
+      case "excellent":
+        return { backgroundColor: "#10B981", color: "#FFFFFF", fontWeight: "bold" };
+      case "good":
+        return { backgroundColor: "#FBBF24", color: "#FFFFFF", fontWeight: "bold" };
+      case "fair":
+        return { backgroundColor: "#F97316", color: "#FFFFFF", fontWeight: "bold" };
+      case "poor":
+        return { backgroundColor: "#EF4444", color: "#FFFFFF", fontWeight: "bold" };
+      default:
+        return {};
+    }
+  };
+
   return (
     <div className="container">
       <div
@@ -91,63 +140,62 @@ const InventoryInfo = ({ inventoryData }) => {
         style={{
           background: "#FFFFFF",
           border: "2px solid #60A5FA",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          boxShadow: "0 4px 발px rgba(0, 0, 0, 0.2)",
           position: "relative",
         }}
       >
         <h5 className="card-title font-semibold pb-2">Inventory Info</h5>
         <Form>
           <Row>
-          {[
-  { label: "Bridge Name", field: "bridge_name" },
-  { label: "Structure Type", field: "structure_type" },
-  { label: "Construction Year", field: "construction_year" },
-  { label: "District", field: "district" },
-  { label: "Road Name", field: "road_name" },
-  { label: "Road Name CWD", field: "road_name_cwd" },
-  { label: "Construction Type", field: "construction_type" },
-  { label: "Survey ID", field: "survey_id" },
-  { label: "Surveyor Name", field: "surveyor_name" },
-  { label: "Road Classification", field: "road_classification" },
-  { label: "Carriageway Type", field: "carriageway_type" },
-  { label: "Road Surface Type", field: "road_surface_type" },
-  { label: "Visual Condition", field: "visual_condition" },
-  { label: "Direction", field: "direction" },
-  {
-    label: "Last Maintenance Date",
-    field: "last_maintenance_date",
-    type: "date",
-  },
-  { label: "Width Structure", field: "structure_width_m" },
-  { label: "Span Length", field: "span_length_m" },
-  { label: "No of Spans", field: "no_of_span" },
-  { label: "Latitude", field: "y_centroid" },
-  { label: "Longitude", field: "x_centroid" },
-  { label: "Remarks", field: "remarks" },
-  { label: "Data Source", field: "data_source" },
-  { label: "Date", field: "data_date_time", type: "date" }, // <- Add type
-].map(({ label, field, type }, index) => {
-  let value = inventoryData?.[field] || "";
-  if (type === "date" && value) {
-    const dateObj = new Date(value);
-    value = isNaN(dateObj) ? value : dateObj.toLocaleString(); // Fallback to raw if invalid
-  }
+            {[
+              { label: "Bridge Name", field: "bridge_name" },
+              { label: "Structure Type", field: "structure_type" },
+              { label: "Construction Year", field: "construction_year" },
+              { label: "District", field: "district" },
+              { label: "Road Name", field: "road_name" },
+              { label: "Road Name CWD", field: "road_name_cwd" },
+              { label: "Construction Type", field: "construction_type" },
+              { label: "Survey ID", field: "survey_id" },
+              { label: "Surveyor Name", field: "surveyor_name" },
+              { label: "Road Classification", field: "road_classification" },
+              { label: "Carriageway Type", field: "carriageway_type" },
+              { label: "Road Surface Type", field: "road_surface_type" },
+              { label: "Visual Condition", field: "visual_condition" },
+              { label: "Direction", field: "direction" },
+              {
+                label: "Last Maintenance Date",
+                field: "last_maintenance_date",
+                type: "date",
+              },
+              { label: "Width Structure", field: "structure_width_m" },
+              { label: "Span Length", field: "span_length_m" },
+              { label: "No of Spans", field: "no_of_span" },
+              { label: "Latitude", field: "y_centroid" },
+              { label: "Longitude", field: "x_centroid" },
+              { label: "Remarks", field: "remarks" },
+              { label: "Data Source", field: "data_source" },
+              { label: "Date", field: "data_date_time", type: "date" },
+            ].map(({ label, field, type }, index) => {
+              let value = inventoryData?.[field] || "";
+              if (type === "date" && value) {
+                const dateObj = new Date(value);
+                value = isNaN(dateObj) ? value : dateObj.toLocaleString();
+              }
 
-  return (
-    <Col key={index} md={3}>
-      <Form.Group>
-        <Form.Label className="custom-label">{label}</Form.Label>
-        <Form.Control
-          type="text"
-          value={value}
-          readOnly
-          style={{ padding: "8px", fontSize: "14px" }}
-        />
-      </Form.Group>
-    </Col>
-  );
-})}
-
+              return (
+                <Col key={index} md={3}>
+                  <Form.Group>
+                    <Form.Label className="custom-label">{label}</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={value}
+                      readOnly
+                      style={{ padding: "8px", fontSize: "14px" }}
+                    />
+                  </Form.Group>
+                </Col>
+              );
+            })}
           </Row>
 
           <Form.Group>
@@ -241,6 +289,42 @@ const InventoryInfo = ({ inventoryData }) => {
               )}
             </div>
           </Form.Group>
+
+          {/* Overall Bridge Condition Dropdown with API Data */}
+          <Col md={6}>
+          <Form.Group>
+            <Form.Label
+              className="custom-label"
+              style={{ fontWeight: "bold", color: "#1E3A8A" }}
+            >
+              Overall Bridge Condition
+            </Form.Label>
+            {loadingConditions ? (
+              <div className="text-center py-2">
+                <Spinner animation="border" size="sm" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              </div>
+            ) : (
+              <Form.Select
+                value={overallCondition}
+                onChange={handleConditionSelect}
+                style={{ padding: "8px", fontSize: "14px", fontWeight: "bold" }}
+              >
+                <option value="">-- Select Condition --</option>
+                {visualConditions.map((condition) => (
+                  <option
+                    key={condition.id}
+                    value={condition.visual_condition}
+                    style={getConditionStyle(condition.visual_condition)}
+                  >
+                    {condition.visual_condition}
+                  </option>
+                ))}
+              </Form.Select>
+            )}
+          </Form.Group>
+          </Col>
         </Form>
       </div>
 
