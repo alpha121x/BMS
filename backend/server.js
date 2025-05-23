@@ -2916,6 +2916,7 @@ SELECT
         carriageway_type, 
         direction, 
         visual_condition, 
+        overall_bridge_condition,
         construction_type_id, 
         construction_type, 
         no_of_span,
@@ -5059,6 +5060,34 @@ app.get("/api/visual-conditions", async (req, res) => {
   } catch (error) {
     console.error("Error fetching visual conditions:", error);
     res.status(500).json({ error: "Failed to fetch visual conditions" });
+  }
+});
+
+// API to update overall_bridge_condition
+app.put("/api/update-overall-condition/:id", async (req, res) => {
+  const { id } = req.params; // Get the record ID from the URL
+  const { overall_bridge_condition } = req.body; // Get the new condition from the request body
+
+  try {
+    // Validate input
+    if (!id || !overall_bridge_condition) {
+      return res.status(400).json({ error: "Missing required fields: id and overall_bridge_condition" });
+    }
+
+    // Update the overall_bridge_condition in the database
+    const result = await pool.query(
+      "UPDATE bms.tbl_bms_master_data SET overall_bridge_condition = $1 WHERE uu_bms_id = $2 RETURNING *",
+      [overall_bridge_condition, id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Record not found" });
+    }
+
+    res.json({ message: "Overall bridge condition updated successfully", data: result.rows[0] });
+  } catch (error) {
+    console.error("Error updating overall bridge condition:", error);
+    res.status(500).json({ error: "Failed to update overall bridge condition" });
   }
 });
 

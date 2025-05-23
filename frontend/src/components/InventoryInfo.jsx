@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Form, Modal, Spinner } from "react-bootstrap";
 import "../index.css";
+import { BASE_URL } from "./config";
 
 const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -10,9 +11,11 @@ const InventoryInfo = ({ inventoryData }) => {
   const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
   const [overviewPhotos, setOverviewPhotos] = useState([]);
   const [loadingSpanPhotos, setLoadingSpanPhotos] = useState(false);
-  const [overallCondition, setOverallCondition] = useState("");
-  const [visualConditions, setVisualConditions] = useState([]); // New state for API data
-  const [loadingConditions, setLoadingConditions] = useState(false); // New state for loading
+  const [overallCondition, setOverallCondition] = useState(""); // Initialize as empty string
+  const [visualConditions, setVisualConditions] = useState([]);
+  const [loadingConditions, setLoadingConditions] = useState(false);
+  const [updateError, setUpdateError] = useState(null);
+  const [updateSuccess, setUpdateSuccess] = useState(null);
 
   const photos = inventoryData?.photos || [];
 
@@ -21,20 +24,20 @@ const InventoryInfo = ({ inventoryData }) => {
     const fetchVisualConditions = async () => {
       setLoadingConditions(true);
       try {
-        const response = await fetch("/api/visual-conditions");
+        const response = await fetch(`${BASE_URL}/api/visual-conditions`);
         if (!response.ok) {
           throw new Error("Failed to fetch visual conditions");
         }
         const data = await response.json();
-        setVisualConditions(data); // Assuming data is an array of { id, visual_condition }
+        setVisualConditions(data);
       } catch (error) {
         console.error("Error fetching visual conditions:", error);
-        // Fallback to default options if API fails
+        // Fallback to the exact options from the database
         setVisualConditions([
-          { id: 1, visual_condition: "Excellent" },
-          { id: 2, visual_condition: "Good" },
-          { id: 3, visual_condition: "Fair" },
-          { id: 4, visual_condition: "Poor" },
+          { id: 1, visual_condition: "FAIR" },
+          { id: 2, visual_condition: "GOOD" },
+          { id: 3, visual_condition: "POOR" },
+          { id: 4, visual_condition: "UNDER CONSTRUCTION" },
         ]);
       } finally {
         setLoadingConditions(false);
@@ -43,6 +46,13 @@ const InventoryInfo = ({ inventoryData }) => {
 
     fetchVisualConditions();
   }, []);
+
+  // Set initial overall condition from inventoryData
+  useEffect(() => {
+    if (inventoryData?.overall_bridge_condition) {
+      setOverallCondition(inventoryData.overall_bridge_condition);
+    }
+  }, [inventoryData]);
 
   useEffect(() => {
     if (inventoryData?.images_spans) {
@@ -113,21 +123,50 @@ const InventoryInfo = ({ inventoryData }) => {
 
   const closeModal = () => setShowPhotoModal(false);
 
-  const handleConditionSelect = (e) => {
-    setOverallCondition(e.target.value);
+  const handleConditionSelect = async (e) => {
+    const selectedCondition = e.target.value;
+    setOverallCondition(selectedCondition);
+
+    if (selectedCondition) {
+      try {
+        const requestData = {
+          overall_bridge_condition: selectedCondition,
+        };
+
+        const response = await fetch(`${BASE_URL}/api/update-overall-condition/${inventoryData.uu_bms_id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update overall bridge condition");
+        }
+
+        const result = await response.json();
+        setUpdateSuccess(result.message);
+        setUpdateError(null);
+      } catch (error) {
+        console.error("Error updating overall bridge condition:", error);
+        setUpdateError("Failed to update overall bridge condition");
+        setUpdateSuccess(null);
+      }
+    }
   };
 
   // Map visual conditions to colors
   const getConditionStyle = (condition) => {
     switch (condition.toLowerCase()) {
-      case "excellent":
-        return { backgroundColor: "#10B981", color: "#FFFFFF", fontWeight: "bold" };
       case "good":
-        return { backgroundColor: "#FBBF24", color: "#FFFFFF", fontWeight: "bold" };
+        return { backgroundColor: "#9FD585", color: "black", fontWeight: "bold" };
       case "fair":
-        return { backgroundColor: "#F97316", color: "#FFFFFF", fontWeight: "bold" };
+        return { backgroundColor: "#FFD685", color: "black", fontWeight: "bold" };
       case "poor":
-        return { backgroundColor: "#EF4444", color: "#FFFFFF", fontWeight: "bold" };
+        return { backgroundColor: "#FF8585", color: "black", fontWeight: "bold" };
+      case "under construction":
+        return { backgroundColor: "#DBDBDB", color: "black", fontWeight: "bold" };
       default:
         return {};
     }
@@ -140,7 +179,7 @@ const InventoryInfo = ({ inventoryData }) => {
         style={{
           background: "#FFFFFF",
           border: "2px solid #60A5FA",
-          boxShadow: "0 4px 발px rgba(0, 0, 0, 0.2)",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
         }}
       >
@@ -292,38 +331,45 @@ const InventoryInfo = ({ inventoryData }) => {
 
           {/* Overall Bridge Condition Dropdown with API Data */}
           <Col md={6}>
-          <Form.Group>
-            <Form.Label
-              className="custom-label"
-              style={{ fontWeight: "bold", color: "#1E3A8A" }}
-            >
-              Overall Bridge Condition
-            </Form.Label>
-            {loadingConditions ? (
-              <div className="text-center py-2">
-                <Spinner animation="border" size="sm" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-              </div>
-            ) : (
-              <Form.Select
-                value={overallCondition}
-                onChange={handleConditionSelect}
-                style={{ padding: "8px", fontSize: "14px", fontWeight: "bold" }}
+            <Form.Group>
+              <Form.Label
+                className="custom-label"
+                style={{ fontWeight: "bold", color: "#1E3A8A" }}
               >
-                <option value="">-- Select Condition --</option>
-                {visualConditions.map((condition) => (
-                  <option
-                    key={condition.id}
-                    value={condition.visual_condition}
-                    style={getConditionStyle(condition.visual_condition)}
-                  >
-                    {condition.visual_condition}
-                  </option>
-                ))}
-              </Form.Select>
-            )}
-          </Form.Group>
+                Overall Bridge Condition
+              </Form.Label>
+              {loadingConditions ? (
+                <div className="text-center py-2">
+                  <Spinner animation="border" size="sm" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                </div>
+              ) : (
+                <Form.Select
+                  value={overallCondition}
+                  onChange={handleConditionSelect}
+                  style={{ padding: "8px", fontSize: "14px", fontWeight: "bold" }}
+                >
+                  <option value="">-- Select Condition --</option>
+                  {visualConditions.map((condition) => (
+                    <option
+                      key={condition.id}
+                      value={condition.visual_condition}
+                      style={getConditionStyle(condition.visual_condition)}
+                    >
+                      {condition.visual_condition}
+                    </option>
+                  ))}
+                </Form.Select>
+              )}
+              {/* Display success or error message */}
+              {updateSuccess && (
+                <div className="text-success mt-2">{updateSuccess}</div>
+              )}
+              {updateError && (
+                <div className="text-danger mt-2">{updateError}</div>
+              )}
+            </Form.Group>
           </Col>
         </Form>
       </div>
