@@ -75,7 +75,7 @@ const BridgesListDashboard = ({
         district: districtId,
         structureType,
         constructionType,
-        bridgeName, // Removed searchQuery, using bridgeName directly
+        bridgeName,
         bridgeLength,
         age,
         underFacility,
