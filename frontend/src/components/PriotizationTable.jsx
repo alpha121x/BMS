@@ -1,5 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button, Table, Modal, Form, Container, Row, Col } from "react-bootstrap";
+import {
+  Button,
+  Table,
+  Modal,
+  Form,
+  Container,
+  Row,
+  Col,
+} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv } from "@fortawesome/free-solid-svg-icons";
 import Highcharts from "highcharts";
@@ -330,7 +338,9 @@ const PrioritizationTable = () => {
       [
         ["Category", "Group A", "Group B", "Group C", "Group D"].join(","),
         ...bridgeScoreData.map((row) =>
-          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(",")
+          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(
+            ","
+          )
         ),
       ].join("\n");
     const encodedUri = encodeURI(csvContent);
@@ -443,7 +453,10 @@ const PrioritizationTable = () => {
                                     row[group],
                                     groupIndex
                                   ),
-                                  cursor: row[group] !== "N.A" ? "pointer" : "default",
+                                  cursor:
+                                    row[group] !== "N.A"
+                                      ? "pointer"
+                                      : "default",
                                 }}
                                 onClick={() =>
                                   row[group] !== "N.A" &&
@@ -480,7 +493,7 @@ const PrioritizationTable = () => {
           <Modal.Header closeButton>
             <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
+          <Modal.Body style={{ maxHeight: "400px", overflowY: "auto" }}>
             {modalData.length > 0 ? (
               <Table bordered hover>
                 <thead>
@@ -531,7 +544,9 @@ const PrioritizationTable = () => {
                       </Button>
                     ))}
                     <Button
-                      variant={activeTab === "map" ? "primary" : "outline-primary"}
+                      variant={
+                        activeTab === "map" ? "primary" : "outline-primary"
+                      }
                       onClick={() => handleViewTabChange("map")}
                       className="mx-1"
                     >
