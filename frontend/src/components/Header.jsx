@@ -88,23 +88,6 @@ const Header = () => {
               Bridge Wise Score
             </Nav.Link>
 
-            <Nav.Link
-              as={Link}
-              to="/Priortization"
-              className={
-                activeTab === "/Priortization"
-                  ? "bg-custom-active text-white active"
-                  : "hover-bg-custom-active"
-              }
-              style={{
-                backgroundColor:
-                  activeTab === "/Priortization" ? "#005d7f" : "transparent",
-                color: activeTab === "/Priortization" ? "#fff" : "#000",
-              }}
-            >
-              Priortization Table 
-            </Nav.Link>
-
             <NavDropdown
               title="Reports"
               show={isReportsDropdownOpen}
@@ -113,6 +96,9 @@ const Header = () => {
             >
               <NavDropdown.Item as={Link} to="/Reports/CostEstimation">
               Cost Estimation  
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/Reports/Priortization">
+                Prioritization  
               </NavDropdown.Item>
               {/* <NavDropdown.Item as={Link} to="/Reports/BridgeListing">
                 Bridge Wise Listing
