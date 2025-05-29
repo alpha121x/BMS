@@ -67,7 +67,7 @@ const PrioritizationTable = () => {
   const [chartHeight, setChartHeight] = useState(300);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeTab, setActiveTab] = useState("map");
-  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [searchTerm, setSearchTerm] = useState("");
   const tableRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -351,6 +351,18 @@ const PrioritizationTable = () => {
     setActiveTab(key);
   };
 
+  // Handle cell click to show bridge details in modal
+  const handleCellClick = (category, group) => {
+    if (bridgeDetails[group] && bridgeDetails[group].length > 0) {
+      const filteredBridges = bridgeDetails[group].filter(
+        (bridge) => bridge.category === category
+      );
+      setModalData(filteredBridges);
+      setSelectedTitle(`${category} - ${group}`);
+      setShowModal(true);
+    }
+  };
+
   const filteredBridgeDetails = () => {
     const selectedRow = bridgeScoreData.find(
       (row) => row.category === selectedCategory
@@ -431,7 +443,12 @@ const PrioritizationTable = () => {
                                     row[group],
                                     groupIndex
                                   ),
+                                  cursor: row[group] !== "N.A" ? "pointer" : "default",
                                 }}
+                                onClick={() =>
+                                  row[group] !== "N.A" &&
+                                  handleCellClick(row.category, group)
+                                }
                               >
                                 {row[group]}
                               </td>
@@ -525,7 +542,6 @@ const PrioritizationTable = () => {
                 <div className="card-body p-0">
                   {activeTab === "table" && (
                     <>
-                      {/* Search Input */}
                       <div className="p-3">
                         <Form.Control
                           type="text"
