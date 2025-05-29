@@ -16,6 +16,7 @@ import Map from "./Map";
 import FilterComponent from "./FilterComponent";
 import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
+import Graph from "./Graph"; // Assuming you have a Graph component for the graph view
 
 const BridgesListDashboard = ({
   districtId,
@@ -46,6 +47,7 @@ const BridgesListDashboard = ({
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
+  const [viewMode, setViewMode] = useState('map'); // New state for view mode
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -148,7 +150,7 @@ const BridgesListDashboard = ({
         district: districtId || "%",
         structureType: structureType || "%",
         constructionType: constructionType || "%",
-        bridgeName: bridgeName || "%", // Removed searchQuery
+        bridgeName: bridgeName || "%",
         bridgeLength: bridgeLength || "",
         age: age || "%",
         underFacility: underFacility || "%",
@@ -189,7 +191,7 @@ const BridgesListDashboard = ({
         district: districtId || "%",
         structureType: structureType || "%",
         constructionType: constructionType || "%",
-        bridgeName: bridgeName || "%", // Removed searchQuery
+        bridgeName: bridgeName || "%",
         bridgeLength: bridgeLength || "",
         age: age || "%",
         underFacility: underFacility || "%",
@@ -455,8 +457,34 @@ const BridgesListDashboard = ({
 
   return (
     <>
+      <div className="flex justify-between items-center p-2 bg-gray-100 border-b">
+        <div className="flex gap-2">
+          <button
+            className={`px-3 py-1 rounded ${
+              viewMode === 'map' ? 'bg-[#005D7F] text-white' : 'bg-gray-200'
+            }`}
+            onClick={() => setViewMode('map')}
+          >
+            Map View
+          </button>
+          <button
+            className={`px-3 py-1 rounded ${
+              viewMode === 'graph' ? 'bg-[#005D7F] text-white' : 'bg-gray-200'
+            }`}
+            onClick={() => setViewMode('graph')}
+          >
+            Graph View
+          </button>
+        </div>
+      </div>
       <div>
-        <Map districtId={districtId} />
+        {viewMode === 'map' ? (
+          <Map districtId={districtId} />
+        ) : (
+          <div className="p-4 text-center">
+          <Graph />
+          </div>
+        )}
       </div>
       <div
         className="card p-0 rounded-0 text-black"

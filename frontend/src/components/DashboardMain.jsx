@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Map from "./Map";
 import BridgesListDashboard from "./BridgesListDashboard";
-import CheckingTable from "./CheckingTable";
-import Graph from "./Graph";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
 import { GiArchBridge } from "react-icons/gi";
@@ -11,6 +8,8 @@ import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
 import TopCardDashboard from "./TopCardDashboard";
 import Filters from "./Filters";
+import PriotizationTable from "./PriotizationTable"; // Import the new component
+import CostEstimation from "./CostEstimation"; // Import the new component
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -60,7 +59,7 @@ const DashboardMain = () => {
 
         const structureMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
-          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
+          BRIDGE: { label: "Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
         };
 
@@ -94,7 +93,7 @@ const DashboardMain = () => {
 
         const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
-          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
+          BRIDGE: { label: "Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
         };
 
@@ -128,7 +127,7 @@ const DashboardMain = () => {
 
         const evaluatedMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
-          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
+          BRIDGE: { label: "Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
         };
 
@@ -203,7 +202,7 @@ const DashboardMain = () => {
                         icon: <LuConstruction />,
                       },
                       {
-                        label: "PC Bridge",
+                        label: "Bridge",
                         value: structureCards[2]?.value,
                         icon: <FaBridge />,
                       },
@@ -230,7 +229,7 @@ const DashboardMain = () => {
                         icon: <LuConstruction />,
                       },
                       {
-                        label: "PC Bridge",
+                        label: "Bridge",
                         value: inspectedCards[1]?.value,
                         icon: <FaBridge />,
                       },
@@ -257,7 +256,7 @@ const DashboardMain = () => {
                         icon: <LuConstruction />,
                       },
                       {
-                        label: "PC Bridge",
+                        label: "Bridge",
                         value: evaluatedCards[1]?.value,
                         icon: <FaBridge />,
                       },
@@ -294,24 +293,6 @@ const DashboardMain = () => {
           <div className="col-md-12">
             {/* Navigation Buttons */}
             <div className="flex justify-start pb-0 gap-2 w-75">
-              {/* <button
-                    onClick={() => setActiveView("map")}
-                    className={`px-12 py-2 text-lg font-semibold rounded-0 ${
-                        activeView === "map" ? "bg-[#005D7F] text-white" : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
-                    }`}
-                >
-                  Map View Analysis
-                </button> */}
-              <button
-                onClick={() => setActiveView("graph")}
-                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
-                  activeView === "graph"
-                    ? "bg-[#005D7F] text-white"
-                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
-                }`}
-              >
-                Graph View Analysis
-              </button>
               <button
                 onClick={() => setActiveView("inventory")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
@@ -322,22 +303,30 @@ const DashboardMain = () => {
               >
                 Inventory
               </button>
-              <button
-                onClick={() => setActiveView("inspections")}
-                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
-                  activeView === "inspections"
+                   <button
+                onClick={() => setActiveView("priortization")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "priortization"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
                 }`}
               >
-                Inspections
+                Priortization
+              </button>
+                   <button
+                onClick={() => setActiveView("cost")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "cost"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Cost
               </button>
             </div>
 
             {/* Content Container */}
             <div className="mt-0">
-              {/* {activeView === "map" && <Map districtId={districtId}/>} */}
-              {activeView === "graph" && <Graph />}
               {activeView === "inventory" && (
                 <BridgesListDashboard
                   districtId={districtId}
@@ -360,12 +349,14 @@ const DashboardMain = () => {
                   setSpanLength={setSpanLength}
                 />
               )}
-              {activeView === "inspections" && (
-                <CheckingTable
-                  districtId={districtId}
-                  bridgeName={bridgeName}
-                />
-              )}
+              {
+                activeView === "priortization" && (
+                  <PriotizationTable />
+                )}
+                {
+                activeView === "cost" && (
+                  <CostEstimation />
+                )}
             </div>
           </div>
         </div>
