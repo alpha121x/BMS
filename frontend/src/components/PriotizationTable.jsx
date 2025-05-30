@@ -18,7 +18,6 @@ import PrioritizationMap from "./PriortizationMap";
 import Header from "./Header";
 import Footer from "./Footer";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import "../index.css";
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
