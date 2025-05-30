@@ -234,7 +234,7 @@ const PrioritizationTable = ({ districtId }) => {
 
     const chartData = bridgeScoreData
       .map((row) => ({
-        name: row.category,
+        name: `${row.category} (${categoryRanges[row.category]})`,
         y: Object.values(row)
           .slice(1)
           .reduce((sum, val) => sum + (val === "N.A" ? 0 : parseInt(val)), 0),
@@ -391,7 +391,7 @@ const PrioritizationTable = ({ districtId }) => {
         (bridge) => bridge.category === category
       );
       setModalData(filteredBridges);
-      setSelectedTitle(`${category} - ${group}`);
+      setSelectedTitle(`${category} (${categoryRanges[category]}) - ${group}`);
       setShowModal(true);
     }
   };
@@ -462,6 +462,21 @@ const PrioritizationTable = ({ districtId }) => {
     },
   };
 
+  // Define category descriptions (optional)
+  const categoryDescriptions = {
+    Good: "Structures in good condition with minimal damage.",
+    Fair: "Structures with moderate damage, still functional.",
+    Poor: "Structures with significant damage, may need repairs.",
+    Severe: "Structures with critical damage, urgent repairs needed.",
+  };
+
+  const categoryRanges = {
+    Good: "~200",
+    Fair: "~500",
+    Poor: "~1000",
+    Severe: "~10",
+  };
+
   return (
     <>
       {!districtId && <Header />}
@@ -511,7 +526,23 @@ const PrioritizationTable = ({ districtId }) => {
                     <tbody>
                       {bridgeScoreData.map((row, rowIndex) => (
                         <tr key={rowIndex}>
-                          <td className="text-center">{row.category}</td>
+                          <td className="text-center">
+                            <OverlayTrigger
+                              placement="top"
+                              overlay={
+                                <Tooltip>
+                                  {row.category} ({categoryRanges[row.category]}
+                                  )
+                                  <br />
+                                  {categoryDescriptions[row.category]}
+                                </Tooltip>
+                              }
+                            >
+                              <span>
+                                {row.category} ({categoryRanges[row.category]})
+                              </span>
+                            </OverlayTrigger>
+                          </td>
                           {[
                             "Critical Structures",
                             "High-Value Structures",
