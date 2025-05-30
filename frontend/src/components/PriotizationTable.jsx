@@ -387,9 +387,9 @@ const PrioritizationTable = ({ districtId }) => {
   // Handle cell click to show bridge details in modal
   const handleCellClick = (category, group) => {
     if (bridgeDetails[group] && bridgeDetails[group].length > 0) {
-      const filteredBridges = bridgeDetails[group].filter(
-        (bridge) => bridge.category === category
-      );
+      const filteredBridges = bridgeDetails[group]
+        .filter((bridge) => bridge.category === category)
+        .sort((a, b) => b.score - a.score); // Sort by score descending
       setModalData(filteredBridges);
       setSelectedTitle(`${category} (${categoryRanges[category]}) - ${group}`);
       setShowModal(true);
@@ -426,17 +426,19 @@ const PrioritizationTable = ({ districtId }) => {
   };
 
   // Filter data based on search term
-  const filteredData = filteredBridgeDetails().filter((row) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      (row.district || "").toLowerCase().includes(searchLower) ||
-      (row.roadName || "").toLowerCase().includes(searchLower) ||
-      (row.structureType || "").toLowerCase().includes(searchLower) ||
-      (row.name || "").toLowerCase().includes(searchLower) ||
-      (row.dateTime || "").toLowerCase().includes(searchLower) ||
-      (row.score || "").toString().toLowerCase().includes(searchLower) // Add score to search
-    );
-  });
+  const filteredData = filteredBridgeDetails()
+    .filter((row) => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        (row.district || "").toLowerCase().includes(searchLower) ||
+        (row.roadName || "").toLowerCase().includes(searchLower) ||
+        (row.structureType || "").toLowerCase().includes(searchLower) ||
+        (row.name || "").toLowerCase().includes(searchLower) ||
+        (row.dateTime || "").toLowerCase().includes(searchLower) ||
+        (row.score || "").toString().toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => b.score - a.score); // Sort by score descending
 
   // Define group metadata
   const groupMetadata = {
@@ -474,7 +476,7 @@ const PrioritizationTable = ({ districtId }) => {
     Good: "~200",
     Fair: "~500",
     Poor: "~1000",
-    Severe: "~10",
+    Severe: "~1001",
   };
 
   return (
@@ -693,6 +695,8 @@ const PrioritizationTable = ({ districtId }) => {
                             <span className="visually-hidden">Loading...</span>
                           </div>
                         }
+                        defaultSortFieldId="score" // Set default sort field
+                        defaultSortAsc={false} // Sort descending by default
                       />
                     </>
                   )}
