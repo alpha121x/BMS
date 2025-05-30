@@ -257,6 +257,7 @@ app.get('/api/bms-matrix', async (req, res) => {
         structure_no, 
         date_time, 
         damagecategory,
+        damagescore,
         category
       FROM bms.tbl_bms_matrix
       WHERE category IS NOT NULL AND category != ''

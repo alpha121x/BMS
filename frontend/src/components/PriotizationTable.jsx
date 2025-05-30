@@ -65,7 +65,7 @@ const StyledDataTable = styled(DataTable)`
   }
 `;
 
-const PrioritizationTable = ({districtId}) => {
+const PrioritizationTable = ({ districtId }) => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [bridgeDetails, setBridgeDetails] = useState({});
   const [loading, setLoading] = useState(true);
@@ -104,6 +104,11 @@ const PrioritizationTable = ({districtId}) => {
     {
       name: "Bridge Name",
       selector: (row) => row.name,
+      sortable: true,
+    },
+    {
+      name: "Damage Score",
+      selector: (row) => row.score, // Update to use `score` instead of `damagescore`
       sortable: true,
     },
     {
@@ -191,6 +196,7 @@ const PrioritizationTable = ({districtId}) => {
               name: item.structure_no,
               dateTime: excelSerialToDate(parseFloat(item.date_time)),
               category: item.damagecategory,
+              score: item.damagescore,
             });
           }
         });
@@ -405,13 +411,14 @@ const PrioritizationTable = ({districtId}) => {
       (row.roadName || "").toLowerCase().includes(searchLower) ||
       (row.structureType || "").toLowerCase().includes(searchLower) ||
       (row.name || "").toLowerCase().includes(searchLower) ||
-      (row.dateTime || "").toLowerCase().includes(searchLower)
+      (row.dateTime || "").toLowerCase().includes(searchLower) ||
+      (row.score || "").toString().toLowerCase().includes(searchLower) // Add score to search
     );
   });
 
   return (
     <>
-   { !districtId && <Header /> }
+      {!districtId && <Header />}
       <Container fluid className="py-2 bg-light mt-[55px]">
         <Row className="justify-content-center">
           <Col md={8}>
@@ -502,6 +509,7 @@ const PrioritizationTable = ({districtId}) => {
                     <th>Road Name</th>
                     <th>Structure Type</th>
                     <th>Bridge Name</th>
+                    <th>Damage Score</th> {/* Add new column */}
                     <th>Date Time</th>
                   </tr>
                 </thead>
@@ -512,6 +520,7 @@ const PrioritizationTable = ({districtId}) => {
                       <td>{bridge.roadName}</td>
                       <td>{bridge.structureType}</td>
                       <td>{bridge.name}</td>
+                      <td>{bridge.score}</td> {/* Display damagescore */}
                       <td>{bridge.dateTime}</td>
                     </tr>
                   ))}
@@ -599,7 +608,7 @@ const PrioritizationTable = ({districtId}) => {
           </Row>
         </Container>
       </Container>
-   { !districtId && <Footer /> }
+      {!districtId && <Footer />}
     </>
   );
 };
