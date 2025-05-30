@@ -427,18 +427,18 @@ const PrioritizationTable = ({ districtId }) => {
 
   // Filter data based on search term
   const filteredData = filteredBridgeDetails()
-    .filter((row) => {
-      const searchLower = searchTerm.toLowerCase();
-      return (
-        (row.district || "").toLowerCase().includes(searchLower) ||
-        (row.roadName || "").toLowerCase().includes(searchLower) ||
-        (row.structureType || "").toLowerCase().includes(searchLower) ||
-        (row.name || "").toLowerCase().includes(searchLower) ||
-        (row.dateTime || "").toLowerCase().includes(searchLower) ||
-        (row.score || "").toString().toLowerCase().includes(searchLower)
-      );
-    })
-    .sort((a, b) => b.score - a.score); // Sort by score descending
+        .filter((row) => {
+          const searchLower = searchTerm.toLowerCase();
+          return (
+            (row.district || "").toLowerCase().includes(searchLower) ||
+            (row.roadName || "").toLowerCase().includes(searchLower) ||
+            (row.structureType || "").toLowerCase().includes(searchLower) ||
+            (row.name || "").toLowerCase().includes(searchLower) ||
+            (row.dateTime || "").toLowerCase().includes(searchLower) ||
+            (row.score || "").toString().toLowerCase().includes(searchLower)
+          );
+        })
+  .sort((a, b) => b.score - a.score); // Sort by score descending
 
   // Define group metadata
   const groupMetadata = {
