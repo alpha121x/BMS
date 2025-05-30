@@ -351,7 +351,9 @@ const DashboardMain = () => {
               )}
               {
                 activeView === "priortization" && (
-                  <PriotizationTable />
+                  <PriotizationTable
+                  districtId={districtId}
+                  />
                 )}
                 {
                 activeView === "cost" && (

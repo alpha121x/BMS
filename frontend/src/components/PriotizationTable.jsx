@@ -15,6 +15,8 @@ import DataTable from "react-data-table-component";
 import styled from "styled-components";
 import { BASE_URL } from "./config";
 import PrioritizationMap from "./PriortizationMap";
+import Header from "./Header";
+import Footer from "./Footer";
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -63,7 +65,7 @@ const StyledDataTable = styled(DataTable)`
   }
 `;
 
-const PrioritizationTable = () => {
+const PrioritizationTable = ({districtId}) => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [bridgeDetails, setBridgeDetails] = useState({});
   const [loading, setLoading] = useState(true);
@@ -409,6 +411,7 @@ const PrioritizationTable = () => {
 
   return (
     <>
+   { !districtId && <Header /> }
       <Container fluid className="py-2 bg-light mt-[55px]">
         <Row className="justify-content-center">
           <Col md={8}>
@@ -596,6 +599,7 @@ const PrioritizationTable = () => {
           </Row>
         </Container>
       </Container>
+   { !districtId && <Footer /> }
     </>
   );
 };
