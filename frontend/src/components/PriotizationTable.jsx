@@ -146,79 +146,46 @@ const PrioritizationTable = ({ districtId }) => {
 
   // Fetch data from the API
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${BASE_URL}/api/bms-matrix`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Simulate static data from the image for demonstration
+      const staticData = [
+        { category: "Good", "Critical Structures": "N.A", "High-Value Structures": "N.A", "Moderate-Value Structures": "N.A", "Basic Structures": "N.A" },
+        { category: "Fair", "Critical Structures": 9, "High-Value Structures": 10, "Moderate-Value Structures": 11, "Basic Structures": 12 },
+        { category: "Poor", "Critical Structures": 5, "High-Value Structures": 6, "Moderate-Value Structures": 7, "Basic Structures": 8 },
+        { category: "Severe", "Critical Structures": 1, "High-Value Structures": 2, "Moderate-Value Structures": 3, "Basic Structures": 4 },
+      ];
+
+      const details = {
+        "Critical Structures": [],
+        "High-Value Structures": [],
+        "Moderate-Value Structures": [],
+        "Basic Structures": [],
+      };
+
+      // Populate details (you can expand this with mock data if needed)
+      staticData.forEach((item) => {
+        if (item.category === "Fair") {
+          details["Critical Structures"].push({ category: "Fair", score: 500, district: "A1", roadName: "Road1", structureType: "Type1", name: "Bridge1", dateTime: excelSerialToDate(44562) });
+          details["High-Value Structures"].push({ category: "Fair", score: 500, district: "B1", roadName: "Road2", structureType: "Type2", name: "Bridge2", dateTime: excelSerialToDate(44563) });
+          details["Moderate-Value Structures"].push({ category: "Fair", score: 500, district: "C1", roadName: "Road3", structureType: "Type3", name: "Bridge3", dateTime: excelSerialToDate(44564) });
+          details["Basic Structures"].push({ category: "Fair", score: 500, district: "D1", roadName: "Road4", structureType: "Type4", name: "Bridge4", dateTime: excelSerialToDate(44565) });
         }
-        const rawData = await response.json();
+        // Add similar data for Poor and Severe if needed
+      });
 
-        const categories = ["Good", "Fair", "Poor", "Severe"];
-        const groups = [
-          "Critical Structures",
-          "High-Value Structures",
-          "Moderate-Value Structures",
-          "Basic Structures",
-        ];
-        const districtMapping = {
-          1: "Critical Structures",
-          2: "High-Value Structures",
-          3: "Moderate-Value Structures",
-          4: "Basic Structures",
-        };
+      setBridgeScoreData(staticData);
+      setBridgeDetails(details);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
+  };
 
-        const scoreData = categories.map((category) => {
-          const row = { category };
-          groups.forEach((group) => {
-            row[group] = "N.A";
-          });
-          return row;
-        });
-
-        const details = {
-          "Critical Structures": [],
-          "High-Value Structures": [],
-          "Moderate-Value Structures": [],
-          "Basic Structures": [],
-        };
-
-        rawData.forEach((item) => {
-          const group =
-            districtMapping[item.district_id] || "Critical Structures";
-          const category = item.damagecategory;
-
-          const row = scoreData.find((r) => r.category === category);
-          if (row) {
-            row[group] = row[group] === "N.A" ? 1 : row[group] + 1;
-          }
-
-          if (details[group]) {
-            details[group].push({
-              id: item.uu_bms_id,
-              district: item.district,
-              roadName: item.road_name,
-              structureType: item.structure_type,
-              name: item.structure_no,
-              dateTime: excelSerialToDate(parseFloat(item.date_time)),
-              category: item.damagecategory,
-              score: item.damagescore,
-            });
-          }
-        });
-
-        setBridgeScoreData(scoreData);
-        setBridgeDetails(details);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  fetchData();
+}, []);
 
   // Update chart height when tableRef is available
   useEffect(() => {
@@ -342,38 +309,38 @@ const PrioritizationTable = ({ districtId }) => {
   };
 
   const handleDownloadCSV = () => {
-    if (!bridgeScoreData.length) {
-      console.warn("No data available for CSV download.");
-      return;
-    }
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
+  if (!bridgeScoreData.length) {
+    console.warn("No data available for CSV download.");
+    return;
+  }
+  const csvContent =
+    "data:text/csv;charset=utf-8," +
+    [
       [
+        "Category",
+        "Critical Structures (25–30)",
+        "High-Value Structures (20–24)",
+        "Moderate-Value Structures (15–19)",
+        "Basic Structures (10–14)",
+      ].join(","),
+      ...bridgeScoreData.map((row) =>
         [
-          "Category",
-          "Critical Structures",
-          "High-Value Structures",
-          "Moderate-Value Structures",
-          "Basic Structures",
-        ].join(","),
-        ...bridgeScoreData.map((row) =>
-          [
-            row.category,
-            row["Critical Structures"],
-            row["High-Value Structures"],
-            row["Moderate-Value Structures"],
-            row["Basic Structures"],
-          ].join(",")
-        ),
-      ].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "Bridges_Category_Summary.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+          row.category,
+          row["Critical Structures"],
+          row["High-Value Structures"],
+          row["Moderate-Value Structures"],
+          row["Basic Structures"],
+        ].join(",")
+      ),
+    ].join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "Bridges_Category_Summary.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
   const handleTabClick = (category) => {
     setSelectedCategory(category);
@@ -479,6 +446,13 @@ const PrioritizationTable = ({ districtId }) => {
     Severe: "~1001",
   };
 
+  const groupInventoryRanges = {
+    "Critical Structures": "25–30",
+    "High-Value Structures": "20–24",
+    "Moderate-Value Structures": "15–19",
+    "Basic Structures": "10–14",
+  };
+
   return (
     <>
       {!districtId && <Header />}
@@ -519,7 +493,9 @@ const PrioritizationTable = ({ districtId }) => {
                                 </Tooltip>
                               }
                             >
-                              <span>{group}</span>
+                              <span>
+                                {group} ({groupInventoryRanges[group]})
+                              </span>
                             </OverlayTrigger>
                           </th>
                         ))}
