@@ -17,6 +17,7 @@ import { BASE_URL } from "./config";
 import PrioritizationMap from "./PriortizationMap";
 import Header from "./Header";
 import Footer from "./Footer";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -155,12 +156,17 @@ const PrioritizationTable = ({ districtId }) => {
         const rawData = await response.json();
 
         const categories = ["Good", "Fair", "Poor", "Severe"];
-        const groups = ["GroupA", "GroupB", "GroupC", "GroupD"];
+        const groups = [
+          "Critical Structures",
+          "High-Value Structures",
+          "Moderate-Value Structures",
+          "Basic Structures",
+        ];
         const districtMapping = {
-          1: "GroupA",
-          2: "GroupB",
-          3: "GroupC",
-          4: "GroupD",
+          1: "Critical Structures",
+          2: "High-Value Structures",
+          3: "Moderate-Value Structures",
+          4: "Basic Structures",
         };
 
         const scoreData = categories.map((category) => {
@@ -172,14 +178,15 @@ const PrioritizationTable = ({ districtId }) => {
         });
 
         const details = {
-          GroupA: [],
-          GroupB: [],
-          GroupC: [],
-          GroupD: [],
+          "Critical Structures": [],
+          "High-Value Structures": [],
+          "Moderate-Value Structures": [],
+          "Basic Structures": [],
         };
 
         rawData.forEach((item) => {
-          const group = districtMapping[item.district_id] || "GroupA";
+          const group =
+            districtMapping[item.district_id] || "Critical Structures";
           const category = item.damagecategory;
 
           const row = scoreData.find((r) => r.category === category);
@@ -342,11 +349,21 @@ const PrioritizationTable = ({ districtId }) => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [
-        ["Category", "Group A", "Group B", "Group C", "Group D"].join(","),
+        [
+          "Category",
+          "Critical Structures",
+          "High-Value Structures",
+          "Moderate-Value Structures",
+          "Basic Structures",
+        ].join(","),
         ...bridgeScoreData.map((row) =>
-          [row.category, row.GroupA, row.GroupB, row.GroupC, row.GroupD].join(
-            ","
-          )
+          [
+            row.category,
+            row["Critical Structures"],
+            row["High-Value Structures"],
+            row["Moderate-Value Structures"],
+            row["Basic Structures"],
+          ].join(",")
         ),
       ].join("\n");
     const encodedUri = encodeURI(csvContent);
@@ -384,7 +401,12 @@ const PrioritizationTable = ({ districtId }) => {
       (row) => row.category === selectedCategory
     );
     if (!selectedRow) return [];
-    const groups = ["GroupA", "GroupB", "GroupC", "GroupD"];
+    const groups = [
+      "Critical Structures",
+      "High-Value Structures",
+      "Moderate-Value Structures",
+      "Basic Structures",
+    ];
     const details = [];
     groups.forEach((group) => {
       if (selectedRow[group] !== "N.A") {
@@ -416,6 +438,30 @@ const PrioritizationTable = ({ districtId }) => {
     );
   });
 
+  // Define group metadata
+  const groupMetadata = {
+    "Critical Structures": {
+      scoreRange: "25–30",
+      description:
+        "Highly important infrastructure critical for connectivity, safety, or economic activity.",
+    },
+    "High-Value Structures": {
+      scoreRange: "20–24",
+      description:
+        "Important structures that support significant traffic or strategic routes.",
+    },
+    "Moderate-Value Structures": {
+      scoreRange: "15–19",
+      description:
+        "Moderately important structures with secondary significance, mainly on less critical routes.",
+    },
+    "Basic Structures": {
+      scoreRange: "10–14",
+      description:
+        "Low-priority structures, typically with minimal impact on the overall network.",
+    },
+  };
+
   return (
     <>
       {!districtId && <Header />}
@@ -439,41 +485,59 @@ const PrioritizationTable = ({ districtId }) => {
                     <thead>
                       <tr>
                         <th className="text-center">Category</th>
-                        <th className="text-center">Group A</th>
-                        <th className="text-center">Group B</th>
-                        <th className="text-center">Group C</th>
-                        <th className="text-center">Group D</th>
+                        {[
+                          "Critical Structures",
+                          "High-Value Structures",
+                          "Moderate-Value Structures",
+                          "Basic Structures",
+                        ].map((group) => (
+                          <th key={group} className="text-center">
+                            <OverlayTrigger
+                              placement="top"
+                              overlay={
+                                <Tooltip>
+                                  {group}: {groupMetadata[group].scoreRange}
+                                  <br />
+                                  {groupMetadata[group].description}
+                                </Tooltip>
+                              }
+                            >
+                              <span>{group}</span>
+                            </OverlayTrigger>
+                          </th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       {bridgeScoreData.map((row, rowIndex) => (
                         <tr key={rowIndex}>
                           <td className="text-center">{row.category}</td>
-                          {["GroupA", "GroupB", "GroupC", "GroupD"].map(
-                            (group, groupIndex) => (
-                              <td
-                                key={group}
-                                className="text-center"
-                                style={{
-                                  backgroundColor: getCellColor(
-                                    row.category,
-                                    row[group],
-                                    groupIndex
-                                  ),
-                                  cursor:
-                                    row[group] !== "N.A"
-                                      ? "pointer"
-                                      : "default",
-                                }}
-                                onClick={() =>
-                                  row[group] !== "N.A" &&
-                                  handleCellClick(row.category, group)
-                                }
-                              >
-                                {row[group]}
-                              </td>
-                            )
-                          )}
+                          {[
+                            "Critical Structures",
+                            "High-Value Structures",
+                            "Moderate-Value Structures",
+                            "Basic Structures",
+                          ].map((group, groupIndex) => (
+                            <td
+                              key={group}
+                              className="text-center"
+                              style={{
+                                backgroundColor: getCellColor(
+                                  row.category,
+                                  row[group],
+                                  groupIndex
+                                ),
+                                cursor:
+                                  row[group] !== "N.A" ? "pointer" : "default",
+                              }}
+                              onClick={() =>
+                                row[group] !== "N.A" &&
+                                handleCellClick(row.category, group)
+                              }
+                            >
+                              {row[group]}
+                            </td>
+                          ))}
                         </tr>
                       ))}
                     </tbody>
