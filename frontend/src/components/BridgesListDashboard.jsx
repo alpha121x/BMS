@@ -47,7 +47,7 @@ const BridgesListDashboard = ({
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
-  const [viewMode, setViewMode] = useState('map'); // New state for view mode
+  const [viewMode, setViewMode] = useState("map"); // New state for view mode
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -372,7 +372,10 @@ const BridgesListDashboard = ({
     {
       name: "Action",
       cell: (row) => (
-        <div className="flex space-x-2 justify-center" style={{ minWidth: "240px" }}>
+        <div
+          className="flex space-x-2 justify-center"
+          style={{ minWidth: "240px" }}
+        >
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -461,28 +464,28 @@ const BridgesListDashboard = ({
         <div className="flex gap-2">
           <button
             className={`px-3 py-1 rounded ${
-              viewMode === 'map' ? 'bg-[#005D7F] text-white' : 'bg-gray-200'
+              viewMode === "map" ? "bg-[#005D7F] text-white" : "bg-gray-200"
             }`}
-            onClick={() => setViewMode('map')}
+            onClick={() => setViewMode("map")}
           >
             Map View
           </button>
           <button
             className={`px-3 py-1 rounded ${
-              viewMode === 'graph' ? 'bg-[#005D7F] text-white' : 'bg-gray-200'
+              viewMode === "graph" ? "bg-[#005D7F] text-white" : "bg-gray-200"
             }`}
-            onClick={() => setViewMode('graph')}
+            onClick={() => setViewMode("graph")}
           >
             Graph View
           </button>
         </div>
       </div>
       <div>
-        {viewMode === 'map' ? (
+        {viewMode === "map" ? (
           <Map districtId={districtId} />
         ) : (
           <div className="p-4 text-center">
-          <Graph />
+            <Graph />
           </div>
         )}
       </div>
