@@ -417,6 +417,42 @@ const InspectionListCon = ({ bridgeId }) => {
     }
   };
 
+  const handleDownloadExcel1 = async (bridgeId, setLoadingExcel) => {
+    setLoadingExcel(true);
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/inspections-export-con-new?bridgeId=${bridgeId}`,
+        { method: "GET" }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch Excel file");
+      }
+
+      const contentDisposition = response.headers.get("Content-Disposition");
+      let bridgeName = "bridge_inspection";
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+?)"/);
+        if (match) bridgeName = match[1].replace(".xlsx", "");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${bridgeName.replace(/\s+/g, "_")}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading Excel:", error);
+      Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+    } finally {
+      setLoadingExcel(false);
+    }
+  };
+
   const getDamageLevel = (data) => {
     const damageLevels = [...new Set(data.map((item) => item.DamageLevel))];
     return damageLevels.join(", ");

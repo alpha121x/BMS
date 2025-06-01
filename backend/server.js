@@ -2,6 +2,12 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { Pool } = require("pg");
+const ExcelJS = require('exceljs');
+const sharp = require('sharp');
+const axios = require('axios');
+const winston = require('winston');
+const fs = require('fs').promises;
+const path = require('path');
 require("dotenv").config();
 
 const JWT_SECRET = "123456789";
@@ -24,6 +30,19 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
+});
+
+// Configure Winston logger
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: '/error.log' }),
+  ],
 });
 
 // Check Database Connection
@@ -2258,6 +2277,273 @@ app.get("/api/inspections-export-con", async (req, res) => {
       success: false,
       message: "Error fetching data from the database",
     });
+  }
+});
+
+app.get('/api/inspections-export-con-new', async (req, res) => {
+  const { bridgeId } = req.query;
+  const requestId = Date.now(); // Unique ID for tracing this request
+  const startTime = Date.now();
+
+  logger.info(`Starting Excel export for bridgeId: ${bridgeId || 'all'}`, { requestId });
+
+  try {
+    // Build database query
+    let query = `
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "REFERENCE NO",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
+          md.structure_type AS "STRUCTURE TYPE",
+          md.road_no AS "ROAD NO",
+          md.road_name AS "ROAD NAME",
+          md.road_name_cwd AS "ROAD NAME CWD",
+          md.road_code_cwd AS "ROAD CODE CWD",
+          md.route_id AS "ROUTE ID",
+          md.survey_id AS "SURVEY ID",
+          md.surveyor_name AS "SURVEYOR NAME",
+          md.zone AS "ZONE",
+          md.district AS "DISTRICT",
+          md.road_classification AS "ROAD CLASSIFICATION",
+          md.road_surface_type AS "ROAD SURFACE TYPE",
+          md.carriageway_type AS "CARRIAGEWAY TYPE",
+          md.direction AS "DIRECTION",
+          md.visual_condition AS "VISUAL CONDITION",
+          md.construction_type AS "CONSTRUCTION TYPE",
+          md.no_of_span AS "NO OF SPANS",
+          md.span_length_m AS "SPAN LENGTH (M)",
+          md.structure_width_m AS "STRUCTURE WIDTH (M)",
+          md.construction_year AS "CONSTRUCTION YEAR",
+          md.last_maintenance_date AS "LAST MAINTENANCE DATE",
+          md.data_source AS "DATA SOURCE",
+          md.date_time AS "DATE TIME",
+          md.remarks AS "REMARKS",
+          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+          f.surveyed_by AS "SURVEYED BY",
+          f."SpanIndex" AS "SPAN INDEX",
+          f."WorkKindName" AS "WORK KIND NAME",
+          f."PartsName" AS "PARTS NAME",
+          f."MaterialName" AS "MATERIAL NAME",
+          f."DamageKindName" AS "DAMAGE KIND NAME",
+          f."DamageLevel" AS "DAMAGE LEVEL",
+          f.damage_extent AS "DAMAGE EXTENT",
+          f."Remarks" AS "INSPECTION REMARKS",
+          f.current_date_time AS "INSPECTION DATE",
+          f.qc_con AS "qc_con",
+          COALESCE(f.inspection_images, '[]') AS "PhotoPaths",
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time ASC) AS "RN"
+        FROM bms.tbl_bms_master_data md
+        LEFT JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id
+        WHERE f.surveyed_by = 'RAMS-UU'
+      )
+      SELECT * FROM ranked_data WHERE 1=1
+    `;
+
+    const queryParams = [];
+    if (bridgeId && bridgeId.trim() !== '') {
+      query += ` AND "REFERENCE NO" = $1`;
+      queryParams.push(bridgeId.trim());
+    }
+
+    // Execute database query
+    let result;
+    try {
+      result = await pool.query(query, queryParams);
+      logger.info(`Database query completed. Rows fetched: ${result.rows.length}`, { requestId });
+    } catch (dbError) {
+      logger.error('Database query failed', { requestId, error: dbError.message });
+      return res.status(500).json({ success: false, message: 'Database query failed' });
+    }
+
+    if (!result.rows || result.rows.length === 0) {
+      logger.warn('No data available for export', { requestId, bridgeId });
+      return res.status(400).json({ success: false, message: 'No data available for export' });
+    }
+
+    // Process data
+    let firstRow = true;
+    const summaryData = result.rows.map((row, index) => {
+      try {
+        // Convert qc_con to readable status
+        let status = 'Unknown';
+        switch (row.qc_con) {
+          case 1:
+            status = 'Pending';
+            break;
+          case 2:
+            status = 'Approved';
+            break;
+          case 3:
+            status = 'Unapproved';
+            break;
+        }
+        row['Consultant Status'] = status;
+        delete row.qc_con;
+
+        // Handle image URLs
+        row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
+
+        // Clear Overview Photos for non-first rows
+        if (!firstRow) {
+          row['Overview Photos'] = [];
+        }
+        firstRow = false;
+
+        return row;
+      } catch (error) {
+        logger.error(`Error processing row ${index}`, { requestId, error: error.message });
+        return row; // Continue with row even if processing fails
+      }
+    });
+
+    const bridgeName = summaryData[0]?.['BRIDGE NAME'] || 'bridge_inspection';
+    logger.info(`Generating Excel for bridge: ${bridgeName}`, { requestId });
+
+    // Create Excel workbook and worksheet
+    let workbook;
+    try {
+      workbook = new ExcelJS.Workbook();
+    } catch (error) {
+      logger.error('Failed to create Excel workbook', { requestId, error: error.message });
+      return res.status(500).json({ success: false, message: 'Failed to create Excel file' });
+    }
+
+    const worksheet = workbook.addWorksheet('Inspections');
+
+    // Define columns
+    const columnKeys = Object.keys(summaryData[0]).filter(
+      (key) =>
+        key !== 'Overview Photos' &&
+        key !== 'PhotoPaths' &&
+        key !== 'RN' &&
+        key !== 'qc_rams' &&
+        key !== 'SURVEYED BY'
+    );
+
+    const columns = columnKeys.map((key) => ({
+      header: key.replace(/_/g, ' '),
+      key,
+      width: 22,
+    }));
+
+    for (let i = 1; i <= 3; i++) {
+      columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 22 });
+      columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 22 });
+    }
+
+    try {
+      worksheet.columns = columns;
+      worksheet.getRow(1).font = { bold: true, size: 14 };
+      worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+      worksheet.getRow(1).height = 25;
+    } catch (error) {
+      logger.error('Failed to configure worksheet', { requestId, error: error.message });
+      return res.status(500).json({ success: false, message: 'Failed to configure Excel worksheet' });
+    }
+
+    // Compress image helper function
+    const compressImage = async (imagePathOrUrl, rowIndex, imageType, imageIndex) => {
+      try {
+        let buffer;
+        if (imagePathOrUrl.startsWith('http')) {
+          // Fetch remote image
+          const response = await axios.get(imagePathOrUrl, { responseType: 'arraybuffer' });
+          buffer = Buffer.from(response.data);
+          logger.debug(`Fetched image: ${imagePathOrUrl}`, { requestId, rowIndex, imageType, imageIndex });
+        } else {
+          // Assume local file path (adjust base path as needed)
+          const imagePath = path.join(__dirname, 'path/to/images', imagePathOrUrl);
+          buffer = await fs.readFile(imagePath);
+          logger.debug(`Read local image: ${imagePath}`, { requestId, rowIndex, imageType, imageIndex });
+        }
+
+        // Compress and resize with sharp
+        const compressedBuffer = await sharp(buffer)
+          .resize({ width: 150, height: 90, fit: 'fill' })
+          .jpeg({ quality: 60 })
+          .toBuffer();
+        logger.debug(`Compressed image: ${imagePathOrUrl}`, { requestId, rowIndex, imageType, imageIndex });
+        return compressedBuffer;
+      } catch (error) {
+        logger.error(`Failed to process image: ${imagePathOrUrl}`, {
+          requestId,
+          rowIndex,
+          imageType,
+          imageIndex,
+          error: error.message,
+        });
+        return null;
+      }
+    };
+
+    // Process images for a set of URLs
+    const processImages = async (photoUrls, columnOffset, rowIndex, imageType) => {
+      try {
+        const compressedBuffers = await Promise.all(
+          photoUrls.map((url, index) => compressImage(url.replace(/\\/g, '/'), rowIndex, imageType, index + 1))
+        );
+
+        for (let j = 0; j < compressedBuffers.length; j++) {
+          if (!compressedBuffers[j]) continue;
+          const imageId = workbook.addImage({
+            buffer: compressedBuffers[j],
+            extension: 'jpeg',
+          });
+          worksheet.addImage(imageId, {
+            tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 },
+            ext: { width: 150, height: 90 },
+          });
+          logger.debug(`Added image to worksheet: ${photoUrls[j]}`, { requestId, rowIndex, imageType, imageIndex: j + 1 });
+        }
+      } catch (error) {
+        logger.error(`Error processing images for ${imageType}`, {
+          requestId,
+          rowIndex,
+          error: error.message,
+        });
+      }
+    };
+
+    // Process each row
+    for (let i = 0; i < summaryData.length; i++) {
+      try {
+        const item = summaryData[i];
+        const overviewPhotos = (item['Overview Photos'] || []).slice(0, 3);
+        const inspectionPhotos = (item['PhotoPaths'] || []).slice(0, 3);
+
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ''));
+
+        const rowIndex = worksheet.addRow(rowData).number;
+        worksheet.getRow(rowIndex).height = 90;
+
+        await Promise.all([
+          processImages(overviewPhotos, 0, rowIndex, 'Overview Photo'),
+          processImages(inspectionPhotos, 3, rowIndex, 'Inspection Photo'),
+        ]);
+
+        logger.info(`Processed row ${i + 1}/${summaryData.length}`, { requestId, rowIndex });
+      } catch (error) {
+        logger.error(`Error processing row ${i + 1}`, { requestId, error: error.message });
+        continue; // Skip to next row on error
+      }
+    }
+
+    // Stream the Excel file
+    try {
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename=${bridgeName.replace(/\s+/g, '_')}.xlsx`);
+      await workbook.xlsx.write(res);
+      logger.info(`Excel file streamed successfully. Time taken: ${Date.now() - startTime}ms`, { requestId });
+    } catch (error) {
+      logger.error('Failed to stream Excel file', { requestId, error: error.message });
+      return res.status(500).json({ success: false, message: 'Failed to stream Excel file' });
+    }
+
+    res.end();
+  } catch (error) {
+    logger.error('Unexpected error in Excel export', { requestId, error: error.message });
+    return res.status(500).json({ success: false, message: 'Unexpected error during Excel generation' });
   }
 });
 
