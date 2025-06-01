@@ -15,6 +15,7 @@ import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import ReportsSummary from "./ReportsSummary";
+import Compressor from "compressorjs";
 
 const InspectionListCon = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
@@ -68,7 +69,9 @@ const InspectionListCon = ({ bridgeId }) => {
         setPendingData(groupBySpanAndWorkKind(result.data.pending));
         setApprovedData(groupBySpanAndWorkKind(result.data.approved));
         setUnapprovedData(groupBySpanAndWorkKind(result.data.unapproved));
-        setUnapprovedRamsData(groupBySpanAndWorkKind(result.data.unapproved_rams));
+        setUnapprovedRamsData(
+          groupBySpanAndWorkKind(result.data.unapproved_rams)
+        );
       } else {
         throw new Error("Invalid data format");
       }
@@ -193,7 +196,12 @@ const InspectionListCon = ({ bridgeId }) => {
     }));
   };
 
-  const handleApprovedFlagChange = (spanIndex, workKind, inspectionId, value) => {
+  const handleApprovedFlagChange = (
+    spanIndex,
+    workKind,
+    inspectionId,
+    value
+  ) => {
     setPendingData((prevData) => ({
       ...prevData,
       [spanIndex]: {
@@ -304,18 +312,17 @@ const InspectionListCon = ({ bridgeId }) => {
 
       const columns = columnKeys.map((key) => ({
         header: key.replace(/_/g, " "),
-        key: key,
+        key,
         width: 22,
       }));
 
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 3; i++) {
+        // Reduced to 3 images per type
         columns.push({
           header: `Overview Photo ${i}`,
           key: `photo${i}`,
           width: 22,
         });
-      }
-      for (let i = 1; i <= 5; i++) {
         columns.push({
           header: `Inspection Photo ${i}`,
           key: `inspection${i}`,
@@ -324,7 +331,6 @@ const InspectionListCon = ({ bridgeId }) => {
       }
 
       worksheet.columns = columns;
-
       worksheet.getRow(1).font = { bold: true, size: 14 };
       worksheet.getRow(1).alignment = {
         vertical: "middle",
@@ -332,50 +338,73 @@ const InspectionListCon = ({ bridgeId }) => {
       };
       worksheet.getRow(1).height = 25;
 
+      // Compress image helper function
+      const compressImage = (blob) =>
+        new Promise((resolve, reject) => {
+          new Compressor(blob, {
+            quality: 0.6, // Adjust quality (0 to 1) for compression
+            maxWidth: 150, // Match Excel image width
+            maxHeight: 90, // Match Excel image height
+            mimeType: "image/jpeg",
+            success: (compressedBlob) => resolve(compressedBlob),
+            error: (err) => reject(err),
+          });
+        });
+
+      // Fetch and compress images concurrently
+      const fetchAndCompressImage = async (url) => {
+        try {
+          const imgResponse = await fetch(url.replace(/\\/g, "/"));
+          if (!imgResponse.ok) return null;
+          const imgBlob = await imgResponse.blob();
+          return await compressImage(imgBlob);
+        } catch (error) {
+          console.error("Failed to fetch/compress image:", url, error);
+          return null;
+        }
+      };
+
       for (let i = 0; i < summaryData.length; i++) {
         const item = summaryData[i];
-
-        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
-          url.replace(/\\/g, "/")
-        );
-        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
-          url.replace(/\\/g, "/")
-        );
+        const overviewPhotos = (item["Overview Photos"] || [])
+          .map((url) => url.replace(/\\/g, "/"))
+          .slice(0, 3); // Limit to 3 images
+        const inspectionPhotos = (item["PhotoPaths"] || [])
+          .map((url) => url.replace(/\\/g, "/"))
+          .slice(0, 3); // Limit to 3 images
 
         const rowData = {};
         columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
 
         const rowIndex = worksheet.addRow(rowData).number;
-
         worksheet.getRow(rowIndex).height = 90;
 
-        const insertImage = async (photoUrls, columnOffset, rowHeight) => {
-          for (let j = 0; j < photoUrls.length && j < 5; j++) {
-            try {
-              const imgResponse = await fetch(photoUrls[j]);
-              const imgBlob = await imgResponse.blob();
-              const arrayBuffer = await imgBlob.arrayBuffer();
+        const insertImages = async (photoUrls, columnOffset) => {
+          const compressedBlobs = await Promise.all(
+            photoUrls.map((url) => fetchAndCompressImage(url))
+          );
 
-              const imageId = workbook.addImage({
-                buffer: arrayBuffer,
-                extension: "jpeg",
-              });
-
-              worksheet.addImage(imageId, {
-                tl: {
-                  col: columnKeys.length + columnOffset + j,
-                  row: rowIndex - 1,
-                },
-                ext: { width: 150, height: 90 },
-              });
-            } catch (error) {
-              console.error("Failed to load image:", photoUrls[j], error);
-            }
+          for (let j = 0; j < compressedBlobs.length; j++) {
+            if (!compressedBlobs[j]) continue;
+            const arrayBuffer = await compressedBlobs[j].arrayBuffer();
+            const imageId = workbook.addImage({
+              buffer: arrayBuffer,
+              extension: "jpeg",
+            });
+            worksheet.addImage(imageId, {
+              tl: {
+                col: columnKeys.length + columnOffset + j,
+                row: rowIndex - 1,
+              },
+              ext: { width: 150, height: 90 },
+            });
           }
         };
 
-        await insertImage(overviewPhotos, 0, 90);
-        await insertImage(inspectionPhotos, 5, 90);
+        await Promise.all([
+          insertImages(overviewPhotos, 0),
+          insertImages(inspectionPhotos, 3),
+        ]);
       }
 
       const buffer = await workbook.xlsx.writeBuffer();
@@ -589,159 +618,177 @@ const InspectionListCon = ({ bridgeId }) => {
                     {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(pendingData[spanIndex]).length > 0 ? (
-                          Object.keys(pendingData[spanIndex]).map((workKind) => (
-                            <div
-                              key={`workKind-${spanIndex}-${workKind}`}
-                              className="mb-4"
-                            >
-                              <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                                {workKind}
-                              </div>
-                              <div className="mt-2">
-                                {pendingData[spanIndex][workKind].map(
-                                  (inspection) => (
-                                    <div
-                                      key={`inspection-${inspection.inspection_id}`}
-                                      className="border rounded p-4 shadow-sm mb-3"
-                                      style={{ backgroundColor: "#CFE2FF" }}
-                                    >
-                                      <div className="row">
-                                        <div className="col-md-3">
-                                          {inspection.PhotoPaths?.length > 0 && (
-                                            <div
-                                              className="d-flex gap-2"
-                                              style={{
-                                                overflowX: "auto",
-                                                whiteSpace: "nowrap",
-                                                display: "flex",
-                                                paddingBottom: "5px",
-                                              }}
-                                            >
-                                              {inspection.PhotoPaths.map(
-                                                (photoUrl, index) => (
-                                                  <img
-                                                    key={`photo-${inspection.id}-${index}`}
-                                                    src={photoUrl}
-                                                    alt={`Photo ${index + 1}`}
-                                                    className="img-fluid rounded border"
-                                                    style={{
-                                                      width: "80px",
-                                                      height: "80px",
-                                                      objectFit: "cover",
-                                                      cursor: "pointer",
-                                                      flexShrink: 0,
-                                                    }}
-                                                    loading="lazy"
-                                                    onClick={() =>
-                                                      handlePhotoClick(
-                                                        inspection.PhotoPaths,
-                                                        index
-                                                      )
-                                                    }
-                                                    onError={(e) => {
-                                                      e.target.onerror = null;
-                                                      e.target.src =
-                                                        "/placeholder-image.png";
-                                                    }}
-                                                  />
+                          Object.keys(pendingData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {pendingData[spanIndex][workKind].map(
+                                    (inspection) => (
+                                      <div
+                                        key={`inspection-${inspection.inspection_id}`}
+                                        className="border rounded p-4 shadow-sm mb-3"
+                                        style={{ backgroundColor: "#CFE2FF" }}
+                                      >
+                                        <div className="row">
+                                          <div className="col-md-3">
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
+                                              <div
+                                                className="d-flex gap-2"
+                                                style={{
+                                                  overflowX: "auto",
+                                                  whiteSpace: "nowrap",
+                                                  display: "flex",
+                                                  paddingBottom: "5px",
+                                                }}
+                                              >
+                                                {inspection.PhotoPaths.map(
+                                                  (photoUrl, index) => (
+                                                    <img
+                                                      key={`photo-${inspection.id}-${index}`}
+                                                      src={photoUrl}
+                                                      alt={`Photo ${index + 1}`}
+                                                      className="img-fluid rounded border"
+                                                      style={{
+                                                        width: "80px",
+                                                        height: "80px",
+                                                        objectFit: "cover",
+                                                        cursor: "pointer",
+                                                        flexShrink: 0,
+                                                      }}
+                                                      loading="lazy"
+                                                      onClick={() =>
+                                                        handlePhotoClick(
+                                                          inspection.PhotoPaths,
+                                                          index
+                                                        )
+                                                      }
+                                                      onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                          "/placeholder-image.png";
+                                                      }}
+                                                    />
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="col-md-6">
+                                            <strong>Parts:</strong>{" "}
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Material:</strong>{" "}
+                                            {inspection.MaterialName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage:</strong>{" "}
+                                            {inspection.DamageKindName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Level:</strong>{" "}
+                                            {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage Extent:</strong>{" "}
+                                            {inspection.damage_extent || "N/A"}{" "}
+                                            <br />
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
+                                            {inspection.Remarks || "N/A"} <br />
+                                          </div>
+                                          <div className="col-md-3 d-flex flex-column justify-content-between">
+                                            <Form.Control
+                                              as="textarea"
+                                              rows={3}
+                                              placeholder="Consultant Remarks"
+                                              value={
+                                                inspection.qc_remarks_con || ""
+                                              }
+                                              onChange={(e) =>
+                                                handleConRemarksChange(
+                                                  spanIndex,
+                                                  workKind,
+                                                  inspection.inspection_id,
+                                                  e.target.value
                                                 )
-                                              )}
-                                            </div>
-                                          )}
-                                        </div>
-                                        <div className="col-md-6">
-                                          <strong>Parts:</strong>{" "}
-                                          {inspection.PartsName || "N/A"} <br />
-                                          <strong>Material:</strong>{" "}
-                                          {inspection.MaterialName || "N/A"}{" "}
-                                          <br />
-                                          <strong>Damage:</strong>{" "}
-                                          {inspection.DamageKindName || "N/A"}{" "}
-                                          <br />
-                                          <strong>Level:</strong>{" "}
-                                          {inspection.DamageLevel || "N/A"}{" "}
-                                          <br />
-                                          <strong>Damage Extent:</strong>{" "}
-                                          {inspection.damage_extent || "N/A"}{" "}
-                                          <br />
-                                          <strong>Situation Remarks:</strong>{" "}
-                                          {inspection.Remarks || "N/A"} <br />
-                                        </div>
-                                        <div className="col-md-3 d-flex flex-column justify-content-between">
-                                          <Form.Control
-                                            as="textarea"
-                                            rows={3}
-                                            placeholder="Consultant Remarks"
-                                            value={inspection.qc_remarks_con || ""}
-                                            onChange={(e) =>
-                                              handleConRemarksChange(
-                                                spanIndex,
-                                                workKind,
-                                                inspection.inspection_id,
-                                                e.target.value
-                                              )
-                                            }
-                                            className="mb-2"
-                                          />
-                                          <Form.Group
-                                            controlId={`qc_con_${inspection.inspection_id}`}
-                                            className="mb-2"
-                                          >
-                                            <div className="flex gap-4">
-                                              <Form.Check
-                                                type="radio"
-                                                name={`qc_con_${inspection.inspection_id}`}
-                                                label="Unapproved"
-                                                value="3"
-                                                checked={inspection.qc_con === 3}
-                                                onChange={(e) =>
-                                                  handleApprovedFlagChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    parseInt(e.target.value)
-                                                  )
-                                                }
-                                                className="text-blue-500 font-medium"
-                                                style={{ accentColor: "blue" }}
-                                              />
-                                              <Form.Check
-                                                type="radio"
-                                                name={`qc_con_${inspection.inspection_id}`}
-                                                label="Approved"
-                                                value="2"
-                                                checked={inspection.qc_con === 2}
-                                                onChange={(e) =>
-                                                  handleApprovedFlagChange(
-                                                    spanIndex,
-                                                    workKind,
-                                                    inspection.inspection_id,
-                                                    parseInt(e.target.value)
-                                                  )
-                                                }
-                                                className="text-blue-500 font-medium"
-                                                style={{ accentColor: "blue" }}
-                                              />
-                                            </div>
-                                          </Form.Group>
-                                          <Button
-                                            onClick={() =>
-                                              handleSaveChanges(inspection)
-                                            }
-                                            className="bg-[#CFE2FF]"
-                                          >
-                                            Save Changes
-                                          </Button>
+                                              }
+                                              className="mb-2"
+                                            />
+                                            <Form.Group
+                                              controlId={`qc_con_${inspection.inspection_id}`}
+                                              className="mb-2"
+                                            >
+                                              <div className="flex gap-4">
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_con_${inspection.inspection_id}`}
+                                                  label="Unapproved"
+                                                  value="3"
+                                                  checked={
+                                                    inspection.qc_con === 3
+                                                  }
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }}
+                                                />
+                                                <Form.Check
+                                                  type="radio"
+                                                  name={`qc_con_${inspection.inspection_id}`}
+                                                  label="Approved"
+                                                  value="2"
+                                                  checked={
+                                                    inspection.qc_con === 2
+                                                  }
+                                                  onChange={(e) =>
+                                                    handleApprovedFlagChange(
+                                                      spanIndex,
+                                                      workKind,
+                                                      inspection.inspection_id,
+                                                      parseInt(e.target.value)
+                                                    )
+                                                  }
+                                                  className="text-blue-500 font-medium"
+                                                  style={{
+                                                    accentColor: "blue",
+                                                  }}
+                                                />
+                                              </div>
+                                            </Form.Group>
+                                            <Button
+                                              onClick={() =>
+                                                handleSaveChanges(inspection)
+                                              }
+                                              className="bg-[#CFE2FF]"
+                                            >
+                                              Save Changes
+                                            </Button>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  )
-                                )}
+                                    )
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          ))
+                            )
+                          )
                         ) : (
-                          <p>No pending records available for Span {spanIndex}</p>
+                          <p>
+                            No pending records available for Span {spanIndex}
+                          </p>
                         )}
                       </div>
                     )}
@@ -818,102 +865,109 @@ const InspectionListCon = ({ bridgeId }) => {
                     {expandedSections[spanIndex] && (
                       <div className="mt-2">
                         {Object.keys(approvedData[spanIndex]).length > 0 ? (
-                          Object.keys(approvedData[spanIndex]).map((workKind) => (
-                            <div
-                              key={`workKind-${spanIndex}-${workKind}`}
-                              className="mb-4"
-                            >
-                              <div className="border rounded p-2 bg-secondary text-white fw-bold">
-                                {workKind}
-                              </div>
-                              <div className="mt-2">
-                                {approvedData[spanIndex][workKind].map(
-                                  (inspection) => (
-                                    <div
-                                      key={`inspection-${inspection.inspection_id}`}
-                                      className="border rounded p-4 shadow-sm mb-3"
-                                      style={{ backgroundColor: "#CFE2FF" }}
-                                    >
-                                      <div className="row">
-                                        <div className="col-md-3">
-                                          {inspection.PhotoPaths?.length > 0 && (
-                                            <div
-                                              className="d-flex gap-2"
-                                              style={{
-                                                overflowX: "auto",
-                                                whiteSpace: "nowrap",
-                                                display: "flex",
-                                                paddingBottom: "5px",
-                                              }}
-                                            >
-                                              {inspection.PhotoPaths.map(
-                                                (photoUrl, index) => (
-                                                  <img
-                                                    key={`photo-${inspection.id}-${index}`}
-                                                    src={photoUrl}
-                                                    alt={`Photo ${index + 1}`}
-                                                    className="img-fluid rounded border"
-                                                    style={{
-                                                      width: "80px",
-                                                      height: "80px",
-                                                      objectFit: "cover",
-                                                      cursor: "pointer",
-                                                      flexShrink: 0,
-                                                    }}
-                                                    loading="lazy"
-                                                    onClick={() =>
-                                                      handlePhotoClick(
-                                                        inspection.PhotoPaths,
-                                                        index
-                                                      )
-                                                    }
-                                                    onError={(e) => {
-                                                      e.target.onerror = null;
-                                                      e.target.src =
-                                                        "/placeholder-image.png";
-                                                    }}
-                                                  />
-                                                )
-                                              )}
-                                            </div>
-                                          )}
-                                        </div>
-                                        <div className="col-md-6">
-                                          <strong>Parts:</strong>{" "}
-                                          {inspection.PartsName || "N/A"} <br />
-                                          <strong>Material:</strong>{" "}
-                                          {inspection.MaterialName || "N/A"}{" "}
-                                          <br />
-                                          <strong>Damage:</strong>{" "}
-                                          {inspection.DamageKindName || "N/A"}{" "}
-                                          <br />
-                                          <strong>Level:</strong>{" "}
-                                          {inspection.DamageLevel || "N/A"}{" "}
-                                          <br />
-                                          <strong>Damage Extent:</strong>{" "}
-                                          {inspection.damage_extent || "N/A"}{" "}
-                                          <br />
-                                          <strong>Situation Remarks:</strong>{" "}
-                                          {inspection.Remarks || "N/A"}
-                                        </div>
-                                        <div className="col-md-3 d-flex flex-column justify-content-between">
-                                          <div className="text-start">
-                                            <strong>Remarks: </strong>
-                                            {inspection.qc_remarks_con || "N/A"}{" "}
+                          Object.keys(approvedData[spanIndex]).map(
+                            (workKind) => (
+                              <div
+                                key={`workKind-${spanIndex}-${workKind}`}
+                                className="mb-4"
+                              >
+                                <div className="border rounded p-2 bg-secondary text-white fw-bold">
+                                  {workKind}
+                                </div>
+                                <div className="mt-2">
+                                  {approvedData[spanIndex][workKind].map(
+                                    (inspection) => (
+                                      <div
+                                        key={`inspection-${inspection.inspection_id}`}
+                                        className="border rounded p-4 shadow-sm mb-3"
+                                        style={{ backgroundColor: "#CFE2FF" }}
+                                      >
+                                        <div className="row">
+                                          <div className="col-md-3">
+                                            {inspection.PhotoPaths?.length >
+                                              0 && (
+                                              <div
+                                                className="d-flex gap-2"
+                                                style={{
+                                                  overflowX: "auto",
+                                                  whiteSpace: "nowrap",
+                                                  display: "flex",
+                                                  paddingBottom: "5px",
+                                                }}
+                                              >
+                                                {inspection.PhotoPaths.map(
+                                                  (photoUrl, index) => (
+                                                    <img
+                                                      key={`photo-${inspection.id}-${index}`}
+                                                      src={photoUrl}
+                                                      alt={`Photo ${index + 1}`}
+                                                      className="img-fluid rounded border"
+                                                      style={{
+                                                        width: "80px",
+                                                        height: "80px",
+                                                        objectFit: "cover",
+                                                        cursor: "pointer",
+                                                        flexShrink: 0,
+                                                      }}
+                                                      loading="lazy"
+                                                      onClick={() =>
+                                                        handlePhotoClick(
+                                                          inspection.PhotoPaths,
+                                                          index
+                                                        )
+                                                      }
+                                                      onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                          "/placeholder-image.png";
+                                                      }}
+                                                    />
+                                                  )
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <div className="col-md-6">
+                                            <strong>Parts:</strong>{" "}
+                                            {inspection.PartsName || "N/A"}{" "}
                                             <br />
-                                            <strong>Status: </strong>
-                                            {inspection.qc_con === 2
-                                              ? "Approved"
-                                              : "Unapproved"}
+                                            <strong>Material:</strong>{" "}
+                                            {inspection.MaterialName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage:</strong>{" "}
+                                            {inspection.DamageKindName || "N/A"}{" "}
+                                            <br />
+                                            <strong>Level:</strong>{" "}
+                                            {inspection.DamageLevel || "N/A"}{" "}
+                                            <br />
+                                            <strong>Damage Extent:</strong>{" "}
+                                            {inspection.damage_extent || "N/A"}{" "}
+                                            <br />
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
+                                            {inspection.Remarks || "N/A"}
+                                          </div>
+                                          <div className="col-md-3 d-flex flex-column justify-content-between">
+                                            <div className="text-start">
+                                              <strong>Remarks: </strong>
+                                              {inspection.qc_remarks_con ||
+                                                "N/A"}{" "}
+                                              <br />
+                                              <strong>Status: </strong>
+                                              {inspection.qc_con === 2
+                                                ? "Approved"
+                                                : "Unapproved"}
+                                            </div>
                                           </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  )
-                                )}
+                                    )
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          ))
+                            )
+                          )
                         ) : (
                           <p>No data available</p>
                         )}
@@ -1007,7 +1061,8 @@ const InspectionListCon = ({ bridgeId }) => {
                                           </div>
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
-                                            {inspection.PartsName || "N/A"} <br />
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
                                             <strong>Material:</strong>{" "}
                                             {inspection.MaterialName || "N/A"}{" "}
                                             <br />
@@ -1020,7 +1075,9 @@ const InspectionListCon = ({ bridgeId }) => {
                                             <strong>Damage Extent:</strong>{" "}
                                             {inspection.damage_extent || "N/A"}{" "}
                                             <br />
-                                            <strong>Situation Remarks:</strong>{" "}
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
                                             {inspection.Remarks || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
@@ -1058,7 +1115,8 @@ const InspectionListCon = ({ bridgeId }) => {
           {activeDiv === "unapproved_rams" && (
             <div className="mb-4">
               <h5>Unapproved by RAMS Reports</h5>
-              {unapprovedRamsData && Object.keys(unapprovedRamsData).length > 0 ? (
+              {unapprovedRamsData &&
+              Object.keys(unapprovedRamsData).length > 0 ? (
                 Object.keys(unapprovedRamsData).map((spanIndex) => (
                   <div key={`span-${spanIndex}`} className="mb-4">
                     <div
@@ -1071,7 +1129,8 @@ const InspectionListCon = ({ bridgeId }) => {
                     </div>
                     {expandedSections[spanIndex] && (
                       <div className="mt-2">
-                        {Object.keys(unapprovedRamsData[spanIndex]).length > 0 ? (
+                        {Object.keys(unapprovedRamsData[spanIndex]).length >
+                        0 ? (
                           Object.keys(unapprovedRamsData[spanIndex]).map(
                             (workKind) => (
                               <div
@@ -1136,7 +1195,8 @@ const InspectionListCon = ({ bridgeId }) => {
                                           </div>
                                           <div className="col-md-6">
                                             <strong>Parts:</strong>{" "}
-                                            {inspection.PartsName || "N/A"} <br />
+                                            {inspection.PartsName || "N/A"}{" "}
+                                            <br />
                                             <strong>Material:</strong>{" "}
                                             {inspection.MaterialName || "N/A"}{" "}
                                             <br />
@@ -1149,7 +1209,9 @@ const InspectionListCon = ({ bridgeId }) => {
                                             <strong>Damage Extent:</strong>{" "}
                                             {inspection.damage_extent || "N/A"}{" "}
                                             <br />
-                                            <strong>Situation Remarks:</strong>{" "}
+                                            <strong>
+                                              Situation Remarks:
+                                            </strong>{" "}
                                             {inspection.Remarks || "N/A"}
                                           </div>
                                           <div className="col-md-3 d-flex flex-column justify-content-between">
