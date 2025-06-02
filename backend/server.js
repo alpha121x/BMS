@@ -2,11 +2,11 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { Pool } = require("pg");
-const ExcelJS = require('exceljs');
-const sharp = require('sharp');
-const axios = require('axios');
-const fs = require('fs').promises;
-const path = require('path');
+const ExcelJS = require("exceljs");
+const sharp = require("sharp");
+const axios = require("axios");
+const fs = require("fs").promises;
+const path = require("path");
 require("dotenv").config();
 
 const JWT_SECRET = "123456789";
@@ -250,7 +250,7 @@ app.get("/api/bms-score", async (req, res) => {
 });
 
 // API endpoint to fetch data from bms.tbl_bms_matrix
-app.get('/api/bms-matrix', async (req, res) => {
+app.get("/api/bms-matrix", async (req, res) => {
   try {
     const query = `
       SELECT 
@@ -270,13 +270,13 @@ app.get('/api/bms-matrix', async (req, res) => {
     const result = await pool.query(query);
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error executing query:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // API endpoint to fetch data from bms.tbl_bms_cost
-app.get('/api/bms-cost', async (req, res) => {
+app.get("/api/bms-cost", async (req, res) => {
   try {
     let { page, limit, district, bridgeName } = req.query;
 
@@ -330,13 +330,13 @@ app.get('/api/bms-cost', async (req, res) => {
       data: result.rows,
     });
   } catch (error) {
-    console.error('Error executing query:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error executing query:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // API endpoint to fetch data from bms.tbl_bms_cost
-app.get('/api/bms-cost-export', async (req, res) => {
+app.get("/api/bms-cost-export", async (req, res) => {
   try {
     let { district, bridgeName } = req.query;
 
@@ -371,8 +371,8 @@ app.get('/api/bms-cost-export', async (req, res) => {
       data: result.rows,
     });
   } catch (error) {
-    console.error('Error executing export query:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error executing export query:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 // API Endpoint for Exporting Full BMS Data (No Limits)
@@ -1126,13 +1126,20 @@ app.get("/api/bridgesRamsDownloadExcelNew", async (req, res) => {
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` ${district === "%" ? "WHERE" : "AND"} "BRIDGE NAME" ILIKE $${paramIndex}`;
+      query += ` ${
+        district === "%" ? "WHERE" : "AND"
+      } "BRIDGE NAME" ILIKE $${paramIndex}`;
       queryParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
     if (structureType !== "%") {
-      query += ` ${district === "%" && (!bridgeName || bridgeName.trim() === "" || bridgeName === "%") ? "WHERE" : "AND"} "STRUCTURE TYPE ID" = $${paramIndex}`;
+      query += ` ${
+        district === "%" &&
+        (!bridgeName || bridgeName.trim() === "" || bridgeName === "%")
+          ? "WHERE"
+          : "AND"
+      } "STRUCTURE TYPE ID" = $${paramIndex}`;
       queryParams.push(structureType);
       paramIndex++;
     }
@@ -1824,13 +1831,14 @@ app.get("/api/bridgesEvalDownloadCsvNew", async (req, res) => {
 app.get("/api/bridgesdownloadExcel", async (req, res) => {
   try {
     const {
-       district = "%",
+      district = "%",
       structureType = "%",
       constructionType = "%",
       roadClassification = "%",
       bridgeName = "%",
       bridgeLength,
-      spanLength,  } = req.query;
+      spanLength,
+    } = req.query;
 
     let query = `
       WITH ranked_data AS (
@@ -1914,42 +1922,43 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
       paramIndex++;
     }
 
-
-      if (constructionType !== "%") {
+    if (constructionType !== "%") {
       query += ` AND md.construction_type_id = $${paramIndex}`;
-     
+
       queryParams.push(constructionType);
-      
+
       paramIndex++;
     }
 
     if (roadClassification !== "%") {
       query += ` AND md.road_classification_id = $${paramIndex}`;
-    
+
       queryParams.push(roadClassification);
-     
+
       paramIndex++;
     }
 
     if (bridgeLength !== "%") {
       if (bridgeLength.startsWith("<")) {
         query += ` AND md.structure_width_m < $${paramIndex}`;
-    
+
         queryParams.push(parseFloat(bridgeLength.substring(1)));
-     
+
         paramIndex++;
       } else if (bridgeLength.includes("-")) {
         const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-      
+        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+
         queryParams.push(min, max);
-    
+
         paramIndex += 2;
       } else if (bridgeLength.startsWith(">")) {
         query += ` AND md.structure_width_m > $${paramIndex}`;
-       
+
         queryParams.push(parseFloat(bridgeLength.substring(1)));
-      
+
         paramIndex++;
       }
     }
@@ -1962,7 +1971,9 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
         paramIndex++;
       } else if (spanLength.includes("-")) {
         const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         paramIndex += 2;
       } else if (spanLength.startsWith(">")) {
@@ -2016,7 +2027,7 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
       roadClassification = "%",
       bridgeName = "%",
       bridgeLength,
-      spanLength, 
+      spanLength,
     } = req.query;
 
     let query = `
@@ -2082,41 +2093,43 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
       paramIndex++;
     }
 
-     if (constructionType !== "%") {
+    if (constructionType !== "%") {
       query += ` AND md.construction_type_id = $${paramIndex}`;
-     
+
       queryParams.push(constructionType);
-      
+
       paramIndex++;
     }
 
     if (roadClassification !== "%") {
       query += ` AND md.road_classification_id = $${paramIndex}`;
-    
+
       queryParams.push(roadClassification);
-     
+
       paramIndex++;
     }
 
     if (bridgeLength !== "%") {
       if (bridgeLength.startsWith("<")) {
         query += ` AND md.structure_width_m < $${paramIndex}`;
-    
+
         queryParams.push(parseFloat(bridgeLength.substring(1)));
-     
+
         paramIndex++;
       } else if (bridgeLength.includes("-")) {
         const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-      
+        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+
         queryParams.push(min, max);
-    
+
         paramIndex += 2;
       } else if (bridgeLength.startsWith(">")) {
         query += ` AND md.structure_width_m > $${paramIndex}`;
-       
+
         queryParams.push(parseFloat(bridgeLength.substring(1)));
-      
+
         paramIndex++;
       }
     }
@@ -2129,7 +2142,9 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
         paramIndex++;
       } else if (spanLength.includes("-")) {
         const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         paramIndex += 2;
       } else if (spanLength.startsWith(">")) {
@@ -2218,7 +2233,6 @@ app.get("/api/inspections-export-con", async (req, res) => {
       query += ` AND "REFERENCE NO" = $1`;
       queryParams.push(bridgeId.trim());
     }
-    
 
     const result = await pool.query(query, queryParams);
 
@@ -2237,25 +2251,25 @@ app.get("/api/inspections-export-con", async (req, res) => {
           status = "Unapproved";
           break;
       }
-    
+
       // Add new field with proper name
       row["Consultant Status"] = status;
-    
+
       // Optionally remove original key
       delete row.qc_con;
-    
+
       // Handle image URL conversion
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-    
+
       // Remove overview photos from other than first
       if (!firstRow) {
         row["Overview Photos"] = null;
       }
       firstRow = false;
-    
+
       return row;
     });
-    
+
     res.json({ success: true, bridges: processedData });
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -2266,12 +2280,14 @@ app.get("/api/inspections-export-con", async (req, res) => {
   }
 });
 
-app.get('/api/inspections-export-con-new', async (req, res) => {
+app.get("/api/inspections-export-con-new", async (req, res) => {
   const { bridgeId } = req.query;
   const requestId = Date.now(); // Unique ID for tracing this request
   const startTime = Date.now();
 
-  logger.info(`Starting Excel export for bridgeId: ${bridgeId || 'all'}`, { requestId });
+  logger.info(`Starting Excel export for bridgeId: ${bridgeId || "all"}`, {
+    requestId,
+  });
 
   try {
     // Build database query
@@ -2326,7 +2342,7 @@ app.get('/api/inspections-export-con-new', async (req, res) => {
     `;
 
     const queryParams = [];
-    if (bridgeId && bridgeId.trim() !== '') {
+    if (bridgeId && bridgeId.trim() !== "") {
       query += ` AND "REFERENCE NO" = $1`;
       queryParams.push(bridgeId.trim());
     }
@@ -2335,15 +2351,25 @@ app.get('/api/inspections-export-con-new', async (req, res) => {
     let result;
     try {
       result = await pool.query(query, queryParams);
-      logger.info(`Database query completed. Rows fetched: ${result.rows.length}`, { requestId });
+      logger.info(
+        `Database query completed. Rows fetched: ${result.rows.length}`,
+        { requestId }
+      );
     } catch (dbError) {
-      logger.error('Database query failed', { requestId, error: dbError.message });
-      return res.status(500).json({ success: false, message: 'Database query failed' });
+      logger.error("Database query failed", {
+        requestId,
+        error: dbError.message,
+      });
+      return res
+        .status(500)
+        .json({ success: false, message: "Database query failed" });
     }
 
     if (!result.rows || result.rows.length === 0) {
-      logger.warn('No data available for export', { requestId, bridgeId });
-      return res.status(400).json({ success: false, message: 'No data available for export' });
+      logger.warn("No data available for export", { requestId, bridgeId });
+      return res
+        .status(400)
+        .json({ success: false, message: "No data available for export" });
     }
 
     // Process data
@@ -2351,19 +2377,19 @@ app.get('/api/inspections-export-con-new', async (req, res) => {
     const summaryData = result.rows.map((row, index) => {
       try {
         // Convert qc_con to readable status
-        let status = 'Unknown';
+        let status = "Unknown";
         switch (row.qc_con) {
           case 1:
-            status = 'Pending';
+            status = "Pending";
             break;
           case 2:
-            status = 'Approved';
+            status = "Approved";
             break;
           case 3:
-            status = 'Unapproved';
+            status = "Unapproved";
             break;
         }
-        row['Consultant Status'] = status;
+        row["Consultant Status"] = status;
         delete row.qc_con;
 
         // Handle image URLs
@@ -2371,18 +2397,21 @@ app.get('/api/inspections-export-con-new', async (req, res) => {
 
         // Clear Overview Photos for non-first rows
         if (!firstRow) {
-          row['Overview Photos'] = [];
+          row["Overview Photos"] = [];
         }
         firstRow = false;
 
         return row;
       } catch (error) {
-        logger.error(`Error processing row ${index}`, { requestId, error: error.message });
+        logger.error(`Error processing row ${index}`, {
+          requestId,
+          error: error.message,
+        });
         return row; // Continue with row even if processing fails
       }
     });
 
-    const bridgeName = summaryData[0]?.['BRIDGE NAME'] || 'bridge_inspection';
+    const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
     logger.info(`Generating Excel for bridge: ${bridgeName}`, { requestId });
 
     // Create Excel workbook and worksheet
@@ -2390,65 +2419,115 @@ app.get('/api/inspections-export-con-new', async (req, res) => {
     try {
       workbook = new ExcelJS.Workbook();
     } catch (error) {
-      logger.error('Failed to create Excel workbook', { requestId, error: error.message });
-      return res.status(500).json({ success: false, message: 'Failed to create Excel file' });
+      logger.error("Failed to create Excel workbook", {
+        requestId,
+        error: error.message,
+      });
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to create Excel file" });
     }
 
-    const worksheet = workbook.addWorksheet('Inspections');
+    const worksheet = workbook.addWorksheet("Inspections");
 
     // Define columns
     const columnKeys = Object.keys(summaryData[0]).filter(
       (key) =>
-        key !== 'Overview Photos' &&
-        key !== 'PhotoPaths' &&
-        key !== 'RN' &&
-        key !== 'qc_rams' &&
-        key !== 'SURVEYED BY'
+        key !== "Overview Photos" &&
+        key !== "PhotoPaths" &&
+        key !== "RN" &&
+        key !== "qc_rams" &&
+        key !== "SURVEYED BY"
     );
 
     const columns = columnKeys.map((key) => ({
-      header: key.replace(/_/g, ' '),
+      header: key.replace(/_/g, " "),
       key,
       width: 22,
     }));
 
     for (let i = 1; i <= 3; i++) {
-      columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 22 });
-      columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 22 });
+      columns.push({
+        header: `Overview Photo ${i}`,
+        key: `photo${i}`,
+        width: 22,
+      });
+      columns.push({
+        header: `Inspection Photo ${i}`,
+        key: `inspection${i}`,
+        width: 22,
+      });
     }
 
     try {
       worksheet.columns = columns;
       worksheet.getRow(1).font = { bold: true, size: 14 };
-      worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
       worksheet.getRow(1).height = 25;
     } catch (error) {
-      logger.error('Failed to configure worksheet', { requestId, error: error.message });
-      return res.status(500).json({ success: false, message: 'Failed to configure Excel worksheet' });
+      logger.error("Failed to configure worksheet", {
+        requestId,
+        error: error.message,
+      });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: "Failed to configure Excel worksheet",
+        });
     }
 
     // Compress image helper function
-    const compressImage = async (imagePathOrUrl, rowIndex, imageType, imageIndex) => {
+    const compressImage = async (
+      imagePathOrUrl,
+      rowIndex,
+      imageType,
+      imageIndex
+    ) => {
       try {
         let buffer;
-        if (imagePathOrUrl.startsWith('http')) {
+        if (imagePathOrUrl.startsWith("http")) {
           // Fetch remote image
-          const response = await axios.get(imagePathOrUrl, { responseType: 'arraybuffer' });
+          const response = await axios.get(imagePathOrUrl, {
+            responseType: "arraybuffer",
+          });
           buffer = Buffer.from(response.data);
-          logger.debug(`Fetched image: ${imagePathOrUrl}`, { requestId, rowIndex, imageType, imageIndex });
+          logger.debug(`Fetched image: ${imagePathOrUrl}`, {
+            requestId,
+            rowIndex,
+            imageType,
+            imageIndex,
+          });
         } else {
           // Assume local file path (adjust base path as needed)
-          const imagePath = path.join(__dirname, 'path/to/images', imagePathOrUrl);
+          const imagePath = path.join(
+            __dirname,
+            "path/to/images",
+            imagePathOrUrl
+          );
           buffer = await fs.readFile(imagePath);
-          logger.debug(`Read local image: ${imagePath}`, { requestId, rowIndex, imageType, imageIndex });
+          logger.debug(`Read local image: ${imagePath}`, {
+            requestId,
+            rowIndex,
+            imageType,
+            imageIndex,
+          });
         }
 
         // Compress and resize with sharp
         const compressedBuffer = await sharp(buffer)
-          .resize({ width: 150, height: 90, fit: 'fill' })
+          .resize({ width: 150, height: 90, fit: "fill" })
           .jpeg({ quality: 60 })
           .toBuffer();
-        logger.debug(`Compressed image: ${imagePathOrUrl}`, { requestId, rowIndex, imageType, imageIndex });
+        logger.debug(`Compressed image: ${imagePathOrUrl}`, {
+          requestId,
+          rowIndex,
+          imageType,
+          imageIndex,
+        });
         return compressedBuffer;
       } catch (error) {
         logger.error(`Failed to process image: ${imagePathOrUrl}`, {
@@ -2463,23 +2542,43 @@ app.get('/api/inspections-export-con-new', async (req, res) => {
     };
 
     // Process images for a set of URLs
-    const processImages = async (photoUrls, columnOffset, rowIndex, imageType) => {
+    const processImages = async (
+      photoUrls,
+      columnOffset,
+      rowIndex,
+      imageType
+    ) => {
       try {
         const compressedBuffers = await Promise.all(
-          photoUrls.map((url, index) => compressImage(url.replace(/\\/g, '/'), rowIndex, imageType, index + 1))
+          photoUrls.map((url, index) =>
+            compressImage(
+              url.replace(/\\/g, "/"),
+              rowIndex,
+              imageType,
+              index + 1
+            )
+          )
         );
 
         for (let j = 0; j < compressedBuffers.length; j++) {
           if (!compressedBuffers[j]) continue;
           const imageId = workbook.addImage({
             buffer: compressedBuffers[j],
-            extension: 'jpeg',
+            extension: "jpeg",
           });
           worksheet.addImage(imageId, {
-            tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 },
+            tl: {
+              col: columnKeys.length + columnOffset + j,
+              row: rowIndex - 1,
+            },
             ext: { width: 150, height: 90 },
           });
-          logger.debug(`Added image to worksheet: ${photoUrls[j]}`, { requestId, rowIndex, imageType, imageIndex: j + 1 });
+          logger.debug(`Added image to worksheet: ${photoUrls[j]}`, {
+            requestId,
+            rowIndex,
+            imageType,
+            imageIndex: j + 1,
+          });
         }
       } catch (error) {
         logger.error(`Error processing images for ${imageType}`, {
@@ -2494,42 +2593,72 @@ app.get('/api/inspections-export-con-new', async (req, res) => {
     for (let i = 0; i < summaryData.length; i++) {
       try {
         const item = summaryData[i];
-        const overviewPhotos = (item['Overview Photos'] || []).slice(0, 3);
-        const inspectionPhotos = (item['PhotoPaths'] || []).slice(0, 3);
+        const overviewPhotos = (item["Overview Photos"] || []).slice(0, 3);
+        const inspectionPhotos = (item["PhotoPaths"] || []).slice(0, 3);
 
         const rowData = {};
-        columnKeys.forEach((key) => (rowData[key] = item[key] || ''));
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
 
         const rowIndex = worksheet.addRow(rowData).number;
         worksheet.getRow(rowIndex).height = 90;
 
         await Promise.all([
-          processImages(overviewPhotos, 0, rowIndex, 'Overview Photo'),
-          processImages(inspectionPhotos, 3, rowIndex, 'Inspection Photo'),
+          processImages(overviewPhotos, 0, rowIndex, "Overview Photo"),
+          processImages(inspectionPhotos, 3, rowIndex, "Inspection Photo"),
         ]);
 
-        logger.info(`Processed row ${i + 1}/${summaryData.length}`, { requestId, rowIndex });
+        logger.info(`Processed row ${i + 1}/${summaryData.length}`, {
+          requestId,
+          rowIndex,
+        });
       } catch (error) {
-        logger.error(`Error processing row ${i + 1}`, { requestId, error: error.message });
+        logger.error(`Error processing row ${i + 1}`, {
+          requestId,
+          error: error.message,
+        });
         continue; // Skip to next row on error
       }
     }
 
     // Stream the Excel file
     try {
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename=${bridgeName.replace(/\s+/g, '_')}.xlsx`);
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=${bridgeName.replace(/\s+/g, "_")}.xlsx`
+      );
       await workbook.xlsx.write(res);
-      logger.info(`Excel file streamed successfully. Time taken: ${Date.now() - startTime}ms`, { requestId });
+      logger.info(
+        `Excel file streamed successfully. Time taken: ${
+          Date.now() - startTime
+        }ms`,
+        { requestId }
+      );
     } catch (error) {
-      logger.error('Failed to stream Excel file', { requestId, error: error.message });
-      return res.status(500).json({ success: false, message: 'Failed to stream Excel file' });
+      logger.error("Failed to stream Excel file", {
+        requestId,
+        error: error.message,
+      });
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to stream Excel file" });
     }
 
     res.end();
   } catch (error) {
-    logger.error('Unexpected error in Excel export', { requestId, error: error.message });
-    return res.status(500).json({ success: false, message: 'Unexpected error during Excel generation' });
+    logger.error("Unexpected error in Excel export", {
+      requestId,
+      error: error.message,
+    });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Unexpected error during Excel generation",
+      });
   }
 });
 
@@ -2618,18 +2747,17 @@ app.get("/api/inspections-export-rams", async (req, res) => {
       }
       row["RAMS Status"] = ramsStatus;
       delete row.qc_rams;
-    
+
       // --- Handle Photos ---
       row.PhotoPaths = extractUrlsFromPath(row.PhotoPaths);
-    
+
       if (!firstRow) {
         row["Overview Photos"] = null;
       }
       firstRow = false;
-    
+
       return row;
     });
-    
 
     res.json({ success: true, bridges: processedData });
   } catch (error) {
@@ -2694,7 +2822,7 @@ app.get("/api/inspections-export-evaluator", async (req, res) => {
         WHERE f."DamageLevelID" IN (4, 5, 6) -- Filtering inside the CTE
       )
       SELECT * FROM ranked_data
-      WHERE (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2))`; 
+      WHERE (surveyed_by = 'RAMS-PITB' OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2))`;
 
     const queryParams = [];
 
@@ -2988,8 +3116,12 @@ app.get("/api/bridges", async (req, res) => {
         paramIndex++;
       } else if (bridgeLength.includes("-")) {
         const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        countQuery += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        countQuery += ` AND structure_width_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
@@ -3012,8 +3144,12 @@ app.get("/api/bridges", async (req, res) => {
         paramIndex++;
       } else if (spanLength.includes("-")) {
         const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
@@ -3026,7 +3162,9 @@ app.get("/api/bridges", async (req, res) => {
       }
     }
 
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
@@ -3270,84 +3408,48 @@ SELECT
   }
 });
 
-// bridge-status-summary for consultant [pending + approved]
-app.get('/api/bridge-status-summary', async (req, res) => {
-  const { status } = req.query;
-  const validStatuses = ['pending', 'approved', 'both'];
-
-  // Validate status parameter
-  if (status && !validStatuses.includes(status)) {
-    const message = `Invalid status parameter: ${status}. Use 'pending', 'approved', or 'both'.`;
-    logError(`Error: ${message}`);
-    return res.status(400).json({ error: message });
-  }
-
+app.get("/api/bridge-status-summary", async (req, res) => {
   try {
-    const queries = {
-      pending: `
-        SELECT 
-          t.uu_bms_id,
-          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-          COUNT(*) AS total_inspections,
-          SUM(CASE WHEN t.reviewed_by = '0' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '1' THEN 1 ELSE 0 END) AS reviewed_inspections
-        FROM bms.tbl_inspection_f t
-        INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
-        WHERE m.is_active = true
-        GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
-        HAVING COUNT(*) = SUM(CASE WHEN t.reviewed_by = '0' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '1' THEN 1 ELSE 0 END)
-        ORDER BY t.uu_bms_id
-      `,
-      approved: `
-        SELECT 
-          t.uu_bms_id,
-          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-          COUNT(*) AS total_inspections,
-          SUM(CASE WHEN t.reviewed_by = '1' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
-        FROM bms.tbl_inspection_f t
-        INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
-        WHERE m.is_active = true
-        GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
-        HAVING COUNT(*) = SUM(CASE WHEN t.reviewed_by = '1' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '2' THEN 1 ELSE 0 END)
-        ORDER BY t.uu_bms_id
-      `,
-    };
+    const query = `
+SELECT 
+  uu_bms_id,
+  
+  COUNT(*) FILTER (WHERE qc_con != 1 OR qc_con IS NULL) AS con_approved_insp,
 
-    let responseData = {};
+  SUM(
+    CASE 
+      WHEN qc_con = 1 AND surveyed_by = 'RAMS-UU' 
+      THEN 1 
+      ELSE 0 
+    END
+  ) AS con_pending_inspections,
 
-    if (!status || status === 'both') {
-      // Fetch both pending and approved inspections
-      const [pendingResult, approvedResult] = await Promise.all([
-        pool.query(queries.pending),
-        pool.query(queries.approved),
-      ]);
+  -- Total = approved + pending
+  COUNT(*) FILTER (WHERE qc_con != 1 OR qc_con IS NULL) + 
+  SUM(CASE 
+        WHEN qc_con = 1 AND surveyed_by = 'RAMS-UU' 
+        THEN 1 
+        ELSE 0 
+      END) AS total_inspections
 
-      responseData = {
-        pending: pendingResult.rows.length > 0 ? pendingResult.rows : [],
-        approved: approvedResult.rows.length > 0 ? approvedResult.rows : [],
-      };
+FROM bms.tbl_inspection_f
+GROUP BY uu_bms_id
+HAVING COUNT(*) FILTER (WHERE qc_con != 1 OR qc_con IS NULL) > 0
+ORDER BY uu_bms_id`;
 
-      if (responseData.pending.length === 0 && responseData.approved.length === 0) {
-        const message = 'No inspections found for either pending or approved status';
-        logError(`Info: ${message}`);
-        return res.status(404).json({ error: message });
-      }
+    const result = await pool.query(query);
+
+    if (result.rows.length > 0) {
+      res.json(result.rows);
     } else {
-      // Fetch only the specified status
-      const result = await pool.query(queries[status]);
-      responseData[status] = result.rows.length > 0 ? result.rows : [];
-
-      if (responseData[status].length === 0) {
-        const message = `No ${status} inspections found`;
-        logError(`Info: ${message}`);
-        return res.status(404).json({ error: message });
-      }
+      const message = "No records found for bridge inspections";
+      logError(`Info: ${message}`);
+      res.status(404).json({ error: message });
     }
-
-    res.json(responseData);
   } catch (error) {
-    const errorMessage = `Error fetching inspections: ${error.message}`;
+    const errorMessage = `Error: ${error.message}`;
     logError(errorMessage);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -3566,7 +3668,9 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
       paramIndex++;
     }
 
-    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
@@ -3852,7 +3956,9 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
       paramIndex++;
     }
 
-    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
@@ -4027,8 +4133,6 @@ app.get("/api/get-summary", async (req, res) => {
   
     ORDER BY inspection_id DESC NULLS LAST;
   `;
-  
-
 
     const { rows } = await pool.query(query, [bridgeId]);
 
@@ -5083,9 +5187,13 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE inspection_id = $1
     `;
-    const checkResult = await client.query(checkInspectionQuery, [inspection_id]);
+    const checkResult = await client.query(checkInspectionQuery, [
+      inspection_id,
+    ]);
     if (parseInt(checkResult.rows[0].count, 10) === 0) {
-      throw new Error("Invalid inspection_id: No matching record in tbl_inspection_f");
+      throw new Error(
+        "Invalid inspection_id: No matching record in tbl_inspection_f"
+      );
     }
 
     // Insert evaluation data into tbl_evaluation
@@ -5152,7 +5260,10 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       RETURNING evaluator_id;
     `;
 
-    const updateResult = await client.query(updateQuery, [inspection_id, evaluator_id]);
+    const updateResult = await client.query(updateQuery, [
+      inspection_id,
+      evaluator_id,
+    ]);
     if (updateResult.rowCount === 0) {
       throw new Error("Failed to update evaluator_id in tbl_inspection_f");
     }
@@ -5427,7 +5538,11 @@ app.put("/api/update-overall-condition/:id", async (req, res) => {
   try {
     // Validate input
     if (!id || !overall_bridge_condition) {
-      return res.status(400).json({ error: "Missing required fields: id and overall_bridge_condition" });
+      return res
+        .status(400)
+        .json({
+          error: "Missing required fields: id and overall_bridge_condition",
+        });
     }
 
     // Update the overall_bridge_condition in the database
@@ -5440,10 +5555,15 @@ app.put("/api/update-overall-condition/:id", async (req, res) => {
       return res.status(404).json({ error: "Record not found" });
     }
 
-    res.json({ message: "Overall bridge condition updated successfully", data: result.rows[0] });
+    res.json({
+      message: "Overall bridge condition updated successfully",
+      data: result.rows[0],
+    });
   } catch (error) {
     console.error("Error updating overall bridge condition:", error);
-    res.status(500).json({ error: "Failed to update overall bridge condition" });
+    res
+      .status(500)
+      .json({ error: "Failed to update overall bridge condition" });
   }
 });
 
@@ -5516,7 +5636,7 @@ app.get("/api/dimentions", async (req, res) => {
 });
 
 // api for bridge damage levels vs damage knds
-app.get('/api/damage-chart', async (req, res) => {
+app.get("/api/damage-chart", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT "DamageKindName" AS damage_kind, "DamageLevelID" AS damage_level, COUNT(*) AS count
@@ -5529,21 +5649,21 @@ app.get('/api/damage-chart', async (req, res) => {
     const rows = result.rows;
     const damageKinds = [];
     const levels = {
-      2: 'I',
-      3: 'II',
-      4: 'III',
-      5: 'IV'
+      2: "I",
+      3: "II",
+      4: "III",
+      5: "IV",
     };
 
     const chartData = {
       I: {},
       II: {},
       III: {},
-      IV: {}
+      IV: {},
     };
 
     // Fill chartData
-    rows.forEach(row => {
+    rows.forEach((row) => {
       const kind = row.damage_kind;
       const level = levels[row.damage_level];
       const count = parseInt(row.count);
@@ -5551,7 +5671,7 @@ app.get('/api/damage-chart', async (req, res) => {
       if (!damageKinds.includes(kind)) {
         damageKinds.push(kind);
         // initialize all levels for that kind
-        Object.keys(chartData).forEach(lvl => {
+        Object.keys(chartData).forEach((lvl) => {
           chartData[lvl][kind] = 0;
         });
       }
@@ -5564,23 +5684,27 @@ app.get('/api/damage-chart', async (req, res) => {
       categories: damageKinds,
       series: Object.entries(chartData).map(([lvl, obj]) => ({
         name: `Damage Level ${lvl}`,
-        data: damageKinds.map(kind => obj[kind]),
-        color: lvl === 'I' ? '#0000FF'
-              : lvl === 'II' ? '#FFA500'
-              : lvl === 'III' ? '#808080'
-              : '#FFFF00'
-      }))
+        data: damageKinds.map((kind) => obj[kind]),
+        color:
+          lvl === "I"
+            ? "#0000FF"
+            : lvl === "II"
+            ? "#FFA500"
+            : lvl === "III"
+            ? "#808080"
+            : "#FFFF00",
+      })),
     };
 
     res.json(final);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
 // api for bridge damage levels vs material knds
-app.get('/api/material-damage-chart', async (req, res) => {
+app.get("/api/material-damage-chart", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT "MaterialName" AS material, "DamageLevelID" AS damage_level, COUNT(*) AS count
@@ -5593,27 +5717,27 @@ app.get('/api/material-damage-chart', async (req, res) => {
     const rows = result.rows;
     const materials = [];
     const levels = {
-      2: 'I',
-      3: 'II',
-      4: 'III',
-      5: 'IV'
+      2: "I",
+      3: "II",
+      4: "III",
+      5: "IV",
     };
 
     const chartData = {
       I: {},
       II: {},
       III: {},
-      IV: {}
+      IV: {},
     };
 
-    rows.forEach(row => {
+    rows.forEach((row) => {
       const material = row.material;
       const level = levels[row.damage_level];
       const count = parseInt(row.count);
 
       if (!materials.includes(material)) {
         materials.push(material);
-        Object.keys(chartData).forEach(lvl => {
+        Object.keys(chartData).forEach((lvl) => {
           chartData[lvl][material] = 0;
         });
       }
@@ -5625,23 +5749,27 @@ app.get('/api/material-damage-chart', async (req, res) => {
       categories: materials,
       series: Object.entries(chartData).map(([lvl, obj]) => ({
         name: `Damage Level ${lvl}`,
-        data: materials.map(material => obj[material]),
-        color: lvl === 'I' ? '#0000FF'
-              : lvl === 'II' ? '#FFA500'
-              : lvl === 'III' ? '#808080'
-              : '#FFFF00'
-      }))
+        data: materials.map((material) => obj[material]),
+        color:
+          lvl === "I"
+            ? "#0000FF"
+            : lvl === "II"
+            ? "#FFA500"
+            : lvl === "III"
+            ? "#808080"
+            : "#FFFF00",
+      })),
     };
 
     res.json(final);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
 // api for bridge damage levels vs work knds
-app.get('/api/workkind-damage-chart', async (req, res) => {
+app.get("/api/workkind-damage-chart", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT "WorkKindName" AS work_kind, "DamageLevelID" AS damage_level, COUNT(*) AS count
@@ -5654,27 +5782,27 @@ app.get('/api/workkind-damage-chart', async (req, res) => {
     const rows = result.rows;
     const workKinds = [];
     const levels = {
-      2: 'I',
-      3: 'II',
-      4: 'III',
-      5: 'IV'
+      2: "I",
+      3: "II",
+      4: "III",
+      5: "IV",
     };
 
     const chartData = {
       I: {},
       II: {},
       III: {},
-      IV: {}
+      IV: {},
     };
 
-    rows.forEach(row => {
+    rows.forEach((row) => {
       const kind = row.work_kind;
       const level = levels[row.damage_level];
       const count = parseInt(row.count);
 
       if (!workKinds.includes(kind)) {
         workKinds.push(kind);
-        Object.keys(chartData).forEach(lvl => {
+        Object.keys(chartData).forEach((lvl) => {
           chartData[lvl][kind] = 0;
         });
       }
@@ -5686,23 +5814,27 @@ app.get('/api/workkind-damage-chart', async (req, res) => {
       categories: workKinds,
       series: Object.entries(chartData).map(([lvl, obj]) => ({
         name: `Damage Level ${lvl}`,
-        data: workKinds.map(kind => obj[kind]),
-        color: lvl === 'I' ? '#0000FF'
-              : lvl === 'II' ? '#FFA500'
-              : lvl === 'III' ? '#808080'
-              : '#FFFF00'
-      }))
+        data: workKinds.map((kind) => obj[kind]),
+        color:
+          lvl === "I"
+            ? "#0000FF"
+            : lvl === "II"
+            ? "#FFA500"
+            : lvl === "III"
+            ? "#808080"
+            : "#FFFF00",
+      })),
     };
 
     res.json(final);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
 // api for crossing types chart
-app.get('/api/crossing-types-chart', async (req, res) => {
+app.get("/api/crossing-types-chart", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT "BridgeUnderSituationName" AS name, 
@@ -5711,7 +5843,7 @@ app.get('/api/crossing-types-chart', async (req, res) => {
       WHERE "DeleteFlag" = 0
     `);
 
-    const chartData = result.rows.map(row => ({
+    const chartData = result.rows.map((row) => ({
       name: row.name,
       y: parseFloat(row.value),
     }));
@@ -5719,7 +5851,7 @@ app.get('/api/crossing-types-chart', async (req, res) => {
     res.json(chartData);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
