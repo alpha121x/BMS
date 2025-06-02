@@ -317,8 +317,7 @@ const InspectionListCon = ({ bridgeId }) => {
         width: 22,
       }));
 
-      for (let i = 1; i <= 3; i++) {
-        // Reduced to 3 images per type
+      for (let i = 1; i <= 5; i++) {
         columns.push({
           header: `Overview Photo ${i}`,
           key: `photo${i}`,
