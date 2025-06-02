@@ -18,6 +18,7 @@ import PrioritizationMap from "./PriortizationMap";
 import Header from "./Header";
 import Footer from "./Footer";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import PriortizationModal from "./PriortizationModal";
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -597,46 +598,12 @@ const PrioritizationTable = ({ districtId }) => {
           </Col>
         </Row>
 
-        <Modal
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          size="xl"
-          centered
-        >
-          <Modal.Header closeButton>
-            <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body style={{ maxHeight: "400px", overflowY: "auto" }}>
-            {modalData.length > 0 ? (
-              <Table bordered hover>
-                <thead>
-                  <tr>
-                    <th>District</th>
-                    <th>Road Name</th>
-                    <th>Structure Type</th>
-                    <th>Bridge Name</th>
-                    <th>Damage Score</th> {/* Add new column */}
-                    <th>Date Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {modalData.map((bridge, idx) => (
-                    <tr key={idx}>
-                      <td>{bridge.district}</td>
-                      <td>{bridge.roadName}</td>
-                      <td>{bridge.structureType}</td>
-                      <td>{bridge.name}</td>
-                      <td>{bridge.score}</td> {/* Display damagescore */}
-                      <td>{bridge.dateTime}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            ) : (
-              <p>No bridges found for this group.</p>
-            )}
-          </Modal.Body>
-        </Modal>
+         <PriortizationModal
+          showModal={showModal}
+          setShowModal={setShowModal}
+          selectedTitle={selectedTitle}
+          modalData={modalData}
+        />
 
         <Container fluid className="py-2 bg-light mt-3">
           <Row className="justify-content-center">
