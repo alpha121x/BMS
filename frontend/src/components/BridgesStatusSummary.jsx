@@ -17,7 +17,7 @@ const customStyles = {
   },
   headCells: {
     style: {
-      padding: "8px",
+      padding: "4px",
       fontSize: "14px",
       fontWeight: "bold",
     },
@@ -30,7 +30,7 @@ const customStyles = {
   },
   cells: {
     style: {
-      padding: "8px",
+      padding: "4px",
       "&:nth-child(1), &:nth-child(2)": { textAlign: "left" },
       "&:nth-child(3), &:nth-child(4)": { textAlign: "center" },
     },
