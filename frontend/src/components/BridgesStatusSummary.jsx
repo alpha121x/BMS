@@ -5,73 +5,45 @@ import DataTable from "react-data-table-component";
 const customStyles = {
   table: {
     style: {
-      backgroundColor: "#ffffff",
-      borderRadius: "8px",
-      boxShadow: "0 4px 6px rgba(0,0,0,0)",
-      margin: "0 auto", // Center the table
-      width: "100%",
-      border: "separate",
-      borderSpacing: "0",
+      width: '100%',
     },
   },
   headRow: {
     style: {
-      backgroundColor: "#1f2937", // Darker gray for contrast
-      borderBottom: "2px solid #d1d5db",
-      fontSize: "13px",
-      fontWeight: "600", // Bolder header text
-      color: "#ffffff", // White text for readability
-      textTransform: "uppercase",
-      letterSpacing: "0.05em",
+      backgroundColor: '#f5f5f5', // Light gray for headers
+      borderBottom: '1px solid #ddd',
     },
   },
   headCells: {
     style: {
-      padding: "12px 16px",
-      justifyContent: "center", // Center header text
-      "&:first-child": {
-        borderTopLeftRadius: "8px",
-      },
-      "&:last-child": {
-        borderTopRightRadius: "8px",
-      },
+      padding: '8px',
+      fontSize: '14px',
+      fontWeight: 'bold',
     },
   },
   rows: {
     style: {
-      fontSize: "14px",
-      color: "#374151",
-      backgroundColor: "#ffffff",
-      borderBottom: "1px solid #e5e7eb",
-      "&:nth-child(even)": {
-        backgroundColor: "#f9fafb",
-      },
-      "&:hover": {
-        backgroundColor: "#f3f4f6",
-      },
+      fontSize: '14px',
+      borderBottom: '1px solid #ddd',
     },
   },
   cells: {
     style: {
-      padding: "12px 16px",
+      padding: '8px',
       // Align text based on content type
-      "&:nth-child(1), &:nth-child(2)": {
-        // Reference No, Bridge Name
-        textAlign: "left",
+      '&:nth-child(1), &:nth-child(2)': { // Reference No, Bridge Name
+        textAlign: 'left',
       },
-      "&:nth-child(3), &:nth-child(4)": {
-        // Total Inspections, Reviewed Inspections
-        textAlign: "center",
+      '&:nth-child(3), &:nth-child(4)': { // Total Inspections, Reviewed Inspections
+        textAlign: 'center',
       },
     },
   },
   pagination: {
     style: {
-      backgroundColor: "#ffffff",
-      borderTop: "1px solid #e5e7eb",
-      padding: "12px",
-      fontSize: "14px",
-      color: "#374151",
+      borderTop: '1px solid #ddd',
+      padding: '8px',
+      fontSize: '14px',
     },
   },
 };

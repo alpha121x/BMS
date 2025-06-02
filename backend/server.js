@@ -3284,6 +3284,35 @@ SELECT
   }
 });
 
+app.get('/api/bridge-status-summary', async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        uu_bms_id,
+        COUNT(*) AS total_inspections,
+        SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
+      FROM bms.tbl_inspection_f
+      GROUP BY uu_bms_id
+      HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
+      ORDER BY uu_bms_id
+    `;
+
+    const result = await pool.query(query);
+
+    if (result.rows.length > 0) {
+      res.json(result.rows);
+    } else {
+      const message = 'No records found for bridge inspections';
+      logError(`Info: ${message}`);
+      res.status(404).json({ error: message });
+    }
+  } catch (error) {
+    const errorMessage = `Error: ${error.message}`;
+    logError(errorMessage);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesRams", async (req, res) => {
   try {
