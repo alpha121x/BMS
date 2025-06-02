@@ -20,6 +20,7 @@ import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 import "leaflet/dist/leaflet.css";
+import BridgesStatusSummary from "./BridgesStatusSummary";
 
 
 const BridgesListNewUpdated = ({

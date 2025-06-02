@@ -10,6 +10,7 @@ import Filters from "./Filters";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
 import { LuConstruction } from "react-icons/lu";
+import BridgesStatusSummary from "./BridgesStatusSummary";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -145,6 +146,16 @@ const EvaluationMainCon = () => {
               >
                 Bridges List
               </button>
+              <button
+                onClick={() => setActiveView("bridgessummary")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "inventory"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Bridges Status Summary
+              </button>
             </div>
 
             {/* Content Container */}
@@ -160,6 +171,7 @@ const EvaluationMainCon = () => {
                   setBridgeName={setBridgeName}
                 />
               )}
+               {activeView === "bridgessummary" && <BridgesStatusSummary />}
             </div>
           </div>
         </div>
