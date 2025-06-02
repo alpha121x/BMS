@@ -67,8 +67,8 @@ const BridgesStatusSummary = ({api_endpoint}) => {
             referenceNo: item.uu_bms_id,
             bridgeName: item.bridge_name,
             totalInspections: item.total_inspections,
-            pendingInspections: item.con_pending_inspections,
-            approvedInspections: item.con_approved_insp,
+            pendingInspections: item.pending_inspections,
+            approvedInspections: item.approved_insp,
           }))
           .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo)); // Sort by referenceNo
         setData(formattedData);

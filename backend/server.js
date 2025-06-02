@@ -3416,7 +3416,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
         t.uu_bms_id,
         CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
 
-        COUNT(*) FILTER (WHERE t.qc_con = 2) AS con_approved_insp,
+        COUNT(*) FILTER (WHERE t.qc_con = 2) AS approved_insp,
 
         SUM(
           CASE 
@@ -3424,7 +3424,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
             THEN 1 
             ELSE 0 
           END
-        ) AS con_pending_inspections,
+        ) AS pending_inspections,
 
         -- Total = approved + pending
         COUNT(*) FILTER (WHERE t.qc_con = 2 OR qc_con = 3 ) + 
@@ -3469,7 +3469,7 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
         CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
 
         -- Approved inspections (RAMS)
-        COUNT(*) FILTER (WHERE t.qc_rams = 2) AS rams_approved_insp,
+        COUNT(*) FILTER (WHERE t.qc_rams = 2) AS approved_insp,
 
         -- Pending inspections (qc_rams = 0 AND surveyed_by = 'RAMS-UU' AND qc_con = 2)
         SUM(
@@ -3478,7 +3478,7 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
             THEN 1 
             ELSE 0 
           END
-        ) AS rams_pending_inspections,
+        ) AS pending_inspections,
 
         -- Total = approved + pending
         COUNT(*) FILTER (WHERE t.qc_rams = 2 OR t.qc_rams = 3) + 
@@ -3513,8 +3513,6 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
 
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesRams", async (req, res) => {
