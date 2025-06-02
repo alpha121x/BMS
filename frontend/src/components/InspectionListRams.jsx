@@ -14,6 +14,8 @@ import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import ReportsSummary from "./ReportsSummary";
+import Compressor from "compressorjs";
+
 
 const InspectionListRams = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
@@ -236,7 +238,6 @@ const InspectionListRams = ({ bridgeId }) => {
       const summaryData = data.bridges;
       const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
 
-
       const headers = Object.keys(summaryData[0]).filter(
         (key) =>
           key !== "Overview Photos" &&
@@ -320,8 +321,6 @@ const InspectionListRams = ({ bridgeId }) => {
           key: `photo${i}`,
           width: 22,
         });
-      }
-      for (let i = 1; i <= 5; i++) {
         columns.push({
           header: `Inspection Photo ${i}`,
           key: `inspection${i}`,
@@ -338,50 +337,74 @@ const InspectionListRams = ({ bridgeId }) => {
       };
       worksheet.getRow(1).height = 25;
 
+      // Compress image helper function
+      const compressImage = (blob) =>
+        new Promise((resolve, reject) => {
+          new Compressor(blob, {
+            quality: 0.6, // Adjust quality (0 to 1) for compression
+            maxWidth: 150, // Match Excel image width
+            maxHeight: 90, // Match Excel image height
+            mimeType: "image/jpeg",
+            success: (compressedBlob) => resolve(compressedBlob),
+            error: (err) => reject(err),
+          });
+        });
+
+      // Fetch and compress images concurrently
+      const fetchAndCompressImage = async (url) => {
+        try {
+          const imgResponse = await fetch(url.replace(/\\/g, "/"));
+          if (!imgResponse.ok) return null;
+          const imgBlob = await imgResponse.blob();
+          return await compressImage(imgBlob);
+        } catch (error) {
+          console.error("Failed to fetch/compress image:", url, error);
+          return null;
+        }
+      };
+
       for (let i = 0; i < summaryData.length; i++) {
         const item = summaryData[i];
 
-        const overviewPhotos = (item["Overview Photos"] || []).map((url) =>
-          url.replace(/\\/g, "/")
-        );
-        const inspectionPhotos = (item["PhotoPaths"] || []).map((url) =>
-          url.replace(/\\/g, "/")
-        );
+        const overviewPhotos = (item["Overview Photos"] || [])
+          .map((url) => url.replace(/\\/g, "/"))
+          .slice(0, 5); // Limit to 5 images
+        const inspectionPhotos = (item["PhotoPaths"] || [])
+          .map((url) => url.replace(/\\/g, "/"))
+          .slice(0, 5); // Limit to 5 images
 
         const rowData = {};
         columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
 
         const rowIndex = worksheet.addRow(rowData).number;
-
         worksheet.getRow(rowIndex).height = 90;
 
-        const insertImage = async (photoUrls, columnOffset, rowHeight) => {
-          for (let j = 0; j < photoUrls.length && j < 5; j++) {
-            try {
-              const imgResponse = await fetch(photoUrls[j]);
-              const imgBlob = await imgResponse.blob();
-              const arrayBuffer = await imgBlob.arrayBuffer();
+        const insertImages = async (photoUrls, columnOffset) => {
+          const compressedBlobs = await Promise.all(
+            photoUrls.map((url) => fetchAndCompressImage(url))
+          );
 
-              const imageId = workbook.addImage({
-                buffer: arrayBuffer,
-                extension: "jpeg",
-              });
-
-              worksheet.addImage(imageId, {
-                tl: {
-                  col: columnKeys.length + columnOffset + j,
-                  row: rowIndex - 1,
-                },
-                ext: { width: 150, height: 90 },
-              });
-            } catch (error) {
-              console.error("Failed to load image:", photoUrls[j], error);
-            }
+          for (let j = 0; j < compressedBlobs.length; j++) {
+            if (!compressedBlobs[j]) continue;
+            const arrayBuffer = await compressedBlobs[j].arrayBuffer();
+            const imageId = workbook.addImage({
+              buffer: arrayBuffer,
+              extension: "jpeg",
+            });
+            worksheet.addImage(imageId, {
+              tl: {
+                col: columnKeys.length + columnOffset + j,
+                row: rowIndex - 1,
+              },
+              ext: { width: 150, height: 90 },
+            });
           }
         };
 
-        await insertImage(overviewPhotos, 0, 90);
-        await insertImage(inspectionPhotos, 5, 90);
+        await Promise.all([
+          insertImages(overviewPhotos, 0),
+          insertImages(inspectionPhotos, 5),
+        ]);
       }
 
       const buffer = await workbook.xlsx.writeBuffer();
