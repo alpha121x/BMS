@@ -295,7 +295,8 @@ const InspectionListCon = ({ bridgeId }) => {
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
+      console.log(summaryData);
+      const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
 
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet("Inspections");
