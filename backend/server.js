@@ -3427,7 +3427,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
         ) AS con_pending_inspections,
 
         -- Total = approved + pending
-        COUNT(*) FILTER (WHERE t.qc_con IS NULL) + 
+        COUNT(*) FILTER (WHERE t.qc_con = 2 OR qc_con = 3 ) + 
         SUM(CASE 
               WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
               THEN 1 
