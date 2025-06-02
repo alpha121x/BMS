@@ -126,13 +126,18 @@ const BridgesStatusSummary = () => {
     >
       <div className="card-header p-2" style={{ background: '#005D7F' }}>
         <div className="flex items-center justify-between">
-          <h5 className="mb-0 text-white">
-            Bridges Status Summary
-          </h5>
+          <div className="flex items-center gap-2">
+            <h5 className="mb uygun değil-0 text-white">Bridges Status Summary</h5>
+            <span
+              className="inline-flex items-center ms-5 px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+            >
+              {status.charAt(0).toUpperCase() + status.slice(1)}: {data.length} Bridges
+            </span>
+          </div>
           <div className="flex gap-2">
             <button
               className={`px-3 py-1 rounded text-sm font-medium text-white ${
-                status === 'pending' ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                status === 'pending' ? 'bg-blue-700' : 'bg-blue-400 hover:bg-blue-600'
               }`}
               onClick={() => handleToggle('pending')}
             >
@@ -140,7 +145,7 @@ const BridgesStatusSummary = () => {
             </button>
             <button
               className={`px-3 py-1 rounded text-sm font-medium text-white ${
-                status === 'approved' ? 'bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'
+                status === 'approved' ? 'bg-blue-700' : 'bg-blue-400 hover:bg-blue-600'
               }`}
               onClick={() => handleToggle('approved')}
             >
