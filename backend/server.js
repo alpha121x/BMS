@@ -3408,34 +3408,39 @@ SELECT
   }
 });
 
+// bridge-status-summary for Consultant evaluation module
 app.get("/api/bridge-status-summary", async (req, res) => {
   try {
     const query = `
-SELECT 
-  uu_bms_id,
-  
-  COUNT(*) FILTER (WHERE qc_con != 1 OR qc_con IS NULL) AS con_approved_insp,
+      SELECT 
+        t.uu_bms_id,
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
 
-  SUM(
-    CASE 
-      WHEN qc_con = 1 AND surveyed_by = 'RAMS-UU' 
-      THEN 1 
-      ELSE 0 
-    END
-  ) AS con_pending_inspections,
+        COUNT(*) FILTER (WHERE t.qc_con != 1 OR t.qc_con IS NULL) AS con_approved_insp,
 
-  -- Total = approved + pending
-  COUNT(*) FILTER (WHERE qc_con != 1 OR qc_con IS NULL) + 
-  SUM(CASE 
-        WHEN qc_con = 1 AND surveyed_by = 'RAMS-UU' 
-        THEN 1 
-        ELSE 0 
-      END) AS total_inspections
+        SUM(
+          CASE 
+            WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
+            THEN 1 
+            ELSE 0 
+          END
+        ) AS con_pending_inspections,
 
-FROM bms.tbl_inspection_f
-GROUP BY uu_bms_id
-HAVING COUNT(*) FILTER (WHERE qc_con != 1 OR qc_con IS NULL) > 0
-ORDER BY uu_bms_id`;
+        -- Total = approved + pending
+        COUNT(*) FILTER (WHERE t.qc_con != 1 OR t.qc_con IS NULL) + 
+        SUM(CASE 
+              WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
+              THEN 1 
+            ELSE 0 
+            END) AS total_inspections
+
+      FROM bms.tbl_inspection_f t
+      INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
+      WHERE m.is_active = true
+      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+      HAVING COUNT(*) FILTER (WHERE t.qc_con != 1 OR t.qc_con IS NULL) > 0
+      ORDER BY t.uu_bms_id;
+    `;
 
     const result = await pool.query(query);
 

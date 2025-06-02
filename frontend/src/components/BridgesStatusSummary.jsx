@@ -1,5 +1,6 @@
-import React from "react";
-import DataTable from "react-data-table-component";
+import React, { useState, useEffect } from 'react';
+import DataTable from 'react-data-table-component';
+import { BASE_URL } from './config';
 
 // Custom styles for the DataTable appearance
 const customStyles = {
@@ -10,7 +11,7 @@ const customStyles = {
   },
   headRow: {
     style: {
-      backgroundColor: '#f5f5f5', // Light gray for headers
+      backgroundColor: '#f5f5f5',
       borderBottom: '1px solid #ddd',
     },
   },
@@ -30,13 +31,8 @@ const customStyles = {
   cells: {
     style: {
       padding: '8px',
-      // Align text based on content type
-      '&:nth-child(1), &:nth-child(2)': { // Reference No, Bridge Name
-        textAlign: 'left',
-      },
-      '&:nth-child(3), &:nth-child(4)': { // Total Inspections, Reviewed Inspections
-        textAlign: 'center',
-      },
+      '&:nth-child(1), &:nth-child(2)': { textAlign: 'left' },
+      '&:nth-child(3), &:nth-child(4)': { textAlign: 'center' },
     },
   },
   pagination: {
@@ -48,92 +44,115 @@ const customStyles = {
   },
 };
 
-const BridgesStatusSummary = ({ data = [] }) => {
-  // Sample data if none provided
-  const defaultData = [
-    {
-      referenceNo: "REF001",
-      bridgeName: "River Cross Bridge",
-      totalInspections: 12,
-      reviewedInspections: 8,
-    },
-    {
-      referenceNo: "REF002",
-      bridgeName: "Valley Span",
-      totalInspections: 15,
-      reviewedInspections: 10,
-    },
-    {
-      referenceNo: "REF003",
-      bridgeName: "City Link Bridge",
-      totalInspections: 9,
-      reviewedInspections: 7,
-    },
-  ];
+const BridgesStatusSummary = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Use provided data or fallback to default data
-  const bridges = data.length > 0 ? data : defaultData;
+  // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`${BASE_URL}/api/bridge-status-summary`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+
+        // Map API data to DataTable format
+        const formattedData = result
+          .map(item => ({
+            referenceNo: item.uu_bms_id,
+            bridgeName: item.bridge_name,
+            totalInspections: item.total_inspections,
+            pendingInspections: item.con_pending_inspections,
+            approvedInspections: item.con_approved_insp,
+          }))
+          .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo)); // Sort by referenceNo
+        setData(formattedData);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Define columns for the DataTable
   const columns = [
     {
-      name: "Reference No",
-      selector: (row) => row.referenceNo,
+      name: 'Reference No',
+      selector: row => row.referenceNo,
       sortable: true,
-      center: false, // Left-aligned
+      center: false,
     },
     {
-      name: "Bridge Name",
-      selector: (row) => row.bridgeName,
+      name: 'Bridge Name',
+      selector: row => row.bridgeName,
       sortable: true,
-      center: false, // Left-aligned
+      center: false,
     },
     {
-      name: "Total Inspections",
-      selector: (row) => row.totalInspections,
+      name: 'Total Inspections',
+      selector: row => row.totalInspections,
       sortable: true,
-      center: true, // Center-aligned
+      center: true,
     },
     {
-      name: "Reviewed Inspections",
-      selector: (row) => row.reviewedInspections,
+      name: 'Pending Inspections',
+      selector: row => row.pendingInspections,
       sortable: true,
-      center: true, // Center-aligned
+      center: true,
+    },
+    {
+      name: 'Approved Inspections',
+      selector: row => row.approvedInspections,
+      sortable: true,
+      center: true,
     },
   ];
 
   return (
-    <>
-      <div
-        className="card p-0 rounded-lg text-black"
-        style={{
-          background: "#FFFFFF",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-          position: "relative",
-        }}
-      >
-        <div className="card-header p-2 " style={{ background: "#005D7F" }}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center justify-between text-white">
-              <h5 className="mb-0 me-5">Bridges Status Summary</h5>
-            </div>
+    <div
+      className="card p-0 rounded-lg text-black"
+      style={{
+        background: '#FFFFFF',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+        position: 'relative',
+      }}
+    >
+      <div className="card-header p-2" style={{ background: '#005D7F' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between text-white">
+            <h5 className="mb-0 me-5">Bridges Status Summary</h5>
           </div>
         </div>
-
-        <div className="card-body p-0 pb-2">
+      </div>
+      <div className="card-body p-0 pb-2">
+        {loading ? (
+          <div className="p-4 text-center text-gray-600">Loading...</div>
+        ) : error ? (
+          <div className="p-4 text-center text-red-600">Error: {error}</div>
+        ) : (
           <DataTable
             columns={columns}
-            data={bridges}
+            data={data}
             customStyles={customStyles}
             pagination
+            paginationPerPage={10}
+            paginationRowsPerPageOptions={[10, 25, 50]}
             highlightOnHover
             striped
             responsive
             noDataComponent="No bridges found"
           />
-        </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
