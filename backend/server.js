@@ -3416,7 +3416,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
         t.uu_bms_id,
         CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
 
-        COUNT(*) FILTER (WHERE t.qc_con = 2 OR t.qc_con IS NULL) AS con_approved_insp,
+        COUNT(*) FILTER (WHERE t.qc_con = 2) AS con_approved_insp,
 
         SUM(
           CASE 
@@ -3459,6 +3459,62 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// bridge-status-summary for RAMS evaluation module
+app.get("/api/bridge-status-summary-rams", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        t.uu_bms_id,
+        CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
+
+        -- Approved inspections (RAMS)
+        COUNT(*) FILTER (WHERE t.qc_rams = 2) AS rams_approved_insp,
+
+        -- Pending inspections (qc_rams = 0 AND surveyed_by = 'RAMS-UU' AND qc_con = 2)
+        SUM(
+          CASE 
+            WHEN t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU' 
+            THEN 1 
+            ELSE 0 
+          END
+        ) AS rams_pending_inspections,
+
+        -- Total = approved + pending
+        COUNT(*) FILTER (WHERE t.qc_rams = 2 OR t.qc_rams = 3) + 
+        SUM(
+          CASE 
+            WHEN t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU' 
+            THEN 1 
+            ELSE 0 
+          END
+        ) AS total_inspections
+
+      FROM bms.tbl_inspection_f t
+      INNER JOIN bms.tbl_bms_master_data m 
+        ON t.uu_bms_id = m.uu_bms_id
+      WHERE m.is_active = true
+      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+      HAVING COUNT(*) FILTER (
+        WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
+      ) > 0
+      ORDER BY t.uu_bms_id;
+    `;
+
+    const result = await pool.query(query);
+
+    if (result.rows.length > 0) {
+      res.json(result.rows);
+    } else {
+      const message = "No records found for RAMS bridge inspections";
+      res.status(404).json({ error: message });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesRams", async (req, res) => {
