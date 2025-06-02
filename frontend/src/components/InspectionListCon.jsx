@@ -237,7 +237,8 @@ const InspectionListCon = ({ bridgeId }) => {
       }
 
       const summaryData = data.bridges;
-      const bridgeName = summaryData[0]?.bridge_name || "bridge_inspection";
+      const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
+
 
       const headers = Object.keys(summaryData[0]).filter(
         (key) =>
@@ -295,7 +296,6 @@ const InspectionListCon = ({ bridgeId }) => {
       }
 
       const summaryData = data.bridges;
-      console.log(summaryData);
       const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
 
       const workbook = new ExcelJS.Workbook();
