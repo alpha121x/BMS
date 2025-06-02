@@ -5,7 +5,6 @@ const { Pool } = require("pg");
 const ExcelJS = require('exceljs');
 const sharp = require('sharp');
 const axios = require('axios');
-const winston = require('winston');
 const fs = require('fs').promises;
 const path = require('path');
 require("dotenv").config();
@@ -30,19 +29,6 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
-});
-
-// Configure Winston logger
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: '/error.log' }),
-  ],
 });
 
 // Check Database Connection
@@ -3284,30 +3270,82 @@ SELECT
   }
 });
 
+// bridge-status-summary for consultant [pending + approved]
 app.get('/api/bridge-status-summary', async (req, res) => {
+  const { status } = req.query;
+  const validStatuses = ['pending', 'approved', 'both'];
+
+  // Validate status parameter
+  if (status && !validStatuses.includes(status)) {
+    const message = `Invalid status parameter: ${status}. Use 'pending', 'approved', or 'both'.`;
+    logError(`Error: ${message}`);
+    return res.status(400).json({ error: message });
+  }
+
   try {
-    const query = `
-      SELECT 
-        uu_bms_id,
-        COUNT(*) AS total_inspections,
-        SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
-      FROM bms.tbl_inspection_f
-      GROUP BY uu_bms_id
-      HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
-      ORDER BY uu_bms_id
-    `;
+    const queries = {
+      pending: `
+        SELECT 
+          t.uu_bms_id,
+          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+          COUNT(*) AS total_inspections,
+          SUM(CASE WHEN t.reviewed_by = '0' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '1' THEN 1 ELSE 0 END) AS reviewed_inspections
+        FROM bms.tbl_inspection_f t
+        INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
+        WHERE m.is_active = true
+        GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+        HAVING COUNT(*) = SUM(CASE WHEN t.reviewed_by = '0' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '1' THEN 1 ELSE 0 END)
+        ORDER BY t.uu_bms_id
+      `,
+      approved: `
+        SELECT 
+          t.uu_bms_id,
+          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+          COUNT(*) AS total_inspections,
+          SUM(CASE WHEN t.reviewed_by = '1' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
+        FROM bms.tbl_inspection_f t
+        INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
+        WHERE m.is_active = true
+        GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+        HAVING COUNT(*) = SUM(CASE WHEN t.reviewed_by = '1' AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = '2' THEN 1 ELSE 0 END)
+        ORDER BY t.uu_bms_id
+      `,
+    };
 
-    const result = await pool.query(query);
+    let responseData = {};
 
-    if (result.rows.length > 0) {
-      res.json(result.rows);
+    if (!status || status === 'both') {
+      // Fetch both pending and approved inspections
+      const [pendingResult, approvedResult] = await Promise.all([
+        pool.query(queries.pending),
+        pool.query(queries.approved),
+      ]);
+
+      responseData = {
+        pending: pendingResult.rows.length > 0 ? pendingResult.rows : [],
+        approved: approvedResult.rows.length > 0 ? approvedResult.rows : [],
+      };
+
+      if (responseData.pending.length === 0 && responseData.approved.length === 0) {
+        const message = 'No inspections found for either pending or approved status';
+        logError(`Info: ${message}`);
+        return res.status(404).json({ error: message });
+      }
     } else {
-      const message = 'No records found for bridge inspections';
-      logError(`Info: ${message}`);
-      res.status(404).json({ error: message });
+      // Fetch only the specified status
+      const result = await pool.query(queries[status]);
+      responseData[status] = result.rows.length > 0 ? result.rows : [];
+
+      if (responseData[status].length === 0) {
+        const message = `No ${status} inspections found`;
+        logError(`Info: ${message}`);
+        return res.status(404).json({ error: message });
+      }
     }
+
+    res.json(responseData);
   } catch (error) {
-    const errorMessage = `Error: ${error.message}`;
+    const errorMessage = `Error fetching inspections: ${error.message}`;
     logError(errorMessage);
     res.status(500).json({ error: 'Internal server error' });
   }
