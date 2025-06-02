@@ -9,6 +9,7 @@ import Filters from "./Filters";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
 import { LuConstruction } from "react-icons/lu";
+import BridgesStatusSummary from "./BridgesStatusSummary";
 
 const EvaluationMainRams = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -18,6 +19,7 @@ const EvaluationMainRams = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
+  const bridges_status_summary = "bridge-status-summary-rams";
   
 
   const fetchInspectionCounts = async () => {
@@ -163,6 +165,16 @@ const EvaluationMainRams = () => {
               >
                 Bridges List
               </button>
+                 <button
+                onClick={() => setActiveView("bridgessummary")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "bridgessummary"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Bridges Status Summary
+              </button>
             </div>
 
             {/* Content Container */}
@@ -178,6 +190,9 @@ const EvaluationMainRams = () => {
                   setBridgeName={setBridgeName}
                 />
               )}
+               {activeView === "bridgessummary" && <BridgesStatusSummary
+                     api_endpoint={bridges_status_summary}
+                />}
             </div>
           </div>
         </div>

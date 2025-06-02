@@ -44,7 +44,7 @@ const customStyles = {
   },
 };
 
-const BridgesStatusSummary = () => {
+const BridgesStatusSummary = ({api_endpoint}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,7 +55,7 @@ const BridgesStatusSummary = () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${BASE_URL}/api/bridge-status-summary`);
+        const response = await fetch(`${BASE_URL}/api/${api_endpoint}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

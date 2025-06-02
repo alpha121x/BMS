@@ -20,6 +20,7 @@ const EvaluationMainCon = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
+  const bridges_status_summary = "bridge-status-summary";
 
   const fetchInspectionCounts = async () => {
     if (!districtId) return; // Avoid unnecessary API calls
@@ -171,7 +172,9 @@ const EvaluationMainCon = () => {
                   setBridgeName={setBridgeName}
                 />
               )}
-               {activeView === "bridgessummary" && <BridgesStatusSummary />}
+               {activeView === "bridgessummary" && <BridgesStatusSummary
+                     api_endpoint={bridges_status_summary}
+                />}
             </div>
           </div>
         </div>
