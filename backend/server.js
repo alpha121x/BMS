@@ -3414,9 +3414,9 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     const query = `
       SELECT 
         t.uu_bms_id,
-        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+        CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
 
-        COUNT(*) FILTER (WHERE t.qc_con != 1 OR t.qc_con IS NULL) AS con_approved_insp,
+        COUNT(*) FILTER (WHERE t.qc_con = 2 OR t.qc_con IS NULL) AS con_approved_insp,
 
         SUM(
           CASE 
@@ -3427,7 +3427,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
         ) AS con_pending_inspections,
 
         -- Total = approved + pending
-        COUNT(*) FILTER (WHERE t.qc_con != 1 OR t.qc_con IS NULL) + 
+        COUNT(*) FILTER (WHERE t.qc_con IS NULL) + 
         SUM(CASE 
               WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
               THEN 1 
@@ -3438,7 +3438,9 @@ app.get("/api/bridge-status-summary", async (req, res) => {
       INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
       WHERE m.is_active = true
       GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
-      HAVING COUNT(*) FILTER (WHERE t.qc_con != 1 OR t.qc_con IS NULL) > 0
+      HAVING COUNT(*) FILTER (
+        WHERE t.qc_con = 2 OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU')
+      ) > 0
       ORDER BY t.uu_bms_id;
     `;
 

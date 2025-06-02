@@ -1,45 +1,45 @@
-import React, { useState, useEffect } from 'react';
-import DataTable from 'react-data-table-component';
-import { BASE_URL } from './config';
+import React, { useState, useEffect } from "react";
+import DataTable from "react-data-table-component";
+import { BASE_URL } from "./config";
 
 // Custom styles for the DataTable appearance
 const customStyles = {
   table: {
     style: {
-      width: '100%',
+      width: "100%",
     },
   },
   headRow: {
     style: {
-      backgroundColor: '#f5f5f5',
-      borderBottom: '1px solid #ddd',
+      backgroundColor: "#f5f5f5",
+      borderBottom: "1px solid #ddd",
     },
   },
   headCells: {
     style: {
-      padding: '8px',
-      fontSize: '14px',
-      fontWeight: 'bold',
+      padding: "8px",
+      fontSize: "14px",
+      fontWeight: "bold",
     },
   },
   rows: {
     style: {
-      fontSize: '14px',
-      borderBottom: '1px solid #ddd',
+      fontSize: "14px",
+      borderBottom: "1px solid #ddd",
     },
   },
   cells: {
     style: {
-      padding: '8px',
-      '&:nth-child(1), &:nth-child(2)': { textAlign: 'left' },
-      '&:nth-child(3), &:nth-child(4)': { textAlign: 'center' },
+      padding: "8px",
+      "&:nth-child(1), &:nth-child(2)": { textAlign: "left" },
+      "&:nth-child(3), &:nth-child(4)": { textAlign: "center" },
     },
   },
   pagination: {
     style: {
-      borderTop: '1px solid #ddd',
-      padding: '8px',
-      fontSize: '14px',
+      borderTop: "1px solid #ddd",
+      padding: "8px",
+      fontSize: "14px",
     },
   },
 };
@@ -63,7 +63,7 @@ const BridgesStatusSummary = () => {
 
         // Map API data to DataTable format
         const formattedData = result
-          .map(item => ({
+          .map((item) => ({
             referenceNo: item.uu_bms_id,
             bridgeName: item.bridge_name,
             totalInspections: item.total_inspections,
@@ -73,7 +73,7 @@ const BridgesStatusSummary = () => {
           .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo)); // Sort by referenceNo
         setData(formattedData);
       } catch (err) {
-        setError(err.message || 'Failed to fetch data');
+        setError(err.message || "Failed to fetch data");
       } finally {
         setLoading(false);
       }
@@ -85,32 +85,32 @@ const BridgesStatusSummary = () => {
   // Define columns for the DataTable
   const columns = [
     {
-      name: 'Reference No',
-      selector: row => row.referenceNo,
+      name: "Reference No",
+      selector: (row) => row.referenceNo,
       sortable: true,
       center: false,
     },
     {
-      name: 'Bridge Name',
-      selector: row => row.bridgeName,
+      name: "Bridge Name",
+      selector: (row) => row.bridgeName,
       sortable: true,
       center: false,
     },
     {
-      name: 'Total Inspections',
-      selector: row => row.totalInspections,
+      name: "Total Inspections",
+      selector: (row) => row.totalInspections,
       sortable: true,
       center: true,
     },
     {
-      name: 'Pending Inspections',
-      selector: row => row.pendingInspections,
+      name: "Pending Inspections",
+      selector: (row) => row.pendingInspections,
       sortable: true,
       center: true,
     },
     {
-      name: 'Approved Inspections',
-      selector: row => row.approvedInspections,
+      name: "Approved Inspections",
+      selector: (row) => row.approvedInspections,
       sortable: true,
       center: true,
     },
@@ -120,15 +120,20 @@ const BridgesStatusSummary = () => {
     <div
       className="card p-0 rounded-lg text-black"
       style={{
-        background: '#FFFFFF',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-        position: 'relative',
+        background: "#FFFFFF",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+        position: "relative",
       }}
     >
-      <div className="card-header p-2" style={{ background: '#005D7F' }}>
+      <div className="card-header p-2" style={{ background: "#005D7F" }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-between text-white">
-            <h5 className="mb-0 me-5">Bridges Status Summary</h5>
+            <h5 className="mb-0 me-5">
+              Bridges Status Summary{" "}
+              <span className="text-sm bg-white text-[#005D7F] px-2 py-1 rounded ml-2">
+                Total: {data.length}
+              </span>
+            </h5>
           </div>
         </div>
       </div>
