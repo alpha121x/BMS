@@ -3633,10 +3633,10 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
         SELECT 
           uu_bms_id,
           COUNT(*) AS total_inspections,
-          SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0' THEN 1 ELSE 0 END) AS reviewed_inspections
+          SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
         FROM bms.tbl_inspection_f
         GROUP BY uu_bms_id
-        HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0' THEN 1 ELSE 0 END)
+        HAVING COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
       )
       SELECT 
         b.uu_bms_id, 
@@ -3684,10 +3684,10 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
         SELECT 
           uu_bms_id,
           COUNT(*) AS total_inspections,
-          SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0' THEN 1 ELSE 0 END) AS reviewed_inspections
+          SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
         FROM bms.tbl_inspection_f
         GROUP BY uu_bms_id
-        HAVING COUNT(*) = SUM(CASE WHEN reviewed_by = '1' AND surveyed_by = 'RAMS-UU' AND qc_con = '2' AND qc_rams = '0' THEN 1 ELSE 0 END)
+        HAVING COUNT(*) = SUM(CASE WHEN  surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
       )
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data b
