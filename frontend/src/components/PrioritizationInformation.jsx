@@ -12,37 +12,25 @@ const PrioritizationInformation = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Placeholder function to fetch bridge data based on uu_bms_id
     const fetchBridgeData = async () => {
       try {
-        // Replace this with your actual API call
-        // Example: const response = await fetch(`/api/bridge/${uu_bms_id}`);
-        // const data = await response.json();
-        const response = await mockFetchBridgeData(uu_bms_id);
-        setBridgeData(response);
+        // Send uu_bms_id as a query parameter
+        const response = await fetch(`/api/PriortizationInfo?bridgeId=${encodeURIComponent(uu_bms_id)}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setBridgeData(data); // Set parsed JSON data
       } catch (error) {
         console.error("Error fetching bridge data:", error);
         setBridgeData(null);
       }
     };
 
-    fetchBridgeData();
+    if (uu_bms_id) {
+      fetchBridgeData();
+    }
   }, [uu_bms_id]);
-
-  // Mock fetch function (replace with actual API call)
-  const mockFetchBridgeData = async (id) => {
-    // Simulate API response
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          uu_bms_id: id,
-          bridge_name: `Bridge ${id}`,
-          last_inspection_date: "2025-05-15",
-          // Add other relevant bridge data fields as needed
-        });
-      }, 500);
-    });
-  };
 
   const handleBackClick = () => {
     navigate("/BridgeWiseScore"); // Adjust the route as needed

@@ -2998,10 +2998,10 @@ function swapDomain(url) {
 }
 
 app.get('/api/PriortizationInfo', async (req, res) => {
-  const { uu_bms_id } = req.params;
+  const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
   // Validate uu_bms_id
-  if (!uu_bms_id) {
+  if (!bridgeId) {
     return res.status(400).json({ error: 'uu_bms_id is required' });
   }
 
@@ -3051,7 +3051,7 @@ app.get('/api/PriortizationInfo', async (req, res) => {
       AND uu_bms_id = $1
     `;
 
-    const result = await pool.query(query, [uu_bms_id]);
+    const result = await pool.query(query, [bridgeId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Bridge not found' });
