@@ -153,9 +153,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route
           path="/PrioritizationInformation"
           element={
-            <PrivateRoute>
               <PrioritizationInformation />
-              </PrivateRoute>
           }
         />
 

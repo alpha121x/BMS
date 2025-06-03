@@ -3002,7 +3002,7 @@ app.get('/api/PriortizationInfo', async (req, res) => {
 
   // Validate uu_bms_id
   if (!bridgeId) {
-    return res.status(400).json({ error: 'uu_bms_id is required' });
+    return res.status(400).json({ error: 'bridgeId is required' });
   }
 
   try {

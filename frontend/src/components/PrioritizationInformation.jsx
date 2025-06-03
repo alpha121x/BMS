@@ -1,39 +1,54 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import InventoryInfoDashboard from "./InventoryInfoDashboard";
 import InspectionListDashboard from "./InspectionListDashboard";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { BASE_URL } from "./config";
 
 const PrioritizationInformation = () => {
-  const { uu_bms_id } = useParams(); // Get uu_bms_id from URL params
-  const [bridgeData, setBridgeData] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const uu_bms_id = queryParams.get("uu_bms_id"); // Extract uu_bms_id from query string
+  const [bridgeData, setBridgeData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchBridgeData = async () => {
+      setLoading(true);
       try {
-        // Send uu_bms_id as a query parameter
-        const response = await fetch(`/api/PriortizationInfo?bridgeId=${encodeURIComponent(uu_bms_id)}`);
+        if (!uu_bms_id) {
+          throw new Error("No bridge ID provided");
+        }
+        console.log("Fetching bridge data for uu_bms_id:", uu_bms_id);
+        const response = await fetch(`${BASE_URL}/api/PrioritizationInfo?bridgeId=${encodeURIComponent(uu_bms_id)}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setBridgeData(data); // Set parsed JSON data
+        console.log("Bridge data received:", data);
+        setBridgeData(data);
       } catch (error) {
         console.error("Error fetching bridge data:", error);
-        setBridgeData(null);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (uu_bms_id) {
       fetchBridgeData();
+    } else {
+      setError("No bridge ID provided");
+      setLoading(false);
     }
   }, [uu_bms_id]);
 
   const handleBackClick = () => {
-    navigate("/BridgeWiseScore"); // Adjust the route as needed
+    navigate("/Dashboard");
   };
 
   return (
@@ -56,7 +71,7 @@ const PrioritizationInformation = () => {
                   </button>
                 </div>
                 <div className="text-lg font-semibold">
-                  Bridge Name: {bridgeData?.bridge_name || "Loading..."}
+                  Bridge Name: {bridgeData?.bridge_name || "N/A"}
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
@@ -73,16 +88,21 @@ const PrioritizationInformation = () => {
             </div>
           </div>
 
-          {/* Single Card wrapping both components */}
           <div className="flex justify-center w-full">
             <div className="w-full sm:w-3/4 md:w-75 lg:w-75 bg-white p-6 rounded-lg shadow-md">
-              {bridgeData ? (
-                <InventoryInfoDashboard inventoryData={bridgeData} />
-              ) : (
+              {loading ? (
                 <p>Loading bridge data...</p>
+              ) : error ? (
+                <p className="text-red-500">Error: {error}</p>
+              ) : bridgeData ? (
+                <>
+                  <InventoryInfoDashboard inventoryData={bridgeData} />
+                  <div className="border-t border-gray-300 my-4"></div>
+                  <InspectionListDashboard bridgeId={uu_bms_id} />
+                </>
+              ) : (
+                <p>No bridge data available</p>
               )}
-              <div className="border-t border-gray-300 my-4"></div>
-              <InspectionListDashboard bridgeId={uu_bms_id} />
             </div>
           </div>
         </section>

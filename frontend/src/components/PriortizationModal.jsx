@@ -1,8 +1,9 @@
-import React from 'react';
-import { Modal } from 'react-bootstrap';
-import DataTable from 'react-data-table-component';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Modal } from "react-bootstrap";
+import DataTable from "react-data-table-component";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Styled DataTable for consistent styling
 const StyledDataTable = styled(DataTable)`
@@ -31,11 +32,18 @@ const StyledDataTable = styled(DataTable)`
   }
 `;
 
-const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData }) => {
+const BridgeDetailsModal = ({
+  showModal,
+  setShowModal,
+  selectedTitle,
+  modalData,
+}) => {
+  const navigate = useNavigate(); // Must be inside a component
+
   // Define columns for DataTable
   const columns = [
     {
-      name: 'District',
+      name: "District",
       selector: (row) => row.district,
       sortable: true,
       cell: (row) => (
@@ -45,38 +53,47 @@ const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData 
       ),
     },
     {
-      name: 'Road Name',
+      name: "Road Name",
       selector: (row) => row.roadName,
       sortable: true,
     },
     {
-      name: 'Structure Type',
+      name: "Structure Type",
       selector: (row) => row.structureType,
       sortable: true,
     },
     {
-      name: 'Damage Score',
+      name: "Damage Score",
       selector: (row) => row.score,
       sortable: true,
     },
     {
-      name: 'Bridge Name',
+      name: "Bridge Name",
       selector: (row) => row.name,
       sortable: true,
     },
     {
-      name: 'Date Time',
+      name: "Date Time",
       selector: (row) => row.dateTime,
       sortable: true,
     },
     {
-      name: 'Bridge Information',
+      name: "Bridge Information",
       selector: (row) => row.uu_bms_id,
       sortable: false,
       cell: (row) => (
-        <Link to={`/PrioritizationInformation/${row.uu_bms_id}`} style={{ textDecoration: 'none', color: '#007bff' }}>
+        <span
+          onClick={() =>
+            navigate(`/PrioritizationInformation?uu_bms_id=${row.id}`)
+          }
+          style={{
+            textDecoration: "none",
+            color: "#007bff",
+            cursor: "pointer",
+          }}
+        >
           View Details
-        </Link>
+        </span>
       ),
     },
   ];
@@ -84,16 +101,16 @@ const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData 
   // Function to get color based on category (consistent with PrioritizationTable)
   const getCategoryColor = (category) => {
     switch (category) {
-      case 'Good':
-        return '#28a745';
-      case 'Fair':
-        return '#ffc107';
-      case 'Poor':
-        return '#fd7e14';
-      case 'Severe':
-        return '#dc3545';
+      case "Good":
+        return "#28a745";
+      case "Fair":
+        return "#ffc107";
+      case "Poor":
+        return "#fd7e14";
+      case "Severe":
+        return "#dc3545";
       default:
-        return '#000000';
+        return "#000000";
     }
   };
 
@@ -101,23 +118,23 @@ const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData 
   const customStyles = {
     rows: {
       style: {
-        minHeight: '50px',
+        minHeight: "50px",
         backgroundColor: (row) => getRowBackgroundColor(row.category),
       },
     },
     headCells: {
       style: {
-        paddingLeft: '8px',
-        paddingRight: '8px',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        backgroundColor: '#e9ecef',
+        paddingLeft: "8px",
+        paddingRight: "8px",
+        fontSize: "14px",
+        fontWeight: "bold",
+        backgroundColor: "#e9ecef",
       },
     },
     cells: {
       style: {
-        paddingLeft: '8px',
-        paddingRight: '8px',
+        paddingLeft: "8px",
+        paddingRight: "8px",
       },
     },
   };
@@ -125,16 +142,16 @@ const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData 
   // Function to get row background color based on category (consistent with PrioritizationTable)
   const getRowBackgroundColor = (category) => {
     switch (category) {
-      case 'Good':
-        return '#e6f3e6';
-      case 'Fair':
-        return '#fff3cd';
-      case 'Poor':
-        return '#ffe4cc';
-      case 'Severe':
-        return '#f8d7da';
+      case "Good":
+        return "#e6f3e6";
+      case "Fair":
+        return "#fff3cd";
+      case "Poor":
+        return "#ffe4cc";
+      case "Severe":
+        return "#f8d7da";
       default:
-        return '#ffffff';
+        return "#ffffff";
     }
   };
 
@@ -148,7 +165,7 @@ const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData 
       <Modal.Header closeButton>
         <Modal.Title>Bridges Category - {selectedTitle}</Modal.Title>
       </Modal.Header>
-      <Modal.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
+      <Modal.Body style={{ maxHeight: "400px", overflowY: "auto" }}>
         {modalData.length > 0 ? (
           <StyledDataTable
             columns={columns}
