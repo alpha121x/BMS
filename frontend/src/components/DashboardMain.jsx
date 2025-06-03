@@ -22,6 +22,8 @@ const DashboardMain = () => {
   const [underFacility, setUnderFacility] = useState("%"); // New filter state
   const [roadClassification, setRoadClassification] = useState("%"); // New filter state
   const [spanLength, setSpanLength] = useState("%");
+  const bridges_status_summary = "bridge-status-summary";
+
 
 
   // State for back-to-top button visibility
@@ -370,7 +372,9 @@ const DashboardMain = () => {
                   <CostEstimation />
                 )}
                 { activeView === "bridge_summary" && (
-                  <BridgesStatusSummary />
+                  <BridgesStatusSummary
+                  api_endpoint={bridges_status_summary}
+                   />
                 )}
             </div>
           </div>
