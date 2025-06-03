@@ -3481,14 +3481,8 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
         ) AS pending_inspections,
 
         -- Total = approved + pending
-        COUNT(*) FILTER (WHERE t.qc_rams = 2 OR t.qc_rams = 3) + 
-        SUM(
-          CASE 
-            WHEN t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU' 
-            THEN 1 
-            ELSE 0 
-          END
-        ) AS total_inspections
+        COUNT(*) FILTER (WHERE t.qc_rams = 2 OR t.qc_rams = 3 or qc_rams = 0) + 
+        AS total_inspections
 
       FROM bms.tbl_inspection_f t
       INNER JOIN bms.tbl_bms_master_data m 
