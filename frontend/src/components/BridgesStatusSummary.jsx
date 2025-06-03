@@ -20,6 +20,7 @@ const customStyles = {
       padding: "4px",
       fontSize: "14px",
       fontWeight: "bold",
+      border: "1px solid #ddd", // Add border to header cells
     },
   },
   rows: {
@@ -31,6 +32,7 @@ const customStyles = {
   cells: {
     style: {
       padding: "4px",
+      border: "1px solid #ddd", // Add border to all cells
       "&:nth-child(1), &:nth-child(2)": { textAlign: "left" },
       "&:nth-child(3), &:nth-child(4)": { textAlign: "center" },
     },
@@ -43,7 +45,6 @@ const customStyles = {
     },
   },
 };
-
 const BridgesStatusSummary = ({api_endpoint}) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,37 +85,46 @@ const BridgesStatusSummary = ({api_endpoint}) => {
 
   // Define columns for the DataTable
   const columns = [
-    {
-      name: "Reference No",
-      selector: (row) => row.referenceNo,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Bridge Name",
-      selector: (row) => row.bridgeName,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Total Inspections",
-      selector: (row) => row.totalInspections,
-      sortable: true,
-      center: true,
-    },
-    {
-      name: "Pending Inspections",
-      selector: (row) => row.pendingInspections,
-      sortable: true,
-      center: true,
-    },
-    {
-      name: "Approved Inspections",
-      selector: (row) => row.approvedInspections,
-      sortable: true,
-      center: true,
-    },
-  ];
+  {
+    name: "Reference No",
+    selector: (row) => row.referenceNo,
+    sortable: true,
+    center: false,
+  },
+  {
+    name: "Bridge Name",
+    selector: (row) => row.bridgeName,
+    sortable: true,
+    center: false,
+  },
+  {
+    name: "Total Inspections",
+    selector: (row) => row.totalInspections,
+    sortable: true,
+    center: true,
+    cell: (row) => (
+      <span style={{ color: "blue" }}>{row.totalInspections}</span>
+    ),
+  },
+  {
+    name: "Pending Inspections",
+    selector: (row) => row.pendingInspections,
+    sortable: true,
+    center: true,
+    cell: (row) => (
+      <span style={{ color: "orange" }}>{row.pendingInspections}</span>
+    ),
+  },
+  {
+    name: "Approved Inspections",
+    selector: (row) => row.approvedInspections,
+    sortable: true,
+    center: true,
+    cell: (row) => (
+      <span style={{ color: "green" }}>{row.approvedInspections}</span>
+    ),
+  },
+];
 
   return (
     <div
