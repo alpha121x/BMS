@@ -259,7 +259,7 @@ app.get("/api/bms-matrix", async (req, res) => {
         district, 
         road_name, 
         structure_type, 
-        structure_no, 
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
         date_time, 
         damagecategory,
         damagescore,

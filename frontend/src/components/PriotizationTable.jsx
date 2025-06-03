@@ -130,8 +130,8 @@ const PrioritizationTable = ({ districtId }) => {
     },
     headCells: {
       style: {
-        paddingLeft: "8px",
-        paddingRight: "8px",
+        paddingLeft: "6px",
+        paddingRight: "6px",
         fontSize: "14px",
         fontWeight: "bold",
         backgroundColor: "#e9ecef",
@@ -139,8 +139,8 @@ const PrioritizationTable = ({ districtId }) => {
     },
     cells: {
       style: {
-        paddingLeft: "8px",
-        paddingRight: "8px",
+        paddingLeft: "6px",
+        paddingRight: "6px",
       },
     },
   };
@@ -201,7 +201,7 @@ const PrioritizationTable = ({ districtId }) => {
               district: item.district,
               roadName: item.road_name,
               structureType: item.structure_type,
-              name: item.structure_no,
+              name: item.bridge_name,
               dateTime: excelSerialToDate(parseFloat(item.date_time)),
               category: item.damagecategory,
               score: item.damagescore,
