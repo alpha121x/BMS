@@ -10,6 +10,7 @@ import TopCardDashboard from "./TopCardDashboard";
 import Filters from "./Filters";
 import PriotizationTable from "./PriotizationTable"; // Import the new component
 import CostEstimation from "./CostEstimation"; // Import the new component
+import BridgesStatusSummary from "./BridgesStatusSummary"; // Import the new component
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -22,7 +23,6 @@ const DashboardMain = () => {
   const [roadClassification, setRoadClassification] = useState("%"); // New filter state
   const [spanLength, setSpanLength] = useState("%");
 
-  // console.log(roadClassification);
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -303,6 +303,16 @@ const DashboardMain = () => {
               >
                 Inventory
               </button>
+               <button
+                onClick={() => setActiveView("bridge_summary")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "bridge_summary"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Bridge Status Summary
+              </button>
                    <button
                 onClick={() => setActiveView("priortization")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
@@ -358,6 +368,9 @@ const DashboardMain = () => {
                 {
                 activeView === "cost" && (
                   <CostEstimation />
+                )}
+                { activeView === "bridge_summary" && (
+                  <BridgesStatusSummary />
                 )}
             </div>
           </div>
