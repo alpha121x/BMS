@@ -18,14 +18,14 @@ const customStyles = {
   headCells: {
     style: {
       padding: "4px",
-      fontSize: "14px",
+      fontSize: "18px",
       fontWeight: "bold",
       border: "1px solid #ddd", // Add border to header cells
     },
   },
   rows: {
     style: {
-      fontSize: "14px",
+      fontSize: "18px",
       borderBottom: "1px solid #ddd",
     },
   },
