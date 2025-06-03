@@ -173,7 +173,7 @@ const EvaluationMainRams = () => {
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
                 }`}
               >
-                Approved/Pending By Consultant
+                Bridges Status Summary
               </button>
             </div>
 
