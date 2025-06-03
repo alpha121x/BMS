@@ -53,11 +53,6 @@ const BridgeDetailsModal = ({
       ),
     },
     {
-      name: "Road Name",
-      selector: (row) => row.roadName,
-      sortable: true,
-    },
-    {
       name: "Structure Type",
       selector: (row) => row.structureType,
       sortable: true,
@@ -70,11 +65,6 @@ const BridgeDetailsModal = ({
     {
       name: "Bridge Name",
       selector: (row) => row.name,
-      sortable: true,
-    },
-    {
-      name: "Date Time",
-      selector: (row) => row.dateTime,
       sortable: true,
     },
     {
