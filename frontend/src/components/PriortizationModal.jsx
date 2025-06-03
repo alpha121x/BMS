@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 // Styled DataTable for consistent styling
 const StyledDataTable = styled(DataTable)`
@@ -53,7 +54,7 @@ const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData 
       selector: (row) => row.structureType,
       sortable: true,
     },
-     {
+    {
       name: 'Damage Score',
       selector: (row) => row.score,
       sortable: true,
@@ -67,6 +68,16 @@ const BridgeDetailsModal = ({ showModal, setShowModal, selectedTitle, modalData 
       name: 'Date Time',
       selector: (row) => row.dateTime,
       sortable: true,
+    },
+    {
+      name: 'Bridge Information',
+      selector: (row) => row.uu_bms_id,
+      sortable: false,
+      cell: (row) => (
+        <Link to={`/PrioritizationInformation/${row.uu_bms_id}`} style={{ textDecoration: 'none', color: '#007bff' }}>
+          View Details
+        </Link>
+      ),
     },
   ];
 

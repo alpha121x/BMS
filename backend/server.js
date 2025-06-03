@@ -2997,6 +2997,74 @@ function swapDomain(url) {
     : url;
 }
 
+app.get('/api/PriortizationInfo', async (req, res) => {
+  const { uu_bms_id } = req.params;
+
+  // Validate uu_bms_id
+  if (!uu_bms_id) {
+    return res.status(400).json({ error: 'uu_bms_id is required' });
+  }
+
+  try {
+    const query = `
+      SELECT 
+        is_active,
+        raw_id,
+        uu_bms_id, 
+        surveyed_by,
+        pms_sec_id, 
+        structure_no, 
+        structure_type_id, 
+        structure_type, 
+        road_name, 
+        road_name_cwd, 
+        route_id, 
+        survey_id, 
+        surveyor_name, 
+        district_id, 
+        district, 
+        road_classification, 
+        road_classification_id,
+        road_surface_type, 
+        carriageway_type, 
+        direction, 
+        visual_condition, 
+        construction_type_id, 
+        construction_type, 
+        no_of_span,
+        data_source, 
+        data_date_time, 
+        span_length_m, 
+        structure_width_m, 
+        construction_year, 
+        last_maintenance_date, 
+        remarks, 
+        is_surveyed, 
+        x_centroid, 
+        y_centroid, 
+        images_spans,
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1 
+      AND is_active = true
+      AND uu_bms_id = $1
+    `;
+
+    const result = await pool.query(query, [uu_bms_id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Bridge not found' });
+    }
+
+    // Return the first (and expected only) row
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching bridge data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // bridges list for dashboard main
 app.get("/api/bridges", async (req, res) => {
   try {
