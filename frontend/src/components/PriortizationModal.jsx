@@ -2,8 +2,8 @@ import React from "react";
 import { Modal } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
 
 // Styled DataTable for consistent styling
 const StyledDataTable = styled(DataTable)`
@@ -87,11 +87,24 @@ const BridgeDetailsModal = ({
             navigate(`/PrioritizationInformation?uu_bms_id=${row.id}`)
           }
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
             textDecoration: "none",
             color: "#007bff",
             cursor: "pointer",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            transition: "background-color 0.2s",
           }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#e6f0ff")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "transparent")
+          }
         >
+          <FaEye size={18} /> {/* Eye icon */}
           View Details
         </span>
       ),
