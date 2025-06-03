@@ -3465,34 +3465,29 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
   try {
     const query = `
       SELECT 
-        t.uu_bms_id,
-        CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
-
-        -- Approved inspections (RAMS)
-        COUNT(*) FILTER (WHERE t.qc_rams = 2) AS approved_insp,
-
-        -- Pending inspections (qc_rams = 0 AND surveyed_by = 'RAMS-UU' AND qc_con = 2)
-        SUM(
-          CASE 
-            WHEN t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU' 
-            THEN 1 
-            ELSE 0 
-          END
-        ) AS pending_inspections,
-
-        -- Total = approved + pending
-        COUNT(*) FILTER (WHERE t.qc_rams = 2 OR t.qc_rams = 3 or qc_rams = 0) + 
-        AS total_inspections
-
-      FROM bms.tbl_inspection_f t
-      INNER JOIN bms.tbl_bms_master_data m 
-        ON t.uu_bms_id = m.uu_bms_id
-      WHERE m.is_active = true
-      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
-      HAVING COUNT(*) FILTER (
-        WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
-      ) > 0
-      ORDER BY t.uu_bms_id;
+  t.uu_bms_id,
+  CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
+  -- Approved inspections (RAMS)
+  COUNT(*) FILTER (WHERE t.qc_rams = 2) AS approved_insp,
+  -- Pending inspections (qc_rams = 0 AND surveyed_by = 'RAMS-UU' AND qc_con = 2)
+  SUM(
+    CASE 
+      WHEN t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU' 
+      THEN 1 
+      ELSE 0 
+    END
+  ) AS pending_inspections,
+  -- Total = approved + pending
+  COUNT(*) FILTER (WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')) AS total_inspections
+FROM bms.tbl_inspection_f t
+INNER JOIN bms.tbl_bms_master_data m 
+  ON t.uu_bms_id = m.uu_bms_id
+WHERE m.is_active = true
+GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+HAVING COUNT(*) FILTER (
+  WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
+) > 0
+ORDER BY t.uu_bms_id;
     `;
 
     const result = await pool.query(query);
