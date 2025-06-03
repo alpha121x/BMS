@@ -24,7 +24,7 @@ const PrioritizationInformation = () => {
           throw new Error("No bridge ID provided");
         }
         console.log("Fetching bridge data for uu_bms_id:", uu_bms_id);
-        const response = await fetch(`${BASE_URL}/api/PrioritizationInfo?bridgeId=${encodeURIComponent(uu_bms_id)}`);
+        const response = await fetch(`${BASE_URL}/api/PriortizationInfo?bridgeId=${encodeURIComponent(uu_bms_id)}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
