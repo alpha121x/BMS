@@ -24,7 +24,11 @@ const PrioritizationInformation = () => {
           throw new Error("No bridge ID provided");
         }
         console.log("Fetching bridge data for uu_bms_id:", uu_bms_id);
-        const response = await fetch(`${BASE_URL}/api/PriortizationInfo?bridgeId=${encodeURIComponent(uu_bms_id)}`);
+        const response = await fetch(
+          `${BASE_URL}/api/PriortizationInfo?bridgeId=${encodeURIComponent(
+            uu_bms_id
+          )}`
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -48,7 +52,7 @@ const PrioritizationInformation = () => {
   }, [uu_bms_id]);
 
   const handleBackClick = () => {
-    navigate("/Dashboard");
+    navigate("/Priortization");
   };
 
   return (
@@ -62,12 +66,12 @@ const PrioritizationInformation = () => {
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
             <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
               <div className="flex-1">
-                <div className="flex justify-start">
+                <div className="flex justify-start mt-5">
                   <button
                     onClick={handleBackClick}
                     className="bg-inherit hover:bg-blue-500 text-black py-2 rounded-md flex items-center gap-2"
                   >
-                    <ArrowLeftIcon className="h-5 w-5" /> Bridges Wise Score
+                    <ArrowLeftIcon className="h-5 w-5" /> Prioritization
                   </button>
                 </div>
                 <div className="text-lg font-semibold">

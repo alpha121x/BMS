@@ -19,6 +19,9 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import PriortizationModal from "./PriortizationModal";
+import { useNavigate } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
+
 
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
@@ -80,6 +83,7 @@ const PrioritizationTable = ({ districtId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const tableRef = useRef(null);
   const chartRef = useRef(null);
+    const navigate = useNavigate(); // Must be inside a component
 
   // DataTable columns configuration
   const columns = [
@@ -92,11 +96,6 @@ const PrioritizationTable = ({ districtId }) => {
           {row.district}
         </span>
       ),
-    },
-    {
-      name: "Road Name",
-      selector: (row) => row.roadName,
-      sortable: true,
     },
     {
       name: "Structure Type",
@@ -114,9 +113,36 @@ const PrioritizationTable = ({ districtId }) => {
       sortable: true,
     },
     {
-      name: "Date Time",
-      selector: (row) => row.dateTime,
-      sortable: true,
+      name: "Bridge Information",
+      selector: (row) => row.uu_bms_id,
+      sortable: false,
+      cell: (row) => (
+        <span
+          onClick={() =>
+            navigate(`/PrioritizationInformation?uu_bms_id=${row.id}`)
+          }
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            textDecoration: "none",
+            color: "#007bff",
+            cursor: "pointer",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            transition: "background-color 0.2s",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#e6f0ff")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "transparent")
+          }
+        >
+          <FaEye size={18} /> {/* Eye icon */}
+          View Details
+        </span>
+      ),
     },
   ];
 
