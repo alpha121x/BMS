@@ -10,7 +10,7 @@ import TopCardDashboard from "./TopCardDashboard";
 import Filters from "./Filters";
 import PriotizationTable from "./PriotizationTable"; // Import the new component
 import CostEstimation from "./CostEstimation"; // Import the new component
-import BridgesStatusSummary from "./BridgesStatusSummary"; // Import the new component
+import BridgeStatusSummaryDashboard from "./BridgeStatusSummaryDashboard"; // Import the new component
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -22,7 +22,7 @@ const DashboardMain = () => {
   const [underFacility, setUnderFacility] = useState("%"); // New filter state
   const [roadClassification, setRoadClassification] = useState("%"); // New filter state
   const [spanLength, setSpanLength] = useState("%");
-  const bridges_status_summary = "bridge-status-summary";
+  const bridges_status_summary = "bridge-status-summary-combined";
 
 
 
@@ -372,7 +372,7 @@ const DashboardMain = () => {
                   <CostEstimation />
                 )}
                 { activeView === "bridge_summary" && (
-                  <BridgesStatusSummary
+                  <BridgeStatusSummaryDashboard
                   api_endpoint={bridges_status_summary}
                    />
                 )}

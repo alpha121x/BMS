@@ -3571,6 +3571,57 @@ ORDER BY t.uu_bms_id;
   }
 });
 
+app.get("/api/bridge-status-summary-combined", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        t.uu_bms_id,
+        CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
+        
+        -- Consultant approved inspections
+        COUNT(*) FILTER (WHERE t.qc_con = 2) AS con_approved,
+        
+        -- RAMS approved inspections
+        COUNT(*) FILTER (WHERE t.qc_rams = 2) AS ram_approved,
+
+        -- Total relevant inspections (con_approved + RAMS pending + consultant pending)
+        COUNT(*) FILTER (
+          WHERE 
+            t.qc_con = 2 OR 
+            (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU') OR
+            t.qc_rams = 2 OR 
+            (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
+        ) AS total_inspections
+
+      FROM bms.tbl_inspection_f t
+      INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
+      WHERE m.is_active = true
+      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+      HAVING 
+        COUNT(*) FILTER (
+          WHERE 
+            t.qc_con = 2 OR 
+            (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU') OR 
+            t.qc_rams = 2 OR 
+            (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
+        ) > 0
+      ORDER BY t.uu_bms_id;
+    `;
+
+    const result = await pool.query(query);
+
+    if (result.rows.length > 0) {
+      res.json(result.rows);
+    } else {
+      res.status(404).json({ error: "No bridge inspection records found." });
+    }
+  } catch (error) {
+    logError(`Error: ${error.message}`);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesRams", async (req, res) => {
   try {
