@@ -16,7 +16,6 @@ import { saveAs } from "file-saver";
 import ReportsSummary from "./ReportsSummary";
 import Compressor from "compressorjs";
 
-
 const InspectionListRams = ({ bridgeId }) => {
   const [pendingData, setPendingData] = useState([]);
   const [approvedData, setApprovedData] = useState([]);
@@ -623,7 +622,7 @@ const InspectionListRams = ({ bridgeId }) => {
                                         <div className="row">
                                           <div className="col-md-3">
                                             {inspection.PhotoPaths?.length >
-                                              0 && (
+                                            0 ? (
                                               <div
                                                 className="d-flex gap-2"
                                                 style={{
@@ -663,6 +662,10 @@ const InspectionListRams = ({ bridgeId }) => {
                                                   )
                                                 )}
                                               </div>
+                                            ) : (
+                                              <p className="text-muted">
+                                                No images found
+                                              </p>
                                             )}
                                           </div>
                                           <div className="col-md-6">

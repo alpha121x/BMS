@@ -239,7 +239,6 @@ const InspectionListCon = ({ bridgeId }) => {
       const summaryData = data.bridges;
       const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
 
-
       const headers = Object.keys(summaryData[0]).filter(
         (key) =>
           key !== "Overview Photos" &&
@@ -674,7 +673,7 @@ const InspectionListCon = ({ bridgeId }) => {
                                         <div className="row">
                                           <div className="col-md-3">
                                             {inspection.PhotoPaths?.length >
-                                              0 && (
+                                            0 ? (
                                               <div
                                                 className="d-flex gap-2"
                                                 style={{
@@ -714,6 +713,10 @@ const InspectionListCon = ({ bridgeId }) => {
                                                   )
                                                 )}
                                               </div>
+                                            ) : (
+                                              <p className="text-muted">
+                                                No images found
+                                              </p>
                                             )}
                                           </div>
                                           <div className="col-md-6">

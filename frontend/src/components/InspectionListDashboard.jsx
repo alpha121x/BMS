@@ -381,7 +381,8 @@ const InspectionList = ({ bridgeId }) => {
                       >
                         <div className="row">
                           <div className="col-md-3">
-                            {inspection.PhotoPaths?.length > 0 && (
+                            {inspection.PhotoPaths &&
+                            inspection.PhotoPaths.length > 0 ? (
                               <div
                                 className="d-flex gap-2"
                                 style={{
@@ -411,6 +412,8 @@ const InspectionList = ({ bridgeId }) => {
                                   />
                                 ))}
                               </div>
+                            ) : (
+                              <p className="text-muted">No images found</p>
                             )}
                           </div>
 
