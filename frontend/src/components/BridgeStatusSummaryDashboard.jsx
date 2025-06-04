@@ -20,7 +20,7 @@ const customStyles = {
       padding: "4px",
       fontSize: "18px",
       fontWeight: "bold",
-      border: "1px solid #ddd", // Add border to header cells
+      border: "1px solid #ddd",
     },
   },
   rows: {
@@ -32,7 +32,7 @@ const customStyles = {
   cells: {
     style: {
       padding: "4px",
-      border: "1px solid #ddd", // Add border to all cells
+      border: "1px solid #ddd",
       "&:nth-child(1), &:nth-child(2)": { textAlign: "left" },
       "&:nth-child(3), &:nth-child(4)": { textAlign: "center" },
     },
@@ -45,8 +45,11 @@ const customStyles = {
     },
   },
 };
-const BridgesStatusSummary = ({api_endpoint}) => {
+
+const BridgesStatusSummary = ({ api_endpoint }) => {
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -71,8 +74,9 @@ const BridgesStatusSummary = ({api_endpoint}) => {
             conInspections: item.con_approved,
             ramsInspections: item.ram_approved,
           }))
-          .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo)); // Sort by referenceNo
+          .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo));
         setData(formattedData);
+        setFilteredData(formattedData);
       } catch (err) {
         setError(err.message || "Failed to fetch data");
       } finally {
@@ -81,50 +85,65 @@ const BridgesStatusSummary = ({api_endpoint}) => {
     };
 
     fetchData();
-  }, []);
+  }, [api_endpoint]);
+
+  // Filter data based on search term
+  useEffect(() => {
+    const filtered = data.filter((row) =>
+      [row.bridgeName, row.totalInspections].some((field) =>
+        field?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    setFilteredData(filtered);
+  }, [searchTerm, data]);
+
+  // Handle search input change
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
 
   // Define columns for the DataTable
   const columns = [
-  {
-    name: "Reference No",
-    selector: (row) => row.referenceNo,
-    sortable: true,
-    center: false,
-  },
-  {
-    name: "Bridge Name",
-    selector: (row) => row.bridgeName,
-    sortable: true,
-    center: false,
-  },
-  {
-    name: "Total Inspections",
-    selector: (row) => row.totalInspections,
-    sortable: true,
-    center: true,
-    cell: (row) => (
-      <span style={{ color: "blue" }}>{row.totalInspections}</span>
-    ),
-  },
-  {
-    name: "Consultant Approved Inspections",
-    selector: (row) => row.conInspections,
-    sortable: true,
-    center: true,
-    cell: (row) => (
-      <span style={{ color: "green" }}>{row.conInspections}</span>
-    ),
-  },
-  {
-    name: "Rams Approved Inspections",
-    selector: (row) => row.ramsInspections,
-    sortable: true,
-    center: true,
-    cell: (row) => (
-      <span style={{ color: "green" }}>{row.ramsInspections}</span>
-    ),
-  },
-];
+    {
+      name: "Reference No",
+      selector: (row) => row.referenceNo,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Bridge Name",
+      selector: (row) => row.bridgeName,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Total Inspections",
+      selector: (row) => row.totalInspections,
+      sortable: true,
+      center: true,
+      cell: (row) => (
+        <span style={{ color: "blue" }}>{row.totalInspections}</span>
+      ),
+    },
+    {
+      name: "Consultant Approved Inspections",
+      selector: (row) => row.conInspections,
+      sortable: true,
+      center: true,
+      cell: (row) => (
+        <span style={{ color: "green" }}>{row.conInspections}</span>
+      ),
+    },
+    {
+      name: "Rams Approved Inspections",
+      selector: (row) => row.ramsInspections,
+      sortable: true,
+      center: true,
+      cell: (row) => (
+        <span style={{ color: "green" }}>{row.ramsInspections}</span>
+      ),
+    },
+  ];
 
   return (
     <div
@@ -141,11 +160,20 @@ const BridgesStatusSummary = ({api_endpoint}) => {
             <h5 className="mb-0 me-5">
               Bridges Status Summary{" "}
               <span className="text-sm bg-white text-[#005D7F] px-2 py-1 rounded ml-2">
-                Total: {data.length}
+                Total: {filteredData.length}
               </span>
             </h5>
           </div>
         </div>
+      </div>
+      <div className="p-4">
+        <input
+          type="text"
+          placeholder="Search by Bridge Name, or Total Inspections..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#005D7F]"
+        />
       </div>
       <div className="card-body p-0 pb-2">
         {loading ? (
@@ -155,14 +183,14 @@ const BridgesStatusSummary = ({api_endpoint}) => {
         ) : (
           <DataTable
             columns={columns}
-            data={data}
+            data={filteredData}
             customStyles={customStyles}
             pagination
             paginationPerPage={10}
             paginationRowsPerPageOptions={[10, 25, 50]}
             highlightOnHover
             striped
-            responsive
+            responsive={true}
             noDataComponent="No bridges found"
           />
         )}
