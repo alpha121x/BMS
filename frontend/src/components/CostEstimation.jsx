@@ -326,7 +326,9 @@ const CostEstimation = () => {
               ) : error ? (
                 <p className="text-danger">{error}</p>
               ) : showMap ? (
-                <CostMap />
+                <CostMap
+                districtId={districtId}
+                 />
               ) : (
                 <>
                   <Table
