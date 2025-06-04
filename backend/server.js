@@ -290,7 +290,8 @@ app.get("/api/bms-cost", async (req, res) => {
     const query = `
       SELECT 
         c.uu_bms_id, 
-        m.district, 
+        m.district,
+        m.district_id, 
         m.structure_type, 
         m.pms_sec_id, 
         CONCAT(m.pms_sec_id, ', ', m.structure_no) AS bridge_name,
@@ -299,7 +300,7 @@ app.get("/api/bms-cost", async (req, res) => {
       JOIN bms.tbl_bms_master_data m
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 
-        m.district::TEXT LIKE $1
+        m.district_id::TEXT LIKE $1
         AND m.structure_type = 'BRIDGE'
         AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
       ORDER BY c.uu_bms_id
@@ -315,7 +316,7 @@ app.get("/api/bms-cost", async (req, res) => {
       JOIN bms.tbl_bms_master_data m
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 
-        m.district::TEXT LIKE $1
+        m.district_id::TEXT LIKE $1
         AND m.structure_type = 'BRIDGE'
         AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
     `;
@@ -411,18 +412,20 @@ app.get("/api/structure-counts", async (req, res) => {
   try {
     const { district } = req.query;
     const params = [];
-    let districtFilter = "";
+    let queryConditions = ["is_active = true"];
 
     if (district && district !== "%") {
-      districtFilter = "WHERE district_id = $1";
+      queryConditions.push("district_id = $1");
       params.push(district);
     }
+
+    const whereClause = queryConditions.length > 0 ? `WHERE ${queryConditions.join(" AND ")}` : "";
 
     const structureTypeCounts = await pool.query(
       `
       SELECT structure_type, COUNT(*) AS count
-      FROM bms.tbl_bms_master_data WHERE is_active = true
-      ${districtFilter}
+      FROM bms.tbl_bms_master_data
+      ${whereClause}
       GROUP BY structure_type
       ORDER BY count DESC;
       `,
@@ -432,8 +435,8 @@ app.get("/api/structure-counts", async (req, res) => {
     const totalStructureCount = await pool.query(
       `
       SELECT COUNT(*) AS total_count
-      FROM bms.tbl_bms_master_data WHERE is_active = true
-      ${districtFilter};
+      FROM bms.tbl_bms_master_data
+      ${whereClause};
       `,
       params
     );
