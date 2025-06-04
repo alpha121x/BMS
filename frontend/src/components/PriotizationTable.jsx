@@ -702,7 +702,7 @@ const PrioritizationTable = ({ districtId }) => {
                       />
                     </>
                   )}
-                  {activeTab === "map" && <PrioritizationMap />}
+                  {activeTab === "map" && <PrioritizationMap districtId={districtId} />}
                 </div>
               </div>
             </Col>
