@@ -29,6 +29,7 @@ const customStyles = {
       borderBottom: "1px solid #ddd",
     },
   },
+  
   cells: {
     style: {
       padding: "4px",
