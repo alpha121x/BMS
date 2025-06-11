@@ -4250,8 +4250,7 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
-
-// inspections for table dashboard
+// inspections for table dashboard unaproeved evaluation
 app.get("/api/inspections-unapproved", async (req, res) => {
   try {
     let { district, bridge } = req.query;
