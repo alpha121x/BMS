@@ -4253,13 +4253,14 @@ app.get("/api/inspections", async (req, res) => {
 // inspections for table dashboard unaproeved evaluation
 app.get("/api/inspections-unapproved", async (req, res) => {
   try {
-    let { district, bridge } = req.query;
+    let { district, bridge, structureType } = req.query;
 
     // Build the base query without ORDER BY
     let query = `
       SELECT 
         bmd."pms_sec_id", 
         bmd."structure_no",
+        bmd."structure_type_id",
         CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
         ins."SpanIndex",
         ins."district_id", 
@@ -4287,6 +4288,12 @@ app.get("/api/inspections-unapproved", async (req, res) => {
     if (district && !isNaN(parseInt(district))) {
       query += ` AND ins."district_id" = $${paramIndex}`;
       queryParams.push(parseInt(district));
+      paramIndex++;
+    }
+
+    if (structureType && !isNaN(parseInt(structureType))) {
+      query += ` AND bmd."structure_type_id" = $${paramIndex}`;
+      queryParams.push(parseInt(structureType));
       paramIndex++;
     }
 

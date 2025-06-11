@@ -6,7 +6,7 @@ import UnapprovedInspectionsModal from "./UnapprovedInspectionsModal";
 import Papa from "papaparse";
 import { FaFileCsv} from "react-icons/fa6";
 
-const UnapprovedInspections = ({ districtId, bridgeName }) => {
+const UnapprovedInspections = ({ districtId, bridgeName, structureType }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,7 +18,7 @@ const UnapprovedInspections = ({ districtId, bridgeName }) => {
 
   useEffect(() => {
     fetchData();
-  }, [districtId, bridgeName]); // Dependency array to re-fetch when district or bridge changes
+  }, [districtId, bridgeName, structureType]); // Dependency array to re-fetch when district or bridge changes
 
   const fetchData = async () => {
     setLoading(true);
@@ -30,6 +30,7 @@ const UnapprovedInspections = ({ districtId, bridgeName }) => {
 
       if (districtId) params.append("district", districtId);
       if (bridgeName) params.append("bridge", bridgeName);
+      if (structureType) params.append("structureType", structureType);
 
       url.search = params.toString(); // Append query parameters to the URL
 
