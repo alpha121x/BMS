@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import CheckingDetailsModal from "./CheckingDetailsModal";
+import UnapprovedInspectionsModal from "./UnapprovedInspectionsModal";
 import Papa from "papaparse";
 import { FaFileCsv} from "react-icons/fa6";
 
@@ -302,7 +302,7 @@ const UnapprovedInspections = ({ districtId, bridgeName }) => {
         </Modal.Header>
 
         {/* Passing selectedRow as a prop to CheckingDetailsModal */}
-        <CheckingDetailsModal selectedRow={selectedRow} />
+        <UnapprovedInspectionsModal selectedRow={selectedRow} />
       </Modal>
     </div>
   );

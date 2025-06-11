@@ -11,7 +11,7 @@ import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
 import { LuConstruction } from "react-icons/lu";
 import BridgesStatusSummary from "./BridgesStatusSummary";
-import InspectionsList from "./CheckingTable";
+import InspectionsList from "./UnapprovedInspections";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
