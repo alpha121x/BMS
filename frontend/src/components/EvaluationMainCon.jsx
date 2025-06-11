@@ -11,6 +11,7 @@ import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
 import { LuConstruction } from "react-icons/lu";
 import BridgesStatusSummary from "./BridgesStatusSummary";
+import InspectionsList from "./CheckingTable";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -157,6 +158,16 @@ const EvaluationMainCon = () => {
               >
                 Bridges Status Summary
               </button>
+                <button
+                onClick={() => setActiveView("unappinspections")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "unappinspections"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Unnapproved Inspections
+              </button>
             </div>
 
             {/* Content Container */}
@@ -175,6 +186,7 @@ const EvaluationMainCon = () => {
                {activeView === "bridgessummary" && <BridgesStatusSummary
                      api_endpoint={bridges_status_summary}
                 />}
+                {activeView === "unappinspections" && <InspectionsList />}
             </div>
           </div>
         </div>

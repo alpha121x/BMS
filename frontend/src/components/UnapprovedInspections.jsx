@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
 import Papa from "papaparse";
-import Filters from "./Filters.jsx";
-import { FaFileCsv, FaFileExcel } from "react-icons/fa6";
-import { FaSpinner } from "react-icons/fa";
+import { FaFileCsv} from "react-icons/fa6";
 
-const CheckingTable = ({ districtId, bridgeName }) => {
+const UnapprovedInspections = ({ districtId, bridgeName }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +25,7 @@ const CheckingTable = ({ districtId, bridgeName }) => {
     setError(null);
     try {
       // Construct the URL with parameters
-      const url = new URL(`${BASE_URL}/api/inspections`);
+      const url = new URL(`${BASE_URL}/api/inspections-unapproved`);
       const params = new URLSearchParams();
 
       if (districtId) params.append("district", districtId);
@@ -310,4 +308,4 @@ const CheckingTable = ({ districtId, bridgeName }) => {
   );
 };
 
-export default CheckingTable;
+export default UnapprovedInspections;

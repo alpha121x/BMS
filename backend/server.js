@@ -3624,7 +3624,6 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
   }
 });
 
-
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesRams", async (req, res) => {
   try {
@@ -4182,6 +4181,105 @@ app.get("/api/inspections", async (req, res) => {
         OR 
         (ins.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
     ) 
+    `;
+
+    const queryParams = [];
+    let paramIndex = 1;
+
+    if (district && !isNaN(parseInt(district))) {
+      query += ` AND ins."district_id" = $${paramIndex}`;
+      queryParams.push(parseInt(district));
+      paramIndex++;
+    }
+
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
+      paramIndex++;
+    }
+
+    // Append ORDER BY clause after dynamic filters
+    query += ` ORDER BY inspection_id DESC;`;
+
+    const result = await pool.query(query, queryParams);
+
+    // Process PhotoPaths to extract image URLs
+    const processedData = result.rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path" keys
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with image paths
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Store extracted paths as a flat array
+      };
+    });
+
+    res.json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+
+// inspections for table dashboard
+app.get("/api/inspections-unapproved", async (req, res) => {
+  try {
+    let { district, bridge } = req.query;
+
+    // Build the base query without ORDER BY
+    let query = `
+      SELECT 
+        bmd."pms_sec_id", 
+        bmd."structure_no",
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
+        ins."SpanIndex",
+        ins."district_id", 
+        ins."WorkKindName", 
+        ins."PartsName", 
+        ins."MaterialName", 
+        ins."DamageKindName", 
+        ins."DamageLevel", 
+        ins."damage_extent",  
+        ins."current_date_time",  
+        ins."Remarks", 
+        ins.qc_con,
+        ins.qc_remarks_con,
+        ins.inspection_images AS "PhotoPaths"
+      FROM bms.tbl_inspection_f AS ins
+      JOIN bms.tbl_bms_master_data AS bmd 
+        ON ins."uu_bms_id" = bmd."uu_bms_id"
+      WHERE 1=1
+    AND ins.surveyed_by = 'RAMS-UU' AND qc_con = 3 
     `;
 
     const queryParams = [];
