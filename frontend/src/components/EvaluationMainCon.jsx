@@ -186,7 +186,11 @@ const EvaluationMainCon = () => {
                {activeView === "bridgessummary" && <BridgesStatusSummary
                      api_endpoint={bridges_status_summary}
                 />}
-                {activeView === "unappinspections" && <InspectionsList />}
+                {activeView === "unappinspections" && <InspectionsList
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                />}
             </div>
           </div>
         </div>
