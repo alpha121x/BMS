@@ -46,7 +46,12 @@ const customStyles = {
   },
 };
 
-const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureType }) => {
+const BridgesStatusSummary = ({
+  api_endpoint,
+  districtId,
+  bridgeName,
+  structureType,
+}) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,10 +72,14 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
         if (bridgeName) params.append("bridgeName", bridgeName);
         if (structureType) params.append("structureType", structureType);
 
-        const response = await fetch(`${BASE_URL}/api/${api_endpoint}?${params.toString()}`);
+        const response = await fetch(
+          `${BASE_URL}/api/${api_endpoint}?${params.toString()}`
+        );
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({})); // Handle JSON parse errors
-          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+          throw new Error(
+            errorData.error || `HTTP error! status: ${response.status}`
+          );
         }
         const result = await response.json();
 
@@ -168,7 +177,7 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
           <div className="flex items-center justify-between text-white">
             <h5 className="mb-0 me-5">
               Bridges Status Summary{" "}
-              {(data.length > 0 && !loading && !error) && (
+              {data.length > 0 && !loading && !error && (
                 <span className="text-sm bg-white text-[#005D7F] px-2 py-1 rounded ml-2">
                   Total: {filteredData.length}
                 </span>
@@ -192,7 +201,9 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
         ) : error ? (
           <div className="p-4 text-center text-red-600">{error}</div>
         ) : data.length === 0 ? (
-          <div className="p-4 text-center text-gray-600">No bridge inspection records found.</div>
+          <div className="p-4 text-center text-gray-600">
+            No bridge inspection records found.
+          </div>
         ) : (
           <DataTable
             columns={columns}
