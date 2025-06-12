@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { BASE_URL } from "./config";
 
@@ -46,20 +46,26 @@ const customStyles = {
   },
 };
 
-const BridgesStatusSummary = ({ api_endpoint }) => {
+const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureType }) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch data on component mount
+  // Fetch data on component mount or when props change
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${BASE_URL}/api/${api_endpoint}`);
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (districtId) params.append("districtId", districtId);
+        if (bridgeName) params.append("bridgeName", bridgeName);
+        if (structureType) params.append("structureType", structureType);
+
+        const response = await fetch(`${BASE_URL}/api/${api_endpoint}?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -85,7 +91,7 @@ const BridgesStatusSummary = ({ api_endpoint }) => {
     };
 
     fetchData();
-  }, [api_endpoint]);
+  }, [api_endpoint, districtId, bridgeName, structureType]);
 
   // Filter data based on search term
   useEffect(() => {

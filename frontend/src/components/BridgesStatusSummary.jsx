@@ -201,7 +201,7 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
             customStyles={customStyles}
             pagination
             paginationPerPage={10}
-            paginationRowsPerPageOptions=[10, 25, 50]
+            paginationRowsPerPageOptions={[10, 25, 50]} // Fixed syntax error
             highlightOnHover
             striped
             responsive={true}
