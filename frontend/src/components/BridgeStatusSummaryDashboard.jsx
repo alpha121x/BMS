@@ -221,6 +221,7 @@ const BridgesStatusSummary = ({
       </div>
     </div>
   );
+  
 };
 
 export default BridgesStatusSummary;
