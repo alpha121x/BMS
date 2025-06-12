@@ -3637,17 +3637,17 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
     const conditions = [];
     const values = [];
 
-    if (districtId) {
+    if (districtId !== "%") {
       conditions.push(`m.district_id = $${conditions.length + 1}`);
       values.push(districtId);
     }
 
-    if (bridgeName) {
+   if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       conditions.push(`LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${conditions.length + 1}`);
       values.push(`%${bridgeName.toLowerCase()}%`);
     }
 
-    if (structureType) {
+    if (structureType !== "%") {
       conditions.push(`m.structure_type_id = $${conditions.length + 1}`);
       values.push(structureType);
     }
