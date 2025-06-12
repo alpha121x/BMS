@@ -20,7 +20,6 @@ const EvaluationMainRams = () => {
   const [inspectedCards, setInspectedCards] = useState([]);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const bridges_status_summary = "bridge-status-summary-rams";
-  
 
   const fetchInspectionCounts = async () => {
     if (!districtId) return; // Avoid unnecessary API calls
@@ -139,7 +138,7 @@ const EvaluationMainRams = () => {
         </div> */}
       {/* </div> */}
 
-       {/* Toggle Buttons */}
+      {/* Toggle Buttons */}
       <div className="container-fluid">
         <div className="row mt-2">
           <div className="col-md-12">
@@ -165,7 +164,7 @@ const EvaluationMainRams = () => {
               >
                 Bridges List
               </button>
-                 <button
+              <button
                 onClick={() => setActiveView("bridgessummary")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "bridgessummary"
@@ -190,9 +189,14 @@ const EvaluationMainRams = () => {
                   setBridgeName={setBridgeName}
                 />
               )}
-               {activeView === "bridgessummary" && <BridgesStatusSummary
-                     api_endpoint={bridges_status_summary}
-                />}
+              {activeView === "bridgessummary" && (
+                <BridgesStatusSummary
+                  api_endpoint={bridges_status_summary}
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                />
+              )}
             </div>
           </div>
         </div>

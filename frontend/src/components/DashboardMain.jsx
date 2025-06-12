@@ -374,6 +374,9 @@ const DashboardMain = () => {
                 { activeView === "bridge_summary" && (
                   <BridgeStatusSummaryDashboard
                   api_endpoint={bridges_status_summary}
+                   districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
                    />
                 )}
             </div>

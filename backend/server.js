@@ -3539,16 +3539,13 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
-      const message = "No records found for bridge inspections";
-      logError(`Info: ${message}`);
-      res.status(404).json({ error: message });
+      res.status(404).json({ error: "No records found for bridge inspections" });
     }
   } catch (error) {
-    const errorMessage = `Error: ${error.message}`;
-    logError(errorMessage);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 // bridge-status-summary for RAMS evaluation module
 app.get("/api/bridge-status-summary-rams", async (req, res) => {
   try {
@@ -3607,17 +3604,14 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
-      const message = "No records found for RAMS bridge inspections";
-      logError(`Info: ${message}`);
-      res.status(404).json({ error: message });
+      res.status(404).json({ error: "No records found for RAMS bridge inspections" });
     }
   } catch (error) {
-    const errorMessage = `Error: ${error.message}`;
-    logError(errorMessage);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
+// bridge-status-summary-combined
 app.get("/api/bridge-status-summary-combined", async (req, res) => {
   try {
     const { districtId, bridgeName, structureType } = req.query;
@@ -3680,13 +3674,9 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
-      const message = "No bridge inspection records found.";
-      logError(`Info: ${message}`);
-      res.status(404).json({ error: message });
+      res.status(404).json({ error: "No bridge inspection records found." });
     }
   } catch (error) {
-    const errorMessage = `Error: ${error.message}`;
-    logError(errorMessage);
     res.status(500).json({ error: "Internal server error" });
   }
 });
