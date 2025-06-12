@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { BASE_URL } from "./config";
 
-// Custom styles (unchanged)
+// Custom styles for the DataTable appearance
 const customStyles = {
   table: {
     style: {
@@ -33,9 +33,8 @@ const customStyles = {
     style: {
       padding: "4px",
       border: "1px solid #ddd",
-      "&:nth-child(1)": { textAlign: "center" },
-      "&:nth-child(2), &:nth-child(3)": { textAlign: "left" },
-      "&:nth-child(4), &:nth-child(5), &:nth-child(6)": { textAlign: "center" },
+      "&:nth-child(1), &:nth-child(2)": { textAlign: "left" },
+      "&:nth-child(3), &:nth-child(4)": { textAlign: "center" },
     },
   },
   pagination: {
@@ -59,6 +58,8 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
     const fetchData = async () => {
       setLoading(true);
       setError(null);
+      setData([]); // Reset data on new fetch
+      setFilteredData([]); // Reset filteredData on new fetch
       try {
         // Build query parameters
         const params = new URLSearchParams();
@@ -68,7 +69,8 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
 
         const response = await fetch(`${BASE_URL}/api/${api_endpoint}?${params.toString()}`);
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
         const result = await response.json();
 
@@ -78,14 +80,14 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
             referenceNo: item.uu_bms_id,
             bridgeName: item.bridge_name,
             totalInspections: item.total_inspections,
-            pendingInspections: item.pending_inspections || item.con_approved || 0, // Adjust for combined endpoint
-            approvedInspections: item.approved_insp || item.ram_approved || 0, // Adjust for combined endpoint
+            conInspections: item.con_approved,
+            ramsInspections: item.ram_approved,
           }))
           .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo));
         setData(formattedData);
         setFilteredData(formattedData);
       } catch (err) {
-        setError(err.message || "Failed to fetch data");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -94,7 +96,7 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
     fetchData();
   }, [api_endpoint, districtId, bridgeName, structureType]);
 
-  // Filter data based on search term (client-side filtering)
+  // Filter data based on search term
   useEffect(() => {
     const filtered = data.filter((row) =>
       [row.bridgeName, row.totalInspections].some((field) =>
@@ -111,13 +113,6 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
 
   // Define columns for the DataTable
   const columns = [
-    {
-      name: "No",
-      selector: (row, index) => index + 1,
-      sortable: false,
-      center: true,
-      width: "60px",
-    },
     {
       name: "Reference No",
       selector: (row) => row.referenceNo,
@@ -140,21 +135,21 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
       ),
     },
     {
-      name: "Pending Inspections",
-      selector: (row) => row.pendingInspections,
+      name: "Consultant Approved Inspections",
+      selector: (row) => row.conInspections,
       sortable: true,
       center: true,
       cell: (row) => (
-        <span style={{ color: "orange" }}>{row.pendingInspections}</span>
+        <span style={{ color: "green" }}>{row.conInspections}</span>
       ),
     },
     {
-      name: "Approved Inspections",
-      selector: (row) => row.approvedInspections,
+      name: "Rams Approved Inspections",
+      selector: (row) => row.ramsInspections,
       sortable: true,
       center: true,
       cell: (row) => (
-        <span style={{ color: "green" }}>{row.approvedInspections}</span>
+        <span style={{ color: "green" }}>{row.ramsInspections}</span>
       ),
     },
   ];
@@ -173,9 +168,11 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
           <div className="flex items-center justify-between text-white">
             <h5 className="mb-0 me-5">
               Bridges Status Summary{" "}
-              <span className="text-sm bg-white text-[#005D7F] px-2 py-1 rounded ml-2">
-                Total: {filteredData.length}
-              </span>
+              {(!loading && !error && data.length > 0) && (
+                <span className="text-sm bg-white text-[#005D7F] px-2 py-1 rounded ml-2">
+                  Total: {filteredData.length}
+                </span>
+              )}
             </h5>
           </div>
         </div>
@@ -193,7 +190,9 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
         {loading ? (
           <div className="p-4 text-center text-gray-600">Loading...</div>
         ) : error ? (
-          <div className="p-4 text-center text-red-600">Error: {error}</div>
+          <div className="p-4 text-center text-red-600">{error}</div>
+        ) : data.length === 0 ? (
+          <div className="p-4 text-center text-gray-600">No bridge inspection records found.</div>
         ) : (
           <DataTable
             columns={columns}
@@ -201,7 +200,7 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
             customStyles={customStyles}
             pagination
             paginationPerPage={10}
-            paginationRowsPerPageOptions={[10, 25, 50]} // Fixed syntax error
+            paginationRowsPerPageOptions={[10, 25, 50]}
             highlightOnHover
             striped
             responsive={true}

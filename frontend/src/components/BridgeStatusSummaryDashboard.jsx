@@ -58,6 +58,8 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
     const fetchData = async () => {
       setLoading(true);
       setError(null);
+      setData([]); // Reset data on new fetch
+      setFilteredData([]); // Reset filteredData on new fetch
       try {
         // Build query parameters
         const params = new URLSearchParams();
@@ -67,7 +69,8 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
 
         const response = await fetch(`${BASE_URL}/api/${api_endpoint}?${params.toString()}`);
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json().catch(() => ({})); // Handle JSON parse errors
+          throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
         const result = await response.json();
 
@@ -84,7 +87,7 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
         setData(formattedData);
         setFilteredData(formattedData);
       } catch (err) {
-        setError(err.message || "Failed to fetch data");
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -165,9 +168,11 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
           <div className="flex items-center justify-between text-white">
             <h5 className="mb-0 me-5">
               Bridges Status Summary{" "}
-              <span className="text-sm bg-white text-[#005D7F] px-2 py-1 rounded ml-2">
-                Total: {filteredData.length}
-              </span>
+              {(data.length > 0 && !loading && !error) && (
+                <span className="text-sm bg-white text-[#005D7F] px-2 py-1 rounded ml-2">
+                  Total: {filteredData.length}
+                </span>
+              )}
             </h5>
           </div>
         </div>
@@ -185,7 +190,9 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
         {loading ? (
           <div className="p-4 text-center text-gray-600">Loading...</div>
         ) : error ? (
-          <div className="p-4 text-center text-red-600">Error: {error}</div>
+          <div className="p-4 text-center text-red-600">{error}</div>
+        ) : data.length === 0 ? (
+          <div className="p-4 text-center text-gray-600">No bridge inspection records found.</div>
         ) : (
           <DataTable
             columns={columns}
