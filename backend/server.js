@@ -3482,13 +3482,14 @@ SELECT
 // bridge-status-summary for Consultant evaluation module
 app.get("/api/bridge-status-summary", async (req, res) => {
   try {
-    const query = `
+    const { districtId, bridgeName, structureType } = req.query;
+
+    // Base query
+    let query = `
       SELECT 
         t.uu_bms_id,
         CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
-
         COUNT(*) FILTER (WHERE t.qc_con = 2) AS approved_insp,
-
         SUM(
           CASE 
             WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
@@ -3496,18 +3497,36 @@ app.get("/api/bridge-status-summary", async (req, res) => {
             ELSE 0 
           END
         ) AS pending_inspections,
-
-        -- Total = approved + pending
-        COUNT(*) FILTER (WHERE t.qc_con = 2 OR qc_con = 3 ) + 
-        SUM(CASE 
-              WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
-              THEN 1 
-            ELSE 0 
-            END) AS total_inspections
-
+        COUNT(*) FILTER (WHERE t.qc_con = 2 OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU')) AS total_inspections
       FROM bms.tbl_inspection_f t
       INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
       WHERE m.is_active = true
+    `;
+
+    // Add filters dynamically
+    const conditions = [];
+    const values = [];
+
+    if (districtId) {
+      conditions.push(`m.district_id = $${conditions.length + 1}`);
+      values.push(districtId);
+    }
+
+    if (bridgeName) {
+      conditions.push(`LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${conditions.length + 1}`);
+      values.push(`%${bridgeName.toLowerCase()}%`);
+    }
+
+    if (structureType) {
+      conditions.push(`m.structure_type_id = $${conditions.length + 1}`);
+      values.push(structureType);
+    }
+
+    if (conditions.length > 0) {
+      query += ` AND ${conditions.join(" AND ")}`;
+    }
+
+    query += `
       GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
       HAVING COUNT(*) FILTER (
         WHERE t.qc_con = 2 OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU')
@@ -3515,7 +3534,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
       ORDER BY t.uu_bms_id;
     `;
 
-    const result = await pool.query(query);
+    const result = await pool.query(query, values);
 
     if (result.rows.length > 0) {
       res.json(result.rows);
@@ -3530,64 +3549,85 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 // bridge-status-summary for RAMS evaluation module
 app.get("/api/bridge-status-summary-rams", async (req, res) => {
   try {
-    const query = `
+    const { districtId, bridgeName, structureType } = req.query;
+
+    let query = `
       SELECT 
-  t.uu_bms_id,
-  CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
-  -- Approved inspections (RAMS)
-  COUNT(*) FILTER (WHERE t.qc_rams = 2) AS approved_insp,
-  -- Pending inspections (qc_rams = 0 AND surveyed_by = 'RAMS-UU' AND qc_con = 2)
-  SUM(
-    CASE 
-      WHEN t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU' 
-      THEN 1 
-      ELSE 0 
-    END
-  ) AS pending_inspections,
-  -- Total = approved + pending
-  COUNT(*) FILTER (WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')) AS total_inspections
-FROM bms.tbl_inspection_f t
-INNER JOIN bms.tbl_bms_master_data m 
-  ON t.uu_bms_id = m.uu_bms_id
-WHERE m.is_active = true
-GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
-HAVING COUNT(*) FILTER (
-  WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
-) > 0
-ORDER BY t.uu_bms_id;
+        t.uu_bms_id,
+        CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
+        COUNT(*) FILTER (WHERE t.qc_rams = 2) AS approved_insp,
+        SUM(
+          CASE 
+            WHEN t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU' 
+            THEN 1 
+            ELSE 0 
+          END
+        ) AS pending_inspections,
+        COUNT(*) FILTER (WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')) AS total_inspections
+      FROM bms.tbl_inspection_f t
+      INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
+      WHERE m.is_active = true
     `;
 
-    const result = await pool.query(query);
+    const conditions = [];
+    const values = [];
+
+    if (districtId) {
+      conditions.push(`m.district_id = $${conditions.length + 1}`);
+      values.push(districtId);
+    }
+
+    if (bridgeName) {
+      conditions.push(`LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${conditions.length + 1}`);
+      values.push(`%${bridgeName.toLowerCase()}%`);
+    }
+
+    if (structureType) {
+      conditions.push(`m.structure_type_id = $${conditions.length + 1}`);
+      values.push(structureType);
+    }
+
+    if (conditions.length > 0) {
+      query += ` AND ${conditions.join(" AND ")}`;
+    }
+
+    query += `
+      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+      HAVING COUNT(*) FILTER (
+        WHERE t.qc_rams = 2 OR (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
+      ) > 0
+      ORDER BY t.uu_bms_id;
+    `;
+
+    const result = await pool.query(query, values);
 
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
       const message = "No records found for RAMS bridge inspections";
+      logError(`Info: ${message}`);
       res.status(404).json({ error: message });
     }
   } catch (error) {
+    const errorMessage = `Error: ${error.message}`;
+    logError(errorMessage);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 app.get("/api/bridge-status-summary-combined", async (req, res) => {
   try {
-    const query = `
+    const { districtId, bridgeName, structureType } = req.query;
+
+    let query = `
       SELECT 
         t.uu_bms_id,
         CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
-        
-        -- Consultant approved inspections
         COUNT(*) FILTER (WHERE t.qc_con = 2) AS con_approved,
-        
-        -- RAMS approved inspections
         COUNT(*) FILTER (WHERE t.qc_rams = 2) AS ram_approved,
-
-        -- Total relevant inspections (con_approved + RAMS pending + consultant pending)
         COUNT(*) FILTER (
           WHERE 
             t.qc_con = 2 OR 
@@ -3595,10 +3635,34 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
             t.qc_rams = 2 OR 
             (t.qc_rams = 0 AND t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU')
         ) AS total_inspections
-
       FROM bms.tbl_inspection_f t
       INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
       WHERE m.is_active = true
+    `;
+
+    const conditions = [];
+    const values = [];
+
+    if (districtId) {
+      conditions.push(`m.district_id = $${conditions.length + 1}`);
+      values.push(districtId);
+    }
+
+    if (bridgeName) {
+      conditions.push(`LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${conditions.length + 1}`);
+      values.push(`%${bridgeName.toLowerCase()}%`);
+    }
+
+    if (structureType) {
+      conditions.push(`m.structure_type_id = $${conditions.length + 1}`);
+      values.push(structureType);
+    }
+
+    if (conditions.length > 0) {
+      query += ` AND ${conditions.join(" AND ")}`;
+    }
+
+    query += `
       GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
       HAVING 
         COUNT(*) FILTER (
@@ -3611,15 +3675,18 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
       ORDER BY t.uu_bms_id;
     `;
 
-    const result = await pool.query(query);
+    const result = await pool.query(query, values);
 
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
-      res.status(404).json({ error: "No bridge inspection records found." });
+      const message = "No bridge inspection records found.";
+      logError(`Info: ${message}`);
+      res.status(404).json({ error: message });
     }
   } catch (error) {
-    logError(`Error: ${error.message}`);
+    const errorMessage = `Error: ${error.message}`;
+    logError(errorMessage);
     res.status(500).json({ error: "Internal server error" });
   }
 });

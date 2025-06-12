@@ -79,28 +79,28 @@ const EvaluationMainCon = () => {
     <section className="min-h-screen">
       {/* Structure Section */}
       <div className="container-fluid mt-[65px]">
-            <div className="row g-1">
-                <div className="col-md-12 d-flex gap-4  justify-content-start align-items-start">
-                    <div className="d-flex gap-2">
-                        <div>
-                            <TopCardsCon inspectedCards={inspectedCards} />
-                        </div>
-                    </div>
-                    <div className="bg-[#8CC5C4] p-3 rounded-1">
-                        <Filters
-                            districtId={districtId}
-                            setDistrictId={setDistrictId}
-                            structureType={structureType}
-                            setStructureType={setStructureType}
-                            bridgeName={bridgeName}
-                            setBridgeName={setBridgeName}
-                            flexDirection="flex-col"
-                            padding="p-0"
-                        />
-                    </div>
-                </div>
+        <div className="row g-1">
+          <div className="col-md-12 d-flex gap-4  justify-content-start align-items-start">
+            <div className="d-flex gap-2">
+              <div>
+                <TopCardsCon inspectedCards={inspectedCards} />
+              </div>
             </div>
+            <div className="bg-[#8CC5C4] p-3 rounded-1">
+              <Filters
+                districtId={districtId}
+                setDistrictId={setDistrictId}
+                structureType={structureType}
+                setStructureType={setStructureType}
+                bridgeName={bridgeName}
+                setBridgeName={setBridgeName}
+                flexDirection="flex-col"
+                padding="p-0"
+              />
+            </div>
+          </div>
         </div>
+      </div>
 
       {/* <div className="mb-2 container-fluid">
         <Map districtId={districtId} />
@@ -158,7 +158,7 @@ const EvaluationMainCon = () => {
               >
                 Bridges Status Summary
               </button>
-                <button
+              <button
                 onClick={() => setActiveView("unappinspections")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "unappinspections"
@@ -183,14 +183,21 @@ const EvaluationMainCon = () => {
                   setBridgeName={setBridgeName}
                 />
               )}
-               {activeView === "bridgessummary" && <BridgesStatusSummary
-                     api_endpoint={bridges_status_summary}
-                />}
-                {activeView === "unappinspections" && <InspectionsList
+              {activeView === "bridgessummary" && (
+                <BridgesStatusSummary
+                  api_endpoint={bridges_status_summary}
                   districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
-                />}
+                />
+              )}
+              {activeView === "unappinspections" && (
+                <InspectionsList
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                />
+              )}
             </div>
           </div>
         </div>

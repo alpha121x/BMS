@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { BASE_URL } from "./config";
 
-// Custom styles for the DataTable appearance
+// Custom styles (unchanged)
 const customStyles = {
   table: {
     style: {
@@ -29,14 +29,13 @@ const customStyles = {
       borderBottom: "1px solid #ddd",
     },
   },
-  
   cells: {
     style: {
       padding: "4px",
       border: "1px solid #ddd",
-      "&:nth-child(1)": { textAlign: "center" }, // Center "No" column
-      "&:nth-child(2), &:nth-child(3)": { textAlign: "left" }, // Reference No, Bridge Name
-      "&:nth-child(4), &:nth-child(5), &:nth-child(6)": { textAlign: "center" }, // Inspections
+      "&:nth-child(1)": { textAlign: "center" },
+      "&:nth-child(2), &:nth-child(3)": { textAlign: "left" },
+      "&:nth-child(4), &:nth-child(5), &:nth-child(6)": { textAlign: "center" },
     },
   },
   pagination: {
@@ -48,20 +47,26 @@ const customStyles = {
   },
 };
 
-const BridgesStatusSummary = ({ api_endpoint }) => {
+const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureType }) => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch data on component mount
+  // Fetch data on component mount or when props change
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${BASE_URL}/api/${api_endpoint}`);
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (districtId) params.append("districtId", districtId);
+        if (bridgeName) params.append("bridgeName", bridgeName);
+        if (structureType) params.append("structureType", structureType);
+
+        const response = await fetch(`${BASE_URL}/api/${api_endpoint}?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -73,8 +78,8 @@ const BridgesStatusSummary = ({ api_endpoint }) => {
             referenceNo: item.uu_bms_id,
             bridgeName: item.bridge_name,
             totalInspections: item.total_inspections,
-            pendingInspections: item.pending_inspections,
-            approvedInspections: item.approved_insp,
+            pendingInspections: item.pending_inspections || item.con_approved || 0, // Adjust for combined endpoint
+            approvedInspections: item.approved_insp || item.ram_approved || 0, // Adjust for combined endpoint
           }))
           .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo));
         setData(formattedData);
@@ -87,9 +92,9 @@ const BridgesStatusSummary = ({ api_endpoint }) => {
     };
 
     fetchData();
-  }, [api_endpoint]);
+  }, [api_endpoint, districtId, bridgeName, structureType]);
 
-  // Filter data based on search term
+  // Filter data based on search term (client-side filtering)
   useEffect(() => {
     const filtered = data.filter((row) =>
       [row.bridgeName, row.totalInspections].some((field) =>
@@ -196,7 +201,7 @@ const BridgesStatusSummary = ({ api_endpoint }) => {
             customStyles={customStyles}
             pagination
             paginationPerPage={10}
-            paginationRowsPerPageOptions={[10, 25, 50]}
+            paginationRowsPerPageOptions=[10, 25, 50]
             highlightOnHover
             striped
             responsive={true}
