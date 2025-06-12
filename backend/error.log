@@ -1,9 +1,0 @@
-C:\Users\PMYLS\Desktop\BMS\backend\server.js:3689
-    logError(errorMessage);
-    ^
-
-ReferenceError: logError is not defined
-    at C:\Users\PMYLS\Desktop\BMS\backend\server.js:3689:5
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-
-Node.js v20.10.0
