@@ -2,17 +2,29 @@ import React, { useEffect, useState } from "react";
 import { Button, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import * as XLSX from "xlsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
+import {
+  faFileCsv,
+  faFileExcel,
+  faAnglesRight,
+  faArrowLeft,
+  faArrowRight,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import Compressor from "compressorjs";
 
 const InspectionList = ({ bridgeId }) => {
   const [inspectionData, setInspectionData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingCsv, setLoadingCsv] = useState(false);
+  const [loadingExcel, setLoadingExcel] = useState(false);
   const [error, setError] = useState(null);
-
   const [openAccordions, setOpenAccordions] = useState({});
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   const toggleAccordion = (spanIndex) => {
@@ -26,11 +38,12 @@ const InspectionList = ({ bridgeId }) => {
     if (bridgeId) {
       fetchData();
     }
-  }, [bridgeId]); // Refetch when inspectionType changes
+  }, [bridgeId]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+
     try {
       if (!bridgeId) {
         throw new Error("bridgeId is required");
@@ -40,9 +53,13 @@ const InspectionList = ({ bridgeId }) => {
         `${BASE_URL}/api/get-summary?bridgeId=${bridgeId}`
       );
 
-      if (!response.ok) throw new Error("Failed to fetch data");
-
+      // Try to parse error response body
       const result = await response.json();
+
+      if (!response.ok) {
+        // Show API response error if available
+        throw new Error(result.message || "Failed to fetch data");
+      }
 
       if (Array.isArray(result.data)) {
         setInspectionData(result.data);
@@ -50,25 +67,42 @@ const InspectionList = ({ bridgeId }) => {
         throw new Error("Invalid data format");
       }
     } catch (error) {
-      setError(error.message);
+      console.error("API Error:", error); // for debugging
+      setError(error.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePhotoClick = (photo) => {
-    setSelectedPhoto(photo);
-    setShowPhotoModal(true);
+  const handlePhotoClick = (photos, clickedIndex) => {
+    if (Array.isArray(photos) && photos.length > 0) {
+      setSelectedPhotos(photos);
+      setCurrentPhotoIndex(clickedIndex);
+      setShowPhotoModal(true);
+    }
+  };
+
+  const handlePreviousPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === 0 ? selectedPhotos.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === selectedPhotos.length - 1 ? 0 : prevIndex + 1
+    );
   };
 
   const handleClosePhotoModal = () => {
     setShowPhotoModal(false);
+    setSelectedPhotos([]);
+    setCurrentPhotoIndex(0);
   };
 
-  // download csv
-  const handleDownloadCSV = async (bridgeId) => {
+  const handleDownloadCSV = async (bridgeId, setLoadingCsv) => {
+    setLoadingCsv(true);
     try {
-      // Fetch data from the API
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
       );
@@ -79,23 +113,26 @@ const InspectionList = ({ bridgeId }) => {
         !Array.isArray(data.bridges) ||
         data.bridges.length === 0
       ) {
-        console.error("No data to export");
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
 
-      const inspectiondata = data.bridges; // Extract full data
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection";
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
 
-      // Extract headers dynamically from the first row
-      const headers = Object.keys(inspectiondata[0]);
+      const headers = Object.keys(summaryData[0]).filter(
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "RN" &&
+          key !== "SURVEYED BY"
+      );
 
-      // Generate CSV content
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
-          headers.join(","), // Dynamic Headers
-          ...inspectiondata.map((row) =>
+          headers.join(","),
+          ...summaryData.map((row) =>
             headers
               .map((key) =>
                 String(row[key]).includes(",")
@@ -106,24 +143,23 @@ const InspectionList = ({ bridgeId }) => {
           ),
         ].join("\n");
 
-      // Create CSV file and trigger download
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `${bridgeName.replace(/\s+/g, "_")}.csv`); // Replace spaces with underscores
+      link.setAttribute("download", `${bridgeName.replace(/\s+/g, "_")}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error("Error downloading CSV:", error);
       Swal.fire("Error!", "Failed to fetch or download CSV file", "error");
+    } finally {
+      setLoadingCsv(false);
     }
   };
 
-  // download excel
-  const handleDownloadExcel = async (bridgeId) => {
+  const handleDownloadExcel = async (bridgeId, setLoadingExcel) => {
+    setLoadingExcel(true);
     try {
-      // Fetch data from the API
       const response = await fetch(
         `${BASE_URL}/api/inspections-export?bridgeId=${bridgeId}`
       );
@@ -135,70 +171,157 @@ const InspectionList = ({ bridgeId }) => {
         data.bridges.length === 0
       ) {
         console.error("No data to export");
-        Swal.fire("Error!", "No data available for export", "error");
+        Swal.fire("No data available for export", "error");
         return;
       }
 
-      const inspectiondata = data.bridges; // Extract full data
-      const bridgeName = inspectiondata[0].bridge_name || "bridge_inspection"; // Use bridge_name dynamically
+      const summaryData = data.bridges;
+      const bridgeName = summaryData[0]?.["BRIDGE NAME"] || "bridge_inspection";
 
-      // Convert JSON to worksheet
-      const ws = XLSX.utils.json_to_sheet(inspectiondata);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Inspections");
 
-      // Set column widths automatically based on data
-      ws["!cols"] = Object.keys(inspectiondata[0]).map(() => ({ width: 20 }));
+      const columnKeys = Object.keys(summaryData[0]).filter(
+        (key) =>
+          key !== "Overview Photos" &&
+          key !== "PhotoPaths" &&
+          key !== "RN" &&
+          key !== "qc_con" &&
+          key !== "qc_rams" &&
+          key !== "SURVEYED BY"
+      );
 
-      // Create a new workbook and append the worksheet
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Inspections");
+      const columns = columnKeys.map((key) => ({
+        header: key.replace(/_/g, " "),
+        key: key,
+        width: 22,
+      }));
 
-      // Generate and trigger file download
-      XLSX.writeFile(wb, `${bridgeName.replace(/\s+/g, "_")}.xlsx`); // Replaces spaces with underscores
+      for (let i = 1; i <= 5; i++) {
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
+      }
+
+      worksheet.columns = columns;
+
+      worksheet.getRow(1).font = { bold: true, size: 14 };
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
+      worksheet.getRow(1).height = 25;
+
+      // Compress image helper function
+      const compressImage = (blob) =>
+        new Promise((resolve, reject) => {
+          new Compressor(blob, {
+            quality: 0.6, // Adjust quality (0 to 1) for compression
+            maxWidth: 150, // Match Excel image width
+            maxHeight: 90, // Match Excel image height
+            mimeType: "image/jpeg",
+            success: (compressedBlob) => resolve(compressedBlob),
+            error: (err) => reject(err),
+          });
+        });
+
+      // Fetch and compress images concurrently
+      const fetchAndCompressImage = async (url) => {
+        try {
+          const imgResponse = await fetch(url.replace(/\\/g, "/"));
+          if (!imgResponse.ok) return null;
+          const imgBlob = await imgResponse.blob();
+          return await compressImage(imgBlob);
+        } catch (error) {
+          console.error("Failed to fetch/compress image:", url, error);
+          return null;
+        }
+      };
+
+      for (let i = 0; i < summaryData.length; i++) {
+        const item = summaryData[i];
+
+        const overviewPhotos = (item["Overview Photos"] || [])
+          .map((url) => url.replace(/\\/g, "/"))
+          .slice(0, 5); // Limit to 5 images
+        const inspectionPhotos = (item["PhotoPaths"] || [])
+          .map((url) => url.replace(/\\/g, "/"))
+          .slice(0, 5); // Limit to 5 images
+
+        const rowData = {};
+        columnKeys.forEach((key) => (rowData[key] = item[key] || ""));
+
+        const rowIndex = worksheet.addRow(rowData).number;
+        worksheet.getRow(rowIndex).height = 90;
+
+        const insertImages = async (photoUrls, columnOffset) => {
+          const compressedBlobs = await Promise.all(
+            photoUrls.map((url) => fetchAndCompressImage(url))
+          );
+
+          for (let j = 0; j < compressedBlobs.length; j++) {
+            if (!compressedBlobs[j]) continue;
+            const arrayBuffer = await compressedBlobs[j].arrayBuffer();
+            const imageId = workbook.addImage({
+              buffer: arrayBuffer,
+              extension: "jpeg",
+            });
+            worksheet.addImage(imageId, {
+              tl: {
+                col: columnKeys.length + columnOffset + j,
+                row: rowIndex - 1,
+              },
+              ext: { width: 150, height: 90 },
+            });
+          }
+        };
+
+        await Promise.all([
+          insertImages(overviewPhotos, 0),
+          insertImages(inspectionPhotos, 5),
+        ]);
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), `${bridgeName.replace(/\s+/g, "_")}.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+    } finally {
+      setLoadingExcel(false);
     }
   };
 
   const getDamageLevel = (data) => {
-    const damageLevels = [...new Set(data.map((item) => item.DamageLevel))]; // Get unique damage levels
-    return damageLevels.join(", "); // Join levels with commas
+    const damageLevels = [...new Set(data.map((item) => item.DamageLevel))];
+    return damageLevels.join(", ");
   };
 
   const getMaterials = (data) => {
-    const materials = [...new Set(data.map((item) => item.MaterialName))]; // Get unique materials
-    return materials.join(", "); // Join materials with commas
+    const materials = [...new Set(data.map((item) => item.MaterialName))];
+    return materials.join(", ");
   };
 
   const getWorkKind = (data) => {
-    const workKinds = [...new Set(data.map((item) => item.WorkKindName))]; // Get unique work kinds
-    return workKinds.join(", "); // Join work kinds with commas
-  };
-
-  const getApprovalStatus = (data) => {
-    const approved = data.filter(
-      (item) => item.approved_by_consultant === "1"
-    ).length;
-    const unapproved = data.filter(
-      (item) => item.approved_by_consultant === "0"
-    ).length;
-    return `Approved: ${approved}, Unapproved: ${unapproved}`;
+    const workKinds = [...new Set(data.map((item) => item.WorkKindName))];
+    return workKinds.join(", ");
   };
 
   const getUniqueSpanIndices = (data) => {
-    // Extracting all SpanIndex values from the data
     const spanIndices = data.map((item) => item.SpanIndex);
-
-    // Using Set to filter out duplicates and get unique values
-    const uniqueSpanIndices = [...new Set(spanIndices)];
-
-    return uniqueSpanIndices.length; // Return the count of unique span indices
+    return [...new Set(spanIndices)].length;
   };
 
-  // Group the inspection data by SpanIndex and then by WorkKind
   const groupedData = inspectionData.reduce((acc, row) => {
-    const spanKey = row.SpanIndex || "N/A";
-    const workKindKey = row.WorkKindName || "N/A";
+    const spanKey = row.SpanIndex ?? "N/A";
+    const workKindKey = row.WorkKindName ?? "N/A";
 
     if (!acc[spanKey]) {
       acc[spanKey] = {};
@@ -213,216 +336,325 @@ const InspectionList = ({ bridgeId }) => {
     return acc;
   }, {});
 
+  useEffect(() => {
+    // console.log("groupedData:", groupedData);
+    Object.keys(groupedData).forEach((spanIndex) => {
+      Object.keys(groupedData[spanIndex]).forEach((workKind) => {
+        groupedData[spanIndex][workKind].forEach((inspection, index) => {});
+      });
+    });
+  }, [groupedData]);
+
+  const inspectionCards = Object.keys(groupedData).length ? (
+    Object.keys(groupedData).map((spanIndex) => (
+      <div key={spanIndex} className="card mb-2 border-0">
+        <div
+          className="p-1 d-flex justify-content-between align-items-center bg-[#005D7F] text-[#fff]"
+          style={{ cursor: "pointer" }}
+          onClick={() => toggleAccordion(spanIndex)}
+        >
+          <h6 className="mb-0">{`Reports For Span: ${spanIndex}`}</h6>
+          <span className="">{openAccordions[spanIndex] ? "▼" : "▶"}</span>
+        </div>
+
+        {openAccordions[spanIndex] && (
+          <div className="card-body p-0">
+            {Object.keys(groupedData[spanIndex]).map((workKind) => (
+              <div
+                key={`${spanIndex}-${workKind}`}
+                className="card mb-2 mt-0 border-0"
+              >
+                <div className="rounded-0 p-1 bg-[#009DB9] text-[#fff]">
+                  {workKind}
+                </div>
+
+                <div className="card-body p-0 rounded-0">
+                  {groupedData[spanIndex][workKind]?.map(
+                    (inspection, index) => (
+                      <div
+                        key={
+                          inspection.id ||
+                          `inspection-${spanIndex}-${workKind}-${index}`
+                        }
+                        className="mb-2 p-4 border-0 rounded-0 shadow-sm"
+                        style={{ backgroundColor: "#c8e4e3" }}
+                      >
+                        <div className="row">
+                          <div className="col-md-3">
+                            {inspection.PhotoPaths &&
+                            inspection.PhotoPaths.length > 0 ? (
+                              <div
+                                className="d-flex gap-2"
+                                style={{
+                                  overflowX: "auto",
+                                  whiteSpace: "nowrap",
+                                  display: "flex",
+                                  paddingBottom: "5px",
+                                }}
+                              >
+                                {inspection.PhotoPaths.map((photo, i) => (
+                                  <img
+                                    key={`photo-${inspection.id}-${i}`}
+                                    src={photo}
+                                    alt={`Photo ${i + 1}`}
+                                    className="img-fluid rounded border"
+                                    loading="lazy"
+                                    style={{
+                                      width: "80px",
+                                      height: "80px",
+                                      objectFit: "cover",
+                                      cursor: "pointer",
+                                      flexShrink: 0,
+                                    }}
+                                    onClick={() =>
+                                      handlePhotoClick(inspection.PhotoPaths, i)
+                                    }
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-muted">No images found</p>
+                            )}
+                          </div>
+
+                          <div className="col-md-9">
+                            <div className="row g-3">
+                              <div className="col-md-6">
+                                <strong>Parts:</strong>{" "}
+                                {inspection.PartsName || "N/A"} <br />
+                                <strong>Material:</strong>{" "}
+                                {inspection.MaterialName || "N/A"}
+                              </div>
+                              <div className="col-md-6">
+                                <strong>Damage:</strong>{" "}
+                                {inspection.DamageKindName || "N/A"} <br />
+                                <strong>Level:</strong>{" "}
+                                {inspection.DamageLevel || "N/A"}
+                              </div>
+                              <div className="col-12">
+                                <strong>Situation Remarks:</strong>{" "}
+                                <span className="text-muted">
+                                  {inspection.Remarks || "N/A"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ))
+  ) : (
+    <p>No inspection data available.</p>
+  );
+
   return (
-    <div
-      className="card p-2 rounded-lg text-black"
-      style={{
-        background: "#FFFFFF",
-        border: "2px solid #60A5FA",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-        position: "relative",
-      }}
-    >
-      <div className="card-body pb-0">
-        <div className="d-flex mb-4 justify-content-between items-center p-4 bg-[#CFE2FF] rounded-lg shadow-md">
-          <h6
-            className="card-title text-lg font-semibold pb-2"
-            style={{ fontSize: "1.25rem" }}
-          >
+    <div className="card p-0 rounded-1">
+      <style>
+        {`
+          .custom-modal .modal-dialog {
+            max-width: 90vw;
+            width: 100%;
+          }
+          .custom-modal .modal-content {
+            max-height: 90vh;
+            overflow: hidden;
+          }
+          .custom-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+          }
+          .custom-modal .image-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-height: 60vh;
+          }
+          .custom-modal .modal-image {
+            max-width: 100%;
+            max-height: 60vh;
+            object-fit: contain;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+          }
+          .custom-modal .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            padding: 8px 12px;
+            font-size: 1.2rem;
+          }
+          .custom-modal .prev-button {
+            left: 10px;
+          }
+          .custom-modal .next-button {
+            right: 10px;
+          }
+        `}
+      </style>
+      <div className="card-body p-2">
+        <div className="d-flex mb-4 justify-content-between items-center bg-[#009DB9] text-[#fff] p-2 rounded-1">
+          <h5 className="card-title font-semibold pb-0 mb-0">
             Condition Assessment Reports
-          </h6>
+          </h5>
           <div className="d-flex gap-3">
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-blue-700"
-              onClick={() => handleDownloadCSV(bridgeId)}
+              className="bg-[#005D7F] text-white px-3 py-1 rounded-1"
+              onClick={() => handleDownloadCSV(bridgeId, setLoadingCsv)}
             >
-              <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-              CSV
+              {loadingCsv ? (
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+              ) : (
+                <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
+              )}
+              {loadingCsv ? "Processing..." : "Csv"}
             </button>
             <button
-              className="bg-green-600 text-white px-4 py-2 rounded-md shadow-md hover:bg-green-700"
-              onClick={() => handleDownloadExcel(bridgeId)}
+              className="bg-[#005D7F] text-white px-3 py-1 rounded-1"
+              onClick={() => handleDownloadExcel(bridgeId, setLoadingExcel)}
             >
-              <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-              Excel
+              {loadingExcel ? (
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+              ) : (
+                <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
+              )}
+              {loadingExcel ? "Processing..." : "Excel"}
             </button>
           </div>
         </div>
 
         <div className="summary-section mt-1 mb-1">
-          <h4 className="text-sm font-semibold text-gray-700 mb-1">
-            Reports Summary
-          </h4>
-          <div className="bg-gray-200  mb-2 mt-1  py-2 px-3 rounded-md shadow border">
-            <div className="grid grid-cols-2 gap-y-1 text-sm">
+          <h5 className="font-semibold text-gray-700 mb-2">Reports Summary</h5>
+          <div className="bg-gray-300 mb-3 mt-1 p-3 rounded-1">
+            <div className="grid grid-cols-2 gap-y-2 text-sm">
               <div>
-                <strong>Total Spans:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
+                  <strong className="-mt-1">Total Spans:</strong>
+                </div>
                 <p className="text-gray-700">
                   {getUniqueSpanIndices(inspectionData)}
                 </p>
               </div>
               <div>
-                <strong>Damage Levels:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
+                  <strong className="-mt-1">Damage Levels:</strong>
+                </div>
                 <p className="text-gray-700">
                   {getDamageLevel(inspectionData)}
                 </p>
               </div>
               <div>
-                <strong>Materials Used:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
+                  <strong className="-mt-1">Materials Used:</strong>
+                </div>
                 <p className="text-gray-700">{getMaterials(inspectionData)}</p>
               </div>
               <div>
-                <strong>Work Kind:</strong>
+                <div className="flex">
+                  <FontAwesomeIcon icon={faAnglesRight} className="mr-1" />
+                  <strong className="-mt-1">Work Kind:</strong>
+                </div>
                 <p className="text-gray-700">{getWorkKind(inspectionData)}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {loading && (
-          <div
-            className="loader"
-            style={{
-              border: "8px solid #f3f3f3",
-              borderTop: "8px solid #3498db",
-              borderRadius: "50%",
-              width: "80px",
-              height: "80px",
-              animation: "spin 1s linear infinite",
-              margin: "auto",
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              zIndex: "999",
-            }}
-          />
-        )}
-
         <div className="inspection-cards-container">
-          {Object.keys(groupedData).map((spanIndex) => (
-            <div key={spanIndex} className="card mb-4">
-              {/* Span Index Dropdown */}
-              <div
-                className="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center"
-                style={{ cursor: "pointer" }}
-                onClick={() => toggleAccordion(spanIndex)}
-              >
-                <h5 className="mb-0">{`Reeports For Span: ${spanIndex}`}</h5>
-                <span>{openAccordions[spanIndex] ? "▼" : "▶"}</span>
-              </div>
-
-              {/* Content - Only visible if expanded */}
-              {openAccordions[spanIndex] && (
-                <div className="card-body">
-                  {Object.keys(groupedData[spanIndex]).map((workKind) => (
-                    <div key={workKind} className="card mb-4 border shadow-sm">
-                      <div className="card-header bg-secondary text-white fw-bold">
-                        {workKind}
-                      </div>
-
-                      <div className="card-body p-3">
-                        {groupedData[spanIndex][workKind]?.map((inspection) => (
-                          <div
-                            key={inspection.id}
-                            className="mb-4 p-4 border rounded shadow-sm"
-                            style={{ backgroundColor: "#CFE2FF" }}
-                          >
-                            <div className="row">
-                              {/* Photos Column */}
-                              <div className="col-md-3">
-                                {inspection.PhotoPaths?.length > 0 && (
-                                  <div
-                                    className="d-flex gap-2"
-                                    style={{
-                                      overflowX: "auto",
-                                      whiteSpace: "nowrap",
-                                      display: "flex",
-                                      paddingBottom: "5px",
-                                    }}
-                                  >
-                                    {inspection.PhotoPaths.map((photo, i) => (
-                                      <img
-                                        key={`photo-${inspection.id}-${i}`}
-                                        src={photo}
-                                        alt={`Photo ${i + 1}`}
-                                        className="img-fluid rounded border"
-                                        loading="lazy"
-                                        style={{
-                                          width: "80px",
-                                          height: "80px",
-                                          objectFit: "cover",
-                                          cursor: "pointer",
-                                          flexShrink: 0,
-                                        }}
-                                        onClick={() => handlePhotoClick(photo)}
-                                      />
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Details Column */}
-                              <div className="col-md-9">
-                                <div className="row g-3">
-                                  <div className="col-md-6">
-                                    <strong>Parts:</strong>{" "}
-                                    {inspection.PartsName || "N/A"} <br />
-                                    <strong>Material:</strong>{" "}
-                                    {inspection.MaterialName || "N/A"}
-                                  </div>
-                                  <div className="col-md-6">
-                                    <strong>Damage:</strong>{" "}
-                                    {inspection.DamageKindName || "N/A"} <br />
-                                    <strong>Level:</strong>{" "}
-                                    {inspection.DamageLevel || "N/A"}
-                                  </div>
-                                  <div className="col-12">
-                                    <strong>Situation Remarks:</strong>{" "}
-                                    <span className="text-muted">
-                                      {inspection.Remarks || "N/A"}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <Modal
-                                show={showPhotoModal}
-                                onHide={handleClosePhotoModal}
-                                centered
-                                size="lg"
-                              >
-                                <Modal.Header closeButton>
-                                  <Modal.Title>Enlarged Photo</Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body className="text-center">
-                                  {selectedPhoto && (
-                                    <img
-                                      src={selectedPhoto}
-                                      alt="Enlarged"
-                                      className="img-fluid rounded border"
-                                      style={{
-                                        maxWidth: "100%",
-                                        maxHeight: "80vh",
-                                      }}
-                                    />
-                                  )}
-                                </Modal.Body>
-                              </Modal>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+          {loading ? (
+            <div
+              className="loader"
+              style={{
+                border: "8px solid #f3f3f3",
+                borderTop: "8px solid #3498db",
+                borderRadius: "50%",
+                width: "80px",
+                height: "80px",
+                animation: "spin 1s linear infinite",
+                margin: "auto",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: "999",
+              }}
+            />
+          ) : error ? (
+            <p className="text-danger">{error}</p>
+          ) : inspectionData.length === 0 ? (
+            <p>No inspection data available.</p>
+          ) : (
+            inspectionCards
+          )}
+          <Modal
+            show={showPhotoModal}
+            onHide={handleClosePhotoModal}
+            centered
+            size="lg"
+            className="custom-modal"
+          >
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Photo {currentPhotoIndex + 1} of {selectedPhotos.length}
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {selectedPhotos.length > 0 && (
+                <div className="image-container">
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handlePreviousPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="nav-button prev-button"
+                  >
+                    <FontAwesomeIcon icon={faArrowLeft} />
+                  </Button>
+                  <img
+                    src={selectedPhotos[currentPhotoIndex]}
+                    alt={`Photo ${currentPhotoIndex + 1}`}
+                    className="modal-image"
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={handleNextPhoto}
+                    disabled={selectedPhotos.length <= 1}
+                    className="nav-button next-button"
+                  >
+                    <FontAwesomeIcon icon={faArrowRight} />
+                  </Button>
                 </div>
               )}
-            </div>
-          ))}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleClosePhotoModal}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
         </div>
       </div>
     </div>
   );
 };
+
+// InspectionList.propTypes = {
+//   bridgeId: PropTypes.string.isRequired,
+// };
 
 export default InspectionList;

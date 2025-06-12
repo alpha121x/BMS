@@ -9,6 +9,7 @@ import RoadClassifications from './components/RoadClassifications';
 import CarriagewayTypes from './components/CarriagewayTypes';
 import BridgeAgeFactors from './components/BridgeAgeFactors';
 import FactorCrossings from './components/FactorCrossings';
+import BridgeDimentions from './components/BridgeDimentions';
 import './index.css';
 
 const SetupListing = () => {
@@ -20,7 +21,7 @@ const SetupListing = () => {
       </div>
 
       {/* Main Content */}
-      <main className="flex-grow p-1">
+      <main className="flex-grow p-1 mt-[50px]">
         <Routes>
           {/* Define routes for each setup listing */}
           <Route path="/DamageRanks" element={<DamageRanks />} />
@@ -30,6 +31,7 @@ const SetupListing = () => {
           <Route path="/CarriagewayTypes" element={<CarriagewayTypes />} />
           <Route path="/BridgeAgeFactors" element={<BridgeAgeFactors />} />
           <Route path="/FactorCrossings" element={<FactorCrossings />} />
+          <Route path="/BridgeDimentions" element={<BridgeDimentions />} />
 
           {/* Default Route: Redirect to DamageRanks */}
           <Route path="/" element={<DamageRanks />} />

@@ -23,11 +23,10 @@ const DamageRanksTable = () => {
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
-      console.log("API Response:", result); // Log the API response
+   
 
       if (Array.isArray(result.data)) {
         setTableData(result.data);
-        console.log("Table Data:", tableData); // Log the table data
       } else {
         throw new Error("Invalid data format");
       }
@@ -179,7 +178,7 @@ const DamageRanksTable = () => {
           />
         )}
 
-        <Table bordered className="custom-table">
+        <Table bordered className="table table-striped table-hover table-sm">
           <thead>
             <tr>
               <th>Sr. No.</th>

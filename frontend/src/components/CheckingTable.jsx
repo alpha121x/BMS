@@ -4,8 +4,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
 import Papa from "papaparse";
+import Filters from "./Filters.jsx";
+import { FaFileCsv, FaFileExcel } from "react-icons/fa6";
+import { FaSpinner } from "react-icons/fa";
 
-const CheckingTable = ({district, bridge}) => {
+const CheckingTable = ({ districtId, bridgeName }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,8 +20,8 @@ const CheckingTable = ({district, bridge}) => {
 
   useEffect(() => {
     fetchData();
-  }, [district, bridge]); // Dependency array to re-fetch when district or bridge changes
-  
+  }, [districtId, bridgeName]); // Dependency array to re-fetch when district or bridge changes
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -26,17 +29,17 @@ const CheckingTable = ({district, bridge}) => {
       // Construct the URL with parameters
       const url = new URL(`${BASE_URL}/api/inspections`);
       const params = new URLSearchParams();
-  
-      if (district) params.append("district", district);
-      if (bridge) params.append("bridge", bridge);
-  
+
+      if (districtId) params.append("district", districtId);
+      if (bridgeName) params.append("bridge", bridgeName);
+
       url.search = params.toString(); // Append query parameters to the URL
-  
+
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch data");
-  
+
       const result = await response.json();
-  
+
       if (Array.isArray(result.data)) {
         setTableData(result.data);
       } else {
@@ -48,7 +51,6 @@ const CheckingTable = ({district, bridge}) => {
       setLoading(false);
     }
   };
-  
 
   const handleViewClick = (row) => {
     setSelectedRow(row);
@@ -183,29 +185,46 @@ const CheckingTable = ({district, bridge}) => {
 
   return (
     <div
-      className="card p-2 rounded-lg text-black"
+      className="card p-0 rounded-0 text-black"
       style={{
         background: "#FFFFFF",
-        border: "2px solid #60A5FA",
         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
         position: "relative",
       }}
     >
-      <div className="card-body pb-0">
-        <div className="text-2xl font-bold">Individual Bridge Inspections</div>
-        <div className="text-sm font-medium mt-1 text-gray-700 mb-1">
-          Total Records: {tableData.length || 0}
+      <div
+        className="card-header rounded-0 p-2 "
+        style={{ background: "#005D7F", color: "#fff" }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
+            <h5 className="mb-0 me-5">Inspections</h5>
+            <h6 className="mb-0" id="structure-heading">
+              Inspections Count:
+              <span
+                className="badge text-white ms-2"
+                style={{ background: "#009CB8" }}
+              >
+                <h6 className="mb-0">{tableData.length || 0}</h6>
+              </span>
+            </h6>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              className="btn text-white"
+              onClick={handleDownloadCSV}
+              disabled={loading}
+            >
+              <div className="flex items-center gap-1">
+                <FaFileCsv />
+                {loading ? "Downloading CSV..." : "CSV"}
+              </div>
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Download CSV Button */}
-        <Button
-          variant="primary"
-          onClick={handleDownloadCSV}
-          style={{ marginBottom: "16px" }}
-        >
-          Download CSV
-        </Button>
-
+      <div className="card-body p-0 pb-2">
         {loading && (
           <div
             className="loader"
@@ -226,14 +245,17 @@ const CheckingTable = ({district, bridge}) => {
           />
         )}
 
-        <Table className="custom-table">
+        <Table
+          className="table table-striped table-bordered table-hover"
+          style={{ fontSize: ".9rem" }}
+        >
           <thead>
             <tr>
               <th>Bridge Name</th>
               <th>Work Kind</th>
               <th>Material</th>
-              <th>Parts</th>
-              <th>Status</th>
+              <th>Element</th>
+              <th>Date Time</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -246,21 +268,17 @@ const CheckingTable = ({district, bridge}) => {
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
                   <td>
-                    {row.ApprovedFlag === 0
-                      ? "Unapproved"
-                      : row.ApprovedFlag || "N/A"}
+                    {row.current_date_time
+                      ? new Date(row.current_date_time).toLocaleString()
+                      : "N/A"}
                   </td>
                   <td>
-                    <Button
+                    <button
+                      className="bg-[#009CB8] text-white px-2 py-1 rounded-1 hover:bg-[#005D7F]"
                       onClick={() => handleViewClick(row)}
-                      style={{
-                        backgroundColor: "#60A5FA",
-                        border: "none",
-                        color: "white",
-                      }}
                     >
                       View
-                    </Button>
+                    </button>
                   </td>
                 </tr>
               ))

@@ -7,6 +7,7 @@ import CategorySummary from './components/CategorySummary';
 import DistrictCategory from './components/DistrictCategory';
 import BridgeCategory from './components/BridgeCategory.jsx';
 import './index.css';
+import CostEstimation from './components/CostEstimation.jsx';
 
 const Reports = () => {
     return (
@@ -17,10 +18,11 @@ const Reports = () => {
 
             <main className="flex-grow p-1">
                 <Routes>
-                    <Route path="/Reports/BridgeListing" element={<BridgeListing />} />
-                    <Route path="/Reports/CategorySummary" element={<CategorySummary />} />
-                    <Route path="/Reports/DistrictCategory" element={<DistrictCategory />} />
-                    <Route path="/Reports/BridgeCategory" element={<BridgeCategory />} />
+                    <Route path="/CostEstimation" element={<CostEstimation />} />
+                    <Route path="/BridgeListing" element={<BridgeListing />} />
+                    <Route path="/CategorySummary" element={<CategorySummary />} />
+                    <Route path="/DistrictCategory" element={<DistrictCategory />} />
+                    <Route path="/BridgeCategory" element={<BridgeCategory />} />
                 </Routes>
             </main>
 

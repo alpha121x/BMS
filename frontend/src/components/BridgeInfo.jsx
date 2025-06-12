@@ -8,13 +8,15 @@ import HeaderEvaluation from "./HeaderEvaluation";
 import Footer from "./Footer";
 import InventoryInfo from "./InventoryInfo";
 import { useLocation, useNavigate } from "react-router-dom";
-import InspectionList from "./InspectionList";
 import InspectionListRams from "./InspectionListRams";
+import InspectionListEvaluator from "./InspectionListEvaluator";
+import InspectionListCon from "./InspectionListCon";
 
 const BridgeInfo = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [bridgeData, setBridgeData] = useState(null);
+
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -27,16 +29,20 @@ const BridgeInfo = () => {
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 
   // Extract username safely
-  const username = userToken?.username;
+  const user_type = userToken?.usertype;
+  
 
   // Function to render components based on username
   const renderInspectionList = () => {
-    if (username === "consultant") {
-      return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
-    } else if (username === "rams") {
+    if (user_type === "consultant") {
+      return <InspectionListCon bridgeId={bridgeData?.uu_bms_id} />;
+    }  else if (user_type === "rams") {
       return <InspectionListRams bridgeId={bridgeData?.uu_bms_id} />;
-    } else {
-      return <InspectionList bridgeId={bridgeData?.uu_bms_id} />;
+    } else if (user_type === "evaluator") {
+      return <InspectionListEvaluator bridgeId={bridgeData?.uu_bms_id} />;
+    }
+    else {
+      return <InspectionListCon bridgeId={bridgeData?.uu_bms_id} />;
     }
   };
 
@@ -49,30 +55,32 @@ const BridgeInfo = () => {
     window.location.href = `/EditBridge?data=${serializedBridgeData}`;
   };
 
-  if (!bridgeData || !username) {
-    return  <div
-    className="loader"
-    style={{
-      border: "8px solid #f3f3f3",
-      borderTop: "8px solid #3498db",
-      borderRadius: "50%",
-      width: "80px",
-      height: "80px",
-      animation: "spin 1s linear infinite",
-      margin: "auto",
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      zIndex: "999",
-    }}
-  />; // Or redirect to login
+  if (!bridgeData || !user_type) {
+    return (
+      <div
+        className="loader"
+        style={{
+          border: "8px solid #f3f3f3",
+          borderTop: "8px solid #3498db",
+          borderRadius: "50%",
+          width: "80px",
+          height: "80px",
+          animation: "spin 1s linear infinite",
+          margin: "auto",
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: "999",
+        }}
+      />
+    ); // Or redirect to login
   }
 
   return (
     <div className="flex flex-col min-h-screen">
       <HeaderEvaluation className="mb-1" />
-      <main className="flex-grow p-1">
+      <main className="flex-grow p-1 mt-5">
         <section className="bg-gray-100 min-h-screen">
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
             <div className="bg-[#CFE2FF] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
@@ -98,7 +106,6 @@ const BridgeInfo = () => {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={handleEditClick}
                   className="bg-[#5C636A] hover:bg-slate-400 text-white px-4 py-2 rounded-md flex items-center gap-2"
                 >
                   <PencilIcon className="h-5 w-5" /> Edit

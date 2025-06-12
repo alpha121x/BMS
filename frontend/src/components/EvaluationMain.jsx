@@ -1,31 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
-import { GiArchBridge } from "react-icons/gi";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
-// import BridgesList from "./BridgesList";
-import BridgesListNew from "./BridgesListNew";
+import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
+import TopCardDashboard from "./TopCardDashboard"; // Import TopCardDashboard
+import Filters from "./Filters"; // Import Filters component
 
 const EvaluationMain = () => {
-  const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [minBridgeLength, setMinBridgeLength] = useState("");
-  const [maxBridgeLength, setMaxBridgeLength] = useState("");
-  const [minSpanLength, setMinSpanLength] = useState("");
-  const [maxSpanLength, setMaxSpanLength] = useState("");
-  const [structureType, setStructureType] = useState("");
-  const [constructionType, setConstructionType] = useState("");
-  const [category, setCategory] = useState("");
-  const [evaluationStatus, setEvaluationStatus] = useState("");
-  const [inspectionStatus, setInspectionStatus] = useState("");
-  const [minYear, setMinYear] = useState("");
-  const [maxYear, setMaxYear] = useState("");
-  const [bridge, setBridgeName] = useState("");
-  // State for back-to-top button visibility
+  const [districtId, setDistrictId] = useState("%");
+  const [structureType, setStructureType] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [inspectedCards, setInspectedCards] = useState([]);
-
+  const [evaluatedCards, setEvaluatedCards] = useState([]);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -47,117 +36,165 @@ const EvaluationMain = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
- useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts-inspected`)
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/structure-counts-inspected-eval?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
-        const totalCount = data.totalStructureCount || "N/A";
-  
-        // Create a structure for inspection types
+        const totalCount = data.totalStructureCount || "0";
+
         const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
           BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
-          // Add any other inspection types as needed
         };
-  
-        // Map the response to the expected format for inspection data
-        const mappedCards = data.structureTypeCounts.map((item) => ({
-          label: inspectionMap[item.structure_type]?.label || item.structure_type,
-          value: item.count || "N/A",
-          icon: inspectionMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
-          color: "blue",
-        }));
-  
-        // Add total count card
+
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase();
+          return {
+            label: inspectionMap[typeKey]?.label || item.structure_type,
+            value: item.count || "0",
+            icon: inspectionMap[typeKey]?.icon || <SiInstructure />,
+            color: "#3B9996",
+          };
+        });
+
         mappedCards.unshift({
-          label: "Total",
+          label: "Inspected Structures",
           value: totalCount,
           icon: <SiInstructure />,
-          color: "blue",
+          color: "#3B9996",
         });
-  
+
         setInspectedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
-  }, []);
+  }, [districtId]);
 
-  // Card Component with dynamic border color
-  const Card = ({ label, value, icon, iconSize = 32 }) => (
-    <div
-      className="rounded-lg shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
-      style={{
-        background:
-          "linear-gradient(135deg, rgba(59, 100, 246, 0.8), rgba(96, 165, 250, 1))", // Light blue gradient
-        border: `2px solid #3B82F6`, // Blue border for contrast
-        borderRadius: "9px", // Rounded corners
-      }}
-    >
-      <div className="flex items-center flex-grow text-white">
-        <div
-          className="p-2 rounded-full mr-3 flex items-center justify-center"
-          style={{
-            backgroundColor: "rgb(123, 179, 247)", // Slightly lighter background for the icon
-            width: `${iconSize + 16}px`,
-            height: `${iconSize + 16}px`,
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Add shadow for depth
-          }}
-        >
-          {React.cloneElement(icon, { size: iconSize, color: "#fff" })}{" "}
-          {/* White icon color */}
-        </div>
-        <h3 className="text-xl font-semibold flex-grow text-white">{label}</h3>
-      </div>
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/structure-counts-evaluated?district=${districtId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const totalCount = data.totalStructureCount || "0";
 
-      <div className="text-3xl font-bold ml-2 text-white">{value}</div>
-    </div>
-  );
+        const evaluatedMap = {
+          CULVERT: { label: "Culvert", icon: <LuConstruction /> },
+          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
+          UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
+        };
+
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase();
+          return {
+            label: evaluatedMap[typeKey]?.label || item.structure_type,
+            value: item.count || "0",
+            icon: evaluatedMap[typeKey]?.icon || <SiInstructure />,
+            color: "#3B9996",
+          };
+        });
+
+        mappedCards.unshift({
+          label: "Evaluated Structures",
+          value: totalCount,
+          icon: <SiInstructure />,
+          color: "#3B9996",
+        });
+
+        setEvaluatedCards(mappedCards);
+      })
+      .catch((error) => console.error("Error fetching structure data:", error));
+  }, [districtId]);
 
   return (
     <section className="bg-gray-100 min-h-screen">
       {/* Evaluation Section */}
-      <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Inspected Structures
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {inspectedCards.map((card, index) => (
-            <Card key={index} {...card} />
-          ))}
+      <div className="container-fluid mt-[65px]">
+        <div className="row g-2">
+          <div className="col-md-10">
+            <div className="row g-2">
+              <div className="col-md-4">
+                <div className="mb-2">
+                  {/* Only One Card Displaying Total and Three Counts */}
+                  <TopCardDashboard
+                    totalLabel="Inspected Structures"
+                    totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
+                    color="#009DB9"
+                    items={[
+                      {
+                        label: "Culvert",
+                        value: inspectedCards[2]?.value,
+                        icon: <LuConstruction />,
+                      },
+                      {
+                        label: "PC Bridge",
+                        value: inspectedCards[1]?.value,
+                        icon: <FaBridge />,
+                      },
+                      {
+                        label: "Underpass",
+                        value: inspectedCards[3]?.value,
+                        icon: <FaRoadBridge />,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-2">
+                  {/* Only One Card Displaying Total and Three Counts */}
+                  <TopCardDashboard
+                    totalLabel="Evaluated Structures"
+                    totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
+                    color="#3B9996"
+                    items={[
+                      {
+                        label: "Culvert",
+                        value: evaluatedCards[2]?.value,
+                        icon: <LuConstruction />,
+                      },
+                      {
+                        label: "PC Bridge",
+                        value: evaluatedCards[1]?.value,
+                        icon: <FaBridge />,
+                      },
+                      {
+                        label: "Underpass",
+                        value: evaluatedCards[3]?.value,
+                        icon: <FaRoadBridge />,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="col-md-2 bg-[#8CC5C4] p-2 rounded-1">
+                <Filters
+                  districtId={districtId}
+                  setDistrictId={setDistrictId}
+                  structureType={structureType}
+                  setStructureType={setStructureType}
+                  bridgeName={bridgeName}
+                  setBridgeName={setBridgeName}
+                  // fetchAllBridges={fetchAllBridges} // Search triggered manually
+                  flexDirection="flex-col"
+                  padding="p-1"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
       {/* Bridges */}
-      <div className="mt-2 flex justify-center">
-        <div className="w-full p-4">
-          <BridgesListNew
-            setSelectedDistrict={setSelectedDistrict}
-            setMinBridgeLength={setMinBridgeLength}
-            setMaxBridgeLength={setMaxBridgeLength}
-            setMinSpanLength={setMinSpanLength}
-            setMaxSpanLength={setMaxSpanLength}
-            setStructureType={setStructureType}
-            setConstructionType={setConstructionType}
-            setCategory={setCategory}
-            setEvaluationStatus={setEvaluationStatus}
-            setInspectionStatus={setInspectionStatus}
-            setMinYear={setMinYear}
-            setMaxYear={setMaxYear}
-            setBridge={setBridgeName}
-            district={selectedDistrict}
-            structureType={structureType}
-            constructionType={constructionType}
-            category={category}
-            evaluationStatus={evaluationStatus}
-            inspectionStatus={inspectionStatus}
-            minBridgeLength={minBridgeLength}
-            maxBridgeLength={maxBridgeLength}
-            minSpanLength={minSpanLength}
-            maxSpanLength={maxSpanLength}
-            minYear={minYear}
-            maxYear={maxYear}
-            bridge={bridge} // Also pass the current bridge id filter
-          />
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-md-12">
+            <BridgesListNewUpdated
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
+            />
+          </div>
         </div>
       </div>
 

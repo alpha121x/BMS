@@ -1,15 +1,31 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useEffect } from "react";
+import "leaflet/dist/leaflet.css"; // Ensure this is imported
 
 const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {
   if (!location) return null;
 
-  const { latitude, longitude } = location;
+  // Correct the coordinates
+  const { latitude: rawLat, longitude: rawLon } = location;
+  const latitude = rawLon; // Swap if needed
+  const longitude = rawLat;
+  console.log("Corrected:", latitude, longitude);
+
+  const InvalidateMapSize = () => {
+    const map = useMap();
+    useEffect(() => {
+      // Invalidate size after a short delay to ensure modal is visible
+      const timer = setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+      return () => clearTimeout(timer);
+    }, [map]);
+    return null;
+  };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        {/* Bridge Details */}
         <div className="bridge-details">
           <p>
             <strong>Bridge:</strong> {bridgeName} <br />
@@ -23,9 +39,10 @@ const MapModal = ({ location, markerLabel, bridgeName, district, road }) => {
             zoom={13}
             style={{ height: "100%", width: "100%" }}
           >
+            <InvalidateMapSize />
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             />
             <Marker position={[latitude, longitude]}>
               <Popup>{markerLabel || "Location"}</Popup>

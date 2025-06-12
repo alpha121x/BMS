@@ -1,35 +1,37 @@
 import React, { useEffect, useState } from "react";
-import Map from "./Map";
-import BridgesListDashboard from "./BirdgesListDashboard";
-import CheckingTable from "./CheckingTable";
-import Graph from "./Graph";
+import BridgesListDashboard from "./BridgesListDashboard";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
 import { GiArchBridge } from "react-icons/gi";
 import { SiInstructure } from "react-icons/si";
 import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
+import TopCardDashboard from "./TopCardDashboard";
+import Filters from "./Filters";
+import PriotizationTable from "./PriotizationTable"; // Import the new component
+import CostEstimation from "./CostEstimation"; // Import the new component
+import BridgeStatusSummaryDashboard from "./BridgeStatusSummaryDashboard"; // Import the new component
 
 const DashboardMain = () => {
-  const [selectedDistrict, setSelectedDistrict] = useState("%");
-  const [minBridgeLength, setMinBridgeLength] = useState("");
-  const [maxBridgeLength, setMaxBridgeLength] = useState("");
-  const [minSpanLength, setMinSpanLength] = useState("");
-  const [maxSpanLength, setMaxSpanLength] = useState("");
-  const [structureType, setStructureType] = useState("");
-  const [constructionType, setConstructionType] = useState("");
-  const [category, setCategory] = useState("");
-  const [evaluationStatus, setEvaluationStatus] = useState("");
-  const [inspectionStatus, setInspectionStatus] = useState("");
-  const [minYear, setMinYear] = useState("");
-  const [maxYear, setMaxYear] = useState("");
-  const [bridge, setBridgeName] = useState("");
+  const [districtId, setDistrictId] = useState("%");
+  const [structureType, setStructureType] = useState("%");
+  const [constructionType, setConstructionType] = useState("%");
+  const [bridgeName, setBridgeName] = useState("");
+  const [bridgeLength, setBridgeLength] = useState("");
+  const [age, setAge] = useState("");
+  const [underFacility, setUnderFacility] = useState("%"); // New filter state
+  const [roadClassification, setRoadClassification] = useState("%"); // New filter state
+  const [spanLength, setSpanLength] = useState("%");
+  const bridges_status_summary = "bridge-status-summary-combined";
+
+
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
+  const [activeView, setActiveView] = useState("inventory"); // 'map' or 'graph'
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
+  const [evaluatedCards, setEvaluatedCards] = useState([]);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -52,217 +54,332 @@ const DashboardMain = () => {
   };
 
   useEffect(() => {
-    // Fetch data from API
-    fetch(`${BASE_URL}/api/structure-counts`)
+    fetch(`${BASE_URL}/api/structure-counts?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
-        // Extract total structure count
-        const totalCount = data.totalStructureCount || "N/A";
+        const totalCount = data.totalStructureCount || "0";
 
-        // Map the response to the expected format
         const structureMap = {
-          CULVERT: {
-            label: "Culvert",
-            icon: <LuConstruction />,
-          },
-          BRIDGE: {
-            label: "PC Bridge",
-            icon: <FaBridge />,
-          },
-          UNDERPASS: {
-            label: "Underpass",
-            icon: <FaRoadBridge />,
-          },
+          CULVERT: { label: "Culvert", icon: <LuConstruction /> },
+          BRIDGE: { label: "Bridge", icon: <FaBridge /> },
+          UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
         };
 
-        const mappedCards = data.structureTypeCounts.map((item) => ({
-          label:
-            structureMap[item.structure_type]?.label || item.structure_type,
-          value: item.count || "N/A",
-          icon: structureMap[item.structure_type]?.icon, // Default icon
-          color: "blue",
-        }));
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase();
+          return {
+            label: structureMap[typeKey]?.label || item.structure_type,
+            value: item.count || "0",
+            icon: structureMap[typeKey]?.icon || <SiInstructure />,
+            color: "#005D7F",
+          };
+        });
 
-        // Add total count card
         mappedCards.unshift({
-          label: "Total",
+          label: "Total Structures Inventory",
           value: totalCount,
           icon: <SiInstructure />,
-          color: "blue",
+          color: "#005D7F",
         });
 
         setStructureCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
-  }, []);
+  }, [districtId]);
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts-inspected`)
+    fetch(`${BASE_URL}/api/structure-counts-inspected?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
-        const totalCount = data.totalStructureCount || "N/A";
-  
-        // Create a structure for inspection types
+        const totalCount = data.totalStructureCount || "0";
+
         const inspectionMap = {
           CULVERT: { label: "Culvert", icon: <LuConstruction /> },
-          BRIDGE: { label: "PC Bridge", icon: <FaBridge /> },
+          BRIDGE: { label: "Bridge", icon: <FaBridge /> },
           UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
-          // Add any other inspection types as needed
         };
-  
-        // Map the response to the expected format for inspection data
-        const mappedCards = data.structureTypeCounts.map((item) => ({
-          label: inspectionMap[item.structure_type]?.label || item.structure_type,
-          value: item.count || "N/A",
-          icon: inspectionMap[item.structure_type]?.icon || <SiInstructure />, // Default icon
-          color: "blue",
-        }));
-  
-        // Add total count card
+
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase();
+          return {
+            label: inspectionMap[typeKey]?.label || item.structure_type,
+            value: item.count || "0",
+            icon: inspectionMap[typeKey]?.icon || <SiInstructure />,
+            color: "#3B9996",
+          };
+        });
+
         mappedCards.unshift({
-          label: "Total",
+          label: "Total Inspected Structures",
           value: totalCount,
           icon: <SiInstructure />,
-          color: "blue",
+          color: "#3B9996",
         });
-  
+
         setInspectedCards(mappedCards);
       })
       .catch((error) => console.error("Error fetching structure data:", error));
-  }, []);
-  
+  }, [districtId]);
 
-  // Card Component with dynamic border color
-  const Card = ({ label, value, icon, iconSize = 32 }) => (
-    <div
-      className="rounded-lg shadow-lg text-white transition-all duration-300 hover:shadow-xl p-2 flex justify-between items-center"
-      style={{
-        background:
-          "linear-gradient(135deg, rgba(59, 100, 246, 0.8), rgba(96, 165, 250, 1))", // Light blue gradient
-        border: `2px solid #3B82F6`, // Blue border for contrast
-        borderRadius: "9px", // Rounded corners
-      }}
-    >
-      <div className="flex items-center flex-grow text-white">
-        <div
-          className="p-2 rounded-full mr-3 flex items-center justify-center"
-          style={{
-            backgroundColor: "rgb(123, 179, 247)", // Slightly lighter background for the icon
-            width: `${iconSize + 16}px`,
-            height: `${iconSize + 16}px`,
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Add shadow for depth
-          }}
-        >
-          {React.cloneElement(icon, { size: iconSize, color: "#fff" })}{" "}
-          {/* White icon color */}
-        </div>
-        <h3 className="text-xl font-semibold flex-grow text-white">{label}</h3>
-      </div>
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/structure-counts-evaluated?district=${districtId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        const totalCount = data.totalStructureCount || "0";
 
-      <div className="text-3xl font-bold ml-2 text-white">{value}</div>
-    </div>
-  );
+        const evaluatedMap = {
+          CULVERT: { label: "Culvert", icon: <LuConstruction /> },
+          BRIDGE: { label: "Bridge", icon: <FaBridge /> },
+          UNDERPASS: { label: "Underpass", icon: <FaRoadBridge /> },
+        };
+
+        const mappedCards = data.structureTypeCounts.map((item) => {
+          const typeKey = item.structure_type.toUpperCase();
+          return {
+            label: evaluatedMap[typeKey]?.label || item.structure_type,
+            value: item.count || "0",
+            icon: evaluatedMap[typeKey]?.icon || <SiInstructure />,
+            color: "#3B9996",
+          };
+        });
+
+        mappedCards.unshift({
+          label: "Total Evaluated Structures",
+          value: totalCount,
+          icon: <SiInstructure />,
+          color: "#3B9996",
+        });
+
+        setEvaluatedCards(mappedCards);
+      })
+      .catch((error) => console.error("Error fetching structure data:", error));
+  }, [districtId]);
+
+  const constructionCards = [
+    // Add same 3 types here also
+    {
+      label: "Deck Slab Bridges",
+      value: "0",
+      icon: <FaBridge />,
+      color: "#009DB9",
+    },
+    {
+      label: "Girder Bridges",
+      value: "0",
+      icon: <FaBridge />,
+      color: "#009DB9",
+    },
+    {
+      label: "Arch & Others",
+      value: "0",
+      icon: <GiArchBridge />,
+      color: "#009DB9",
+    },
+    {
+      label: "Culverts (Box & Pipes)",
+      value: "0",
+      icon: <LuConstruction />,
+      color: "#009DB9",
+    },
+  ];
 
   return (
-    <section className="bg-gray-100 min-h-screen">
+    <section className="min-h-screen">
       {/* Structure Section */}
-      <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Total Structures Inventory
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {structureCards.map((card, index) => (
-            <Card key={index} {...card} />
-          ))}
-        </div>
-      </div>
-
-      {/* Evaluation Section */}
-      <div className="mb-2">
-        <h3 className="text-xl font-semibold text-gray-700">
-          Inspected Structures
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          {inspectedCards.map((card, index) => (
-            <Card key={index} {...card} />
-          ))}
+      <div className="container-fluid mt-[65px]">
+        <div className="row g-2">
+          <div className="col-md-10">
+            <div className="row g-2">
+              <div className="col-md-4">
+                <div className="mb-2">
+                  {/* Only One Card Displaying Total and Three Counts */}
+                  <TopCardDashboard
+                    totalLabel="Inventory Structures"
+                    totalValue={structureCards[0]?.value} // Assuming first item contains the total
+                    color="#005D7F"
+                    items={[
+                      {
+                        label: "Culvert",
+                        value: structureCards[1]?.value,
+                        icon: <LuConstruction />,
+                      },
+                      {
+                        label: "Bridge",
+                        value: structureCards[2]?.value,
+                        icon: <FaBridge />,
+                      },
+                      {
+                        label: "Underpass",
+                        value: structureCards[3]?.value,
+                        icon: <FaRoadBridge />,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-2">
+                  {/* Only One Card Displaying Total and Three Counts */}
+                  <TopCardDashboard
+                    totalLabel="Inspected Structures"
+                    totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
+                    color="#009DB9"
+                    items={[
+                      {
+                        label: "Culvert",
+                        value: inspectedCards[2]?.value,
+                        icon: <LuConstruction />,
+                      },
+                      {
+                        label: "Bridge",
+                        value: inspectedCards[1]?.value,
+                        icon: <FaBridge />,
+                      },
+                      {
+                        label: "Underpass",
+                        value: inspectedCards[3]?.value,
+                        icon: <FaRoadBridge />,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <div className="mb-2">
+                  {/* Only One Card Displaying Total and Three Counts */}
+                  <TopCardDashboard
+                    totalLabel="Evaluated Structures"
+                    totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
+                    color="#3B9996"
+                    items={[
+                      {
+                        label: "Culvert",
+                        value: evaluatedCards[2]?.value,
+                        icon: <LuConstruction />,
+                      },
+                      {
+                        label: "Bridge",
+                        value: evaluatedCards[1]?.value,
+                        icon: <FaBridge />,
+                      },
+                      {
+                        label: "Underpass",
+                        value: evaluatedCards[3]?.value,
+                        icon: <FaRoadBridge />,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-2 bg-[#8CC5C4] p-2 rounded-1">
+            <Filters
+              districtId={districtId}
+              setDistrictId={setDistrictId}
+              structureType={structureType}
+              setStructureType={setStructureType}
+              bridgeName={bridgeName}
+              setBridgeName={setBridgeName}
+              // fetchAllBridges={fetchAllBridges} // Search triggered manually
+              flexDirection="flex-col"
+              padding="p-1"
+            />
+          </div>
         </div>
       </div>
 
       {/* Toggle Buttons */}
-      <div className="flex justify-start p-1 gap-3 w-50 mt-2">
-        <button
-          onClick={() => setActiveView("map")}
-          className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
-            activeView === "map"
-              ? "bg-blue-600 text-white shadow-lg transform scale-105"
-              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-          }`}
-        >
-          Map View
-        </button>
-        <button
-          onClick={() => setActiveView("graph")}
-          className={`px-8 py-2 text-lg font-semibold rounded-lg transition-all duration-300 ${
-            activeView === "graph"
-              ? "bg-blue-600 text-white shadow-lg transform scale-105"
-              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-          }`}
-        >
-          Graph View
-        </button>
-      </div>
+      <div className="container-fluid">
+        <div className="row mt-2">
+          <div className="col-md-12">
+            {/* Navigation Buttons */}
+            <div className="flex justify-start pb-0 gap-2 w-75">
+              <button
+                onClick={() => setActiveView("inventory")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "inventory"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Inventory
+              </button>
+               <button
+                onClick={() => setActiveView("bridge_summary")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "bridge_summary"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Bridge Status Summary
+              </button>
+                   <button
+                onClick={() => setActiveView("priortization")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "priortization"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Priortization
+              </button>
+                   <button
+                onClick={() => setActiveView("cost")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "cost"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Cost
+              </button>
+            </div>
 
-      {/* Content Container */}
-      <div>
-        {activeView === "map" ? (
-          <div className="mt-1">
-            <Map districtId={selectedDistrict} />
-          </div>
-        ) : (
-          <div className="mt-1">
-            <Graph />
-          </div>
-        )}
-      </div>
-
-      {/* Bridges List */}
-      <div className="mt-2 flex justify-center">
-        <div className="w-full p-4">
-          <BridgesListDashboard
-            setSelectedDistrict={setSelectedDistrict}
-            setMinBridgeLength={setMinBridgeLength}
-            setMaxBridgeLength={setMaxBridgeLength}
-            setMinSpanLength={setMinSpanLength}
-            setMaxSpanLength={setMaxSpanLength}
-            setStructureType={setStructureType}
-            setConstructionType={setConstructionType}
-            setCategory={setCategory}
-            setEvaluationStatus={setEvaluationStatus}
-            setInspectionStatus={setInspectionStatus}
-            setMinYear={setMinYear}
-            setMaxYear={setMaxYear}
-            setBridge={setBridgeName}
-            district={selectedDistrict}
-            structureType={structureType}
-            constructionType={constructionType}
-            category={category}
-            evaluationStatus={evaluationStatus}
-            inspectionStatus={inspectionStatus}
-            minBridgeLength={minBridgeLength}
-            maxBridgeLength={maxBridgeLength}
-            minSpanLength={minSpanLength}
-            maxSpanLength={maxSpanLength}
-            minYear={minYear}
-            maxYear={maxYear}
-            bridge={bridge} // Also pass the current bridge id filter
-          />
-
-          <div className="mt-2">
-            <CheckingTable
-             district={selectedDistrict}
-             bridge={bridge}
-             />
+            {/* Content Container */}
+            <div className="mt-0">
+              {activeView === "inventory" && (
+                <BridgesListDashboard
+                  districtId={districtId}
+                  setDistrictId={setDistrictId}
+                  structureType={structureType}
+                  setStructureType={setStructureType}
+                  constructionType={constructionType}
+                  setConstructionType={setConstructionType}
+                  bridgeName={bridgeName}
+                  setBridgeName={setBridgeName}
+                  bridgeLength={bridgeLength}
+                  setBridgeLength={setBridgeLength}
+                  age={age}
+                  setAge={setAge}
+                  underFacility={underFacility}
+                  setUnderFacility={setUnderFacility}
+                  roadClassification={roadClassification}
+                  setRoadClassification={setRoadClassification}
+                  spanLength={spanLength}
+                  setSpanLength={setSpanLength}
+                />
+              )}
+              {
+                activeView === "priortization" && (
+                  <PriotizationTable
+                  districtId={districtId}
+                  />
+                )}
+                {
+                activeView === "cost" && (
+                  <CostEstimation />
+                )}
+                { activeView === "bridge_summary" && (
+                  <BridgeStatusSummaryDashboard
+                  api_endpoint={bridges_status_summary}
+                   districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                   />
+                )}
+            </div>
           </div>
         </div>
       </div>
