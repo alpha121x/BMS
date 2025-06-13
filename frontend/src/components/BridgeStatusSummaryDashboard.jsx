@@ -78,7 +78,7 @@ const BridgesStatusSummary = ({
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({})); // Handle JSON parse errors
           throw new Error(
-            errorData.error || `HTTP error! status: ${response.status}`
+            errorData.error
           );
         }
         const result = await response.json();

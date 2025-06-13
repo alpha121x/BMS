@@ -4312,9 +4312,9 @@ app.get("/api/inspections-unapproved", async (req, res) => {
   try {
     let { district, bridge, structureType } = req.query;
 
-    // Build the base query without ORDER BY
+    // Build the base query with DISTINCT ON and is_active condition
     let query = `
-      SELECT 
+      SELECT DISTINCT ON (ins.uu_bms_id)
         bmd."pms_sec_id", 
         bmd."structure_no",
         bmd."structure_type_id",
@@ -4334,9 +4334,8 @@ app.get("/api/inspections-unapproved", async (req, res) => {
         ins.inspection_images AS "PhotoPaths"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
-        ON ins."uu_bms_id" = bmd."uu_bms_id"
-      WHERE 1=1
-    AND ins.surveyed_by = 'RAMS-UU' AND qc_con = 3 
+        ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
+      WHERE ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3
     `;
 
     const queryParams = [];
@@ -4361,9 +4360,12 @@ app.get("/api/inspections-unapproved", async (req, res) => {
     }
 
     // Append ORDER BY clause after dynamic filters
-    query += ` ORDER BY inspection_id DESC;`;
+    query += ` ORDER BY ins.uu_bms_id, ins.inspection_id DESC;`;
 
     const result = await pool.query(query, queryParams);
+
+    // Log the number of rows returned for debugging
+    console.log("Rows returned:", result.rows.length);
 
     // Process PhotoPaths to extract image URLs
     const processedData = result.rows.map((row) => {
