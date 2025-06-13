@@ -2,10 +2,6 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { Pool } = require("pg");
-const ExcelJS = require("exceljs");
-const sharp = require("sharp");
-const axios = require("axios");
-const fs = require("fs").promises;
 const path = require("path");
 require("dotenv").config();
 
