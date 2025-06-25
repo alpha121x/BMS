@@ -12,6 +12,7 @@ import { FaRoadBridge } from "react-icons/fa6";
 import { LuConstruction } from "react-icons/lu";
 import BridgesStatusSummary from "./BridgesStatusSummary";
 import InspectionsList from "./UnapprovedInspections";
+import UnapprovedInspections from "./UnapprovedInspectionsRams";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -168,6 +169,16 @@ const EvaluationMainCon = () => {
               >
                 Unapproved Inspections
               </button>
+                <button
+                onClick={() => setActiveView("unappinspectionsrams")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "unappinspectionsrams"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Unapproved Inspections Rams
+              </button>
             </div>
 
             {/* Content Container */}
@@ -196,6 +207,14 @@ const EvaluationMainCon = () => {
                   districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
+                />
+              )}
+                {activeView === "unappinspectionsrams" && (
+                <UnapprovedInspections
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                  api_endpoint="inspections-unapproved-rams"
                 />
               )}
             </div>
