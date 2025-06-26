@@ -28,7 +28,7 @@ const DashboardMain = () => {
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [activeView, setActiveView] = useState("inventory"); // 'map' or 'graph'
+  const [activeView, setActiveView] = useState("inventory");
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [evaluatedCards, setEvaluatedCards] = useState([]);
