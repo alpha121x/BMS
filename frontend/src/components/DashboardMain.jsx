@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BridgesListDashboard from "./BridgesListDashboard";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
