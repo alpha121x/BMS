@@ -155,33 +155,33 @@ const DashboardMain = () => {
       .catch((error) => console.error("Error fetching structure data:", error));
   }, [districtId]);
 
-  const constructionCards = [
-    // Add same 3 types here also
-    {
-      label: "Deck Slab Bridges",
-      value: "0",
-      icon: <FaBridge />,
-      color: "#009DB9",
-    },
-    {
-      label: "Girder Bridges",
-      value: "0",
-      icon: <FaBridge />,
-      color: "#009DB9",
-    },
-    {
-      label: "Arch & Others",
-      value: "0",
-      icon: <GiArchBridge />,
-      color: "#009DB9",
-    },
-    {
-      label: "Culverts (Box & Pipes)",
-      value: "0",
-      icon: <LuConstruction />,
-      color: "#009DB9",
-    },
-  ];
+  // const constructionCards = [
+  //   // Add same 3 types here also
+  //   {
+  //     label: "Deck Slab Bridges",
+  //     value: "0",
+  //     icon: <FaBridge />,
+  //     color: "#009DB9",
+  //   },
+  //   {
+  //     label: "Girder Bridges",
+  //     value: "0",
+  //     icon: <FaBridge />,
+  //     color: "#009DB9",
+  //   },
+  //   {
+  //     label: "Arch & Others",
+  //     value: "0",
+  //     icon: <GiArchBridge />,
+  //     color: "#009DB9",
+  //   },
+  //   {
+  //     label: "Culverts (Box & Pipes)",
+  //     value: "0",
+  //     icon: <LuConstruction />,
+  //     color: "#009DB9",
+  //   },
+  // ];
 
   return (
     <section className="min-h-screen">
