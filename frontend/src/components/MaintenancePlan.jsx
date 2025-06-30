@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import Header from './Header';
+import Footer from './Footer';
 
 const MaintenancePlan = () => {
   const [bridges] = useState([
@@ -10,6 +12,8 @@ const MaintenancePlan = () => {
   ]);
 
   return (
+    <>
+    <Header />
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Bridge Maintenance Plan</h2>
       <table className="w-full border-collapse">
@@ -65,6 +69,8 @@ const MaintenancePlan = () => {
         </tbody>
       </table>
     </div>
+    <Footer />
+    </>
   );
 };
 
