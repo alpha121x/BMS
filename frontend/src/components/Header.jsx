@@ -87,6 +87,7 @@ const Header = () => {
             >
               Bridge Wise Score
             </Nav.Link>
+
                  <Nav.Link
               as={Link}
               to="/Priortization"
@@ -102,6 +103,23 @@ const Header = () => {
               }}
             >
               Priortization
+            </Nav.Link>
+
+                    <Nav.Link
+              as={Link}
+              to="/MaintenancePlan"
+              className={
+                activeTab === "/MaintenancePlan"
+                  ? "bg-custom-active text-white active"
+                  : "hover-bg-custom-active"
+              }
+              style={{
+                backgroundColor:
+                  activeTab === "/MaintenancePlan" ? "#005d7f" : "transparent",
+                color: activeTab === "/MaintenancePlan" ? "#fff" : "#000",
+              }}
+            >
+              Maintenance Plan
             </Nav.Link>
 
 
