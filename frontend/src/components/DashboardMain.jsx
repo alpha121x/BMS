@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BridgesListDashboard from "./BridgesListDashboard";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
@@ -28,7 +28,7 @@ const DashboardMain = () => {
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [activeView, setActiveView] = useState("inventory"); // 'map' or 'graph'
+  const [activeView, setActiveView] = useState("inventory");
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [evaluatedCards, setEvaluatedCards] = useState([]);
@@ -374,7 +374,7 @@ const DashboardMain = () => {
                 { activeView === "bridge_summary" && (
                   <BridgeStatusSummaryDashboard
                   api_endpoint={bridges_status_summary}
-                   districtId={districtId}
+                  districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
                    />

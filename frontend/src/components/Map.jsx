@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 import { useNavigate } from "react-router-dom"; // For navigation
 import { BASE_URL } from "./config";

@@ -80,8 +80,8 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
             referenceNo: item.uu_bms_id,
             bridgeName: item.bridge_name,
             totalInspections: item.total_inspections,
-            conInspections: item.con_approved,
-            ramsInspections: item.ram_approved,
+            pendingInspections: item.pending_inspections,
+            approvedInspections: item.approved_insp,
           }))
           .sort((a, b) => a.referenceNo.localeCompare(b.referenceNo));
         setData(formattedData);
@@ -135,21 +135,21 @@ const BridgesStatusSummary = ({ api_endpoint, districtId, bridgeName, structureT
       ),
     },
     {
-      name: "Consultant Approved Inspections",
-      selector: (row) => row.conInspections,
+      name: "Pending Inspections",
+      selector: (row) => row.pendingInspections,
       sortable: true,
       center: true,
       cell: (row) => (
-        <span style={{ color: "green" }}>{row.conInspections}</span>
+        <span style={{ color: "orange" }}>{row.pendingInspections}</span>
       ),
     },
-    {
-      name: "Rams Approved Inspections",
-      selector: (row) => row.ramsInspections,
+     {
+      name: "Approved Inspections",
+      selector: (row) => row.approvedInspections,
       sortable: true,
       center: true,
       cell: (row) => (
-        <span style={{ color: "green" }}>{row.ramsInspections}</span>
+        <span style={{ color: "green" }}>{row.approvedInspections}</span>
       ),
     },
   ];
