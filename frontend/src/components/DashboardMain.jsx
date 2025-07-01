@@ -281,7 +281,6 @@ const DashboardMain = () => {
               setStructureType={setStructureType}
               bridgeName={bridgeName}
               setBridgeName={setBridgeName}
-              // fetchAllBridges={fetchAllBridges} // Search triggered manually
               flexDirection="flex-col"
               padding="p-1"
             />
