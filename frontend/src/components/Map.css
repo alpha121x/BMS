@@ -1,21 +1,21 @@
 /* Ensure higher specificity */
 .esri-popup__action .esri-popup__button.esri-popup__button--primary {
-    background-color: #005D7F !important;
-    color: white !important;
-    border-radius: 6px !important;
-    padding: 8px 16px !important;
-    font-weight: 500 !important;
-    transition: background-color 0.3s ease, transform 0.1s ease !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-    border: none !important;
-    cursor: pointer !important;
-  }
-  
-  .esri-popup__action .esri-popup__button.esri-popup__button--primary:hover {
-    background-color: #004a63 !important;
-    transform: scale(1.05) !important;
-  }
-  
-  .esri-popup__action .esri-popup__button.esri-popup__button--primary:active {
-    transform: scale(0.95) !important;
-  }
+  background-color: #005d7f !important;
+  color: white !important;
+  border-radius: 6px !important;
+  padding: 8px 16px !important;
+  font-weight: 500 !important;
+  transition: background-color 0.3s ease, transform 0.1s ease !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.esri-popup__action .esri-popup__button.esri-popup__button--primary:hover {
+  background-color: #004a63 !important;
+  transform: scale(1.05) !important;
+}
+
+.esri-popup__action .esri-popup__button.esri-popup__button--primary:active {
+  transform: scale(0.95) !important;
+}
