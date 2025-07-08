@@ -27,36 +27,36 @@ const EsriMap = ({ districtId }) => {
 
         // Define a popup template for the layer
         const popupTemplate = {
-  title: "Bridge Details",
-  content: `
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th colspan="2" class="table-primary text-center">Bridge Details</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><th>Road Name:</th><td>{road_name}</td></tr>
-        <tr><th>District:</th><td>{district}</td></tr>
-        <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
-        <tr><th>Damage Category:</th><td>{damagecategory}</td></tr>
-        <tr><th>Damage Score:</th><td>{damagescore}</td></tr>
-        <tr>
-          <th>Images:</th>
-          <td>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
-              <img src="{image_1}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
-              <img src="{image_2}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
-              <img src="{image_3}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
-              <img src="{image_4}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
-              <img src="{image_5}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  `,
-};
+        title: "Bridge Details",
+          content: `
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th colspan="2" class="table-primary text-center">Bridge Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th>Road Name:</th><td>{road_name}</td></tr>
+                <tr><th>District:</th><td>{district}</td></tr>
+                <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
+                <tr><th>Damage Category:</th><td>{damagecategory}</td></tr>
+                <tr><th>Damage Score:</th><td>{damagescore}</td></tr>
+                <tr>
+                  <th>Images:</th>
+                  <td>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
+                      <img src="{image_1}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_2}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_3}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_4}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_5}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            `,
+          };
 
 
         // Add the ArcGIS MapImageLayer for the road damage service with sublayers
