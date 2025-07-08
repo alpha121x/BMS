@@ -14,19 +14,12 @@ const EsriMap = ({ districtId }) => {
         "esri/views/MapView",
         "esri/layers/MapImageLayer",
         "esri/widgets/Legend",
-        "esri/identity/IdentityManager",
         "esri/geometry/Extent", // Add Extent module for district extent
       ],
       { css: true }
     )
-      .then(([Map, MapView, MapImageLayer, Legend, IdentityManager, Extent]) => {
-        // Register the token with IdentityManager (if required)
-        const token = "your-token-here"; // Replace with your actual token
-        IdentityManager.registerToken({
-          server: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services",
-          token: token,
-        });
-
+      .then(([Map, MapView, MapImageLayer, Legend, Extent]) => {
+      
         // Initialize the map
         const map = new Map({
           basemap: "gray-vector",
