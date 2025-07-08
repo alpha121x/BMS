@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 import { BASE_URL } from "./config";
 
@@ -52,7 +52,7 @@ const CostMap = ({ districtId }) => {
             return `
               <div style="margin-bottom: 20px;">
                 <b>Bridge ID:</b> {uu_bms_id}<br/>
-                <b>Cost (Millions):</b> <b>{cost_million }</b><br/>
+                <b>Cost (Millions):</b> <b>{cost_million}</b><br/>
                 <b>Road Name:</b> {road_name}<br/>
                 <b>District:</b> {district}<br/>
                 <b>Structure Type:</b> {structure_type}<br/>
