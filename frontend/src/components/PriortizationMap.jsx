@@ -27,35 +27,37 @@ const EsriMap = ({ districtId }) => {
 
         // Define a popup template for the layer
         const popupTemplate = {
-          title: "Bridge Details",
-          content: ({ graphic }) => {
-            const attributes = graphic.attributes;
-            const images = [
-              attributes.image_1,
-              attributes.image_2,
-              attributes.image_3,
-              attributes.image_4,
-              attributes.image_5,
-            ].map((img, index) =>
-              img
-                ? `<img src="${img}" alt="Overview Image ${index + 1}" style="width: 18%; height: auto; object-fit: cover;">`
-                : `<span>No image</span>`
-            ).join(" ");
+  title: "Bridge Details",
+  content: `
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th colspan="2" class="table-primary text-center">Bridge Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>Road Name:</th><td>{road_name}</td></tr>
+        <tr><th>District:</th><td>{district}</td></tr>
+        <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
+        <tr><th>Damage Category:</th><td>{damagecategory}</td></tr>
+        <tr><th>Damage Score:</th><td>{damagescore}</td></tr>
+        <tr>
+          <th>Images:</th>
+          <td>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
+              <img src="{image_1}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_2}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_3}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_4}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_5}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+};
 
-            return `
-              <div style="margin-bottom: 20px;">
-                <b>Road Name:</b> {road_name}<br/>
-                <b>District:</b> {district}<br/>
-                <b>Structure Type:</b> {structure_type}<br/>
-                <b>Damage Category:</b> {damagecategory}<br/>
-                <b>Damage Score:</b> {damagescore}
-              </div>
-              <div style="display: flex; justify-content: space-between; gap: 10px;">
-                ${images}
-              </div>
-            `;
-          },
-        };
 
         // Add the ArcGIS MapImageLayer for the road damage service with sublayers
         const mapServiceLayer = new MapImageLayer({

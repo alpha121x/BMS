@@ -55,13 +55,6 @@ const CostMap = ({ districtId }) => {
       </tbody>
     </table>
   `,
-  actions: [
-    {
-      title: "View Bridge Details",
-      id: "view-details",
-      className: "esri-popup__button--primary",
-    },
-  ],
 };
 
         
