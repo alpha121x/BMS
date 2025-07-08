@@ -25,36 +25,46 @@ const CostMap = ({ districtId }) => {
         });
 
         // Define a popup template for the cost layers
-        const popupTemplate = {
-          title: "Bridge Cost Details",
-          content: ({ graphic }) => {
-            const attributes = graphic.attributes;
-            const images = [
-              attributes.image_1,
-              attributes.image_2,
-              attributes.image_3,
-              attributes.image_4,
-              attributes.image_5,
-            ].map((img, index) =>
-              img
-                ? `<img src="${img}" alt="Overview Image ${index + 1}" style="width: 18%; height: auto; object-fit: cover;">`
-                : `<span>No image</span>`
-            ).join(" ");
+     const popupTemplate = {
+  title: "Bridge Cost Details",
+  content: `
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th colspan="2" class="table-primary text-center">Bridge Cost Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>Bridge ID:</th><td>{uu_bms_id}</td></tr>
+        <tr><th>Cost (Millions):</th><td>{cost_million}</td></tr>
+        <tr><th>Road Name:</th><td>{road_name}</td></tr>
+        <tr><th>District:</th><td>{district}</td></tr>
+        <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
+        <tr>
+          <th>Images:</th>
+          <td>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
+              <img src="{image_1}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_2}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_3}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_4}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
+              <img src="{image_5}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  `,
+  actions: [
+    {
+      title: "View Bridge Details",
+      id: "view-details",
+      className: "esri-popup__button--primary",
+    },
+  ],
+};
 
-            return `
-              <div style="margin-bottom: 20px;">
-                <b>Bridge ID:</b> {uu_bms_id}<br/>
-                <b>Cost (Millions):</b> <b>{cost_million}</b><br/>
-                <b>Road Name:</b> {road_name}<br/>
-                <b>District:</b> {district}<br/>
-                <b>Structure Type:</b> {structure_type}<br/>
-              </div>
-              <div style="display: flex; justify-content: space-between; gap: 10px;">
-                ${images}
-              </div>
-            `;
-          },
-        };
+        
 
         // Add the ArcGIS MapImageLayer for the cost data with sublayers
         const costLayer = new MapImageLayer({
