@@ -21,7 +21,7 @@ const SetupListing = () => {
       </div>
 
       {/* Main Content */}
-      <main className="flex-grow p-1 mt-[50px]">
+      <main className="flex-grow p-1 mt-[65px]">
         <Routes>
           {/* Define routes for each setup listing */}
           <Route path="/DamageRanks" element={<DamageRanks />} />
