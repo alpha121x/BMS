@@ -277,8 +277,6 @@ const MaintenancePlan = () => {
     },
   ]);
 
-  
-
   return (
     <>
       <Header />
