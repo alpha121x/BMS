@@ -37,7 +37,7 @@ const BridgeWiseScore = () => {
     setError(null);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score-new?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
+        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
