@@ -155,17 +155,14 @@ const Map = ({ districtId }) => {
         };
 
         const bridgeLayer = new MapImageLayer({
-          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
-          title: "Bridge Conditions",
+          url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_MainDashboard_230725/MapServer",
+          title: "BMS Dashboard",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            { id: 1, title: "Districts", opacity: 0.6, listMode: "hide" },
-            { id: 3, title: "Good", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 4, title: "Fair", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 5, title: "Poor", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 6, title: "Under Construction", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 2, title: "Bridge Locations", listMode: "hide", popupTemplate },
+            { id: 0, title: "Districts", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 2, title: "Structure Types", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 3, title: "Road Classification", opacity: 0.6, listMode: "show", popupTemplate },
           ],
         });
 
@@ -177,7 +174,7 @@ const Map = ({ districtId }) => {
           layerInfos: [
             {
               layer: bridgeLayer,
-              title: "Bridge Conditions",
+              title: "BMS Dashboard Layers",
             },
           ],
         });
