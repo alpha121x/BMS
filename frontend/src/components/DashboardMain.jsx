@@ -11,6 +11,7 @@ import Filters from "./Filters";
 import PriotizationTable from "./PriotizationTable"; // Import the new component
 import CostEstimation from "./CostEstimation"; // Import the new component
 import BridgeStatusSummaryDashboard from "./BridgeStatusSummaryDashboard"; // Import the new component
+import FiveYearPlan from "./FiveYearPlan"; // Import the new component
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -334,6 +335,17 @@ const DashboardMain = () => {
               >
                 Cost
               </button>
+
+                 <button
+                onClick={() => setActiveView("fiveyearplan")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "fiveyearplan"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Five Year Plan
+              </button>
             </div>
 
             {/* Content Container */}
@@ -377,6 +389,9 @@ const DashboardMain = () => {
                   structureType={structureType}
                   bridgeName={bridgeName}
                    />
+                )}
+                { activeView === "fiveyearplan" && (
+                  <FiveYearPlan/>
                 )}
             </div>
           </div>
