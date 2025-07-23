@@ -58,28 +58,36 @@ const FiveYearPlan = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-100 rounded-xl shadow-lg max-w-6xl mx-auto">
-      <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">5-Year Development Plan</h2>
+    <div className="p-6 bg-gray-50 rounded-2xl shadow-lg max-w-6xl mx-auto border border-gray-200">
+      <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-800">
+        5-Year Development Plan
+      </h2>
 
       {/* Table Section */}
-      <div className="overflow-x-auto mb-12">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
-          <thead className="bg-gradient-to-r from-blue-600 to-blue-500 text-white">
-            <tr>
-              <th className="py-3 px-5 text-left text-lg">Year</th>
-              <th className="py-3 px-5 text-center text-lg">Number of Schemes</th>
-              <th className="py-3 px-5 text-center text-lg">Cost (Million Rupees)</th>
+      <div className="overflow-x-auto mb-14">
+        <table className="min-w-full bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
+          <thead>
+            <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-lg">
+              <th className="py-4 px-6 text-left">Year</th>
+              <th className="py-4 px-6 text-center">Number of Schemes</th>
+              <th className="py-4 px-6 text-center">Cost (Million Rupees)</th>
             </tr>
           </thead>
           <tbody className="text-gray-800 text-md">
             {data.map((item, index) => (
               <tr
                 key={index}
-                className={index % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50' : 'bg-white hover:bg-blue-50'}
+                className={`${
+                  index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                } hover:bg-blue-50 transition`}
               >
-                <td className="py-3 px-5">{item.year}</td>
-                <td className="py-3 px-5 text-center font-medium text-blue-700">{item.schemes.toLocaleString()}</td>
-                <td className="py-3 px-5 text-center font-medium text-green-700">{item.cost.toLocaleString()}</td>
+                <td className="py-3 px-6 font-medium">{item.year}</td>
+                <td className="py-3 px-6 text-center font-bold text-blue-700">
+                  {item.schemes.toLocaleString()}
+                </td>
+                <td className="py-3 px-6 text-center font-bold text-green-600">
+                  {item.cost.toLocaleString()}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -87,8 +95,8 @@ const FiveYearPlan = () => {
       </div>
 
       {/* Chart Section */}
-      <div className="w-full h-96">
-        <div ref={chartRef} style={{ height: '100%' }} />
+      <div className="bg-white rounded-xl shadow-md p-6">
+        <div ref={chartRef} className="h-96" />
       </div>
     </div>
   );
