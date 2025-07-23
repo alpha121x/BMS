@@ -227,7 +227,7 @@ app.get("/api/bms-score", async (req, res) => {
           AND CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $3;
     `;
 
-    const countResult = await pool.query(countQuery, values.slice(0, 3)); // Skip limit & offset
+    const countResult = await pool.query(countQuery, values.slice(0, 3));
     const totalRecords = countResult.rows[0].total;
 
     res.json({
