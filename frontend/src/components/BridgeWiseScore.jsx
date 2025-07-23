@@ -315,72 +315,56 @@ const BridgeWiseScore = () => {
                     className="table table-bordered table-hover table-striped table-responsive"
                     style={{ fontSize: "14px" }}
                   >
-                    <thead>
-                      <tr>
-                        <th>Bridge Name</th>
-                        <th>District</th>
-                        <th>Total Damage Score</th>
-                        <th>Critical Damage Score</th>
-                        <th>Average Damage Score</th>
-                        <th>BPI</th>
-                        <th>Bridge Information</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentData.length > 0 ? (
-                        currentData.map((row, index) => (
-                          <tr key={index}>
-                            <td>{row.bridge_name || "N/A"}</td>
-                            <td>{row.district || "N/A"}</td>
-                            <td>
-                              {row.total_damage_score
-                                ? parseFloat(row.total_damage_score).toFixed(2)
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {row.critical_damage_score
-                                ? parseFloat(row.critical_damage_score).toFixed(
-                                    2
-                                  )
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {row.average_damage_score
-                                ? parseFloat(row.average_damage_score).toFixed(
-                                    2
-                                  )
-                                : "N/A"}
-                            </td>
+                   <thead>
+  <tr>
+    <th>Bridge Name</th>
+    <th>District</th>
+    <th>Total Damage Score</th>
+    <th>Critical Damage Score</th>
+    <th>Average Damage Score</th>
+    <th>BPI</th>
+    <th>Inventory Score (TDS)</th>
+    <th>Inventory Score (CDS)</th>
+    <th>Inventory Score (ADS)</th>
+    <th>Damage Sum</th>
+  </tr>
+</thead>
+<tbody>
+  {currentData.length > 0 ? (
+    currentData.map((row, index) => (
+      <tr key={index}>
+        <td>{row.bridge_name || "N/A"}</td>
+        <td>{row.district || "N/A"}</td>
+        <td>{row.total_damage_score ? parseFloat(row.total_damage_score).toFixed(2) : "N/A"}</td>
+        <td>{row.critical_damage_score ? parseFloat(row.critical_damage_score).toFixed(2) : "N/A"}</td>
+        <td>{row.average_damage_score ? parseFloat(row.average_damage_score).toFixed(2) : "N/A"}</td>
+        <td>{row.bridge_performance_index ? parseFloat(row.bridge_performance_index).toFixed(2) : "N/A"}</td>
+        <td>{row.inventory_score_tds ? parseFloat(row.inventory_score_tds).toFixed(2) : "0"}</td>
+        <td>{row.inventory_score_cds ? parseFloat(row.inventory_score_cds).toFixed(2) : "0"}</td>
+        <td>{row.inventory_score_ads ? parseFloat(row.inventory_score_ads).toFixed(2) : "0"}</td>
+        <td className="text-center">
+          <button
+            onClick={() => handleClick(row)}
+            className="btn btn-sm"
+            style={{
+              backgroundColor: "#3B9996",
+              color: "white",
+            }}
+          >
+            Bridge Info
+          </button>
+        </td>
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="10" className="text-center">
+        No data available
+      </td>
+    </tr>
+  )}
+</tbody>
 
-                            <td>
-                              {row.bridge_performance_index
-                                ? parseFloat(
-                                    row.bridge_performance_index
-                                  ).toFixed(2)
-                                : "N/A"}
-                            </td>
-                            <td className="text-center">
-                              <button
-                                onClick={() => handleClick(row)}
-                                className="btn btn-sm"
-                                style={{
-                                  backgroundColor: "#3B9996",
-                                  color: "white",
-                                }}
-                              >
-                                Bridge Info
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" className="text-center">
-                            No data available
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
                   </Table>
 
                   {/* Pagination Section */}
