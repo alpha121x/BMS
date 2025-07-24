@@ -159,7 +159,7 @@ const Map = ({ districtId }) => {
           sublayers: [
             { id: 0, title: "Districts", opacity: 0.6, listMode: "show", popupTemplate },
             { id: 2, title: "Structure Types", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 3, title: "Road Classification", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 3, title: "Road Classification", opacity: 0.6, listMode: "show", popupTemplate, visible: false }, // Set to false to keep off by default
           ],
         });
 
