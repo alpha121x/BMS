@@ -245,6 +245,126 @@ app.get("/api/bms-score", async (req, res) => {
   }
 });
 
+// API Endpoint for bridge-wise score with aggregated detailed scores
+app.get("/api/bms-score-new", async (req, res) => {
+  try {
+    let { page, limit, district, structureType, bridgeName } = req.query;
+
+    // Defaults
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
+    const offset = (page - 1) * limit;
+
+    district = district || "%";
+    structureType = structureType || "%";
+    bridgeName = bridgeName ? `%${bridgeName}%` : "%";
+
+    // Main Query with aggregated detailed scores
+   const query = `
+  WITH detailed_scores AS (
+    SELECT 
+      "ObjectID",
+      SUM("Inventory Score (TDS)"::numeric) AS inventory_score_tds,
+      SUM("Inventory Score (CDS)"::numeric) AS inventory_score_cds,
+      SUM("Inventory Score (ADS)"::numeric) AS inventory_score_ads,
+      SUM("Damage Sum"::numeric) AS damage_sum
+    FROM bms.tbl_bms_detailed_calc
+    GROUP BY "ObjectID"
+  )
+  SELECT 
+    c."ObjectID" AS uu_bms_id,
+    c.total_damage_score, 
+    c.critical_damage_score,
+    c.avg_damage_score AS average_damage_score,
+    c.bridge_performance_index,
+
+    -- Detailed score aggregates
+    d.inventory_score_tds,
+    d.inventory_score_cds,
+    d.inventory_score_ads,
+    d.damage_sum,
+
+    -- Master data
+    m.structure_no, 
+    m.structure_type_id, 
+    m.structure_type, 
+    m.road_name, 
+    m.road_name_cwd, 
+    m.route_id, 
+    m.survey_id, 
+    m.surveyor_name, 
+    m.district_id, 
+    m.district, 
+    m.road_classification, 
+    m.road_surface_type, 
+    m.carriageway_type, 
+    m.direction, 
+    m.visual_condition, 
+    m.construction_type_id, 
+    m.construction_type, 
+    m.no_of_span, 
+    m.span_length_m, 
+    m.structure_width_m, 
+    m.construction_year, 
+    m.last_maintenance_date, 
+    m.remarks, 
+    m.is_surveyed, 
+    m.x_centroid, 
+    m.y_centroid, 
+    m.images_spans,
+    CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+    ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+
+  FROM 
+    bms.tbl_bms_calculations_2 c
+  LEFT JOIN 
+    bms.tbl_bms_master_data m ON c."ObjectID"::INTEGER = m.id
+  LEFT JOIN 
+    detailed_scores d ON c."ObjectID" = d."ObjectID"
+  WHERE 
+    m.district_id::TEXT LIKE $1 AND
+    m.structure_type_id::TEXT LIKE $2 AND
+    CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $3
+  ORDER BY c."ObjectID"
+  LIMIT $4 OFFSET $5;
+`;
+
+
+    const values = [district, structureType, bridgeName, limit, offset];
+    const result = await pool.query(query, values);
+
+    // Total Count Query
+    const countQuery = `
+      SELECT COUNT(*) AS total
+      FROM bms.tbl_bms_calculations_2 c 
+      LEFT JOIN bms.tbl_bms_master_data m ON c."ObjectID"::INTEGER = m.id
+      WHERE 
+        m.district_id::TEXT LIKE $1 AND
+        m.structure_type_id::TEXT LIKE $2 AND
+        CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $3;
+    `;
+    const countResult = await pool.query(countQuery, values.slice(0, 3));
+    const totalRecords = parseInt(countResult.rows[0]?.total || 0);
+
+    // Response
+    res.json({
+      success: true,
+      totalRecords,
+      totalPages: Math.ceil(totalRecords / limit),
+      currentPage: page,
+      data: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error fetching data:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database.",
+    });
+  }
+});
+
+
 // API endpoint to fetch data from bms.tbl_bms_matrix
 app.get("/api/bms-matrix", async (req, res) => {
   try {

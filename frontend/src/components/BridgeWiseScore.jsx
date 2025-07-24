@@ -37,7 +37,7 @@ const BridgeWiseScore = () => {
     setError(null);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
+        `${BASE_URL}/api/bms-score-new?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
@@ -289,107 +289,125 @@ const BridgeWiseScore = () => {
                 </div>
               </div>
             </div>
-            <div className="card-body p-0 pb-2">
-              {loading ? (
-                <div
-                  style={{
-                    border: "8px solid #f3f3f3",
-                    borderTop: "8px solid #3498db",
-                    borderRadius: "50%",
-                    width: "80px",
-                    height: "80px",
-                    animation: "spin 1s linear infinite",
-                    margin: "auto",
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 999,
-                  }}
-                />
-              ) : error ? (
-                <p className="text-danger">{error}</p>
-              ) : (
-                <>
-                  <Table
-                    className="table table-bordered table-hover table-striped table-responsive"
-                    style={{ fontSize: "14px" }}
+          <div className="card-body p-0 pb-2">
+  {loading ? (
+    <div
+      style={{
+        border: "8px solid #f3f3f3",
+        borderTop: "8px solid #3498db",
+        borderRadius: "50%",
+        width: "80px",
+        height: "80px",
+        animation: "spin 1s linear infinite",
+        margin: "auto",
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: 999,
+      }}
+    />
+  ) : error ? (
+    <p className="text-danger">{error}</p>
+  ) : (
+    <>
+      <Table
+        className="table table-bordered table-hover table-striped table-responsive"
+        style={{ fontSize: "14px" }}
+      >
+        <thead>
+          <tr>
+            <th>Bridge Name</th>
+            <th>District</th>
+            <th>Total Damage Score</th>
+            <th>Critical Damage Score</th>
+            <th>Average Damage Score</th>
+            <th>BPI</th>
+            <th>Inv. Score (TDS)</th>
+            <th>Inv. Score (CDS)</th>
+            <th>Inv. Score (ADS)</th>
+            <th>Damage Sum</th>
+            <th>Bridge Information</th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentData.length > 0 ? (
+            currentData.map((row, index) => (
+              <tr key={index}>
+                <td>{row.bridge_name || "N/A"}</td>
+                <td>{row.district || "N/A"}</td>
+                <td>
+                  {row.total_damage_score
+                    ? parseFloat(row.total_damage_score).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td>
+                  {row.critical_damage_score
+                    ? parseFloat(row.critical_damage_score).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td>
+                  {row.average_damage_score
+                    ? parseFloat(row.average_damage_score).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td>
+                  {row.bridge_performance_index
+                    ? parseFloat(row.bridge_performance_index).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td>
+                  {row.inventory_score_tds
+                    ? parseFloat(row.inventory_score_tds).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td>
+                  {row.inventory_score_cds
+                    ? parseFloat(row.inventory_score_cds).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td>
+                  {row.inventory_score_ads
+                    ? parseFloat(row.inventory_score_ads).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td>
+                  {row.damage_sum
+                    ? parseFloat(row.damage_sum).toFixed(2)
+                    : "N/A"}
+                </td>
+                <td className="text-center">
+                  <button
+                    onClick={() => handleClick(row)}
+                    className="btn btn-sm"
+                    style={{
+                      backgroundColor: "#3B9996",
+                      color: "white",
+                    }}
                   >
-                    <thead>
-                      <tr>
-                        <th>Bridge Name</th>
-                        <th>District</th>
-                        <th>Total Damage Score</th>
-                        <th>Critical Damage Score</th>
-                        <th>Average Damage Score</th>
-                        <th>BPI</th>
-                        <th>Bridge Information</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentData.length > 0 ? (
-                        currentData.map((row, index) => (
-                          <tr key={index}>
-                            <td>{row.bridge_name || "N/A"}</td>
-                            <td>{row.district || "N/A"}</td>
-                            <td>
-                              {row.total_damage_score
-                                ? parseFloat(row.total_damage_score).toFixed(2)
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {row.critical_damage_score
-                                ? parseFloat(row.critical_damage_score).toFixed(
-                                    2
-                                  )
-                                : "N/A"}
-                            </td>
-                            <td>
-                              {row.average_damage_score
-                                ? parseFloat(row.average_damage_score).toFixed(
-                                    2
-                                  )
-                                : "N/A"}
-                            </td>
+                    Bridge Info
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="11" className="text-center">
+                No data available
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </Table>
 
-                            <td>
-                              {row.bridge_performance_index
-                                ? parseFloat(
-                                    row.bridge_performance_index
-                                  ).toFixed(2)
-                                : "N/A"}
-                            </td>
-                            <td className="text-center">
-                              <button
-                                onClick={() => handleClick(row)}
-                                className="btn btn-sm"
-                                style={{
-                                  backgroundColor: "#3B9996",
-                                  color: "white",
-                                }}
-                              >
-                                Bridge Info
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" className="text-center">
-                            No data available
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </Table>
+      {/* Pagination Section */}
+      <div className="d-flex justify-content-center align-items-center mt-3">
+        {renderPaginationButtons()}
+      </div>
+    </>
+  )}
+</div>
 
-                  {/* Pagination Section */}
-                  <div className="d-flex justify-content-center align-items-center mt-3">
-                    {renderPaginationButtons()}
-                  </div>
-                </>
-              )}
-            </div>
           </div>
         </div>
       </section>
