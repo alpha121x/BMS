@@ -1,24 +1,24 @@
 import { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "./config";
 
 const Map = ({ districtId }) => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
-  const navigate = useNavigate(); // Use for navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, Legend, Extent] =
+        const [Map, MapView, MapImageLayer, Extent, LayerList] =
           await loadModules(
             [
               "esri/Map",
               "esri/views/MapView",
               "esri/layers/MapImageLayer",
-              "esri/widgets/Legend",
               "esri/geometry/Extent",
+              "esri/widgets/LayerList"
             ],
             { css: true }
           );
@@ -39,7 +39,7 @@ const Map = ({ districtId }) => {
         const handlePopupAction = async (event) => {
           if (event.action.id === "view-details") {
             const attributes = view.popup.selectedFeature.attributes;
-            const bridgeId = attributes?.uu_bms_id; // Extract Bridge ID
+            const bridgeId = attributes?.uu_bms_id;
         
             if (!bridgeId) {
               console.error("Bridge ID not found.");
@@ -51,18 +51,15 @@ const Map = ({ districtId }) => {
               const bridgeData = await response.json();
         
               if (bridgeData.success) {
-                const bridgesArray = bridgeData.bridges; // Extract bridges array
-                const bridge = bridgesArray[0]; // Select the first bridge
+                const bridgesArray = bridgeData.bridges;
+                const bridge = bridgesArray[0];
         
                 if (!bridge) {
                   console.error("No bridge details found");
                   return;
                 }
         
-                // Serialize and encode the bridges array
                 const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-        
-                // Redirect using window.location.href
                 window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
               } else {
                 console.error("Bridge details not found");
@@ -168,17 +165,29 @@ const Map = ({ districtId }) => {
 
         map.add(bridgeLayer);
 
-        // Add Legend widget to the top-right
-        const legend = new Legend({
+        // Add LayerList widget to the top-right with layer control
+        const layerList = new LayerList({
           view: view,
-          layerInfos: [
-            {
-              layer: bridgeLayer,
-              title: "BMS Dashboard Layers",
-            },
-          ],
+          listItemCreatedFunction: function(event) {
+            const item = event.item;
+            if (item.layer.type !== "group") {
+              item.panel = {
+                content: "legend",
+                open: true // Set to true to allow interaction
+              };
+              item.actionsSections = [
+                [
+                  {
+                    title: "Toggle Visibility",
+                    className: "esri-icon-visible",
+                    id: "toggle-layer-visibility"
+                  }
+                ]
+              ];
+            }
+          }
         });
-        view.ui.add(legend, "top-right");
+        view.ui.add(layerList, "top-right");
 
         await view.when();
         console.log("EzriMap is ready.");
