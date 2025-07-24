@@ -245,6 +245,37 @@ app.get("/api/bms-score", async (req, res) => {
   }
 });
 
+// API Endpoint for Exporting Full BMS Data (No Limits)
+app.get("/api/bms-score-export", async (req, res) => {
+  try {
+    const query = `
+    SELECT 
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS "BridgeName",
+        m.district,
+        c.total_damage_score, 
+        c.critical_damage_score,
+        c.avg_damage_score AS average_damage_score  -- Ensure consistent column naming
+    FROM 
+        bms.tbl_bms_calculations_2 c  -- Ensure correct table name
+    LEFT JOIN 
+        bms.tbl_bms_master_data m 
+    ON 
+        c."ObjectID"::INTEGER = m.id  -- Ensure case-sensitive match
+    ORDER BY c."ObjectID";
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      totalRecords: result.rowCount, // More efficient than result.rows.length
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching export data:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // API Endpoint for bridge-wise score with aggregated detailed scores
 app.get("/api/bms-score-new", async (req, res) => {
   try {
@@ -363,6 +394,64 @@ app.get("/api/bms-score-new", async (req, res) => {
     });
   }
 });
+
+// API Endpoint for Exporting All Bridge-wise BMS Data (No Pagination)
+app.get("/api/bms-score-export-new", async (req, res) => {
+  try {
+    const query = `
+      WITH detailed_scores AS (
+        SELECT 
+          "ObjectID",
+          SUM("Inventory Score (TDS)"::numeric) AS inventory_score_tds,
+          SUM("Inventory Score (CDS)"::numeric) AS inventory_score_cds,
+          SUM("Inventory Score (ADS)"::numeric) AS inventory_score_ads,
+          SUM("Damage Sum"::numeric) AS damage_sum
+        FROM bms.tbl_bms_detailed_calc
+        GROUP BY "ObjectID"
+      )
+      SELECT 
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+        m.district,
+        c.total_damage_score, 
+        c.critical_damage_score,
+        c.avg_damage_score AS average_damage_score,
+        c.bridge_performance_index,
+
+        -- Detailed score aggregates
+        d.inventory_score_tds,
+        d.inventory_score_cds,
+        d.inventory_score_ads,
+        d.damage_sum
+
+      FROM 
+        bms.tbl_bms_calculations_2 c
+      LEFT JOIN 
+        bms.tbl_bms_master_data m ON c."ObjectID"::INTEGER = m.id
+      LEFT JOIN 
+        detailed_scores d ON c."ObjectID" = d."ObjectID"
+      WHERE 
+        m.district IS NOT NULL
+      ORDER BY 
+        c."ObjectID";
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      success: true,
+      totalRecords: result.rowCount,
+      data: result.rows,
+    });
+
+  } catch (error) {
+    console.error("Error exporting bridge-wise BMS data:", error.message);
+    res.status(500).json({
+      success: false,
+      message: "Error exporting bridge-wise BMS data.",
+    });
+  }
+});
+
 
 
 // API endpoint to fetch data from bms.tbl_bms_matrix
@@ -490,36 +579,6 @@ app.get("/api/bms-cost-export", async (req, res) => {
   } catch (error) {
     console.error("Error executing export query:", error);
     res.status(500).json({ error: "Internal server error" });
-  }
-});
-// API Endpoint for Exporting Full BMS Data (No Limits)
-app.get("/api/bms-score-export", async (req, res) => {
-  try {
-    const query = `
-    SELECT 
-        CONCAT(m.pms_sec_id, ',', m.structure_no) AS "BridgeName",
-        m.district,
-        c.total_damage_score, 
-        c.critical_damage_score,
-        c.avg_damage_score AS average_damage_score  -- Ensure consistent column naming
-    FROM 
-        bms.tbl_bms_calculations_2 c  -- Ensure correct table name
-    LEFT JOIN 
-        bms.tbl_bms_master_data m 
-    ON 
-        c."ObjectID"::INTEGER = m.id  -- Ensure case-sensitive match
-    ORDER BY c."ObjectID";
-    `;
-
-    const result = await pool.query(query);
-
-    res.json({
-      totalRecords: result.rowCount, // More efficient than result.rows.length
-      data: result.rows,
-    });
-  } catch (error) {
-    console.error("Error fetching export data:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

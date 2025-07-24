@@ -8,6 +8,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
 import Filters from "./Filters";
+import DataTable from "react-data-table-component";
+
 
 const BridgeWiseScore = () => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
@@ -59,6 +61,93 @@ const BridgeWiseScore = () => {
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const currentData = bridgeScoreData; // Since data is already paginated from API
 
+  const columns = [
+  {
+    name: "Bridge Name",
+    selector: (row) => row.bridge_name || "N/A",
+    sortable: true,
+  },
+  {
+    name: "District",
+    selector: (row) => row.district || "N/A",
+    sortable: true,
+  },
+  {
+    name: "Total Damage Score",
+    selector: (row) =>
+      row.total_damage_score
+        ? parseFloat(row.total_damage_score).toFixed(2)
+        : "N/A",
+    sortable: true,
+  },
+  {
+    name: "Critical Damage Score",
+    selector: (row) =>
+      row.critical_damage_score
+        ? parseFloat(row.critical_damage_score).toFixed(2)
+        : "N/A",
+    sortable: true,
+  },
+  {
+    name: "Average Damage Score",
+    selector: (row) =>
+      row.average_damage_score
+        ? parseFloat(row.average_damage_score).toFixed(2)
+        : "N/A",
+    sortable: true,
+  },
+  {
+    name: "BPI",
+    selector: (row) =>
+      row.bridge_performance_index
+        ? parseFloat(row.bridge_performance_index).toFixed(2)
+        : "N/A",
+    sortable: true,
+  },
+  {
+    name: "Inv. Score (TDS)",
+    selector: (row) =>
+      row.inventory_score_tds
+        ? parseFloat(row.inventory_score_tds).toFixed(2)
+        : "N/A",
+  },
+  {
+    name: "Inv. Score (CDS)",
+    selector: (row) =>
+      row.inventory_score_cds
+        ? parseFloat(row.inventory_score_cds).toFixed(2)
+        : "N/A",
+  },
+  {
+    name: "Inv. Score (ADS)",
+    selector: (row) =>
+      row.inventory_score_ads
+        ? parseFloat(row.inventory_score_ads).toFixed(2)
+        : "N/A",
+  },
+  {
+    name: "Damage Sum",
+    selector: (row) =>
+      row.damage_sum ? parseFloat(row.damage_sum).toFixed(2) : "N/A",
+  },
+  {
+    name: "Bridge Information",
+    cell: (row) => (
+      <button
+        onClick={() => handleClick(row)}
+        className="btn btn-sm"
+        style={{ backgroundColor: "#3B9996", color: "white" }}
+      >
+        Bridge Info
+      </button>
+    ),
+    ignoreRowClick: true,
+    allowOverflow: true,
+    button: true,
+  },
+];
+
+
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
@@ -73,7 +162,7 @@ const BridgeWiseScore = () => {
 
   const handleDownloadCSV = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/bms-score-export`);
+      const response = await fetch(`${BASE_URL}/api/bms-score-export-new`);
       const { data } = await response.json();
 
       if (!data.length) {
@@ -105,7 +194,7 @@ const BridgeWiseScore = () => {
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/bms-score-export`);
+      const response = await fetch(`${BASE_URL}/api/bms-score-export-new`);
       const { data } = await response.json();
 
       if (!data.length) {
@@ -311,94 +400,21 @@ const BridgeWiseScore = () => {
     <p className="text-danger">{error}</p>
   ) : (
     <>
-      <Table
-        className="table table-bordered table-hover table-striped table-responsive"
-        style={{ fontSize: "14px" }}
-      >
-        <thead>
-          <tr>
-            <th>Bridge Name</th>
-            <th>District</th>
-            <th>Total Damage Score</th>
-            <th>Critical Damage Score</th>
-            <th>Average Damage Score</th>
-            <th>BPI</th>
-            <th>Inv. Score (TDS)</th>
-            <th>Inv. Score (CDS)</th>
-            <th>Inv. Score (ADS)</th>
-            <th>Damage Sum</th>
-            <th>Bridge Information</th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentData.length > 0 ? (
-            currentData.map((row, index) => (
-              <tr key={index}>
-                <td>{row.bridge_name || "N/A"}</td>
-                <td>{row.district || "N/A"}</td>
-                <td>
-                  {row.total_damage_score
-                    ? parseFloat(row.total_damage_score).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td>
-                  {row.critical_damage_score
-                    ? parseFloat(row.critical_damage_score).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td>
-                  {row.average_damage_score
-                    ? parseFloat(row.average_damage_score).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td>
-                  {row.bridge_performance_index
-                    ? parseFloat(row.bridge_performance_index).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td>
-                  {row.inventory_score_tds
-                    ? parseFloat(row.inventory_score_tds).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td>
-                  {row.inventory_score_cds
-                    ? parseFloat(row.inventory_score_cds).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td>
-                  {row.inventory_score_ads
-                    ? parseFloat(row.inventory_score_ads).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td>
-                  {row.damage_sum
-                    ? parseFloat(row.damage_sum).toFixed(2)
-                    : "N/A"}
-                </td>
-                <td className="text-center">
-                  <button
-                    onClick={() => handleClick(row)}
-                    className="btn btn-sm"
-                    style={{
-                      backgroundColor: "#3B9996",
-                      color: "white",
-                    }}
-                  >
-                    Bridge Info
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="11" className="text-center">
-                No data available
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </Table>
+     <DataTable
+  columns={columns}
+  data={currentData}
+  progressPending={loading}
+  pagination
+  paginationServer
+  paginationTotalRows={totalItems}
+  paginationPerPage={itemsPerPage}
+  onChangePage={(page) => setCurrentPage(page)}
+  highlightOnHover
+  responsive
+  persistTableHead
+  noDataComponent="No data available"
+/>
+
 
       {/* Pagination Section */}
       <div className="d-flex justify-content-center align-items-center mt-3">
