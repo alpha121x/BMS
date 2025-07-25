@@ -157,108 +157,42 @@ const Map = ({ districtId }) => {
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            { 
-              id: 0, 
-              title: "Districts", 
-              opacity: 0.6, 
-              listMode: "show", 
-              popupTemplate,
-              visible: true // Explicitly set visibility
-            },
-            { 
-              id: 2, 
-              title: "Structure Types", 
-              opacity: 0.6, 
-              listMode: "show", 
-              popupTemplate,
-              visible: true // Explicitly set visibility
-            },
-            { 
-              id: 3, 
-              title: "Road Classification", 
-              opacity: 0.6, 
-              listMode: "show", 
-              popupTemplate, 
-              visible: false // Keep off by default
-            },
+            { id: 0, title: "Districts", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 2, title: "Structure Types", opacity: 0.6, listMode: "show", popupTemplate },
+            { id: 3, title: "Road Classification", opacity: 0.6, listMode: "show", popupTemplate, visible: false }, // Set to false to keep off by default
           ],
         });
 
         map.add(bridgeLayer);
 
-        // Enhanced LayerList widget with proper layer control
+        // Add LayerList widget to the top-right with layer control
         const layerList = new LayerList({
           view: view,
           listItemCreatedFunction: function(event) {
             const item = event.item;
-            
-            // Handle MapImageLayer sublayers
-            if (item.layer.type === "map-image") {
-              // Enable visibility toggle for the main layer
+            if (item.layer.type !== "group") {
               item.panel = {
                 content: "legend",
-                open: false
+                open: true // Set to true to allow interaction
               };
-            }
-            
-            // Handle sublayers
-            if (item.parent && item.parent.layer.type === "map-image") {
-              // Add custom actions for sublayers
               item.actionsSections = [
                 [
                   {
-                    title: "Show/Hide Layer",
+                    title: "Toggle Visibility",
                     className: "esri-icon-visible",
-                    id: "toggle-visibility"
-                  },
-                  {
-                    title: "Zoom to Layer",
-                    className: "esri-icon-zoom-out-fixed",
-                    id: "zoom-to-layer"
+                    id: "toggle-layer-visibility"
                   }
                 ]
               ];
             }
-          },
-          
-          // Handle layer list actions
-          triggerAction: function(event) {
-            const id = event.action.id;
-            const item = event.item;
-            
-            if (id === "toggle-visibility") {
-              // Toggle sublayer visibility
-              if (item.parent && item.parent.layer.type === "map-image") {
-                const sublayer = item.parent.layer.sublayers.find(sl => sl.id === item.layer.id);
-                if (sublayer) {
-                  sublayer.visible = !sublayer.visible;
-                }
-              } else {
-                // Toggle main layer visibility
-                item.layer.visible = !item.layer.visible;
-              }
-            } else if (id === "zoom-to-layer") {
-              // Zoom to layer extent (you can customize this based on your needs)
-              if (extent) {
-                view.goTo(extent);
-              }
-            }
           }
         });
-
-        // Add LayerList to the view
         view.ui.add(layerList, "top-right");
 
-        // Additional event listener for visibility changes
-        layerList.on("trigger-action", function(event) {
-          console.log("Layer action triggered:", event.action.id, "for layer:", event.item.title);
-        });
-
         await view.when();
-        console.log("EsriMap is ready with enhanced layer controls.");
-        
+        console.log("EzriMap is ready.");
       } catch (error) {
-        console.error("Error initializing EsriMap:", error);
+        console.error("Error initializing EzriMap:", error);
       }
     };
 
