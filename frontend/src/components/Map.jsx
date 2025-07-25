@@ -314,10 +314,18 @@ const Map = ({
 
         map.add(bridgeLayer);
 
-        // Log sublayer definition expressions for debugging
+        // Log sublayer definition expressions
         bridgeLayer.when(() => {
           bridgeLayer.sublayers.forEach((sublayer) => {
             console.log(`Sublayer ${sublayer.id} definitionExpression:`, sublayer.definitionExpression);
+            // Note: queryFeatureCount is not supported for MapImageLayer sublayers. Check data manually via ArcGIS REST API if needed.
+          });
+        });
+
+        // Force refresh of sublayers
+        bridgeLayer.when(() => {
+          bridgeLayer.sublayers.forEach((sublayer) => {
+            sublayer.definitionExpression = definitionExpression;
           });
         });
 
