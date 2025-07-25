@@ -18,18 +18,6 @@ const Map = ({
   const viewRef = useRef(null);
   const navigate = useNavigate();
 
-    console.log("Map component props:", {
-    districtId,
-    structureType,
-    bridgeName,
-    constructionType,
-    bridgeLength,
-    age,
-    underFacility,
-    roadClassification,
-    spanLength
-  });
-
   useEffect(() => {
     const initializeMap = async () => {
       try {
@@ -177,6 +165,17 @@ const Map = ({
         // Build definition expression based on all filter props
         const buildDefinitionExpression = () => {
           const expressions = [];
+          console.log("Input values:", {
+            districtId,
+            structureType,
+            bridgeName,
+            constructionType,
+            bridgeLength,
+            age,
+            underFacility,
+            roadClassification,
+            spanLength
+          });
 
           if (structureType && structureType !== "" && structureType !== "%") {
             expressions.push(`structure_type_id = '${structureType}'`);
@@ -314,6 +313,13 @@ const Map = ({
         });
 
         map.add(bridgeLayer);
+
+        // Log sublayer definition expressions for debugging
+        bridgeLayer.when(() => {
+          bridgeLayer.sublayers.forEach((sublayer) => {
+            console.log(`Sublayer ${sublayer.id} definitionExpression:`, sublayer.definitionExpression);
+          });
+        });
 
         // Add LayerList widget to the top-right with layer control
         const layerList = new LayerList({
