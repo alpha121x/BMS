@@ -123,6 +123,7 @@ const Map = ({ districtId }) => {
               <tbody>
                 <tr><th>Road Name:</th><td>{road_name}</td></tr>
                 <tr><th>Reference No:</th><td>{uu_bms_id}</td></tr>
+                <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
                 <tr><th>District:</th><td>{district}</td></tr>
                 <tr><th>Inventory Score:</th><td>{inventory_score}</td></tr>
                 <tr><th>Inspection Score:</th><td>{inspection_score}</td></tr>
