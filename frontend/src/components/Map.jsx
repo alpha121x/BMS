@@ -3,7 +3,17 @@ import { loadModules } from "esri-loader";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "./config";
 
-const Map = ({ districtId }) => {
+const Map = ({
+  districtId,
+  structureType,
+  bridgeName,
+  constructionType,
+  bridgeLength,
+  age,
+  underFacility,
+  roadClassification,
+  spanLength
+}) => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
   const navigate = useNavigate();
@@ -152,15 +162,71 @@ const Map = ({ districtId }) => {
           ],
         };
 
+        // Build definition expression based on all filter props
+        const buildDefinitionExpression = () => {
+          const expressions = [];
+
+          if (structureType && structureType !== "" && structureType !== "%") {
+            expressions.push(`structure_type_id = '${structureType}'`);
+          }
+          if (bridgeName && bridgeName !== "" && bridgeName !== "%") {
+            expressions.push(`bridge_name = '${bridgeName}'`);
+          }
+          if (constructionType && constructionType !== "" && constructionType !== "%") {
+            expressions.push(`construction_type_id = '${constructionType}'`);
+          }
+          if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
+            expressions.push(`bridge_length = ${bridgeLength}`);
+          }
+          if (age && age !== "" && age !== "%") {
+            expressions.push(`age = ${age}`);
+          }
+          if (underFacility && underFacility !== "" && underFacility !== "%") {
+            expressions.push(`under_facility = '${underFacility}'`);
+          }
+          if (roadClassification && roadClassification !== "" && roadClassification !== "%") {
+            expressions.push(`road_classification_id = '${roadClassification}'`);
+          }
+          if (spanLength && spanLength !== "" && spanLength !== "%") {
+            expressions.push(`span_length = ${spanLength}`);
+          }
+
+          return expressions.length > 0 ? expressions.join(" AND ") : null;
+        };
+
+        const definitionExpression = buildDefinitionExpression();
+
         const bridgeLayer = new MapImageLayer({
           url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_MainDashboard_230725/MapServer",
           title: "Bridge Conditions",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            { id: 0, title: "Districts", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 2, title: "Structure Types", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 3, title: "Road Classification", opacity: 0.6, listMode: "show", popupTemplate, visible: false }, // Set to false to keep off by default
+            {
+              id: 0,
+              title: "Districts",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              definitionExpression
+            },
+            {
+              id: 2,
+              title: "Structure Types",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              definitionExpression
+            },
+            {
+              id: 3,
+              title: "Road Classification",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              visible: false,
+              definitionExpression
+            },
           ],
         });
 
@@ -174,7 +240,7 @@ const Map = ({ districtId }) => {
             if (item.layer.type !== "group") {
               item.panel = {
                 content: "legend",
-                open: true // Set to true to allow interaction
+                open: true
               };
               item.actionsSections = [
                 [
@@ -188,7 +254,21 @@ const Map = ({ districtId }) => {
             }
           }
         });
-        view.ui.add(layerList, "top-right");
+
+        // Handle layer visibility toggle
+        layerList.on("trigger-action", function(event) {
+          if (event.action.id === "toggle-layer-visibility") {
+            const item = event.item;
+            item.layer.visible = !item.layer.visible;
+            event.action.title = item.layer.visible ? "Hide Layer" : "Show Layer";
+            event.action.className = item.layer.visible ? "esri-icon-non-visible" : "esri-icon-visible";
+          }
+        });
+
+        view.ui.add(layerList, {
+          position: "top-right",
+          className: "esri-ui-corner-container"
+        });
 
         await view.when();
         console.log("EzriMap is ready.");
@@ -204,7 +284,18 @@ const Map = ({ districtId }) => {
         viewRef.current.container = null;
       }
     };
-  }, [districtId, navigate]);
+  }, [
+    districtId,
+    structureType,
+    bridgeName,
+    constructionType,
+    bridgeLength,
+    age,
+    underFacility,
+    roadClassification,
+    spanLength,
+    navigate
+  ]);
 
   return (
     <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{ border: "1px solid #005D7F" }}>

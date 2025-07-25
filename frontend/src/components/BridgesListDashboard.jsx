@@ -482,7 +482,17 @@ const BridgesListDashboard = ({
       </div>
       <div>
         {viewMode === "map" ? (
-          <Map districtId={districtId} />
+          <Map 
+          districtId={districtId}
+          structureType={structureType}
+          bridgeName={bridgeName}
+          constructionType={constructionType}
+          bridgeLength={bridgeLength}
+          age={age}
+          underFacility={underFacility}
+          roadClassification={roadClassification}
+          spanLength={spanLength}
+           />
         ) : (
           <div className="p-4 text-center">
             <Graph />
