@@ -18,6 +18,18 @@ const Map = ({
   const viewRef = useRef(null);
   const navigate = useNavigate();
 
+    console.log("Map component props:", {
+    districtId,
+    structureType,
+    bridgeName,
+    constructionType,
+    bridgeLength,
+    age,
+    underFacility,
+    roadClassification,
+    spanLength
+  });
+
   useEffect(() => {
     const initializeMap = async () => {
       try {
@@ -176,10 +188,47 @@ const Map = ({
             expressions.push(`construction_type_id = '${constructionType}'`);
           }
           if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
-            expressions.push(`bridge_length = ${bridgeLength}`);
+            try {
+              if (bridgeLength.startsWith("<")) {
+                const value = parseFloat(bridgeLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`structure_width_m < ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
+              } else if (bridgeLength.includes("-")) {
+                const [min, max] = bridgeLength.split("-").map(parseFloat);
+                if (!isNaN(min) && !isNaN(max)) {
+                  expressions.push(`structure_width_m BETWEEN ${min} AND ${max}`);
+                } else {
+                  console.warn(`Invalid bridgeLength range: ${bridgeLength}`);
+                }
+              } else if (bridgeLength.startsWith(">")) {
+                const value = parseFloat(bridgeLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`structure_width_m > ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
+              } else {
+                const value = parseFloat(bridgeLength);
+                if (!isNaN(value)) {
+                  expressions.push(`structure_width_m = ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
+              }
+            } catch (error) {
+              console.error(`Error parsing bridgeLength: ${bridgeLength}`, error);
+            }
           }
           if (age && age !== "" && age !== "%") {
-            expressions.push(`age = ${age}`);
+            const value = parseFloat(age);
+            if (!isNaN(value)) {
+              expressions.push(`age = ${value}`);
+            } else {
+              console.warn(`Invalid age value: ${age}`);
+            }
           }
           if (underFacility && underFacility !== "" && underFacility !== "%") {
             expressions.push(`under_facility = '${underFacility}'`);
@@ -188,10 +237,44 @@ const Map = ({
             expressions.push(`road_classification_id = '${roadClassification}'`);
           }
           if (spanLength && spanLength !== "" && spanLength !== "%") {
-            expressions.push(`span_length = ${spanLength}`);
+            try {
+              if (spanLength.startsWith("<")) {
+                const value = parseFloat(spanLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`span_length_m < ${value}`);
+                } else {
+                  console.warn(`Invalid spanLength value: ${spanLength}`);
+                }
+              } else if (spanLength.includes("-")) {
+                const [min, max] = spanLength.split("-").map(parseFloat);
+                if (!isNaN(min) && !isNaN(max)) {
+                  expressions.push(`span_length_m BETWEEN ${min} AND ${max}`);
+                } else {
+                  console.warn(`Invalid spanLength range: ${spanLength}`);
+                }
+              } else if (spanLength.startsWith(">")) {
+                const value = parseFloat(spanLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`span_length_m > ${value}`);
+                } else {
+                  console.warn(`Invalid spanLength value: ${spanLength}`);
+                }
+              } else {
+                const value = parseFloat(spanLength);
+                if (!isNaN(value)) {
+                  expressions.push(`span_length_m = ${value}`);
+                } else {
+                  console.warn(`Invalid spanLength value: ${spanLength}`);
+                }
+              }
+            } catch (error) {
+              console.error(`Error parsing spanLength: ${spanLength}`, error);
+            }
           }
 
-          return expressions.length > 0 ? expressions.join(" AND ") : null;
+          const expression = expressions.length > 0 ? expressions.join(" AND ") : null;
+          console.log("Generated definitionExpression:", expression);
+          return expression;
         };
 
         const definitionExpression = buildDefinitionExpression();
