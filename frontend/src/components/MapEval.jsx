@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 import { useNavigate } from "react-router-dom"; // For navigation
 import { BASE_URL } from "./config";
@@ -38,32 +38,36 @@ const Map = ({ districtId }) => {
 
         const handlePopupAction = async (event) => {
           if (event.action.id === "view-details") {
-            const attributes = view.popup.selectedFeature.attributes;
-            const bridgeId = attributes?.uu_bms_id; // Extract Bridge ID
-        
+            const attributes = view.popup.selectedFeature?.attributes;
+            const bridgeId = attributes?.uu_bms_id;
+
             if (!bridgeId) {
               console.error("Bridge ID not found.");
               return;
             }
-        
+
             try {
               const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`);
               const bridgeData = await response.json();
-        
+
               if (bridgeData.success) {
-                const bridgesArray = bridgeData.bridges; // Extract bridges array
-                const bridge = bridgesArray[0]; // Select the first bridge
-        
+                const bridgesArray = bridgeData.bridges;
+                const bridge = bridgesArray[0];
+
                 if (!bridge) {
                   console.error("No bridge details found");
                   return;
                 }
-        
-                // Serialize and encode the bridges array
+
                 const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-        
-                // Redirect using window.location.href
-                window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
+                const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+                const username = userToken ? userToken.username : null;
+
+                if (username=== "consultant") {
+                  window.location.href = `/BridgeInformationCon?bridgeData=${serializedBridgeData}`;
+                } else if (username === "rams") {
+                   window.location.href = `/BridgeInformationRams?bridgeData=${serializedBridgeData}`;
+                }
               } else {
                 console.error("Bridge details not found");
               }
