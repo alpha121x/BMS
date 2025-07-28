@@ -188,34 +188,45 @@ const Map = ({
           }
           if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
             try {
-              if (bridgeLength.startsWith("<")) {
-                const value = parseFloat(bridgeLength.substring(1));
-                if (!isNaN(value)) {
-                  expressions.push(`structure_width_m < ${value}`);
-                } else {
-                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
-                }
-              } else if (bridgeLength.includes("-")) {
+              // Fallback to show all valid numeric data
+              expressions.push(`structure_width_m IS NOT NULL AND CAST(structure_width_m AS FLOAT) IS NOT NULL`);
+              let rangeApplied = false;
+              if (bridgeLength.includes("-")) {
                 const [min, max] = bridgeLength.split("-").map(parseFloat);
-                if (!isNaN(min) && !isNaN(max)) {
-                  expressions.push(`structure_width_m BETWEEN ${min} AND ${max}`);
+                if (!isNaN(min) && !isNaN(max) && min <= max) {
+                  expressions.push(`CAST(structure_width_m AS FLOAT) BETWEEN ${min} AND ${max}`);
+                  rangeApplied = true;
                 } else {
                   console.warn(`Invalid bridgeLength range: ${bridgeLength}`);
+                }
+              } else if (bridgeLength.startsWith("<")) {
+                const value = parseFloat(bridgeLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`CAST(structure_width_m AS FLOAT) < ${value}`);
+                  rangeApplied = true;
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
                 }
               } else if (bridgeLength.startsWith(">")) {
                 const value = parseFloat(bridgeLength.substring(1));
                 if (!isNaN(value)) {
-                  expressions.push(`structure_width_m > ${value}`);
+                  expressions.push(`CAST(structure_width_m AS FLOAT) > ${value}`);
+                  rangeApplied = true;
                 } else {
                   console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
                 }
               } else {
                 const value = parseFloat(bridgeLength);
                 if (!isNaN(value)) {
-                  expressions.push(`structure_width_m = ${value}`);
+                  expressions.push(`CAST(structure_width_m AS FLOAT) = ${value}`);
+                  rangeApplied = true;
                 } else {
                   console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
                 }
+              }
+              // If no valid range is applied, rely on the fallback to show all valid data
+              if (!rangeApplied) {
+                expressions.pop(); // Remove the fallback if a specific condition failed
               }
             } catch (error) {
               console.error(`Error parsing bridgeLength: ${bridgeLength}`, error);
@@ -306,7 +317,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
-              visible: false,
+              visible: true, // Enabled to check all sublayers
               definitionExpression
             },
           ],
@@ -314,11 +325,18 @@ const Map = ({
 
         map.add(bridgeLayer);
 
-        // Log sublayer definition expressions
+        // Log sublayer definition expressions, visibility, and attempt to estimate feature count
         bridgeLayer.when(() => {
           bridgeLayer.sublayers.forEach((sublayer) => {
             console.log(`Sublayer ${sublayer.id} definitionExpression:`, sublayer.definitionExpression);
-            // Note: queryFeatureCount is not supported for MapImageLayer sublayers. Check data manually via ArcGIS REST API if needed.
+            console.log(`Sublayer ${sublayer.id} visibility:`, sublayer.visible);
+            // Workaround to estimate features: Log the number of visible features (approximate)
+            sublayer.queryExtent().then((result) => {
+              console.log(`Sublayer ${sublayer.id} approximate feature count:`, result.count);
+            }).catch((error) => {
+              console.warn(`Cannot query extent for sublayer ${sublayer.id}:`, error);
+            });
+            // Note: Use the ArcGIS REST API (e.g., https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_MainDashboard_230725/MapServer/0/query?where=structure_width_m+IS+NOT+NULL+AND+CAST(structure_width_m+AS+FLOAT)+IS+NOT+NULL) to manually check data.
           });
         });
 
@@ -327,6 +345,10 @@ const Map = ({
           bridgeLayer.sublayers.forEach((sublayer) => {
             sublayer.definitionExpression = definitionExpression;
           });
+          bridgeLayer.refresh(); // Force layer refresh
+          view.goTo(view.extent).then(() => {
+            console.log("Map view refreshed.");
+          }); // Force map refresh with callback
         });
 
         // Add LayerList widget to the top-right with layer control
