@@ -290,6 +290,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
+              visible: true, // Show by default
               definitionExpression
             },
             {
@@ -298,6 +299,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
+              visible: false, // Hide by default
               definitionExpression
             },
             {
@@ -306,7 +308,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
-              visible: true, // Show by default as requested
+              visible: false, // Hide by default
               definitionExpression
             },
             {
@@ -315,6 +317,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
+              visible: true,
               definitionExpression
             },
             {
@@ -323,6 +326,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
+              visible: true,
               definitionExpression
             },
           ],
@@ -334,6 +338,7 @@ const Map = ({
         bridgeLayer.when(() => {
           bridgeLayer.sublayers.forEach((sublayer) => {
             console.log(`Sublayer ${sublayer.id} definitionExpression:`, sublayer.definitionExpression);
+            console.log(`Sublayer ${sublayer.id} visibility:`, sublayer.visible);
             // Note: queryFeatureCount is not supported for MapImageLayer sublayers. Check data manually via ArcGIS REST API if needed.
           });
         });
