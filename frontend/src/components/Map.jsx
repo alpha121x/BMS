@@ -139,43 +139,36 @@ const Map = ({
 
         const popupTemplate = {
           title: "Bridge Information",
-          content: (feature) => {
-            const attributes = feature.graphic.attributes || {};
-            if (!attributes || Object.keys(attributes).length === 0) {
-              console.warn("No attributes available for popup:", feature.graphic);
-              return "<p>No data available for this feature.</p>";
-            }
-            return `
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <th colspan="2" class="table-primary text-center">Bridge Information</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><th>Road Name:</th><td>${attributes.road_name || 'N/A'}</td></tr>
-                  <tr><th>Reference No:</th><td>${attributes.uu_bms_id || 'N/A'}</td></tr>
-                  <tr><th>Structure Type:</th><td>${attributes.structure_type || 'N/A'}</td></tr>
-                  <tr><th>District:</th><td>${attributes.district || 'N/A'}</td></tr>
-                  <tr><th>Inventory Score:</th><td>${attributes.inventory_score || 'N/A'}</td></tr>
-                  <tr><th>Inspection Score:</th><td>${attributes.inspection_score || 'N/A'}</td></tr>
-                  <tr><th>Budget Cost:</th><td>${attributes.budget_cost || 'N/A'}</td></tr>
-                  <tr>
-                    <th>Images:</th>
-                    <td>
-                      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
-                        <img src="${attributes.image_1 || ''}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
-                        <img src="${attributes.image_2 || ''}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
-                        <img src="${attributes.image_3 || ''}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
-                        <img src="${attributes.image_4 || ''}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
-                        <img src="${attributes.image_5 || ''}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            `;
-          },
+          content: `
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th colspan="2" class="table-primary text-center">Bridge Information</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><th>Road Name:</th><td>{road_name}</td></tr>
+                <tr><th>Reference No:</th><td>{uu_bms_id}</td></tr>
+                <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
+                <tr><th>District:</th><td>{district}</td></tr>
+                <tr><th>Inventory Score:</th><td>{inventory_score}</td></tr>
+                <tr><th>Inspection Score:</th><td>{inspection_score}</td></tr>
+                <tr><th>Budget Cost:</th><td>{budget_cost}</td></tr>
+                <tr>
+                  <th>Images:</th>
+                  <td>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
+                      <img src="{image_1}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_2}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_3}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_4}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_5}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          `,
           actions: [
             {
               title: "View Bridge Details",
