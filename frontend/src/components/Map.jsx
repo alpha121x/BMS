@@ -21,14 +21,15 @@ const Map = ({
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, Extent, LayerList] =
+        const [Map, MapView, MapImageLayer, Extent, LayerList, Legend] =
           await loadModules(
             [
               "esri/Map",
               "esri/views/MapView",
               "esri/layers/MapImageLayer",
               "esri/geometry/Extent",
-              "esri/widgets/LayerList"
+              "esri/widgets/LayerList",
+              "esri/widgets/Legend"
             ],
             { css: true }
           );
@@ -80,7 +81,15 @@ const Map = ({
           }
         };
 
+        const handlePopupTrigger = (event) => {
+          const attributes = event.graphic.attributes;
+          console.log("Popup triggered for feature with attributes:", attributes);
+          const layerId = event.graphic.layer?.id;
+          console.log("Clicked layer ID:", layerId);
+        };
+
         view.popup.on("trigger-action", handlePopupAction);
+        view.popup.on("trigger", handlePopupTrigger);
 
         const getDistrictExtent = async (districtId) => {
           if (districtId === "%") {
@@ -131,22 +140,22 @@ const Map = ({
                 </tr>
               </thead>
               <tbody>
-                <tr><th>Road Name:</th><td>{road_name}</td></tr>
-                <tr><th>Reference No:</th><td>{uu_bms_id}</td></tr>
-                <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
-                <tr><th>District:</th><td>{district}</td></tr>
-                <tr><th>Inventory Score:</th><td>{inventory_score}</td></tr>
-                <tr><th>Inspection Score:</th><td>{inspection_score}</td></tr>
-                <tr><th>Budget Cost:</th><td>{budget_cost}</td></tr>
+                <tr><th>Road Name:</th><td>{road_name || 'N/A'}</td></tr>
+                <tr><th>Reference No:</th><td>{uu_bms_id || 'N/A'}</td></tr>
+                <tr><th>Structure Type:</th><td>{structure_type || 'N/A'}</td></tr>
+                <tr><th>District:</th><td>{district || 'N/A'}</td></tr>
+                <tr><th>Inventory Score:</th><td>{inventory_score || 'N/A'}</td></tr>
+                <tr><th>Inspection Score:</th><td>{inspection_score || 'N/A'}</td></tr>
+                <tr><th>Budget Cost:</th><td>{budget_cost || 'N/A'}</td></tr>
                 <tr>
                   <th>Images:</th>
                   <td>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 100%;">
-                      <img src="{image_1}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
-                      <img src="{image_2}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
-                      <img src="{image_3}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
-                      <img src="{image_4}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
-                      <img src="{image_5}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_1 || ''}" alt="Image 1" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_2 || ''}" alt="Image 2" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_3 || ''}" alt="Image 3" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_4 || ''}" alt="Image 4" style="width: 18%; height: auto; border-radius: 5px;" />
+                      <img src="{image_5 || ''}" alt="Image 5" style="width: 18%; height: auto; border-radius: 5px;" />
                     </div>
                   </td>
                 </tr>
@@ -317,7 +326,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
-              visible: true,
+              visible: false, // Hide by default
               definitionExpression
             },
             {
@@ -326,7 +335,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
-              visible: true,
+              visible: false, // Hide by default
               definitionExpression
             },
           ],
@@ -334,30 +343,36 @@ const Map = ({
 
         map.add(bridgeLayer);
 
-        // Log sublayer definition expressions
+        // Enhanced layer view error handling
         bridgeLayer.when(() => {
+          console.log("Bridge layer loaded successfully.");
           bridgeLayer.sublayers.forEach((sublayer) => {
             console.log(`Sublayer ${sublayer.id} definitionExpression:`, sublayer.definitionExpression);
             console.log(`Sublayer ${sublayer.id} visibility:`, sublayer.visible);
-            // Note: queryFeatureCount is not supported for MapImageLayer sublayers. Check data manually via ArcGIS REST API if needed.
           });
+        }).catch((error) => {
+          console.error("Error loading bridge layer:", error);
         });
 
-        // Force refresh of sublayers
+        // Force refresh after layer load
         bridgeLayer.when(() => {
+          bridgeLayer.refresh();
+          console.log("Layer refreshed.");
           bridgeLayer.sublayers.forEach((sublayer) => {
             sublayer.definitionExpression = definitionExpression;
           });
+        }).catch((error) => {
+          console.error("Error during layer refresh:", error);
         });
 
-        // Add LayerList widget to the top-right with layer control
+        // Add LayerList widget to the top-right without legend
         const layerList = new LayerList({
           view: view,
           listItemCreatedFunction: function(event) {
             const item = event.item;
             if (item.layer.type !== "group") {
               item.panel = {
-                content: "legend",
+                content: null, // Remove legend from LayerList
                 open: true
               };
               item.actionsSections = [
@@ -385,6 +400,16 @@ const Map = ({
 
         view.ui.add(layerList, {
           position: "top-right",
+          className: "esri-ui-corner-container"
+        });
+
+        // Add Legend widget to the left
+        const legend = new Legend({
+          view: view,
+          container: document.createElement("div")
+        });
+        view.ui.add(legend, {
+          position: "top-left",
           className: "esri-ui-corner-container"
         });
 
