@@ -286,14 +286,6 @@ const Map = ({
           sublayers: [
             {
               id: 0,
-              title: "Districts",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate,
-              definitionExpression
-            },
-            {
-              id: 2,
               title: "Structure Types",
               opacity: 0.6,
               listMode: "show",
@@ -301,12 +293,36 @@ const Map = ({
               definitionExpression
             },
             {
-              id: 3,
+              id: 1,
               title: "Road Classification",
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
-              visible: false,
+              definitionExpression
+            },
+            {
+              id: 2,
+              title: "Visual Condition",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              visible: true, // Show by default as requested
+              definitionExpression
+            },
+            {
+              id: 3,
+              title: "Divisions",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              definitionExpression
+            },
+            {
+              id: 4,
+              title: "Districts",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
               definitionExpression
             },
           ],
