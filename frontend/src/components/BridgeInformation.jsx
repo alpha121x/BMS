@@ -20,7 +20,7 @@ const BridgeInfoDashboard = () => {
   }, [location]);
 
   const handleBackClick = () => {
-    navigate("/BridgeWiseScore");
+    navigate("/Dashboard");
   };
 
   return (
@@ -39,7 +39,7 @@ const BridgeInfoDashboard = () => {
                     onClick={handleBackClick}
                     className="bg-inherit hover:bg-blue-500 text-black py-2 rounded-md flex items-center gap-2"
                   >
-                    <ArrowLeftIcon className="h-5 w-5" /> Bridges Wise Score
+                    <ArrowLeftIcon className="h-5 w-5" /> Dashboard
                   </button>
                 </div>
                 <div className="text-lg font-semibold">
