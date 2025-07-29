@@ -3175,6 +3175,19 @@ function swapDomain(url) {
 
 app.get("/api/inspection-points", async (req, res) => {
   try {
+    const { bbox } = req.query;
+    let spatialFilter = "";
+
+    if (bbox) {
+      const [xmin, ymin, xmax, ymax] = bbox.split(",").map(Number);
+      spatialFilter = `
+        AND ST_Intersects(
+          ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326),
+          ST_SetSRID(ST_MakePoint(m.x_centroid, m.y_centroid), 4326)
+        )
+      `;
+    }
+
     const result = await pool.query(`
       SELECT 
         i.inspection_id,
@@ -3195,7 +3208,8 @@ app.get("/api/inspection-points", async (req, res) => {
       WHERE 
         i.is_latest = true 
         AND m.is_active = true
-        LIMIT 500
+        ${spatialFilter}
+      LIMIT 1000
     `);
 
     const features = result.rows.map(row => {
@@ -3224,6 +3238,7 @@ app.get("/api/inspection-points", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 app.get('/api/PriortizationInfo', async (req, res) => {
   const { bridgeId } = req.query; // Get uu_bms_id from query parameters
