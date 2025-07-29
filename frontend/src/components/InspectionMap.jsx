@@ -4,7 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "../index.css";
 import { BASE_URL } from "./config";
 
-const InspectionMap = () => {
+const InspectionMap = ({ map_endpoint }) => {
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ map.fitBounds(punjabBounds);
         bounds.getNorth(),
       ].join(",");
 
-      fetch(`${BASE_URL}/api/inspection-points?bbox=${bbox}`)
+      fetch(`${BASE_URL}/api/${map_endpoint}?bbox=${bbox}`)
         .then((res) => res.json())
         .then((data) => {
           if (geoJsonLayer) {
