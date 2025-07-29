@@ -81,7 +81,7 @@ map.fitBounds(punjabBounds);
     return () => map.remove();
   }, []);
 
-  return <div id="map" style={{ height: "600px", width: "100%" }}></div>;
+  return <div id="map" style={{ height: "400px", width: "100%" }}></div>;
 };
 
 export default InspectionMap;
