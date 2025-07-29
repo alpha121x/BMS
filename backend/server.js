@@ -3305,7 +3305,6 @@ app.get("/api/inspection-points-rams", async (req, res) => {
   }
 });
 
-
 app.get('/api/PriortizationInfo', async (req, res) => {
   const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
