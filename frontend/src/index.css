@@ -128,3 +128,17 @@
     border-bottom: 0.25rem solid #5a5c69 !important;
 }
 
+/* Optional: global.css or App.css */
+.leaflet-container {
+  font-family: Arial, sans-serif;
+}
+
+.leaflet-control .legend {
+  background: white;
+  padding: 10px;
+  font-size: 14px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  line-height: 20px;
+}
+

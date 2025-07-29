@@ -13,6 +13,7 @@ import { LuConstruction } from "react-icons/lu";
 import BridgesStatusSummary from "./BridgesStatusSummary";
 import InspectionsList from "./UnapprovedInspections";
 import UnapprovedInspections from "./UnapprovedInspectionsRams";
+import InspectionMap from "./InspectionMap";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -183,7 +184,10 @@ const EvaluationMainCon = () => {
 
             {/* Content Container */}
             <div className="mt-0">
-              {activeView === "map" && <Map districtId={districtId} />}
+              {/* {activeView === "map" && <Map districtId={districtId} />} */}
+              {activeView === "map" && (
+                  <InspectionMap/>
+                )}
               {activeView === "inventory" && (
                 <BridgesListNewUpdated
                   districtId={districtId}
