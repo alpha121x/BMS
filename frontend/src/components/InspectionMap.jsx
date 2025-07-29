@@ -66,7 +66,7 @@ map.fitBounds(punjabBounds);
     map.on("moveend", fetchPoints);
 
     // Legend
-    const legend = L.control({ position: "bottomright" });
+    const legend = L.control({ position: "topright" });
     legend.onAdd = function () {
       const div = L.DomUtil.create("div", "info legend");
       div.innerHTML = `
