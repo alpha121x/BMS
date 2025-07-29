@@ -29,7 +29,7 @@ const BridgeInfoDashboard = () => {
         <Header />
       </div>
 
-      <main className="flex-grow">
+      <main className="flex-grow mt-5">
         <section className="bg-gray-100 min-h-screen">
           <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
             <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">

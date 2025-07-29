@@ -49,6 +49,35 @@ const CostEstimation = () => {
     }
   };
 
+    const handleBridgeInfo = async (bridgeId) => {
+    if (!bridgeId) {
+      console.error("Bridge ID not found:", bridgeId);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`);
+      const bridgeData = await response.json();
+
+      if (bridgeData.success) {
+        const bridgesArray = bridgeData.bridges;
+        const bridge = bridgesArray[0];
+
+        if (!bridge) {
+          console.error("No bridge details found");
+          return;
+        }
+
+        const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+        window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
+      } else {
+        console.error("Bridge details not found");
+      }
+    } catch (error) {
+      console.error("Error fetching bridge details:", error);
+    }
+  };
+
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const currentData = bridgeScoreData;
 
@@ -341,6 +370,7 @@ const CostEstimation = () => {
                         <th>Structure Type</th>
                         <th>Bridge Name</th>
                         <th>Cost (Millions)</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -353,6 +383,15 @@ const CostEstimation = () => {
                             <td className="font-bold">
                               {row.cost_million || "N/A"}
                             </td>
+                        <td>
+                             <button
+          onClick={() => handleBridgeInfo(row.uu_bms_id)}
+        className="btn btn-sm"
+        style={{ backgroundColor: "#3B9996", color: "white" }}
+      >
+        Bridge Info
+      </button>
+                </td>
                           </tr>
                         ))
                       ) : (
