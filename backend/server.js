@@ -3239,6 +3239,72 @@ app.get("/api/inspection-points", async (req, res) => {
   }
 });
 
+app.get("/api/inspection-points-rams", async (req, res) => {
+  try {
+    const { bbox } = req.query;
+    let spatialFilter = "";
+
+    if (bbox) {
+      const [xmin, ymin, xmax, ymax] = bbox.split(",").map(Number);
+      spatialFilter = `
+        AND ST_Intersects(
+          ST_MakeEnvelope(${xmin}, ${ymin}, ${xmax}, ${ymax}, 4326),
+          ST_SetSRID(ST_MakePoint(m.x_centroid, m.y_centroid), 4326)
+        )
+      `;
+    }
+
+    const result = await pool.query(`
+      SELECT 
+        i.inspection_id,
+        i.uu_bms_id,
+        i.bridge_name,
+        i.qc_rams,
+        m.x_centroid,
+        m.y_centroid,
+        CASE 
+            WHEN i.qc_rams = 0 THEN 'Pending'
+            WHEN i.qc_rams = 2 THEN 'Approved'
+            ELSE 'Unknown'
+        END AS status
+      FROM 
+        bms.tbl_inspection_f i
+      JOIN 
+        bms.tbl_bms_master_data m ON i.uu_bms_id = m.uu_bms_id
+      WHERE 
+        i.is_latest = true 
+        AND m.is_active = true
+        ${spatialFilter}
+      LIMIT 1000
+    `);
+
+    const features = result.rows.map(row => {
+      let color = "gray";
+      if (row.status === "Pending") color = "red";
+      if (row.status === "Approved") color = "green";
+
+      return {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [parseFloat(row.x_centroid), parseFloat(row.y_centroid)],
+        },
+        properties: {
+          inspection_id: row.inspection_id,
+          bridge_name: row.bridge_name,
+          status: row.status,
+          color,
+        },
+      };
+    });
+
+    res.json({ type: "FeatureCollection", features });
+  } catch (err) {
+    console.error("Error fetching points:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 app.get('/api/PriortizationInfo', async (req, res) => {
   const { bridgeId } = req.query; // Get uu_bms_id from query parameters

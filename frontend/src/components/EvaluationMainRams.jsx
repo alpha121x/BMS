@@ -11,6 +11,7 @@ import { FaRoadBridge } from "react-icons/fa6";
 import { LuConstruction } from "react-icons/lu";
 import BridgesStatusSummary from "./BridgesStatusSummary";
 import UnapprovedInspectionsRams from "./UnapprovedInspectionsRams";
+import InspectionMap from "./InspectionMap";
 
 const EvaluationMainRams = () => {
   const [districtId, setDistrictId] = useState("%");
