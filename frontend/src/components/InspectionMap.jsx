@@ -9,12 +9,12 @@ const InspectionMap = ({ map_endpoint }) => {
 
   useEffect(() => {
     // Initialize map
-const map = L.map("map");
-const punjabBounds = [
-  [27.5, 69.5], // Southwest
-  [32.9, 75.5], // Northeast
-];
-map.fitBounds(punjabBounds);
+    const map = L.map("map");
+    const punjabBounds = [
+    [27.5, 69.5], // Southwest
+    [32.9, 75.5], // Northeast
+    ];
+    map.fitBounds(punjabBounds);
 
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
