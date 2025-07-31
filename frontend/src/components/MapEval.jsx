@@ -1,24 +1,35 @@
 import { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "./config";
 
-const Map = ({ districtId }) => {
+const Map = ({
+  districtId,
+  structureType,
+  bridgeName,
+  constructionType,
+  bridgeLength,
+  age,
+  underFacility,
+  roadClassification,
+  spanLength
+}) => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
-  const navigate = useNavigate(); // Use for navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const initializeMap = async () => {
       try {
-        const [Map, MapView, MapImageLayer, Legend, Extent] =
+        const [Map, MapView, MapImageLayer, Extent, LayerList, Legend] =
           await loadModules(
             [
               "esri/Map",
               "esri/views/MapView",
               "esri/layers/MapImageLayer",
-              "esri/widgets/Legend",
               "esri/geometry/Extent",
+              "esri/widgets/LayerList",
+              "esri/widgets/Legend"
             ],
             { css: true }
           );
@@ -40,34 +51,27 @@ const Map = ({ districtId }) => {
           if (event.action.id === "view-details") {
             const attributes = view.popup.selectedFeature?.attributes;
             const bridgeId = attributes?.uu_bms_id;
-
+        
             if (!bridgeId) {
-              console.error("Bridge ID not found.");
+              console.error("Bridge ID not found in attributes:", attributes);
               return;
             }
-
+        
             try {
               const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`);
               const bridgeData = await response.json();
-
+        
               if (bridgeData.success) {
                 const bridgesArray = bridgeData.bridges;
                 const bridge = bridgesArray[0];
-
+        
                 if (!bridge) {
                   console.error("No bridge details found");
                   return;
                 }
-
+        
                 const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-                const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
-                const username = userToken ? userToken.username : null;
-
-                if (username=== "consultant") {
-                  window.location.href = `/BridgeInformationCon?bridgeData=${serializedBridgeData}`;
-                } else if (username === "rams") {
-                   window.location.href = `/BridgeInformationRams?bridgeData=${serializedBridgeData}`;
-                }
+                window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
               } else {
                 console.error("Bridge details not found");
               }
@@ -77,7 +81,22 @@ const Map = ({ districtId }) => {
           }
         };
 
+        const handlePopupTrigger = (event) => {
+          const graphic = event.graphic;
+          const attributes = graphic?.attributes || {};
+          const geometry = graphic?.geometry;
+          console.log("Popup triggered for feature:", {
+            attributes,
+            geometry: geometry ? "Valid" : "Null",
+            layerId: graphic?.layer?.id
+          });
+          if (!geometry) {
+            console.warn("Feature has null geometry, popup may be empty.");
+          }
+        };
+
         view.popup.on("trigger-action", handlePopupAction);
+        view.popup.on("trigger", handlePopupTrigger);
 
         const getDistrictExtent = async (districtId) => {
           if (districtId === "%") {
@@ -130,6 +149,7 @@ const Map = ({ districtId }) => {
               <tbody>
                 <tr><th>Road Name:</th><td>{road_name}</td></tr>
                 <tr><th>Reference No:</th><td>{uu_bms_id}</td></tr>
+                <tr><th>Structure Type:</th><td>{structure_type}</td></tr>
                 <tr><th>District:</th><td>{district}</td></tr>
                 <tr><th>Inventory Score:</th><td>{inventory_score}</td></tr>
                 <tr><th>Inspection Score:</th><td>{inspection_score}</td></tr>
@@ -158,34 +178,247 @@ const Map = ({ districtId }) => {
           ],
         };
 
+        // Build definition expression based on all filter props
+        const buildDefinitionExpression = () => {
+          const expressions = [];
+          console.log("Input values:", {
+            districtId,
+            structureType,
+            bridgeName,
+            constructionType,
+            bridgeLength,
+            age,
+            underFacility,
+            roadClassification,
+            spanLength
+          });
+
+          if (structureType && structureType !== "" && structureType !== "%") {
+            expressions.push(`structure_type_id = '${structureType}'`);
+          }
+          if (bridgeName && bridgeName !== "" && bridgeName !== "%") {
+            expressions.push(`bridge_name = '${bridgeName}'`);
+          }
+          if (constructionType && constructionType !== "" && constructionType !== "%") {
+            expressions.push(`construction_type_id = '${constructionType}'`);
+          }
+          if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
+            try {
+              if (bridgeLength.startsWith("<")) {
+                const value = parseFloat(bridgeLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`structure_width_m < ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
+              } else if (bridgeLength.includes("-")) {
+                const [min, max] = bridgeLength.split("-").map(parseFloat);
+                if (!isNaN(min) && !isNaN(max)) {
+                  expressions.push(`structure_width_m BETWEEN ${min} AND ${max}`);
+                } else {
+                  console.warn(`Invalid bridgeLength range: ${bridgeLength}`);
+                }
+              } else if (bridgeLength.startsWith(">")) {
+                const value = parseFloat(bridgeLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`structure_width_m > ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
+              } else {
+                const value = parseFloat(bridgeLength);
+                if (!isNaN(value)) {
+                  expressions.push(`structure_width_m = ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
+              }
+            } catch (error) {
+              console.error(`Error parsing bridgeLength: ${bridgeLength}`, error);
+            }
+          }
+          if (age && age !== "" && age !== "%") {
+            const value = parseFloat(age);
+            if (!isNaN(value)) {
+              expressions.push(`age = ${value}`);
+            } else {
+              console.warn(`Invalid age value: ${age}`);
+            }
+          }
+          if (underFacility && underFacility !== "" && underFacility !== "%") {
+            expressions.push(`under_facility = '${underFacility}'`);
+          }
+          if (roadClassification && roadClassification !== "" && roadClassification !== "%") {
+            expressions.push(`road_classification_id = '${roadClassification}'`);
+          }
+          if (spanLength && spanLength !== "" && spanLength !== "%") {
+            try {
+              if (spanLength.startsWith("<")) {
+                const value = parseFloat(spanLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`span_length_m < ${value}`);
+                } else {
+                  console.warn(`Invalid spanLength value: ${spanLength}`);
+                }
+              } else if (spanLength.includes("-")) {
+                const [min, max] = spanLength.split("-").map(parseFloat);
+                if (!isNaN(min) && !isNaN(max)) {
+                  expressions.push(`span_length_m BETWEEN ${min} AND ${max}`);
+                } else {
+                  console.warn(`Invalid spanLength range: ${spanLength}`);
+                }
+              } else if (spanLength.startsWith(">")) {
+                const value = parseFloat(spanLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`span_length_m > ${value}`);
+                } else {
+                  console.warn(`Invalid spanLength value: ${spanLength}`);
+                }
+              } else {
+                const value = parseFloat(spanLength);
+                if (!isNaN(value)) {
+                  expressions.push(`span_length_m = ${value}`);
+                } else {
+                  console.warn(`Invalid spanLength value: ${spanLength}`);
+                }
+              }
+            } catch (error) {
+              console.error(`Error parsing spanLength: ${spanLength}`, error);
+            }
+          }
+
+          const expression = expressions.length > 0 ? expressions.join(" AND ") : null;
+          console.log("Generated definitionExpression:", expression);
+          return expression;
+        };
+
+        const definitionExpression = buildDefinitionExpression();
+
         const bridgeLayer = new MapImageLayer({
-          url: "http://map3.urbanunit.gov.pk:6080/arcgis/rest/services/Punjab/PB_BMS_Road_241224/MapServer",
+          url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_MainDashboard_230725/MapServer",
           title: "Bridge Conditions",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
-            { id: 1, title: "Districts", opacity: 0.6, listMode: "hide" },
-            { id: 3, title: "Good", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 4, title: "Fair", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 5, title: "Poor", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 6, title: "Under Construction", opacity: 0.6, listMode: "show", popupTemplate },
-            { id: 2, title: "Bridge Locations", listMode: "hide", popupTemplate },
+            {
+              id: 0,
+              title: "Structure Types",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              visible: true,
+              definitionExpression
+            },
+            {
+              id: 1,
+              title: "Road Classification",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              visible: false,
+              definitionExpression
+            },
+            {
+              id: 2,
+              title: "Visual Condition",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              visible: false,
+              definitionExpression
+            },
+            {
+              id: 3,
+              title: "Divisions",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              visible: false,
+              definitionExpression
+            },
+            {
+              id: 4,
+              title: "Districts",
+              opacity: 0.6,
+              listMode: "show",
+              popupTemplate,
+              visible: false,
+              definitionExpression
+            },
           ],
         });
 
         map.add(bridgeLayer);
 
-        // Add Legend widget to the top-right
+        // Enhanced layer view error handling
+        bridgeLayer.when(() => {
+          console.log("Bridge layer loaded successfully.");
+          bridgeLayer.sublayers.forEach((sublayer) => {
+            console.log(`Sublayer ${sublayer.id} definitionExpression:`, sublayer.definitionExpression);
+            console.log(`Sublayer ${sublayer.id} visibility:`, sublayer.visible);
+          });
+        }).catch((error) => {
+          console.error("Error loading bridge layer:", error);
+        });
+
+        // Force refresh after layer load
+        bridgeLayer.when(() => {
+          bridgeLayer.refresh();
+          console.log("Layer refreshed.");
+          bridgeLayer.sublayers.forEach((sublayer) => {
+            sublayer.definitionExpression = definitionExpression;
+          });
+        }).catch((error) => {
+          console.error("Error during layer refresh:", error);
+        });
+
+        // Add LayerList widget to the top-right without legend
+        const layerList = new LayerList({
+          view: view,
+          listItemCreatedFunction: function(event) {
+            const item = event.item;
+            if (item.layer.type !== "group") {
+              item.panel = {
+                content: null,
+                open: true
+              };
+              item.actionsSections = [
+                [
+                  {
+                    title: "Toggle Visibility",
+                    className: "esri-icon-visible",
+                    id: "toggle-layer-visibility"
+                  }
+                ]
+              ];
+            }
+          }
+        });
+
+        // Handle layer visibility toggle
+        layerList.on("trigger-action", function(event) {
+          if (event.action.id === "toggle-layer-visibility") {
+            const item = event.item;
+            item.layer.visible = !item.layer.visible;
+            event.action.title = item.layer.visible ? "Hide Layer" : "Show Layer";
+            event.action.className = item.layer.visible ? "esri-icon-non-visible" : "esri-icon-visible";
+          }
+        });
+
+        view.ui.add(layerList, {
+          position: "top-right",
+          className: "esri-ui-corner-container"
+        });
+
+        // Add Legend widget to the left
         const legend = new Legend({
           view: view,
-          layerInfos: [
-            {
-              layer: bridgeLayer,
-              title: "Bridge Conditions",
-            },
-          ],
+          container: document.createElement("div")
         });
-        view.ui.add(legend, "top-right");
+        view.ui.add(legend, {
+          position: "top-left",
+          className: "esri-ui-corner-container"
+        });
 
         await view.when();
         console.log("EzriMap is ready.");
@@ -201,7 +434,18 @@ const Map = ({ districtId }) => {
         viewRef.current.container = null;
       }
     };
-  }, [districtId, navigate]);
+  }, [
+    districtId,
+    structureType,
+    bridgeName,
+    constructionType,
+    bridgeLength,
+    age,
+    underFacility,
+    roadClassification,
+    spanLength,
+    navigate
+  ]);
 
   return (
     <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{ border: "1px solid #005D7F" }}>

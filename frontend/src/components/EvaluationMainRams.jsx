@@ -191,12 +191,14 @@ const EvaluationMainRams = () => {
 
             {/* Content Container */}
             <div className="mt-0">
-            {/* {activeView === "map" && <Map districtId={districtId} />} */}
-              {activeView === "map" && (
+          {activeView === "map" && <Map  districtId={districtId}
+          structureType={structureType}
+          bridgeName={bridgeName} />}
+              {/* {activeView === "map" && (
                   <InspectionMap
                   map_endpoint={map_endpoint}
                   />
-                )}
+                )} */}
               {activeView === "inventory" && (
                 <BridgesListNewUpdated
                   districtId={districtId}
