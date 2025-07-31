@@ -58,7 +58,7 @@ const FiveYearPlan = () => {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-50 rounded-2xl shadow-lg max-w-6xl mx-auto border border-gray-200">
+    <div className="p-6 bg-gray-50 rounded-md mt-3 shadow-lg max-w-6xl mx-auto border border-gray-200">
       <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-800">
         5-Year Development Plan
       </h2>
