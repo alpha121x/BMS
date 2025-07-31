@@ -448,6 +448,17 @@ const InspectionListRams = ({ bridgeId }) => {
     }));
   };
 
+    // Calculate total inspections for each category
+  const getTotalInspections = (data) => {
+    return Object.values(data).reduce((total, span) => {
+      return total + Object.values(span).reduce((sum, items) => sum + items.length, 0);
+    }, 0);
+  };
+
+  const pendingCount = getTotalInspections(pendingData);
+  const approvedCount = getTotalInspections(approvedData);
+  const unapprovedCount = getTotalInspections(unapprovedData);
+
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -567,21 +578,21 @@ const InspectionListRams = ({ bridgeId }) => {
             className="fw-bold text-grey"
             onClick={() => handleDivChange("pending")}
           >
-            View Pending Reports
+            View Pending Reports ({pendingCount})
           </Button>
           <Button
             variant="success"
             className="fw-bold"
             onClick={() => handleDivChange("approved")}
           >
-            View Approved Reports
+            View Approved Reports ({approvedCount})
           </Button>
           <Button
             variant="danger"
             className="fw-bold"
             onClick={() => handleDivChange("unapproved")}
           >
-            View Unapproved Reports
+            View Unapproved Reports ({unapprovedCount})
           </Button>
         </div>
         <div className="border rounded p-3 shadow-lg mt-2">

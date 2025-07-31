@@ -541,6 +541,15 @@ const InspectionListEvaluator = ({ bridgeId }) => {
     }));
   };
 
+    // Calculate total inspections for each category
+  const getTotalInspections = (data) => {
+    return Object.values(data).reduce((total, span) => {
+      return total + Object.values(span).reduce((sum, items) => sum + items.length, 0);
+    }, 0);
+  };
+
+  const pendingCount = getTotalInspections(pendingData);
+
   return (
     <div
       className="card p-2 rounded-lg text-black"
@@ -669,7 +678,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
             className="fw-bold text-grey"
             onClick={() => handleDivChange("pending")}
           >
-            View Pending Reports
+            View Pending Reports ({pendingCount})
           </Button>
         </div>
         <div className="border rounded p-3 shadow-lg mt-2">
