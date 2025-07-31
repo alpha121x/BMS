@@ -13,18 +13,15 @@ import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListCon from "./InspectionListCon";
 
 const BridgeInfo = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [bridgeData, setBridgeData] = useState(null);
-
+  const { state } = useLocation();
+  const bridgeData = state?.bridge;
+  
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const serializedBridgeData = urlParams.get("bridgeData");
-    if (serializedBridgeData) {
-      setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
+    if (!bridgeData) {
+      console.error('No bridge data in state');
     }
-  }, [location]);
+  }, [bridgeData]);
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
 

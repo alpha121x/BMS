@@ -7,17 +7,19 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import InspectionListDashboard from "./InspectionListDashboard";
 
 const BridgeInfoDashboard = () => {
-  const location = useLocation();
-  const [bridgeData, setBridgeData] = useState(null);
-  const navigate = useNavigate();
+  const { state } = useLocation();
+  const bridgeData = state?.bridge;
+  
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const serializedBridgeData = urlParams.get("bridgeData");
-    if (serializedBridgeData) {
-      setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
+    if (!bridgeData) {
+  console.log("Bridge Data:", bridgeData);
+
+      console.error('No bridge data in state');
     }
-  }, [location]);
+  }, [bridgeData]);
+
+
 
   const handleBackClick = () => {
     navigate("/Dashboard");

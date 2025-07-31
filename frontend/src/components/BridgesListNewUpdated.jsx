@@ -21,6 +21,7 @@ import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 import "leaflet/dist/leaflet.css";
 import BridgesStatusSummary from "./BridgesStatusSummary";
+import { useNavigate } from 'react-router-dom';
 
 
 const BridgesListNewUpdated = ({
@@ -47,6 +48,8 @@ const BridgesListNewUpdated = ({
   const itemsPerPage = 10;
 
   const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+  const navigate = useNavigate();
+
 
   // Extract username safely
   const user_type = userToken?.usertype;
@@ -112,10 +115,9 @@ const BridgesListNewUpdated = ({
   };
 
   const handleRowClick = (bridge) => {
-    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-    const editUrl = `/BridgeInfoEvaluation?bridgeData=${serializedBridgeData}`;
-    window.location.href = editUrl;
-  };
+  navigate('/BridgeInfoEvaluation', { state: { bridge } });
+};
+
 
   const handleViewInventory = (bridge) => {
     setSelectedBridge(bridge); // Set the selected bridge data

@@ -17,6 +17,8 @@ import FilterComponent from "./FilterComponent";
 import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
 import Graph from "./Graph"; // Assuming you have a Graph component for the graph view
+import { useNavigate } from 'react-router-dom';
+
 
 const BridgesListDashboard = ({
   districtId,
@@ -48,6 +50,8 @@ const BridgesListDashboard = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
   const [viewMode, setViewMode] = useState("map"); // New state for view mode
+  const navigate = useNavigate();
+  
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -105,11 +109,10 @@ const BridgesListDashboard = ({
     setShowModal(true);
   };
 
-  const handleRowClick = (bridge) => {
-    const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-    const editUrl = `/BridgeInfoDashboard?bridgeData=${serializedBridgeData}`;
-    window.location.href = editUrl;
-  };
+    const handleRowClick = (bridge) => {
+  navigate('/BridgeInfoDashboard', { state: { bridge } });
+};
+
 
   const handleCloseModal = () => {
     setShowModal(false);
