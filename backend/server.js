@@ -4643,7 +4643,7 @@ app.get("/api/inspections-unapproved", async (req, res) => {
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
-      WHERE ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3
+      WHERE ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3 AND ins.is_latest = true
     `;
 
     const queryParams = [];
@@ -4750,7 +4750,7 @@ app.get("/api/inspections-unapproved-rams", async (req, res) => {
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
-      WHERE ins.surveyed_by = 'RAMS-UU' AND ins.qc_rams = 3
+      WHERE ins.surveyed_by = 'RAMS-UU' AND ins.qc_rams = 3 AND ins.is_latest = true
     `;
 
     const queryParams = [];
