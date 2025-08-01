@@ -291,7 +291,7 @@ app.get("/api/bms-score-new", async (req, res) => {
     bridgeName = bridgeName ? `%${bridgeName}%` : "%";
 
     // Main Query with aggregated detailed scores
-   const query = `
+    const query = `
   WITH detailed_scores AS (
     SELECT 
       "ObjectID",
@@ -360,7 +360,6 @@ app.get("/api/bms-score-new", async (req, res) => {
   LIMIT $4 OFFSET $5;
 `;
 
-
     const values = [district, structureType, bridgeName, limit, offset];
     const result = await pool.query(query, values);
 
@@ -385,7 +384,6 @@ app.get("/api/bms-score-new", async (req, res) => {
       currentPage: page,
       data: result.rows,
     });
-
   } catch (error) {
     console.error("Error fetching data:", error.message);
     res.status(500).json({
@@ -442,7 +440,6 @@ app.get("/api/bms-score-export-new", async (req, res) => {
       totalRecords: result.rowCount,
       data: result.rows,
     });
-
   } catch (error) {
     console.error("Error exporting bridge-wise BMS data:", error.message);
     res.status(500).json({
@@ -592,7 +589,10 @@ app.get("/api/structure-counts", async (req, res) => {
       params.push(district);
     }
 
-    const whereClause = queryConditions.length > 0 ? `WHERE ${queryConditions.join(" AND ")}` : "";
+    const whereClause =
+      queryConditions.length > 0
+        ? `WHERE ${queryConditions.join(" AND ")}`
+        : "";
 
     const structureTypeCounts = await pool.query(
       `
@@ -2285,33 +2285,31 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
       paramIndex++;
     }
 
-    if (bridgeLength !== "%") {
+    if (
+      bridgeLength &&
+      typeof bridgeLength === "string" &&
+      bridgeLength !== "%"
+    ) {
       if (bridgeLength.startsWith("<")) {
         query += ` AND md.structure_width_m < $${paramIndex}`;
-
         queryParams.push(parseFloat(bridgeLength.substring(1)));
-
         paramIndex++;
       } else if (bridgeLength.includes("-")) {
         const [min, max] = bridgeLength.split("-").map(parseFloat);
         query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${
           paramIndex + 1
         }`;
-
         queryParams.push(min, max);
-
         paramIndex += 2;
       } else if (bridgeLength.startsWith(">")) {
         query += ` AND md.structure_width_m > $${paramIndex}`;
-
         queryParams.push(parseFloat(bridgeLength.substring(1)));
-
         paramIndex++;
       }
     }
 
     // Add spanLength filter
-    if (spanLength && spanLength !== "%") {
+    if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
       if (spanLength.startsWith("<")) {
         query += ` AND md.span_length_m < $${paramIndex}`;
         queryParams.push(parseFloat(spanLength.substring(1)));
@@ -2648,12 +2646,10 @@ app.get("/api/inspections-export-con-new", async (req, res) => {
         requestId,
         error: error.message,
       });
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Failed to configure Excel worksheet",
-        });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to configure Excel worksheet",
+      });
     }
 
     // Compress image helper function
@@ -2829,12 +2825,10 @@ app.get("/api/inspections-export-con-new", async (req, res) => {
       requestId,
       error: error.message,
     });
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "Unexpected error during Excel generation",
-      });
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected error during Excel generation",
+    });
   }
 });
 
@@ -3212,7 +3206,7 @@ app.get("/api/inspection-points", async (req, res) => {
       LIMIT 1000
     `);
 
-    const features = result.rows.map(row => {
+    const features = result.rows.map((row) => {
       let color = "gray";
       if (row.status === "Pending") color = "red";
       if (row.status === "Approved") color = "green";
@@ -3278,7 +3272,7 @@ app.get("/api/inspection-points-rams", async (req, res) => {
       LIMIT 1000
     `);
 
-    const features = result.rows.map(row => {
+    const features = result.rows.map((row) => {
       let color = "gray";
       if (row.status === "Pending") color = "red";
       if (row.status === "Approved") color = "green";
@@ -3305,12 +3299,12 @@ app.get("/api/inspection-points-rams", async (req, res) => {
   }
 });
 
-app.get('/api/PriortizationInfo', async (req, res) => {
+app.get("/api/PriortizationInfo", async (req, res) => {
   const { bridgeId } = req.query; // Get uu_bms_id from query parameters
 
   // Validate uu_bms_id
   if (!bridgeId) {
-    return res.status(400).json({ error: 'bridgeId is required' });
+    return res.status(400).json({ error: "bridgeId is required" });
   }
 
   try {
@@ -3362,14 +3356,14 @@ app.get('/api/PriortizationInfo', async (req, res) => {
     const result = await pool.query(query, [bridgeId]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Bridge not found' });
+      return res.status(404).json({ error: "Bridge not found" });
     }
 
     // Return the first (and expected only) row
     res.status(200).json(result.rows[0]);
   } catch (error) {
-    console.error('Error fetching bridge data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching bridge data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -3922,13 +3916,17 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     const conditions = [];
     const values = [];
 
-   if (districtId !== "%") {
+    if (districtId !== "%") {
       conditions.push(`m.district_id = $${conditions.length + 1}`);
       values.push(districtId);
     }
 
-   if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      conditions.push(`LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${conditions.length + 1}`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      conditions.push(
+        `LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${
+          conditions.length + 1
+        }`
+      );
       values.push(`%${bridgeName.toLowerCase()}%`);
     }
 
@@ -3954,7 +3952,9 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
-      res.status(404).json({ error: "No records found for bridge inspections" });
+      res
+        .status(404)
+        .json({ error: "No records found for bridge inspections" });
     }
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
@@ -3987,13 +3987,17 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
     const conditions = [];
     const values = [];
 
-   if (districtId !== "%") {
+    if (districtId !== "%") {
       conditions.push(`m.district_id = $${conditions.length + 1}`);
       values.push(districtId);
     }
 
-   if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      conditions.push(`LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${conditions.length + 1}`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      conditions.push(
+        `LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${
+          conditions.length + 1
+        }`
+      );
       values.push(`%${bridgeName.toLowerCase()}%`);
     }
 
@@ -4019,7 +4023,9 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
-      res.status(404).json({ error: "No records found for RAMS bridge inspections" });
+      res
+        .status(404)
+        .json({ error: "No records found for RAMS bridge inspections" });
     }
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
@@ -4057,8 +4063,12 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
       values.push(districtId);
     }
 
-   if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      conditions.push(`LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${conditions.length + 1}`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      conditions.push(
+        `LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${
+          conditions.length + 1
+        }`
+      );
       values.push(`%${bridgeName.toLowerCase()}%`);
     }
 
@@ -6398,11 +6408,9 @@ app.put("/api/update-overall-condition/:id", async (req, res) => {
   try {
     // Validate input
     if (!id || !overall_bridge_condition) {
-      return res
-        .status(400)
-        .json({
-          error: "Missing required fields: id and overall_bridge_condition",
-        });
+      return res.status(400).json({
+        error: "Missing required fields: id and overall_bridge_condition",
+      });
     }
 
     // Update the overall_bridge_condition in the database
