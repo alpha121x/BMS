@@ -9,6 +9,7 @@ import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo compone
 import InspectionListCon from "./InspectionListCon";
 import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListRams from "./InspectionListRams";
+import InspectionListDashboard from "./InspectionListDashboard";
 import MapModal from "./MapModal"; // Adjust the import path as needed
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
@@ -583,13 +584,7 @@ const BridgesListNewUpdated = ({
           </Modal.Header>
           <Modal.Body>
             {selectedBridge && user_type === "consultant" && (
-              <InspectionListCon bridgeId={selectedBridge.uu_bms_id} />
-            )}
-            {selectedBridge && user_type === "rams" && (
-              <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />
-            )}
-            {selectedBridge && user_type === "evaluator" && (
-              <InspectionListEvaluator bridgeId={selectedBridge.uu_bms_id} />
+              <InspectionListDashboard bridgeId={selectedBridge.uu_bms_id} />
             )}
           </Modal.Body>
         </Modal>
