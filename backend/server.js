@@ -2114,50 +2114,42 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
       paramIndex++;
     }
 
-    if (bridgeLength !== "%") {
-      if (bridgeLength.startsWith("<")) {
-        query += ` AND md.structure_width_m < $${paramIndex}`;
+ if (bridgeLength && typeof bridgeLength === "string" && bridgeLength !== "%") {
+  if (bridgeLength.startsWith("<")) {
+    query += ` AND md.structure_width_m < $${paramIndex}`;
+    queryParams.push(parseFloat(bridgeLength.substring(1)));
+    paramIndex++;
+  } else if (bridgeLength.includes("-")) {
+    const [min, max] = bridgeLength.split("-").map(parseFloat);
+    query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+    queryParams.push(min, max);
+    paramIndex += 2;
+  } else if (bridgeLength.startsWith(">")) {
+    query += ` AND md.structure_width_m > $${paramIndex}`;
+    queryParams.push(parseFloat(bridgeLength.substring(1)));
+    paramIndex++;
+  }
+}
 
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-
-        paramIndex++;
-      } else if (bridgeLength.includes("-")) {
-        const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
-
-        queryParams.push(min, max);
-
-        paramIndex += 2;
-      } else if (bridgeLength.startsWith(">")) {
-        query += ` AND md.structure_width_m > $${paramIndex}`;
-
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-
-        paramIndex++;
-      }
-    }
 
     // Add spanLength filter
-    if (spanLength && spanLength !== "%") {
-      if (spanLength.startsWith("<")) {
-        query += ` AND md.span_length_m < $${paramIndex}`;
-        queryParams.push(parseFloat(spanLength.substring(1)));
-        paramIndex++;
-      } else if (spanLength.includes("-")) {
-        const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
-        queryParams.push(min, max);
-        paramIndex += 2;
-      } else if (spanLength.startsWith(">")) {
-        query += ` AND md.span_length_m > $${paramIndex}`;
-        queryParams.push(parseFloat(spanLength.substring(1)));
-        paramIndex++;
-      }
-    }
+   if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
+  if (spanLength.startsWith("<")) {
+    query += ` AND md.span_length_m < $${paramIndex}`;
+    queryParams.push(parseFloat(spanLength.substring(1)));
+    paramIndex++;
+  } else if (spanLength.includes("-")) {
+    const [min, max] = spanLength.split("-").map(parseFloat);
+    query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+    queryParams.push(min, max);
+    paramIndex += 2;
+  } else if (spanLength.startsWith(">")) {
+    query += ` AND md.span_length_m > $${paramIndex}`;
+    queryParams.push(parseFloat(spanLength.substring(1)));
+    paramIndex++;
+  }
+}
+
 
     query += ` ORDER BY "REFERENCE NO" ) SELECT * FROM ranked_data;`;
 
