@@ -3670,6 +3670,116 @@ SELECT
   }
 });
 
+// bridges list for history tab
+app.get("/api/bridgeshistory", async (req, res) => {
+  try {
+    const {
+      set = 0,
+      limit = 10,
+      district = "%",
+      structureType = "%",
+      bridgeName = "%",
+    } = req.query;
+
+    let query = `
+SELECT 
+        uu_bms_id, surveyed_by,
+        pms_sec_id, 
+        structure_no, 
+        structure_type_id, 
+        structure_type, 
+        road_name, 
+        road_name_cwd, 
+        route_id, 
+        survey_id, 
+        surveyor_name, 
+        district_id, 
+        district, 
+        road_classification, 
+        road_surface_type, 
+        carriageway_type, 
+        direction, 
+        visual_condition, 
+        construction_type_id, 
+        construction_type, 
+        no_of_span,
+        data_source, 
+        date_time, 
+        span_length_m, 
+        structure_width_m, 
+        construction_year, 
+        last_maintenance_date, 
+        remarks, 
+        is_surveyed, 
+        x_centroid, 
+        y_centroid, 
+        images_spans,
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1 
+	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
+    AND is_active = true
+    `;
+
+    let countQuery = `
+      SELECT COUNT(*) AS totalCount
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1
+      AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU')
+    AND is_active = true
+    `;
+
+    const queryParams = [];
+    const countParams = [];
+    let paramIndex = 1;
+
+    if (district !== "%") {
+      query += ` AND district_id = $${paramIndex}`;
+      countQuery += ` AND district_id = $${paramIndex}`;
+      queryParams.push(district);
+      countParams.push(district);
+      paramIndex++;
+    }
+
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
+
+    if (structureType !== "%") {
+      query += ` AND structure_type_id = $${paramIndex}`;
+      countQuery += ` AND structure_type_id = $${paramIndex}`;
+      queryParams.push(structureType);
+      countParams.push(structureType);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
+    queryParams.push(parseInt(set, 10), parseInt(limit, 10));
+
+    const result = await pool.query(query, queryParams);
+    const countResult = await pool.query(countQuery, countParams);
+
+    res.json({
+      success: true,
+      bridges: result.rows,
+      totalCount: parseInt(countResult.rows[0].totalcount, 10),
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesCon", async (req, res) => {
   try {
