@@ -14,6 +14,7 @@ import BridgesStatusSummary from "./BridgesStatusSummary";
 import InspectionsList from "./UnapprovedInspections";
 import UnapprovedInspections from "./UnapprovedInspectionsRams";
 import InspectionMap from "./InspectionMap";
+import HistoryRecords from "./HistoryRecords";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -152,6 +153,16 @@ const EvaluationMainCon = () => {
                 Bridges List
               </button>
               <button
+                onClick={() => setActiveView("historytab")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "historytab"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+               History Records
+              </button>
+              <button
                 onClick={() => setActiveView("bridgessummary")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "bridgessummary"
@@ -186,8 +197,13 @@ const EvaluationMainCon = () => {
             {/* Content Container */}
             <div className="mt-0">
               {activeView === "map" && <Map  districtId={districtId}
-          structureType={structureType}
-          bridgeName={bridgeName} />}
+                structureType={structureType}
+                bridgeName={bridgeName} />}
+                 {activeView === "historytab" && <HistoryRecords
+                 districtId={districtId}
+                 structureType={structureType}
+                  bridgeName={bridgeName}
+                  />}
               {/* {activeView === "map" && (
                   <InspectionMap
                   map_endpoint={map_endpoint}
