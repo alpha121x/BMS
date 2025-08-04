@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { Row, Col, Form, Modal, Spinner } from "react-bootstrap";
+import { useState, useEffect } from "react";
+import { Row, Col, Form, Modal, Button, Spinner } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import "../index.css";
 import { BASE_URL } from "./config";
 
 const InventoryInfo = ({ inventoryData }) => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [selectedPhotos, setSelectedPhotos] = useState([]);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [selectedSpan, setSelectedSpan] = useState("");
   const [parsedSpanPhotos, setParsedSpanPhotos] = useState({});
   const [currentSpanPhotos, setCurrentSpanPhotos] = useState([]);
   const [overviewPhotos, setOverviewPhotos] = useState([]);
   const [loadingSpanPhotos, setLoadingSpanPhotos] = useState(false);
-  const [overallCondition, setOverallCondition] = useState(""); // Initialize as empty string
+  const [overallCondition, setOverallCondition] = useState("");
   const [visualConditions, setVisualConditions] = useState([]);
   const [loadingConditions, setLoadingConditions] = useState(false);
   const [updateError, setUpdateError] = useState(null);
@@ -32,7 +35,6 @@ const InventoryInfo = ({ inventoryData }) => {
         setVisualConditions(data);
       } catch (error) {
         console.error("Error fetching visual conditions:", error);
-        // Fallback to the exact options from the database
         setVisualConditions([
           { id: 1, visual_condition: "FAIR" },
           { id: 2, visual_condition: "GOOD" },
@@ -116,12 +118,31 @@ const InventoryInfo = ({ inventoryData }) => {
     setSelectedSpan(e.target.value);
   };
 
-  const handlePhotoClick = (photo) => {
-    setSelectedPhoto(photo);
-    setShowPhotoModal(true);
+  const handlePhotoClick = (photosArray, clickedIndex) => {
+    if (Array.isArray(photosArray) && photosArray.length > 0) {
+      setSelectedPhotos(photosArray);
+      setCurrentPhotoIndex(clickedIndex);
+      setShowPhotoModal(true);
+    }
   };
 
-  const closeModal = () => setShowPhotoModal(false);
+  const handlePreviousPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === 0 ? selectedPhotos.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prevIndex) =>
+      prevIndex === selectedPhotos.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const handleClosePhotoModal = () => {
+    setShowPhotoModal(false);
+    setSelectedPhotos([]);
+    setCurrentPhotoIndex(0);
+  };
 
   const handleConditionSelect = async (e) => {
     const selectedCondition = e.target.value;
@@ -268,7 +289,7 @@ const InventoryInfo = ({ inventoryData }) => {
                     alt={`Overview Photo ${index + 1}`}
                     className="img-thumbnail m-1"
                     style={{ width: "80px", height: "80px", cursor: "pointer" }}
-                    onClick={() => handlePhotoClick(photo)}
+                    onClick={() => handlePhotoClick(overviewPhotos, index)}
                   />
                 ))
               ) : (
@@ -318,7 +339,7 @@ const InventoryInfo = ({ inventoryData }) => {
                           height: "80px",
                           cursor: "pointer",
                         }}
-                        onClick={() => handlePhotoClick(photo)}
+                        onClick={() => handlePhotoClick(currentSpanPhotos, index)}
                       />
                     ))
                   ) : (
@@ -340,7 +361,7 @@ const InventoryInfo = ({ inventoryData }) => {
                     alt={`Photo ${index + 1}`}
                     className="img-thumbnail m-1"
                     style={{ width: "80px", height: "80px", cursor: "pointer" }}
-                    onClick={() => handlePhotoClick(photo)}
+                    onClick={() => handlePhotoClick(photos, index)}
                   />
                 ))
               ) : (
@@ -349,7 +370,6 @@ const InventoryInfo = ({ inventoryData }) => {
             </div>
           </Form.Group>
 
-          {/* Overall Bridge Condition Card */}
           <Col md={6}>
             <div
               className="card p-3 mt-3"
@@ -394,7 +414,6 @@ const InventoryInfo = ({ inventoryData }) => {
                     ))}
                   </Form.Select>
                 )}
-                {/* Display success or error message */}
                 {updateSuccess && (
                   <div className="text-success mt-2">{updateSuccess}</div>
                 )}
@@ -407,20 +426,103 @@ const InventoryInfo = ({ inventoryData }) => {
         </Form>
       </div>
 
-      <Modal show={showPhotoModal} onHide={closeModal} centered>
+      <Modal
+        show={showPhotoModal}
+        onHide={handleClosePhotoModal}
+        centered
+        size="lg"
+        className="custom-modal"
+      >
+        <style>
+          {`
+            .custom-modal .modal-dialog {
+              max-width: 90vw;
+              width: 100%;
+            }
+            .custom-modal .modal-content {
+              max-height: 90vh;
+              overflow: hidden;
+            }
+            .custom-modal .modal-body {
+              max-height: 70vh;
+              overflow-y: auto;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              padding: 15px;
+            }
+            .custom-modal .image-container {
+              position: relative;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              max-height: 60vh;
+            }
+            .custom-modal .modal-image {
+              max-width: 100%;
+              max-height: 60vh;
+              object-fit: contain;
+              border-radius: 4px;
+              border: 1px solid #dee2e6;
+            }
+            .custom-modal .nav-button {
+              position: absolute;
+              top: 50%;
+              transform: translateY(-50%);
+              z-index: 10;
+              padding: 8px 12px;
+              font-size: 1.2rem;
+            }
+            .custom-modal .prev-button {
+              left: 10px;
+            }
+            .custom-modal .next-button {
+              right: 10px;
+            }
+          `}
+        </style>
         <Modal.Header closeButton>
-          <Modal.Title>Photo Preview</Modal.Title>
+          <Modal.Title>
+            Photo {currentPhotoIndex + 1} of {selectedPhotos.length}
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-center">
-          {selectedPhoto && (
-            <img
-              src={selectedPhoto}
-              alt="Selected Photo"
-              className="img-fluid"
-              style={{ maxHeight: "400px", objectFit: "contain" }}
-            />
+        <Modal.Body>
+          {selectedPhotos.length > 0 && (
+            <div className="image-container">
+              <Button
+                variant="outline-secondary"
+                onClick={handlePreviousPhoto}
+                disabled={selectedPhotos.length <= 1}
+                className="nav-button prev-button"
+              >
+                <FontAwesomeIcon icon={faArrowLeft} />
+              </Button>
+              <img
+                src={selectedPhotos[currentPhotoIndex]}
+                alt={`Photo ${currentPhotoIndex + 1}`}
+                className="modal-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/placeholder-image.png";
+                }}
+              />
+              <Button
+                variant="outline-secondary"
+                onClick={handleNextPhoto}
+                disabled={selectedPhotos.length <= 1}
+                className="nav-button next-button"
+              >
+                <FontAwesomeIcon icon={faArrowRight} />
+              </Button>
+            </div>
           )}
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClosePhotoModal}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
     </div>
   );

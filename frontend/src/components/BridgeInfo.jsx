@@ -27,6 +27,8 @@ const BridgeInfo = () => {
 
   // Extract username safely
   const user_type = userToken?.usertype;
+
+  const navigate = useNavigate();
   
 
   // Function to render components based on username
