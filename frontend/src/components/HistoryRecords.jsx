@@ -5,7 +5,9 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { BASE_URL } from "./config";
 import Papa from "papaparse"; // Import papaparse
 import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
-import InspectionListDashboard from "./InspectionListDashboard";
+import InspectionListCon from "./InspectionListCon";
+import InspectionListRams from "./InspectionListRams";
+import InspectionListEvaluator from "./InspectionListEvaluator";
 import MapModal from "./MapModal"; // Adjust the import path as needed
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
@@ -567,7 +569,7 @@ const BridgesListNewUpdated = ({
         </Modal>
 
         {/* Modal for Inspection Details */}
-        <Modal
+      <Modal
           show={showInspectionModal}
           onHide={handleCloseInspectionModal}
           size="lg"
@@ -578,8 +580,14 @@ const BridgesListNewUpdated = ({
             <Modal.Title>Inspection Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedBridge && (
-              <InspectionListDashboard bridgeId={selectedBridge.uu_bms_id} />
+            {selectedBridge && user_type === "consultant" && (
+              <InspectionListCon bridgeId={selectedBridge.uu_bms_id} />
+            )}
+            {selectedBridge && user_type === "rams" && (
+              <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />
+            )}
+            {selectedBridge && user_type === "evaluator" && (
+              <InspectionListEvaluator bridgeId={selectedBridge.uu_bms_id} />
             )}
           </Modal.Body>
         </Modal>
