@@ -4,11 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { BASE_URL } from "./config";
 import Papa from "papaparse"; // Import papaparse
-import Filters from "./Filters";
 import InventoryInfo from "./InventoryInfo"; // Import the InventoryInfo component
-import InspectionListCon from "./InspectionListCon";
-import InspectionListEvaluator from "./InspectionListEvaluator";
-import InspectionListRams from "./InspectionListRams";
 import InspectionListDashboard from "./InspectionListDashboard";
 import MapModal from "./MapModal"; // Adjust the import path as needed
 import Swal from "sweetalert2";
@@ -21,7 +17,6 @@ import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
 import "leaflet/dist/leaflet.css";
-import BridgesStatusSummary from "./BridgesStatusSummary";
 import { useNavigate } from 'react-router-dom';
 
 
@@ -589,6 +584,8 @@ const BridgesListNewUpdated = ({
           </Modal.Body>
         </Modal>
 
+
+        {/* Modal for Map View */}  
         <Modal
           show={showMapModal}
           onHide={handleCloseMapModal}
