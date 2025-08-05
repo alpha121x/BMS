@@ -20,6 +20,7 @@ import PriortizationTable from './components/PriotizationTable';
 import PrioritizationInformation from './components/PrioritizationInformation';
 import MaintenancePlan from './components/MaintenancePlan';
 import FiveYearPlan from './components/FiveYearPlan'; // Importing the Five Year Plan component
+import BridgeInfoHistory from './components/BridgeInfoHistory';
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -117,6 +118,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           element={
             <PrivateRoute>
               <BridgeInfo />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Private Route for BridgeInfoHistory */}
+         <Route
+          path="/BridgeInfoHistory"
+          element={
+            <PrivateRoute>
+              <BridgeInfoHistory />
             </PrivateRoute>
           }
         />

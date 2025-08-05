@@ -106,7 +106,7 @@ const BridgesListNewUpdated = ({
   };
 
   const handleRowClick = (bridge) => {
-  navigate('/BridgeInfoEvaluation', { state: { bridge } });
+  navigate('/BridgeInfoHistory', { state: { bridge } });
 };
 
 
