@@ -131,7 +131,7 @@ const EvaluationMainCon = () => {
         <div className="row mt-2">
           <div className="col-md-12">
             {/* Navigation Buttons */}
-            <div className="flex justify-start pb-0 gap-2 w-75">
+            <div className="flex justify-start pb-0 gap-2 w-full">
               <button
                 onClick={() => setActiveView("map")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
