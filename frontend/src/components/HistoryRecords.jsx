@@ -578,7 +578,7 @@ const BridgesListNewUpdated = ({
             <Modal.Title>Inspection Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedBridge && user_type === "consultant" && (
+            {selectedBridge && (
               <InspectionListDashboard bridgeId={selectedBridge.uu_bms_id} />
             )}
           </Modal.Body>
