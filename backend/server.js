@@ -972,11 +972,10 @@ app.get("/api/bridgesConDownloadExcel", async (req, res) => {
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-  query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-  queryParams.push(`%${bridgeName.trim()}%`);
-  paramIndex++;
-}
-
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
     if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -1072,11 +1071,10 @@ app.get("/api/bridgesConDownloadCsv", async (req, res) => {
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-  query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-  queryParams.push(`%${bridgeName.trim()}%`);
-  paramIndex++;
-}
-
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
     if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -1409,11 +1407,10 @@ app.get("/api/bridgesRamsDownloadCsv", async (req, res) => {
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-  query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-  queryParams.push(`%${bridgeName.trim()}%`);
-  paramIndex++;
-}
-
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
     if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -1516,12 +1513,11 @@ app.get("/api/bridgesRamsDownloadCsvNew", async (req, res) => {
       paramIndex++;
     }
 
-   if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-  query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-  queryParams.push(`%${bridgeName.trim()}%`);
-  paramIndex++;
-}
-
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
     if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -1851,11 +1847,10 @@ app.get("/api/bridgesEvalDownloadCsv", async (req, res) => {
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-  query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-  queryParams.push(`%${bridgeName.trim()}%`);
-  paramIndex++;
-}
-
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
     if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -2091,12 +2086,11 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
       paramIndex++;
     }
 
-   if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-  query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-  queryParams.push(`%${bridgeName.trim()}%`);
-  paramIndex++;
-}
-
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
     if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -2256,11 +2250,10 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-  query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
-  queryParams.push(`%${bridgeName.trim()}%`);
-  paramIndex++;
-}
-
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
 
     if (structureType !== "%") {
       query += ` AND md.structure_type_id = $${paramIndex}`;
@@ -3444,16 +3437,11 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-       if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      // Clean user input by removing all spaces
-      const cleanedBridgeName = bridgeName.replace(/\s+/g, '');
-
-      // Use REPLACE in SQL to remove spaces from DB fields
-      query += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-      countQuery += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-
-      queryParams.push(`%${cleanedBridgeName}%`);
-      countParams.push(`%${cleanedBridgeName}%`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
@@ -3740,16 +3728,11 @@ SELECT
       paramIndex++;
     }
 
-       if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      // Clean user input by removing all spaces
-      const cleanedBridgeName = bridgeName.replace(/\s+/g, '');
-
-      // Use REPLACE in SQL to remove spaces from DB fields
-      query += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-      countQuery += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-
-      queryParams.push(`%${cleanedBridgeName}%`);
-      countParams.push(`%${cleanedBridgeName}%`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
@@ -3860,18 +3843,12 @@ SELECT
     }
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      // Clean user input by removing all spaces
-      const cleanedBridgeName = bridgeName.replace(/\s+/g, '');
-
-      // Use REPLACE in SQL to remove spaces from DB fields
-      query += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-      countQuery += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-
-      queryParams.push(`%${cleanedBridgeName}%`);
-      countParams.push(`%${cleanedBridgeName}%`);
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
-
 
     if (structureType !== "%") {
       query += ` AND structure_type_id = $${paramIndex}`;
@@ -4193,16 +4170,11 @@ SELECT
       paramIndex++;
     }
 
-       if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      // Clean user input by removing all spaces
-      const cleanedBridgeName = bridgeName.replace(/\s+/g, '');
-
-      // Use REPLACE in SQL to remove spaces from DB fields
-      query += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-      countQuery += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-
-      queryParams.push(`%${cleanedBridgeName}%`);
-      countParams.push(`%${cleanedBridgeName}%`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
@@ -4325,16 +4297,11 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
       paramIndex++;
     }
 
-        if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      // Clean user input by removing all spaces
-      const cleanedBridgeName = bridgeName.replace(/\s+/g, '');
-
-      // Use REPLACE in SQL to remove spaces from DB fields
-      query += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-      countQuery += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-
-      queryParams.push(`%${cleanedBridgeName}%`);
-      countParams.push(`%${cleanedBridgeName}%`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
@@ -4450,16 +4417,11 @@ SELECT
       paramIndex++;
     }
 
-       if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      // Clean user input by removing all spaces
-      const cleanedBridgeName = bridgeName.replace(/\s+/g, '');
-
-      // Use REPLACE in SQL to remove spaces from DB fields
-      query += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-      countQuery += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-
-      queryParams.push(`%${cleanedBridgeName}%`);
-      countParams.push(`%${cleanedBridgeName}%`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 
@@ -4623,16 +4585,11 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
       paramIndex++;
     }
 
-        if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      // Clean user input by removing all spaces
-      const cleanedBridgeName = bridgeName.replace(/\s+/g, '');
-
-      // Use REPLACE in SQL to remove spaces from DB fields
-      query += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-      countQuery += ` AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE $${paramIndex}`;
-
-      queryParams.push(`%${cleanedBridgeName}%`);
-      countParams.push(`%${cleanedBridgeName}%`);
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(b.pms_sec_id, ',', b.structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
 

@@ -1,0 +1,94 @@
+[2025-08-05T12:26:49.181Z] Final Query:
+
+SELECT 
+        is_active,
+        raw_id,
+        uu_bms_id, 
+        surveyed_by,
+        pms_sec_id, 
+        structure_no, 
+        structure_type_id, 
+        structure_type, 
+        road_name, 
+        road_name_cwd, 
+        route_id, 
+        survey_id, 
+        surveyor_name, 
+        district_id, 
+        district, 
+        road_classification, 
+        road_surface_type, 
+        carriageway_type, 
+        direction, 
+        visual_condition, 
+        overall_bridge_condition,
+        construction_type_id, 
+        construction_type, 
+        no_of_span,
+        data_source, 
+        data_date_time, 
+        span_length_m, 
+        structure_width_m, 
+        construction_year, 
+        last_maintenance_date, 
+        remarks, 
+        is_surveyed, 
+        x_centroid, 
+        y_centroid, 
+        images_spans,
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1 
+	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU' AND qc_con = '1')
+    AND is_active = true
+     AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE '%GW_C0164_ST_51%' ORDER BY data_date_time DESC OFFSET 0 LIMIT 10
+Params: ["%GW_C0164_ST_51%",0,10]
+------------------
+[2025-08-05T12:26:49.779Z] Final Query:
+
+SELECT 
+        is_active,
+        raw_id,
+        uu_bms_id, 
+        surveyed_by,
+        pms_sec_id, 
+        structure_no, 
+        structure_type_id, 
+        structure_type, 
+        road_name, 
+        road_name_cwd, 
+        route_id, 
+        survey_id, 
+        surveyor_name, 
+        district_id, 
+        district, 
+        road_classification, 
+        road_surface_type, 
+        carriageway_type, 
+        direction, 
+        visual_condition, 
+        overall_bridge_condition,
+        construction_type_id, 
+        construction_type, 
+        no_of_span,
+        data_source, 
+        data_date_time, 
+        span_length_m, 
+        structure_width_m, 
+        construction_year, 
+        last_maintenance_date, 
+        remarks, 
+        is_surveyed, 
+        x_centroid, 
+        y_centroid, 
+        images_spans,
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1 
+	  AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU' AND qc_con = '1')
+    AND is_active = true
+     AND REPLACE(CONCAT(pms_sec_id, ',', structure_no), ' ', '') ILIKE '%GW_C0164_ST_51%' ORDER BY data_date_time DESC OFFSET 0 LIMIT 10
+Params: ["%GW_C0164_ST_51%",0,10]
+------------------
