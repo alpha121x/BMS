@@ -88,7 +88,7 @@ const Header = () => {
               Bridge Wise Score
             </Nav.Link>
 
-                 <Nav.Link
+                 {/* <Nav.Link
               as={Link}
               to="/Priortization"
               className={
@@ -103,7 +103,7 @@ const Header = () => {
               }}
             >
               Priortization
-            </Nav.Link>
+            </Nav.Link> */}
 
                     {/* <Nav.Link
               as={Link}
