@@ -101,7 +101,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, user_name, user_password, user_type
+    SELECT id, user_name, user_password, user_type, district_id
     FROM bms.tbl_users_evaluations
     WHERE user_name = $1
 `;
@@ -127,6 +127,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
         userId: user.id,
         username: user.user_name,
         usertype: user.user_type,
+        districtId: user.district_id,
       },
       JWT_SECRET,
       { expiresIn: "1h" }
@@ -139,6 +140,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
         userId: user.id,
         username: user.user_name,
         usertype: user.user_type,
+        districtId: user.district_id
       },
     });
   } catch (error) {

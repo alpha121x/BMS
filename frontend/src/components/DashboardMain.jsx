@@ -32,6 +32,7 @@ const DashboardMain = () => {
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [evaluatedCards, setEvaluatedCards] = useState([]);
+  
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
