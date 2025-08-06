@@ -36,6 +36,8 @@ const BridgesListDashboard = ({
   setRoadClassification,
   spanLength,
   setSpanLength,
+  inspectionStatus, // New prop
+  setInspectionStatus, // New prop
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -67,6 +69,7 @@ const BridgesListDashboard = ({
     underFacility,
     roadClassification,
     spanLength,
+    inspectionStatus,
   ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -87,6 +90,7 @@ const BridgesListDashboard = ({
         underFacility,
         roadClassification,
         spanLength,
+        inspectionStatus, // New filter parameter
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -159,6 +163,7 @@ const BridgesListDashboard = ({
         underFacility: underFacility || "%",
         roadClassification: roadClassification || "%",
         spanLength: spanLength || "%",
+        inspectionStatus: inspectionStatus || "%", // New filter parameter
       };
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
@@ -200,6 +205,7 @@ const BridgesListDashboard = ({
         underFacility: underFacility || "%",
         roadClassification: roadClassification || "%",
         spanLength: spanLength || "%",
+        inspectionStatus: inspectionStatus || "%", // New filter parameter
       };
       const queryString = new URLSearchParams(params).toString();
 
@@ -547,6 +553,8 @@ const BridgesListDashboard = ({
               setUnderFacility={setUnderFacility}
               roadClassification={roadClassification}
               setRoadClassification={setRoadClassification}
+              inspectionStatus={inspectionStatus}
+              setInspectionStatus={setInspectionStatus}
               spanLength={spanLength}
               setSpanLength={setSpanLength}
               onApplyFilters={() => fetchAllBridges(currentPage)}

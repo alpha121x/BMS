@@ -3371,7 +3371,8 @@ app.get("/api/bridges", async (req, res) => {
       roadClassification = "%",
       bridgeName = "%",
       bridgeLength,
-      spanLength, // Add spanLength as a query parameter
+      spanLength,
+      inspectionStatus = "%", // Add inspectionStatus as a query parameter
     } = req.query;
 
     let query = `
@@ -3412,7 +3413,15 @@ app.get("/api/bridges", async (req, res) => {
         y_centroid, 
         images_spans,
         CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
-        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos,
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 
+            FROM bms.tbl_inspection_f 
+            WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+          ) THEN 'inspected'
+          ELSE 'uninspected'
+        END AS inspection_status
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
       AND is_active = true
@@ -3478,12 +3487,8 @@ app.get("/api/bridges", async (req, res) => {
         paramIndex++;
       } else if (bridgeLength.includes("-")) {
         const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
-        countQuery += ` AND structure_width_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
+        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
@@ -3496,7 +3501,6 @@ app.get("/api/bridges", async (req, res) => {
       }
     }
 
-    // Add spanLength filter
     if (spanLength && spanLength !== "%") {
       if (spanLength.startsWith("<")) {
         query += ` AND span_length_m < $${paramIndex}`;
@@ -3506,12 +3510,8 @@ app.get("/api/bridges", async (req, res) => {
         paramIndex++;
       } else if (spanLength.includes("-")) {
         const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
-        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
+        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
@@ -3524,9 +3524,34 @@ app.get("/api/bridges", async (req, res) => {
       }
     }
 
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
-      paramIndex + 1
-    }`;
+    // Add inspectionStatus filter
+    if (inspectionStatus !== "%") {
+      if (inspectionStatus === "inspected") {
+        query += ` AND EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+        countQuery += ` AND EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+      } else if (inspectionStatus === "uninspected") {
+        query += ` AND NOT EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+        countQuery += ` AND NOT EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+      }
+    }
+
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);

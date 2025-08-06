@@ -12,8 +12,10 @@ const FilterComponent = ({
   setUnderFacility,
   roadClassification,
   setRoadClassification,
-  spanLength, // New prop
-  setSpanLength, // New prop
+  spanLength,
+  setSpanLength,
+  inspectionStatus, // New prop
+  setInspectionStatus, // New prop
   onApplyFilters,
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
@@ -21,9 +23,10 @@ const FilterComponent = ({
   const [localConstructionType, setLocalConstructionType] = useState(constructionType || "%");
   const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "%");
   const [localAge, setLocalAge] = useState(age || "%");
-  const [localSpanLength, setLocalSpanLength] = useState(spanLength || "%"); // Initialize with prop
+  const [localSpanLength, setLocalSpanLength] = useState(spanLength || "%");
   const [localUnderFacility, setLocalUnderFacility] = useState(underFacility || "%");
   const [localRoadClassification, setLocalRoadClassification] = useState(roadClassification || "%");
+  const [localInspectionStatus, setLocalInspectionStatus] = useState(inspectionStatus || "%"); // New local state
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -66,7 +69,8 @@ const FilterComponent = ({
     setAge(localAge);
     setUnderFacility(localUnderFacility);
     setRoadClassification(localRoadClassification);
-    setSpanLength(localSpanLength); // Update spanLength in parent state
+    setSpanLength(localSpanLength);
+    setInspectionStatus(localInspectionStatus); // Update inspectionStatus in parent state
     if (onApplyFilters) {
       onApplyFilters();
     }
@@ -114,7 +118,7 @@ const FilterComponent = ({
           </select>
         </div>
 
-         {/* Span Length Filter */}
+        {/* Span Length Filter */}
         <div className="flex-1 min-w-[100px]">
           <label htmlFor="span-length" className="block text-white font-medium mb-1 text-xs">
             Span Length (m)
@@ -185,6 +189,23 @@ const FilterComponent = ({
                 {classification.name}
               </option>
             ))}
+          </select>
+        </div>
+
+        {/* Inspection Status Filter */}
+        <div className="flex-1 min-w-[100px]">
+          <label htmlFor="inspection-status" className="block text-white font-medium mb-1 text-xs">
+            Inspection Status
+          </label>
+          <select
+            id="inspection-status"
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
+            value={localInspectionStatus}
+            onChange={handleChange(setLocalInspectionStatus)}
+          >
+            <option value="%">All</option>
+            <option value="inspected">Inspected</option>
+            <option value="uninspected">Uninspected</option>
           </select>
         </div>
 
