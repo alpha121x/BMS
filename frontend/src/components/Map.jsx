@@ -319,15 +319,6 @@ const Map = ({
               definitionExpression
             },
             {
-              id: 2,
-              title: "Visual Condition",
-              opacity: 0.6,
-              listMode: "show",
-              popupTemplate,
-              visible: false,
-              definitionExpression
-            },
-            {
               id: 3,
               title: "Divisions",
               opacity: 0.6,
