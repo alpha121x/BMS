@@ -305,7 +305,7 @@ const DashboardMain = () => {
               >
                 Inventory
               </button>
-               <button
+               {/* <button
                 onClick={() => setActiveView("bridge_summary")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "bridge_summary"
@@ -314,7 +314,7 @@ const DashboardMain = () => {
                 }`}
               >
                 Bridge Status Summary
-              </button>
+              </button> */}
                    <button
                 onClick={() => setActiveView("priortization")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
@@ -335,8 +335,7 @@ const DashboardMain = () => {
               >
                 Cost
               </button>
-
-                 <button
+              <button
                 onClick={() => setActiveView("fiveyearplan")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "fiveyearplan"
