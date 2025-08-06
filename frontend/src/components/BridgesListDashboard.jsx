@@ -363,6 +363,13 @@ const BridgesListDashboard = ({
       grow: 1,
     },
     {
+      name: "Length of Structure & Span",
+      selector: (row) => row.span_length_m || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
       name: "Date Time",
       selector: (row) =>
         row.data_date_time

@@ -114,7 +114,7 @@ const FilterComponent = ({
           </select>
         </div>
 
-        {/* Span Length Filter */}
+         {/* Span Length Filter */}
         <div className="flex-1 min-w-[100px]">
           <label htmlFor="span-length" className="block text-white font-medium mb-1 text-xs">
             Span Length (m)
@@ -126,10 +126,12 @@ const FilterComponent = ({
             onChange={handleChange(setLocalSpanLength)}
           >
             <option value="%">All</option>
-            <option value="<5">Less than 5 m</option>
-            <option value="5-15">5 to 15 m</option>
-            <option value="15-30">15 to 30 m</option>
-            <option value=">30">Greater than 30 m</option>
+            <option value="<6">Less than 6 m</option>
+            <option value="6-10">6 to 10 m</option>
+            <option value="10-15">10 to 15 m</option>
+            <option value="15-20">15 to 20 m</option>
+            <option value="20-35">20 to 35 m</option>
+            <option value=">35">Greater than 35 m</option>
           </select>
         </div>
 
