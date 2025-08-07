@@ -645,11 +645,11 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
         SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f
       )
       SELECT 
-        m.structure_type, 
+        m.structure_type,
         COUNT(*) AS count
       FROM bms.tbl_bms_master_data m
       JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
-      WHERE 1=1 ${districtFilter}
+      WHERE m.is_active = true ${districtFilter}
       GROUP BY m.structure_type
       ORDER BY count DESC;
     `;
@@ -660,7 +660,7 @@ app.get("/api/structure-counts-inspected", async (req, res) => {
       JOIN (
         SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f
       ) i ON m.uu_bms_id = i.uu_bms_id
-      WHERE 1=1 ${districtFilter};
+      WHERE m.is_active = true ${districtFilter};
     `;
 
     const structureTypeCounts = await pool.query(query, params);
@@ -704,9 +704,8 @@ app.get("/api/structure-counts-inspected-eval", async (req, res) => {
         COUNT(*) AS count
       FROM bms.tbl_bms_master_data m
       JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
-      WHERE 1=1 
+      WHERE m.is_active = true 
         ${districtFilter}
-        AND m.is_active = true
       GROUP BY m.structure_type
       ORDER BY count DESC;
     `;
@@ -725,9 +724,8 @@ app.get("/api/structure-counts-inspected-eval", async (req, res) => {
       SELECT COUNT(*) AS total_count
       FROM bms.tbl_bms_master_data m
       JOIN inspected_structures i ON m.uu_bms_id = i.uu_bms_id
-      WHERE 1=1 
-        ${districtFilter}
-        AND m.is_active = true;
+      WHERE m.is_active = true 
+        ${districtFilter};
     `;
 
     const structureTypeCounts = await pool.query(query, params);
@@ -764,7 +762,8 @@ app.get("/api/structure-counts-evaluated", async (req, res) => {
         COUNT(*) AS count
       FROM bms.tbl_bms_master_data m
       JOIN evaluated_structures i ON m.uu_bms_id = i.uu_bms_id
-      WHERE 1=1 ${districtFilter}
+      WHERE m.is_active = true 
+        ${districtFilter}
       GROUP BY m.structure_type
       ORDER BY count DESC;
     `;
@@ -775,7 +774,8 @@ app.get("/api/structure-counts-evaluated", async (req, res) => {
       JOIN (
         SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation_f
       ) i ON m.uu_bms_id = i.uu_bms_id
-      WHERE 1=1 ${districtFilter};
+      WHERE m.is_active = true 
+        ${districtFilter};
     `;
 
     const structureTypeCounts = await pool.query(query, params);
@@ -790,6 +790,7 @@ app.get("/api/structure-counts-evaluated", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 // counts for Con
 app.get("/api/inspection-counts-con", async (req, res) => {
