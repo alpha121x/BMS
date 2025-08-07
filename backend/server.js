@@ -88,7 +88,6 @@ app.post("/api/login", async (req, res) => {
         phoneNum: user.phone_num,
         role: user.role,
         districtId: user.district_id,
-
       },
     });
   } catch (error) {
@@ -6276,15 +6275,23 @@ app.get("/api/construction-types", async (req, res) => {
   }
 });
 
-// API route to get Districts
+// API route to get Districts dynamically
 app.get("/api/districts", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT id,district FROM bms.tbl_districts"
-    );
+    const { districtId = "0" } = req.query;
+
+    let query = "SELECT id, district FROM bms.tbl_districts";
+    const params = [];
+
+    if (districtId !== "0" && districtId !== "%") {
+      query += " WHERE id = $1";
+      params.push(districtId);
+    }
+
+    const result = await pool.query(query, params);
     res.json(result.rows);
   } catch (err) {
-    console.error(err.message);
+    console.error("Error in /api/districts:", err.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
