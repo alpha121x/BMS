@@ -43,7 +43,7 @@ app.post("/api/login", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, username, password,phone_num, email, id, is_active
+    SELECT id, username, password,phone_num, email, id, is_active, district_id
     FROM bms.tbl_users
     WHERE username = $1 AND is_active::boolean = true
 `;
@@ -71,6 +71,7 @@ app.post("/api/login", async (req, res) => {
         role: user.role_id,
         phoneNum: user.phone_num,
         email: user.email,
+        districtId: user.district_id,
       },
       JWT_SECRET,
       { expiresIn: "1h" }
@@ -86,6 +87,8 @@ app.post("/api/login", async (req, res) => {
         email: user.email,
         phoneNum: user.phone_num,
         role: user.role,
+        districtId: user.district_id,
+
       },
     });
   } catch (error) {
@@ -101,7 +104,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
   try {
     // Query to fetch user details from tbl_users_web
     const query = `
-    SELECT id, user_name, user_password, user_type
+    SELECT id, user_name, user_password, user_type, district_id
     FROM bms.tbl_users_evaluations
     WHERE user_name = $1
 `;
@@ -127,6 +130,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
         userId: user.id,
         username: user.user_name,
         usertype: user.user_type,
+        districtId: user.district_id,
       },
       JWT_SECRET,
       { expiresIn: "1h" }
@@ -139,6 +143,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
         userId: user.id,
         username: user.user_name,
         usertype: user.user_type,
+        districtId: user.district_id
       },
     });
   } catch (error) {
