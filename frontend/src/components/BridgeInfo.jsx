@@ -23,7 +23,7 @@ const BridgeInfo = () => {
     }
   }, [bridgeData]);
 
-  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+  const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
 
   // Extract username safely
   const user_type = userToken?.usertype;

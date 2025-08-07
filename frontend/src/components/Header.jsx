@@ -14,10 +14,10 @@ const Header = () => {
   const [isSetupDropdownOpen, setIsSetupDropdownOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.setItem("isAuthenticated", "false");
-    localStorage.setItem("isEvaluationAuthenticated", "false");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    sessionStorage.setItem("isAuthenticated", "false");
+    sessionStorage.setItem("isEvaluationAuthenticated", "false");
     navigate("/");
   };
 
@@ -27,7 +27,7 @@ const Header = () => {
   };
   
 
-  const userToken = JSON.parse(localStorage.getItem("user"));
+  const userToken = JSON.parse(sessionStorage.getItem("user"));
   const userName = userToken?.username;
 
   return (

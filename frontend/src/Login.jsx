@@ -35,18 +35,18 @@ const Login = () => {
 
       // Store the JWT token
       if (data.token) {
-        localStorage.setItem("token", data.token);
+        sessionStorage.setItem("token", data.token);
       } else {
         console.warn("No token received from server");
       }
 
       // Store user details including roleId and districtId if they're included in the response
       if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
+        sessionStorage.setItem("user", JSON.stringify(data.user));
         navigate("/Dashboard", {});
       }
 
-      localStorage.setItem("isAuthenticated", "true");
+      sessionStorage.setItem("isAuthenticated", "true");
     } catch (error) {
       console.error("Login error:", error);
       setError("An error occurred. Please try again.");

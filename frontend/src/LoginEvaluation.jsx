@@ -37,12 +37,12 @@ const LoginEvaluation = () => {
   
       // Store the JWT token and user data
       if (data.token) {
-        localStorage.setItem("userEvaluation", data.token);
-        localStorage.setItem("isEvaluationAuthenticated", "true");
+        sessionStorage.setItem("userEvaluation", data.token);
+        sessionStorage.setItem("isEvaluationAuthenticated", "true");
       }
   
       if (data.user) {
-        localStorage.setItem("userEvaluation", JSON.stringify(data.user));
+        sessionStorage.setItem("userEvaluation", JSON.stringify(data.user));
         navigate("/Evaluation");
       }
     } catch (error) {

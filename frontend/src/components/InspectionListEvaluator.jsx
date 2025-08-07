@@ -95,7 +95,7 @@ const InspectionListEvaluator = ({ bridgeId }) => {
       .catch((err) => console.error("Error fetching damage kinds:", err));
   }, []);
 
-  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+  const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const userId = userToken?.userId;
 
   useEffect(() => {

@@ -45,7 +45,7 @@ const BridgesListNewUpdated = ({
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 10;
 
-  const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+  const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const navigate = useNavigate();
 
 

@@ -13,13 +13,13 @@ const Header = () => {
     const profileRef = useRef(null);
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        localStorage.setItem("isEvaluationAuthenticated", "false");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
+        sessionStorage.setItem("isEvaluationAuthenticated", "false");
         navigate("/LoginEvaluation");
     };
 
-    const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+    const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
     const userName = userToken?.username;
 
     const toggleProfileDropdown = () => {

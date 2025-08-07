@@ -15,7 +15,7 @@ const Evaluation = () => {
   Date: 11/21/2024
 */
 
-const userToken = JSON.parse(localStorage.getItem("userEvaluation"));
+const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
 
   // Extract username safely
   const user_type = userToken?.usertype;
