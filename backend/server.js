@@ -3837,9 +3837,9 @@ SELECT
     span_length_m, 
     structure_width_m, 
     construction_year, 
-    -- Age calculation
-    (EXTRACT(YEAR FROM CURRENT_DATE) - construction_year) AS age,
-    bridge_situations,  -- Fetch directly from DB
+    (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(construction_year, '')::int) AS age,
+    (COALESCE(span_length_m, 0) * COALESCE(no_of_span, 0)) AS bridge_length,
+    bridge_situation,
     last_maintenance_date, 
     remarks, 
     is_surveyed, 
@@ -3856,7 +3856,7 @@ WHERE 1=1
         WHERE surveyed_by = 'RAMS-UU' 
           AND qc_con = '1'
     )
-    AND is_active = true;
+    AND is_active = true
     `;
 
     let countQuery = `
@@ -4293,6 +4293,9 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
         b.span_length_m, 
         b.structure_width_m, 
         b.construction_year, 
+    (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(b.construction_year, '')::int) AS age,
+    (COALESCE(b.span_length_m, 0) * COALESCE(b.no_of_span, 0)) AS bridge_length,
+        b.bridge_situation,
         b.last_maintenance_date, 
         b.remarks, 
         b.is_surveyed, 
