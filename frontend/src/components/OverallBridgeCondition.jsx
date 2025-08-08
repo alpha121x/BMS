@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Spinner } from 'react-bootstrap';
+import { Form, Spinner, Button, FormCheck } from 'react-bootstrap';
 import { BASE_URL } from './config';
 
 const DamageStatusBox = ({ title, counts }) => {
@@ -40,7 +40,7 @@ const DamageStatusBox = ({ title, counts }) => {
               lineHeight: '40px',
               color: 'black',
               fontWeight: 'bold',
-               borderRadius: '5px',
+              borderRadius: '5px',
             }}
           >
             {normalizedCounts[level]}
@@ -62,6 +62,8 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
+  const [overallRemarks, setOverallRemarks] = useState(''); // New state for Overall Remarks
+  const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // New state for Is Bridge Completed
 
   // Fetch Visual Conditions from API
   useEffect(() => {
@@ -90,27 +92,27 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     fetchVisualConditions();
   }, []);
 
-// Fetch Work Kinds from API
-useEffect(() => {
-  const fetchWorkKinds = async () => {
-    setLoadingWorkKinds(true);
-    try {
-      const response = await fetch(`${BASE_URL}/api/work-kinds`); // ✅ use backticks
-      if (!response.ok) {
-        throw new Error('Failed to fetch work kinds');
+  // Fetch Work Kinds from API
+  useEffect(() => {
+    const fetchWorkKinds = async () => {
+      setLoadingWorkKinds(true);
+      try {
+        const response = await fetch(`${BASE_URL}/api/work-kinds`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch work kinds');
+        }
+        const data = await response.json();
+        setWorkKinds(data);
+      } catch (error) {
+        console.error('Error fetching work kinds:', error);
+        setError('Failed to load work kinds');
+      } finally {
+        setLoadingWorkKinds(false);
       }
-      const data = await response.json();
-      setWorkKinds(data);
-    } catch (error) {
-      console.error('Error fetching work kinds:', error);
-      setError('Failed to load work kinds');
-    } finally {
-      setLoadingWorkKinds(false);
-    }
-  };
+    };
 
-  fetchWorkKinds();
-}, []);
+    fetchWorkKinds();
+  }, []);
 
   // Fetch Damage Counts for the specific bridge
   useEffect(() => {
@@ -146,6 +148,12 @@ useEffect(() => {
   useEffect(() => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
+    }
+    if (inventoryData?.overall_remarks) {
+      setOverallRemarks(inventoryData.overall_remarks); // Initialize Remarks if available
+    }
+    if (inventoryData?.is_bridge_completed !== undefined) {
+      setIsBridgeCompleted(inventoryData.is_bridge_completed); // Initialize toggle if available
     }
   }, [inventoryData]);
 
@@ -183,6 +191,42 @@ useEffect(() => {
         setUpdateError('Failed to update overall bridge condition');
         setUpdateSuccess(null);
       }
+    }
+  };
+
+  // Handle save for Remarks and Is Bridge Completed
+  const handleSaveRemarksAndToggle = async () => {
+    try {
+      const requestData = {
+        overall_remarks: overallRemarks,
+        is_bridge_completed: isBridgeCompleted,
+      };
+
+      console.log('Request Data:', requestData);
+      return;
+
+      const response = await fetch(
+        `${BASE_URL}/api/update-remarks-toggle/${inventoryData.uu_bms_id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update remarks and toggle');
+      }
+
+      const result = await response.json();
+      setUpdateSuccess(result.message);
+      setUpdateError(null);
+    } catch (error) {
+      console.error('Error updating remarks and toggle:', error);
+      setUpdateError('Failed to update remarks and toggle');
+      setUpdateSuccess(null);
     }
   };
 
@@ -298,6 +342,30 @@ useEffect(() => {
         {updateError && (
           <div className="text-danger mt-2">{updateError}</div>
         )}
+      </Form.Group>
+      <Form.Group className="mt-3">
+        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          value={overallRemarks}
+          onChange={(e) => setOverallRemarks(e.target.value)}
+          placeholder="Enter overall remarks..."
+          style={{ resize: 'vertical' }}
+        />
+      </Form.Group>
+      <Form.Group className="mt-3 d-flex align-items-center">
+        <FormCheck
+          type="switch"
+          id="isBridgeCompleted"
+          label="Is Bridge Completed"
+          checked={isBridgeCompleted}
+          onChange={(e) => setIsBridgeCompleted(e.target.checked)}
+          style={{ marginRight: '15px' }}
+        />
+        <Button variant="primary" onClick={handleSaveRemarksAndToggle}>
+          Save
+        </Button>
       </Form.Group>
     </div>
   );
