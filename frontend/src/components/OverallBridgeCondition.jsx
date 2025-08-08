@@ -40,6 +40,7 @@ const DamageStatusBox = ({ title, counts }) => {
               lineHeight: '40px',
               color: 'black',
               fontWeight: 'bold',
+               borderRadius: '5px',
             }}
           >
             {normalizedCounts[level]}
