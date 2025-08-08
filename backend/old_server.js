@@ -692,7 +692,8 @@ app.get("/api/structure-counts-inspected-eval", async (req, res) => {
       WITH inspected_structures AS (
         SELECT DISTINCT uu_bms_id 
         FROM bms.tbl_inspection_f 
-        WHERE (
+        WHERE "DamageLevelID" IN (4, 5, 6)
+        AND (
           surveyed_by = 'RAMS-PITB' 
           OR 
           (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
@@ -713,7 +714,8 @@ app.get("/api/structure-counts-inspected-eval", async (req, res) => {
       WITH inspected_structures AS (
         SELECT DISTINCT uu_bms_id 
         FROM bms.tbl_inspection_f 
-        WHERE (
+        WHERE "DamageLevelID" IN (4, 5, 6)
+        AND (
           surveyed_by = 'RAMS-PITB' 
           OR 
           (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
@@ -738,7 +740,6 @@ app.get("/api/structure-counts-inspected-eval", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // API endpoint to get counts for evaluated structures
 app.get("/api/structure-counts-evaluated", async (req, res) => {
@@ -4496,27 +4497,34 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
 
     let query = `
       WITH inspection_counts AS (
-  SELECT 
-    uu_bms_id,
-    COUNT(*) AS total_inspections,
-    SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
-             AND reviewed_by = '2' 
-             AND qc_rams = '2' 
-             THEN 1 ELSE 0 END) AS reviewed_inspections,
-    SUM(CASE WHEN surveyed_by = 'RAMS-PITB'
-             THEN 1 ELSE 0 END) AS pitb_inspections
-  FROM bms.tbl_inspection_f
-  GROUP BY uu_bms_id
-  HAVING SUM(CASE WHEN surveyed_by = 'RAMS-PITB' THEN 1 ELSE 0 END) > 0
-         OR (
-           SUM(CASE WHEN surveyed_by = 'RAMS-UU' THEN 1 ELSE 0 END) > 0
-           AND COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
-                                   AND reviewed_by = '2' 
-                                   AND qc_rams = '2' 
-                                   THEN 1 ELSE 0 END)
-         )
-)
-
+        SELECT 
+          uu_bms_id,
+          COUNT(*) AS total_inspections,
+          SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
+                   AND reviewed_by = '2' 
+                   AND "DamageLevelID" IN (4, 5, 6) 
+                   AND qc_rams = '2' 
+                   THEN 1 ELSE 0 END) AS reviewed_inspections,
+          SUM(CASE WHEN surveyed_by = 'RAMS-PITB' 
+                   AND "DamageLevelID" IN (4, 5, 6) 
+                   THEN 1 ELSE 0 END) AS pitb_inspections
+        FROM bms.tbl_inspection_f
+        WHERE "DamageLevelID" IN (4, 5, 6)
+        GROUP BY uu_bms_id
+        HAVING SUM(CASE WHEN surveyed_by = 'RAMS-PITB' 
+                        AND "DamageLevelID" IN (4, 5, 6) 
+                        THEN 1 ELSE 0 END) > 0
+               OR (
+                 SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
+                          AND "DamageLevelID" IN (4, 5, 6) 
+                          THEN 1 ELSE 0 END) > 0
+                 AND COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
+                                        AND reviewed_by = '2' 
+                                        AND "DamageLevelID" IN (4, 5, 6) 
+                                        AND qc_rams = '2' 
+                                        THEN 1 ELSE 0 END)
+               )
+      )
       SELECT 
         b.uu_bms_id, 
         b.surveyed_by,
@@ -4560,28 +4568,35 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
     `;
 
     let countQuery = `
-     WITH inspection_counts AS (
-  SELECT 
-    uu_bms_id,
-    COUNT(*) AS total_inspections,
-    SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
-             AND reviewed_by = '2' 
-             AND qc_rams = '2' 
-             THEN 1 ELSE 0 END) AS reviewed_inspections,
-    SUM(CASE WHEN surveyed_by = 'RAMS-PITB'
-             THEN 1 ELSE 0 END) AS pitb_inspections
-  FROM bms.tbl_inspection_f
-  GROUP BY uu_bms_id
-  HAVING SUM(CASE WHEN surveyed_by = 'RAMS-PITB' THEN 1 ELSE 0 END) > 0
-         OR (
-           SUM(CASE WHEN surveyed_by = 'RAMS-UU' THEN 1 ELSE 0 END) > 0
-           AND COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
-                                   AND reviewed_by = '2' 
-                                   AND qc_rams = '2' 
-                                   THEN 1 ELSE 0 END)
-         )
-)
-
+      WITH inspection_counts AS (
+        SELECT 
+          uu_bms_id,
+          COUNT(*) AS total_inspections,
+          SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
+                   AND reviewed_by = '2' 
+                   AND "DamageLevelID" IN (4, 5, 6) 
+                   AND qc_rams = '2' 
+                   THEN 1 ELSE 0 END) AS reviewed_inspections,
+          SUM(CASE WHEN surveyed_by = 'RAMS-PITB' 
+                   AND "DamageLevelID" IN (4, 5, 6) 
+                   THEN 1 ELSE 0 END) AS pitb_inspections
+        FROM bms.tbl_inspection_f
+        WHERE "DamageLevelID" IN (4, 5, 6)
+        GROUP BY uu_bms_id
+        HAVING SUM(CASE WHEN surveyed_by = 'RAMS-PITB' 
+                        AND "DamageLevelID" IN (4, 5, 6) 
+                        THEN 1 ELSE 0 END) > 0
+               OR (
+                 SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
+                          AND "DamageLevelID" IN (4, 5, 6) 
+                          THEN 1 ELSE 0 END) > 0
+                 AND COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' 
+                                        AND reviewed_by = '2' 
+                                        AND "DamageLevelID" IN (4, 5, 6) 
+                                        AND qc_rams = '2' 
+                                        THEN 1 ELSE 0 END)
+               )
+      )
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data b
       INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id

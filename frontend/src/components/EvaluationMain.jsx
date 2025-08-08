@@ -37,7 +37,7 @@ const EvaluationMain = () => {
   };
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts-inspected-eval?district=${districtId}`)
+    fetch(`${BASE_URL}/api/structure-counts-inspected?district=${districtId}`)
       .then((response) => response.json())
       .then((data) => {
         const totalCount = data.totalStructureCount || "0";
