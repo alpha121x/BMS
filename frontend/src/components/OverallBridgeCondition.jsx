@@ -2,12 +2,65 @@ import React, { useState, useEffect } from 'react';
 import { Form, Spinner } from 'react-bootstrap';
 import { BASE_URL } from './config';
 
+const DamageStatusBox = ({ title, counts }) => {
+  const damageLevels = ['No Damage', 'Invisible', 'Good', 'Fair', 'Poor', 'Severe'];
+  const levelColors = {
+    'No Damage': '#9FD585',
+    'Invisible': '#DBDBDB',
+    'Good': '#00C4FF',
+    'Fair': '#FFD685',
+    'Poor': '#FFAA00',
+    'Severe': '#FF0000',
+  };
+
+  // Normalize API response keys to match expected levels
+  const normalizedCounts = {
+    'No Damage': counts['No damage'] || counts['No Damage'] || 0,
+    'Invisible': counts['Invisible'] || 0,
+    'Good': counts['I. Good'] || counts['Good'] || 0,
+    'Fair': counts['II. Fair'] || counts['Fair'] || 0,
+    'Poor': counts['III. Poor'] || counts['Poor'] || 0,
+    'Severe': counts['Severe'] || 0,
+  };
+
+  return (
+    <div style={{ border: '1px solid #ddd', borderRadius: '10px', padding: '10px', margin: '5px' }}>
+      <h6>{title}</h6>
+      <div className="d-flex flex-wrap">
+        {damageLevels.map((level) => (
+          <span
+            key={level}
+            style={{
+              backgroundColor: levelColors[level],
+              width: '40px',
+              height: '40px',
+              display: 'inline-block',
+              margin: '5px',
+              textAlign: 'center',
+              lineHeight: '40px',
+              color: 'black',
+              fontWeight: 'bold',
+            }}
+          >
+            {normalizedCounts[level]}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const OverallBridgeCondition = ({ inventoryData }) => {
   const [overallCondition, setOverallCondition] = useState('');
   const [visualConditions, setVisualConditions] = useState([]);
+  const [workKinds, setWorkKinds] = useState([]);
+  const [damageCounts, setDamageCounts] = useState({});
   const [loadingConditions, setLoadingConditions] = useState(false);
+  const [loadingWorkKinds, setLoadingWorkKinds] = useState(false);
+  const [loadingDamageCounts, setLoadingDamageCounts] = useState(false);
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
+  const [error, setError] = useState(null);
 
   // Fetch Visual Conditions from API
   useEffect(() => {
@@ -35,6 +88,58 @@ const OverallBridgeCondition = ({ inventoryData }) => {
 
     fetchVisualConditions();
   }, []);
+
+// Fetch Work Kinds from API
+useEffect(() => {
+  const fetchWorkKinds = async () => {
+    setLoadingWorkKinds(true);
+    try {
+      const response = await fetch(`${BASE_URL}/api/work-kinds`); // ✅ use backticks
+      if (!response.ok) {
+        throw new Error('Failed to fetch work kinds');
+      }
+      const data = await response.json();
+      setWorkKinds(data);
+    } catch (error) {
+      console.error('Error fetching work kinds:', error);
+      setError('Failed to load work kinds');
+    } finally {
+      setLoadingWorkKinds(false);
+    }
+  };
+
+  fetchWorkKinds();
+}, []);
+
+  // Fetch Damage Counts for the specific bridge
+  useEffect(() => {
+    const fetchDamageCounts = async () => {
+      if (!inventoryData?.uu_bms_id) return;
+      setLoadingDamageCounts(true);
+      try {
+        const response = await fetch(
+          `${BASE_URL}/api/damage-counts?uu_bms_id=${inventoryData.uu_bms_id}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch damage counts');
+        }
+        const data = await response.json();
+        // Transform data into a map of WorkKindID to damage level counts
+        const countsMap = {};
+        data.forEach((item) => {
+          countsMap[item.WorkKindID] = item;
+        });
+        setDamageCounts(countsMap);
+      } catch (error) {
+        console.error('Error fetching damage counts:', error);
+        setError('Failed to load damage counts');
+      } finally {
+        setLoadingDamageCounts(false);
+      }
+    };
+
+    fetchDamageCounts();
+  }, [inventoryData?.uu_bms_id]);
 
   // Set initial overall condition from inventoryData
   useEffect(() => {
@@ -121,6 +226,36 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
       }}
     >
+      <div className="mb-4">
+        <h4 className="text-center mb-3">Damage Status</h4>
+        <div className="d-flex justify-content-around mb-3">
+          <button style={{ backgroundColor: '#9FD585', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>No Damage</button>
+          <button style={{ backgroundColor: '#DBDBDB', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Invisible</button>
+          <button style={{ backgroundColor: '#00C4FF', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Good</button>
+          <button style={{ backgroundColor: '#FFD685', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Fair</button>
+          <button style={{ backgroundColor: '#FFAA00', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Poor</button>
+          <button style={{ backgroundColor: '#FF0000', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Severe</button>
+        </div>
+        <div className="d-flex flex-wrap justify-content-around">
+          {loadingWorkKinds || loadingDamageCounts ? (
+            <div className="text-center py-2 w-100">
+              <Spinner animation="border" size="sm" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+            </div>
+          ) : error ? (
+            <div className="text-danger text-center w-100">{error}</div>
+          ) : (
+            workKinds.map((workKind) => (
+              <DamageStatusBox
+                key={workKind.WorkKindID}
+                title={workKind.WorkKindName}
+                counts={damageCounts[workKind.WorkKindID] || {}}
+              />
+            ))
+          )}
+        </div>
+      </div>
       <Form.Group>
         <Form.Label
           className="custom-label"

@@ -6358,6 +6358,62 @@ app.get("/api/damage-levels", async (req, res) => {
   }
 });
 
+// API endpoint to get damage counts
+app.get('/api/damage-counts', async (req, res) => {
+  const { uu_bms_id } = req.query;
+
+  if (!uu_bms_id) {
+    return res.status(400).json({ error: 'uu_bms_id is required' });
+  }
+
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      `
+        SELECT "WorkKindID", "DamageLevel", COUNT(*) as count
+        FROM bms.tbl_inspection_f
+        WHERE "uu_bms_id" = $1
+        GROUP BY "WorkKindID", "DamageLevel"
+      `,
+      [uu_bms_id]
+    );
+    client.release();
+
+    // Transform the result into the desired format
+    const damageCounts = result.rows.reduce((acc, row) => {
+      const workKindId = row.WorkKindID;
+      if (!acc[workKindId]) {
+        acc[workKindId] = {};
+      }
+      acc[workKindId][row.DamageLevel] = parseInt(row.count);
+      return acc;
+    }, {});
+
+    // Fetch work kinds to include WorkKindName
+    const workKindsResult = await client.query(
+      `
+        SELECT DISTINCT "WorkKindID", "WorkKindName"
+        FROM bms.tbl_inspection_f
+        WHERE "uu_bms_id" = $1
+      `,
+      [uu_bms_id]
+    );
+
+    // Combine damage counts with work kind names
+    const response = workKindsResult.rows.map((workKind) => ({
+      WorkKindID: workKind.WorkKindID,
+      WorkKindName: workKind.WorkKindName,
+      ...damageCounts[workKind.WorkKindID],
+    }));
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error fetching damage counts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 app.get("/api/damage-kinds", async (req, res) => {
   try {
     const result = await pool.query(
