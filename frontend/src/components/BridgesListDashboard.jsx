@@ -328,18 +328,6 @@ const BridgesListDashboard = ({
       grow: 1,
     },
     {
-      name: "Road Name",
-      selector: (row) => row.road_name || "N/A",
-      sortable: true,
-      wrap: true,
-      grow: 1.5,
-      cell: (row) => (
-        <div className="truncate-text" title={row.road_name || "N/A"}>
-          {row.road_name || "N/A"}
-        </div>
-      ),
-    },
-    {
       name: "Structure Type",
       selector: (row) => row.structure_type || "N/A",
       sortable: true,

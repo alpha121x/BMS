@@ -478,9 +478,9 @@ const BridgesListNewUpdated = ({
                 <thead>
                   <tr>
                     <th style={{ width: "10%" }}>District</th>
-                    <th style={{ width: "50%" }}>Road Name</th>
                     <th style={{ width: "10%" }}>Structure Type</th>
                     <th style={{ width: "20%" }}>Bridge Name</th>
+                    <th style={{ width: "20%" }}>Length of Structure & Span</th>
                     <th style={{ width: "20%" }}>Date Time</th>
                     <th style={{ width: "10%" }} className="text-center">
                       Action
@@ -496,16 +496,13 @@ const BridgesListNewUpdated = ({
                         className="hover-row"
                       >
                         <td>{bridge.district || "N/A"}</td>
-                        <td
-                          className="truncate-text"
-                          title={bridge.road_name || "N/A"}
-                        >
-                          {bridge.road_name || "N/A"}
-                        </td>
                         <td>{bridge.structure_type || "N/A"}</td>
                         <td>
                           {bridge.pms_sec_id || "N/A"},{" "}
                           {bridge.structure_no || "N/A"}
+                        </td>
+                        <td>
+                          {bridge.span_length_m || "N/A"}
                         </td>
                         <td>{new Date(bridge.data_date_time).toLocaleString()}</td>
                         <td>
