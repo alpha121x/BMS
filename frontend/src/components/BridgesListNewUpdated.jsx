@@ -8,15 +8,16 @@ import InventoryInfo from "./InventoryInfo";
 import InspectionListCon from "./InspectionListCon";
 import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListRams from "./InspectionListRams";
+import OverallBridgeCondition from "./OverallBridgeCondition";
 import MapModal from "./MapModal";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { FaSpinner } from "react-icons/fa";
-import { FaFileCsv, FaFileExcel } from "react-icons/fa6";
+import { FaSpinner, FaFileCsv, FaFileExcel } from "react-icons/fa6";
 import { MdInventory } from "react-icons/md";
 import { FcInspection } from "react-icons/fc";
 import { BiSolidZoomIn } from "react-icons/bi";
+import { FaBridge } from "react-icons/fa6";
 import "leaflet/dist/leaflet.css";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +32,7 @@ const BridgesListNewUpdated = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [showConditionModal, setShowConditionModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [selectedBridge, setSelectedBridge] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -106,6 +108,16 @@ const BridgesListNewUpdated = ({
 
   const handleCloseInspectionModal = () => {
     setShowInspectionModal(false);
+    setSelectedBridge(null);
+  };
+
+  const handleViewCondition = (bridge) => {
+    setSelectedBridge(bridge);
+    setShowConditionModal(true);
+  };
+
+  const handleCloseConditionModal = () => {
+    setShowConditionModal(false);
     setSelectedBridge(null);
   };
 
@@ -287,16 +299,44 @@ const BridgesListNewUpdated = ({
       name: "Action",
       cell: (row) => (
         <div className="flex space-x-2 justify-center">
-          <button onClick={(e) => { e.stopPropagation(); handleViewInventory(row); }}
-            className="bg-blue-400 p-1 text-white rounded hover:bg-blue-200" title="View Inventory">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInventory(row);
+            }}
+            className="bg-blue-400 p-1 text-white rounded hover:bg-blue-200"
+            title="View Inventory"
+          >
             <MdInventory />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); handleViewInspection(row); }}
-            className="bg-blue-400 p-1 text-white rounded hover:bg-blue-200" title="View Inspection Info">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInspection(row);
+            }}
+            className="bg-blue-400 p-1 text-white rounded hover:bg-blue-200"
+            title="View Inspection Info"
+          >
             <FcInspection />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); handleZoomToBridge(row); }}
-            className="bg-blue-400 p-1 text-white rounded hover:bg-blue-200" title="Zoom to Bridge">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewCondition(row);
+            }}
+            className="bg-blue-400 p-1 text-white rounded hover:bg-blue-200"
+            title="View Overall Bridge Condition"
+          >
+            <FaBridge />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomToBridge(row);
+            }}
+            className="bg-blue-400 p-1 text-white rounded hover:bg-blue-200"
+            title="Zoom to Bridge"
+          >
             <BiSolidZoomIn />
           </button>
         </div>
@@ -369,6 +409,13 @@ const BridgesListNewUpdated = ({
           {selectedBridge && user_type === "consultant" && <InspectionListCon bridgeId={selectedBridge.uu_bms_id} />}
           {selectedBridge && user_type === "rams" && <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />}
           {selectedBridge && user_type === "evaluator" && <InspectionListEvaluator bridgeId={selectedBridge.uu_bms_id} />}
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={showConditionModal} onHide={handleCloseConditionModal} size="lg" centered>
+        <Modal.Header closeButton><Modal.Title>Overall Bridge Condition</Modal.Title></Modal.Header>
+        <Modal.Body>
+          {selectedBridge && <OverallBridgeCondition inventoryData={selectedBridge} />}
         </Modal.Body>
       </Modal>
 

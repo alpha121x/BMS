@@ -370,7 +370,7 @@ const InventoryInfo = ({ inventoryData }) => {
             </div>
           </Form.Group>
 
-          <Col md={6}>
+          {/* <Col md={6}>
             <div
               className="card p-3 mt-3"
               style={{
@@ -422,7 +422,7 @@ const InventoryInfo = ({ inventoryData }) => {
                 )}
               </Form.Group>
             </div>
-          </Col>
+          </Col> */}
         </Form>
       </div>
 
