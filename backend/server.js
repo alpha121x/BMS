@@ -3840,6 +3840,8 @@ SELECT
     (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(construction_year, '')::int) AS age,
     (COALESCE(span_length_m, 0) * COALESCE(no_of_span, 0)) AS bridge_length,
     bridge_situation,
+    overall_remarks,
+    is_bridge_completed,
     last_maintenance_date, 
     remarks, 
     is_surveyed, 
@@ -4296,6 +4298,8 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
     (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(b.construction_year, '')::int) AS age,
     (COALESCE(b.span_length_m, 0) * COALESCE(b.no_of_span, 0)) AS bridge_length,
         b.bridge_situation,
+        overall_remarks,
+    is_bridge_completed,
         b.last_maintenance_date, 
         b.remarks, 
         b.is_surveyed, 
@@ -6413,7 +6417,6 @@ app.get('/api/damage-counts', async (req, res) => {
   }
 });
 
-
 app.get("/api/damage-kinds", async (req, res) => {
   try {
     const result = await pool.query(
@@ -6514,6 +6517,39 @@ app.put("/api/update-overall-condition/:id", async (req, res) => {
     res
       .status(500)
       .json({ error: "Failed to update overall bridge condition" });
+  }
+});
+
+// API endpoint to update remarks and toggle
+app.put('/api/update-remarks-toggle/:id', async (req, res) => {
+  const { id } = req.params;
+  const { overall_remarks, is_bridge_completed } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: 'uu_bms_id is required' });
+  }
+
+  try {
+    const client = await pool.connect();
+    const query = `
+      UPDATE bms.tbl_bms_master_data
+      SET overall_remarks = $1, is_bridge_completed = $2
+      WHERE uu_bms_id = $3
+      RETURNING uu_bms_id, overall_remarks, is_bridge_completed
+    `;
+    const values = [overall_remarks, is_bridge_completed, id];
+
+    const result = await client.query(query, values);
+    client.release();
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Bridge not found' });
+    }
+
+    res.json({ message: 'Remarks updated successfully', data: result.rows[0] });
+  } catch (error) {
+    console.error('Error updating remarks and toggle:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
