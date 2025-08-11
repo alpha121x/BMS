@@ -48,6 +48,8 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       const ramsResponse = await fetch(`${BASE_URL}/api/inspections-unapproved-rams?${consultantParams.toString()}`);
       const ramsData = ramsResponse.ok ? await ramsResponse.json() : { data: [] };
 
+      
+
       // Combine and process data
     const combinedData = bridgeData.map(bridge => {
   const consultantUnapproved = consultantData.data?.filter(item => 
@@ -75,6 +77,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
 });
 
       setProjectData(combinedData);
+      console.log('Project Data:', combinedData);
     } catch (err) {
       setError(err.message);
     } finally {
