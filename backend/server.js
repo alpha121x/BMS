@@ -4446,6 +4446,8 @@ app.get("/api/bridge-status-summary", async (req, res) => {
       SELECT 
         t.uu_bms_id,
         CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+        m.district,
+        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
         COUNT(*) FILTER (WHERE t.qc_con = 2) AS approved_insp,
         SUM(
           CASE 
@@ -4488,7 +4490,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     }
 
     query += `
-      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no
+      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no,m.district, m.span_length_m, m.no_of_span
       HAVING COUNT(*) FILTER (
         WHERE t.qc_con = 2 OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU')
       ) > 0
@@ -4881,7 +4883,6 @@ function extractPhotoPaths(raw) {
 }
 
 
-
 // inspections - approved by RAMS
 app.get("/api/inspections-approved-rams", async (req, res) => {
   try {
@@ -4929,7 +4930,6 @@ app.get("/api/inspections-approved-rams", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {

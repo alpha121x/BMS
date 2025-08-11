@@ -237,8 +237,8 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       width: '100px',
     },
     {
-      name: 'Structure Length',
-      selector: row => row.structureLength,
+      name: 'Structure Length(m)',
+      selector: row => row.bridge_length,
       sortable: true,
       width: '130px',
     },
