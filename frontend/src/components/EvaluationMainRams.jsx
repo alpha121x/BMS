@@ -13,6 +13,7 @@ import BridgesStatusSummary from "./BridgesStatusSummary";
 import UnapprovedInspectionsRams from "./UnapprovedInspectionsRams";
 import InspectionMap from "./InspectionMap";
 import HistoryRecords from "./HistoryRecords";
+import ProjectProgress from "./ProjectProgress";
 
 const EvaluationMainRams = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -168,7 +169,7 @@ const EvaluationMainRams = () => {
               >
                 Structure Evaluation
               </button>
-                <button
+                {/* <button
                 onClick={() => setActiveView("historytab")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "historytab"
@@ -177,8 +178,8 @@ const EvaluationMainRams = () => {
                 }`}
               >
                History Records
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveView("bridgessummary")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "bridgessummary"
@@ -197,7 +198,17 @@ const EvaluationMainRams = () => {
                 }`}
               >
                 Unapproved Inspections
-              </button>
+              </button> */}
+               <button
+                onClick={() => setActiveView("projectprogress")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "projectprogress"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}           
+              >
+                Project Progress    
+                </button>
             </div>
 
             {/* Content Container */}
@@ -225,27 +236,34 @@ const EvaluationMainRams = () => {
                   setBridgeName={setBridgeName}
                 />
               )}
-              {activeView === "bridgessummary" && (
+              {/* {activeView === "bridgessummary" && (
                 <BridgesStatusSummary
                   api_endpoint={bridges_status_summary}
                   districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
                 />
-              )}
-              {activeView === "unappinspections" && (
+              )} */}
+              {/* {activeView === "unappinspections" && (
                 <InspectionsList
                   districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
                 />
-              )}
-                {activeView === "unappinspectionsrams" && (
+              )} */}
+                {/* {activeView === "unappinspectionsrams" && (
                 <UnapprovedInspections
                   districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
                   api_endpoint="inspections-unapproved-rams"
+                />
+              )} */}
+              {activeView === "projectprogress" && (
+                <ProjectProgress
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
                 />
               )}
             </div>
