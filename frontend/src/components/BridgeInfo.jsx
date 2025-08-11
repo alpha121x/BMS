@@ -11,6 +11,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import InspectionListRams from "./InspectionListRams";
 import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListCon from "./InspectionListCon";
+import OverallBridgeCondition from "./OverallBridgeCondition";
+import OverallBridgeConditionRams from "./OverallBridgeConditionRams";
 
 const BridgeInfo = () => {
   const { state } = useLocation();
@@ -42,6 +44,17 @@ const BridgeInfo = () => {
     }
     else {
       return <InspectionListCon bridgeId={bridgeData?.uu_bms_id} />;
+    }
+  };
+
+  // Function to render Overall Bridge Condition based on user type
+  const renderOverallBridgesCondition = () => {
+     if (user_type === "consultant") {
+      return <OverallBridgeCondition inventoryData={bridgeData} />;
+    }  else if (user_type === "rams") {
+      return <OverallBridgeConditionRams inventoryData={bridgeData} />;
+    } else if (user_type === "evaluator") {
+      return <OverallBridgeCondition inventoryData={bridgeData} />;
     }
   };
 
@@ -120,6 +133,8 @@ const BridgeInfo = () => {
           <div className="flex justify-center w-full">
             <div className="w-full sm:w-3/4 md:w-75 lg:w-75 bg-white p-6 rounded-lg shadow-md">
               {bridgeData && <InventoryInfo inventoryData={bridgeData} />}
+              <div className="border-t border-gray-300 my-4"></div>
+              <div>{renderOverallBridgesCondition()}</div>
               <div className="border-t border-gray-300 my-4"></div>
               <div>{renderInspectionList()}</div>
             </div>
