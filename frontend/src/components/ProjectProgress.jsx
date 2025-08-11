@@ -85,45 +85,61 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     }
   };
 
-  const handleCellClick = async (type, bridge) => {
-    setModalLoading(true);
-    setShowModal(true);
-    
-    let data = [];
-    let title = '';
+ const handleCellClick = async (type, bridge) => {
+  setModalLoading(true);
+  setShowModal(true);
 
-    switch (type) {
-      case 'totalInspections':
-        title = `Total Inspections - ${bridge.bridgeName}`;
-        data = [
-          ...bridge.consultantUnapprovedData.map(item => ({ ...item, source: 'Consultant', unapprovedBy: 'Consultant' })),
-          ...bridge.ramsUnapprovedData.map(item => ({ ...item, source: 'RAMS', unapprovedBy: 'RAMS' }))
-        ];
-        break;
-      case 'unapprovedByConsultant':
-        title = `Unapproved by Consultant - ${bridge.bridgeName}`;
-        data = bridge.consultantUnapprovedData.map(item => ({ ...item, unapprovedBy: 'Consultant' }));
-        break;
-      case 'unapprovedByRAMS':
-        title = `Unapproved by RAMS - ${bridge.bridgeName}`;
-        data = bridge.ramsUnapprovedData.map(item => ({ ...item, unapprovedBy: 'RAMS' }));
-        break;
-      case 'approvedByConsultant':
-        title = `Approved by Consultant - ${bridge.bridgeName}`;
-        data = [];
-        break;
-      case 'approvedByRAMS':
-        title = `Approved by RAMS - ${bridge.bridgeName}`;
-        data = [];
-        break;
-      default:
-        data = [];
+  let data = [];
+  let title = '';
+
+  const fetchData = async (endpoint) => {
+    try {
+      const res = await fetch(`${BASE_URL}${endpoint}?uu_bms_id=${bridge.uu_bms_id}`);
+      const json = await res.json();
+      return json.success ? json.data : [];
+    } catch (err) {
+      console.error(`Error fetching ${type} data:`, err);
+      return [];
     }
-
-    setModalTitle(title);
-    setModalData(data);
-    setModalLoading(false);
   };
+
+  switch (type) {
+    case 'totalInspections':
+      title = `Total Inspections - ${bridge.bridgeName}`;
+      data = await fetchData('/api/inspections-all');
+      break;
+    case 'unapprovedByConsultant':
+      title = `Unapproved by Consultant - ${bridge.bridgeName}`;
+      data = bridge.consultantUnapprovedData.map(i => ({
+        ...i,
+        unapprovedBy: 'Consultant'
+      }));
+      break;
+    case 'unapprovedByRAMS':
+      title = `Unapproved by RAMS - ${bridge.bridgeName}`;
+      data = bridge.ramsUnapprovedData.map(i => ({
+        ...i,
+        unapprovedBy: 'RAMS'
+      }));
+      break;
+    case 'approvedByConsultant':
+      title = `Approved by Consultant - ${bridge.bridgeName}`;
+      data = await fetchData('/api/inspections-approved-consultant');
+      break;
+    case 'approvedByRAMS':
+      title = `Approved by RAMS - ${bridge.bridgeName}`;
+      data = await fetchData('/api/inspections-approved-rams');
+      break;
+    default:
+      data = [];
+  }
+
+  setModalTitle(title);
+  setModalData(data);
+  setModalLoading(false);
+};
+
+
 
   const handleInspectionDetail = (inspection) => {
     setSelectedInspection(inspection);

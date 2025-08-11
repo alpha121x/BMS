@@ -4803,6 +4803,133 @@ app.get("/api/inspections-all", async (req, res) => {
   }
 });
 
+// inspections - approved by consultant
+app.get("/api/inspections-approved-consultant", async (req, res) => {
+  try {
+    let { uu_bms_id } = req.query;
+
+    if (!uu_bms_id) {
+      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+    }
+
+    let query = `
+      SELECT 
+        bmd."pms_sec_id", 
+        bmd."structure_no",
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
+        ins."SpanIndex",
+        ins."district_id", 
+        ins."WorkKindName", 
+        ins."PartsName", 
+        ins."MaterialName", 
+        ins."DamageKindName", 
+        ins."DamageLevel", 
+        ins."damage_extent",  
+        ins."current_date_time",  
+        ins."Remarks", 
+        ins.inspection_images AS "PhotoPaths"
+      FROM bms.tbl_inspection_f AS ins
+      JOIN bms.tbl_bms_master_data AS bmd 
+        ON ins."uu_bms_id" = bmd."uu_bms_id"
+      WHERE ins."uu_bms_id" = $1
+      AND ins.qc_con = 2
+      AND ins."DamageLevelID" IN (1, 2, 3)
+      ORDER BY ins.inspection_id DESC
+    `;
+
+    const result = await pool.query(query, [uu_bms_id]);
+
+    const processedData = result.rows.map(row => ({
+      ...row,
+      PhotoPaths: extractPhotoPaths(row.PhotoPaths)
+    }));
+
+    res.json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching approved consultant inspections:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+function extractPhotoPaths(raw) {
+  let extracted = [];
+  try {
+    if (raw) {
+      const cleanedJson = raw.replace(/\"\{/g, "{").replace(/\}\"/g, "}");
+      const parsed = JSON.parse(cleanedJson);
+
+      if (Array.isArray(parsed)) {
+        parsed.forEach(item => {
+          if (item.path) extracted.push(item.path);
+        });
+      } else if (typeof parsed === "object") {
+        Object.values(parsed).forEach(category => {
+          if (typeof category === "object") {
+            Object.values(category).forEach(imagesArray => {
+              if (Array.isArray(imagesArray)) {
+                extracted.push(...imagesArray);
+              }
+            });
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error parsing PhotoPaths:", error);
+  }
+  return extracted;
+}
+
+
+
+// inspections - approved by RAMS
+app.get("/api/inspections-approved-rams", async (req, res) => {
+  try {
+    let { uu_bms_id } = req.query;
+
+    if (!uu_bms_id) {
+      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+    }
+
+    let query = `
+      SELECT 
+        bmd."pms_sec_id", 
+        bmd."structure_no",
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
+        ins."SpanIndex",
+        ins."district_id", 
+        ins."WorkKindName", 
+        ins."PartsName", 
+        ins."MaterialName", 
+        ins."DamageKindName", 
+        ins."DamageLevel", 
+        ins."damage_extent",  
+        ins."current_date_time",  
+        ins."Remarks", 
+        ins.inspection_images AS "PhotoPaths"
+      FROM bms.tbl_inspection_f AS ins
+      JOIN bms.tbl_bms_master_data AS bmd 
+        ON ins."uu_bms_id" = bmd."uu_bms_id"
+      WHERE ins."uu_bms_id" = $1
+      AND ins.qc_rams = 2
+      AND ins."DamageLevelID" IN (1, 2, 3)
+      ORDER BY ins.inspection_id DESC
+    `;
+
+    const result = await pool.query(query, [uu_bms_id]);
+
+    const processedData = result.rows.map(row => ({
+      ...row,
+      PhotoPaths: extractPhotoPaths(row.PhotoPaths)
+    }));
+
+    res.json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching approved RAMS inspections:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 
 // inspections for table dashboard
 app.get("/api/inspections", async (req, res) => {
