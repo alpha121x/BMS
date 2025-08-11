@@ -14,6 +14,7 @@ import BridgesStatusSummary from "./BridgesStatusSummary";
 import InspectionsList from "./UnapprovedInspections";
 import UnapprovedInspections from "./UnapprovedInspectionsRams";
 import HistoryRecords from "./HistoryRecords";
+import ProjectProgress from "./ProjectProgress";
 
 const EvaluationMainCon = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -190,6 +191,16 @@ const EvaluationMainCon = () => {
               >
                 Unapproved Inspections Rams
               </button>
+              <button
+                onClick={() => setActiveView("projectprogress")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "projectprogress"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}           
+              >
+                Project Progress    
+                </button>
             </div>
 
             {/* Content Container */}
@@ -235,6 +246,14 @@ const EvaluationMainCon = () => {
                   api_endpoint="inspections-unapproved-rams"
                 />
               )}
+              {activeView === "projectprogress" && (
+                 <ProjectProgress
+              districtId={districtId}
+              structureType={structureType}
+              bridgeName={bridgeName}
+            />
+              )
+              }
             </div>
           </div>
         </div>
