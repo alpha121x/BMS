@@ -4883,7 +4883,6 @@ function extractPhotoPaths(raw) {
   return extracted;
 }
 
-
 // inspections - approved by RAMS
 app.get("/api/inspections-approved-rams", async (req, res) => {
   try {
