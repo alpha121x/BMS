@@ -149,8 +149,8 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
-    if (inventoryData?.overall_remarks) {
-      setOverallRemarks(inventoryData.overall_remarks); // Initialize Remarks if available
+    if (inventoryData?.overall_remarks_rams) {
+      setOverallRemarks(inventoryData.overall_remarks_rams); // Initialize Remarks if available
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
       setIsBridgeCompleted(inventoryData.is_bridge_completed); // Initialize toggle if available
@@ -198,7 +198,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const handleSaveRemarksAndToggle = async () => {
     try {
       const requestData = {
-        overall_remarks: overallRemarks,
+        overall_remarks_rams: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
       };
 
@@ -206,7 +206,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     //   return;
 
       const response = await fetch(
-        `${BASE_URL}/api/update-remarks-toggle/${inventoryData.uu_bms_id}`,
+        `${BASE_URL}/api/update-remarks-toggle-rams/${inventoryData.uu_bms_id}`,
         {
           method: 'PUT',
           headers: {
