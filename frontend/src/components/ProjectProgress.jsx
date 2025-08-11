@@ -181,7 +181,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     },
     headRow: {
       style: {
-        backgroundColor: '#343a40',
+        backgroundColor: '#005D7F',
         color: '#fff',
         borderBottom: '1px solid #dee2e6',
       },
