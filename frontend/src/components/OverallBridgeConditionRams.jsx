@@ -63,6 +63,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
   const [overallRemarks, setOverallRemarks] = useState(''); // New state for Overall Remarks
+  const [overallRemarksCon, setOverallRemarksCon] = useState(''); // New state for Overall Remarks Rams
   const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // New state for Is Bridge Completed
 
   // Fetch Visual Conditions from API
@@ -154,6 +155,9 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
       setIsBridgeCompleted(inventoryData.is_bridge_completed); // Initialize toggle if available
+    }
+    if (inventoryData?.overall_remarks_con) {
+      setOverallRemarksCon(inventoryData.overall_remarks_con); // Initialize Remarks Rams if
     }
   }, [inventoryData]);
 
@@ -342,6 +346,17 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         {updateError && (
           <div className="text-danger mt-2">{updateError}</div>
         )}
+      </Form.Group>
+        <Form.Group className="mt-3">
+        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Consultant)</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          value={overallRemarks}
+          placeholder="Enter overall remarks..."
+          style={{ resize: 'vertical' }}
+          disabled
+        />
       </Form.Group>
       <Form.Group className="mt-3">
         <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Rams)</Form.Label>
