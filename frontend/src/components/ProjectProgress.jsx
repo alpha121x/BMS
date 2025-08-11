@@ -228,25 +228,25 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       name: 'Bridge Name',
       selector: row => row.bridgeName,
       sortable: true,
-      width: '200px',
+      minWidth: '200px',
     },
     {
       name: 'District',
       selector: row => row.district,
       sortable: true,
-      width: '100px',
+      minWidth: '100px',
     },
     {
       name: 'Structure Length(m)',
       selector: row => row.bridge_length,
       sortable: true,
-      width: '130px',
+      minWidth: '180px',
     },
     {
       name: 'Total Inspections',
       selector: row => row.totalInspections,
       sortable: true,
-      width: '130px',
+      minWidth: '130px',
       cell: row => (
         <Button
           variant="link"
@@ -262,7 +262,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       name: 'Unapproved by Consultant',
       selector: row => row.unapprovedByConsultant,
       sortable: true,
-      width: '160px',
+      minWidth: '200px',
       cell: row => (
         <Button
           variant="link"
@@ -279,7 +279,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       name: 'Unapproved by RAMS',
       selector: row => row.unapprovedByRAMS,
       sortable: true,
-      width: '140px',
+      minWidth: '200px',
       cell: row => (
         <Button
           variant="link"
@@ -296,7 +296,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       name: 'Approved by Consultant',
       selector: row => row.approvedByConsultant,
       sortable: true,
-      width: '150px',
+      minWidth: '200px',
       cell: row => (
         <Button
           variant="link"
@@ -313,7 +313,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       name: 'Approved by RAMS',
       selector: row => row.approvedByRAMS,
       sortable: true,
-      width: '130px',
+      minWidth: '180px',
       cell: row => (
         <Button
           variant="link"
@@ -330,13 +330,13 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       name: 'Consultant Comments',
       selector: row => row.consultantComments,
       sortable: true,
-      width: '150px',
+      minWidth: '150px',
     },
     {
       name: 'RAMS Comments',
       selector: row => row.ramsComments,
       sortable: true,
-      width: '130px',
+      minWidth: '130px',
     },
   ];
 
