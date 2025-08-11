@@ -60,7 +60,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   return {
     ...bridge,
     bridgeName: bridge.bridge_name,
-    district: districtId || 'N/A',
+    district: bridge.district || 'N/A',
     structureLength: 'N/A',
     totalInspections: bridge.total_inspections || 0,
     unapprovedByConsultant: consultantUnapproved.length,
