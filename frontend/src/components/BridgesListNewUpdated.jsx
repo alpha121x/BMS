@@ -9,6 +9,7 @@ import InspectionListCon from "./InspectionListCon";
 import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListRams from "./InspectionListRams";
 import OverallBridgeCondition from "./OverallBridgeCondition";
+import OverallBridgeConditionRams from "./OverallBridgeConditionRams";
 import MapModal from "./MapModal";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
@@ -415,7 +416,8 @@ const BridgesListNewUpdated = ({
       <Modal show={showConditionModal} onHide={handleCloseConditionModal} size="lg" centered>
         <Modal.Header closeButton><Modal.Title>Overall Bridge Condition</Modal.Title></Modal.Header>
         <Modal.Body>
-          {selectedBridge && <OverallBridgeCondition inventoryData={selectedBridge} />}
+          {selectedBridge && user_type === "consultant" && <OverallBridgeCondition inventoryData={selectedBridge} />}
+          {selectedBridge && user_type === "rams" && <OverallBridgeConditionRams inventoryData={selectedBridge} />}
         </Modal.Body>
       </Modal>
 

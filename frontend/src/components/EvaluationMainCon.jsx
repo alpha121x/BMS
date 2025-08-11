@@ -151,7 +151,7 @@ const EvaluationMainCon = () => {
               >
                 Structures Evaluation
               </button>
-              <button
+              {/* <button
                 onClick={() => setActiveView("bridgessummary")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "bridgessummary"
@@ -160,7 +160,7 @@ const EvaluationMainCon = () => {
                 }`}
               >
                 Bridges Status Summary
-              </button>
+              </button> */}
                   {/* <button
                 onClick={() => setActiveView("historyrecords")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
@@ -171,7 +171,7 @@ const EvaluationMainCon = () => {
               >
                History
               </button> */}
-              <button
+              {/* <button
                 onClick={() => setActiveView("unappinspections")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "unappinspections"
@@ -190,7 +190,7 @@ const EvaluationMainCon = () => {
                 }`}
               >
                 Unapproved Inspections Rams
-              </button>
+              </button> */}
               <button
                 onClick={() => setActiveView("projectprogress")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
