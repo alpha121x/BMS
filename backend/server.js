@@ -4445,7 +4445,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
     let query = `
       SELECT 
         t.uu_bms_id,
-        CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
         COUNT(*) FILTER (WHERE t.qc_con = 2) AS approved_insp,
         SUM(
           CASE 
@@ -4471,7 +4471,7 @@ app.get("/api/bridge-status-summary", async (req, res) => {
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       conditions.push(
-        `LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${
+        `LOWER(CONCAT(m.pms_sec_id, ',', m.structure_no)) ILIKE $${
           conditions.length + 1
         }`
       );
