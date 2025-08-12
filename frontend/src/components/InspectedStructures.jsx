@@ -18,6 +18,7 @@ import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
 import Graph from "./Graph"; // Assuming you have a Graph component for the graph view
 import { useNavigate } from 'react-router-dom';
+import InspectionListInsStruc from "./InspectionListInsStruc";
 
 
 const InspectedStructures = ({
@@ -111,9 +112,9 @@ const InspectedStructures = ({
     setShowModal(true);
   };
 
-    const handleRowClick = (bridge) => {
-  navigate('/BridgeInfoDashboard', { state: { bridge } });
-};
+        const handleRowClick = (bridge) => {
+    navigate('/BridgeInfoInspected', { state: { bridge } });
+    };
 
 
   const handleCloseModal = () => {
@@ -660,7 +661,7 @@ const InspectedStructures = ({
                 </Modal.Header>
                 <Modal.Body>
                   {selectedBridge && (
-                    <InspectionListDashboard
+                    <InspectionListInsStruc
                       bridgeId={selectedBridge.uu_bms_id}
                     />
                   )}
