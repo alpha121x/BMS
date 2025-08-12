@@ -320,9 +320,9 @@ const Graph = () => {
     {/* Pie Charts (3 in First Row, 2 in Second Row) */}
     <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "20px" }}>
       {/* First Row - 3 Charts */}
-      <div style={{ width: "30%", height: "400px" }}>
+      {/* <div style={{ width: "30%", height: "400px" }}>
         <HighchartsReact highcharts={Highcharts} options={planAScoreOptions} />
-      </div>
+      </div> */}
       <div style={{ width: "30%", height: "400px" }}>
         <HighchartsReact highcharts={Highcharts} options={crossingTypesOptions} />
       </div>
