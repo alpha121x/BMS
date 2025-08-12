@@ -352,7 +352,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         <Form.Control
           as="textarea"
           rows={3}
-          value={overallRemarks}
+          value={overallRemarksCon}
           placeholder="Enter overall remarks..."
           style={{ resize: 'vertical' }}
           disabled
@@ -363,7 +363,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         <Form.Control
           as="textarea"
           rows={3}
-          value={overallRemarksCon}
+          value={overallRemarks}
           onChange={(e) => setOverallRemarks(e.target.value)}
           placeholder="Enter overall remarks..."
           style={{ resize: 'vertical' }}
