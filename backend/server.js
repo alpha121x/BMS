@@ -4112,7 +4112,6 @@ app.get("/api/bridgesInspected", async (req, res) => {
   }
 });
 
-
 // bridges list for evaluation module
 app.get("/api/bridgesNew", async (req, res) => {
   try {

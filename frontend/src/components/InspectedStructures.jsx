@@ -11,7 +11,7 @@ import { FaFileCsv, FaFileExcel } from "react-icons/fa6";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import "leaflet/dist/leaflet.css";
-import Map from "./Map";
+import Map from "./MapInspectedStructures";
 import FilterComponent from "./FilterComponent";
 import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
