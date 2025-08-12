@@ -12,6 +12,7 @@ import PriotizationTable from "./PriotizationTable"; // Import the new component
 import CostEstimation from "./CostEstimation"; // Import the new component
 import BridgeStatusSummaryDashboard from "./BridgeStatusSummaryDashboard"; // Import the new component
 import FiveYearPlan from "./FiveYearPlan"; // Import the new component
+import InspectedStructures from "./InspectedStructures";
 
 const DashboardMain = () => {
   const [districtId, setDistrictId] = useState("%");
@@ -306,6 +307,16 @@ const DashboardMain = () => {
               >
                 Inventory
               </button>
+              <button
+                onClick={() => setActiveView("inspectedstructures")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "inspected"
+                  ? "bg-[#005D7F] text-white"
+                  : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+               Inspected Structures
+              </button>
                {/* <button
                 onClick={() => setActiveView("bridge_summary")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
@@ -395,6 +406,30 @@ const DashboardMain = () => {
                 { activeView === "fiveyearplan" && (
                   <FiveYearPlan/>
                 )}
+              {activeView === "inspectedstructures" && (
+                <InspectedStructures
+                  districtId={districtId}
+                  setDistrictId={setDistrictId}
+                  structureType={structureType}
+                  setStructureType={setStructureType}
+                  constructionType={constructionType}
+                  setConstructionType={setConstructionType}
+                  bridgeName={bridgeName}
+                  setBridgeName={setBridgeName}
+                  bridgeLength={bridgeLength}
+                  setBridgeLength={setBridgeLength}
+                  age={age}
+                  setAge={setAge}
+                  underFacility={underFacility}
+                  setUnderFacility={setUnderFacility}
+                  roadClassification={roadClassification}
+                  setRoadClassification={setRoadClassification}
+                  spanLength={spanLength}
+                  setSpanLength={setSpanLength}
+                  inspectionStatus={inspectionStatus}
+                  setInspectionStatus={setInspectionStatus}
+                />
+              )}
             </div>
           </div>
         </div>
