@@ -2341,8 +2341,8 @@ app.get("/api/bridgesdownloadCsv", async (req, res) => {
   }
 });
 
-// Download bridges data as Excel
-app.get("/api/bridgesdownloadExcelInspected", async (req, res) => {
+// briges details download excel for dashboard and evaluationn working correctly
+app.get("/api/bridgesdownloadExcel", async (req, res) => {
   try {
     const {
       district = "%",
@@ -2355,179 +2355,176 @@ app.get("/api/bridgesdownloadExcelInspected", async (req, res) => {
     } = req.query;
 
     let query = `
-      SELECT
-        is_active,
-        raw_id,
-        uu_bms_id AS "Reference No",
-        surveyed_by AS "Surveyed By",
-        pms_sec_id AS "PMS Section ID",
-        structure_no AS "Structure No",
-        structure_type_id,
-        structure_type AS "Structure Type",
-        road_name AS "Road Name",
-        road_name_cwd AS "Road Name CWD",
-        route_id AS "Route ID",
-        survey_id AS "Survey ID",
-        surveyor_name AS "Surveyor Name",
-        district_id,
-        district AS "District",
-        road_classification AS "Road Classification",
-        road_classification_id,
-        road_surface_type AS "Road Surface Type",
-        carriageway_type AS "Carriageway Type",
-        direction AS "Direction",
-        visual_condition AS "Visual Condition",
-        construction_type_id,
-        construction_type AS "Construction Type",
-        no_of_span AS "No of Spans",
-        data_source AS "Data Source",
-        data_date_time AS "Data Date Time",
-        span_length_m AS "Span Length (m)",
-        structure_width_m AS "Structure Width (m)",
-        construction_year AS "Construction Year",
-        last_maintenance_date AS "Last Maintenance Date",
-        remarks AS "Remarks",
-        is_surveyed AS "Is Surveyed",
-        x_centroid AS "X Centroid",
-        y_centroid AS "Y Centroid",
-        images_spans AS "Span Images",
-        (COALESCE(span_length_m, 0) * COALESCE(no_of_span, 0)) AS "Bridge Length (m)",
-        CONCAT(pms_sec_id, ',', structure_no) AS "Bridge Name",
-        ARRAY[image_1, image_2, image_3, image_4, image_5] AS "Overview Photos",
-        'inspected' AS "Inspection Status"
-      FROM bms.tbl_bms_master_data
-      WHERE 1=1
-        AND is_active = true
-        AND EXISTS (
-          SELECT 1
-          FROM bms.tbl_inspection_f
-          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
-        )
+      WITH ranked_data AS (
+        SELECT 
+          md.uu_bms_id AS "REFERENCE NO",
+          CONCAT(md.pms_sec_id, ',', md.structure_no) AS "BRIDGE NAME",
+          md.structure_type AS "STRUCTURE TYPE",
+          md.road_no AS "ROAD NO",
+          md.road_name AS "ROAD NAME",
+          md.road_name_cwd AS "ROAD NAME CWD",
+          md.road_code_cwd AS "ROAD CODE CWD",
+          md.route_id AS "ROUTE ID",
+          md.survey_id AS "SURVEY ID",
+          md.pms_start AS "PMS START",
+          md.pms_end AS "PMS END",
+          md.survey_chainage_start AS "SURVEY CHAINAGE START",
+          md.survey_chainage_end AS "SURVEY CHAINAGE END",
+          md.pms_sec_id AS "PMS SEC ID",
+          md.structure_no AS "STRUCTURE NO",
+          md.surveyor_name AS "SURVEYOR NAME",
+          md.zone_id AS "ZONE ID",
+          md.zone AS "ZONE",
+          md.district_id AS "DISTRICT ID",
+          md.district AS "DISTRICT",
+          md.road_classification_id AS "ROAD CLASSIFICATION ID",
+          md.road_classification AS "ROAD CLASSIFICATION",
+          md.road_surface_type_id AS "ROAD SURFACE TYPE ID",
+          md.road_surface_type AS "ROAD SURFACE TYPE",
+          md.carriageway_type_id AS "CARRIAGEWAY TYPE ID",
+          md.carriageway_type AS "CARRIAGEWAY TYPE",
+          md.direction AS "DIRECTION",
+          md.visual_condition AS "VISUAL CONDITION",
+          md.construction_type_id AS "CONSTRUCTION TYPE ID",
+          md.construction_type AS "CONSTRUCTION TYPE",
+          md.no_of_span AS "NO OF SPAN",
+          md.span_length_m AS "SPAN LENGTH (M)",
+          md.structure_width_m AS "STRUCTURE WIDTH (M)",
+          md.construction_year AS "CONSTRUCTION YEAR",
+          md.last_maintenance_date AS "LAST MAINTENANCE DATE",
+          md.data_source AS "DATA SOURCE",
+          md.date_time AS "DATE TIME",
+          md.remarks AS "REMARKS",
+          f.surveyed_by AS "SURVEYED BY",
+          f."SpanIndex" AS "SPAN INDEX",
+          f."WorkKindName" AS "WORK KIND NAME",
+          f."PartsName" AS "PARTS NAME",
+          f."MaterialName" AS "MATERIAL NAME",
+          f."DamageKindID" AS "DAMAGE KIND ID",
+          f."DamageKindName" AS "DAMAGE KIND NAME",
+          f."DamageLevelID" AS "DAMAGE LEVEL ID",
+          f."DamageLevel" AS "DAMAGE LEVEL",
+          f.damage_extent AS "DAMAGE EXTENT",
+          f."Remarks" AS "INSPECTION REMARKS",
+          f.current_date_time AS "CURRENT DATE TIME",
+          ROW_NUMBER() OVER (PARTITION BY md.uu_bms_id ORDER BY f.current_date_time DESC) AS "ROW RANK",
+          ARRAY[md.image_1, md.image_2, md.image_3, md.image_4, md.image_5] AS "Overview Photos",
+          COALESCE(f.inspection_images, '[]') AS "PhotoPaths"
+        FROM bms.tbl_bms_master_data md
+        JOIN bms.tbl_inspection_f f ON md.uu_bms_id = f.uu_bms_id AND md.is_active = true
+        WHERE 1=1
     `;
+
     const queryParams = [];
     let paramIndex = 1;
 
     if (district !== "%") {
-      query += ` AND district_id = $${paramIndex}`;
+      query += ` AND md.district_id = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
     }
+
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
       queryParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
+
     if (structureType !== "%") {
-      query += ` AND structure_type_id = $${paramIndex}`;
+      query += ` AND md.structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       paramIndex++;
     }
+
     if (constructionType !== "%") {
-      query += ` AND construction_type_id = $${paramIndex}`;
+      query += ` AND md.construction_type_id = $${paramIndex}`;
+
       queryParams.push(constructionType);
+
       paramIndex++;
-    }
-    if (roadClassification !== "%") {
-      query += ` AND road_classification_id = $${paramIndex}`;
-      queryParams.push(roadClassification);
-      paramIndex++;
-    }
-    if (bridgeLength && typeof bridgeLength === "string" && bridgeLength !== "%") {
-      if (bridgeLength.startsWith("<")) {
-        query += ` AND structure_width_m < $${paramIndex}`;
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-        paramIndex++;
-      } else if (bridgeLength.includes("-")) {
-        const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        queryParams.push(min, max);
-        paramIndex += 2;
-      } else if (bridgeLength.startsWith(">")) {
-        query += ` AND structure_width_m > $${paramIndex}`;
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-        paramIndex++;
-      }
-    }
-    if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
-      if (spanLength.startsWith("<")) {
-        query += ` AND span_length_m < $${paramIndex}`;
-        queryParams.push(parseFloat(spanLength.substring(1)));
-        paramIndex++;
-      } else if (spanLength.includes("-")) {
-        const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        queryParams.push(min, max);
-        paramIndex += 2;
-      } else if (spanLength.startsWith(">")) {
-        query += ` AND span_length_m > $${paramIndex}`;
-        queryParams.push(parseFloat(spanLength.substring(1)));
-        paramIndex++;
-      }
     }
 
-    query += ` ORDER BY uu_bms_id`;
+    if (roadClassification !== "%") {
+      query += ` AND md.road_classification_id = $${paramIndex}`;
+
+      queryParams.push(roadClassification);
+
+      paramIndex++;
+    }
+
+ if (bridgeLength && typeof bridgeLength === "string" && bridgeLength !== "%") {
+  if (bridgeLength.startsWith("<")) {
+    query += ` AND md.structure_width_m < $${paramIndex}`;
+    queryParams.push(parseFloat(bridgeLength.substring(1)));
+    paramIndex++;
+  } else if (bridgeLength.includes("-")) {
+    const [min, max] = bridgeLength.split("-").map(parseFloat);
+    query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+    queryParams.push(min, max);
+    paramIndex += 2;
+  } else if (bridgeLength.startsWith(">")) {
+    query += ` AND md.structure_width_m > $${paramIndex}`;
+    queryParams.push(parseFloat(bridgeLength.substring(1)));
+    paramIndex++;
+  }
+}
+
+
+    // Add spanLength filter
+   if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
+  if (spanLength.startsWith("<")) {
+    query += ` AND md.span_length_m < $${paramIndex}`;
+    queryParams.push(parseFloat(spanLength.substring(1)));
+    paramIndex++;
+  } else if (spanLength.includes("-")) {
+    const [min, max] = spanLength.split("-").map(parseFloat);
+    query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+    queryParams.push(min, max);
+    paramIndex += 2;
+  } else if (spanLength.startsWith(">")) {
+    query += ` AND md.span_length_m > $${paramIndex}`;
+    queryParams.push(parseFloat(spanLength.substring(1)));
+    paramIndex++;
+  }
+}
+
+
+    query += ` ORDER BY "REFERENCE NO" ) SELECT * FROM ranked_data;`;
+
     const result = await pool.query(query, queryParams);
 
-    // Create Excel workbook
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Bridges Data');
+    // **Track First Row for Each uu_bms_id**
+    let firstRowMap = new Map();
 
-    // Define columns
-    const columns = [
-      { header: 'Reference No', key: 'Reference No', width: 15 },
-      { header: 'Bridge Name', key: 'Bridge Name', width: 20 },
-      { header: 'Structure Type', key: 'Structure Type', width: 15 },
-      { header: 'Road Name', key: 'Road Name', width: 20 },
-      { header: 'Road Name CWD', key: 'Road Name CWD', width: 20 },
-      { header: 'Route ID', key: 'Route ID', width: 10 },
-      { header: 'Survey ID', key: 'Survey ID', width: 10 },
-      { header: 'Surveyor Name', key: 'Surveyor Name', width: 20 },
-      { header: 'District', key: 'District', width: 15 },
-      { header: 'Road Classification', key: 'Road Classification', width: 15 },
-      { header: 'Road Surface Type', key: 'Road Surface Type', width: 15 },
-      { header: 'Carriageway Type', key: 'Carriageway Type', width: 15 },
-      { header: 'Direction', key: 'Direction', width: 10 },
-      { header: 'Visual Condition', key: 'Visual Condition', width: 15 },
-      { header: 'Construction Type', key: 'Construction Type', width: 15 },
-      { header: 'No of Spans', key: 'No of Spans', width: 10 },
-      { header: 'Span Length (m)', key: 'Span Length (m)', width: 12 },
-      { header: 'Structure Width (m)', key: 'Structure Width (m)', width: 12 },
-      { header: 'Bridge Length (m)', key: 'Bridge Length (m)', width: 12 },
-      { header: 'Construction Year', key: 'Construction Year', width: 12 },
-      { header: 'Last Maintenance Date', key: 'Last Maintenance Date', width: 15 },
-      { header: 'Remarks', key: 'Remarks', width: 30 },
-      { header: 'Inspection Status', key: 'Inspection Status', width: 15 },
-      { header: 'Overview Photos', key: 'Overview Photos', width: 30 },
-    ];
+    // **Process Data**
+    const processedData = result.rows.map((row) => {
+      if (!firstRowMap.has(row["REFERENCE NO"])) {
+        firstRowMap.set(row["REFERENCE NO"], true);
+      } else {
+        row["Overview Photos"] = null;
+      }
 
-    worksheet.columns = columns;
+      // **Fix Photo Paths**
+      row["PhotoPaths"] = extractUrlsFromPath(row["PhotoPaths"]);
 
-    // Add rows
-    result.rows.forEach(row => {
-      worksheet.addRow({
-        ...row,
-        'Overview Photos': row['Overview Photos'] ? row['Overview Photos'].join(', ') : '',
-      });
+      return row;
     });
 
-    // Set response headers
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=bridges_data.xlsx');
-
-    // Write to response
-    await workbook.xlsx.write(res);
-    res.end();
+    res.json({
+      success: true,
+      bridges: processedData,
+    });
   } catch (error) {
-    console.error("Error generating Excel:", error);
+    console.error("Error fetching data:", error);
     res.status(500).json({
       success: false,
-      message: "Error generating Excel file",
+      message: "Error fetching data from the database",
     });
   }
 });
 
-// Download bridges data as CSV
-app.get("/api/bridgesdownloadCsvInspected", async (req, res) => {
+// bridges details download csv for dashboard and evluation
+app.get("/api/bridgesdownloadCsv", async (req, res) => {
   try {
     const {
       district = "%",
@@ -2589,119 +2586,100 @@ app.get("/api/bridgesdownloadCsvInspected", async (req, res) => {
           WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
         )
     `;
+
     const queryParams = [];
     let paramIndex = 1;
 
     if (district !== "%") {
-      query += ` AND district_id = $${paramIndex}`;
+      query += ` AND md.district_id = $${paramIndex}`;
       queryParams.push(district);
       paramIndex++;
     }
+
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      query += ` AND CONCAT(md.pms_sec_id, ',', md.structure_no) ILIKE $${paramIndex}`;
       queryParams.push(`%${bridgeName}%`);
       paramIndex++;
     }
+
     if (structureType !== "%") {
-      query += ` AND structure_type_id = $${paramIndex}`;
+      query += ` AND md.structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       paramIndex++;
     }
+
     if (constructionType !== "%") {
-      query += ` AND construction_type_id = $${paramIndex}`;
+      query += ` AND md.construction_type_id = $${paramIndex}`;
+
       queryParams.push(constructionType);
+
       paramIndex++;
     }
+
     if (roadClassification !== "%") {
-      query += ` AND road_classification_id = $${paramIndex}`;
+      query += ` AND md.road_classification_id = $${paramIndex}`;
+
       queryParams.push(roadClassification);
+
       paramIndex++;
     }
-    if (bridgeLength && typeof bridgeLength === "string" && bridgeLength !== "%") {
+
+    if (
+      bridgeLength &&
+      typeof bridgeLength === "string" &&
+      bridgeLength !== "%"
+    ) {
       if (bridgeLength.startsWith("<")) {
-        query += ` AND structure_width_m < $${paramIndex}`;
+        query += ` AND md.structure_width_m < $${paramIndex}`;
         queryParams.push(parseFloat(bridgeLength.substring(1)));
         paramIndex++;
       } else if (bridgeLength.includes("-")) {
         const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         paramIndex += 2;
       } else if (bridgeLength.startsWith(">")) {
-        query += ` AND structure_width_m > $${paramIndex}`;
+        query += ` AND md.structure_width_m > $${paramIndex}`;
         queryParams.push(parseFloat(bridgeLength.substring(1)));
         paramIndex++;
       }
     }
+
+    // Add spanLength filter
     if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
       if (spanLength.startsWith("<")) {
-        query += ` AND span_length_m < $${paramIndex}`;
+        query += ` AND md.span_length_m < $${paramIndex}`;
         queryParams.push(parseFloat(spanLength.substring(1)));
         paramIndex++;
       } else if (spanLength.includes("-")) {
         const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         paramIndex += 2;
       } else if (spanLength.startsWith(">")) {
-        query += ` AND span_length_m > $${paramIndex}`;
+        query += ` AND md.span_length_m > $${paramIndex}`;
         queryParams.push(parseFloat(spanLength.substring(1)));
         paramIndex++;
       }
     }
 
-    query += ` ORDER BY uu_bms_id`;
+    query += ` ORDER BY "Reference No"`;
+
     const result = await pool.query(query, queryParams);
 
-    // Process data for CSV
-    const processedData = result.rows.map(row => ({
-      ...row,
-      'Overview Photos': row['Overview Photos'] ? row['Overview Photos'].join(', ') : '',
-    }));
-
-    // Define CSV fields
-    const fields = [
-      'Reference No',
-      'Bridge Name',
-      'Structure Type',
-      'Road Name',
-      'Road Name CWD',
-      'Route ID',
-      'Survey ID',
-      'Surveyor Name',
-      'District',
-      'Road Classification',
-      'Road Surface Type',
-      'Carriageway Type',
-      'Direction',
-      'Visual Condition',
-      'Construction Type',
-      'No of Spans',
-      'Span Length (m)',
-      'Structure Width (m)',
-      'Bridge Length (m)',
-      'Construction Year',
-      'Last Maintenance Date',
-      'Remarks',
-      'Inspection Status',
-      'Overview Photos',
-    ];
-
-    // Create CSV
-    const json2csvParser = new Parser({ fields });
-    const csv = json2csvParser.parse(processedData);
-
-    // Set response headers
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename=bridges_data.csv');
-
-    // Send CSV
-    res.send(csv);
+    res.json({
+      success: true,
+      bridges: result.rows,
+    });
   } catch (error) {
-    console.error("Error generating CSV:", error);
+    console.error("Error fetching data:", error);
     res.status(500).json({
       success: false,
-      message: "Error generating CSV file",
+      message: "Error fetching data from the database",
     });
   }
 });
