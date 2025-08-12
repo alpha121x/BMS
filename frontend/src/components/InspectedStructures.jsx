@@ -166,7 +166,7 @@ const InspectedStructures = ({
       };
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadCsv?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadCsvInspected?${queryString}`,
         { method: "GET" }
       );
 
@@ -209,7 +209,7 @@ const InspectedStructures = ({
       const queryString = new URLSearchParams(params).toString();
 
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadExcel?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadExcelInspected?${queryString}`,
         { method: "GET" }
       );
 

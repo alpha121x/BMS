@@ -310,7 +310,7 @@ const DashboardMain = () => {
               <button
                 onClick={() => setActiveView("inspectedstructures")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
-                  activeView === "inspected"
+                  activeView === "inspectedstructures"
                   ? "bg-[#005D7F] text-white"
                   : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
                 }`}
