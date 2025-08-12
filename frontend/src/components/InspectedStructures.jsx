@@ -19,6 +19,9 @@ import { saveAs } from "file-saver";
 import Graph from "./Graph"; // Assuming you have a Graph component for the graph view
 import { useNavigate } from 'react-router-dom';
 import InspectionListInsStruc from "./InspectionListInsStruc";
+const [loadingCSV, setLoadingCSV] = useState(false);
+const [loadingExcel, setLoadingExcel] = useState(false);
+
 
 
 const InspectedStructures = ({
@@ -150,7 +153,7 @@ const InspectedStructures = ({
   };
 
   const handleDownloadCSV = async () => {
-    setLoading(true);
+    setLoadingCSV(true);
     try {
       const params = {
         district: districtId || "%",
@@ -166,7 +169,7 @@ const InspectedStructures = ({
       };
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadCsvInspected?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadCsv?${queryString}`,
         { method: "GET" }
       );
 
@@ -187,12 +190,12 @@ const InspectedStructures = ({
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
     } finally {
-      setLoading(false);
+      setLoadingCSV(false);
     }
   };
 
   const handleDownloadExcel = async () => {
-    setLoading(true);
+    setLoadingExcel(true);
     try {
       const params = {
         district: districtId || "%",
@@ -209,7 +212,7 @@ const InspectedStructures = ({
       const queryString = new URLSearchParams(params).toString();
 
       const response = await fetch(
-        `${BASE_URL}/api/bridgesdownloadExcelInspected?${queryString}`,
+        `${BASE_URL}/api/bridgesdownloadExcel?${queryString}`,
         { method: "GET" }
       );
 
@@ -314,7 +317,7 @@ const InspectedStructures = ({
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-      setLoading(false);
+      setLoadingExcel(false);
     }
   };
 
@@ -548,33 +551,34 @@ const InspectedStructures = ({
             />
 
             <div className="flex items-center gap-1">
-              <button
-                className="btn text-white"
-                onClick={handleDownloadCSV}
-                disabled={loadingCSV}
-              >
-                <div className="flex items-center gap-1">
-                  <FaFileCsv />
-                  {loadingCSV ? "Downloading CSV..." : "CSV"}
-                </div>
-              </button>
-              <button
-                className="btn text-white"
-                onClick={handleDownloadExcel}
-                disabled={loadingExcel}
-              >
-                {loadingExcel ? (
-                  <>
-                    <FaSpinner className="animate-spin mr-2" /> Downloading
-                    Excel...
-                  </>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <FaFileExcel />
-                    {loading ? "Downloading Excel..." : "Excel"}
-                  </div>
-                )}
-              </button>
+            <button
+  className="btn text-white"
+  onClick={handleDownloadCSV}
+  disabled={loadingCSV}
+>
+  <div className="flex items-center gap-1">
+    <FaFileCsv />
+    {loadingCSV ? "Downloading CSV..." : "CSV"}
+  </div>
+</button>
+
+<button
+  className="btn text-white"
+  onClick={handleDownloadExcel}
+  disabled={loadingExcel}
+>
+  {loadingExcel ? (
+    <>
+      <FaSpinner className="animate-spin mr-2" /> Downloading Excel...
+    </>
+  ) : (
+    <div className="flex items-center gap-1">
+      <FaFileExcel />
+      Excel
+    </div>
+  )}
+</button>
+
             </div>
           </div>
         </div>
