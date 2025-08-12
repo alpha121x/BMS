@@ -202,12 +202,12 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const handleSaveRemarksAndToggle = async () => {
     try {
       const requestData = {
-        overall_remarks_rams: overallRemarks,
+        overall_remarks: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
       };
 
-    //   console.log('Request Data:', requestData);
-    //   return;
+      console.log('Request Data:', requestData);
+      // return;
 
       const response = await fetch(
         `${BASE_URL}/api/update-remarks-toggle-rams/${inventoryData.uu_bms_id}`,

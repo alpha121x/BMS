@@ -198,7 +198,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const handleSaveRemarksAndToggle = async () => {
     try {
       const requestData = {
-        overall_remarks_con: overallRemarks,
+        overall_remarks: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
       };
 
