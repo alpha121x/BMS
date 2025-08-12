@@ -19,9 +19,6 @@ import { saveAs } from "file-saver";
 import Graph from "./Graph"; // Assuming you have a Graph component for the graph view
 import { useNavigate } from 'react-router-dom';
 import InspectionListInsStruc from "./InspectionListInsStruc";
-const [loadingCSV, setLoadingCSV] = useState(false);
-const [loadingExcel, setLoadingExcel] = useState(false);
-
 
 
 const InspectedStructures = ({
@@ -50,8 +47,8 @@ const InspectedStructures = ({
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingExcel, setLoadingExcel] = useState(false);
   const [loadingCSV, setLoadingCSV] = useState(false);
+const [loadingExcel, setLoadingExcel] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
