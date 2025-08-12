@@ -474,14 +474,14 @@ const BridgesListDashboard = ({
           >
             Map View
           </button>
-          <button
+          {/* <button
             className={`px-3 py-1 rounded ${
               viewMode === "graph" ? "bg-[#005D7F] text-white" : "bg-gray-200"
             }`}
             onClick={() => setViewMode("graph")}
           >
             Graph View
-          </button>
+          </button> */}
         </div>
       </div>
       <div>
