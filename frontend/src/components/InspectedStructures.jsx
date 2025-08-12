@@ -5,7 +5,6 @@ import { BASE_URL } from "./config";
 import "./BridgeList.css";
 import Papa from "papaparse";
 import InventoryInfoDashboard from "./InventoryInfoDashboard";
-import InspectionListDashboard from "./InspectionListDashboard";
 import MapModal from "./MapModal";
 import { FaSpinner } from "react-icons/fa";
 import { FaFileCsv, FaFileExcel } from "react-icons/fa6";
