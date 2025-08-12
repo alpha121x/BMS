@@ -6485,6 +6485,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
         uu_bms_id,
         inspection_id,
         qc_con,
+        qc_rams,
         qc_remarks_con,
         qc_remarks_rams,
         reviewed_by,
@@ -6510,6 +6511,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
         uu_bms_id,
         inspection_id,
         qc_con,
+        qc_rams,
         qc_remarks_con,
         qc_remarks_rams,
         reviewed_by,
@@ -7080,6 +7082,62 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
     client.release();
   }
 });
+
+// GET /api/rates - Fetch all rates data
+app.get("/api/rates", async (req, res) => {
+  try {
+    const { category } = req.query;
+    const query = `
+      SELECT 
+        category, 
+        structure_type, 
+        type_of_defect, 
+        damage_severity, 
+        repair_method, 
+        unit_rate, 
+        quantity_assumed_per_span, 
+        cost_of_repair_per_span 
+      FROM bms.tbl_bms_rates
+      WHERE $1::TEXT IS NULL OR category = $1
+      ORDER BY category, structure_type, damage_severity;
+    `;
+    const values = [category || null];
+    const result = await pool.query(query, values);
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching rates:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching rates from the database",
+    });
+  }
+});
+
+// GET /api/rates/categories - Fetch distinct categories
+app.get("/api/rates/categories", async (req, res) => {
+  try {
+    const query = `
+      SELECT DISTINCT category
+      FROM bms.tbl_bms_rates
+      ORDER BY category;
+    `;
+    const result = await pool.query(query);
+    res.json({
+      success: true,
+      categories: result.rows.map(row => row.category),
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching categories from the database",
+    });
+  }
+});
+
 
 // api for structure types
 app.get("/api/structure-types", async (req, res) => {

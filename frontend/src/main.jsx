@@ -22,6 +22,7 @@ import MaintenancePlan from './components/MaintenancePlan';
 import FiveYearPlan from './components/FiveYearPlan'; // Importing the Five Year Plan component
 import BridgeInfoHistory from './components/BridgeInfoHistory';
 import BridgeInfoInspected from './components/BridgeInfoInspected';
+import Rates from './components/Rates'; // Importing the Rates component
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -130,6 +131,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <PrivateRoute>
               <BridgeInfoHistory />
             </PrivateRoute>
+          }
+        />
+
+          {/* Private Route forRates */}
+          <Route
+          path="/Rates"
+          element={
+            <PrivateRoute>
+              <Rates />
+              </PrivateRoute>
           }
         />
 

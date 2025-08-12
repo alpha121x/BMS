@@ -142,3 +142,46 @@
   line-height: 20px;
 }
 
+.category-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.category-btn:hover {
+  background-color: #6595c7;
+}
+
+.category-btn.active {
+  background-color: #a9d2e2;
+  color: rgb(21, 21, 21);
+  border-color: #005D7F;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.export-btn.csv {
+  background-color: #28a745;
+  color: white;
+}
+
+.export-btn.excel {
+  background-color: #007bff;
+  color: white;
+}
+
+.export-btn:hover {
+  opacity: 0.9;
+}
