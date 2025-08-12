@@ -3576,6 +3576,200 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
+// Bridges list - Inspected for dashboard main
+app.get("/api/bridgesInspected", async (req, res) => {
+  try {
+    const {
+      set = 0,
+      limit = 10,
+      district = "%",
+      structureType = "%",
+      constructionType = "%",
+      roadClassification = "%",
+      bridgeName = "%",
+      bridgeLength,
+      spanLength,
+    } = req.query;
+
+    let query = `
+      SELECT 
+        is_active,
+        raw_id,
+        uu_bms_id, 
+        surveyed_by,
+        pms_sec_id, 
+        structure_no, 
+        structure_type_id, 
+        structure_type, 
+        road_name, 
+        road_name_cwd, 
+        route_id, 
+        survey_id, 
+        surveyor_name, 
+        district_id, 
+        district, 
+        road_classification, 
+        road_classification_id,
+        road_surface_type, 
+        carriageway_type, 
+        direction, 
+        visual_condition, 
+        construction_type_id, 
+        construction_type, 
+        no_of_span,
+        data_source, 
+        data_date_time, 
+        span_length_m, 
+        structure_width_m, 
+        construction_year, 
+        last_maintenance_date, 
+        remarks, 
+        is_surveyed, 
+        x_centroid, 
+        y_centroid, 
+        images_spans,
+        (COALESCE(span_length_m, 0) * COALESCE(no_of_span, 0)) AS bridge_length,
+        CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
+        ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos,
+        'inspected' AS inspection_status
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1 
+        AND is_active = true
+        AND EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )
+    `;
+
+    let countQuery = `
+      SELECT COUNT(*) AS totalCount
+      FROM bms.tbl_bms_master_data
+      WHERE 1=1
+        AND is_active = true
+        AND EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )
+    `;
+
+    const queryParams = [];
+    const countParams = [];
+    let paramIndex = 1;
+
+    if (district !== "%") {
+      query += ` AND district_id = $${paramIndex}`;
+      countQuery += ` AND district_id = $${paramIndex}`;
+      queryParams.push(district);
+      countParams.push(district);
+      paramIndex++;
+    }
+
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridgeName}%`);
+      countParams.push(`%${bridgeName}%`);
+      paramIndex++;
+    }
+
+    if (structureType !== "%") {
+      query += ` AND structure_type_id = $${paramIndex}`;
+      countQuery += ` AND structure_type_id = $${paramIndex}`;
+      queryParams.push(structureType);
+      countParams.push(structureType);
+      paramIndex++;
+    }
+
+    if (constructionType !== "%") {
+      query += ` AND construction_type_id = $${paramIndex}`;
+      countQuery += ` AND construction_type_id = $${paramIndex}`;
+      queryParams.push(constructionType);
+      countParams.push(constructionType);
+      paramIndex++;
+    }
+
+    if (roadClassification !== "%") {
+      query += ` AND road_classification_id = $${paramIndex}`;
+      countQuery += ` AND road_classification_id = $${paramIndex}`;
+      queryParams.push(roadClassification);
+      countParams.push(roadClassification);
+      paramIndex++;
+    }
+
+    if (bridgeLength !== "%") {
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND structure_width_m < $${paramIndex}`;
+        countQuery += ` AND structure_width_m < $${paramIndex}`;
+        const val = parseFloat(bridgeLength.substring(1));
+        queryParams.push(val);
+        countParams.push(val);
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength.split("-").map(parseFloat);
+        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        queryParams.push(min, max);
+        countParams.push(min, max);
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND structure_width_m > $${paramIndex}`;
+        countQuery += ` AND structure_width_m > $${paramIndex}`;
+        const val = parseFloat(bridgeLength.substring(1));
+        queryParams.push(val);
+        countParams.push(val);
+        paramIndex++;
+      }
+    }
+
+    if (spanLength && spanLength !== "%") {
+      if (spanLength.startsWith("<")) {
+        query += ` AND span_length_m < $${paramIndex}`;
+        countQuery += ` AND span_length_m < $${paramIndex}`;
+        const val = parseFloat(spanLength.substring(1));
+        queryParams.push(val);
+        countParams.push(val);
+        paramIndex++;
+      } else if (spanLength.includes("-")) {
+        const [min, max] = spanLength.split("-").map(parseFloat);
+        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        queryParams.push(min, max);
+        countParams.push(min, max);
+        paramIndex += 2;
+      } else if (spanLength.startsWith(">")) {
+        query += ` AND span_length_m > $${paramIndex}`;
+        countQuery += ` AND span_length_m > $${paramIndex}`;
+        const val = parseFloat(spanLength.substring(1));
+        queryParams.push(val);
+        countParams.push(val);
+        paramIndex++;
+      }
+    }
+
+    // Pagination
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    queryParams.push(parseInt(set, 10), parseInt(limit, 10));
+
+    const result = await pool.query(query, queryParams);
+    const countResult = await pool.query(countQuery, countParams);
+
+    res.json({
+      success: true,
+      bridges: result.rows,
+      totalCount: parseInt(countResult.rows[0].totalcount, 10),
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching data from the database",
+    });
+  }
+});
+
+
 // bridges list for evaluation module
 app.get("/api/bridgesNew", async (req, res) => {
   try {
@@ -5177,7 +5371,7 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
   }
 });
 
-// for evaluator summary data
+// for dashboard summary data
 app.get("/api/get-summary", async (req, res) => {
   try {
     const { bridgeId } = req.query;
@@ -5599,6 +5793,115 @@ app.get("/api/get-summary-evaluator", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+// for evaluator summary data
+app.get("/api/get-inspections-dashboard", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    if (!bridgeId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
+    }
+
+    const query = `
+  SELECT 
+    uu_bms_id,
+    damage_extent,
+    inspection_id,
+    bridge_name, 
+    "SpanIndex", 
+    "WorkKindName", 
+    "PartsName", 
+    "MaterialName", 
+    "DamageKindName", 
+    "DamageLevel", 
+    "Remarks", 
+    "inspection_images" AS "PhotoPaths"
+  FROM bms.tbl_inspection_f
+  WHERE
+    surveyed_by IN ('RAMS-PITB', 'RAMS-UU')
+    AND uu_bms_id = $1
+
+  UNION ALL
+
+  SELECT 
+    uu_bms_id,
+    NULL AS damage_extent,
+    NULL AS inspection_id,
+    NULL AS bridge_name,
+    NULL AS "SpanIndex",
+    NULL AS "WorkKindName",
+    NULL AS "PartsName",
+    NULL AS "MaterialName",
+    NULL AS "DamageKindName",
+    NULL AS "DamageLevel",
+    "Remarks",
+    inspection_images AS "PhotoPaths"
+  FROM bms.tbl_evaluation_f
+  WHERE uu_bms_id = $1
+
+  ORDER BY inspection_id DESC NULLS LAST;
+`;
+
+
+    const { rows } = await pool.query(query, [bridgeId]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No inspection data available" });
+    }
+
+    // Process PhotoPaths for all rows
+    const processedData = rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          // Clean JSON if wrapped in quotes
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path" keys
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with image paths
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Flattened array of image paths
+      };
+    });
+
+    res.status(200).json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 
 // api endpoint for consultant inspections data
 app.get("/api/get-inspections-con", async (req, res) => {

@@ -69,7 +69,6 @@ const InspectedStructures = ({
     underFacility,
     roadClassification,
     spanLength,
-    inspectionStatus,
   ]);
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
@@ -77,7 +76,7 @@ const InspectedStructures = ({
     try {
       const set = (page - 1) * limit;
 
-      const url = new URL(`${BASE_URL}/api/bridges`);
+      const url = new URL(`${BASE_URL}/api/bridgesInspected`);
       const params = {
         set,
         limit,
@@ -90,7 +89,6 @@ const InspectedStructures = ({
         underFacility,
         roadClassification,
         spanLength,
-        inspectionStatus, // New filter parameter
       };
 
       url.search = new URLSearchParams(params).toString();
