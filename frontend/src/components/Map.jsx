@@ -204,7 +204,7 @@ const Map = ({
           }
          if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
               try {
-                const computedField = "(no_of_spans * span_length_m)";
+                const computedField = "(no_of_span * span_length_m)";
                 if (bridgeLength.startsWith("<")) {
                   const value = parseFloat(bridgeLength.substring(1));
                   if (!isNaN(value)) {
