@@ -5,10 +5,9 @@ import { BASE_URL } from "./config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
-import Filters from "./Filters";
 import CostMap from "./CostMap";
 
-const CostEstimation = () => {
+const CostEstimation = ({districtId,structureType,bridgeName}) => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,9 +16,6 @@ const CostEstimation = () => {
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
-  const [districtId, setDistrictId] = useState("%");
-  const [structureType, setStructureType] = useState("%");
-  const [bridgeName, setBridgeName] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -261,27 +257,7 @@ const CostEstimation = () => {
 
   return (
     <>
-      <section
-        className="container p-3"
-        style={{ marginTop: "50px", backgroundColor: "#F2F2F2" }}
-      >
-        <div className="row">
-          <div className="col-md-12">
-            <Filters
-              districtId={districtId}
-              setDistrictId={setDistrictId}
-              structureType={structureType}
-              setStructureType={setStructureType}
-              bridgeName={bridgeName}
-              setBridgeName={setBridgeName}
-              flexDirection="flex-row"
-              padding="p-2"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="container p-2 mt-0 bg-gray-200 items-center">
+      <section className="bg-white border-1 p-0 rounded-0 shadow-md">
         {/* Two Separate Buttons with Active/Inactive Styling */}
         <div className="d-flex justify-content-start mt-2 mb-2">
           <Button

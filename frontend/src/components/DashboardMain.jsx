@@ -404,7 +404,11 @@ const DashboardMain = () => {
                 )}
                 {
                 activeView === "cost" && (
-                  <CostEstimation />
+                  <CostEstimation
+                    districtId={districtId}
+                    structureType={structureType}
+                    bridgeName={bridgeName}
+                   />
                 )}
                 { activeView === "rates" && (
                   <Rates

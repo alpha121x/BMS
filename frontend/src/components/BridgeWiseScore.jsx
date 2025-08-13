@@ -309,7 +309,7 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
 
   return (
     <>
-      <section className="container p-2 bg-gray-200 items-center">
+      <section className="bg-white border-1 p-0 rounded-0 shadow-md">
         <div className="row">
           <div className="col-md-12">
             <div
