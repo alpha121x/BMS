@@ -298,7 +298,7 @@ const Map = ({
 
         const bridgeLayer = new MapImageLayer({
           url: "https://map3.urbanunit.gov.pk:6443/arcgis/rest/services/Punjab/PB_BMS_MainDashboard_230725/MapServer",
-          title: "Bridge Conditions",
+          title: "Inventory Structures",
           opacity: 0.8,
           listMode: "show",
           sublayers: [
