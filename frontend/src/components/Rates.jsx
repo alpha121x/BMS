@@ -133,7 +133,7 @@ const Rates = () => {
   const currentData = ratesData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <section className="container p-2 mt-3 bg-gray-200">
+    <section className="bg-white border-1 p-0 rounded-0 shadow-md">
       <div className="card-header rounded-0 p-2" style={{ background: "#005D7F", color: "#fff" }}>
         <div className="d-flex flex-wrap justify-content-between align-items-center">
           <div className="d-flex align-items-center gap-4">
