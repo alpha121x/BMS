@@ -71,7 +71,7 @@ const Header = () => {
             >
               Dashboard
             </Nav.Link>
-            <Nav.Link
+            {/* <Nav.Link
               as={Link}
               to="/BridgeWiseScore"
               className={
@@ -86,7 +86,7 @@ const Header = () => {
               }}
             >
               Bridge Wise Score
-            </Nav.Link>
+            </Nav.Link> */}
 
                  {/* <Nav.Link
               as={Link}

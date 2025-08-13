@@ -2,16 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Button, Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
-import Header from "./Header";
-import Footer from "./Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
-import Filters from "./Filters";
 import DataTable from "react-data-table-component";
 
-
-const BridgeWiseScore = () => {
+const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,16 +15,12 @@ const BridgeWiseScore = () => {
   const itemsPerPage = 10;
   const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
-  const [districtId, setDistrictId] = useState("%");
-  const [structureType, setStructureType] = useState("%");
-  const [bridgeName, setBridgeName] = useState("");
 
   const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
     const editUrl = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
     window.location.href = editUrl;
   };
-  
 
   useEffect(() => {
     fetchData(); // Fetch data whenever currentPage changes
@@ -62,91 +54,90 @@ const BridgeWiseScore = () => {
   const currentData = bridgeScoreData; // Since data is already paginated from API
 
   const columns = [
-  {
-    name: "Bridge Name",
-    selector: (row) => row.bridge_name || "N/A",
-    sortable: true,
-  },
-  {
-    name: "District",
-    selector: (row) => row.district || "N/A",
-    sortable: true,
-  },
-  {
-    name: "Total Damage Score",
-    selector: (row) =>
-      row.total_damage_score
-        ? parseFloat(row.total_damage_score).toFixed(2)
-        : "N/A",
-    sortable: true,
-  },
-  {
-    name: "Critical Damage Score",
-    selector: (row) =>
-      row.critical_damage_score
-        ? parseFloat(row.critical_damage_score).toFixed(2)
-        : "N/A",
-    sortable: true,
-  },
-  {
-    name: "Average Damage Score",
-    selector: (row) =>
-      row.average_damage_score
-        ? parseFloat(row.average_damage_score).toFixed(2)
-        : "N/A",
-    sortable: true,
-  },
-  {
-    name: "BPI",
-    selector: (row) =>
-      row.bridge_performance_index
-        ? parseFloat(row.bridge_performance_index).toFixed(2)
-        : "N/A",
-    sortable: true,
-  },
-  {
-    name: "Inv. Score (TDS)",
-    selector: (row) =>
-      row.inventory_score_tds
-        ? parseFloat(row.inventory_score_tds).toFixed(2)
-        : "N/A",
-  },
-  {
-    name: "Inv. Score (CDS)",
-    selector: (row) =>
-      row.inventory_score_cds
-        ? parseFloat(row.inventory_score_cds).toFixed(2)
-        : "N/A",
-  },
-  {
-    name: "Inv. Score (ADS)",
-    selector: (row) =>
-      row.inventory_score_ads
-        ? parseFloat(row.inventory_score_ads).toFixed(2)
-        : "N/A",
-  },
-  {
-    name: "Damage Sum",
-    selector: (row) =>
-      row.damage_sum ? parseFloat(row.damage_sum).toFixed(2) : "N/A",
-  },
-  {
-    name: "Bridge Information",
-    cell: (row) => (
-      <button
-        onClick={() => handleClick(row)}
-        className="btn btn-sm"
-        style={{ backgroundColor: "#3B9996", color: "white" }}
-      >
-        Bridge Info
-      </button>
-    ),
-    ignoreRowClick: true,
-    allowOverflow: true,
-    button: true,
-  },
-];
-
+    {
+      name: "Bridge Name",
+      selector: (row) => row.bridge_name || "N/A",
+      sortable: true,
+    },
+    {
+      name: "District",
+      selector: (row) => row.district || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Total Damage Score",
+      selector: (row) =>
+        row.total_damage_score
+          ? parseFloat(row.total_damage_score).toFixed(2)
+          : "N/A",
+      sortable: true,
+    },
+    {
+      name: "Critical Damage Score",
+      selector: (row) =>
+        row.critical_damage_score
+          ? parseFloat(row.critical_damage_score).toFixed(2)
+          : "N/A",
+      sortable: true,
+    },
+    {
+      name: "Average Damage Score",
+      selector: (row) =>
+        row.average_damage_score
+          ? parseFloat(row.average_damage_score).toFixed(2)
+          : "N/A",
+      sortable: true,
+    },
+    {
+      name: "BPI",
+      selector: (row) =>
+        row.bridge_performance_index
+          ? parseFloat(row.bridge_performance_index).toFixed(2)
+          : "N/A",
+      sortable: true,
+    },
+    {
+      name: "Inv. Score (TDS)",
+      selector: (row) =>
+        row.inventory_score_tds
+          ? parseFloat(row.inventory_score_tds).toFixed(2)
+          : "N/A",
+    },
+    {
+      name: "Inv. Score (CDS)",
+      selector: (row) =>
+        row.inventory_score_cds
+          ? parseFloat(row.inventory_score_cds).toFixed(2)
+          : "N/A",
+    },
+    {
+      name: "Inv. Score (ADS)",
+      selector: (row) =>
+        row.inventory_score_ads
+          ? parseFloat(row.inventory_score_ads).toFixed(2)
+          : "N/A",
+    },
+    {
+      name: "Damage Sum",
+      selector: (row) =>
+        row.damage_sum ? parseFloat(row.damage_sum).toFixed(2) : "N/A",
+    },
+    {
+      name: "Bridge Information",
+      cell: (row) => (
+        <button
+          onClick={() => handleClick(row)}
+          className="btn btn-sm"
+          style={{ backgroundColor: "#3B9996", color: "white" }}
+        >
+          Bridge Info
+        </button>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+  ];
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -318,29 +309,7 @@ const BridgeWiseScore = () => {
 
   return (
     <>
-      <Header />
-
-      <section
-        className="container p-3"
-        style={{ marginTop: "70px", backgroundColor: "#F2F2F2" }}
-      >
-        <div className="row">
-          <div className="col-md-12">
-            <Filters
-              districtId={districtId}
-              setDistrictId={setDistrictId}
-              structureType={structureType}
-              setStructureType={setStructureType}
-              bridgeName={bridgeName}
-              setBridgeName={setBridgeName}
-              flexDirection="flex-row"
-              padding="p-2"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="container p-2 mt-[20px] bg-gray-200 items-center">
+      <section className="container p-2 bg-gray-200 items-center">
         <div className="row">
           <div className="col-md-12">
             <div
@@ -378,57 +347,53 @@ const BridgeWiseScore = () => {
                 </div>
               </div>
             </div>
-          <div className="card-body p-0 pb-2">
-  {loading ? (
-    <div
-      style={{
-        border: "8px solid #f3f3f3",
-        borderTop: "8px solid #3498db",
-        borderRadius: "50%",
-        width: "80px",
-        height: "80px",
-        animation: "spin 1s linear infinite",
-        margin: "auto",
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 999,
-      }}
-    />
-  ) : error ? (
-    <p className="text-danger">{error}</p>
-  ) : (
-    <>
-     <DataTable
-  columns={columns}
-  data={currentData}
-  progressPending={loading}
-  pagination
-  paginationServer
-  paginationTotalRows={totalItems}
-  paginationPerPage={itemsPerPage}
-  onChangePage={(page) => setCurrentPage(page)}
-  highlightOnHover
-  responsive
-  persistTableHead
-  noDataComponent="No data available"
-/>
+            <div className="card-body p-0 pb-2">
+              {loading ? (
+                <div
+                  style={{
+                    border: "8px solid #f3f3f3",
+                    borderTop: "8px solid #3498db",
+                    borderRadius: "50%",
+                    width: "80px",
+                    height: "80px",
+                    animation: "spin 1s linear infinite",
+                    margin: "auto",
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 999,
+                  }}
+                />
+              ) : error ? (
+                <p className="text-danger">{error}</p>
+              ) : (
+                <>
+                  <DataTable
+                    columns={columns}
+                    data={currentData}
+                    progressPending={loading}
+                    pagination
+                    paginationServer
+                    paginationTotalRows={totalItems}
+                    paginationPerPage={itemsPerPage}
+                    onChangePage={(page) => setCurrentPage(page)}
+                    highlightOnHover
+                    responsive
+                    persistTableHead
+                    noDataComponent="No data available"
+                  />
 
-
-      {/* Pagination Section */}
-      <div className="d-flex justify-content-center align-items-center mt-3">
-        {renderPaginationButtons()}
-      </div>
-    </>
-  )}
-</div>
-
+                  {/* Pagination Section */}
+                  <div className="d-flex justify-content-center align-items-center mt-3">
+                    {renderPaginationButtons()}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </section>
-
-      <Footer />
     </>
   );
 };
