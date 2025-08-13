@@ -45,7 +45,9 @@ const Rates = () => {
     setError(null);
     try {
       const url = selectedCategory
-        ? `${BASE_URL}/api/rates?category=${encodeURIComponent(selectedCategory)}`
+        ? `${BASE_URL}/api/rates?category=${encodeURIComponent(
+            selectedCategory
+          )}`
         : `${BASE_URL}/api/rates`;
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch rates data");
@@ -66,20 +68,57 @@ const Rates = () => {
   };
 
   const columns = [
-    { name: "Category", selector: (row) => row.category || "N/A", sortable: true },
-    { name: "Structure Type", selector: (row) => row.structure_type || "N/A", sortable: true },
-    { name: "Type of Defect", selector: (row) => row.type_of_defect || "N/A", sortable: true },
-    { name: "Damage Severity", selector: (row) => row.damage_severity || "N/A", sortable: true },
-    { name: "Repair Method", selector: (row) => row.repair_method || "N/A", sortable: true },
-    { name: "Unit Rate", selector: (row) => row.unit_rate || "N/A", sortable: true },
-    { name: "Quantity Assumed Per Span", selector: (row) => row.quantity_assumed_per_span || "N/A", sortable: true },
-    { name: "Cost of Repair Per Span", selector: (row) => row.cost_of_repair_per_span ? parseFloat(row.cost_of_repair_per_span).toFixed(2) : "N/A", sortable: true }
+    {
+      name: "Category",
+      selector: (row) => row.category || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Structure Type",
+      selector: (row) => row.structure_type || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Type of Defect",
+      selector: (row) => row.type_of_defect || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Damage Severity",
+      selector: (row) => row.damage_severity || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Repair Method",
+      selector: (row) => row.repair_method || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Unit Rate",
+      selector: (row) => row.unit_rate || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Quantity Assumed Per Span",
+      selector: (row) => row.quantity_assumed_per_span || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Cost of Repair Per Span",
+      selector: (row) =>
+        row.cost_of_repair_per_span
+          ? parseFloat(row.cost_of_repair_per_span).toFixed(2)
+          : "N/A",
+      sortable: true,
+    },
   ];
 
   const handleDownloadCSV = async () => {
     try {
       const url = selectedCategory
-        ? `${BASE_URL}/api/rates?category=${encodeURIComponent(selectedCategory)}`
+        ? `${BASE_URL}/api/rates?category=${encodeURIComponent(
+            selectedCategory
+          )}`
         : `${BASE_URL}/api/rates`;
       const response = await fetch(url);
       const { data } = await response.json();
@@ -88,12 +127,22 @@ const Rates = () => {
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
-        [Object.keys(data[0]).join(","), ...data.map((row) => Object.values(row).map(val => `"${val}"`).join(","))].join("\n");
+        [
+          Object.keys(data[0]).join(","),
+          ...data.map((row) =>
+            Object.values(row)
+              .map((val) => `"${val}"`)
+              .join(",")
+          ),
+        ].join("\n");
 
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Rates_Data${selectedCategory ? `_${selectedCategory}` : ''}.csv`);
+      link.setAttribute(
+        "download",
+        `Rates_Data${selectedCategory ? `_${selectedCategory}` : ""}.csv`
+      );
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -105,7 +154,9 @@ const Rates = () => {
   const handleDownloadExcel = async () => {
     try {
       const url = selectedCategory
-        ? `${BASE_URL}/api/rates?category=${encodeURIComponent(selectedCategory)}`
+        ? `${BASE_URL}/api/rates?category=${encodeURIComponent(
+            selectedCategory
+          )}`
         : `${BASE_URL}/api/rates`;
       const response = await fetch(url);
       const { data } = await response.json();
@@ -116,11 +167,18 @@ const Rates = () => {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Rates Data");
 
-      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `Rates_Data${selectedCategory ? `_${selectedCategory}` : ''}.xlsx`;
+      link.download = `Rates_Data${
+        selectedCategory ? `_${selectedCategory}` : ""
+      }.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -130,58 +188,70 @@ const Rates = () => {
   };
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const currentData = ratesData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const currentData = ratesData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <section className="bg-white border-1 p-0 rounded-0 shadow-md">
-      <div className="card-header rounded-0 p-2" style={{ background: "#005D7F", color: "#fff" }}>
+      <div
+        className="card-header rounded-0 p-2"
+        style={{ background: "#005D7F", color: "#fff" }}
+      >
         <div className="d-flex flex-wrap justify-content-between align-items-center">
           <div className="d-flex align-items-center gap-4">
             <h5 className="mb-0">Rates</h5>
             <h6 className="mb-0">
               Rates Count:
-              <span className="badge text-white ms-2" style={{ background: "#009CB8" }}>
+              <span
+                className="badge text-white ms-2"
+                style={{ background: "#009CB8" }}
+              >
                 {ratesCount || 0}
               </span>
             </h6>
           </div>
 
           <div className="d-flex gap-4 align-items-center flex-wrap">
-  {/* Category Buttons */}
-  <div className="d-flex gap-2 flex-wrap pe-32">
-    {categories.map((category) => (
-      <button
-        key={category}
-        className="export-btn"
-        style={{
-          background: selectedCategory === category ? "#007f99" : "#009CB8",
-          color: "#fff",
-          padding: "6px 12px",
-          borderRadius: "4px",
-          border: "none",
-          cursor: "pointer",
-        }}
-        onClick={() => {
-          setSelectedCategory(category);
-          setCurrentPage(1);
-        }}
-      >
-        {category}
-      </button>
-    ))}
-  </div>
+            {/* Category Buttons */}
+            <div className="d-flex gap-2 flex-wrap pe-32">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  className="export-btn"
+                  style={{
+                    background:
+                      selectedCategory === category ? "#007f99" : "#009CB8",
+                    color: "#fff",
+                    padding: "6px 12px",
+                    borderRadius: "4px",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setSelectedCategory(category);
+                    setCurrentPage(1);
+                  }}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
 
-  {/* Export Buttons */}
-  <div className="d-flex gap-2">
-    <button className="export-btn csv" onClick={handleDownloadCSV}>
-      <FontAwesomeIcon icon={faFileCsv} /> CSV
-    </button>
-    <button className="export-btn excel" onClick={handleDownloadExcel}>
-      <FontAwesomeIcon icon={faFileExcel} /> Excel
-    </button>
-  </div>
-</div>
-
+            {/* Export Buttons */}
+            <div className="d-flex gap-2">
+              <button className="export-btn csv" onClick={handleDownloadCSV}>
+                <FontAwesomeIcon icon={faFileCsv} /> CSV
+              </button>
+              <button
+                className="export-btn excel"
+                onClick={handleDownloadExcel}
+              >
+                <FontAwesomeIcon icon={faFileExcel} /> Excel
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -191,7 +261,7 @@ const Rates = () => {
         ) : error ? (
           <p className="text-danger">{error}</p>
         ) : (
-         <DataTable
+          <DataTable
             columns={columns}
             data={currentData}
             highlightOnHover
@@ -226,7 +296,6 @@ const Rates = () => {
             }}
             striped
           />
-
         )}
       </div>
     </section>
