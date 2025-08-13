@@ -3717,8 +3717,8 @@ app.get("/api/bridges", async (req, res) => {
       constructionType = "%",
       roadClassification = "%",
       bridgeName = "%",
-      bridgeLength,
-      spanLength,
+      bridgeLength = "%",
+      spanLength = "%",
       inspectionStatus = "%", // Add inspectionStatus as a query parameter
     } = req.query;
 
@@ -3826,28 +3826,41 @@ app.get("/api/bridges", async (req, res) => {
       paramIndex++;
     }
 
-    if (bridgeLength !== "%") {
-      if (bridgeLength.startsWith("<")) {
-        query += ` AND structure_width_m < $${paramIndex}`;
-        countQuery += ` AND structure_width_m < $${paramIndex}`;
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-        countParams.push(parseFloat(bridgeLength.substring(1)));
-        paramIndex++;
-      } else if (bridgeLength.includes("-")) {
-        const [min, max] = bridgeLength.split("-").map(parseFloat);
-        query += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        countQuery += ` AND structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        queryParams.push(min, max);
-        countParams.push(min, max);
-        paramIndex += 2;
-      } else if (bridgeLength.startsWith(">")) {
-        query += ` AND structure_width_m > $${paramIndex}`;
-        countQuery += ` AND structure_width_m > $${paramIndex}`;
-        queryParams.push(parseFloat(bridgeLength.substring(1)));
-        countParams.push(parseFloat(bridgeLength.substring(1)));
-        paramIndex++;
-      }
-    }
+ if (bridgeLength !== "%") {
+  const computedField = "(no_of_span * span_length_m)";
+
+  if (bridgeLength.startsWith("<")) {
+    query += ` AND ${computedField} < $${paramIndex}`;
+    countQuery += ` AND ${computedField} < $${paramIndex}`;
+    const value = parseFloat(bridgeLength.substring(1));
+    queryParams.push(value);
+    countParams.push(value);
+    paramIndex++;
+  } else if (bridgeLength.includes("-")) {
+    const [min, max] = bridgeLength.split("-").map(v => parseFloat(v.trim()));
+    query += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+    countQuery += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+    queryParams.push(min, max);
+    countParams.push(min, max);
+    paramIndex += 2;
+  } else if (bridgeLength.startsWith(">")) {
+    query += ` AND ${computedField} > $${paramIndex}`;
+    countQuery += ` AND ${computedField} > $${paramIndex}`;
+    const value = parseFloat(bridgeLength.substring(1));
+    queryParams.push(value);
+    countParams.push(value);
+    paramIndex++;
+  } else {
+    // exact match
+    query += ` AND ${computedField} = $${paramIndex}`;
+    countQuery += ` AND ${computedField} = $${paramIndex}`;
+    const value = parseFloat(bridgeLength);
+    queryParams.push(value);
+    countParams.push(value);
+    paramIndex++;
+  }
+}
+
 
     if (spanLength && spanLength !== "%") {
       if (spanLength.startsWith("<")) {

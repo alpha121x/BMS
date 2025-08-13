@@ -20,7 +20,7 @@ const DashboardMain = () => {
   const [structureType, setStructureType] = useState("%");
   const [constructionType, setConstructionType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
-  const [bridgeLength, setBridgeLength] = useState("");
+  const [bridgeLength, setBridgeLength] = useState("%");
   const [age, setAge] = useState("");
   const [underFacility, setUnderFacility] = useState("%"); // New filter state
   const [roadClassification, setRoadClassification] = useState("%"); // New filter state
