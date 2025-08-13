@@ -469,7 +469,7 @@ const InspectedStructures = ({
             }`}
             onClick={() => setViewMode("map")}
           >
-            Map View
+            Map
           </button>
           <button
             className={`px-3 py-1 rounded ${
@@ -477,7 +477,7 @@ const InspectedStructures = ({
             }`}
             onClick={() => setViewMode("graph")}
           >
-            Graph View
+            Graph
           </button>
           <button
             className={`px-3 py-1 rounded ${
