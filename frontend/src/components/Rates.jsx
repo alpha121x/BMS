@@ -146,36 +146,42 @@ const Rates = () => {
             </h6>
           </div>
 
-          <div className="d-flex gap-2 align-items-center flex-wrap">
-            {/* Category Buttons */}
-            <div className="d-flex gap-2 flex-wrap">
-              <button
-                className={`category-btn ${selectedCategory === null ? "active" : ""}`}
-                onClick={() => { setSelectedCategory(null); setCurrentPage(1); }}
-              >
-                All
-              </button>
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  className={`category-btn ${selectedCategory === category ? "active" : ""}`}
-                  onClick={() => { setSelectedCategory(category); setCurrentPage(1); }}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+          <div className="d-flex gap-4 align-items-center flex-wrap">
+  {/* Category Buttons */}
+  <div className="d-flex gap-2 flex-wrap pe-32">
+    {categories.map((category) => (
+      <button
+        key={category}
+        className="export-btn"
+        style={{
+          background: selectedCategory === category ? "#007f99" : "#009CB8",
+          color: "#fff",
+          padding: "6px 12px",
+          borderRadius: "4px",
+          border: "none",
+          cursor: "pointer",
+        }}
+        onClick={() => {
+          setSelectedCategory(category);
+          setCurrentPage(1);
+        }}
+      >
+        {category}
+      </button>
+    ))}
+  </div>
 
-            {/* Export Buttons */}
-            <div className="d-flex gap-2">
-              <button className="export-btn csv" onClick={handleDownloadCSV}>
-                <FontAwesomeIcon icon={faFileCsv} /> CSV
-              </button>
-              <button className="export-btn excel" onClick={handleDownloadExcel}>
-                <FontAwesomeIcon icon={faFileExcel} /> Excel
-              </button>
-            </div>
-          </div>
+  {/* Export Buttons */}
+  <div className="d-flex gap-2">
+    <button className="export-btn csv" onClick={handleDownloadCSV}>
+      <FontAwesomeIcon icon={faFileCsv} /> CSV
+    </button>
+    <button className="export-btn excel" onClick={handleDownloadExcel}>
+      <FontAwesomeIcon icon={faFileExcel} /> Excel
+    </button>
+  </div>
+</div>
+
         </div>
       </div>
 
