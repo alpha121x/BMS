@@ -16,7 +16,7 @@ import Map from "./Map";
 import FilterComponent from "./FilterComponent";
 import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
-import Graph from "./Graph"; // Assuming you have a Graph component for the graph view
+import Graph from "./GraphInventory"; // Assuming you have a Graph component for the graph view
 import { useNavigate } from 'react-router-dom';
 
 

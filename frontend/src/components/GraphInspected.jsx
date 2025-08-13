@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import { BASE_URL } from "../components/config";
+import { BASE_URL } from "./config";
 
 const Graph = () => {
   // Previous pie chart configurations remain the same
