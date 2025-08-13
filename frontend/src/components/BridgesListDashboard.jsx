@@ -472,7 +472,7 @@ const BridgesListDashboard = ({
             }`}
             onClick={() => setViewMode("map")}
           >
-            Map View
+            Map
           </button>
           {/* <button
             className={`px-3 py-1 rounded ${

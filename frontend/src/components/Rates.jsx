@@ -186,40 +186,40 @@ const Rates = () => {
           <p className="text-danger">{error}</p>
         ) : (
          <DataTable
-  columns={columns}
-  data={currentData}
-  highlightOnHover
-  responsive
-  persistTableHead
-  noDataComponent="No rates data available"
-  customStyles={{
-    table: {
-      style: {
-        border: "1px solid #dee2e6",
-      },
-    },
-    headRow: {
-      style: {
-        backgroundColor: "#009DB9",
-        borderBottom: "2px solid #dee2e6",
-      },
-    },
-    rows: {
-      style: {
-        borderBottom: "1px solid #dee2e6",
-      },
-      stripedStyle: {
-        backgroundColor: "#f2f2f2", // stripe effect
-      },
-    },
-    cells: {
-      style: {
-        borderRight: "1px solid #dee2e6",
-      },
-    },
-  }}
-  striped
-/>
+            columns={columns}
+            data={currentData}
+            highlightOnHover
+            responsive
+            persistTableHead
+            noDataComponent="No rates data available"
+            customStyles={{
+              table: {
+                style: {
+                  border: "1px solid #dee2e6",
+                },
+              },
+              headRow: {
+                style: {
+                  backgroundColor: "#009DB9",
+                  borderBottom: "2px solid #dee2e6",
+                },
+              },
+              rows: {
+                style: {
+                  borderBottom: "1px solid #dee2e6",
+                },
+                stripedStyle: {
+                  backgroundColor: "#f2f2f2", // stripe effect
+                },
+              },
+              cells: {
+                style: {
+                  borderRight: "1px solid #dee2e6",
+                },
+              },
+            }}
+            striped
+          />
 
         )}
       </div>
