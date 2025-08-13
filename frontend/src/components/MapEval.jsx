@@ -200,41 +200,42 @@ const MapEval = ({
           if (roadClassification && roadClassification !== "" && roadClassification !== "%") {
             expressions.push(`road_classification_id = '${roadClassification}'`);
           }
-          if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
-            try {
-              if (bridgeLength.startsWith("<")) {
-                const value = parseFloat(bridgeLength.substring(1));
-                if (!isNaN(value)) {
-                  expressions.push(`structure_width_m < ${value}`);
+             if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
+              try {
+                const computedField = "(no_of_span * span_length_m)";
+                if (bridgeLength.startsWith("<")) {
+                  const value = parseFloat(bridgeLength.substring(1));
+                  if (!isNaN(value)) {
+                    expressions.push(`${computedField} < ${value}`);
+                  } else {
+                    console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                  }
+                } else if (bridgeLength.includes("-")) {
+                  const [min, max] = bridgeLength.split("-").map(v => parseFloat(v.trim()));
+                  if (!isNaN(min) && !isNaN(max)) {
+                    expressions.push(`${computedField} BETWEEN ${min} AND ${max}`);
+                  } else {
+                    console.warn(`Invalid bridgeLength range: ${bridgeLength}`);
+                  }
+                } else if (bridgeLength.startsWith(">")) {
+                  const value = parseFloat(bridgeLength.substring(1));
+                  if (!isNaN(value)) {
+                    expressions.push(`${computedField} > ${value}`);
+                  } else {
+                    console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                  }
                 } else {
-                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                  const value = parseFloat(bridgeLength);
+                  if (!isNaN(value)) {
+                    expressions.push(`${computedField} = ${value}`);
+                  } else {
+                    console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                  }
                 }
-              } else if (bridgeLength.includes("-")) {
-                const [min, max] = bridgeLength.split("-").map(parseFloat);
-                if (!isNaN(min) && !isNaN(max)) {
-                  expressions.push(`structure_width_m BETWEEN ${min} AND ${max}`);
-                } else {
-                  console.warn(`Invalid bridgeLength range: ${bridgeLength}`);
-                }
-              } else if (bridgeLength.startsWith(">")) {
-                const value = parseFloat(bridgeLength.substring(1));
-                if (!isNaN(value)) {
-                  expressions.push(`structure_width_m > ${value}`);
-                } else {
-                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
-                }
-              } else {
-                const value = parseFloat(bridgeLength);
-                if (!isNaN(value)) {
-                  expressions.push(`structure_width_m = ${value}`);
-                } else {
-                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
-                }
+              } catch (error) {
+                console.error(`Error parsing bridgeLength: ${bridgeLength}`, error);
               }
-            } catch (error) {
-              console.error(`Error parsing bridgeLength: ${bridgeLength}`, error);
             }
-          }
           if (spanLength && spanLength !== "" && spanLength !== "%") {
             try {
               if (spanLength.startsWith("<")) {
