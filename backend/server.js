@@ -7807,6 +7807,162 @@ app.get("/api/crossing-types-chart", async (req, res) => {
   }
 });
 
+// api for road type structures chart
+app.get("/api/road-types-structures", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT road_classification, COUNT(*) AS count
+      FROM bms.tbl_bms_master_data
+      WHERE road_classification IS NOT NULL
+      GROUP BY road_classification
+      ORDER BY count DESC
+    `);
+
+    // Transform for Highcharts
+    const chartData = result.rows.map(row => ({
+      name: row.road_classification,
+      y: parseInt(row.count, 10)
+    }));
+
+    res.json(chartData);
+  } catch (err) {
+    console.error("Error fetching road classifications", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// api for span length structures chart
+app.get("/api/span-length-structures", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        CASE
+          WHEN span_length_m < 6 THEN 'Less than 6 m'
+          WHEN span_length_m >= 6 AND span_length_m < 10 THEN '6 to 10 m'
+          WHEN span_length_m >= 10 AND span_length_m < 15 THEN '10 to 15 m'
+          WHEN span_length_m >= 15 AND span_length_m < 20 THEN '15 to 20 m'
+          WHEN span_length_m >= 20 AND span_length_m < 35 THEN '20 to 35 m'
+          ELSE 'Greater than 35 m'
+        END AS span_group,
+        COUNT(*) AS count
+      FROM bms.tbl_bms_master_data
+      WHERE span_length_m IS NOT NULL
+      GROUP BY span_group
+      ORDER BY MIN(span_length_m)
+    `);
+
+    // Transform for Highcharts
+    const chartData = result.rows.map(row => ({
+      name: row.span_group,
+      y: parseInt(row.count, 10)
+    }));
+
+    res.json(chartData);
+  } catch (err) {
+    console.error("Error fetching span length structures", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// API endpoint to get bridge ages for chart
+app.get("/api/bridge-ages", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT age_group, COUNT(*) AS count
+      FROM (
+        SELECT
+          CASE
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER) <= 5 THEN 'upto 5 years'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER) BETWEEN 6 AND 10 THEN '6–10 years'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER) BETWEEN 11 AND 20 THEN '11–20 years'
+            WHEN EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER) BETWEEN 21 AND 30 THEN '21–30 years'
+            ELSE '30+ years'
+          END AS age_group
+        FROM bms.tbl_bms_master_data
+        WHERE construction_year IS NOT NULL
+          AND construction_year <> ''
+          AND construction_year ~ '^[0-9]{4}$'
+      ) t
+      GROUP BY age_group
+      ORDER BY CASE age_group
+        WHEN 'upto 5 years' THEN 1
+        WHEN '6–10 years' THEN 2
+        WHEN '11–20 years' THEN 3
+        WHEN '21–30 years' THEN 4
+        ELSE 5
+      END
+    `);
+
+    // Transform for Highcharts
+    const chartData = result.rows.map(row => ({
+      name: row.age_group,
+      y: parseInt(row.count, 10)
+    }));
+
+    res.json(chartData);
+  } catch (err) {
+    console.error("Error fetching bridge ages", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// ------------------- Inspection & Evaluation Status API -------------------
+app.get("/api/bridge-status", async (req, res) => {
+  try {
+    const inspectedQuery = `
+      SELECT COUNT(*) AS count
+      FROM bms.tbl_bms_master_data b
+      WHERE is_active = true
+      AND EXISTS (
+        SELECT 1 
+        FROM bms.tbl_inspection_f i
+        WHERE i.uu_bms_id = b.uu_bms_id
+      )
+    `;
+
+    const uninspectedQuery = `
+      SELECT COUNT(*) AS count
+      FROM bms.tbl_bms_master_data b
+      WHERE is_active = true
+      AND NOT EXISTS (
+        SELECT 1 
+        FROM bms.tbl_inspection_f i
+        WHERE i.uu_bms_id = b.uu_bms_id
+      )
+    `;
+
+    const evaluatedQuery = `
+      SELECT COUNT(*) AS count
+      FROM bms.tbl_bms_master_data b
+      WHERE is_active = true
+      AND EXISTS (
+        SELECT 1 
+        FROM bms.tbl_evaluation_f e
+        WHERE e.uu_bms_id = b.uu_bms_id
+      )
+    `;
+
+    // Run all queries in parallel
+    const [inspected, uninspected, evaluated] = await Promise.all([
+      pool.query(inspectedQuery),
+      pool.query(uninspectedQuery),
+      pool.query(evaluatedQuery)
+    ]);
+
+    const chartData = [
+      { name: "Inspected", y: parseInt(inspected.rows[0].count, 10) },
+      { name: "Uninspected", y: parseInt(uninspected.rows[0].count, 10) },
+      { name: "Evaluated", y: parseInt(evaluated.rows[0].count, 10) }
+    ];
+
+    res.json(chartData);
+  } catch (err) {
+    console.error("Error fetching bridge status data", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// API endpoint to get inspection counts for RAMS
 app.get("/api/inspection-counts-ramsNew", async (req, res) => {
   try {
     let { districtId } = req.query;

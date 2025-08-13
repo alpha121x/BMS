@@ -4,7 +4,7 @@ import HighchartsReact from "highcharts-react-official";
 import { BASE_URL } from "./config";
 
 const Graph = () => {
-  // Previous pie chart configurations remain the same
+  // ------------------- Construction Types (Static) -------------------
   const constructionTypesOptions = {
     chart: { type: "pie" },
     title: { text: "Construction Types" },
@@ -27,25 +27,7 @@ const Graph = () => {
     ],
   };
 
-  const groupConstructionTypesOptions = {
-    chart: { type: "pie" },
-    title: { text: "Group Construction Types" },
-    series: [
-      {
-        name: "Count",
-        data: [
-          { name: "Concrete Deck Slab", y: 17086, color: "#47F9E3" },
-          { name: "Culverts (box and pipe)", y: 752, color: "#FF645B" },
-          { name: "Others", y: 51, color: "#60C3FE" },
-          { name: "Concrete Box Girder", y: 2, color: "#FF4500" },
-          { name: "Concretel-Girder", y: 458, color: "#EE81FF" },
-          { name: "Arch Structure", y: 31, color: "#6B8ABC" },
-          { name: "Not Available", y: 315, color: "#FF834E" },
-        ],
-      },
-    ],
-  };
-
+  // ------------------- Structure Types (API) -------------------
   const [structureTypesOptions, setStructureTypesOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Type of Structures" },
@@ -53,7 +35,7 @@ const Graph = () => {
   });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts`) // Replace with your actual API
+    fetch(`${BASE_URL}/api/structure-counts`)
       .then((res) => res.json())
       .then((data) => {
         const colorMap = {
@@ -63,9 +45,11 @@ const Graph = () => {
         };
 
         const formattedData = data.structureTypeCounts.map((item) => ({
-          name: item.structure_type.charAt(0).toUpperCase() + item.structure_type.slice(1).toLowerCase(),
+          name:
+            item.structure_type.charAt(0).toUpperCase() +
+            item.structure_type.slice(1).toLowerCase(),
           y: parseInt(item.count),
-          color: colorMap[item.structure_type] || "#999999", // fallback color
+          color: colorMap[item.structure_type] || "#999999",
         }));
 
         setStructureTypesOptions({
@@ -74,285 +58,317 @@ const Graph = () => {
           series: [{ name: "Count", data: formattedData }],
         });
       })
-      .catch((error) => {
-        console.error("Error fetching structure types:", error);
-      });
+      .catch((error) =>
+        console.error("Error fetching structure types:", error)
+      );
   }, []);
 
+  // ------------------- Crossing Types (API) -------------------
   const [crossingTypesOptions, setCrossingTypesOptions] = useState({
     chart: { type: "pie" },
-    title: { text: "Crossing Types" },
+    title: { text: "Under Bridge Situation" },
     series: [{ name: "Factor Value", data: [] }],
   });
-  
+
   useEffect(() => {
     fetch(`${BASE_URL}/api/crossing-types-chart`)
       .then((res) => res.json())
       .then((data) => {
         const colorPalette = [
-          "#45C8FF", "#6D68DE", "#19FB8B", "#FF6347",
-          "#6B8ABC", "#D568FB", "#47F9E3", "#FF645B",
-          "#FFD700", "#ADFF2F",
+          "#45C8FF",
+          "#6D68DE",
+          "#19FB8B",
+          "#FF6347",
+          "#6B8ABC",
+          "#D568FB",
+          "#47F9E3",
+          "#FF645B",
+          "#FFD700",
+          "#ADFF2F",
         ];
-  
+
         const formattedData = data.map((item, index) => ({
           name: item.name,
           y: parseFloat(item.y),
           color: colorPalette[index % colorPalette.length],
         }));
-  
+
         setCrossingTypesOptions({
           chart: { type: "pie" },
-          title: { text: "Crossing Types" },
+          title: { text: "Under Bridge Situation" },
           series: [{ name: "Factor Value", data: formattedData }],
         });
       })
-      .catch((error) => {
-        console.error("Error fetching crossing types chart:", error);
-      });
+      .catch((error) =>
+        console.error("Error fetching crossing types chart:", error)
+      );
   }, []);
-  
 
-  const planAScoreOptions = {
+  // ------------------- Road Classifications (API) -------------------
+  const [roadClassificationOptions, setRoadClassificationOptions] = useState({
     chart: { type: "pie" },
-    title: { text: "Plan A Score Category wise Summary" },
-    series: [
-      {
-        name: "Count",
-        data: [
-          { name: "I: 1222", y: 1222, color: "#228B22" },
-          { name: "II: 159", y: 159, color: "#FFD700" },
-          { name: "III: 42", y: 42, color: "#FF4500" },
-          { name: "IV: 11", y: 11, color: "#FF69B4" },
-        ],
-      },
-    ],
-  };
-
-  const [bridgeDamageLevelsOptions, setBridgeDamageLevelsOptions] = useState({
-    chart: { type: "bar", height: 800 },
-    title: { text: "Bridges Damage Levels by Damage Kind", style: { fontSize: "16px", fontWeight: "bold" } },
-    xAxis: { categories: [], title: { text: "Damage Kind" } },
-    yAxis: { min: 0, title: { text: "Number of Damages" } },
-    legend: { reversed: true },
-    plotOptions: { series: { stacking: "normal" } },
-    series: [],
+    title: { text: "Road Type Structures" },
+    series: [{ name: "Count", data: [] }],
   });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/damage-chart`) // Replace with your actual API
+    fetch(`${BASE_URL}/api/road-types-structures`)
       .then((res) => res.json())
       .then((data) => {
-        // destructure API response
-        const { categories, series } = data;
+        const colorPalette = [
+          "#FF5733",
+          "#33FF57",
+          "#3357FF",
+          "#FF33A8",
+          "#FFD733",
+          "#33FFF0",
+          "#8E44AD",
+          "#F39C12",
+        ];
 
-        setBridgeDamageLevelsOptions({
-          chart: { type: "bar", height: 800 },
-          title: { text: "Bridges Damage Levels by Damage Kind", style: { fontSize: "16px", fontWeight: "bold" } },
-          xAxis: {
-            categories: categories,
-            title: { text: "Damage Kind" },
-          },
-          yAxis: {
-            min: 0,
-            title: { text: "Number of Damages" },
-          },
-          legend: { reversed: true },
-          plotOptions: { series: { stacking: "normal" } },
-          series: series,
+        const formattedData = data.map((item, index) => ({
+          name: item.name,
+          y: parseInt(item.y),
+          color: colorPalette[index % colorPalette.length],
+        }));
+
+        setRoadClassificationOptions({
+          chart: { type: "pie" },
+          title: { text: "Road Type Structures" },
+          series: [{ name: "Count", data: formattedData }],
         });
       })
-      .catch((error) => {
-        console.error("Error fetching bridge damage levels:", error);
-      });
+      .catch((error) =>
+        console.error("Error fetching road classifications:", error)
+      );
   }, []);
 
-  const [materialElementDamagesOptions, setMaterialElementDamagesOptions] = useState({
-    chart: { type: "bar", height: 800 },
-    title: { text: "Material Element-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
-    xAxis: { categories: [], title: { text: "Elements" } },
-    yAxis: { min: 0, title: { text: "Number of Damages" } },
-    legend: { reversed: true },
-    plotOptions: { series: { stacking: "normal" } },
-    series: [],
-  });
-
-  useEffect(() => {
-    fetch(`${BASE_URL}/api/material-damage-chart`) // Replace with your actual API
-      .then((res) => res.json())
-      .then((data) => {
-        // destructure API response
-        const { categories, series } = data;
-
-        setMaterialElementDamagesOptions({
-          chart: { type: "bar", height: 800 },
-          title: { text: "Material Element-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
-          xAxis: {
-            categories: categories,
-            title: { text: "Elements" },
-          },
-          yAxis: {
-            min: 0,
-            title: { text: "Number of Damages" },
-          },
-          legend: { reversed: true },
-          plotOptions: { series: { stacking: "normal" } },
-          series: series,
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching bridge damage levels:", error);
-      });
-  }, []);
-
-  const [elementCategoryDamagesOptions, setElementCategoryDamagesOptions] = useState({
-    chart: { type: "bar", height: 800 },
-    title: { text: "Element Category-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
-    xAxis: { categories: [], title: { text: "Work Kind" } },
-    yAxis: { min: 0, title: { text: "Number of Damages" } },
-    legend: { reversed: true },
-    plotOptions: { series: { stacking: "normal" } },
-    series: [],
-  });
-
-  useEffect(() => {
-    fetch(`${BASE_URL}/api/workkind-damage-chart`) // Replace with your actual API
-      .then((res) => res.json())
-      .then((data) => {
-        // destructure API response
-        const { categories, series } = data;
-
-        setElementCategoryDamagesOptions({
-          chart: { type: "bar", height: 800 },
-          title: { text: "Element Category-wise Damages", style: { fontSize: "16px", fontWeight: "bold" } },
-          xAxis: {
-            categories: categories,
-            title: { text: "Work Kind" },
-          },
-          yAxis: {
-            min: 0,
-            title: { text: "Number of Damages" },
-          },
-          legend: { reversed: true },
-          plotOptions: { series: { stacking: "normal" } },
-          series: series,
-        });
-      })
-      .catch((error) => {
-        console.error("Error fetching bridge damage levels:", error);
-      });
-  }, []);
-
+  // ------------------- Bridge Length (Static) -------------------
   const bridgeLengthOptions = {
-    chart: {
-      type: "bar",
-      height: 400,
-    },
-    title: {
-      text: "Bridge Length Of Structure M",
-    },
+    chart: { type: "bar", height: 400 },
+    title: { text: "Bridge Length Of Structure M" },
     xAxis: {
       categories: ["L <= 6", "6m < L≤ 30m", "30m < L≤ 60m", "L < 60m"],
-      title: {
-        text: "Bridge Length",
-      },
+      title: { text: "Bridge Length" },
     },
     yAxis: {
       min: 0,
-      title: {
-        text: "Construction Types",
-      },
       max: 19000,
+      title: { text: "Construction Types" },
     },
-    plotOptions: {
-      series: {
-        stacking: "normal",
-      },
-    },
+    plotOptions: { series: { stacking: "normal" } },
     series: [
-      {
-        name: "Others",
-        data: [43, 5, 1, 2],
-        color: "#008000",
-      },
-      {
-        name: "Steel Girder",
-        data: [0, 5, 1, 4],
-        color: "#0000FF",
-      },
+      { name: "Others", data: [43, 5, 1, 2], color: "#008000" },
+      { name: "Steel Girder", data: [0, 5, 1, 4], color: "#0000FF" },
       {
         name: "Culverts (box and pipe)",
         data: [723, 26, 3, 0],
         color: "#FFA500",
       },
-      {
-        name: "Concrete I-Girder",
-        data: [39, 271, 62, 86],
-        color: "#FFFF00",
-      },
+      { name: "Concrete I-Girder", data: [39, 271, 62, 86], color: "#FFFF00" },
       {
         name: "Concrete Deck Slab",
         data: [16330, 668, 52, 28],
         color: "#FF7F7F",
       },
-      {
-        name: "Concrete Box Girder",
-        data: [0, 1, 0, 1],
-        color: "#E6E6FA",
-      },
-      {
-        name: "Arch Structure",
-        data: [14, 12, 2, 3],
-        color: "#808080",
-      },
+      { name: "Concrete Box Girder", data: [0, 1, 0, 1], color: "#E6E6FA" },
+      { name: "Arch Structure", data: [14, 12, 2, 3], color: "#808080" },
     ],
   };
 
+  // ------------------- Span Length Distribution (API) -------------------
+  const [spanLengthOptions, setSpanLengthOptions] = useState({
+    chart: { type: "pie" },
+    title: { text: "Span Length Distribution" },
+    series: [{ name: "Count", data: [] }],
+  });
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/span-length-structures`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSpanLengthOptions((prev) => ({
+          ...prev,
+          series: [{ name: "Count", data }],
+        }));
+      })
+      .catch(console.error);
+  }, []);
+
+// ------------------- Bridge Ages (Vertical Column Chart) -------------------
+const [bridgeAgesOptions, setBridgeAgesOptions] = useState({
+  chart: { type: "column" }, // vertical bars
+  title: { text: "Bridge Ages" },
+  xAxis: {
+    categories: [],
+    title: { text: "Age Groups" }
+  },
+  yAxis: {
+    min: 0,
+    title: { text: "Number of Bridges" }
+  },
+  series: [{ name: "Count", data: [] }],
+});
+
+useEffect(() => {
+  fetch(`${BASE_URL}/api/bridge-ages`)
+    .then((res) => res.json())
+    .then((data) => {
+      setBridgeAgesOptions((prev) => ({
+        ...prev,
+        xAxis: {
+          ...prev.xAxis,
+          categories: data.map(item => item.name), // Age group names
+        },
+        series: [{
+          name: "Count",
+          data: data.map(item => item.y), // Counts only
+        }],
+      }));
+    })
+    .catch(console.error);
+}, []);
+
+// ------------------- Bridge Inspection & Evaluation Status (API) -------------------
+const [bridgeStatusOptions, setBridgeStatusOptions] = useState({
+  chart: { type: "pie" },
+  title: { text: "Stuructures Status" },
+  series: [{ name: "Count", data: [] }],
+});
+
+useEffect(() => {
+  fetch(`${BASE_URL}/api/bridge-status`)
+    .then((res) => res.json())
+    .then((data) => {
+      setBridgeStatusOptions((prev) => ({
+        ...prev,
+        series: [{ name: "Count", data }]
+      }));
+    })
+    .catch(console.error);
+}, []);
+
+
+
   return (
-    <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{border: "1px solid #005D7F"}}>
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-    }}
-  >
-    {/* Pie Charts (3 in First Row, 2 in Second Row) */}
-    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "20px" }}>
-      {/* First Row - 2 Charts */}
-      <div style={{ width: "30%", height: "400px" }}>
-        <HighchartsReact highcharts={Highcharts} options={crossingTypesOptions} />
-      </div>
-      <div style={{ width: "30%", height: "400px" }}>
-        <HighchartsReact highcharts={Highcharts} options={structureTypesOptions} />
-      </div>
+    <div
+      className="bg-white border-1 p-0 rounded-0 shadow-md"
+      style={{ border: "1px solid #005D7F" }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        {/* Pie Charts */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: "20px",
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              flex: "1 1 calc(33.33% - 20px)",
+              minWidth: "280px",
+              height: "400px",
+            }}
+          >
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={structureTypesOptions}
+            />
+          </div>
 
-      {/* Second Row - 2 Charts */}
-      <div style={{ width: "40%", height: "400px" }}>
-        <HighchartsReact highcharts={Highcharts} options={groupConstructionTypesOptions} />
+          <div
+            style={{
+              flex: "1 1 calc(33.33% - 20px)",
+              minWidth: "280px",
+              height: "400px",
+            }}
+          >
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={constructionTypesOptions}
+            />
+          </div>
+
+          <div
+            style={{
+              flex: "1 1 calc(33.33% - 20px)",
+              minWidth: "280px",
+              height: "400px",
+            }}
+          >
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={crossingTypesOptions}
+            />
+          </div>
+
+          <div
+            style={{
+              flex: "1 1 calc(33.33% - 20px)",
+              minWidth: "280px",
+              height: "400px",
+            }}
+          >
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={roadClassificationOptions}
+            />
+          </div>
+
+          <div
+            style={{
+              flex: "1 1 calc(33.33% - 20px)",
+              minWidth: "280px",
+              height: "400px",
+            }}
+          >
+            <HighchartsReact
+              highcharts={Highcharts}
+              options={spanLengthOptions}
+            />
+          </div>
+        </div>
+
+        {/* Bridge Inspection & Evaluation Status Pie Chart */}
+        <div
+        style={{
+          flex: "1 1 calc(33.33% - 20px)",
+          minWidth: "280px",
+          height: "400px",
+          }}
+        >
+          <HighchartsReact
+          highcharts={Highcharts}
+          options={bridgeStatusOptions}
+          />
+        </div>
+
+        {/* Bar Chart */}
+        <div style={{ width: "90%", marginBottom: "40px" }}>
+          <HighchartsReact
+            highcharts={Highcharts}
+            options={bridgeLengthOptions}
+          />
+        </div>
+
+        {/* Bridge Ages Bar Chart */}
+        <div style={{ width: "90%", marginBottom: "40px" }}>
+          <HighchartsReact
+          highcharts={Highcharts}
+          options={bridgeAgesOptions}
+          />
+          </div>
       </div>
-      <div style={{ width: "40%", height: "400px" }}>
-        <HighchartsReact highcharts={Highcharts} options={constructionTypesOptions} />
-      </div>
     </div>
-
-    {/* Bar Charts */}
-    <div style={{ width: "90%", marginBottom: "40px" }}>
-      <HighchartsReact highcharts={Highcharts} options={bridgeDamageLevelsOptions} />
-    </div>
-
-    <div style={{ width: "90%", marginBottom: "40px" }}>
-      <HighchartsReact highcharts={Highcharts} options={materialElementDamagesOptions} />
-    </div>
-    <div style={{ width: "90%", marginBottom: "40px" }}>
-      <HighchartsReact highcharts={Highcharts} options={elementCategoryDamagesOptions} />
-    </div>
-    <div style={{ width: "90%", marginBottom: "40px" }}>
-      <HighchartsReact highcharts={Highcharts} options={bridgeLengthOptions} />
-    </div>
-  </div>
-</div>
-
   );
 };
 
