@@ -16,9 +16,9 @@ import FilterComponent from "./FilterComponent";
 import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
 import Graph from "./GraphInspected"; // Assuming you have a Graph component for the graph view
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import InspectionListInsStruc from "./InspectionListInsStruc";
-
+import BridgeWiseScore from "./BridgeWiseScore"; // Assuming you have a BridgeWiseScroe component for the bridge wise score view
 
 const InspectedStructures = ({
   districtId,
@@ -47,13 +47,13 @@ const InspectedStructures = ({
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingCSV, setLoadingCSV] = useState(false);
-const [loadingExcel, setLoadingExcel] = useState(false);
+  const [loadingExcel, setLoadingExcel] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
   const [viewMode, setViewMode] = useState("map"); // New state for view mode
   const navigate = useNavigate();
-  
+
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -111,10 +111,9 @@ const [loadingExcel, setLoadingExcel] = useState(false);
     setShowModal(true);
   };
 
-        const handleRowClick = (bridge) => {
-    navigate('/BridgeInfoInspected', { state: { bridge } });
-    };
-
+  const handleRowClick = (bridge) => {
+    navigate("/BridgeInfoInspected", { state: { bridge } });
+  };
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -480,27 +479,48 @@ const [loadingExcel, setLoadingExcel] = useState(false);
           >
             Graph View
           </button>
+          <button
+            className={`px-3 py-1 rounded ${
+              viewMode === "table" ? "bg-[#005D7F] text-white" : "bg-gray-200"
+            }`}
+            onClick={() => setViewMode("bridgeWiseScore")}
+          >
+            Bridge Wise Score
+          </button>
         </div>
       </div>
       <div>
-        {viewMode === "map" ? (
-          <Map 
-          districtId={districtId}
-          structureType={structureType}
-          bridgeName={bridgeName}
-          constructionType={constructionType}
-          bridgeLength={bridgeLength}
-          age={age}
-          underFacility={underFacility}
-          roadClassification={roadClassification}
-          spanLength={spanLength}
-           />
-        ) : (
+        {viewMode === "map" && (
+          <Map
+            districtId={districtId}
+            structureType={structureType}
+            bridgeName={bridgeName}
+            constructionType={constructionType}
+            bridgeLength={bridgeLength}
+            age={age}
+            underFacility={underFacility}
+            roadClassification={roadClassification}
+            spanLength={spanLength}
+          />
+        )}
+
+        {viewMode === "bridgeWiseScore" && (
+          <div className="p-4 text-center">
+            <BridgeWiseScore
+              districtId={districtId}
+              structureType={structureType}
+              bridgeName={bridgeName}
+            />
+          </div>
+        )}
+
+        {viewMode === "graph" && (
           <div className="p-4 text-center">
             <Graph />
           </div>
         )}
       </div>
+
       <div
         className="card p-0 rounded-0 text-black"
         style={{
@@ -547,34 +567,34 @@ const [loadingExcel, setLoadingExcel] = useState(false);
             />
 
             <div className="flex items-center gap-1">
-            <button
-  className="btn text-white"
-  onClick={handleDownloadCSV}
-  disabled={loadingCSV}
->
-  <div className="flex items-center gap-1">
-    <FaFileCsv />
-    {loadingCSV ? "Downloading CSV..." : "CSV"}
-  </div>
-</button>
+              <button
+                className="btn text-white"
+                onClick={handleDownloadCSV}
+                disabled={loadingCSV}
+              >
+                <div className="flex items-center gap-1">
+                  <FaFileCsv />
+                  {loadingCSV ? "Downloading CSV..." : "CSV"}
+                </div>
+              </button>
 
-<button
-  className="btn text-white"
-  onClick={handleDownloadExcel}
-  disabled={loadingExcel}
->
-  {loadingExcel ? (
-    <>
-      <FaSpinner className="animate-spin mr-2" /> Downloading Excel...
-    </>
-  ) : (
-    <div className="flex items-center gap-1">
-      <FaFileExcel />
-      Excel
-    </div>
-  )}
-</button>
-
+              <button
+                className="btn text-white"
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+              >
+                {loadingExcel ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" /> Downloading
+                    Excel...
+                  </>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <FaFileExcel />
+                    Excel
+                  </div>
+                )}
+              </button>
             </div>
           </div>
         </div>
