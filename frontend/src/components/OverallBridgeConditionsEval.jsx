@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Spinner, Button, FormCheck } from 'react-bootstrap';
 import { BASE_URL } from './config';
 
-// Small box for damage status (kept same as your version)
+// Small box for damage status
 const DamageStatusBox = ({ title, counts }) => {
   const damageLevels = ['No Damage', 'Invisible', 'Good', 'Fair', 'Poor', 'Severe'];
   const levelColors = {
@@ -63,8 +63,6 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
   const [overallRemarks, setOverallRemarks] = useState('');
-  const [overallRemarksCon, setOverallRemarksCon] = useState('');
-  const [overallRemarksRams, setOverallRemarksRams] = useState('');
   const [isBridgeCompleted, setIsBridgeCompleted] = useState(false);
 
   // --- NEW STATES for evaluation table ---
@@ -92,28 +90,43 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     }));
   };
 
-  // Save evaluation table to API
-  const handleSaveEvaluation = async () => {
+  // --- NEW unified save function ---
+  const handleSaveAll = async () => {
     try {
-      const requestData = { evaluation: evaluationState };
-
-      const response = await fetch(
+      // Save evaluation
+      const evalResponse = await fetch(
         `${BASE_URL}/api/update-bridge-evaluation/${inventoryData.uu_bms_id}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestData),
+          body: JSON.stringify({ evaluation: evaluationState }),
         }
       );
+      if (!evalResponse.ok) throw new Error('Failed to update evaluation table');
 
-      if (!response.ok) throw new Error('Failed to update evaluation table');
+      // Save remarks, toggle, and overall condition
+      const remarksResponse = await fetch(
+        `${BASE_URL}/api/update-remarks-toggle-evaluator/${inventoryData.uu_bms_id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            overall_remarks: overallRemarks,
+            is_bridge_completed: isBridgeCompleted,
+            overall_bridge_condition: overallCondition,
+          }),
+        }
+      );
+      if (!remarksResponse.ok) throw new Error('Failed to update remarks/toggle/condition');
 
-      const result = await response.json();
-      setUpdateSuccess(result.message);
+      const result1 = await evalResponse.json();
+      const result2 = await remarksResponse.json();
+
+      setUpdateSuccess(`${result1.message} | ${result2.message}`);
       setUpdateError(null);
     } catch (error) {
-      console.error('Error updating evaluation table:', error);
-      setUpdateError('Failed to update evaluation table');
+      console.error('Error saving data:', error);
+      setUpdateError('Failed to save bridge evaluation / remarks / condition');
       setUpdateSuccess(null);
     }
   };
@@ -127,8 +140,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         if (!response.ok) throw new Error('Failed to fetch visual conditions');
         const data = await response.json();
         setVisualConditions(data);
-      } catch (error) {
-        console.error('Error fetching visual conditions:', error);
+      } catch {
         setVisualConditions([
           { id: 1, visual_condition: 'FAIR' },
           { id: 2, visual_condition: 'GOOD' },
@@ -142,7 +154,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     fetchVisualConditions();
   }, []);
 
-  // Fetch Work Kinds from API
+  // Fetch Work Kinds
   useEffect(() => {
     const fetchWorkKinds = async () => {
       setLoadingWorkKinds(true);
@@ -151,8 +163,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         if (!response.ok) throw new Error('Failed to fetch work kinds');
         const data = await response.json();
         setWorkKinds(data);
-      } catch (error) {
-        console.error('Error fetching work kinds:', error);
+      } catch {
         setError('Failed to load work kinds');
       } finally {
         setLoadingWorkKinds(false);
@@ -177,8 +188,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
           countsMap[item.WorkKindID] = item;
         });
         setDamageCounts(countsMap);
-      } catch (error) {
-        console.error('Error fetching damage counts:', error);
+      } catch {
         setError('Failed to load damage counts');
       } finally {
         setLoadingDamageCounts(false);
@@ -192,69 +202,17 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
-    if (inventoryData?.overall_remarks_rams) {
-      setOverallRemarksRams(inventoryData.overall_remarks_rams);
+    if (inventoryData?.overall_remarks) {
+      setOverallRemarks(inventoryData.overall_remarks);
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
       setIsBridgeCompleted(inventoryData.is_bridge_completed);
     }
-    if (inventoryData?.overall_remarks_con) {
-      setOverallRemarksCon(inventoryData.overall_remarks_con);
-    }
   }, [inventoryData]);
 
-  // Handle condition select
-  const handleConditionSelect = async (e) => {
-    const selectedCondition = e.target.value;
-    setOverallCondition(selectedCondition);
-
-    if (selectedCondition) {
-      try {
-        const requestData = { overall_bridge_condition: selectedCondition };
-        const response = await fetch(
-          `${BASE_URL}/api/update-overall-condition/${inventoryData.uu_bms_id}`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData),
-          }
-        );
-        if (!response.ok) throw new Error('Failed to update overall bridge condition');
-        const result = await response.json();
-        setUpdateSuccess(result.message);
-        setUpdateError(null);
-      } catch (error) {
-        console.error('Error updating overall bridge condition:', error);
-        setUpdateError('Failed to update overall bridge condition');
-        setUpdateSuccess(null);
-      }
-    }
-  };
-
-  // Save remarks and toggle
-  const handleSaveRemarksAndToggle = async () => {
-    try {
-      const requestData = {
-        overall_remarks: overallRemarks,
-        is_bridge_completed: isBridgeCompleted,
-      };
-      const response = await fetch(
-        `${BASE_URL}/api/update-remarks-toggle-evaluator/${inventoryData.uu_bms_id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestData),
-        }
-      );
-      if (!response.ok) throw new Error('Failed to update remarks and toggle');
-      const result = await response.json();
-      setUpdateSuccess(result.message);
-      setUpdateError(null);
-    } catch (error) {
-      console.error('Error updating remarks and toggle:', error);
-      setUpdateError('Failed to update remarks and toggle');
-      setUpdateSuccess(null);
-    }
+  // Local select only (no API call here now)
+  const handleConditionSelect = (e) => {
+    setOverallCondition(e.target.value);
   };
 
   // Style helper
@@ -322,7 +280,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         )}
       </Form.Group>
 
-      {/* --- New Evaluation Table --- */}
+      {/* Evaluation Table */}
       <div className="mt-4">
         <h5 className="text-center mb-3">Bridge Component Evaluation</h5>
         <Form>
@@ -358,7 +316,6 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
               ))}
             </tbody>
           </table>
-          <Button variant="success" onClick={handleSaveEvaluation}>Save Evaluation</Button>
         </Form>
       </div>
 
@@ -385,8 +342,14 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
           onChange={(e) => setIsBridgeCompleted(e.target.checked)}
           style={{ marginRight: '15px' }}
         />
-        <Button variant="primary" onClick={handleSaveRemarksAndToggle}>Save</Button>
       </Form.Group>
+
+      {/* Single Save Button */}
+      <div className="mt-3">
+        <Button variant="success" onClick={handleSaveAll}>
+          Save All
+        </Button>
+      </div>
 
       {updateSuccess && <div className="text-success mt-2">{updateSuccess}</div>}
       {updateError && <div className="text-danger mt-2">{updateError}</div>}
