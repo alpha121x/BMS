@@ -62,8 +62,10 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
-  const [overallRemarks, setOverallRemarks] = useState(''); // New state for Overall Remarks
-  const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // New state for Is Bridge Completed
+  const [overallRemarks, setOverallRemarks] = useState(''); // State for Overall Remarks
+  const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // State for Is Bridge Completed
+  const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
+  const userId = userToken?.userId;
 
   // Fetch Visual Conditions from API
   useEffect(() => {
@@ -144,66 +146,36 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     fetchDamageCounts();
   }, [inventoryData?.uu_bms_id]);
 
-  // Set initial overall condition from inventoryData
+  // Set initial values from inventoryData
   useEffect(() => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
     if (inventoryData?.overall_remarks_con) {
-      setOverallRemarks(inventoryData.overall_remarks_con); // Initialize Remarks if available
+      setOverallRemarks(inventoryData.overall_remarks_con);
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
-      setIsBridgeCompleted(inventoryData.is_bridge_completed); // Initialize toggle if available
+      setIsBridgeCompleted(inventoryData.is_bridge_completed);
     }
   }, [inventoryData]);
 
-  // Handle condition selection and API update
-  const handleConditionSelect = async (e) => {
+  // Handle condition selection (no API call, just update state)
+  const handleConditionSelect = (e) => {
     const selectedCondition = e.target.value;
     setOverallCondition(selectedCondition);
-
-    if (selectedCondition) {
-      try {
-        const requestData = {
-          overall_bridge_condition: selectedCondition,
-        };
-
-        const response = await fetch(
-          `${BASE_URL}/api/update-overall-condition/${inventoryData.uu_bms_id}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to update overall bridge condition');
-        }
-
-        const result = await response.json();
-        setUpdateSuccess(result.message);
-        setUpdateError(null);
-      } catch (error) {
-        console.error('Error updating overall bridge condition:', error);
-        setUpdateError('Failed to update overall bridge condition');
-        setUpdateSuccess(null);
-      }
-    }
   };
 
-  // Handle save for Remarks and Is Bridge Completed
-  const handleSaveRemarksAndToggle = async () => {
+  // Handle save for all fields (condition, remarks, and toggle)
+  const handleSaveAll = async () => {
     try {
       const requestData = {
+        overall_bridge_condition: overallCondition,
         overall_remarks: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
+        user_id: userId,
+        userId: userId,
+        uu_bms_id: inventoryData.uu_bms_id,
       };
-
-    //   console.log('Request Data:', requestData);
-    //   return;
 
       const response = await fetch(
         `${BASE_URL}/api/update-remarks-toggle/${inventoryData.uu_bms_id}`,
@@ -217,15 +189,15 @@ const OverallBridgeCondition = ({ inventoryData }) => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to update remarks and toggle');
+        throw new Error('Failed to update bridge data');
       }
 
       const result = await response.json();
       setUpdateSuccess(result.message);
       setUpdateError(null);
     } catch (error) {
-      console.error('Error updating remarks and toggle:', error);
-      setUpdateError('Failed to update remarks and toggle');
+      console.error('Error updating bridge data:', error);
+      setUpdateError('Failed to update bridge data');
       setUpdateSuccess(null);
     }
   };
@@ -363,8 +335,8 @@ const OverallBridgeCondition = ({ inventoryData }) => {
           onChange={(e) => setIsBridgeCompleted(e.target.checked)}
           style={{ marginRight: '15px' }}
         />
-        <Button variant="primary" onClick={handleSaveRemarksAndToggle}>
-          Save
+        <Button variant="primary" onClick={handleSaveAll}>
+          Save All
         </Button>
       </Form.Group>
     </div>

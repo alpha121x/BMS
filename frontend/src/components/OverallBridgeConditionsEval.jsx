@@ -64,8 +64,10 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const [error, setError] = useState(null);
   const [overallRemarks, setOverallRemarks] = useState('');
   const [isBridgeCompleted, setIsBridgeCompleted] = useState(false);
+  const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
+  const userId = userToken?.userId;
 
-  // --- NEW STATES for evaluation table ---
+  // States for evaluation table
   const [evaluationState, setEvaluationState] = useState({});
 
   const evaluationOptions = ["Good", "Fair", "Poor", "Severe"];
@@ -90,43 +92,35 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     }));
   };
 
-  // --- NEW unified save function ---
+  // Unified save function
   const handleSaveAll = async () => {
     try {
-      // Save evaluation
-      const evalResponse = await fetch(
+      const requestData = {
+        evaluation: evaluationState,
+        overall_bridge_condition: overallCondition,
+        overall_remarks: overallRemarks,
+        is_bridge_completed: isBridgeCompleted,
+        user_id: userId,
+        uu_bms_id: inventoryData.uu_bms_id,
+      };
+
+      const response = await fetch(
         `${BASE_URL}/api/update-bridge-evaluation/${inventoryData.uu_bms_id}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ evaluation: evaluationState }),
+          body: JSON.stringify(requestData),
         }
       );
-      if (!evalResponse.ok) throw new Error('Failed to update evaluation table');
 
-      // Save remarks, toggle, and overall condition
-      const remarksResponse = await fetch(
-        `${BASE_URL}/api/update-remarks-toggle-evaluator/${inventoryData.uu_bms_id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            overall_remarks: overallRemarks,
-            is_bridge_completed: isBridgeCompleted,
-            overall_bridge_condition: overallCondition,
-          }),
-        }
-      );
-      if (!remarksResponse.ok) throw new Error('Failed to update remarks/toggle/condition');
+      if (!response.ok) throw new Error('Failed to update bridge evaluation, remarks, and condition');
 
-      const result1 = await evalResponse.json();
-      const result2 = await remarksResponse.json();
-
-      setUpdateSuccess(`${result1.message} | ${result2.message}`);
+      const result = await response.json();
+      setUpdateSuccess(result.message);
       setUpdateError(null);
     } catch (error) {
       console.error('Error saving data:', error);
-      setUpdateError('Failed to save bridge evaluation / remarks / condition');
+      setUpdateError('Failed to save bridge evaluation, remarks, or condition');
       setUpdateSuccess(null);
     }
   };
@@ -210,7 +204,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     }
   }, [inventoryData]);
 
-  // Local select only (no API call here now)
+  // Local select only (no API call)
   const handleConditionSelect = (e) => {
     setOverallCondition(e.target.value);
   };
