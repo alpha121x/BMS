@@ -4605,7 +4605,7 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
           uu_bms_id,
           COUNT(*) AS total_inspections,
           SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
-        FROM bms.tbl_inspection_f
+        FROM bms.tbl_inspection_f  where surveyed_by = 'RAMS-UU' AND qc_con = '2'
         GROUP BY uu_bms_id
         HAVING COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
       )
