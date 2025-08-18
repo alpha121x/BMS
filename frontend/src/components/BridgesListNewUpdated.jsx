@@ -293,7 +293,7 @@ const BridgesListNewUpdated = ({
     { name: "Construction Type", selector: (row) => row.construction_type || "N/A", sortable: true, wrap: true },
     { name: "Road Classfication", selector: (row) => row.road_classification || "N/A", sortable: true, wrap: true },
     { name: "Bridge Situations", selector: (row) => row.bridge_situations || "N/A", sortable: true, wrap: true },
-    { name: "Age", selector: (row) => row.age || "N/A", sortable: true, wrap: true },
+    { name: "Age (Y)", selector: (row) => row.age || "N/A", sortable: true, wrap: true },
     { name: "Structure Length", selector: (row) => row.bridge_length || "N/A", sortable: true, wrap: true },
     { name: "Date Time", selector: (row) => row.data_date_time ? new Date(row.data_date_time).toLocaleString() : "N/A", sortable: true, wrap: true },
     {
