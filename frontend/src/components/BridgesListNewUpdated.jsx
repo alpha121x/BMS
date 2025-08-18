@@ -22,6 +22,7 @@ import { FaBridge } from "react-icons/fa6";
 import "leaflet/dist/leaflet.css";
 import DataTable from "react-data-table-component";
 import { useNavigate } from "react-router-dom";
+import OverallBridgeConditionEval from "./OverallBridgeConditionsEval";
 
 const BridgesListNewUpdated = ({
   districtId,
@@ -418,6 +419,7 @@ const BridgesListNewUpdated = ({
         <Modal.Body>
           {selectedBridge && user_type === "consultant" && <OverallBridgeCondition inventoryData={selectedBridge} />}
           {selectedBridge && user_type === "rams" && <OverallBridgeConditionRams inventoryData={selectedBridge} />}
+          {selectedBridge && user_type === "evaluator" && <OverallBridgeConditionEval inventoryData={selectedBridge} />}
         </Modal.Body>
       </Modal>
 
