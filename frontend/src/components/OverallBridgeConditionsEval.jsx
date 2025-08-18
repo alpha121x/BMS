@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Spinner, Button, FormCheck } from 'react-bootstrap';
 import { BASE_URL } from './config';
 
+// Small box for damage status (kept same as your version)
 const DamageStatusBox = ({ title, counts }) => {
   const damageLevels = ['No Damage', 'Invisible', 'Good', 'Fair', 'Poor', 'Severe'];
   const levelColors = {
@@ -13,7 +14,6 @@ const DamageStatusBox = ({ title, counts }) => {
     'Severe': '#FF0000',
   };
 
-  // Normalize API response keys to match expected levels
   const normalizedCounts = {
     'No Damage': counts['No damage'] || counts['No Damage'] || 0,
     'Invisible': counts['Invisible'] || 0,
@@ -62,10 +62,61 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
-  const [overallRemarks, setOverallRemarks] = useState(''); // New state for Overall Remarks
-  const [overallRemarksCon, setOverallRemarksCon] = useState(''); // New state for Overall Remarks Rams
-  const [overallRemarksRams, setOverallRemarksRams] = useState(''); // New state for Overall Remarks Rams
-  const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // New state for Is Bridge Completed
+  const [overallRemarks, setOverallRemarks] = useState('');
+  const [overallRemarksCon, setOverallRemarksCon] = useState('');
+  const [overallRemarksRams, setOverallRemarksRams] = useState('');
+  const [isBridgeCompleted, setIsBridgeCompleted] = useState(false);
+
+  // --- NEW STATES for evaluation table ---
+  const [evaluationState, setEvaluationState] = useState({});
+
+  const evaluationOptions = ["Good", "Fair", "Poor", "Severe"];
+  const components = [
+    "Superstructure",
+    "Substructure",
+    "Connections",
+    "Protection Work",
+    "Expansion Joint",
+    "Bridge (As a Whole)"
+  ];
+  const factors = ["Live Load", "Earthquake", "Heavy Rain/Flooding"];
+
+  // Handle table value changes
+  const handleEvaluationChange = (component, factor, value) => {
+    setEvaluationState((prev) => ({
+      ...prev,
+      [component]: {
+        ...prev[component],
+        [factor]: value,
+      },
+    }));
+  };
+
+  // Save evaluation table to API
+  const handleSaveEvaluation = async () => {
+    try {
+      const requestData = { evaluation: evaluationState };
+
+      const response = await fetch(
+        `${BASE_URL}/api/update-bridge-evaluation/${inventoryData.uu_bms_id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      if (!response.ok) throw new Error('Failed to update evaluation table');
+
+      const result = await response.json();
+      setUpdateSuccess(result.message);
+      setUpdateError(null);
+    } catch (error) {
+      console.error('Error updating evaluation table:', error);
+      setUpdateError('Failed to update evaluation table');
+      setUpdateSuccess(null);
+    }
+  };
 
   // Fetch Visual Conditions from API
   useEffect(() => {
@@ -73,9 +124,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
       setLoadingConditions(true);
       try {
         const response = await fetch(`${BASE_URL}/api/visual-conditions`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch visual conditions');
-        }
+        if (!response.ok) throw new Error('Failed to fetch visual conditions');
         const data = await response.json();
         setVisualConditions(data);
       } catch (error) {
@@ -90,7 +139,6 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         setLoadingConditions(false);
       }
     };
-
     fetchVisualConditions();
   }, []);
 
@@ -100,9 +148,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
       setLoadingWorkKinds(true);
       try {
         const response = await fetch(`${BASE_URL}/api/work-kinds`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch work kinds');
-        }
+        if (!response.ok) throw new Error('Failed to fetch work kinds');
         const data = await response.json();
         setWorkKinds(data);
       } catch (error) {
@@ -112,11 +158,10 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         setLoadingWorkKinds(false);
       }
     };
-
     fetchWorkKinds();
   }, []);
 
-  // Fetch Damage Counts for the specific bridge
+  // Fetch Damage Counts
   useEffect(() => {
     const fetchDamageCounts = async () => {
       if (!inventoryData?.uu_bms_id) return;
@@ -125,11 +170,8 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         const response = await fetch(
           `${BASE_URL}/api/damage-counts?uu_bms_id=${inventoryData.uu_bms_id}`
         );
-        if (!response.ok) {
-          throw new Error('Failed to fetch damage counts');
-        }
+        if (!response.ok) throw new Error('Failed to fetch damage counts');
         const data = await response.json();
-        // Transform data into a map of WorkKindID to damage level counts
         const countsMap = {};
         data.forEach((item) => {
           countsMap[item.WorkKindID] = item;
@@ -142,52 +184,42 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         setLoadingDamageCounts(false);
       }
     };
-
     fetchDamageCounts();
   }, [inventoryData?.uu_bms_id]);
 
-  // Set initial overall condition from inventoryData
+  // Set initial overall condition and remarks
   useEffect(() => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
     if (inventoryData?.overall_remarks_rams) {
-      setOverallRemarksRams(inventoryData.overall_remarks_rams); // Initialize Remarks if available
+      setOverallRemarksRams(inventoryData.overall_remarks_rams);
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
-      setIsBridgeCompleted(inventoryData.is_bridge_completed); // Initialize toggle if available
+      setIsBridgeCompleted(inventoryData.is_bridge_completed);
     }
     if (inventoryData?.overall_remarks_con) {
-      setOverallRemarksCon(inventoryData.overall_remarks_con); // Initialize Remarks Rams if
+      setOverallRemarksCon(inventoryData.overall_remarks_con);
     }
   }, [inventoryData]);
 
-  // Handle condition selection and API update
+  // Handle condition select
   const handleConditionSelect = async (e) => {
     const selectedCondition = e.target.value;
     setOverallCondition(selectedCondition);
 
     if (selectedCondition) {
       try {
-        const requestData = {
-          overall_bridge_condition: selectedCondition,
-        };
-
+        const requestData = { overall_bridge_condition: selectedCondition };
         const response = await fetch(
           `${BASE_URL}/api/update-overall-condition/${inventoryData.uu_bms_id}`,
           {
             method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData),
           }
         );
-
-        if (!response.ok) {
-          throw new Error('Failed to update overall bridge condition');
-        }
-
+        if (!response.ok) throw new Error('Failed to update overall bridge condition');
         const result = await response.json();
         setUpdateSuccess(result.message);
         setUpdateError(null);
@@ -199,32 +231,22 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     }
   };
 
-  // Handle save for Remarks and Is Bridge Completed
+  // Save remarks and toggle
   const handleSaveRemarksAndToggle = async () => {
     try {
       const requestData = {
         overall_remarks: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
       };
-
-      console.log('Request Data:', requestData);
-      // return;
-
       const response = await fetch(
         `${BASE_URL}/api/update-remarks-toggle-evaluator/${inventoryData.uu_bms_id}`,
         {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestData),
         }
       );
-
-      if (!response.ok) {
-        throw new Error('Failed to update remarks and toggle');
-      }
-
+      if (!response.ok) throw new Error('Failed to update remarks and toggle');
       const result = await response.json();
       setUpdateSuccess(result.message);
       setUpdateError(null);
@@ -235,63 +257,33 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     }
   };
 
-  // Map visual conditions to colors
+  // Style helper
   const getConditionStyle = (condition) => {
     switch (condition.toLowerCase()) {
-      case 'good':
-        return {
-          backgroundColor: '#9FD585',
-          color: 'black',
-          fontWeight: 'bold',
-        };
-      case 'fair':
-        return {
-          backgroundColor: '#FFD685',
-          color: 'black',
-          fontWeight: 'bold',
-        };
-      case 'poor':
-        return {
-          backgroundColor: '#FF8585',
-          color: 'black',
-          fontWeight: 'bold',
-        };
-      case 'under construction':
-        return {
-          backgroundColor: '#DBDBDB',
-          color: 'black',
-          fontWeight: 'bold',
-        };
-      default:
-        return {};
+      case 'good': return { backgroundColor: '#9FD585', fontWeight: 'bold' };
+      case 'fair': return { backgroundColor: '#FFD685', fontWeight: 'bold' };
+      case 'poor': return { backgroundColor: '#FF8585', fontWeight: 'bold' };
+      case 'under construction': return { backgroundColor: '#DBDBDB', fontWeight: 'bold' };
+      default: return {};
     }
   };
 
   return (
-    <div
-      className="card p-3 mt-3"
-      style={{
-        background: '#CFE2FF',
-        border: '2px solid #60A5FA',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-      }}
-    >
+    <div className="card p-3 mt-3" style={{ background: '#CFE2FF', border: '2px solid #60A5FA' }}>
       <div className="mb-4">
         <h4 className="text-center mb-3">Damage Status</h4>
         <div className="d-flex justify-content-around mb-3">
-          <button style={{ backgroundColor: '#9FD585', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>No Damage</button>
-          <button style={{ backgroundColor: '#DBDBDB', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Invisible</button>
-          <button style={{ backgroundColor: '#00C4FF', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Good</button>
-          <button style={{ backgroundColor: '#FFD685', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Fair</button>
-          <button style={{ backgroundColor: '#FFAA00', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Poor</button>
-          <button style={{ backgroundColor: '#FF0000', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Severe</button>
+          <button style={{ backgroundColor: '#9FD585', padding: '5px 15px', borderRadius: '10px' }}>No Damage</button>
+          <button style={{ backgroundColor: '#DBDBDB', padding: '5px 15px', borderRadius: '10px' }}>Invisible</button>
+          <button style={{ backgroundColor: '#00C4FF', padding: '5px 15px', borderRadius: '10px' }}>Good</button>
+          <button style={{ backgroundColor: '#FFD685', padding: '5px 15px', borderRadius: '10px' }}>Fair</button>
+          <button style={{ backgroundColor: '#FFAA00', padding: '5px 15px', borderRadius: '10px' }}>Poor</button>
+          <button style={{ backgroundColor: '#FF0000', padding: '5px 15px', borderRadius: '10px' }}>Severe</button>
         </div>
         <div className="d-flex flex-wrap justify-content-around">
           {loadingWorkKinds || loadingDamageCounts ? (
             <div className="text-center py-2 w-100">
-              <Spinner animation="border" size="sm" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
+              <Spinner animation="border" size="sm" />
             </div>
           ) : error ? (
             <div className="text-danger text-center w-100">{error}</div>
@@ -306,29 +298,16 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
           )}
         </div>
       </div>
+
+      {/* Overall Bridge Condition */}
       <Form.Group>
-        <Form.Label
-          className="custom-label"
-          style={{ fontWeight: 'bold', color: '#1E3A8A' }}
-        >
+        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>
           Overall Bridge Condition
         </Form.Label>
         {loadingConditions ? (
-          <div className="text-center py-2">
-            <Spinner animation="border" size="sm" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </Spinner>
-          </div>
+          <Spinner animation="border" size="sm" />
         ) : (
-          <Form.Select
-            value={overallCondition}
-            onChange={handleConditionSelect}
-            style={{
-              padding: '8px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-            }}
-          >
+          <Form.Select value={overallCondition} onChange={handleConditionSelect}>
             <option value="">-- Select Condition --</option>
             {visualConditions.map((condition) => (
               <option
@@ -341,44 +320,59 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
             ))}
           </Form.Select>
         )}
-        {updateSuccess && (
-          <div className="text-success mt-2">{updateSuccess}</div>
-        )}
-        {updateError && (
-          <div className="text-danger mt-2">{updateError}</div>
-        )}
       </Form.Group>
-        {/* <Form.Group className="mt-3">
-        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Consultant)</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={3}
-          value={overallRemarksCon}
-          placeholder="Enter overall remarks..."
-          style={{ resize: 'vertical' }}
-          disabled
-        />
-      </Form.Group>
+
+      {/* --- New Evaluation Table --- */}
+      <div className="mt-4">
+        <h5 className="text-center mb-3">Bridge Component Evaluation</h5>
+        <Form>
+          <table className="table table-bordered text-center">
+            <thead>
+              <tr>
+                <th>Bridge Components</th>
+                {factors.map((factor) => (
+                  <th key={factor}>{factor}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {components.map((component) => (
+                <tr key={component}>
+                  <td>{component}</td>
+                  {factors.map((factor) => (
+                    <td key={factor}>
+                      <Form.Select
+                        value={evaluationState[component]?.[factor] || ""}
+                        onChange={(e) =>
+                          handleEvaluationChange(component, factor, e.target.value)
+                        }
+                      >
+                        <option value="">-- Select --</option>
+                        {evaluationOptions.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </Form.Select>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Button variant="success" onClick={handleSaveEvaluation}>Save Evaluation</Button>
+        </Form>
+      </div>
+
+      {/* Remarks & Toggle */}
       <Form.Group className="mt-3">
-        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Rams)</Form.Label>
+        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>
+          Overall Remarks (Evaluator)
+        </Form.Label>
         <Form.Control
           as="textarea"
           rows={3}
           value={overallRemarks}
           onChange={(e) => setOverallRemarks(e.target.value)}
           placeholder="Enter overall remarks..."
-          style={{ resize: 'vertical' }}
-        />
-      </Form.Group> */}
-       <Form.Group className="mt-3">
-        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Evaluator)</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={3}
-          value={overallRemarks}
-          onChange={(e) => setOverallRemarks(e.target.value)}
-          placeholder="Enter overall remarks..."
-          style={{ resize: 'vertical' }}
         />
       </Form.Group>
 
@@ -391,10 +385,11 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
           onChange={(e) => setIsBridgeCompleted(e.target.checked)}
           style={{ marginRight: '15px' }}
         />
-        <Button variant="primary" onClick={handleSaveRemarksAndToggle}>
-          Save
-        </Button>
+        <Button variant="primary" onClick={handleSaveRemarksAndToggle}>Save</Button>
       </Form.Group>
+
+      {updateSuccess && <div className="text-success mt-2">{updateSuccess}</div>}
+      {updateError && <div className="text-danger mt-2">{updateError}</div>}
     </div>
   );
 };
