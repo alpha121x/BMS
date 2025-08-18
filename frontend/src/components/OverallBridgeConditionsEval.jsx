@@ -72,9 +72,9 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const components = [
     "Superstructure",
     "Substructure",
-    "Connections",
-    "Protection Work",
-    "Expansion Joint",
+    "Connections b/w the Superstructure and Substructure",
+    "Protection Work (wing wall, approach slab, guide banks etc.)",
+    "Expansion Joint, Pavement, and Railing, drainage etc.",
     "Bridge (As a Whole)"
   ];
   const factors = ["Live Load", "Earthquake", "Heavy Rain/Flooding"];
