@@ -64,6 +64,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const [error, setError] = useState(null);
   const [overallRemarks, setOverallRemarks] = useState(''); // New state for Overall Remarks
   const [overallRemarksCon, setOverallRemarksCon] = useState(''); // New state for Overall Remarks Rams
+  const [overallRemarksRams, setOverallRemarksRams] = useState(''); // New state for Overall Remarks Rams
   const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // New state for Is Bridge Completed
 
   // Fetch Visual Conditions from API
@@ -151,7 +152,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
     if (inventoryData?.overall_remarks_rams) {
-      setOverallRemarks(inventoryData.overall_remarks_rams); // Initialize Remarks if available
+      setOverallRemarksRams(inventoryData.overall_remarks_rams); // Initialize Remarks if available
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
       setIsBridgeCompleted(inventoryData.is_bridge_completed); // Initialize toggle if available
@@ -210,7 +211,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
       // return;
 
       const response = await fetch(
-        `${BASE_URL}/api/update-remarks-toggle-rams/${inventoryData.uu_bms_id}`,
+        `${BASE_URL}/api/update-remarks-toggle-evaluator/${inventoryData.uu_bms_id}`,
         {
           method: 'PUT',
           headers: {
@@ -347,7 +348,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
           <div className="text-danger mt-2">{updateError}</div>
         )}
       </Form.Group>
-        <Form.Group className="mt-3">
+        {/* <Form.Group className="mt-3">
         <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Consultant)</Form.Label>
         <Form.Control
           as="textarea"
@@ -368,7 +369,19 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
           placeholder="Enter overall remarks..."
           style={{ resize: 'vertical' }}
         />
+      </Form.Group> */}
+       <Form.Group className="mt-3">
+        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Evaluator)</Form.Label>
+        <Form.Control
+          as="textarea"
+          rows={3}
+          value={overallRemarks}
+          onChange={(e) => setOverallRemarks(e.target.value)}
+          placeholder="Enter overall remarks..."
+          style={{ resize: 'vertical' }}
+        />
       </Form.Group>
+
       <Form.Group className="mt-3 d-flex align-items-center">
         <FormCheck
           type="switch"
