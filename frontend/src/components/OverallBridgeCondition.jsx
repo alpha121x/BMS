@@ -178,9 +178,9 @@ const OverallBridgeCondition = ({ inventoryData }) => {
       };
 
       const response = await fetch(
-        `${BASE_URL}/api/update-overall-remarks-con/${inventoryData.uu_bms_id}`,
+        `${BASE_URL}/api/update-bridge-data`,
         {
-          method: 'PUT',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },

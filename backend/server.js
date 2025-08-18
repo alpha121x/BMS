@@ -5600,7 +5600,7 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
     let query = `
       SELECT 
         t.uu_bms_id,
-        CONCAT(m.pms_sec_id, ' ', m.structure_no) AS bridge_name,
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
         COUNT(*) FILTER (WHERE t.qc_rams = 2) AS approved_insp,
         SUM(
           CASE 
@@ -5625,7 +5625,7 @@ app.get("/api/bridge-status-summary-rams", async (req, res) => {
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       conditions.push(
-        `LOWER(CONCAT(m.pms_sec_id, ' ', m.structure_no)) ILIKE $${
+        `LOWER(CONCAT(m.pms_sec_id, ',', m.structure_no)) ILIKE $${
           conditions.length + 1
         }`
       );
@@ -7519,6 +7519,65 @@ app.put('/api/update-overall-remarks-rams/:id', async (req, res) => {
   }
 });
 
+
+app.post('/api/update-bridge-data', async (req, res) => {
+  const { overall_bridge_condition, overall_remarks, is_bridge_completed, user_id, uu_bms_id, evaluation_rating } = req.body;
+
+  if (!uu_bms_id) {
+    return res.status(400).json({ error: 'uu_bms_id is required' });
+  }
+
+  if (!user_id) {
+    return res.status(400).json({ error: 'user_id is required' });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Step 1: Update overall_bridge_condition and is_bridge_completed in tbl_bms_master_data
+    const updateQuery = `
+      UPDATE bms.tbl_bms_master_data
+      SET overall_bridge_condition = $1,
+          is_bridge_completed = $2
+      WHERE uu_bms_id = $3
+      RETURNING uu_bms_id, overall_bridge_condition, is_bridge_completed
+    `;
+    const updateValues = [overall_bridge_condition || null, is_bridge_completed, uu_bms_id];
+    const updateResult = await client.query(updateQuery, updateValues);
+
+    if (updateResult.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Bridge not found' });
+    }
+
+    // Step 2: Insert remarks into tbl_bms_master_data_remarks
+    const insertQuery = `
+      INSERT INTO bms.tbl_bms_master_data_remarks (uu_bms_id, user_id, remarks, evaluation_rating)
+      VALUES ($1, $2, $3, $4)
+      RETURNING raw_id, uu_bms_id, user_id, date_time, remarks
+    `;
+    const insertValues = [uu_bms_id, user_id, overall_remarks || null, null]; // evaluation_rating set to null if not provided
+    const insertResult = await client.query(insertQuery, insertValues);
+
+    await client.query('COMMIT');
+
+    res.json({
+      message: 'Bridge condition updated and remarks inserted successfully',
+      data: {
+        master_data: updateResult.rows[0],
+        remarks: insertResult.rows[0],
+      },
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error updating bridge data and remarks:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
 
 // API endpoint to update remarks and toggle rams
 app.put('/api/update-overall-remarks-eval/:id', async (req, res) => {
