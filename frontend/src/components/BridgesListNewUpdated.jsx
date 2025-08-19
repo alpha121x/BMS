@@ -232,15 +232,26 @@ const BridgesListNewUpdated = ({
       }));
 
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Overview Photo ${i}`, key: `photo${i}`, width: 22 });
+        columns.push({
+          header: `Overview Photo ${i}`,
+          key: `photo${i}`,
+          width: 22,
+        });
       }
       for (let i = 1; i <= 5; i++) {
-        columns.push({ header: `Inspection Photo ${i}`, key: `inspection${i}`, width: 22 });
+        columns.push({
+          header: `Inspection Photo ${i}`,
+          key: `inspection${i}`,
+          width: 22,
+        });
       }
 
       worksheet.columns = columns;
       worksheet.getRow(1).font = { bold: true, size: 14 };
-      worksheet.getRow(1).alignment = { vertical: "middle", horizontal: "center" };
+      worksheet.getRow(1).alignment = {
+        vertical: "middle",
+        horizontal: "center",
+      };
       worksheet.getRow(1).height = 25;
 
       for (let i = 0; i < summaryData.length; i++) {
@@ -264,7 +275,10 @@ const BridgesListNewUpdated = ({
                 extension: "jpeg",
               });
               worksheet.addImage(imageId, {
-                tl: { col: columnKeys.length + columnOffset + j, row: rowIndex - 1 },
+                tl: {
+                  col: columnKeys.length + columnOffset + j,
+                  row: rowIndex - 1,
+                },
                 ext: { width: 150, height: 90 },
               });
             } catch (error) {
@@ -288,15 +302,66 @@ const BridgesListNewUpdated = ({
   };
 
   const columns = [
-    { name: "District", selector: (row) => row.district || "N/A", sortable: true, wrap: true },
-    { name: "Bridge Name", selector: (row) => `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`, sortable: true, wrap: true },
-    { name: "Structure Type", selector: (row) => row.structure_type || "N/A", sortable: true, wrap: true },
-    { name: "Construction Type", selector: (row) => row.construction_type || "N/A", sortable: true, wrap: true },
-    { name: "Road Classfication", selector: (row) => row.road_classification || "N/A", sortable: true, wrap: true },
-    { name: "Bridge Situations", selector: (row) => row.bridge_situations || "N/A", sortable: true, wrap: true },
-    { name: "Age (Y)", selector: (row) => row.age || "N/A", sortable: true, wrap: true },
-    { name: "Structure Length", selector: (row) => row.bridge_length || "N/A", sortable: true, wrap: true },
-    { name: "Date Time", selector: (row) => row.data_date_time ? new Date(row.data_date_time).toLocaleString() : "N/A", sortable: true, wrap: true },
+    {
+      name: "District",
+      selector: (row) => row.district || "N/A",
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: "Bridge Name",
+      selector: (row) =>
+        `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: "Structure Type",
+      selector: (row) => row.structure_type || "N/A",
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: "Construction Type",
+      selector: (row) => row.construction_type || "N/A",
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: "Road Classfication",
+      selector: (row) => row.road_classification || "N/A",
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: "Bridge Situations",
+      selector: (row) => row.bridge_situations || "N/A",
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: "Age (Y)",
+      selector: (row) => row.age || "N/A",
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: "Structure Length (m)",
+      selector: (row) =>
+        row.bridge_length !== null && row.bridge_length !== undefined
+          ? parseFloat(row.bridge_length).toFixed(2)
+          : "—",
+      sortable: true,
+    },
+    {
+      name: "Date Time",
+      selector: (row) =>
+        row.data_date_time
+          ? new Date(row.data_date_time).toLocaleString()
+          : "N/A",
+      sortable: true,
+      wrap: true,
+    },
     {
       name: "Action",
       cell: (row) => (
@@ -349,7 +414,13 @@ const BridgesListNewUpdated = ({
 
   const customStyles = {
     headCells: {
-      style: { backgroundColor: "#005D7F", color: "#fff", fontSize: "14px", fontWeight: "bold", border: "1px solid #dee2e6" },
+      style: {
+        backgroundColor: "#005D7F",
+        color: "#fff",
+        fontSize: "14px",
+        fontWeight: "bold",
+        border: "1px solid #dee2e6",
+      },
     },
     cells: {
       style: { fontSize: "13px", border: "1px solid #dee2e6" },
@@ -361,26 +432,59 @@ const BridgesListNewUpdated = ({
 
   return (
     <>
-      <div className="card p-0 rounded-lg text-black" style={{ background: "#FFFFFF", boxShadow: "0 4px 8px rgba(0,0,0,0.2)" }}>
+      <div
+        className="card p-0 rounded-lg text-black"
+        style={{
+          background: "#FFFFFF",
+          boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+        }}
+      >
         <div className="card-header p-2" style={{ background: "#005D7F" }}>
           <div className="flex items-center justify-between text-white">
             <h5 className="mb-0">Inventory</h5>
-            <h6 className="mb-0">Structures Count:
-              <span className="badge text-white ms-2" style={{ background: "#009CB8" }}>{bridgeCount || 0}</span>
+            <h6 className="mb-0">
+              Structures Count:
+              <span
+                className="badge text-white ms-2"
+                style={{ background: "#009CB8" }}
+              >
+                {bridgeCount || 0}
+              </span>
             </h6>
             <div className="flex items-center gap-1">
-              <button className="btn text-white" onClick={handleDownloadCSV} disabled={loadingCSV}>
+              <button
+                className="btn text-white"
+                onClick={handleDownloadCSV}
+                disabled={loadingCSV}
+              >
                 <FaFileCsv /> {loadingCSV ? "Downloading..." : "CSV"}
               </button>
-              <button className="btn text-white" onClick={handleDownloadExcel} disabled={loadingExcel}>
-                {loadingExcel ? <><FaSpinner className="animate-spin mr-2" />Downloading...</> : <><FaFileExcel /> Excel</>}
+              <button
+                className="btn text-white"
+                onClick={handleDownloadExcel}
+                disabled={loadingExcel}
+              >
+                {loadingExcel ? (
+                  <>
+                    <FaSpinner className="animate-spin mr-2" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <FaFileExcel /> Excel
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
 
         <div className="card-body p-2">
-          {error && <div className="text-danger text-center"><strong>Error:</strong> {error}</div>}
+          {error && (
+            <div className="text-danger text-center">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
           <DataTable
             columns={columns}
             data={tableData}
@@ -392,7 +496,9 @@ const BridgesListNewUpdated = ({
             onChangePage={(page) => setCurrentPage(page)}
             onRowClicked={(row) => handleRowClick(row)}
             customStyles={customStyles}
-            noDataComponent={<div className="text-center p-4">No data available</div>}
+            noDataComponent={
+              <div className="text-center p-4">No data available</div>
+            }
             highlightOnHover
             pointerOnHover
             responsive
@@ -401,34 +507,78 @@ const BridgesListNewUpdated = ({
       </div>
 
       <Modal show={showModal} onHide={handleCloseModal} size="lg" centered>
-        <Modal.Header closeButton><Modal.Title>Bridge Inventory Details</Modal.Title></Modal.Header>
-        <Modal.Body>{selectedBridge && <InventoryInfo inventoryData={selectedBridge} />}</Modal.Body>
-      </Modal>
-
-      <Modal show={showInspectionModal} onHide={handleCloseInspectionModal} size="lg" centered>
-        <Modal.Header closeButton><Modal.Title>Inspection Details</Modal.Title></Modal.Header>
+        <Modal.Header closeButton>
+          <Modal.Title>Bridge Inventory Details</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          {selectedBridge && user_type === "consultant" && <InspectionListCon bridgeId={selectedBridge.uu_bms_id} />}
-          {selectedBridge && user_type === "rams" && <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />}
-          {selectedBridge && user_type === "evaluator" && <InspectionListEvaluator bridgeId={selectedBridge.uu_bms_id} />}
+          {selectedBridge && <InventoryInfo inventoryData={selectedBridge} />}
         </Modal.Body>
       </Modal>
 
-      <Modal show={showConditionModal} onHide={handleCloseConditionModal} size="lg" centered>
-        <Modal.Header closeButton><Modal.Title>Overall Bridge Condition</Modal.Title></Modal.Header>
+      <Modal
+        show={showInspectionModal}
+        onHide={handleCloseInspectionModal}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Inspection Details</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          {selectedBridge && user_type === "consultant" && <OverallBridgeCondition inventoryData={selectedBridge} />}
-          {selectedBridge && user_type === "rams" && <OverallBridgeConditionRams inventoryData={selectedBridge} />}
-          {selectedBridge && user_type === "evaluator" && <OverallBridgeConditionEval inventoryData={selectedBridge} />}
+          {selectedBridge && user_type === "consultant" && (
+            <InspectionListCon bridgeId={selectedBridge.uu_bms_id} />
+          )}
+          {selectedBridge && user_type === "rams" && (
+            <InspectionListRams bridgeId={selectedBridge.uu_bms_id} />
+          )}
+          {selectedBridge && user_type === "evaluator" && (
+            <InspectionListEvaluator bridgeId={selectedBridge.uu_bms_id} />
+          )}
         </Modal.Body>
       </Modal>
 
-      <Modal show={showMapModal} onHide={handleCloseMapModal} size="lg" centered>
-        <Modal.Header closeButton><Modal.Title>Bridge Location on Map</Modal.Title></Modal.Header>
+      <Modal
+        show={showConditionModal}
+        onHide={handleCloseConditionModal}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Overall Bridge Condition</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
-          {selectedLocation && <MapModal location={selectedLocation} onClose={handleCloseMapModal}
-            markerLabel={selectedLocation?.name || "Bridge Location"} bridgeName={selectedLocation?.bridgeName}
-            district={selectedLocation?.district} road={selectedLocation?.road} />}
+          {selectedBridge && user_type === "consultant" && (
+            <OverallBridgeCondition inventoryData={selectedBridge} />
+          )}
+          {selectedBridge && user_type === "rams" && (
+            <OverallBridgeConditionRams inventoryData={selectedBridge} />
+          )}
+          {selectedBridge && user_type === "evaluator" && (
+            <OverallBridgeConditionEval inventoryData={selectedBridge} />
+          )}
+        </Modal.Body>
+      </Modal>
+
+      <Modal
+        show={showMapModal}
+        onHide={handleCloseMapModal}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Bridge Location on Map</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedLocation && (
+            <MapModal
+              location={selectedLocation}
+              onClose={handleCloseMapModal}
+              markerLabel={selectedLocation?.name || "Bridge Location"}
+              bridgeName={selectedLocation?.bridgeName}
+              district={selectedLocation?.district}
+              road={selectedLocation?.road}
+            />
+          )}
         </Modal.Body>
       </Modal>
     </>

@@ -35,27 +35,9 @@
 // export default TopCardCon;
 
 import React, { useState } from "react";
+import { Modal } from "react-bootstrap"; // 👈 Bootstrap modal
 import { BASE_URL } from "./config";
 import StructuresTable from "./StructuresTable"; // import here
-
-// Example modal component
-const Modal = ({ isOpen, onClose, title, children }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-center border-b pb-2 mb-4">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} className="text-red-500 font-bold text-lg">
-            ×
-          </button>
-        </div>
-        {children}
-      </div>
-    </div>
-  );
-};
 
 const TopCardCon = ({ inspectedCards }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -85,6 +67,7 @@ const TopCardCon = ({ inspectedCards }) => {
 
   return (
     <div className="mb-2">
+      {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {inspectedCards.map((card, index) => (
           <div
@@ -109,17 +92,26 @@ const TopCardCon = ({ inspectedCards }) => {
         ))}
       </div>
 
-      {/* Modal */}
+      {/* ✅ Bootstrap Modal */}
       <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={selectedType ? `Structures: ${selectedType}` : "Structures"}
-        className="max-w-4xl" // 👈 makes it large
+        show={modalOpen}
+        onHide={() => setModalOpen(false)}
+        size="lg"
+        centered
       >
-        <StructuresTable data={structures} />
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {selectedType ? `Structures: ${selectedType}` : "Structures"}
+          </Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <StructuresTable data={structures} />
+        </Modal.Body>
       </Modal>
     </div>
   );
 };
 
 export default TopCardCon;
+

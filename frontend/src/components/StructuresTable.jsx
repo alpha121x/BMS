@@ -61,25 +61,28 @@ const columns = [
     sortable: true,
   },
   {
-    name: "Type",
+    name: "Structure Type",
     selector: (row) => row.structure_type,
     sortable: true,
   },
   {
-    name: "Condition",
-    selector: (row) => row.overall_bridge_condition,
+    name: "Construction Type",
+    selector: (row) => row.construction_type,
     sortable: true,
   },
   {
-    name: "Year",
-    selector: (row) => row.construction_year || "—",
+    name: "Age (Years)",
+    selector: (row) => row.age || "—",
     sortable: true,
   },
   {
-    name: "Length (m)",
-    selector: (row) => row.bridge_length || "—",
-    sortable: true,
-  },
+  name: "Structure Length (m)",
+  selector: (row) => 
+    row.bridge_length !== null && row.bridge_length !== undefined
+      ? parseFloat(row.bridge_length).toFixed(2)
+      : "—",
+  sortable: true,
+},
 ];
 
 const StructuresTable = ({ data }) => {
