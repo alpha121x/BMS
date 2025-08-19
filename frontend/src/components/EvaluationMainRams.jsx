@@ -26,7 +26,41 @@ const EvaluationMainRams = () => {
   const bridges_status_summary = "bridge-status-summary-rams";
   const map_endpoint = "inspection-points-rams";
 
-const fetchInspectionCounts = async () => {
+  // const fetchInspectionCounts = async () => {
+  //   if (!districtId) return; // Avoid unnecessary API calls
+
+  //   try {
+  //     const response = await fetch(
+  //       `${BASE_URL}/api/inspection-counts-rams?districtId=${districtId}`
+  //     );
+  //     const data = await response.json();
+
+  //     setInspectedCards([
+  //       {
+  //         label: "Pending Records",
+  //         value: data.pending || "N/A",
+  //         icon: <FaClipboardList />,
+  //         color: "#33B1C7",
+  //       },
+  //       {
+  //         label: "Approved Records",
+  //         value: data.approved || "N/A",
+  //         icon: <FaClipboardCheck />,
+  //         color: "#005D7F",
+  //       },
+  //     ]);
+  //   } catch (error) {
+  //     console.error("Error fetching inspection counts:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchInspectionCounts();
+  // }, []);
+
+  // Show back-to-top button based on scroll position
+ 
+ const fetchInspectionCounts = async () => {
   if (!districtId) return; // Avoid unnecessary API calls
 
   try {
@@ -74,8 +108,7 @@ useEffect(() => {
   fetchInspectionCounts();
 }, [districtId]); // Only re-fetch when districtId changes
 
-
-  // Show back-to-top button based on scroll position
+ 
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
