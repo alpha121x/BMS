@@ -35,6 +35,8 @@
 // export default TopCardCon;
 
 import React, { useState } from "react";
+import { BASE_URL } from "./config";
+import StructuresTable from "./StructuresTable"; // import here
 
 // Example modal component
 const Modal = ({ isOpen, onClose, title, children }) => {
@@ -45,7 +47,9 @@ const Modal = ({ isOpen, onClose, title, children }) => {
       <div className="bg-white rounded-lg shadow-lg p-6 w-[600px] max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center border-b pb-2 mb-4">
           <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} className="text-red-500 font-bold text-lg">×</button>
+          <button onClick={onClose} className="text-red-500 font-bold text-lg">
+            ×
+          </button>
         </div>
         {children}
       </div>
@@ -70,8 +74,7 @@ const TopCardCon = ({ inspectedCards }) => {
     setModalOpen(true);
 
     try {
-      // Call API depending on type
-      const response = await fetch(`/api/structures?type=${type}`);
+      const response = await fetch(`${BASE_URL}/api/strucutres?type=${type}`);
       const data = await response.json();
       setStructures(data || []);
     } catch (err) {
@@ -86,7 +89,7 @@ const TopCardCon = ({ inspectedCards }) => {
         {inspectedCards.map((card, index) => (
           <div
             key={index}
-            onClick={() => handleCardClick(card.type)} // pass type to backend
+            onClick={() => handleCardClick(card.type)}
             className="cursor-pointer rounded-lg shadow-md text-white transition-all duration-300 hover:shadow-xl px-3 py-5"
             style={{
               background: card.color,
@@ -95,7 +98,9 @@ const TopCardCon = ({ inspectedCards }) => {
             }}
           >
             <div className="flex flex-col items-start">
-              <h6 className="mb-1 font-semibold text-white text-lg">{card.label}</h6>
+              <h6 className="mb-1 font-semibold text-white text-lg">
+                {card.label}
+              </h6>
               <div className="text-3xl font-bold text-white">
                 {addCommas(card.value)}
               </div>
@@ -109,20 +114,12 @@ const TopCardCon = ({ inspectedCards }) => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={selectedType ? `Structures: ${selectedType}` : "Structures"}
+        className="max-w-4xl" // 👈 makes it large
       >
-        {structures.length > 0 ? (
-          <ul className="list-disc pl-5 space-y-2">
-            {structures.map((item, i) => (
-              <li key={i}>{item.bridge_name || `Structure #${i + 1}`}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No structures found.</p>
-        )}
+        <StructuresTable data={structures} />
       </Modal>
     </div>
   );
 };
 
 export default TopCardCon;
-
