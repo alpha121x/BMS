@@ -4,7 +4,7 @@ import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
 import Map from "./MapEval";
-import { FaClipboardCheck, FaClipboardList } from "react-icons/fa";
+import { FaClipboardCheck, FaClipboardList, FaUserCheck, FaTimesCircle } from "react-icons/fa";
 import TopCardsCon from "./TopCardsCon";
 import Filters from "./Filters";
 import { FaBridge } from "react-icons/fa6";
@@ -26,37 +26,53 @@ const EvaluationMainCon = () => {
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const bridges_status_summary = "bridge-status-summary";
 
-  const fetchInspectionCounts = async () => {
-    if (!districtId) return; // Avoid unnecessary API calls
+const fetchInspectionCounts = async () => {
+  if (!districtId) return; // Avoid unnecessary API calls
 
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/inspection-counts-con?districtId=${districtId}`
-      );
-      const data = await response.json();
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/project-progress-summary?districtId=${districtId}`
+    );
+    const result = await response.json();
+
+    if (result.success && result.data) {
+      const data = result.data;
 
       setInspectedCards([
         {
-          label: "Pending Records",
-          value: data.pending || "N/A",
-          icon: <FaClipboardList />,
+          label: "Inspected by Bridge Inspectors",
+          value: data.inspected_by_bridge_inspectors || "N/A",
+          icon: <FaUserCheck />,
           color: "#33B1C7",
         },
         {
-          label: "Approved Records",
-          value: data.approved || "N/A",
+          label: "Unapproved Structures",
+          value: data.unapproved_structures || "N/A",
+          icon: <FaTimesCircle />,
+          color: "#E57373",
+        },
+        {
+          label: "Submitted to RAMS",
+          value: data.submitted_to_rams || "N/A",
+          icon: <FaClipboardList />,
+          color: "#FFB74D",
+        },
+        {
+          label: "Approved Structures",
+          value: data.approved_structures || "N/A",
           icon: <FaClipboardCheck />,
-          color: "#005D7F",
+          color: "#4CAF50",
         },
       ]);
-    } catch (error) {
-      console.error("Error fetching inspection counts:", error);
     }
-  };
+  } catch (error) {
+    console.error("Error fetching inspection counts:", error);
+  }
+};
 
-  useEffect(() => {
-    fetchInspectionCounts();
-  }, [districtId, structureType, bridgeName]); // Re-run the effect when any of these state variables change
+useEffect(() => {
+  fetchInspectionCounts();
+}, [districtId]); // Only re-fetch when districtId changes
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
