@@ -24,7 +24,6 @@ const EvaluationMainRams = () => {
   const [inspectedCards, setInspectedCards] = useState([]);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const bridges_status_summary = "bridge-status-summary-rams";
-  const map_endpoint = "inspection-points-rams";
 
   // const fetchInspectionCounts = async () => {
   //   if (!districtId) return; // Avoid unnecessary API calls
