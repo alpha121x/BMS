@@ -173,9 +173,12 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         overall_remarks: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
         user_id: userId,
-        userId: userId,
         uu_bms_id: inventoryData.uu_bms_id,
+        raw_id: inventoryData.raw_id,
       };
+
+      console.log('Request Data:', requestData);
+      // return;
 
       const response = await fetch(
         `${BASE_URL}/api/update-bridge-data`,

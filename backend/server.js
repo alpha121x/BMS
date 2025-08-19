@@ -7551,9 +7551,17 @@ app.put('/api/update-overall-remarks-rams/:id', async (req, res) => {
   }
 });
 
-
+// API endpoint to update bridge data and insert remarks Evaluation Module..
 app.post('/api/update-bridge-data', async (req, res) => {
-  const { overall_bridge_condition, overall_remarks, is_bridge_completed, user_id, uu_bms_id, evaluation_rating } = req.body;
+  const { 
+    overall_bridge_condition, 
+    overall_remarks, 
+    is_bridge_completed, 
+    user_id, 
+    uu_bms_id, 
+    evaluation_rating,
+    raw_id
+  } = req.body;
 
   if (!uu_bms_id) {
     return res.status(400).json({ error: 'uu_bms_id is required' });
@@ -7568,29 +7576,50 @@ app.post('/api/update-bridge-data', async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    // Step 1: Update overall_bridge_condition and is_bridge_completed in tbl_bms_master_data
-    const updateQuery = `
-      UPDATE bms.tbl_bms_master_data
-      SET overall_bridge_condition = $1,
-          is_bridge_completed = $2
-      WHERE uu_bms_id = $3
-      RETURNING uu_bms_id, overall_bridge_condition, is_bridge_completed
-    `;
-    const updateValues = [overall_bridge_condition || null, is_bridge_completed, uu_bms_id];
-    const updateResult = await client.query(updateQuery, updateValues);
+    // --- Step 1: Update master data (only update provided fields) ---
+    let updateFields = [];
+    let updateValues = [];
+    let idx = 1;
 
-    if (updateResult.rowCount === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ error: 'Bridge not found' });
+    if (overall_bridge_condition !== undefined) {
+      updateFields.push(`overall_bridge_condition = $${idx++}`);
+      updateValues.push(overall_bridge_condition);
+    }
+    if (is_bridge_completed !== undefined) {
+      updateFields.push(`is_bridge_completed = $${idx++}`);
+      updateValues.push(is_bridge_completed);
     }
 
-    // Step 2: Insert remarks into tbl_bms_master_data_remarks
+    if (updateFields.length > 0) {
+      updateValues.push(uu_bms_id);
+      const updateQuery = `
+        UPDATE bms.tbl_bms_master_data
+        SET ${updateFields.join(', ')}
+        WHERE uu_bms_id = $${idx}
+        RETURNING uu_bms_id, overall_bridge_condition, is_bridge_completed
+      `;
+      const updateResult = await client.query(updateQuery, updateValues);
+
+      if (updateResult.rowCount === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Bridge not found' });
+      }
+    }
+
+    // --- Step 2: Insert remarks (date_time added automatically without timezone) ---
     const insertQuery = `
-      INSERT INTO bms.tbl_bms_master_data_remarks (uu_bms_id, user_id, remarks, evaluation_rating)
-      VALUES ($1, $2, $3, $4)
-      RETURNING raw_id, uu_bms_id, user_id, date_time, remarks
+      INSERT INTO bms.tbl_bms_master_data_remarks 
+        (raw_id,uu_bms_id, user_id, remarks, evaluation_rating, date_time)
+      VALUES ($1, $2, $3, $4, $5, NOW()::timestamp)  -- <-- auto datetime without timezone
+      RETURNING raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating
     `;
-    const insertValues = [uu_bms_id, user_id, overall_remarks || null, null]; // evaluation_rating set to null if not provided
+    const insertValues = [
+      raw_id,
+      uu_bms_id, 
+      user_id, 
+      overall_remarks || null, 
+      evaluation_rating || null
+    ];
     const insertResult = await client.query(insertQuery, insertValues);
 
     await client.query('COMMIT');
@@ -7598,7 +7627,7 @@ app.post('/api/update-bridge-data', async (req, res) => {
     res.json({
       message: 'Bridge condition updated and remarks inserted successfully',
       data: {
-        master_data: updateResult.rows[0],
+        master_data: updateFields.length > 0 ? updateValues : null, // only return if updated
         remarks: insertResult.rows[0],
       },
     });
@@ -7610,6 +7639,7 @@ app.post('/api/update-bridge-data', async (req, res) => {
     client.release();
   }
 });
+
 
 // API endpoint to update remarks and toggle rams
 app.put('/api/update-overall-remarks-eval/:id', async (req, res) => {
