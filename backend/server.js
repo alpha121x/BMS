@@ -739,7 +739,6 @@ app.get("/api/structure-counts-inspected-eval", async (req, res) => {
   }
 });
 
-
 // API endpoint to get counts for evaluated structures
 app.get("/api/structure-counts-evaluated", async (req, res) => {
   try {
@@ -787,6 +786,59 @@ app.get("/api/structure-counts-evaluated", async (req, res) => {
   } catch (err) {
     console.error("Error executing query", err.stack);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// /api/structures?type=inspected_by_bridge_inspectors&districtId=...
+app.get("/api/structures", async (req, res) => {
+  const { type, districtId } = req.query;
+
+  if (!type) {
+    return res.status(400).json({ error: "type is required" });
+  }
+
+  let query = `
+    SELECT DISTINCT t.uu_bms_id, 
+           CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+           m.district,
+           (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length
+    FROM bms.tbl_inspection_f t
+    INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
+    WHERE m.is_active = true
+  `;
+
+  // optional district filter
+  if (districtId) {
+    query += ` AND m.district = '${districtId}' `;
+  }
+
+  switch (type) {
+    case "inspected_by_bridge_inspectors":
+      query += ` AND t.surveyed_by = 'RAMS-UU' `;
+      break;
+
+    case "unapproved_structures":
+      query += ` AND (t.qc_con = 3 OR t.qc_rams = 3) `;
+      break;
+
+    case "submitted_to_rams":
+      query += ` AND t.surveyed_by = 'RAMS-UU' AND t.qc_con = 2 `;
+      break;
+
+    case "approved_structures":
+      query += ` AND (t.qc_con = 2 OR t.qc_rams = 2) `;
+      break;
+
+    default:
+      return res.status(400).json({ error: "Invalid type" });
+  }
+
+  try {
+    const { rows } = await pool.query(query);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching structures:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

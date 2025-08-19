@@ -4,7 +4,12 @@ import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
 import TopCard from "./TopCard";
 import Map from "./MapEval";
-import { FaClipboardCheck, FaClipboardList, FaUserCheck, FaTimesCircle } from "react-icons/fa";
+import {
+  FaClipboardCheck,
+  FaClipboardList,
+  FaUserCheck,
+  FaTimesCircle,
+} from "react-icons/fa";
 import TopCardsCon from "./TopCardsCon";
 import Filters from "./Filters";
 import { FaBridge } from "react-icons/fa6";
@@ -26,56 +31,53 @@ const EvaluationMainCon = () => {
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const bridges_status_summary = "bridge-status-summary";
 
-
   const fetchInspectionCounts = async () => {
-  if (!districtId) return; // Avoid unnecessary API calls
+    if (!districtId) return; // Avoid unnecessary API calls
 
-  try {
-    const response = await fetch(
-      `${BASE_URL}/api/project-progress-summary?districtId=${districtId}`
-    );
-    const result = await response.json();
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/project-progress-summary?districtId=${districtId}`
+      );
+      const result = await response.json();
 
-    if (result.success && result.data) {
-      const data = result.data;
+      if (result.success && result.data) {
+        const data = result.data;
 
-      setInspectedCards([
-        {
-          label: "Inspected by Bridge Inspectors",
-          value: data.inspected_by_bridge_inspectors || "N/A",
-          icon: <FaUserCheck />,
-          color: "#33B1C7",
-        },
-        {
-          label: "Unapproved Structures",
-          value: data.unapproved_structures || "N/A",
-          icon: <FaTimesCircle />,
-          color: "#E57373",
-        },
-        {
-          label: "Submitted to RAMS",
-          value: data.submitted_to_rams || "N/A",
-          icon: <FaClipboardList />,
-          color: "#FFB74D",
-        },
-        {
-          label: "Approved Structures",
-          value: data.approved_structures || "N/A",
-          icon: <FaClipboardCheck />,
-          color: "#4CAF50",
-        },
-      ]);
+        setInspectedCards([
+          {
+            label: "Inspected by Bridge Inspectors",
+            value: data.inspected_by_bridge_inspectors,
+            color: "#33B1C7",
+            type: "inspected_by_bridge_inspectors",
+          },
+          {
+            label: "Unapproved Structures",
+            value: data.unapproved_structures,
+            color: "#E74C3C",
+            type: "unapproved_structures",
+          },
+          {
+            label: "Submitted to RAMS",
+            value: data.submitted_to_rams,
+            color: "#F39C12",
+            type: "submitted_to_rams",
+          },
+          {
+            label: "Approved Structures",
+            value: data.approved_structures,
+            color: "#27AE60",
+            type: "approved_structures",
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching inspection counts:", error);
     }
-  } catch (error) {
-    console.error("Error fetching inspection counts:", error);
-  }
-};
-
+  };
 
   useEffect(() => {
-    fetchInspectionCounts();   
+    fetchInspectionCounts();
   }, [districtId, structureType, bridgeName]); // Re-run the effect when any of these state variables change
-  
 
   //   if (!districtId) return; // Avoid unnecessary API calls
 
@@ -211,7 +213,7 @@ const EvaluationMainCon = () => {
               >
                 Bridges Status Summary
               </button> */}
-                  {/* <button
+              {/* <button
                 onClick={() => setActiveView("historyrecords")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "historyrecords"
@@ -247,10 +249,10 @@ const EvaluationMainCon = () => {
                   activeView === "projectprogress"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
-                }`}           
+                }`}
               >
-                Project Progress    
-                </button>
+                Project Progress
+              </button>
             </div>
 
             {/* Content Container */}
@@ -288,7 +290,7 @@ const EvaluationMainCon = () => {
                   bridgeName={bridgeName}
                 />
               )}
-                {activeView === "unappinspectionsrams" && (
+              {activeView === "unappinspectionsrams" && (
                 <UnapprovedInspections
                   districtId={districtId}
                   structureType={structureType}
@@ -297,13 +299,12 @@ const EvaluationMainCon = () => {
                 />
               )}
               {activeView === "projectprogress" && (
-                 <ProjectProgress
-              districtId={districtId}
-              structureType={structureType}
-              bridgeName={bridgeName}
-            />
-              )
-              }
+                <ProjectProgress
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                />
+              )}
             </div>
           </div>
         </div>
