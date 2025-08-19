@@ -20,19 +20,31 @@ const FilterComponent = ({
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
   const [roadClassifications, setRoadClassifications] = useState([]);
-  const [localConstructionType, setLocalConstructionType] = useState(constructionType || "%");
-  const [localBridgeLength, setLocalBridgeLength] = useState(bridgeLength || "%");
+  const [localConstructionType, setLocalConstructionType] = useState(
+    constructionType || "%"
+  );
+  const [localBridgeLength, setLocalBridgeLength] = useState(
+    bridgeLength || "%"
+  );
   const [localAge, setLocalAge] = useState(age || "%");
   const [localSpanLength, setLocalSpanLength] = useState(spanLength || "%");
-  const [localUnderFacility, setLocalUnderFacility] = useState(underFacility || "%");
-  const [localRoadClassification, setLocalRoadClassification] = useState(roadClassification || "%");
-  const [localInspectionStatus, setLocalInspectionStatus] = useState(inspectionStatus || "%"); // New local state
+  const [localUnderFacility, setLocalUnderFacility] = useState(
+    underFacility || "%"
+  );
+  const [localRoadClassification, setLocalRoadClassification] = useState(
+    roadClassification || "%"
+  );
+  const [localInspectionStatus, setLocalInspectionStatus] = useState(
+    inspectionStatus || "%"
+  ); // New local state
 
   useEffect(() => {
     const fetchFilters = async () => {
       try {
         // Fetch construction types
-        const constructionTypeResponse = await fetch(`${BASE_URL}/api/construction-types`);
+        const constructionTypeResponse = await fetch(
+          `${BASE_URL}/api/construction-types`
+        );
         const constructionTypeData = await constructionTypeResponse.json();
         setConstructionTypes(
           constructionTypeData.map((type) => ({
@@ -42,7 +54,9 @@ const FilterComponent = ({
         );
 
         // Fetch road classifications
-        const roadClassificationResponse = await fetch(`${BASE_URL}/api/road-classifications`);
+        const roadClassificationResponse = await fetch(
+          `${BASE_URL}/api/road-classifications`
+        );
         const roadClassificationData = await roadClassificationResponse.json();
         setRoadClassifications(
           roadClassificationData.map((classification) => ({
@@ -81,7 +95,10 @@ const FilterComponent = ({
       <div className="flex flex-nowrap gap-1 items-center">
         {/* Construction Type Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="construction-type" className="block text-white font-medium mb-1 text-xs">
+          <label
+            htmlFor="construction-type"
+            className="block text-white font-medium mb-1 text-xs"
+          >
             Construction Type
           </label>
           <select
@@ -101,7 +118,10 @@ const FilterComponent = ({
 
         {/* Bridge Length Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="bridge-length" className="block text-white font-medium mb-1 text-xs">
+          <label
+            htmlFor="bridge-length"
+            className="block text-white font-medium mb-1 text-xs"
+          >
             Bridge Length (m)
           </label>
           <select
@@ -120,7 +140,10 @@ const FilterComponent = ({
 
         {/* Span Length Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="span-length" className="block text-white font-medium mb-1 text-xs">
+          <label
+            htmlFor="span-length"
+            className="block text-white font-medium mb-1 text-xs"
+          >
             Span Length (m)
           </label>
           <select
@@ -141,7 +164,10 @@ const FilterComponent = ({
 
         {/* Age Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="age" className="block text-white font-medium mb-1 text-xs">
+          <label
+            htmlFor="age"
+            className="block text-white font-medium mb-1 text-xs"
+          >
             Age
           </label>
           <select
@@ -151,13 +177,20 @@ const FilterComponent = ({
             onChange={handleChange(setLocalAge)}
           >
             <option value="%">All</option>
-            {/* Options to be filled later */}
+            <option value="upto 5 years">Upto 5 years</option>
+            <option value="6–10 years">6–10 years</option>
+            <option value="11–20 years">11–20 years</option>
+            <option value="21–30 years">21–30 years</option>
+            <option value="30+ years">30+ years</option>
           </select>
         </div>
 
         {/* UnderFacility Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="under_facility" className="block text-white font-medium mb-1 text-xs">
+          <label
+            htmlFor="under_facility"
+            className="block text-white font-medium mb-1 text-xs"
+          >
             Under Facility
           </label>
           <select
@@ -174,7 +207,10 @@ const FilterComponent = ({
 
         {/* Road Classification Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="road-classification" className="block text-white font-medium mb-1 text-xs">
+          <label
+            htmlFor="road-classification"
+            className="block text-white font-medium mb-1 text-xs"
+          >
             Road Classification
           </label>
           <select
@@ -194,7 +230,10 @@ const FilterComponent = ({
 
         {/* Inspection Status Filter */}
         <div className="flex-1 min-w-[100px]">
-          <label htmlFor="inspection-status" className="block text-white font-medium mb-1 text-xs">
+          <label
+            htmlFor="inspection-status"
+            className="block text-white font-medium mb-1 text-xs"
+          >
             Inspection Status
           </label>
           <select

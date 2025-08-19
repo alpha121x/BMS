@@ -3720,6 +3720,7 @@ app.get("/api/bridges", async (req, res) => {
       bridgeLength = "%",
       spanLength = "%",
       inspectionStatus = "%", // Add inspectionStatus as a query parameter
+      age = "%",
     } = req.query;
 
     let query = `
@@ -3825,6 +3826,37 @@ app.get("/api/bridges", async (req, res) => {
       countParams.push(roadClassification);
       paramIndex++;
     }
+
+    // --- AGE FILTER ---
+   if (age !== "%") {
+  const ageExpr = `EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER)`;
+
+  // Add safeguard so only valid years are used
+  query += ` AND construction_year IS NOT NULL 
+             AND construction_year <> '' 
+             AND construction_year ~ '^[0-9]{4}$'`;
+
+  countQuery += ` AND construction_year IS NOT NULL 
+                  AND construction_year <> '' 
+                  AND construction_year ~ '^[0-9]{4}$'`;
+
+  if (age === "upto 5 years") {
+    query += ` AND ${ageExpr} <= 5`;
+    countQuery += ` AND ${ageExpr} <= 5`;
+  } else if (age === "6–10 years") {
+    query += ` AND ${ageExpr} BETWEEN 6 AND 10`;
+    countQuery += ` AND ${ageExpr} BETWEEN 6 AND 10`;
+  } else if (age === "11–20 years") {
+    query += ` AND ${ageExpr} BETWEEN 11 AND 20`;
+    countQuery += ` AND ${ageExpr} BETWEEN 11 AND 20`;
+  } else if (age === "21–30 years") {
+    query += ` AND ${ageExpr} BETWEEN 21 AND 30`;
+    countQuery += ` AND ${ageExpr} BETWEEN 21 AND 30`;
+  } else if (age === "30+ years") {
+    query += ` AND ${ageExpr} > 30`;
+    countQuery += ` AND ${ageExpr} > 30`;
+  }
+}
 
  if (bridgeLength !== "%") {
   const computedField = "(no_of_span * span_length_m)";
