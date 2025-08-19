@@ -76,14 +76,58 @@ const columns = [
     sortable: true,
   },
   {
-  name: "Structure Length (m)",
-  selector: (row) => 
+    name: "Structure Length (m)",
+    selector: (row) =>
+      row.bridge_length !== null && row.bridge_length !== undefined
+        ? parseFloat(row.bridge_length).toFixed(2)
+        : "—",
+    sortable: true,
+  },
+];
+
+// Function to convert data to CSV and trigger download
+const exportToCSV = (data, filename = "structures_data.csv") => {
+  // Define CSV headers based on columns
+  const headers = [
+    "#",
+    "Bridge Name",
+    "District",
+    "Structure Type",
+    "Construction Type",
+    "Age (Years)",
+    "Structure Length (m)",
+  ];
+
+  // Map data to CSV rows
+  const rows = data.map((row, index) => [
+    index + 1,
+    `"${row.bridge_name || ""}"`, // Wrap strings in quotes to handle commas
+    row.district || "",
+    row.structure_type || "",
+    row.construction_type || "",
+    row.age || "—",
     row.bridge_length !== null && row.bridge_length !== undefined
       ? parseFloat(row.bridge_length).toFixed(2)
       : "—",
-  sortable: true,
-},
-];
+  ]);
+
+  // Combine headers and rows into CSV content
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.join(",")),
+  ].join("\n");
+
+  // Create a Blob and trigger download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 const StructuresTable = ({ data }) => {
   if (!data || data.length === 0) {
@@ -92,6 +136,14 @@ const StructuresTable = ({ data }) => {
 
   return (
     <div className="overflow-x-auto">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={() => exportToCSV(data)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          Export to CSV
+        </button>
+      </div>
       <DataTable
         columns={columns}
         data={data}
