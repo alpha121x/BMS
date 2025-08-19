@@ -790,7 +790,6 @@ app.get("/api/structure-counts-evaluated", async (req, res) => {
   }
 });
 
-
 // counts for Con
 app.get("/api/inspection-counts-con", async (req, res) => {
   try {
