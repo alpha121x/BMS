@@ -4,6 +4,7 @@ import BridgesListNewUpdated from "./BridgesListNewUpdated";
 import { BASE_URL } from "./config";
 import TopCardsCon from "./TopCardsCon";
 import Map from "./Map";
+import MapInspectedStructures from "./MapInspectedStructures";
 import { FaClipboardCheck, FaClipboardList, FaUserCheck, FaTimesCircle } from "react-icons/fa";
 import Filters from "./Filters";
 import { FaBridge } from "react-icons/fa6";
@@ -262,7 +263,7 @@ useEffect(() => {
 
             {/* Content Container */}
             <div className="mt-0">
-              {activeView === "map" && <Map  districtId={districtId}
+              {activeView === "map" && <MapInspectedStructures  districtId={districtId}
                 structureType={structureType}
                 bridgeName={bridgeName} />}
                  {activeView === "historytab" && <HistoryRecords
