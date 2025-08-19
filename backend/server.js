@@ -4907,6 +4907,7 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
 
       SELECT 
         b.uu_bms_id, 
+        b.raw_id,
         b.surveyed_by,
         b.pms_sec_id, 
         b.structure_no, 

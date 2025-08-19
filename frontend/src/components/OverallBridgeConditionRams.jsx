@@ -177,20 +177,21 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         overall_remarks: overallRemarks,
         overall_remarks_con: overallRemarksCon,
         is_bridge_completed: isBridgeCompleted,
-        userId: userId,
+        user_id: userId,
         uu_bms_id: inventoryData.uu_bms_id,
+        raw_id: inventoryData.raw_id, // Include raw_id for the update
       };
 
       const response = await fetch(
-        `${BASE_URL}/api/update-overall-remarks-rams/${inventoryData.uu_bms_id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+             `${BASE_URL}/api/update-bridge-data`,
+             {
+               method: 'POST',
+               headers: {
+                 'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(requestData),
+             }
+           );
 
       if (!response.ok) {
         throw new Error('Failed to update bridge data');

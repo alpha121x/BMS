@@ -96,22 +96,25 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const handleSaveAll = async () => {
     try {
       const requestData = {
-        evaluation: evaluationState,
+        evaluation_rating: evaluationState,
         overall_bridge_condition: overallCondition,
         overall_remarks: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
         user_id: userId,
         uu_bms_id: inventoryData.uu_bms_id,
+        raw_id: inventoryData.raw_id, // Include raw_id for the update
       };
 
-      const response = await fetch(
-        `${BASE_URL}/api/update-overall-remarks-eval/${inventoryData.uu_bms_id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestData),
-        }
-      );
+     const response = await fetch(
+            `${BASE_URL}/api/update-bridge-data`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(requestData),
+            }
+          );
 
       if (!response.ok) throw new Error('Failed to update bridge evaluation, remarks, and condition');
 
