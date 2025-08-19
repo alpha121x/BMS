@@ -146,13 +146,16 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     fetchDamageCounts();
   }, [inventoryData?.uu_bms_id]);
 
+
+  console.log(inventoryData);
+
   // Set initial values from inventoryData
   useEffect(() => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
-    if (inventoryData?.overall_remarks_con) {
-      setOverallRemarks(inventoryData.overall_remarks_con);
+    if (inventoryData?.overall_bridge_remarks) {
+      setOverallRemarks(inventoryData.overall_bridge_remarks);
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
       setIsBridgeCompleted(inventoryData.is_bridge_completed);

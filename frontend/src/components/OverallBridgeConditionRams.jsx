@@ -63,7 +63,6 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
   const [overallRemarks, setOverallRemarks] = useState(''); // State for Overall Remarks (Rams)
-  const [overallRemarksCon, setOverallRemarksCon] = useState(''); // State for Overall Remarks (Consultant)
   const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // State for Is Bridge Completed
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const userId = userToken?.userId;
@@ -152,11 +151,8 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
-    if (inventoryData?.overall_remarks_rams) {
-      setOverallRemarks(inventoryData.overall_remarks_rams);
-    }
-    if (inventoryData?.overall_remarks_con) {
-      setOverallRemarksCon(inventoryData.overall_remarks_con);
+    if (inventoryData?.overall_bridge_remarks) {
+      setOverallRemarks(inventoryData.overall_bridge_remarks);
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
       setIsBridgeCompleted(inventoryData.is_bridge_completed);
@@ -174,8 +170,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     try {
       const requestData = {
         overall_bridge_condition: overallCondition,
-        overall_remarks: overallRemarks,
-        overall_remarks_con: overallRemarksCon,
+        overall_bridge_remarks: overallRemarks,
         is_bridge_completed: isBridgeCompleted,
         user_id: userId,
         uu_bms_id: inventoryData.uu_bms_id,
@@ -321,18 +316,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         )}
       </Form.Group>
       <Form.Group className="mt-3">
-        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Consultant)</Form.Label>
-        <Form.Control
-          as="textarea"
-          rows={3}
-          value={overallRemarksCon}
-          placeholder="Enter overall remarks..."
-          style={{ resize: 'vertical' }}
-          disabled
-        />
-      </Form.Group>
-      <Form.Group className="mt-3">
-        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks (Rams)</Form.Label>
+        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks</Form.Label>
         <Form.Control
           as="textarea"
           rows={3}
