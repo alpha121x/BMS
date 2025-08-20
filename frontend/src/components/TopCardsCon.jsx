@@ -43,6 +43,8 @@ const TopCardCon = ({ inspectedCards }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [structures, setStructures] = useState([]);
+  const [loading, setLoading] = useState(false); // Add loading state
+
 
   const addCommas = (x) => {
     if (!x || x === "N/A") return "N/A";
@@ -54,14 +56,17 @@ const TopCardCon = ({ inspectedCards }) => {
   const handleCardClick = async (type) => {
     setSelectedType(type);
     setModalOpen(true);
+    setLoading(true);
 
     try {
       const response = await fetch(`${BASE_URL}/api/strucutres?type=${type}`);
       const data = await response.json();
       setStructures(data || []);
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching structures:", err);
       setStructures([]);
+      setLoading(false);
     }
   };
 
@@ -108,7 +113,9 @@ const TopCardCon = ({ inspectedCards }) => {
         </Modal.Header>
 
         <Modal.Body>
-          <StructuresTable data={structures} />
+          <StructuresTable 
+          loading={loading}
+          data={structures} />
         </Modal.Body>
       </Modal>
     </div>

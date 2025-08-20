@@ -86,7 +86,7 @@ const columns = [
 ];
 
 // Function to convert data to CSV and trigger download
-const exportToCSV = (data, filename = "structures_data.csv") => {
+const exportToCSV = (data, filename = "structures_data.csv", loading) => {
   // Define CSV headers based on columns
   const headers = [
     "#",
@@ -129,9 +129,17 @@ const exportToCSV = (data, filename = "structures_data.csv") => {
   URL.revokeObjectURL(url);
 };
 
-const StructuresTable = ({ data }) => {
+const StructuresTable = ({ data, loading }) => {
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
+      </div>
+    );
+  }
+
   if (!data || data.length === 0) {
-    return <p className="text-gray-600">No structures found.</p>;
+    return <p className="text-gray-600 text-center py-4">No structures found.</p>;
   }
 
   return (
