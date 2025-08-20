@@ -513,7 +513,7 @@ const columns = [
       </div>
     ),
     ignoreRowClick: true,
-    grow: 3, // more space for action buttons
+    grow: 2.6, // more space for action buttons
   },
 ];
 
