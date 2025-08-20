@@ -42,16 +42,21 @@ const DamageStatusBox = ({ title, counts }) => {
 
 const DamageSummary = ({ workKinds, damageCounts, loadingWorkKinds, loadingDamageCounts, error }) => {
   return (
-    <div className="mb-4">
+    <div className="mb-4 bg-[#DBEAFE] p-4">
+      {/* Title */}
       <h4 className="text-center mb-3 text-lg font-bold">Damage Status</h4>
-      <div className="flex justify-around mb-3">
-        <button className="px-4 py-1 rounded" style={{ backgroundColor: '#9FD585' }}>No Damage</button>
-        <button className="px-4 py-1 rounded" style={{ backgroundColor: '#DBDBDB' }}>Invisible</button>
-        <button className="px-4 py-1 rounded" style={{ backgroundColor: '#00C4FF' }}>Good</button>
-        <button className="px-4 py-1 rounded" style={{ backgroundColor: '#FFD685' }}>Fair</button>
-        <button className="px-4 py-1 rounded" style={{ backgroundColor: '#FFAA00' }}>Poor</button>
-        <button className="px-4 py-1 rounded" style={{ backgroundColor: '#FF0000' }}>Severe</button>
+
+      {/* Legend */}
+      <div className="flex justify-around mb-3 flex-wrap gap-2">
+        <button className="px-4 py-1 rounded text-sm font-medium" style={{ backgroundColor: '#9FD585' }}>No Damage</button>
+        <button className="px-4 py-1 rounded text-sm font-medium" style={{ backgroundColor: '#DBDBDB' }}>Invisible</button>
+        <button className="px-4 py-1 rounded text-sm font-medium" style={{ backgroundColor: '#00C4FF' }}>Good</button>
+        <button className="px-4 py-1 rounded text-sm font-medium" style={{ backgroundColor: '#FFD685' }}>Fair</button>
+        <button className="px-4 py-1 rounded text-sm font-medium" style={{ backgroundColor: '#FFAA00' }}>Poor</button>
+        <button className="px-4 py-1 rounded text-sm font-medium" style={{ backgroundColor: '#FF0000' }}>Severe</button>
       </div>
+
+      {/* Content */}
       <div className="flex flex-wrap justify-around">
         {loadingWorkKinds || loadingDamageCounts ? (
           <div className="text-center py-2 w-full">
