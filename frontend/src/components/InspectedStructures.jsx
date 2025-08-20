@@ -361,6 +361,13 @@ const InspectedStructures = ({
       grow: 1,
     },
     {
+      name: "Overall Bridge Condition",
+      selector: (row) => row.overall_bridge_condition || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
       name: "Date Time",
       selector: (row) =>
         row.data_date_time

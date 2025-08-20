@@ -3987,6 +3987,7 @@ app.get("/api/bridges", async (req, res) => {
         y_centroid, 
         images_spans,
         (COALESCE(span_length_m, 0) * COALESCE(no_of_span, 0)) AS bridge_length,
+        overall_bridge_condition,
         CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos,
         CASE 
