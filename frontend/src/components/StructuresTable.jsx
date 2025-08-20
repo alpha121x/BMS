@@ -86,7 +86,7 @@ const columns = [
 ];
 
 // Function to convert data to CSV and trigger download
-const exportToCSV = (data, filename = "structures_data.csv", loading) => {
+const exportToCSV = (data, filename = "structures_data.csv") => {
   // Define CSV headers based on columns
   const headers = [
     "#",

@@ -55,6 +55,8 @@ const TopCardDashboard = ({ type, totalLabel, totalValue, color, items }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [structures, setStructures] = useState([]);
+  const [loading, setLoading] = useState(false); // Add loading state
+
 
   const addCommas = (x) => {
     if (!x) return "0";
@@ -66,6 +68,7 @@ const TopCardDashboard = ({ type, totalLabel, totalValue, color, items }) => {
   const handleItemClick = async (type) => {
     setSelectedType(type);
     setModalOpen(true);
+    setLoading(true);
 
     try {
       const response = await fetch(
@@ -75,9 +78,11 @@ const TopCardDashboard = ({ type, totalLabel, totalValue, color, items }) => {
 
       // ✅ ensure structures is always an array
       setStructures(data.structures || []);
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching structures:", err);
       setStructures([]);
+      setLoading(false);
     }
   };
 
@@ -135,7 +140,9 @@ const TopCardDashboard = ({ type, totalLabel, totalValue, color, items }) => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <StructuresTable data={structures} />
+          <StructuresTable data={structures}
+          loading={loading}
+           />
         </Modal.Body>
       </Modal>
     </>
