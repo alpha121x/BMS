@@ -138,7 +138,9 @@ const EvaluationMainCon = () => {
           <div className="col-md-12 d-flex gap-4  justify-content-start align-items-start">
             <div className="d-flex gap-2">
               <div>
-                <TopCardsCon inspectedCards={inspectedCards} />
+                <TopCardsCon inspectedCards={inspectedCards}
+                  districtId={districtId}
+                 />
               </div>
             </div>
             <div className="bg-[#8CC5C4] p-3 rounded-1">

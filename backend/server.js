@@ -5384,6 +5384,15 @@ app.get("/api/bridge-status-summary", async (req, res) => {
 // Project Progress Counts API
 app.get("/api/project-progress-summary", async (req, res) => {
   try {
+    const { districtId } = req.query;
+    const params = [];
+    let districtFilter = "";
+
+    if (districtId && districtId !== "%") {
+      districtFilter = "AND m.district_id = $1";
+      params.push(districtId);
+    }
+
     const query = `
       SELECT 
           -- 1. Structures inspected by Bridge Inspectors (surveyed_by = RAMS-UU)
@@ -5395,7 +5404,7 @@ app.get("/api/project-progress-summary", async (req, res) => {
               THEN t.uu_bms_id END
           ) AS unapproved_structures,
 
-          -- 3. Structures submitted to RAMS (surveyed_by = RAMS-UU and submitted for QC by consultant)
+          -- 3. Structures submitted to RAMS (surveyed_by = 'RAMS-UU' and submitted for QC by consultant)
           COUNT(DISTINCT CASE 
               WHEN t.surveyed_by = 'RAMS-UU' AND t.qc_con = 2 
               THEN t.uu_bms_id END
@@ -5410,10 +5419,10 @@ app.get("/api/project-progress-summary", async (req, res) => {
       FROM bms.tbl_inspection_f t
       INNER JOIN bms.tbl_bms_master_data m 
           ON t.uu_bms_id = m.uu_bms_id
-      WHERE m.is_active = true;
+      WHERE m.is_active = true ${districtFilter};
     `;
 
-    const { rows } = await pool.query(query);
+    const { rows } = await pool.query(query, params);
 
     res.json({
       success: true,

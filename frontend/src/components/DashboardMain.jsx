@@ -231,6 +231,7 @@ const DashboardMain = () => {
                     totalLabel="Inspected Structures"
                     totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
                     color="#009DB9"
+                    districtId={districtId}
                     items={[
                       {
                         label: "Culvert",
@@ -259,6 +260,7 @@ const DashboardMain = () => {
                     totalLabel="Evaluated Structures"
                     totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
                     color="#3B9996"
+                    districtId={districtId}
                     items={[
                       {
                         label: "Culvert",
