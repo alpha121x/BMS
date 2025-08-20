@@ -67,6 +67,8 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const userId = userToken?.userId;
 
+  console.log(inventoryData);
+
   // States for evaluation table
   const [evaluationState, setEvaluationState] = useState({});
 
@@ -199,8 +201,8 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
     if (inventoryData?.overall_bridge_condition) {
       setOverallCondition(inventoryData.overall_bridge_condition);
     }
-    if (inventoryData?.overall_remarks) {
-      setOverallRemarks(inventoryData.overall_remarks);
+    if (inventoryData?.overall_bridge_remarks) {
+      setOverallRemarks(inventoryData.overall_bridge_remarks);
     }
     if (inventoryData?.is_bridge_completed !== undefined) {
       setIsBridgeCompleted(inventoryData.is_bridge_completed);

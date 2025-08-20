@@ -5204,9 +5204,24 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
         b.y_centroid, 
         b.images_spans,
         CONCAT(b.pms_sec_id, ',', b.structure_no) AS bridge_name,
-        ARRAY[b.image_1, b.image_2, b.image_3, b.image_4, b.image_5] AS photos
+        ARRAY[b.image_1, b.image_2, b.image_3, b.image_4, b.image_5] AS photos,
+
+          -- latest remarks info
+      r.raw_id AS remarks_raw_id,
+      r.user_id AS remarks_user_id,
+      r.date_time AS remarks_date_time,
+      r.remarks AS overall_bridge_remarks,
+      r.evaluation_rating AS remarks_evaluation_rating
+
       FROM bms.tbl_bms_master_data b
       INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
+        LEFT JOIN LATERAL (
+      SELECT raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating
+      FROM bms.tbl_bms_master_data_remarks r
+      WHERE r.uu_bms_id = b.uu_bms_id
+      ORDER BY r.date_time DESC
+      LIMIT 1
+  ) r ON true
       WHERE b.is_active = true
     `;
 
