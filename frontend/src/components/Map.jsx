@@ -12,7 +12,7 @@ const Map = ({
   age,
   underFacility,
   roadClassification,
-  spanLength
+  spanLength,
 }) => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);
@@ -29,7 +29,7 @@ const Map = ({
               "esri/layers/MapImageLayer",
               "esri/geometry/Extent",
               "esri/widgets/LayerList",
-              "esri/widgets/Legend"
+              "esri/widgets/Legend",
             ],
             { css: true }
           );
@@ -51,26 +51,30 @@ const Map = ({
           if (event.action.id === "view-details") {
             const attributes = view.popup.selectedFeature?.attributes;
             const bridgeId = attributes?.uu_bms_id;
-        
+
             if (!bridgeId) {
               console.error("Bridge ID not found in attributes:", attributes);
               return;
             }
-        
+
             try {
-              const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`);
+              const response = await fetch(
+                `${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`
+              );
               const bridgeData = await response.json();
-        
+
               if (bridgeData.success) {
                 const bridgesArray = bridgeData.bridges;
                 const bridge = bridgesArray[0];
-        
+
                 if (!bridge) {
                   console.error("No bridge details found");
                   return;
                 }
-        
-                const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
+
+                const serializedBridgeData = encodeURIComponent(
+                  JSON.stringify(bridge)
+                );
                 window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
               } else {
                 console.error("Bridge details not found");
@@ -88,7 +92,7 @@ const Map = ({
           console.log("Popup triggered for feature:", {
             attributes,
             geometry: geometry ? "Valid" : "Null",
-            layerId: graphic?.layer?.id
+            layerId: graphic?.layer?.id,
           });
           if (!geometry) {
             console.warn("Feature has null geometry, popup may be empty.");
@@ -109,7 +113,9 @@ const Map = ({
             });
           } else {
             try {
-              const response = await fetch(`${BASE_URL}/api/districtExtent?districtId=${districtId}`);
+              const response = await fetch(
+                `${BASE_URL}/api/districtExtent?districtId=${districtId}`
+              );
               const data = await response.json();
 
               if (data.success && data.district) {
@@ -181,17 +187,6 @@ const Map = ({
         // Build definition expression based on all filter props
         const buildDefinitionExpression = () => {
           const expressions = [];
-          console.log("Input values:", {
-            districtId,
-            structureType,
-            bridgeName,
-            constructionType,
-            bridgeLength,
-            age,
-            underFacility,
-            roadClassification,
-            spanLength
-          });
 
           if (structureType && structureType !== "" && structureType !== "%") {
             expressions.push(`structure_type_id = '${structureType}'`);
@@ -199,59 +194,96 @@ const Map = ({
           if (bridgeName && bridgeName !== "" && bridgeName !== "%") {
             expressions.push(`bridge_name = '${bridgeName}'`);
           }
-          if (constructionType && constructionType !== "" && constructionType !== "%") {
+          if (
+            constructionType &&
+            constructionType !== "" &&
+            constructionType !== "%"
+          ) {
             expressions.push(`construction_type_id = '${constructionType}'`);
           }
-         if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
-              try {
-                const computedField = "(no_of_span * span_length_m)";
-                if (bridgeLength.startsWith("<")) {
-                  const value = parseFloat(bridgeLength.substring(1));
-                  if (!isNaN(value)) {
-                    expressions.push(`${computedField} < ${value}`);
-                  } else {
-                    console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
-                  }
-                } else if (bridgeLength.includes("-")) {
-                  const [min, max] = bridgeLength.split("-").map(v => parseFloat(v.trim()));
-                  if (!isNaN(min) && !isNaN(max)) {
-                    expressions.push(`${computedField} BETWEEN ${min} AND ${max}`);
-                  } else {
-                    console.warn(`Invalid bridgeLength range: ${bridgeLength}`);
-                  }
-                } else if (bridgeLength.startsWith(">")) {
-                  const value = parseFloat(bridgeLength.substring(1));
-                  if (!isNaN(value)) {
-                    expressions.push(`${computedField} > ${value}`);
-                  } else {
-                    console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
-                  }
+          if (bridgeLength && bridgeLength !== "" && bridgeLength !== "%") {
+            try {
+              const computedField = "(no_of_span * span_length_m)";
+              if (bridgeLength.startsWith("<")) {
+                const value = parseFloat(bridgeLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`${computedField} < ${value}`);
                 } else {
-                  const value = parseFloat(bridgeLength);
-                  if (!isNaN(value)) {
-                    expressions.push(`${computedField} = ${value}`);
-                  } else {
-                    console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
-                  }
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
                 }
-              } catch (error) {
-                console.error(`Error parsing bridgeLength: ${bridgeLength}`, error);
+              } else if (bridgeLength.includes("-")) {
+                const [min, max] = bridgeLength
+                  .split("-")
+                  .map((v) => parseFloat(v.trim()));
+                if (!isNaN(min) && !isNaN(max)) {
+                  expressions.push(
+                    `${computedField} BETWEEN ${min} AND ${max}`
+                  );
+                } else {
+                  console.warn(`Invalid bridgeLength range: ${bridgeLength}`);
+                }
+              } else if (bridgeLength.startsWith(">")) {
+                const value = parseFloat(bridgeLength.substring(1));
+                if (!isNaN(value)) {
+                  expressions.push(`${computedField} > ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
+              } else {
+                const value = parseFloat(bridgeLength);
+                if (!isNaN(value)) {
+                  expressions.push(`${computedField} = ${value}`);
+                } else {
+                  console.warn(`Invalid bridgeLength value: ${bridgeLength}`);
+                }
               }
-            }
-
-          if (age && age !== "" && age !== "%") {
-            const value = parseFloat(age);
-            if (!isNaN(value)) {
-              expressions.push(`age = ${value}`);
-            } else {
-              console.warn(`Invalid age value: ${age}`);
+            } catch (error) {
+              console.error(
+                `Error parsing bridgeLength: ${bridgeLength}`,
+                error
+              );
             }
           }
+
+          if (age && age !== "" && age !== "%") {
+            try {
+              const computedAge = `(EXTRACT(YEAR FROM CURRENT_DATE) - construction_year)`;
+
+              switch (age) {
+                case "upto 5 years":
+                  expressions.push(`${computedAge} <= 5`);
+                  break;
+                case "6–10 years":
+                  expressions.push(`${computedAge} BETWEEN 6 AND 10`);
+                  break;
+                case "11–20 years":
+                  expressions.push(`${computedAge} BETWEEN 11 AND 20`);
+                  break;
+                case "21–30 years":
+                  expressions.push(`${computedAge} BETWEEN 21 AND 30`);
+                  break;
+                case "30+ years":
+                  expressions.push(`${computedAge} > 30`);
+                  break;
+                default:
+                  console.warn(`Unrecognized age option: ${age}`);
+              }
+            } catch (error) {
+              console.error(`Error parsing age: ${age}`, error);
+            }
+          }
+
           if (underFacility && underFacility !== "" && underFacility !== "%") {
             expressions.push(`under_facility = '${underFacility}'`);
           }
-          if (roadClassification && roadClassification !== "" && roadClassification !== "%") {
-            expressions.push(`road_classification_id = '${roadClassification}'`);
+          if (
+            roadClassification &&
+            roadClassification !== "" &&
+            roadClassification !== "%"
+          ) {
+            expressions.push(
+              `road_classification_id = '${roadClassification}'`
+            );
           }
           if (spanLength && spanLength !== "" && spanLength !== "%") {
             try {
@@ -289,8 +321,9 @@ const Map = ({
             }
           }
 
-          const expression = expressions.length > 0 ? expressions.join(" AND ") : null;
-          console.log("Generated definitionExpression:", expression);
+          const expression =
+            expressions.length > 0 ? expressions.join(" AND ") : null;
+          // console.log("Generated definitionExpression:", expression);
           return expression;
         };
 
@@ -309,7 +342,7 @@ const Map = ({
               listMode: "show",
               popupTemplate,
               visible: true,
-              definitionExpression
+              definitionExpression,
             },
             {
               id: 1,
@@ -318,7 +351,7 @@ const Map = ({
               listMode: "show",
               popupTemplate,
               visible: false,
-              definitionExpression
+              definitionExpression,
             },
             {
               id: 3,
@@ -327,7 +360,7 @@ const Map = ({
               listMode: "show",
               popupTemplate,
               visible: false,
-              definitionExpression
+              definitionExpression,
             },
             {
               id: 4,
@@ -336,7 +369,7 @@ const Map = ({
               listMode: "show",
               popupTemplate,
               visible: false,
-              definitionExpression
+              definitionExpression,
             },
           ],
         });
@@ -344,73 +377,87 @@ const Map = ({
         map.add(bridgeLayer);
 
         // Enhanced layer view error handling
-        bridgeLayer.when(() => {
-          console.log("Bridge layer loaded successfully.");
-          bridgeLayer.sublayers.forEach((sublayer) => {
-            console.log(`Sublayer ${sublayer.id} definitionExpression:`, sublayer.definitionExpression);
-            console.log(`Sublayer ${sublayer.id} visibility:`, sublayer.visible);
+        bridgeLayer
+          .when(() => {
+            console.log("Bridge layer loaded successfully.");
+            bridgeLayer.sublayers.forEach((sublayer) => {
+              console.log(
+                `Sublayer ${sublayer.id} definitionExpression:`,
+                sublayer.definitionExpression
+              );
+              console.log(
+                `Sublayer ${sublayer.id} visibility:`,
+                sublayer.visible
+              );
+            });
+          })
+          .catch((error) => {
+            console.error("Error loading bridge layer:", error);
           });
-        }).catch((error) => {
-          console.error("Error loading bridge layer:", error);
-        });
 
         // Force refresh after layer load
-        bridgeLayer.when(() => {
-          bridgeLayer.refresh();
-          console.log("Layer refreshed.");
-          bridgeLayer.sublayers.forEach((sublayer) => {
-            sublayer.definitionExpression = definitionExpression;
+        bridgeLayer
+          .when(() => {
+            bridgeLayer.refresh();
+            console.log("Layer refreshed.");
+            bridgeLayer.sublayers.forEach((sublayer) => {
+              sublayer.definitionExpression = definitionExpression;
+            });
+          })
+          .catch((error) => {
+            console.error("Error during layer refresh:", error);
           });
-        }).catch((error) => {
-          console.error("Error during layer refresh:", error);
-        });
 
         // Add LayerList widget to the top-right without legend
         const layerList = new LayerList({
           view: view,
-          listItemCreatedFunction: function(event) {
+          listItemCreatedFunction: function (event) {
             const item = event.item;
             if (item.layer.type !== "group") {
               item.panel = {
                 content: null,
-                open: true
+                open: true,
               };
               item.actionsSections = [
                 [
                   {
                     title: "Toggle Visibility",
                     className: "esri-icon-visible",
-                    id: "toggle-layer-visibility"
-                  }
-                ]
+                    id: "toggle-layer-visibility",
+                  },
+                ],
               ];
             }
-          }
+          },
         });
 
         // Handle layer visibility toggle
-        layerList.on("trigger-action", function(event) {
+        layerList.on("trigger-action", function (event) {
           if (event.action.id === "toggle-layer-visibility") {
             const item = event.item;
             item.layer.visible = !item.layer.visible;
-            event.action.title = item.layer.visible ? "Hide Layer" : "Show Layer";
-            event.action.className = item.layer.visible ? "esri-icon-non-visible" : "esri-icon-visible";
+            event.action.title = item.layer.visible
+              ? "Hide Layer"
+              : "Show Layer";
+            event.action.className = item.layer.visible
+              ? "esri-icon-non-visible"
+              : "esri-icon-visible";
           }
         });
 
         view.ui.add(layerList, {
           position: "top-right",
-          className: "esri-ui-corner-container"
+          className: "esri-ui-corner-container",
         });
 
         // Add Legend widget to the left
         const legend = new Legend({
           view: view,
-          container: document.createElement("div")
+          container: document.createElement("div"),
         });
         view.ui.add(legend, {
           position: "top-left",
-          className: "esri-ui-corner-container"
+          className: "esri-ui-corner-container",
         });
 
         await view.when();
@@ -437,11 +484,14 @@ const Map = ({
     underFacility,
     roadClassification,
     spanLength,
-    navigate
+    navigate,
   ]);
 
   return (
-    <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{ border: "1px solid #005D7F" }}>
+    <div
+      className="bg-white border-1 p-0 rounded-0 shadow-md"
+      style={{ border: "1px solid #005D7F" }}
+    >
       <div ref={mapRef} className="map-container" style={{ height: "500px" }} />
     </div>
   );
