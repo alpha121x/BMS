@@ -17,8 +17,8 @@ import FilterComponent from "./FilterComponent";
 import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
 import Graph from "./GraphInventory"; // Assuming you have a Graph component for the graph view
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
+import DamageSummary from "./DamageSummary";
 
 const BridgesListDashboard = ({
   districtId,
@@ -41,6 +41,7 @@ const BridgesListDashboard = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [showInspectionSummaryModal, setShowInspectionSummaryModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [selectedBridge, setSelectedBridge] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -52,8 +53,14 @@ const BridgesListDashboard = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
   const [viewMode, setViewMode] = useState("map"); // New state for view mode
+  const [workKinds, setWorkKinds] = useState([]);
+  const [damageCounts, setDamageCounts] = useState({});
+  const [loadingWorkKinds, setLoadingWorkKinds] = useState(false);
+  const [loadingDamageCounts, setLoadingDamageCounts] = useState(false);
+  const [visualConditions, setVisualConditions] = useState([]);
+  const [loadingConditions, setLoadingConditions] = useState(false);
   const navigate = useNavigate();
-  
+
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -108,15 +115,102 @@ const BridgesListDashboard = ({
     }
   };
 
+  // Fetch Visual Conditions from API
+  useEffect(() => {
+    const fetchVisualConditions = async () => {
+      setLoadingConditions(true);
+      try {
+        const response = await fetch(`${BASE_URL}/api/visual-conditions`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch visual conditions');
+        }
+        const data = await response.json();
+        setVisualConditions(data);
+      } catch (error) {
+        console.error('Error fetching visual conditions:', error);
+        setVisualConditions([
+          { id: 1, visual_condition: 'FAIR' },
+          { id: 2, visual_condition: 'GOOD' },
+          { id: 3, visual_condition: 'POOR' },
+          { id: 4, visual_condition: 'UNDER CONSTRUCTION' },
+        ]);
+      } finally {
+        setLoadingConditions(false);
+      }
+    };
+
+    fetchVisualConditions();
+  }, []);
+
+  // Fetch Work Kinds from API
+  useEffect(() => {
+    const fetchWorkKinds = async () => {
+      setLoadingWorkKinds(true);
+      try {
+        const response = await fetch(`${BASE_URL}/api/work-kinds`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch work kinds');
+        }
+        const data = await response.json();
+        setWorkKinds(data);
+      } catch (error) {
+        console.error('Error fetching work kinds:', error);
+        setError('Failed to load work kinds');
+      } finally {
+        setLoadingWorkKinds(false);
+      }
+    };
+
+    fetchWorkKinds();
+  }, []);
+
+  // Fetch Damage Counts for the specific bridge
+  useEffect(() => {
+    const fetchDamageCounts = async () => {
+      if (!selectedBridge?.uu_bms_id) return;
+      setLoadingDamageCounts(true);
+      try {
+        const response = await fetch(
+          `${BASE_URL}/api/damage-counts?uu_bms_id=${selectedBridge.uu_bms_id}`
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch damage counts');
+        }
+        const data = await response.json();
+        const countsMap = {};
+        data.forEach((item) => {
+          countsMap[item.WorkKindID] = item;
+        });
+        setDamageCounts(countsMap);
+      } catch (error) {
+        console.error('Error fetching damage counts:', error);
+        setError('Failed to load damage counts');
+      } finally {
+        setLoadingDamageCounts(false);
+      }
+    };
+
+    fetchDamageCounts();
+  }, [selectedBridge?.uu_bms_id]);
+
   const handleViewInventory = (bridge) => {
     setSelectedBridge(bridge);
     setShowModal(true);
   };
 
-    const handleRowClick = (bridge) => {
-  navigate('/BridgeInfoDashboard', { state: { bridge } });
-};
+  const handleRowClick = (bridge) => {
+    navigate("/BridgeInfoDashboard", { state: { bridge } });
+  };
 
+  const handleViewInspectionSummary = (bridge) => {
+    setSelectedBridge(bridge);
+    setShowInspectionSummaryModal(true);
+  };
+
+  const handleCloseInspectionSummaryModal = () => {
+    setShowInspectionSummaryModal(false); 
+    setSelectedBridge(null);
+  };
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -151,7 +245,7 @@ const BridgesListDashboard = ({
   };
 
   const handleDownloadCSV = async () => {
-    setLoading(true);
+    setLoadingCSV(true);
     try {
       const params = {
         district: districtId || "%",
@@ -188,12 +282,12 @@ const BridgesListDashboard = ({
     } catch (error) {
       Swal.fire("Error!", "Failed to download CSV file", "error");
     } finally {
-      setLoading(false);
+      setLoadingCSV(false);
     }
   };
 
   const handleDownloadExcel = async () => {
-    setLoading(true);
+    setLoadingExcel(true);
     try {
       const params = {
         district: districtId || "%",
@@ -315,7 +409,7 @@ const BridgesListDashboard = ({
       console.error("Error downloading Excel:", error);
       Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
     } finally {
-      setLoading(false);
+      setLoadingExcel(false);
     }
   };
 
@@ -403,6 +497,16 @@ const BridgesListDashboard = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
+              handleViewInspectionSummary(row);
+            }}
+            className="bg-[#005D7F] text-white px-1 py-0.5 rounded-1 hover:bg-[#003f5f]"
+            style={{ fontSize: "12px" }}
+          >
+            Inspection Summary
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
               handleZoomToBridge(row);
             }}
             className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
@@ -486,17 +590,17 @@ const BridgesListDashboard = ({
       </div>
       <div>
         {viewMode === "map" ? (
-          <Map 
-          districtId={districtId}
-          structureType={structureType}
-          bridgeName={bridgeName}
-          constructionType={constructionType}
-          bridgeLength={bridgeLength}
-          age={age}
-          underFacility={underFacility}
-          roadClassification={roadClassification}
-          spanLength={spanLength}
-           />
+          <Map
+            districtId={districtId}
+            structureType={structureType}
+            bridgeName={bridgeName}
+            constructionType={constructionType}
+            bridgeLength={bridgeLength}
+            age={age}
+            underFacility={underFacility}
+            roadClassification={roadClassification}
+            spanLength={spanLength}
+          />
         ) : (
           <div className="p-4 text-center">
             <Graph />
@@ -572,7 +676,7 @@ const BridgesListDashboard = ({
                 ) : (
                   <div className="flex items-center gap-1">
                     <FaFileExcel />
-                    {loading ? "Downloading Excel..." : "Excel"}
+                    Excel
                   </div>
                 )}
               </button>
@@ -671,6 +775,37 @@ const BridgesListDashboard = ({
                   <Button
                     variant="secondary"
                     onClick={handleCloseInspectionModal}
+                  >
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              <Modal
+                show={showInspectionSummaryModal}
+                onHide={handleCloseInspectionSummaryModal}
+                size="lg"
+                centered
+                className="custom-modal"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Inspection Summary</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <DamageSummary
+                      workKinds={workKinds}
+                      damageCounts={damageCounts}
+                      loadingWorkKinds={loadingWorkKinds}
+                      loadingDamageCounts={loadingDamageCounts}
+                      error={error}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="secondary"
+                    onClick={handleCloseInspectionSummaryModal}
                   >
                     Close
                   </Button>
