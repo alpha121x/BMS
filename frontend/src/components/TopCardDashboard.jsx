@@ -51,7 +51,7 @@ import { Modal } from "react-bootstrap";
 import { BASE_URL } from "./config";
 import StructuresTable from "./StructuresTable";
 
-const TopCardDashboard = ({ type,  totalLabel, totalValue, color, items }) => {
+const TopCardDashboard = ({ type, totalLabel, totalValue, color, items }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [structures, setStructures] = useState([]);
@@ -63,22 +63,23 @@ const TopCardDashboard = ({ type,  totalLabel, totalValue, color, items }) => {
     return parts.join(".");
   };
 
-const handleItemClick = async (type) => {
-  setSelectedType(type);
-  setModalOpen(true);
+  const handleItemClick = async (type) => {
+    setSelectedType(type);
+    setModalOpen(true);
 
-  try {
-    const response = await fetch(`${BASE_URL}/api/structures-dashboard?type=${type}`);
-    const data = await response.json();
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/structures-dashboard?type=${type}`
+      );
+      const data = await response.json();
 
-    // ✅ ensure structures is always an array
-    setStructures(data.structures || []);
-  } catch (err) {
-    console.error("Error fetching structures:", err);
-    setStructures([]);
-  }
-};
-
+      // ✅ ensure structures is always an array
+      setStructures(data.structures || []);
+    } catch (err) {
+      console.error("Error fetching structures:", err);
+      setStructures([]);
+    }
+  };
 
   return (
     <>
@@ -128,7 +129,9 @@ const handleItemClick = async (type) => {
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {selectedType ? `Structures: ${selectedType}` : "Structures"}
+            {selectedType
+              ? `Structures: ${selectedType.toUpperCase()}`
+              : "Structures"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

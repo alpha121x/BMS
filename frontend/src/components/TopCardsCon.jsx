@@ -101,7 +101,9 @@ const TopCardCon = ({ inspectedCards }) => {
       >
         <Modal.Header closeButton>
           <Modal.Title>
-            {selectedType ? `Structures: ${selectedType}` : "Structures"}
+            {selectedType
+              ? `Structures: ${selectedType.toUpperCase()}`
+              : "Structures"}
           </Modal.Title>
         </Modal.Header>
 
@@ -114,4 +116,3 @@ const TopCardCon = ({ inspectedCards }) => {
 };
 
 export default TopCardCon;
-
