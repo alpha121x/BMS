@@ -115,6 +115,7 @@ const EvaluationMain = () => {
                 <div className="mb-2">
                   {/* Only One Card Displaying Total and Three Counts */}
                   <TopCardDashboard
+                    type={"inspected_structures"}
                     totalLabel="Inspected Structures"
                     totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
                     color="#009DB9"
@@ -142,6 +143,7 @@ const EvaluationMain = () => {
                 <div className="mb-2">
                   {/* Only One Card Displaying Total and Three Counts */}
                   <TopCardDashboard
+                  type={"evaluated_structures"}
                     totalLabel="Evaluated Structures"
                     totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
                     color="#3B9996"
