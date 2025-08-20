@@ -197,6 +197,34 @@ const MapInspectedStructures = ({
           if (constructionType && constructionType !== "" && constructionType !== "%") {
             expressions.push(`construction_type_id = '${constructionType}'`);
           }
+             if (age && age !== "" && age !== "%") {
+            try {
+              const computedAge = `(EXTRACT(YEAR FROM CURRENT_DATE) - construction_year)`;
+
+              switch (age) {
+                case "upto 5 years":
+                  expressions.push(`${computedAge} <= 5`);
+                  break;
+                case "6–10 years":
+                  expressions.push(`${computedAge} BETWEEN 6 AND 10`);
+                  break;
+                case "11–20 years":
+                  expressions.push(`${computedAge} BETWEEN 11 AND 20`);
+                  break;
+                case "21–30 years":
+                  expressions.push(`${computedAge} BETWEEN 21 AND 30`);
+                  break;
+                case "30+ years":
+                  expressions.push(`${computedAge} > 30`);
+                  break;
+                default:
+                  console.warn(`Unrecognized age option: ${age}`);
+              }
+            } catch (error) {
+              console.error(`Error parsing age: ${age}`, error);
+            }
+          }
+
           if (roadClassification && roadClassification !== "" && roadClassification !== "%") {
             expressions.push(`road_classification_id = '${roadClassification}'`);
           }
