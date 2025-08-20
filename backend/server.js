@@ -557,6 +557,7 @@ app.get("/api/bms-cost-export", async (req, res) => {
         m.structure_type, 
         m.pms_sec_id, 
         CONCAT(m.pms_sec_id, ', ', m.structure_no) AS bridge_name,
+        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
         c.cost_million
       FROM bms.tbl_bms_cost c
       JOIN bms.tbl_bms_master_data m

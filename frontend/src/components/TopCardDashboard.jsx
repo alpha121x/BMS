@@ -51,11 +51,13 @@ import { Modal } from "react-bootstrap";
 import { BASE_URL } from "./config";
 import StructuresTable from "./StructuresTable";
 
-const TopCardDashboard = ({ type, totalLabel, totalValue, color, items }) => {
+const TopCardDashboard = ({ type, totalLabel, totalValue, color, items, districtId }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [structures, setStructures] = useState([]);
   const [loading, setLoading] = useState(false); // Add loading state
+
+  console.log(districtId);
 
 
   const addCommas = (x) => {
@@ -72,7 +74,7 @@ const TopCardDashboard = ({ type, totalLabel, totalValue, color, items }) => {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/structures-dashboard?type=${type}`
+        `${BASE_URL}/api/structures-dashboard?type=${type}&district=${districtId}`
       );
       const data = await response.json();
 

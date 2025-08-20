@@ -202,6 +202,7 @@ const DashboardMain = () => {
                     totalLabel="Inventory Structures"
                     totalValue={structureCards[0]?.value} // Assuming first item contains the total
                     color="#005D7F"
+                    districtId={districtId}
                     items={[
                       {
                         label: "Culvert",
