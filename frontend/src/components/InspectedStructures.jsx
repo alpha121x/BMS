@@ -481,9 +481,9 @@ const InspectedStructures = ({
           </button>
           <button
             className={`px-3 py-1 rounded ${
-              viewMode === "table" ? "bg-[#005D7F] text-white" : "bg-gray-200"
+              viewMode === "bws" ? "bg-[#005D7F] text-white" : "bg-gray-200"
             }`}
-            onClick={() => setViewMode("bridgeWiseScore")}
+            onClick={() => setViewMode("bws")}
           >
             Bridge Wise Score
           </button>
@@ -504,7 +504,7 @@ const InspectedStructures = ({
           />
         )}
 
-        {viewMode === "bridgeWiseScore" && (
+        {viewMode === "bws" && (
           <div className="p-4 text-center">
             <BridgeWiseScore
               districtId={districtId}
