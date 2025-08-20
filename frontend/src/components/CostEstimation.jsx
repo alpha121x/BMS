@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table } from "react-bootstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
+import DataTable from "react-data-table-component";
 import { BASE_URL } from "./config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
 import CostMap from "./CostMap";
 
-const CostEstimation = ({districtId,structureType,bridgeName}) => {
+const CostEstimation = ({ districtId, structureType, bridgeName }) => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showMap, setShowMap] = useState(false); // State for toggling map/table
-  const itemsPerPage = 10;
+  const [showMap, setShowMap] = useState(false);
   const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchData();
@@ -45,7 +44,7 @@ const CostEstimation = ({districtId,structureType,bridgeName}) => {
     }
   };
 
-    const handleBridgeInfo = async (bridgeId) => {
+  const handleBridgeInfo = async (bridgeId) => {
     if (!bridgeId) {
       console.error("Bridge ID not found:", bridgeId);
       return;
@@ -74,21 +73,6 @@ const CostEstimation = ({districtId,structureType,bridgeName}) => {
     }
   };
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const currentData = bridgeScoreData;
-
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
   const handleDownloadCSV = async () => {
     try {
       const response = await fetch(`${BASE_URL}/api/bms-cost-export`);
@@ -101,10 +85,9 @@ const CostEstimation = ({districtId,structureType,bridgeName}) => {
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
-        [
-          Object.keys(data[0]).join(","),
-          ...data.map((row) => Object.values(row).join(",")),
-        ].join("\n");
+        [Object.keys(data[0]).join(","), ...data.map((row) => Object.values(row).join(","))].join(
+          "\n"
+        );
 
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
@@ -150,249 +133,144 @@ const CostEstimation = ({districtId,structureType,bridgeName}) => {
     }
   };
 
-  const buttonStyles = {
-    margin: "0 6px",
-    padding: "4px 8px",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "12px",
-    cursor: "pointer",
-  };
-
-  const renderPaginationButtons = () => {
-    const buttons = [];
-    buttons.push(
-      <Button
-        onClick={handlePrevPage}
-        disabled={currentPage === 1}
-        key="prev"
-        style={buttonStyles}
-      >
-        «
-      </Button>
-    );
-
-    buttons.push(
-      <Button
-        key="1"
-        onClick={() => handlePageChange(1)}
-        style={{
-          ...buttonStyles,
-          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA",
-        }}
-      >
-        1
-      </Button>
-    );
-
-    const pageRange = 3;
-    let startPage = Math.max(currentPage - pageRange, 2);
-    let endPage = Math.min(currentPage + pageRange, totalPages - 1);
-
-    if (totalPages <= 7) {
-      startPage = 2;
-      endPage = totalPages - 1;
-    }
-
-    for (let page = startPage; page <= endPage; page++) {
-      buttons.push(
-        <Button
-          key={page}
-          onClick={() => handlePageChange(page)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA",
-          }}
+  const columns = [
+    {
+      name: "District",
+      selector: (row) => row.district || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Structure Type",
+      selector: (row) => row.structure_type || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Bridge Name",
+      selector: (row) => row.bridge_name || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Structure Length",
+      selector: (row) => (row.bridge_length ? `${row.bridge_length} m` : "N/A"),
+      sortable: true,
+    },
+    {
+      name: "Cost (Millions)",
+      selector: (row) => row.cost_million || "N/A",
+      sortable: true,
+      cell: (row) => <span className="font-bold">{row.cost_million || "N/A"}</span>,
+    },
+    {
+      name: "Action",
+      cell: (row) => (
+        <button
+          onClick={() => handleBridgeInfo(row.uu_bms_id)}
+          className="px-2 py-1 text-white rounded"
+          style={{ backgroundColor: "#3B9996" }}
         >
-          {page}
-        </Button>
-      );
-    }
+          Bridge Info
+        </button>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+  ];
 
-    if (totalPages > 1) {
-      buttons.push(
-        <Button
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    buttons.push(
-      <Button
-        onClick={handleNextPage}
-        disabled={currentPage === totalPages}
-        key="next"
-        style={buttonStyles}
-      >
-        »
-      </Button>
-    );
-
-    return buttons;
-  };
-
-  // Define styles for active and inactive buttons
-  const activeButtonStyle = {
-    backgroundColor: "#003F5C", // Darker shade for active button
-    borderColor: "#003F5C",
-    marginRight: "10px",
-    cursor: "pointer",
-  };
-
-  const inactiveButtonStyle = {
-    backgroundColor: "#B5DCF3", // Original color for inactive button
-    borderColor: "#B5DCF3",
-    marginRight: "10px",
-    color: "#000", // Change text color to black for inactive button
-    cursor: "pointer",
+  const customStyles = {
+    table: {
+      style: {
+        border: "1px solid #e5e7eb", // Tailwind's gray-200 for table border
+      },
+    },
+    headCells: {
+      style: {
+        backgroundColor: "#005D7F",
+        color: "#fff",
+        fontSize: "14px",
+        fontWeight: "bold",
+        border: "1px solid #e5e7eb", // Border for header cells
+      },
+    },
+    cells: {
+      style: {
+        fontSize: "14px",
+        border: "1px solid #e5e7eb", // Border for table cells
+      },
+    },
+    rows: {
+      style: {
+        "&:nth-child(odd)": {
+          backgroundColor: "#f9fafb", // Tailwind's gray-50 for striped effect
+        },
+        "&:nth-child(even)": {
+          backgroundColor: "#ffffff", // White background for even rows
+        },
+      },
+    },
   };
 
   return (
-    <>
-      <section className="bg-white border-1 p-0 rounded-0 shadow-md">
-        {/* Two Separate Buttons with Active/Inactive Styling */}
-        <div className="d-flex justify-content-start mt-2 mb-2">
-          <Button
-            onClick={() => setShowMap(false)}
-            style={showMap ? inactiveButtonStyle : activeButtonStyle}
-          >
-            Show Table
-          </Button>
-          <Button
-            onClick={() => setShowMap(true)}
-            style={showMap ? activeButtonStyle : inactiveButtonStyle}
-          >
-            Show Map
-          </Button>
+    <div className="bg-white border p-4 rounded shadow-md">
+      <div className="flex justify-start mb-2">
+        <button
+          onClick={() => setShowMap(false)}
+          className={`px-4 py-2 mr-2 rounded ${
+            showMap ? "bg-blue-200 text-black" : "bg-blue-800 text-white"
+          }`}
+        >
+          Show Table
+        </button>
+        <button
+          onClick={() => setShowMap(true)}
+          className={`px-4 py-2 rounded ${
+            showMap ? "bg-blue-800 text-white" : "bg-blue-200 text-black"
+          }`}
+        >
+          Show Map
+        </button>
+      </div>
+      <div className="flex items-center justify-between mb-2 p-2 rounded" style={{ background: "#005D7F" }}>
+        <div className="flex items-center gap-4">
+          <h5 className="text-white mb-0">Cost Estimation</h5>
+          <h6 className="text-white mb-0">
+            Records: <span className="bg-teal-500 text-white px-2 py-1 rounded">{bridgeCount || 0}</span>
+          </h6>
         </div>
-        <div className="row">
-          <div className="col-md-12">
-            <div
-              className="card-header rounded-0 p-2"
-              style={{ background: "#005D7F", color: "#fff" }}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center justify-between gap-4">
-                  <h5 className="mb-0">Cost Estimation</h5>
-                  <h6 className="mb-0" id="structure-heading">
-                    Records:
-                    <span
-                      className="badge text-white ms-2"
-                      style={{ background: "#009CB8" }}
-                    >
-                      <h6 className="mb-0">{bridgeCount || 0}</h6>
-                    </span>
-                  </h6>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    className="btn text-white"
-                    onClick={handleDownloadCSV}
-                  >
-                    <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
-                    CSV
-                  </button>
-                  <button
-                    className="btn text-white"
-                    onClick={handleDownloadExcel}
-                  >
-                    <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
-                    Excel
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="card-body p-0 pb-2">
-              {loading ? (
-                <div
-                  style={{
-                    border: "8px solid #f3f3f3",
-                    borderTop: "8px solid #3498db",
-                    borderRadius: "50%",
-                    width: "80px",
-                    height: "80px",
-                    animation: "spin 1s linear infinite",
-                    margin: "auto",
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    zIndex: 999,
-                  }}
-                />
-              ) : error ? (
-                <p className="text-danger">{error}</p>
-              ) : showMap ? (
-                <CostMap
-                districtId={districtId}
-                 />
-              ) : (
-                <>
-                  <Table
-                    className="table table-bordered table-hover table-striped table-responsive"
-                    style={{ fontSize: "14px" }}
-                  >
-                    <thead>
-                      <tr>
-                        <th>District</th>
-                        <th>Structure Type</th>
-                        <th>Bridge Name</th>
-                        <th>Structure Length</th>
-                        <th>Cost (Millions)</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentData.length > 0 ? (
-                        currentData.map((row, index) => (
-                          <tr key={index}>
-                            <td>{row.district || "N/A"}</td>
-                            <td>{row.structure_type || "N/A"}</td>
-                            <td>{row.bridge_name || "N/A"}</td>
-                            <td>  {row.bridge_length ? `${row.bridge_length} m` : "N/A"}</td>
-                            <td className="font-bold">
-                              {row.cost_million || "N/A"}
-                            </td>
-                        <td>
-                             <button
-          onClick={() => handleBridgeInfo(row.uu_bms_id)}
-        className="btn btn-sm"
-        style={{ backgroundColor: "#3B9996", color: "white" }}
-      >
-        Bridge Info
-      </button>
-                </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" className="text-center">
-                            No data available
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </Table>
-
-                  {/* Pagination Section */}
-                  <div className="d-flex justify-content-center align-items-center mt-3">
-                    {renderPaginationButtons()}
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+        <div className="flex gap-2">
+          <button className="text-white flex items-center gap-1" onClick={handleDownloadCSV}>
+            <FontAwesomeIcon icon={faFileCsv} />
+            CSV
+          </button>
+          <button className="text-white flex items-center gap-1" onClick={handleDownloadExcel}>
+            <FontAwesomeIcon icon={faFileExcel} />
+            Excel
+          </button>
         </div>
-      </section>
-    </>
+      </div>
+      {loading ? (
+        <div
+          className="border-8 border-gray-200 border-t-8 border-t-blue-500 rounded-full w-20 h-20 animate-spin mx-auto my-10"
+        />
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : showMap ? (
+        <CostMap districtId={districtId} />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={bridgeScoreData}
+          pagination
+          paginationServer
+          paginationTotalRows={totalItems}
+          paginationPerPage={itemsPerPage}
+          paginationRowsPerPageOptions={[10]}
+          onChangePage={(page) => setCurrentPage(page)}
+          customStyles={customStyles}
+          noDataComponent={<div className="text-center p-4">No data available</div>}
+        />
+      )}
+    </div>
   );
 };
 
