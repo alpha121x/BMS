@@ -413,113 +413,110 @@ const BridgesListDashboard = ({
     }
   };
 
-  const columns = [
-    {
-      name: "District",
-      selector: (row) => row.district || "N/A",
-      sortable: true,
-      wrap: true,
-      grow: 1,
-    },
-    {
-      name: "Structure Type",
-      selector: (row) => row.structure_type || "N/A",
-      sortable: true,
-      wrap: true,
-      grow: 1,
-    },
-    {
-      name: "Construction Type",
-      selector: (row) => row.construction_type || "N/A",
-      sortable: true,
-      wrap: true,
-      grow: 1,
-    },
-    {
-      name: "Road Classification",
-      selector: (row) => row.road_classification || "N/A",
-      sortable: true,
-      wrap: true,
-      grow: 1,
-    },
-    {
-      name: "Bridge Name",
-      selector: (row) =>
-        `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
-      sortable: true,
-      wrap: true,
-      grow: 1,
-    },
-    {
-      name: "Structure Length",
-      selector: (row) => row.bridge_length || "N/A",
-      sortable: true,
-      wrap: true,
-      grow: 1,
-    },
-    {
-      name: "Date Time",
-      selector: (row) =>
-        row.data_date_time
-          ? new Date(row.data_date_time).toLocaleString()
-          : "N/A",
-      sortable: true,
-      wrap: true,
-      grow: 1.5,
-    },
-    {
-      name: "Action",
-      cell: (row) => (
-        <div
-          className="flex space-x-2 justify-center"
-          style={{ minWidth: "240px" }}
+const columns = [
+  {
+    name: "District",
+    selector: (row) => row.district || "N/A",
+    sortable: true,
+    wrap: true,
+    grow: 0.5,
+  },
+  {
+    name: "Structure Type",
+    selector: (row) => row.structure_type || "N/A",
+    sortable: true,
+    wrap: true,
+    grow: 0.7,
+  },
+  {
+    name: "Construction Type",
+    selector: (row) => row.construction_type || "N/A",
+    sortable: true,
+    wrap: true,
+    grow: 0.7,
+  },
+  {
+    name: "Road Classification",
+    selector: (row) => row.road_classification || "N/A",
+    sortable: true,
+    wrap: true,
+    grow: 0.7,
+  },
+  {
+    name: "Bridge Name",
+    selector: (row) =>
+      `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
+    sortable: true,
+    wrap: true,
+    grow: 1,
+  },
+  {
+    name: "Structure Length",
+    selector: (row) => row.bridge_length || "N/A",
+    sortable: true,
+    wrap: true,
+    grow: 0.5,
+  },
+  {
+    name: "Date Time",
+    selector: (row) =>
+      row.data_date_time
+        ? new Date(row.data_date_time).toLocaleString()
+        : "N/A",
+    sortable: true,
+    wrap: true,
+    grow: 1,
+  },
+  {
+    name: "Action",
+    cell: (row) => (
+      <div
+        className="flex flex-wrap gap-2 justify-center"
+        style={{ minWidth: "360px" }}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleViewInventory(row);
+          }}
+          className="bg-[#009CB8] text-white px-2 py-1 rounded hover:bg-[#007485] text-xs"
         >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewInventory(row);
-            }}
-            className="bg-[#009CB8] text-white px-1 py-0.5 rounded-1 hover:bg-[#007485]"
-            style={{ fontSize: "12px" }}
-          >
-            Inventory Info
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewInspection(row);
-            }}
-            className="bg-[#3B9895] text-white px-1 py-0.5 rounded-1 hover:bg-[#2d7270]"
-            style={{ fontSize: "12px" }}
-          >
-            Inspection Info
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewInspectionSummary(row);
-            }}
-            className="bg-[#005D7F] text-white px-1 py-0.5 rounded-1 hover:bg-[#003f5f]"
-            style={{ fontSize: "12px" }}
-          >
-            Inspection Summary
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleZoomToBridge(row);
-            }}
-            className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
-            style={{ fontSize: "12px" }}
-          >
-            Zoom To
-          </button>
-        </div>
-      ),
-      ignoreRowClick: true,
-      grow: 2,
-    },
-  ];
+          Inventory Info
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleViewInspection(row);
+          }}
+          className="bg-[#3B9895] text-white px-2 py-1 rounded hover:bg-[#2d7270] text-xs"
+        >
+          Inspection Info
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleViewInspectionSummary(row);
+          }}
+          className="bg-[#005D7F] text-white px-2 py-1 rounded hover:bg-[#003f5f] text-xs"
+        >
+          Inspection Summary
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleZoomToBridge(row);
+          }}
+          className="bg-[#88B9B8] text-white px-2 py-1 rounded hover:bg-[#6a8f8f] text-xs"
+        >
+          Zoom To
+        </button>
+      </div>
+    ),
+    ignoreRowClick: true,
+    grow: 3, // more space for action buttons
+  },
+];
+
 
   const customStyles = {
     headCells: {
