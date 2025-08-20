@@ -419,7 +419,7 @@ const columns = [
     selector: (row) => row.district || "N/A",
     sortable: true,
     wrap: true,
-    grow: 0.5,
+    grow: 0.8,
   },
   {
     name: "Structure Type",
