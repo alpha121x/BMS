@@ -923,6 +923,98 @@ app.get("/api/strucutres", async (req, res) => {
   }
 });
 
+// API endpoint to get list of structures by type (inventory, inspected, evaluated)
+app.get("/api/structures-dashboard", async (req, res) => {
+  try {
+    const { type, district } = req.query;
+    const params = [];
+    let districtFilter = "";
+
+    if (district && district !== "%") {
+      districtFilter = "AND m.district_id = $1";
+      params.push(district);
+    }
+
+    let joinClause = "";
+    if (type === "inspected_structures") {
+      joinClause = `
+        JOIN (
+          SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f
+        ) i ON m.uu_bms_id = i.uu_bms_id
+      `;
+    } else if (type === "evaluated_structures") {
+      joinClause = `
+        JOIN (
+          SELECT DISTINCT uu_bms_id FROM bms.tbl_evaluation_f
+        ) e ON m.uu_bms_id = e.uu_bms_id
+      `;
+    } else if (type === "inventory_structures") {
+      // inventory = all active structures
+      joinClause = "";
+    } else {
+      return res.status(400).json({ error: "Invalid type parameter" });
+    }
+
+    const query = `
+      SELECT 
+        m.is_active,
+        m.raw_id,
+        m.uu_bms_id, 
+        m.surveyed_by,
+        m.pms_sec_id, 
+        m.structure_no, 
+        m.structure_type_id, 
+        m.structure_type, 
+        m.road_name, 
+        m.road_name_cwd, 
+        m.route_id, 
+        m.survey_id, 
+        m.surveyor_name, 
+        m.district_id, 
+        m.district, 
+        m.road_classification, 
+        m.road_classification_id,
+        m.road_surface_type, 
+        m.carriageway_type, 
+        m.direction, 
+        m.visual_condition, 
+        m.construction_type_id, 
+        m.construction_type, 
+        m.no_of_span,
+        m.data_source, 
+        m.data_date_time, 
+        m.span_length_m, 
+        m.structure_width_m, 
+        m.construction_year, 
+        m.last_maintenance_date, 
+        m.remarks, 
+        m.is_surveyed, 
+        m.x_centroid, 
+        m.y_centroid, 
+        m.images_spans,
+        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+        ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
+        '${type}' AS data_type
+      FROM bms.tbl_bms_master_data m
+      ${joinClause}
+      WHERE m.is_active = true ${districtFilter};
+    `;
+
+    const result = await pool.query(query, params);
+
+    res.json({
+      type,
+      count: result.rowCount,
+      structures: result.rows,
+    });
+  } catch (err) {
+    console.error("Error executing query", err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 // counts for Con
 app.get("/api/inspection-counts-con", async (req, res) => {
   try {
