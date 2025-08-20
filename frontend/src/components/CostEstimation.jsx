@@ -345,6 +345,7 @@ const CostEstimation = ({districtId,structureType,bridgeName}) => {
                         <th>District</th>
                         <th>Structure Type</th>
                         <th>Bridge Name</th>
+                        <th>Structure Length</th>
                         <th>Cost (Millions)</th>
                         <th>Action</th>
                       </tr>
@@ -356,6 +357,7 @@ const CostEstimation = ({districtId,structureType,bridgeName}) => {
                             <td>{row.district || "N/A"}</td>
                             <td>{row.structure_type || "N/A"}</td>
                             <td>{row.bridge_name || "N/A"}</td>
+                            <td>  {row.bridge_length ? `${row.bridge_length} m` : "N/A"}</td>
                             <td className="font-bold">
                               {row.cost_million || "N/A"}
                             </td>

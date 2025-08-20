@@ -497,6 +497,7 @@ app.get("/api/bms-cost", async (req, res) => {
         m.district,
         m.district_id, 
         m.structure_type, 
+        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
         m.pms_sec_id, 
         CONCAT(m.pms_sec_id, ', ', m.structure_no) AS bridge_name,
         c.cost_million
