@@ -442,15 +442,18 @@ const BridgesListNewUpdated = ({
         <div className="card-header p-2" style={{ background: "#005D7F" }}>
           <div className="flex items-center justify-between text-white">
             <h5 className="mb-0">Inventory</h5>
-            <h6 className="mb-0">
-              Structures Count:
-              <span
-                className="badge text-white ms-2"
-                style={{ background: "#009CB8" }}
-              >
-                {bridgeCount || 0}
-              </span>
-            </h6>
+            {user_type !== "evaluator" && (
+              <h6 className="mb-0">
+                Structures Count:
+                <span
+                  className="badge text-white ms-2"
+                  style={{ background: "#009CB8" }}
+                >
+                  {bridgeCount || 0}
+                </span>
+              </h6>
+            )}
+
             <div className="flex items-center gap-1">
               <button
                 className="btn text-white"
