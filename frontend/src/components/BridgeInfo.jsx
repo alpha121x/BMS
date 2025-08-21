@@ -13,6 +13,7 @@ import InspectionListEvaluator from "./InspectionListEvaluator";
 import InspectionListCon from "./InspectionListCon";
 import OverallBridgeCondition from "./OverallBridgeCondition";
 import OverallBridgeConditionRams from "./OverallBridgeConditionRams";
+import OverallBridgeConditionEval from "./OverallBridgeConditionsEval";
 
 const BridgeInfo = () => {
   const { state } = useLocation();
@@ -54,7 +55,7 @@ const BridgeInfo = () => {
     }  else if (user_type === "rams") {
       return <OverallBridgeConditionRams inventoryData={bridgeData} />;
     } else if (user_type === "evaluator") {
-      return <OverallBridgeCondition inventoryData={bridgeData} />;
+      return <OverallBridgeConditionEval inventoryData={bridgeData} />;
     }
   };
 
