@@ -419,7 +419,7 @@ const columns = [
     selector: (row) => row.district || "N/A",
     sortable: true,
     wrap: true,
-    grow: 0.8,
+    grow: 0.7,
   },
   {
     name: "Structure Type",
@@ -513,7 +513,7 @@ const columns = [
       </div>
     ),
     ignoreRowClick: true,
-    grow: 2.6, // more space for action buttons
+    grow: 2.8, // more space for action buttons
   },
 ];
 
