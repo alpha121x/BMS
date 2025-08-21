@@ -45,6 +45,7 @@ const BridgesListNewUpdated = ({
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
+  const [qcSummary, setQcSummary] = useState({});
   const itemsPerPage = 10;
 
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
@@ -82,6 +83,7 @@ const BridgesListNewUpdated = ({
       const data = await response.json();
       setTableData(data.bridges || []);
       setBridgeCount(data.totalCount || 0);
+      setQcSummary(data.qcSummary);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -441,20 +443,46 @@ const BridgesListNewUpdated = ({
       >
         <div className="card-header p-2" style={{ background: "#005D7F" }}>
           <div className="flex items-center justify-between text-white">
+            {/* Left side */}
             <h5 className="mb-0">Inventory</h5>
+
+            {/* Middle section: Counts */}
             {user_type !== "evaluator" && (
-              <h6 className="mb-0">
-                Structures Count:
-                <span
-                  className="badge text-white ms-2"
-                  style={{ background: "#009CB8" }}
-                >
-                  {bridgeCount || 0}
-                </span>
-              </h6>
+              <div className="flex items-center gap-4">
+                <h6 className="mb-0">
+                  Structures Count:
+                  <span
+                    className="badge text-white ms-2"
+                    style={{ background: "#009CB8" }}
+                  >
+                    {bridgeCount || 0}
+                  </span>
+                </h6>
+
+                <h6 className="mb-0">
+                  Approved Records:
+                  <span
+                    className="badge text-white ms-2"
+                    style={{ background: "green" }}
+                  >
+                    {qcSummary?.approved_count || 0}
+                  </span>
+                </h6>
+
+                <h6 className="mb-0">
+                  Pending Records:
+                  <span
+                    className="badge text-white ms-2"
+                    style={{ background: "orange" }}
+                  >
+                    {qcSummary?.pending_count || 0}
+                  </span>
+                </h6>
+              </div>
             )}
 
-            <div className="flex items-center gap-1">
+            {/* Right side: Export buttons */}
+            <div className="flex items-center gap-2">
               <button
                 className="btn text-white"
                 onClick={handleDownloadCSV}
