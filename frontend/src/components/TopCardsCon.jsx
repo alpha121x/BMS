@@ -39,7 +39,7 @@ import { Modal } from "react-bootstrap"; // 👈 Bootstrap modal
 import { BASE_URL } from "./config";
 import StructuresTable from "./StructuresTable"; // import here
 
-const TopCardCon = ({ inspectedCards, districtId }) => {
+const TopCardCon = ({ inspectedCards, districtId, type }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState(null);
   const [structures, setStructures] = useState([]);
@@ -59,6 +59,8 @@ const TopCardCon = ({ inspectedCards, districtId }) => {
     setLoading(true);
 
     try {
+      console.log("Fetching structures for type:", type, "and districtId:", districtId);
+      return;
       const response = await fetch(`${BASE_URL}/api/strucutres?type=${type}&districtId=${districtId}`);
       const data = await response.json();
       setStructures(data || []);

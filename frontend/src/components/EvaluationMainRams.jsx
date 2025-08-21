@@ -78,24 +78,28 @@ const EvaluationMainRams = () => {
           value: data.inspected_by_bridge_inspectors || "N/A",
           icon: <FaUserCheck />,
           color: "#33B1C7",
+          type:"inspected_by_bridge_inspectors",
         },
         {
           label: "Unapproved Structures",
           value: data.unapproved_structures || "N/A",
           icon: <FaTimesCircle />,
           color: "#E57373",
+          type: "unapproved_structures",
         },
         {
           label: "Submitted to RAMS",
           value: data.submitted_to_rams || "N/A",
           icon: <FaClipboardList />,
           color: "#FFB74D",
+          type: "submitted_to_rams",
         },
         {
           label: "Approved Structures",
           value: data.approved_structures || "N/A",
           icon: <FaClipboardCheck />,
           color: "#4CAF50",
+          type: "approved_structures",
         },
       ]);
     }
@@ -154,7 +158,9 @@ useEffect(() => {
           <div className="col-md-12 d-flex gap-4  justify-content-start align-items-start">
             <div className="d-flex gap-2">
               <div>
-                <TopCardsCon inspectedCards={inspectedCards} />
+                <TopCardsCon inspectedCards={inspectedCards}
+                districtId={districtId}
+                />
               </div>
             </div>
             <div className="bg-[#8CC5C4] p-3 rounded-1">
