@@ -30,7 +30,7 @@ const BridgeInfoDashboard = () => {
 
       <main className="flex-grow">
         <section className="bg-gray-100 min-h-screen">
-          <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-2">
+          <div className="w-full sm:w-3/4 md:w-75 lg:w-75 mx-auto mt-5">
             <div className="bg-[#60A5FA] text-grey p-3 rounded-md shadow-md flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex justify-start">
@@ -38,7 +38,7 @@ const BridgeInfoDashboard = () => {
                     onClick={handleBackClick}
                     className="bg-inherit hover:bg-blue-500 text-black py-2 rounded-md flex items-center gap-2"
                   >
-                    <ArrowLeftIcon className="h-5 w-5" /> Bridges Wise Score
+                    <ArrowLeftIcon className="h-5 w-5" /> Evaluation
                   </button>
                 </div>
                 <div className="text-lg font-semibold">

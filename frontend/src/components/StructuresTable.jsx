@@ -155,7 +155,7 @@ const StructuresTable = ({ data, loading }) => {
           onClick={() => handleBridgeInfo(row)}
           className="text-blue-600 hover:text-blue-800 focus:outline-none"
         >
-          Bridge Info
+         👁 Bridge Info
         </button>
       ),
       ignoreRowClick: true,
