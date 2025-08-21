@@ -208,9 +208,9 @@ const BridgesListDashboard = ({
   };
 
   const handleCloseHistoryModal = () => {
-       setShowHistroyModal(false);
+    setShowHistroyModal(false);
     setSelectedBridge(null);
-  }
+  };
 
   const handleRowClick = (bridge) => {
     navigate("/BridgeInfoDashboard", { state: { bridge } });
@@ -859,22 +859,19 @@ const BridgesListDashboard = ({
                 </Modal.Footer>
               </Modal>
 
-              <Modal 
-            show={showHistoryModal}
+              <Modal
+                show={showHistoryModal}
                 onHide={handleCloseHistoryModal}
                 size="lg"
                 centered
-                className="custom-modal">
+                className="custom-modal"
+              >
                 <Modal.Header closeButton>
-                  <Modal.Title>
-                    History Records
-                  </Modal.Title>
+                  <Modal.Title>History Records</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                   {selectedBridge && (
-                    <InspectionListHistory
-                     inventoryData={selectedBridge}
-                    />
+                    <InspectionListHistory inventoryData={selectedBridge} />
                   )}
                 </Modal.Body>
                 <Modal.Footer>
