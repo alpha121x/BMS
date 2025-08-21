@@ -85,8 +85,9 @@ const exportToCSV = (data, filename = "structures_data.csv") => {
 
 const StructuresTable = ({ data, loading }) => {
   const navigate = useNavigate();
-  const userToken = sessionStorage.getItem("userEvaluation");
+  const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const user_type = userToken?.usertype;
+  console.log("User Type:", user_type);
 
 
 const handleBridgeInfo = (bridgeData) => {
@@ -148,21 +149,20 @@ const handleBridgeInfo = (bridgeData) => {
           : "—",
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <button
-          onClick={() => handleBridgeInfo(row)}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 focus:outline-none"
-        >
-          <FaEye className="text-lg" />
-          Bridge Info
-        </button>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
+     {
+    name: "Actions",
+    cell: (row) => (
+      <button
+        onClick={() => handleBridgeInfo(row)}
+        className="text-blue-600 hover:text-blue-800 focus:outline-none"
+      >
+        Bridge Info
+      </button>
+    ),
+    ignoreRowClick: true,
+    allowOverflow: true,
+    button: true,
+  },
   ];
 
   if (loading) {

@@ -59,8 +59,6 @@ const TopCardCon = ({ inspectedCards, districtId, type }) => {
     setLoading(true);
 
     try {
-      console.log("Fetching structures for type:", type, "and districtId:", districtId);
-      return;
       const response = await fetch(`${BASE_URL}/api/strucutres?type=${type}&districtId=${districtId}`);
       const data = await response.json();
       setStructures(data || []);
