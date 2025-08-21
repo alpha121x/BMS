@@ -239,9 +239,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
          <Route
           path="/BridgeInformationCon"
           element={
-            <PrivateRoute>
               <BridgeInformationCon />
-            </PrivateRoute>
           }
         />
 
@@ -249,9 +247,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
          <Route
           path="/BridgeInformationRams"
           element={
-            <PrivateRoute>
               <BridgeInformationRams />
-            </PrivateRoute>
           }
         />
 
@@ -259,9 +255,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route
           path="/BridgeInformationEval"
           element={
-            <PrivateEvaluationRoute>
               <BridgeInformationEval />
-            </PrivateEvaluationRoute>
           }
         />
 
