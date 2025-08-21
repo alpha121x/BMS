@@ -871,7 +871,7 @@ const BridgesListDashboard = ({
                 </Modal.Header>
                 <Modal.Body>
                   {selectedBridge && (
-                    <InspectionListHistory inventoryData={selectedBridge} />
+                    <InspectionListHistory bridgeId={selectedBridge.uu_bms_id} />
                   )}
                 </Modal.Body>
                 <Modal.Footer>

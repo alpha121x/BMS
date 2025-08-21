@@ -5413,7 +5413,7 @@ app.get("/api/project-progress-summary", async (req, res) => {
 
           -- 4. Structures approved (either consultant OR RAMS approved)
           COUNT(DISTINCT CASE 
-              WHEN (t.qc_con = 2 OR t.qc_rams = 2) 
+              WHEN (t.qc_rams = 2) 
               THEN t.uu_bms_id END
           ) AS approved_structures
 
@@ -6100,6 +6100,115 @@ app.get("/api/bridge-status-summary-combined", async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// for dashboard summary data
+app.get("/api/get-summary-history", async (req, res) => {
+  try {
+    const { bridgeId } = req.query;
+
+    if (!bridgeId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
+    }
+
+    const query = `
+  SELECT 
+    uu_bms_id,
+    damage_extent,
+    inspection_id,
+    bridge_name, 
+    "SpanIndex", 
+    "WorkKindName", 
+    "PartsName", 
+    "MaterialName", 
+    "DamageKindName", 
+    "DamageLevel", 
+    "Remarks", 
+    "inspection_images" AS "PhotoPaths"
+  FROM bms.tbl_inspection_f
+  WHERE
+    (
+      surveyed_by = 'RAMS-PITB'
+      OR (surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    )
+    AND uu_bms_id = $1
+
+  UNION ALL
+
+  SELECT 
+    uu_bms_id,
+    NULL AS damage_extent,
+    NULL AS inspection_id,
+    NULL AS bridge_name,
+    NULL AS "SpanIndex",
+    NULL AS "WorkKindName",
+    NULL AS "PartsName",
+    NULL AS "MaterialName",
+    NULL AS "DamageKindName",
+    NULL AS "DamageLevel",
+    "Remarks",
+    inspection_images AS "PhotoPaths"
+  FROM bms.tbl_evaluation_f
+  WHERE uu_bms_id = $1
+
+  ORDER BY inspection_id DESC NULLS LAST;
+`;
+    const { rows } = await pool.query(query, [bridgeId]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No inspection data available" });
+    }
+
+    // Process PhotoPaths for all rows
+    const processedData = rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          // Clean JSON if wrapped in quotes
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path" keys
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with image paths
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Flattened array of image paths
+      };
+    });
+
+    res.status(200).json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
