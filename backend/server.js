@@ -4626,83 +4626,95 @@ app.get("/api/bridgesCon", async (req, res) => {
       bridgeName = "%",
     } = req.query;
 
-  let query = `
-SELECT 
-    m.is_active,
-    m.raw_id,
-    m.uu_bms_id, 
-    m.surveyed_by,
-    m.pms_sec_id, 
-    m.structure_no, 
-    m.structure_type_id, 
-    m.structure_type, 
-    m.road_name, 
-    m.road_name_cwd, 
-    m.route_id, 
-    m.survey_id, 
-    m.surveyor_name, 
-    m.district_id, 
-    m.district, 
-    m.road_classification, 
-    m.road_surface_type, 
-    m.carriageway_type, 
-    m.direction, 
-    m.visual_condition, 
-    m.overall_bridge_condition,
-    m.construction_type_id, 
-    m.construction_type, 
-    m.no_of_span,
-    m.data_source, 
-    m.data_date_time, 
-    m.span_length_m, 
-    m.structure_width_m, 
-    m.construction_year, 
-    (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(m.construction_year, '')::int) AS age,
-    (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
-    m.bridge_situation,
-    m.is_bridge_completed,
-    m.last_maintenance_date, 
-    m.remarks, 
-    m.is_surveyed, 
-    m.x_centroid, 
-    m.y_centroid, 
-    m.images_spans,
-    CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-    ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
-    
-    -- latest remarks info
-    r.raw_id AS remarks_raw_id,
-    r.user_id AS remarks_user_id,
-    r.date_time AS remarks_date_time,
-    r.remarks AS overall_bridge_remarks,
-    r.evaluation_rating AS remarks_evaluation_rating
+    let query = `
+      SELECT 
+          m.is_active,
+          m.raw_id,
+          m.uu_bms_id, 
+          m.surveyed_by,
+          m.pms_sec_id, 
+          m.structure_no, 
+          m.structure_type_id, 
+          m.structure_type, 
+          m.road_name, 
+          m.road_name_cwd, 
+          m.route_id, 
+          m.survey_id, 
+          m.surveyor_name, 
+          m.district_id, 
+          m.district, 
+          m.road_classification, 
+          m.road_surface_type, 
+          m.carriageway_type, 
+          m.direction, 
+          m.visual_condition, 
+          m.overall_bridge_condition,
+          m.construction_type_id, 
+          m.construction_type, 
+          m.no_of_span,
+          m.data_source, 
+          m.data_date_time, 
+          m.span_length_m, 
+          m.structure_width_m, 
+          m.construction_year, 
+          (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(m.construction_year, '')::int) AS age,
+          (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
+          m.bridge_situation,
+          m.is_bridge_completed,
+          m.last_maintenance_date, 
+          m.remarks, 
+          m.is_surveyed, 
+          m.x_centroid, 
+          m.y_centroid, 
+          m.images_spans,
+          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
+          
+          -- latest remarks info
+          r.raw_id AS remarks_raw_id,
+          r.user_id AS remarks_user_id,
+          r.date_time AS remarks_date_time,
+          r.remarks AS overall_bridge_remarks,
+          r.evaluation_rating AS remarks_evaluation_rating
 
-FROM bms.tbl_bms_master_data m
-LEFT JOIN LATERAL (
-    SELECT raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating
-    FROM bms.tbl_bms_master_data_remarks r
-    WHERE r.uu_bms_id = m.uu_bms_id
-    ORDER BY r.date_time DESC
-    LIMIT 1
-) r ON true
+      FROM bms.tbl_bms_master_data m
+      LEFT JOIN LATERAL (
+          SELECT raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating
+          FROM bms.tbl_bms_master_data_remarks r
+          WHERE r.uu_bms_id = m.uu_bms_id
+          ORDER BY r.date_time DESC
+          LIMIT 1
+      ) r ON true
 
-WHERE 1=1 
-    AND m.uu_bms_id IN (
-        SELECT DISTINCT uu_bms_id 
-        FROM bms.tbl_inspection_f 
-        WHERE surveyed_by = 'RAMS-UU' 
-          AND qc_con = '1'
-    )
-    AND m.is_active = true
-`;
-
+      WHERE 1=1 
+          AND m.uu_bms_id IN (
+              SELECT DISTINCT uu_bms_id 
+              FROM bms.tbl_inspection_f 
+              WHERE surveyed_by = 'RAMS-UU' 
+                AND qc_con = '1'
+          )
+          AND m.is_active = true
+    `;
 
     let countQuery = `
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data
       WHERE 1=1
-      AND uu_bms_id IN (SELECT DISTINCT uu_bms_id FROM bms.tbl_inspection_f WHERE surveyed_by = 'RAMS-UU' AND qc_con = '1')
-    AND is_active = true
+      AND uu_bms_id IN (
+        SELECT DISTINCT uu_bms_id 
+        FROM bms.tbl_inspection_f 
+        WHERE surveyed_by = 'RAMS-UU' AND qc_con = '1'
+      )
+      AND is_active = true
+    `;
+
+    // New QC summary query
+    let qcSummaryQuery = `
+      SELECT 
+        COUNT(CASE WHEN qc_con = 1 THEN 1 END) AS pending_count,
+        COUNT(CASE WHEN qc_con = 2 THEN 1 END) AS approved_count
+      FROM bms.tbl_inspection_f
+      WHERE surveyed_by = 'RAMS-UU'
     `;
 
     const queryParams = [];
@@ -4733,18 +4745,21 @@ WHERE 1=1
       paramIndex++;
     }
 
-    query += ` ORDER BY data_date_time DESC OFFSET $${paramIndex} LIMIT $${
-      paramIndex + 1
-    }`;
+    query += ` ORDER BY data_date_time DESC OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
-    const result = await pool.query(query, queryParams);
-    const countResult = await pool.query(countQuery, countParams);
+    // Run all queries in parallel
+    const [result, countResult, qcResult] = await Promise.all([
+      pool.query(query, queryParams),
+      pool.query(countQuery, countParams),
+      pool.query(qcSummaryQuery),
+    ]);
 
     res.json({
       success: true,
       bridges: result.rows,
       totalCount: parseInt(countResult.rows[0].totalcount, 10),
+      qcSummary: qcResult.rows[0], // <-- added
     });
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -4754,6 +4769,7 @@ WHERE 1=1
     });
   }
 });
+
 
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesRams", async (req, res) => {
@@ -4875,78 +4891,77 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
       bridgeName = "%",
     } = req.query;
 
-  let query = `
-  WITH inspection_counts AS (
-    SELECT 
-      uu_bms_id,
-      COUNT(*) AS total_inspections,
-      SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
-    FROM bms.tbl_inspection_f  
-    WHERE surveyed_by = 'RAMS-UU' AND qc_con = '2'
-    GROUP BY uu_bms_id
-    HAVING COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
-  )
-  SELECT 
-      b.uu_bms_id,
-      b.raw_id,
-      b.surveyed_by,
-      b.pms_sec_id, 
-      b.structure_no, 
-      b.structure_type_id, 
-      b.structure_type, 
-      b.road_name, 
-      b.road_name_cwd, 
-      b.route_id, 
-      b.survey_id, 
-      b.surveyor_name, 
-      b.district_id, 
-      b.district, 
-      b.road_classification, 
-      b.road_surface_type, 
-      b.carriageway_type, 
-      b.direction, 
-      b.visual_condition, 
-      b.overall_bridge_condition,
-      b.construction_type_id, 
-      b.construction_type, 
-      b.no_of_span,
-      b.data_source, 
-      b.data_date_time, 
-      b.span_length_m, 
-      b.structure_width_m, 
-      b.construction_year, 
-      (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(b.construction_year, '')::int) AS age,
-      (COALESCE(b.span_length_m, 0) * COALESCE(b.no_of_span, 0)) AS bridge_length,
-      b.bridge_situation,
-      b.is_bridge_completed,
-      b.last_maintenance_date, 
-      b.remarks AS remarks, 
-      b.is_surveyed, 
-      b.x_centroid, 
-      b.y_centroid, 
-      b.images_spans,
-      CONCAT(b.pms_sec_id, ',', b.structure_no) AS bridge_name,
-      ARRAY[b.image_1, b.image_2, b.image_3, b.image_4, b.image_5] AS photos,
+    let query = `
+      WITH inspection_counts AS (
+        SELECT 
+          uu_bms_id,
+          COUNT(*) AS total_inspections,
+          SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
+        FROM bms.tbl_inspection_f  
+        WHERE surveyed_by = 'RAMS-UU' AND qc_con = '2'
+        GROUP BY uu_bms_id
+        HAVING COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
+      )
+      SELECT 
+          b.uu_bms_id,
+          b.raw_id,
+          b.surveyed_by,
+          b.pms_sec_id, 
+          b.structure_no, 
+          b.structure_type_id, 
+          b.structure_type, 
+          b.road_name, 
+          b.road_name_cwd, 
+          b.route_id, 
+          b.survey_id, 
+          b.surveyor_name, 
+          b.district_id, 
+          b.district, 
+          b.road_classification, 
+          b.road_surface_type, 
+          b.carriageway_type, 
+          b.direction, 
+          b.visual_condition, 
+          b.overall_bridge_condition,
+          b.construction_type_id, 
+          b.construction_type, 
+          b.no_of_span,
+          b.data_source, 
+          b.data_date_time, 
+          b.span_length_m, 
+          b.structure_width_m, 
+          b.construction_year, 
+          (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(b.construction_year, '')::int) AS age,
+          (COALESCE(b.span_length_m, 0) * COALESCE(b.no_of_span, 0)) AS bridge_length,
+          b.bridge_situation,
+          b.is_bridge_completed,
+          b.last_maintenance_date, 
+          b.remarks AS remarks, 
+          b.is_surveyed, 
+          b.x_centroid, 
+          b.y_centroid, 
+          b.images_spans,
+          CONCAT(b.pms_sec_id, ',', b.structure_no) AS bridge_name,
+          ARRAY[b.image_1, b.image_2, b.image_3, b.image_4, b.image_5] AS photos,
 
-      -- latest remarks info
-      r.raw_id AS remarks_raw_id,
-      r.user_id AS remarks_user_id,
-      r.date_time AS remarks_date_time,
-      r.remarks AS overall_bridge_remarks,
-      r.evaluation_rating AS remarks_evaluation_rating
+          -- latest remarks info
+          r.raw_id AS remarks_raw_id,
+          r.user_id AS remarks_user_id,
+          r.date_time AS remarks_date_time,
+          r.remarks AS overall_bridge_remarks,
+          r.evaluation_rating AS remarks_evaluation_rating
 
-  FROM bms.tbl_bms_master_data b
-  INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
-  LEFT JOIN LATERAL (
-      SELECT raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating
-      FROM bms.tbl_bms_master_data_remarks r
-      WHERE r.uu_bms_id = b.uu_bms_id
-      ORDER BY r.date_time DESC
-      LIMIT 1
-  ) r ON true
-  WHERE b.is_active = true
-`;
-
+      FROM bms.tbl_bms_master_data b
+      INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
+      LEFT JOIN LATERAL (
+          SELECT raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating
+          FROM bms.tbl_bms_master_data_remarks r
+          WHERE r.uu_bms_id = b.uu_bms_id
+          ORDER BY r.date_time DESC
+          LIMIT 1
+      ) r ON true
+      WHERE b.is_active = true
+    `;
 
     let countQuery = `
       WITH inspection_counts AS (
@@ -4954,14 +4969,24 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
           uu_bms_id,
           COUNT(*) AS total_inspections,
           SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END) AS reviewed_inspections
-        FROM bms.tbl_inspection_f where surveyed_by = 'RAMS-UU' AND qc_con = '2'
+        FROM bms.tbl_inspection_f 
+        WHERE surveyed_by = 'RAMS-UU' AND qc_con = '2'
         GROUP BY uu_bms_id
-        HAVING COUNT(*) = SUM(CASE WHEN  surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
+        HAVING COUNT(*) = SUM(CASE WHEN surveyed_by = 'RAMS-UU' AND qc_con = '2' THEN 1 ELSE 0 END)
       )
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data b
       INNER JOIN inspection_counts ic ON b.uu_bms_id = ic.uu_bms_id
       WHERE b.is_active = true
+    `;
+
+    // new QC summary query
+    let qcSummaryQuery = `
+      SELECT 
+        COUNT(CASE WHEN qc_rams = 0 AND qc_con = 2 THEN 1 END) AS pending_count,
+        COUNT(CASE WHEN qc_rams = 2 THEN 1 END) AS approved_count
+      FROM bms.tbl_inspection_f
+      WHERE surveyed_by = 'RAMS-UU'
     `;
 
     const queryParams = [];
@@ -4992,18 +5017,21 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
       paramIndex++;
     }
 
-    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${
-      paramIndex + 1
-    }`;
+    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
-    const result = await pool.query(query, queryParams);
-    const countResult = await pool.query(countQuery, countParams);
+    // run all queries together
+    const [result, countResult, qcResult] = await Promise.all([
+      pool.query(query, queryParams),
+      pool.query(countQuery, countParams),
+      pool.query(qcSummaryQuery),
+    ]);
 
     res.json({
       success: true,
       bridges: result.rows,
       totalCount: parseInt(countResult.rows[0].totalcount, 10),
+      qcSummary: qcResult.rows[0], // <-- pending_count & approved_count
     });
   } catch (error) {
     console.error("Error fetching data:", error);
@@ -5013,6 +5041,7 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
     });
   }
 });
+
 
 // bridges list for evaluation module for evaluator
 app.get("/api/bridgesEvaluator", async (req, res) => {
