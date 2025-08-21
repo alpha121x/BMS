@@ -69,23 +69,9 @@ const BridgeInfo = () => {
 
   if (!bridgeData || !user_type) {
     return (
-      <div
-        className="loader"
-        style={{
-          border: "8px solid #f3f3f3",
-          borderTop: "8px solid #3498db",
-          borderRadius: "50%",
-          width: "80px",
-          height: "80px",
-          animation: "spin 1s linear infinite",
-          margin: "auto",
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: "999",
-        }}
-      />
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
+      </div>
     ); // Or redirect to login
   }
 
