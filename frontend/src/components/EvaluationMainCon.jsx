@@ -18,7 +18,6 @@ import { LuConstruction } from "react-icons/lu";
 import BridgesStatusSummary from "./BridgesStatusSummary";
 import InspectionsList from "./UnapprovedInspections";
 import UnapprovedInspections from "./UnapprovedInspectionsRams";
-import HistoryRecords from "./HistoryRecords";
 import ProjectProgress from "./ProjectProgress";
 
 const EvaluationMainCon = () => {
@@ -214,16 +213,6 @@ const EvaluationMainCon = () => {
                 }`}
               >
                 Bridges Status Summary
-              </button> */}
-              {/* <button
-                onClick={() => setActiveView("historyrecords")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
-                  activeView === "historyrecords"
-                    ? "bg-[#005D7F] text-white"
-                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
-                }`}
-              >
-               History
               </button> */}
               {/* <button
                 onClick={() => setActiveView("unappinspections")}

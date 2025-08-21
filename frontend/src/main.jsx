@@ -20,7 +20,6 @@ import PriortizationTable from './components/PriotizationTable';
 import PrioritizationInformation from './components/PrioritizationInformation';
 import MaintenancePlan from './components/MaintenancePlan';
 import FiveYearPlan from './components/FiveYearPlan'; // Importing the Five Year Plan component
-import BridgeInfoHistory from './components/BridgeInfoHistory';
 import BridgeInfoInspected from './components/BridgeInfoInspected';
 import Rates from './components/Rates'; // Importing the Rates component
 import BridgeInformationEval from './components/BridgeInformationEval'; // Importing the Bridge Information Evaluation component
@@ -121,16 +120,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           element={
             <PrivateRoute>
               <BridgeInfo />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Private Route for BridgeInfoHistory */}
-         <Route
-          path="/BridgeInfoHistory"
-          element={
-            <PrivateRoute>
-              <BridgeInfoHistory />
             </PrivateRoute>
           }
         />
