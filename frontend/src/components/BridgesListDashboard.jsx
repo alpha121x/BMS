@@ -6,9 +6,11 @@ import "./BridgeList.css";
 import Papa from "papaparse";
 import InventoryInfoDashboard from "./InventoryInfoDashboard";
 import InspectionListDashboard from "./InspectionListDashboard";
+import InspectionListHistory from "./InspectionListHistory";
 import MapModal from "./MapModal";
 import { FaSpinner } from "react-icons/fa";
 import { FaFileCsv, FaFileExcel } from "react-icons/fa6";
+import { FaHistory } from "react-icons/fa";
 import Swal from "sweetalert2";
 import ExcelJS from "exceljs";
 import "leaflet/dist/leaflet.css";
@@ -41,8 +43,10 @@ const BridgesListDashboard = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
-  const [showInspectionSummaryModal, setShowInspectionSummaryModal] = useState(false);
+  const [showInspectionSummaryModal, setShowInspectionSummaryModal] =
+    useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
+  const [showHistoryModal, setShowHistroyModal] = useState(false);
   const [selectedBridge, setSelectedBridge] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [tableData, setTableData] = useState([]);
@@ -122,17 +126,17 @@ const BridgesListDashboard = ({
       try {
         const response = await fetch(`${BASE_URL}/api/visual-conditions`);
         if (!response.ok) {
-          throw new Error('Failed to fetch visual conditions');
+          throw new Error("Failed to fetch visual conditions");
         }
         const data = await response.json();
         setVisualConditions(data);
       } catch (error) {
-        console.error('Error fetching visual conditions:', error);
+        console.error("Error fetching visual conditions:", error);
         setVisualConditions([
-          { id: 1, visual_condition: 'FAIR' },
-          { id: 2, visual_condition: 'GOOD' },
-          { id: 3, visual_condition: 'POOR' },
-          { id: 4, visual_condition: 'UNDER CONSTRUCTION' },
+          { id: 1, visual_condition: "FAIR" },
+          { id: 2, visual_condition: "GOOD" },
+          { id: 3, visual_condition: "POOR" },
+          { id: 4, visual_condition: "UNDER CONSTRUCTION" },
         ]);
       } finally {
         setLoadingConditions(false);
@@ -149,13 +153,13 @@ const BridgesListDashboard = ({
       try {
         const response = await fetch(`${BASE_URL}/api/work-kinds`);
         if (!response.ok) {
-          throw new Error('Failed to fetch work kinds');
+          throw new Error("Failed to fetch work kinds");
         }
         const data = await response.json();
         setWorkKinds(data);
       } catch (error) {
-        console.error('Error fetching work kinds:', error);
-        setError('Failed to load work kinds');
+        console.error("Error fetching work kinds:", error);
+        setError("Failed to load work kinds");
       } finally {
         setLoadingWorkKinds(false);
       }
@@ -174,7 +178,7 @@ const BridgesListDashboard = ({
           `${BASE_URL}/api/damage-counts?uu_bms_id=${selectedBridge.uu_bms_id}`
         );
         if (!response.ok) {
-          throw new Error('Failed to fetch damage counts');
+          throw new Error("Failed to fetch damage counts");
         }
         const data = await response.json();
         const countsMap = {};
@@ -183,8 +187,8 @@ const BridgesListDashboard = ({
         });
         setDamageCounts(countsMap);
       } catch (error) {
-        console.error('Error fetching damage counts:', error);
-        setError('Failed to load damage counts');
+        console.error("Error fetching damage counts:", error);
+        setError("Failed to load damage counts");
       } finally {
         setLoadingDamageCounts(false);
       }
@@ -198,6 +202,16 @@ const BridgesListDashboard = ({
     setShowModal(true);
   };
 
+  const handleViewHistory = (bridge) => {
+    setSelectedBridge(bridge);
+    setShowHistroyModal(true);
+  };
+
+  const handleCloseHistoryModal = () => {
+       setShowHistroyModal(false);
+    setSelectedBridge(null);
+  }
+
   const handleRowClick = (bridge) => {
     navigate("/BridgeInfoDashboard", { state: { bridge } });
   };
@@ -208,7 +222,7 @@ const BridgesListDashboard = ({
   };
 
   const handleCloseInspectionSummaryModal = () => {
-    setShowInspectionSummaryModal(false); 
+    setShowInspectionSummaryModal(false);
     setSelectedBridge(null);
   };
 
@@ -413,110 +427,117 @@ const BridgesListDashboard = ({
     }
   };
 
-const columns = [
-  {
-    name: "District",
-    selector: (row) => row.district || "N/A",
-    sortable: true,
-    wrap: true,
-    grow: 0.7,
-  },
-  {
-    name: "Structure Type",
-    selector: (row) => row.structure_type || "N/A",
-    sortable: true,
-    wrap: true,
-    grow: 0.7,
-  },
-  {
-    name: "Construction Type",
-    selector: (row) => row.construction_type || "N/A",
-    sortable: true,
-    wrap: true,
-    grow: 0.7,
-  },
-  {
-    name: "Road Classification",
-    selector: (row) => row.road_classification || "N/A",
-    sortable: true,
-    wrap: true,
-    grow: 0.7,
-  },
-  {
-    name: "Bridge Name",
-    selector: (row) =>
-      `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
-    sortable: true,
-    wrap: true,
-    grow: 1,
-  },
-  {
-    name: "Structure Length",
-    selector: (row) => row.bridge_length || "N/A",
-    sortable: true,
-    wrap: true,
-    grow: 0.5,
-  },
-  {
-    name: "Date Time",
-    selector: (row) =>
-      row.data_date_time
-        ? new Date(row.data_date_time).toLocaleString()
-        : "N/A",
-    sortable: true,
-    wrap: true,
-    grow: 1,
-  },
-  {
-    name: "Action",
-    cell: (row) => (
-      <div
-        className="flex flex-wrap gap-2 justify-center"
-        style={{ minWidth: "360px" }}
-      >
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleViewInventory(row);
-          }}
-          className="bg-[#009CB8] text-white px-2 py-1 rounded hover:bg-[#007485] text-xs"
+  const columns = [
+    {
+      name: "District",
+      selector: (row) => row.district || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 0.7,
+    },
+    {
+      name: "Structure Type",
+      selector: (row) => row.structure_type || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 0.7,
+    },
+    {
+      name: "Construction Type",
+      selector: (row) => row.construction_type || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 0.7,
+    },
+    {
+      name: "Road Classification",
+      selector: (row) => row.road_classification || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 0.7,
+    },
+    {
+      name: "Bridge Name",
+      selector: (row) =>
+        `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
+      name: "Structure Length",
+      selector: (row) => row.bridge_length || "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 0.5,
+    },
+    {
+      name: "Date Time",
+      selector: (row) =>
+        row.data_date_time
+          ? new Date(row.data_date_time).toLocaleString()
+          : "N/A",
+      sortable: true,
+      wrap: true,
+      grow: 1,
+    },
+    {
+      name: "Action",
+      cell: (row) => (
+        <div
+          className="flex flex-wrap gap-2 justify-center"
+          style={{ minWidth: "360px" }}
         >
-          Inventory Info
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleViewInspection(row);
-          }}
-          className="bg-[#3B9895] text-white px-2 py-1 rounded hover:bg-[#2d7270] text-xs"
-        >
-          Inspection Info
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleViewInspectionSummary(row);
-          }}
-          className="bg-[#005D7F] text-white px-2 py-1 rounded hover:bg-[#003f5f] text-xs"
-        >
-          Inspection Summary
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleZoomToBridge(row);
-          }}
-          className="bg-[#88B9B8] text-white px-2 py-1 rounded hover:bg-[#6a8f8f] text-xs"
-        >
-          Zoom To
-        </button>
-      </div>
-    ),
-    ignoreRowClick: true,
-    grow: 2.8, // more space for action buttons
-  },
-];
-
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInventory(row);
+            }}
+            className="bg-[#009CB8] text-white px-2 py-1 rounded hover:bg-[#007485] text-xs"
+          >
+            Inventory Info
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInspection(row);
+            }}
+            className="bg-[#3B9895] text-white px-2 py-1 rounded hover:bg-[#2d7270] text-xs"
+          >
+            Inspection Info
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInspectionSummary(row);
+            }}
+            className="bg-[#005D7F] text-white px-2 py-1 rounded hover:bg-[#003f5f] text-xs"
+          >
+            Inspection Summary
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoomToBridge(row);
+            }}
+            className="bg-[#88B9B8] text-white px-2 py-1 rounded hover:bg-[#6a8f8f] text-xs"
+          >
+            Zoom To
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewHistory(row);
+            }}
+          >
+            <FaHistory />
+          </button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      grow: 3, // more space for action buttons
+    },
+  ];
 
   const customStyles = {
     headCells: {
@@ -833,6 +854,31 @@ const columns = [
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={handleCloseMapModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              <Modal 
+            show={showHistoryModal}
+                onHide={handleCloseHistoryModal}
+                size="lg"
+                centered
+                className="custom-modal">
+                <Modal.Header closeButton>
+                  <Modal.Title>
+                    History Records
+                  </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <InspectionListHistory
+                     inventoryData={selectedBridge}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={handleCloseHistoryModal}>
                     Close
                   </Button>
                 </Modal.Footer>
