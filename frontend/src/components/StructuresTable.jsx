@@ -1,5 +1,7 @@
 import React from "react";
 import DataTable from "react-data-table-component";
+import { FaEye } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 // Define custom styles to match the original table's look
 const customStyles = {
@@ -41,53 +43,8 @@ const customStyles = {
   },
 };
 
-// Define columns for the DataTable
-const columns = [
-  {
-    name: "#",
-    selector: (row, index) => index + 1,
-    sortable: false,
-    width: "60px",
-  },
-  {
-    name: "Bridge Name",
-    selector: (row) => row.bridge_name,
-    sortable: true,
-    cell: (row) => <span className="font-medium">{row.bridge_name}</span>,
-  },
-  {
-    name: "District",
-    selector: (row) => row.district,
-    sortable: true,
-  },
-  {
-    name: "Structure Type",
-    selector: (row) => row.structure_type,
-    sortable: true,
-  },
-  {
-    name: "Construction Type",
-    selector: (row) => row.construction_type,
-    sortable: true,
-  },
-  {
-    name: "Age (Years)",
-    selector: (row) => row.age || "—",
-    sortable: true,
-  },
-  {
-    name: "Structure Length (m)",
-    selector: (row) =>
-      row.bridge_length !== null && row.bridge_length !== undefined
-        ? parseFloat(row.bridge_length).toFixed(2)
-        : "—",
-    sortable: true,
-  },
-];
-
 // Function to convert data to CSV and trigger download
 const exportToCSV = (data, filename = "structures_data.csv") => {
-  // Define CSV headers based on columns
   const headers = [
     "#",
     "Bridge Name",
@@ -98,10 +55,9 @@ const exportToCSV = (data, filename = "structures_data.csv") => {
     "Structure Length (m)",
   ];
 
-  // Map data to CSV rows
   const rows = data.map((row, index) => [
     index + 1,
-    `"${row.bridge_name || ""}"`, // Wrap strings in quotes to handle commas
+    `"${row.bridge_name || ""}"`,
     row.district || "",
     row.structure_type || "",
     row.construction_type || "",
@@ -111,13 +67,11 @@ const exportToCSV = (data, filename = "structures_data.csv") => {
       : "—",
   ]);
 
-  // Combine headers and rows into CSV content
   const csvContent = [
     headers.join(","),
     ...rows.map((row) => row.join(",")),
   ].join("\n");
 
-  // Create a Blob and trigger download
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -130,6 +84,73 @@ const exportToCSV = (data, filename = "structures_data.csv") => {
 };
 
 const StructuresTable = ({ data, loading }) => {
+  const navigate = useNavigate();
+
+  const handleBridgeInfo = (bridgeData) => {
+    // console.log("Navigating to Bridge Information with data:", bridgeData);
+    // return;
+    navigate("/BridgeInformationEval", { state: { bridgeData } });
+  };
+
+  // ✅ Columns must be inside the component so handleBridgeInfo is in scope
+  const columns = [
+    {
+      name: "#",
+      selector: (row, index) => index + 1,
+      sortable: false,
+      width: "60px",
+    },
+    {
+      name: "Bridge Name",
+      selector: (row) => row.bridge_name,
+      sortable: true,
+      cell: (row) => <span className="font-medium">{row.bridge_name}</span>,
+    },
+    {
+      name: "District",
+      selector: (row) => row.district,
+      sortable: true,
+    },
+    {
+      name: "Structure Type",
+      selector: (row) => row.structure_type,
+      sortable: true,
+    },
+    {
+      name: "Construction Type",
+      selector: (row) => row.construction_type,
+      sortable: true,
+    },
+    {
+      name: "Age (Years)",
+      selector: (row) => row.age || "—",
+      sortable: true,
+    },
+    {
+      name: "Structure Length (m)",
+      selector: (row) =>
+        row.bridge_length !== null && row.bridge_length !== undefined
+          ? parseFloat(row.bridge_length).toFixed(2)
+          : "—",
+      sortable: true,
+    },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <button
+          onClick={() => handleBridgeInfo(row)}
+          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 focus:outline-none"
+        >
+          <FaEye className="text-lg" />
+          Bridge Info
+        </button>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+  ];
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
@@ -139,7 +160,9 @@ const StructuresTable = ({ data, loading }) => {
   }
 
   if (!data || data.length === 0) {
-    return <p className="text-gray-600 text-center py-4">No structures found.</p>;
+    return (
+      <p className="text-gray-600 text-center py-4">No structures found.</p>
+    );
   }
 
   return (

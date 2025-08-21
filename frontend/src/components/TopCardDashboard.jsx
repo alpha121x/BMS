@@ -57,7 +57,7 @@ const TopCardDashboard = ({ type, totalLabel, totalValue, color, items, district
   const [structures, setStructures] = useState([]);
   const [loading, setLoading] = useState(false); // Add loading state
 
-  console.log(districtId);
+  // console.log(districtId);
 
 
   const addCommas = (x) => {

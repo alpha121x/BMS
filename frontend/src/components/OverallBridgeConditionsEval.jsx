@@ -67,7 +67,7 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const userId = userToken?.userId;
 
-  console.log(inventoryData);
+  // console.log(inventoryData);
 
   // States for evaluation table
   const [evaluationState, setEvaluationState] = useState({});

@@ -23,6 +23,7 @@ import FiveYearPlan from './components/FiveYearPlan'; // Importing the Five Year
 import BridgeInfoHistory from './components/BridgeInfoHistory';
 import BridgeInfoInspected from './components/BridgeInfoInspected';
 import Rates from './components/Rates'; // Importing the Rates component
+import BridgeInformationEval from './components/BridgeInformationEval'; // Importing the Bridge Information Evaluation component
 
 // Authentication Checker Component for regular routes
 const PrivateRoute = ({ children }) => {
@@ -249,6 +250,16 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <PrivateRoute>
               <BridgeInformationRams />
             </PrivateRoute>
+          }
+        />
+
+        {/* Private Route for BridgeInformationEval */}
+        <Route
+          path="/BridgeInformationEval"
+          element={
+            <PrivateEvaluationRoute>
+              <BridgeInformationEval />
+            </PrivateEvaluationRoute>
           }
         />
 
