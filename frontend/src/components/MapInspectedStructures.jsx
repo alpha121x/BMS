@@ -11,6 +11,7 @@ const MapInspectedStructures = ({
   bridgeLength,
   roadClassification,
   spanLength,
+  age,
 }) => {
   const mapRef = useRef(null);
   const viewRef = useRef(null);

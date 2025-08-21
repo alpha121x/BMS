@@ -893,15 +893,15 @@ app.get("/api/strucutres", async (req, res) => {
   const values = [];
   const conditions = [];
 
-  if (districtId) {
+  if (districtId !== "%") {
     conditions.push(`m.district_id = $${values.length + 1}`);
     values.push(districtId);
   }
-  if (structureType) {
+  if (structureType && structureType !== "%") {
     conditions.push(`m.structure_type_id = $${values.length + 1}`);
     values.push(structureType);
   }
-  if (bridgeName) {
+  if (bridgeName && bridgeName !== "%") {
     conditions.push(`CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${values.length + 1}`);
     values.push(`%${bridgeName}%`);
   }

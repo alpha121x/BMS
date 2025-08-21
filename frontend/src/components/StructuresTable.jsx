@@ -85,12 +85,26 @@ const exportToCSV = (data, filename = "structures_data.csv") => {
 
 const StructuresTable = ({ data, loading }) => {
   const navigate = useNavigate();
+  const userToken = sessionStorage.getItem("userEvaluation");
+  const user_type = userToken?.usertype;
 
-  const handleBridgeInfo = (bridgeData) => {
-    // console.log("Navigating to Bridge Information with data:", bridgeData);
-    // return;
-    navigate("/BridgeInformationEval", { state: { bridgeData } });
-  };
+
+const handleBridgeInfo = (bridgeData) => {
+  // Conditional route based on user_type
+  switch (user_type) {
+    case "consultant":
+      navigate("/BridgeInformationCon", { state: { bridgeData } });
+      break;
+
+    case "rams":
+      navigate("/BridgeInformationRams", { state: { bridgeData } });
+      break;
+
+    case "evaluator":
+      navigate("/BridgeInformationEval", { state: { bridgeData } });
+      break;
+  }
+};
 
   // ✅ Columns must be inside the component so handleBridgeInfo is in scope
   const columns = [

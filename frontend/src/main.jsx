@@ -239,7 +239,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
          <Route
           path="/BridgeInformationCon"
           element={
+            <PrivateRoute>
               <BridgeInformationCon />
+            </PrivateRoute>
           }
         />
 

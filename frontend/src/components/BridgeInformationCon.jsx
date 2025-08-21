@@ -12,12 +12,11 @@ const BridgeInfoDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const serializedBridgeData = urlParams.get("bridgeData");
-    if (serializedBridgeData) {
-      setBridgeData(JSON.parse(decodeURIComponent(serializedBridgeData)));
-    }
-  }, [location]);
+     if (location.state?.bridgeData) {
+       setBridgeData(location.state.bridgeData);
+       console.log("Received Bridge Data:", location.state.bridgeData);
+     }
+   }, [location.state]);
 
   const handleBackClick = () => {
     navigate("/Evaluation");
