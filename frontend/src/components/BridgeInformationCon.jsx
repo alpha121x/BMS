@@ -14,7 +14,6 @@ const BridgeInfoDashboard = () => {
   useEffect(() => {
      if (location.state?.bridgeData) {
        setBridgeData(location.state.bridgeData);
-       console.log("Received Bridge Data:", location.state.bridgeData);
      }
    }, [location.state]);
 
