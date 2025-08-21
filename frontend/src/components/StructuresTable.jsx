@@ -89,23 +89,22 @@ const StructuresTable = ({ data, loading }) => {
   const user_type = userToken?.usertype;
   console.log("User Type:", user_type);
 
+  const handleBridgeInfo = (bridgeData) => {
+    // Conditional route based on user_type
+    switch (user_type) {
+      case "consultant":
+        navigate("/BridgeInformationCon", { state: { bridgeData } });
+        break;
 
-const handleBridgeInfo = (bridgeData) => {
-  // Conditional route based on user_type
-  switch (user_type) {
-    case "consultant":
-      navigate("/BridgeInformationCon", { state: { bridgeData } });
-      break;
+      case "rams":
+        navigate("/BridgeInformationRams", { state: { bridgeData } });
+        break;
 
-    case "rams":
-      navigate("/BridgeInformationRams", { state: { bridgeData } });
-      break;
-
-    case "evaluator":
-      navigate("/BridgeInformationEval", { state: { bridgeData } });
-      break;
-  }
-};
+      case "evaluator":
+        navigate("/BridgeInformationEval", { state: { bridgeData } });
+        break;
+    }
+  };
 
   // ✅ Columns must be inside the component so handleBridgeInfo is in scope
   const columns = [
@@ -149,20 +148,20 @@ const handleBridgeInfo = (bridgeData) => {
           : "—",
       sortable: true,
     },
-     {
-    name: "Actions",
-    cell: (row) => (
-      <button
-        onClick={() => handleBridgeInfo(row)}
-        className="text-blue-600 hover:text-blue-800 focus:outline-none"
-      >
-        Bridge Info
-      </button>
-    ),
-    ignoreRowClick: true,
-    allowOverflow: true,
-    button: true,
-  },
+    {
+      name: "Actions",
+      cell: (row) => (
+        <button
+          onClick={() => handleBridgeInfo(row)}
+          className="text-blue-600 hover:text-blue-800 focus:outline-none"
+        >
+          Bridge Info
+        </button>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
   ];
 
   if (loading) {
