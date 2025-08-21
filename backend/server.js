@@ -5401,7 +5401,7 @@ app.get("/api/project-progress-summary", async (req, res) => {
 
           -- 2. Structures with unapproved inspections (pending with Bridge Inspector, only latest inspections)
           COUNT(DISTINCT CASE 
-              WHEN (t.qc_con = 3 OR t.qc_rams = 3 AND t.is_latest = true ) 
+              WHEN ((t.surveyed_by = 'RAMS-UU' AND t.qc_con = 3 OR t.qc_rams = 3) AND t.is_latest = true ) 
               THEN t.uu_bms_id END
           ) AS unapproved_structures,
 
@@ -5413,7 +5413,7 @@ app.get("/api/project-progress-summary", async (req, res) => {
 
           -- 4. Structures approved (either consultant OR RAMS approved)
           COUNT(DISTINCT CASE 
-              WHEN (t.qc_rams = 2) 
+              WHEN (t.qc_rams = 2 AND t.surveyed_by = 'RAMS-UU') 
               THEN t.uu_bms_id END
           ) AS approved_structures
 

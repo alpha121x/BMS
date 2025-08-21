@@ -62,7 +62,7 @@ const EvaluationMainCon = () => {
             type: "submitted_to_rams",
           },
           {
-            label: "Approved Structures",
+            label: "Rams Approved Structures",
             value: data.approved_structures,
             color: "#27AE60",
             type: "approved_structures",

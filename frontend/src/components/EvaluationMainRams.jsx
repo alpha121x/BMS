@@ -94,7 +94,7 @@ const EvaluationMainRams = () => {
           type: "submitted_to_rams",
         },
         {
-          label: "Approved Structures",
+          label: "Rams Approved Structures",
           value: data.approved_structures || "N/A",
           icon: <FaClipboardCheck />,
           color: "#4CAF50",
