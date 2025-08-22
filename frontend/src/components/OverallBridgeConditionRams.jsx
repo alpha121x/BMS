@@ -66,6 +66,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // State for Is Bridge Completed
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const userId = userToken?.userId;
+  const user_type = userToken?.user_type; // User type for API requests
 
   // Fetch Visual Conditions from API
   useEffect(() => {
@@ -175,6 +176,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         user_id: userId,
         uu_bms_id: inventoryData.uu_bms_id,
         raw_id: inventoryData.raw_id, // Include raw_id for the update
+        user_type: user_type, // Include user_type for the update
       };
 
       const response = await fetch(

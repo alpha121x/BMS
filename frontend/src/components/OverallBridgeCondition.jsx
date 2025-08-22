@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Spinner, Button, FormCheck } from 'react-bootstrap';
-import { BASE_URL } from './config';
-import DamageSummary from './DamageSummary';
+import React, { useState, useEffect } from "react";
+import { Form, Spinner, Button, FormCheck } from "react-bootstrap";
+import { BASE_URL } from "./config";
+import DamageSummary from "./DamageSummary";
 
 const OverallBridgeCondition = ({ inventoryData }) => {
-  const [overallCondition, setOverallCondition] = useState('');
+  const [overallCondition, setOverallCondition] = useState("");
   const [visualConditions, setVisualConditions] = useState([]);
   const [workKinds, setWorkKinds] = useState([]);
   const [damageCounts, setDamageCounts] = useState({});
@@ -14,10 +14,12 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
-  const [overallRemarks, setOverallRemarks] = useState('');
+  const [overallRemarks, setOverallRemarks] = useState("");
   const [isBridgeCompleted, setIsBridgeCompleted] = useState(false);
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const userId = userToken?.userId;
+  const user_type = userToken?.usertype;
+
 
   // Fetch Visual Conditions from API
   useEffect(() => {
@@ -26,17 +28,17 @@ const OverallBridgeCondition = ({ inventoryData }) => {
       try {
         const response = await fetch(`${BASE_URL}/api/visual-conditions`);
         if (!response.ok) {
-          throw new Error('Failed to fetch visual conditions');
+          throw new Error("Failed to fetch visual conditions");
         }
         const data = await response.json();
         setVisualConditions(data);
       } catch (error) {
-        console.error('Error fetching visual conditions:', error);
+        console.error("Error fetching visual conditions:", error);
         setVisualConditions([
-          { id: 1, visual_condition: 'FAIR' },
-          { id: 2, visual_condition: 'GOOD' },
-          { id: 3, visual_condition: 'POOR' },
-          { id: 4, visual_condition: 'UNDER CONSTRUCTION' },
+          { id: 1, visual_condition: "FAIR" },
+          { id: 2, visual_condition: "GOOD" },
+          { id: 3, visual_condition: "POOR" },
+          { id: 4, visual_condition: "UNDER CONSTRUCTION" },
         ]);
       } finally {
         setLoadingConditions(false);
@@ -53,13 +55,13 @@ const OverallBridgeCondition = ({ inventoryData }) => {
       try {
         const response = await fetch(`${BASE_URL}/api/work-kinds`);
         if (!response.ok) {
-          throw new Error('Failed to fetch work kinds');
+          throw new Error("Failed to fetch work kinds");
         }
         const data = await response.json();
         setWorkKinds(data);
       } catch (error) {
-        console.error('Error fetching work kinds:', error);
-        setError('Failed to load work kinds');
+        console.error("Error fetching work kinds:", error);
+        setError("Failed to load work kinds");
       } finally {
         setLoadingWorkKinds(false);
       }
@@ -78,7 +80,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
           `${BASE_URL}/api/damage-counts?uu_bms_id=${inventoryData.uu_bms_id}`
         );
         if (!response.ok) {
-          throw new Error('Failed to fetch damage counts');
+          throw new Error("Failed to fetch damage counts");
         }
         const data = await response.json();
         const countsMap = {};
@@ -87,8 +89,8 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         });
         setDamageCounts(countsMap);
       } catch (error) {
-        console.error('Error fetching damage counts:', error);
-        setError('Failed to load damage counts');
+        console.error("Error fetching damage counts:", error);
+        setError("Failed to load damage counts");
       } finally {
         setLoadingDamageCounts(false);
       }
@@ -99,15 +101,9 @@ const OverallBridgeCondition = ({ inventoryData }) => {
 
   // Set initial values from inventoryData
   useEffect(() => {
-    if (inventoryData?.overall_bridge_condition) {
-      setOverallCondition(inventoryData.overall_bridge_condition);
-    }
-    if (inventoryData?.overall_bridge_remarks) {
-      setOverallRemarks(inventoryData.overall_bridge_remarks);
-    }
-    if (inventoryData?.is_bridge_completed !== undefined) {
-      setIsBridgeCompleted(inventoryData.is_bridge_completed);
-    }
+    setOverallCondition(inventoryData?.overall_bridge_condition ?? "");
+    setOverallRemarks(inventoryData?.overall_bridge_remarks ?? "");
+    setIsBridgeCompleted(Boolean(inventoryData?.is_bridge_completed));
   }, [inventoryData]);
 
   // Handle condition selection
@@ -126,26 +122,30 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         user_id: userId,
         uu_bms_id: inventoryData.uu_bms_id,
         raw_id: inventoryData.raw_id,
+        user_type: user_type,
       };
 
+      console.log("Saving data:", requestData);
+      // return;
+
       const response = await fetch(`${BASE_URL}/api/update-bridge-data`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update bridge data');
+        throw new Error("Failed to update bridge data");
       }
 
       const result = await response.json();
       setUpdateSuccess(result.message);
       setUpdateError(null);
     } catch (error) {
-      console.error('Error updating bridge data:', error);
-      setUpdateError('Failed to update bridge data');
+      console.error("Error updating bridge data:", error);
+      setUpdateError("Failed to update bridge data");
       setUpdateSuccess(null);
     }
   };
@@ -153,29 +153,29 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   // Map visual conditions to colors
   const getConditionStyle = (condition) => {
     switch (condition.toLowerCase()) {
-      case 'good':
+      case "good":
         return {
-          backgroundColor: '#9FD585',
-          color: 'black',
-          fontWeight: 'bold',
+          backgroundColor: "#9FD585",
+          color: "black",
+          fontWeight: "bold",
         };
-      case 'fair':
+      case "fair":
         return {
-          backgroundColor: '#FFD685',
-          color: 'black',
-          fontWeight: 'bold',
+          backgroundColor: "#FFD685",
+          color: "black",
+          fontWeight: "bold",
         };
-      case 'poor':
+      case "poor":
         return {
-          backgroundColor: '#FF8585',
-          color: 'black',
-          fontWeight: 'bold',
+          backgroundColor: "#FF8585",
+          color: "black",
+          fontWeight: "bold",
         };
-      case 'under construction':
+      case "under construction":
         return {
-          backgroundColor: '#DBDBDB',
-          color: 'black',
-          fontWeight: 'bold',
+          backgroundColor: "#DBDBDB",
+          color: "black",
+          fontWeight: "bold",
         };
       default:
         return {};
@@ -192,7 +192,9 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         error={error}
       />
       <div className="mb-4">
-        <label className="font-bold text-blue-900">Overall Bridge Condition</label>
+        <label className="font-bold text-blue-900">
+          Overall Bridge Condition
+        </label>
         {loadingConditions ? (
           <div className="text-center py-2">
             <Spinner animation="border" size="sm" role="status">
@@ -217,7 +219,9 @@ const OverallBridgeCondition = ({ inventoryData }) => {
             ))}
           </Form.Select>
         )}
-        {updateSuccess && <div className="text-green-500 mt-2">{updateSuccess}</div>}
+        {updateSuccess && (
+          <div className="text-green-500 mt-2">{updateSuccess}</div>
+        )}
         {updateError && <div className="text-red-500 mt-2">{updateError}</div>}
       </div>
       <div className="mb-3">

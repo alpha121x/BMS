@@ -8024,105 +8024,78 @@ app.put('/api/update-overall-remarks-rams/:id', async (req, res) => {
 });
 
 // API endpoint to update bridge data and insert remarks Evaluation Module..
-app.post('/api/update-bridge-data', async (req, res) => {
-  const { 
-    overall_remarks, 
-    is_bridge_completed, 
-    user_id, 
-    uu_bms_id, 
-    evaluation_rating,
-    raw_id,
-    evaluator_id,
-    overall_bridge_condition
-  } = req.body;
-
-  if (!uu_bms_id) {
-    return res.status(400).json({ error: 'uu_bms_id is required' });
-  }
-
-  if (!user_id) {
-    return res.status(400).json({ error: 'user_id is required' });
-  }
-
-  const client = await pool.connect();
-
+app.post("/api/update-bridge-data", async (req, res) => {
   try {
-    await client.query('BEGIN');
+    const { 
+      uu_bms_id, 
+      raw_id,
+      user_id, 
+      user_type, 
+      overall_bridge_condition, 
+      overall_remarks, 
+      is_bridge_completed,
+      evaluation_rating 
+    } = req.body;
 
-    let updatedMasterData = null;
-    let insertedRemark = null;
-
-    // --- Step 1: Evaluator logic ---
-    if ([1, 2, 3, 4].includes(Number(evaluator_id))) {
-      // Evaluators 1-4 → Insert remarks with overall_condition
-      const insertQuery = `
-        INSERT INTO bms.tbl_bms_master_data_remarks 
-          (raw_id, uu_bms_id, user_id, remarks, evaluation_rating, date_time, overall_condition)
-        VALUES ($1, $2, $3, $4, $5, NOW()::timestamp, $6)
-        RETURNING raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating, overall_condition
-      `;
-      const insertValues = [
-        raw_id,
-        uu_bms_id, 
-        user_id, 
-        overall_remarks || null, 
-        evaluation_rating || null,
-        overall_bridge_condition || null
-      ];
-      const insertResult = await client.query(insertQuery, insertValues);
-      insertedRemark = insertResult.rows[0];
-    } 
-    else if (Number(evaluator_id) === 5) {
-      // Evaluator 5 → Update master data with overall_bridge_condition
-      let updateFields = [];
-      let updateValues = [];
-      let idx = 1;
-
-      if (overall_bridge_condition !== undefined) {
-        updateFields.push(`overall_bridge_condition = $${idx++}`);
-        updateValues.push(overall_bridge_condition);
-      }
-      if (is_bridge_completed !== undefined) {
-        updateFields.push(`is_bridge_completed = $${idx++}`);
-        updateValues.push(is_bridge_completed);
-      }
-
-      if (updateFields.length > 0) {
-        updateValues.push(uu_bms_id);
-        const updateQuery = `
-          UPDATE bms.tbl_bms_master_data
-          SET ${updateFields.join(', ')}
-          WHERE uu_bms_id = $${idx}
-          RETURNING uu_bms_id, overall_bridge_condition, is_bridge_completed
-        `;
-        const updateResult = await client.query(updateQuery, updateValues);
-
-        if (updateResult.rowCount === 0) {
-          await client.query('ROLLBACK');
-          return res.status(404).json({ error: 'Bridge not found' });
-        }
-
-        updatedMasterData = updateResult.rows[0];
-      }
-    } else {
-      return res.status(400).json({ error: 'Invalid evaluator_id' });
+    if (!uu_bms_id || !user_id || !user_type) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
-    await client.query('COMMIT');
+    // === Case 1: Consultant / RAMS Users ===
+    if (user_type === "consultant" || user_type === "rams") {
+      // Update master table with overall_condition + is_bridge_completed
+      await pool.query(
+        `UPDATE bms.tbl_bms_master_data 
+         SET overall_bridge_condition = $1,
+             is_bridge_completed = $2
+         WHERE uu_bms_id = $3`,
+        [overall_bridge_condition, is_bridge_completed, uu_bms_id]
+      );
 
-    res.json({
-      message: 'Bridge condition processed successfully',
-      data: {
-        master_data: updatedMasterData,
-        remarks: insertedRemark,
-      },
-    });
+      // Insert into remarks table
+      await pool.query(
+        `INSERT INTO bms.tbl_bms_master_data_remarks 
+         (uu_bms_id, raw_id, user_id, overall_condition, remarks, date_time) 
+         VALUES ($1, $2, $3, $4, $5, NOW()::timestamp)`,
+        [uu_bms_id, raw_id, user_id, overall_bridge_condition, overall_remarks]
+      );
+
+      return res.json({ message: "Inventory data & remarks updated successfully" });
+    }
+
+    // === Case 2: Evaluator Users ===
+    if (user_type === "evaluator") {
+      let isFinalCheck = false;
+
+      // === Case 3: Evaluator Special Case (user_id = 5) ===
+      if (parseInt(user_id) === 5) {
+        isFinalCheck = true;
+      }
+
+      // Insert evaluator remarks
+      await pool.query(
+        `INSERT INTO bms.tbl_evaluation_remarks 
+         (uu_bms_id, raw_id, user_id, overall_condition, remarks, evaluation_rating, is_final_check, date_time) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()::timestamp)`,
+        [uu_bms_id, raw_id, user_id, overall_bridge_condition, overall_remarks, evaluation_rating || null, isFinalCheck]
+      );
+
+      // Always update is_bridge_completed in master table
+      await pool.query(
+        `UPDATE bms.tbl_bms_master_data
+         SET is_bridge_completed = $1
+         WHERE uu_bms_id = $2`,
+        [is_bridge_completed, uu_bms_id]
+      );
+
+      return res.json({ message: "Evaluator remarks saved & bridge completion updated" });
+    }
+
+    return res.status(400).json({ message: "Invalid user_type" });
+
   } catch (error) {
-    await client.query('ROLLBACK');
-    console.error('Error updating bridge data and remarks:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  } finally {
-    client.release();
+    console.error("Error saving remarks:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
