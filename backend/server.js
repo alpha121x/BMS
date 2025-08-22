@@ -8074,8 +8074,8 @@ app.post("/api/update-bridge-data", async (req, res) => {
 
       // Insert evaluator remarks
       await pool.query(
-        `INSERT INTO bms.tbl_evaluation_remarks 
-         (uu_bms_id, raw_id, user_id, overall_condition, remarks, evaluation_rating, is_final_check, date_time) 
+        `INSERT INTO bms.tbl_bms_master_data_remarks 
+         (uu_bms_id, raw_id, user_id, overall_condition, remarks, evaluation_rating, is_final, date_time) 
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()::timestamp)`,
         [uu_bms_id, raw_id, user_id, overall_bridge_condition, overall_remarks, evaluation_rating || null, isFinalCheck]
       );
@@ -8141,12 +8141,15 @@ app.get("/api/past-overall-conditions", async (req, res) => {
   }
 
   try {
-    const [rows] = await pool.query(
-      "SELECT date_time, overall_bridge_condition, remarks, evaluator FROM bridge_conditions WHERE uu_bms_id = ? ORDER BY date DESC",
+    const result = await pool.query(
+      `SELECT user_id, date_time, overall_condition, remarks 
+       FROM bms.tbl_bms_master_data_remarks 
+       WHERE uu_bms_id = $1 
+       ORDER BY date_time DESC`,
       [uu_bms_id]
     );
 
-    res.json(rows);
+    res.json(result.rows);
   } catch (error) {
     console.error("DB Error:", error);
     res.status(500).json({ error: "Database error" });

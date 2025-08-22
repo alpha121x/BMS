@@ -56,10 +56,10 @@ const PastConditionsModal = ({ show, handleClose, uu_bms_id }) => {
             <tbody>
               {conditions.map((cond, idx) => (
                 <tr key={idx}>
-                  <td>{cond.date || "N/A"}</td>
-                  <td>{cond.condition || "N/A"}</td>
+                  <td>{cond.date_time ? new Date(cond.date_time).toLocaleString() : "N/A"}</td>
+                  <td>{cond.overall_condition || "N/A"}</td>
                   <td>{cond.remarks || "N/A"}</td>
-                  <td>{cond.evaluator || "N/A"}</td>
+                  <td>Evaluator {cond.user_id || "N/A"}</td>
                 </tr>
               ))}
             </tbody>
