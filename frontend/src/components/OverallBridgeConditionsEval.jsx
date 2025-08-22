@@ -331,11 +331,13 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
       </div>
 
       {/* ================= Past Conditions Button ================= */}
-      <div className="mb-3 d-flex justify-content-start">
-        <Button variant="info" onClick={() => setShowPastModal(true)}>
-          Past Overall Conditions
-        </Button>
-      </div>
+      {userId !== 1 && (
+        <div className="mb-3 d-flex justify-content-start">
+          <Button variant="info" onClick={() => setShowPastModal(true)}>
+            Past Overall Conditions
+          </Button>
+        </div>
+      )}
 
       {/* Overall Bridge Condition */}
       <Form.Group>
@@ -408,12 +410,14 @@ const OverallBridgeConditionEval = ({ inventoryData }) => {
         </Form>
       </div>
 
-       {/* Include Modal */}
-      <PastConditionsModal
-        show={showPastModal}
-        handleClose={() => setShowPastModal(false)}
-        uu_bms_id={inventoryData?.uu_bms_id}
-      />
+      {/* Include Modal */}
+      {userId !== 1 && (
+        <PastConditionsModal
+          show={showPastModal}
+          handleClose={() => setShowPastModal(false)}
+          uu_bms_id={inventoryData?.uu_bms_id}
+        />
+      )}
 
       {/* Remarks & Toggle */}
       <Form.Group className="mt-3">
