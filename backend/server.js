@@ -806,7 +806,7 @@ app.get("/api/strucutres", async (req, res) => {
       break;
     case "unapproved_structures":
       // unapproved by Consultant or RAMS (latest preferred)
-      typeClause = `(t.qc_con = 3 OR t.qc_rams = 3 AND t.is_latest = true)`;
+      typeClause = `((t.qc_con = 3 OR t.qc_rams = 3)AND t.is_latest = true)`;
       break;
     case "submitted_to_rams":
       // as per your last spec: surveyed_by RAMS-UU and consultant QC = 2
@@ -7851,6 +7851,41 @@ app.get('/api/damage-counts', async (req, res) => {
   } catch (error) {
     console.error('Error fetching damage counts:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /api/damage-details?workKind=...&damageLevel=...&bridgeId=...
+app.get("/api/detailed-damage-counts", async (req, res) => {
+  try {
+    const { workKind, damageLevel, bridgeId } = req.query;
+
+    if (!workKind || !damageLevel || !bridgeId) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    const query = `
+      SELECT 
+        bridge_name,
+        "SpanIndex",
+        "WorkKindName",
+        "PartsName",
+        "MaterialName",
+        "DamageKindName",
+        "DamageLevel",
+        damage_extent,
+        qc_con AS "unapprovedBy"
+      FROM bms.tbl_inspection_f
+      WHERE "WorkKindName" = $1
+        AND "DamageLevel" = $2
+        AND uu_bms_id = $3
+    `;
+
+    const result = await pool.query(query, [workKind, damageLevel, bridgeId]);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching damage details:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
