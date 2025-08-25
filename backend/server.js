@@ -2,6 +2,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { Pool } = require("pg");
+const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
@@ -26,6 +27,15 @@ const pool = new Pool({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
 });
+
+// initiliaze error.log
+// Path to log file
+const logFile = path.join(__dirname, "query.log");
+
+function logQuery(message) {
+  const logMsg = `[${new Date().toISOString()}] ${message}\n`;
+  fs.appendFileSync(logFile, logMsg, "utf8");
+}
 
 // Check Database Connection
 pool
@@ -7232,6 +7242,7 @@ app.get("/api/get-inspections-rams", async (req, res) => {
   }
 });
 
+//for evluator inspections data
 app.get("/api/get-inspections-evaluator", async (req, res) => {
   try {
     const { bridgeId, userId } = req.query;
@@ -7252,23 +7263,30 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
 
     // Define condition based on evaluator ID
     let evaluationCondition = "";
-    switch (evaluatorLevel) {
+      switch (evaluatorLevel) {
       case 1:
-        evaluationCondition = `evaluator_id ILIKE '%0%'`; // E1
+        evaluationCondition = `(',' || evaluator_id || ',') ILIKE '%,0,%'`; 
         break;
       case 2:
-        evaluationCondition = `evaluator_id NOT ILIKE '%2%'`; // E2
+        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,2,%'`;
         break;
       case 3:
-        evaluationCondition = `evaluator_id NOT ILIKE '%3%'`; // E3
+        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,3,%'`;
         break;
       case 4:
-        evaluationCondition = `evaluator_id NOT ILIKE '%4%'`; // E4
+        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,4,%'`;
         break;
       case 5:
-        evaluationCondition = `evaluator_id = '1,2,3,4' AND evaluator_id NOT ILIKE '%5%'`; // E5
+        evaluationCondition = `
+          (',' || evaluator_id || ',') ILIKE '%,1,%'
+          AND (',' || evaluator_id || ',') ILIKE '%,2,%'
+          AND (',' || evaluator_id || ',') ILIKE '%,3,%'
+          AND (',' || evaluator_id || ',') ILIKE '%,4,%'
+          AND (',' || evaluator_id || ',') NOT ILIKE '%,5,%'
+        `;
         break;
     }
+
 
     // SQL query
     const query = `
@@ -7540,7 +7558,10 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       inspection_images,
     } = req.body;
 
-    await client.query("BEGIN"); // Start transaction
+    logQuery("API Called: /api/insert-inspection-evaluator", req.body);
+
+    await client.query("BEGIN");
+    logQuery("Transaction started");
 
     // Validate inspection_id exists in tbl_inspection_f
     const checkInspectionQuery = `
@@ -7548,154 +7569,87 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE inspection_id = $1
     `;
-    const checkResult = await client.query(checkInspectionQuery, [
-      inspection_id,
-    ]);
+    logQuery("Check inspection_id query", { inspection_id });
+    const checkResult = await client.query(checkInspectionQuery, [inspection_id]);
     if (parseInt(checkResult.rows[0].count, 10) === 0) {
-      throw new Error(
-        "Invalid inspection_id: No matching record in tbl_inspection_f"
-      );
+      throw new Error("Invalid inspection_id: No matching record in tbl_inspection_f");
     }
 
-    // Insert evaluation data into tbl_evaluation
+    // Insert into tbl_evaluation
     const insertQuery = `
       INSERT INTO bms.tbl_evaluation (
-        inspection_id,
-        uu_bms_id,
-        bridge_name,
-        district_id,
-        "SpanIndex",
-        "WorkKindID",
-        "WorkKindName",
-        inspection_images,
-        qc_remarks_con,
-        qc_remarks_rams,
-        evaluator_remarks,
-        "Remarks",
-        evaluator_id,
-        "PartsID",
-        "PartsName",
-        "MaterialID",
-        "MaterialName",
-        "DamageKindID",
-        "DamageKindName",
-        "DamageLevelID",
-        "DamageLevel",
-        damage_extent
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+        inspection_id, uu_bms_id, bridge_name, district_id, "SpanIndex",
+        "WorkKindID", "WorkKindName", inspection_images, qc_remarks_con, qc_remarks_rams,
+        evaluator_remarks, "Remarks", evaluator_id, "PartsID", "PartsName",
+        "MaterialID", "MaterialName", "DamageKindID", "DamageKindName",
+        "DamageLevelID", "DamageLevel", damage_extent
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
       RETURNING *;
     `;
-
     const insertValues = [
-      inspection_id,
-      uu_bms_id,
-      bridge_name,
-      district_id,
-      SpanIndex,
-      WorkKindID,
-      WorkKindName,
-      inspection_images,
-      qc_remarks_con,
-      qc_remarks_rams,
-      qc_remarks_evaluator,
-      situation_remarks,
-      evaluator_id,
-      PartsID,
-      PartsName,
-      MaterialID,
-      MaterialName,
-      DamageKindID,
-      DamageKindName,
-      DamageLevelID,
-      DamageLevel,
-      damage_extent,
+      inspection_id, uu_bms_id, bridge_name, district_id, SpanIndex, WorkKindID, WorkKindName,
+      inspection_images, qc_remarks_con, qc_remarks_rams, qc_remarks_evaluator,
+      situation_remarks, evaluator_id, PartsID, PartsName, MaterialID, MaterialName,
+      DamageKindID, DamageKindName, DamageLevelID, DamageLevel, damage_extent,
     ];
-
+    logQuery("Insert into tbl_evaluation", insertValues);
     const result = await client.query(insertQuery, insertValues);
 
-    // Update evaluator_id in tbl_inspection_f (set directly instead of appending)
+    // Update evaluator_id in tbl_inspection_f
     const updateQuery = `
       UPDATE bms.tbl_inspection_f 
-      SET evaluator_id = $2
-      WHERE inspection_id = $1
-      RETURNING evaluator_id;
+        SET evaluator_id = 
+          CASE 
+            WHEN evaluator_id IS NULL OR evaluator_id = '' THEN $2
+            WHEN evaluator_id NOT ILIKE '%' || $2 || '%' THEN evaluator_id || ',' || $2
+            ELSE evaluator_id
+          END
+        WHERE inspection_id = $1
+        RETURNING evaluator_id;
     `;
-
+    logQuery("Update evaluator_id in tbl_inspection_f", { inspection_id, evaluator_id });
     const updateResult = await client.query(updateQuery, [
       inspection_id,
-      evaluator_id,
+      evaluator_id.toString(),
     ]);
-    if (updateResult.rowCount === 0) {
-      throw new Error("Failed to update evaluator_id in tbl_inspection_f");
-    }
 
-    // Special condition: If evaluator_id == '5', also insert into tbl_evaluation_f
-    if (evaluator_id === "5") {
-      const insertSpecialValues = [
-        inspection_id,
-        uu_bms_id,
-        bridge_name,
-        district_id,
-        SpanIndex,
-        WorkKindID,
-        WorkKindName,
-        inspection_images,
-        qc_remarks_con,
-        qc_remarks_rams,
-        qc_remarks_evaluator,
-        situation_remarks,
-        PartsID,
-        PartsName,
-        MaterialID,
-        MaterialName,
-        DamageKindID,
-        DamageKindName,
-        DamageLevelID,
-        DamageLevel,
-        damage_extent,
-      ];
-
+    // Special condition: If evaluator_id == 5
+    const evaluatorIdNum = parseInt(evaluator_id, 10);
+    if (evaluatorIdNum === 5) {
       const insertSpecialQuery = `
         INSERT INTO bms.tbl_evaluation_f (
-          inspection_id,
-          uu_bms_id,
-          bridge_name,
-          district_id,
-          "SpanIndex",
-          "WorkKindID",
-          "WorkKindName",
-          inspection_images,
-          qc_remarks_con,
-          qc_remarks_rams,
-          evaluator_final_remarks,
-          "Remarks",
-          "PartsID",
-          "PartsName",
-          "MaterialID",
-          "MaterialName",
-          "DamageKindID",
-          "DamageKindName",
-          "DamageLevelID",
-          "DamageLevel",
-          damage_extent
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21);
+          inspection_id, uu_bms_id, bridge_name, district_id, "SpanIndex",
+          "WorkKindID", "WorkKindName", inspection_images, qc_remarks_con, qc_remarks_rams,
+          evaluator_final_remarks, "Remarks", "PartsID", "PartsName", "MaterialID",
+          "MaterialName", "DamageKindID", "DamageKindName", "DamageLevelID",
+          "DamageLevel", damage_extent
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21);
       `;
-
+      const insertSpecialValues = [
+        inspection_id, uu_bms_id, bridge_name, district_id, SpanIndex, WorkKindID, WorkKindName,
+        inspection_images, qc_remarks_con, qc_remarks_rams, qc_remarks_evaluator,
+        situation_remarks, PartsID, PartsName, MaterialID, MaterialName,
+        DamageKindID, DamageKindName, DamageLevelID, DamageLevel, damage_extent,
+      ];
+      logQuery("Insert into tbl_evaluation_f (Evaluator 5)", insertSpecialValues);
       await client.query(insertSpecialQuery, insertSpecialValues);
     }
 
-    await client.query("COMMIT"); // Commit transaction
+    await client.query("COMMIT");
+    logQuery("Transaction committed");
 
     res.status(201).json({
       message: "Evaluation done successfully",
       data: result.rows[0],
     });
   } catch (error) {
-    await client.query("ROLLBACK"); // Rollback transaction on error
+    await client.query("ROLLBACK");
+    logQuery("Transaction rolled back due to error", { error: error.message });
     console.error("Error inserting evaluation:", error.message);
     res.status(500).json({ error: `Internal Server Error: ${error.message}` });
   } finally {
     client.release();
+    logQuery("DB client released");
   }
 });
 
