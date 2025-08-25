@@ -4770,7 +4770,6 @@ app.get("/api/bridgesCon", async (req, res) => {
   }
 });
 
-
 // bridges list for Consultant evaluation module
 app.get("/api/bridgesRams", async (req, res) => {
   try {
@@ -5336,7 +5335,7 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
   }
 });
 
-// bridge-status-summary for Consultant evaluation module
+// bridge-status-summary for evaluation module
 app.get("/api/bridge-status-summary", async (req, res) => {
   try {
     const { districtId, bridgeName, structureType } = req.query;
@@ -5407,6 +5406,95 @@ app.get("/api/bridge-status-summary", async (req, res) => {
         .json({ error: "No records found for bridge inspections" });
     }
   } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// bridge-status-summary for evaluation module
+app.get("/api/bridge-status-summaryNew", async (req, res) => {
+  try {
+    const { districtId, bridgeName, structureType } = req.query;
+
+    // Base query
+    let query = `
+      SELECT 
+        t.uu_bms_id,
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+        m.district,
+        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
+
+        -- ✅ separate counts
+        COUNT(*) FILTER (WHERE t.qc_con = 2) AS approved_insp,
+        COUNT(*) FILTER (WHERE t.qc_con = 3) AS consultant_unapproved,
+        COUNT(*) FILTER (WHERE t.qc_rams = 3) AS rams_unapproved,
+
+        -- ✅ pending inspections
+        SUM(
+          CASE 
+            WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
+            THEN 1 ELSE 0 
+          END
+        ) AS pending_inspections,
+
+        -- ✅ total inspections includes all 4 categories
+        COUNT(*) FILTER (
+          WHERE t.qc_con = 2 
+             OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU') 
+             OR t.qc_con = 3
+             OR t.qc_con = 4
+        ) AS total_inspections
+
+      FROM bms.tbl_inspection_f t
+      INNER JOIN bms.tbl_bms_master_data m 
+        ON t.uu_bms_id = m.uu_bms_id
+      WHERE m.is_active = true
+    `;
+
+    // Add filters dynamically
+    const conditions = [];
+    const values = [];
+
+    if (districtId && districtId !== "%") {
+      conditions.push(`m.district_id = $${conditions.length + 1}`);
+      values.push(districtId);
+    }
+
+    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
+      conditions.push(
+        `LOWER(CONCAT(m.pms_sec_id, ',', m.structure_no)) ILIKE $${conditions.length + 1}`
+      );
+      values.push(`%${bridgeName.toLowerCase()}%`);
+    }
+
+    if (structureType && structureType !== "%") {
+      conditions.push(`m.structure_type_id = $${conditions.length + 1}`);
+      values.push(structureType);
+    }
+
+    if (conditions.length > 0) {
+      query += ` AND ${conditions.join(" AND ")}`;
+    }
+
+    query += `
+      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no, m.district, m.span_length_m, m.no_of_span
+      HAVING COUNT(*) FILTER (
+        WHERE t.qc_con = 2 
+           OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU') 
+           OR t.qc_con = 3
+           OR t.qc_con = 4
+      ) > 0
+      ORDER BY t.uu_bms_id;
+    `;
+
+    const result = await pool.query(query, values);
+
+    if (result.rows.length > 0) {
+      res.json(result.rows);
+    } else {
+      res.status(404).json({ error: "No records found for bridge inspections" });
+    }
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -5498,7 +5586,7 @@ app.get("/api/inspections-unapproved", async (req, res) => {
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
-      WHERE ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3 AND ins.is_latest = true
+      WHERE ((ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3) AND ins.is_latest = true)
     `;
 
     const queryParams = [];
@@ -5606,7 +5694,7 @@ app.get("/api/inspections-unapproved-rams", async (req, res) => {
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
-      WHERE ins.surveyed_by = 'RAMS-UU' AND ins.qc_rams = 3 AND ins.is_latest = true
+     WHERE ((ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3) AND ins.is_latest = true)
     `;
 
     const queryParams = [];
