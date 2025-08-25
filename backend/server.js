@@ -5420,10 +5420,10 @@ app.get("/api/bridge-status-summary", async (req, res) => {
   }
 });
 
-// bridge-status-summary for evaluation module
-app.get("/api/bridge-status-summaryNew", async (req, res) => {
+// bridge-status-summary for evaluation module (POST)
+app.post("/api/bridge-status-summaryNew", async (req, res) => {
   try {
-    const { districtId, bridgeName, structureType } = req.query;
+    const { districtId, bridgeName, structureType } = req.body;
 
     // Base query
     let query = `
@@ -5504,7 +5504,7 @@ app.get("/api/bridge-status-summaryNew", async (req, res) => {
       res.status(404).json({ error: "No records found for bridge inspections" });
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error in bridge-status-summaryNew:", error.message);
     res.status(500).json({ error: "Internal server error" });
   }
 });
@@ -5812,7 +5812,6 @@ app.get("/api/inspections-all", async (req, res) => {
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id"
       WHERE ins."uu_bms_id" = $1
-      AND ins."DamageLevelID" IN (1, 2, 3) 
       ORDER BY ins.inspection_id DESC
     `;
 
@@ -8232,7 +8231,6 @@ app.get("/api/past-overall-conditions", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
-
 
 // API for Road Classifications
 app.get("/api/road-classifications", async (req, res) => {

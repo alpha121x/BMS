@@ -1,8 +1,0 @@
-[2025-08-25T11:08:17.661Z] API Called: /api/insert-inspection-evaluator
-[2025-08-25T11:08:17.663Z] Transaction started
-[2025-08-25T11:08:17.663Z] Check inspection_id query
-[2025-08-25T11:08:17.665Z] Insert into tbl_evaluation
-[2025-08-25T11:08:17.667Z] Update evaluator_id in tbl_inspection_f
-[2025-08-25T11:08:17.668Z] Insert into tbl_evaluation_f (Evaluator 5)
-[2025-08-25T11:08:17.675Z] Transaction committed
-[2025-08-25T11:08:17.675Z] DB client released

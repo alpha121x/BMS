@@ -24,78 +24,51 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     setError(null);
 
     try {
-      // Build query parameters
-      const params = new URLSearchParams();
-      if (districtId) params.append("districtId", districtId);
-      if (bridgeName) params.append("bridgeName", bridgeName);
-      if (structureType) params.append("structureType", structureType);
+      // Build POST request body
+      const body = {
+        districtId: districtId || "%",
+        bridgeName: bridgeName || "%",
+        structureType: structureType || "%",
+      };
 
-      // Fetch bridge status summary
+      // Fetch bridge status summary (POST)
       const bridgeResponse = await fetch(
-        `${BASE_URL}/api/bridge-status-summary?${params.toString()}`
+        `${BASE_URL}/api/bridge-status-summaryNew`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
       );
+
       const bridgeJson = await bridgeResponse.json();
 
       if (!bridgeResponse.ok || bridgeJson.error) {
         throw new Error(bridgeJson.error || "Failed to fetch bridge data");
       }
 
-      // ✅ always normalize to array
+      // ✅ normalize to array
       const bridgeData = Array.isArray(bridgeJson)
         ? bridgeJson
         : bridgeJson.data || [];
 
-      // Fetch unapproved inspections (consultant)
-      const consultantParams = new URLSearchParams();
-      if (districtId) consultantParams.append("district", districtId);
-      if (bridgeName) consultantParams.append("bridge", bridgeName);
-      if (structureType)
-        consultantParams.append("structureType", structureType);
-
-      const consultantResponse = await fetch(
-        `${BASE_URL}/api/inspections-unapproved?${consultantParams.toString()}`
-      );
-      const consultantJson = await consultantResponse.json();
-      const consultantData = consultantJson.error
-        ? []
-        : consultantJson.data || consultantJson;
-
-      // Fetch unapproved inspections (RAMS)
-      const ramsResponse = await fetch(
-        `${BASE_URL}/api/inspections-unapproved-rams?${consultantParams.toString()}`
-      );
-      const ramsJson = await ramsResponse.json();
-      const ramsData = ramsJson.error ? [] : ramsJson.data || ramsJson;
-
-      // Combine
-      const combinedData = bridgeData.map((bridge) => {
-        const consultantUnapproved =
-          consultantData.filter(
-            (item) => item.uu_bms_id === bridge.uu_bms_id
-          ) || [];
-        const ramsUnapproved =
-          ramsData.filter((item) => item.uu_bms_id === bridge.uu_bms_id) || [];
-
-        return {
-          ...bridge,
-          bridgeName: bridge.bridge_name,
-          district: bridge.district || "N/A",
-          structureLength: "N/A",
-          totalInspections: bridge.total_inspections || 0,
-          unapprovedByConsultant: consultantUnapproved.length,
-          unapprovedByRAMS: ramsUnapproved.length,
-          approvedByConsultant: bridge.approved_insp || 0,
-          approvedByRAMS: 0,
-          consultantComments: "N/A",
-          ramsComments: "N/A",
-          consultantUnapprovedData: consultantUnapproved,
-          ramsUnapprovedData: ramsUnapproved,
-        };
-      });
+      // Map and normalize
+      const combinedData = bridgeData.map((bridge) => ({
+        ...bridge,
+        bridgeName: bridge.bridge_name,
+        district: bridge.district || "N/A",
+        structureLength: bridge.bridge_length || "N/A",
+        totalInspections: bridge.total_inspections || 0,
+        unapprovedByConsultant: bridge.consultant_unapproved || 0,
+        unapprovedByRAMS: bridge.rams_unapproved || 0,
+        approvedByConsultant: bridge.approved_insp || 0,
+        approvedByRAMS: 0, // ✅ if you plan to track RAMS-approved separately, add in SQL
+        consultantComments: "N/A",
+        ramsComments: "N/A",
+      }));
 
       setProjectData(combinedData);
     } catch (err) {
-      // ✅ catches both network errors and API {error:"..."} messages
       setError(err.message);
       setProjectData([]); // reset table
     } finally {
@@ -130,18 +103,20 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
         break;
       case "unapprovedByConsultant":
         title = `Unapproved by Consultant - ${bridge.bridgeName}`;
-        data = bridge.consultantUnapprovedData.map((i) => ({
+        data = (bridge.consultantUnapprovedData || []).map((i) => ({
           ...i,
           unapprovedBy: "Consultant",
         }));
         break;
+
       case "unapprovedByRAMS":
         title = `Unapproved by RAMS - ${bridge.bridgeName}`;
-        data = bridge.ramsUnapprovedData.map((i) => ({
+        data = (bridge.ramsUnapprovedData || []).map((i) => ({
           ...i,
           unapprovedBy: "RAMS",
         }));
         break;
+
       case "approvedByConsultant":
         title = `Approved by Consultant - ${bridge.bridgeName}`;
         data = await fetchData("/api/inspections-approved-consultant");
