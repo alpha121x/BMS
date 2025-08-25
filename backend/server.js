@@ -7558,10 +7558,10 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       inspection_images,
     } = req.body;
 
-    logQuery("API Called: /api/insert-inspection-evaluator", req.body);
+   // logQuery("API Called: /api/insert-inspection-evaluator", req.body);
 
     await client.query("BEGIN");
-    logQuery("Transaction started");
+    //logQuery("Transaction started");
 
     // Validate inspection_id exists in tbl_inspection_f
     const checkInspectionQuery = `
@@ -7569,7 +7569,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       FROM bms.tbl_inspection_f
       WHERE inspection_id = $1
     `;
-    logQuery("Check inspection_id query", { inspection_id });
+    //logQuery("Check inspection_id query", { inspection_id });
     const checkResult = await client.query(checkInspectionQuery, [inspection_id]);
     if (parseInt(checkResult.rows[0].count, 10) === 0) {
       throw new Error("Invalid inspection_id: No matching record in tbl_inspection_f");
@@ -7592,7 +7592,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       situation_remarks, evaluator_id, PartsID, PartsName, MaterialID, MaterialName,
       DamageKindID, DamageKindName, DamageLevelID, DamageLevel, damage_extent,
     ];
-    logQuery("Insert into tbl_evaluation", insertValues);
+    //logQuery("Insert into tbl_evaluation", insertValues);
     const result = await client.query(insertQuery, insertValues);
 
     // Update evaluator_id in tbl_inspection_f
@@ -7607,7 +7607,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
         WHERE inspection_id = $1
         RETURNING evaluator_id;
     `;
-    logQuery("Update evaluator_id in tbl_inspection_f", { inspection_id, evaluator_id });
+    //logQuery("Update evaluator_id in tbl_inspection_f", { inspection_id, evaluator_id });
     const updateResult = await client.query(updateQuery, [
       inspection_id,
       evaluator_id.toString(),
@@ -7631,12 +7631,12 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
         situation_remarks, PartsID, PartsName, MaterialID, MaterialName,
         DamageKindID, DamageKindName, DamageLevelID, DamageLevel, damage_extent,
       ];
-      logQuery("Insert into tbl_evaluation_f (Evaluator 5)", insertSpecialValues);
+     // logQuery("Insert into tbl_evaluation_f (Evaluator 5)", insertSpecialValues);
       await client.query(insertSpecialQuery, insertSpecialValues);
     }
 
     await client.query("COMMIT");
-    logQuery("Transaction committed");
+    //logQuery("Transaction committed");
 
     res.status(201).json({
       message: "Evaluation done successfully",
@@ -7644,12 +7644,12 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
     });
   } catch (error) {
     await client.query("ROLLBACK");
-    logQuery("Transaction rolled back due to error", { error: error.message });
+    //logQuery("Transaction rolled back due to error", { error: error.message });
     console.error("Error inserting evaluation:", error.message);
     res.status(500).json({ error: `Internal Server Error: ${error.message}` });
   } finally {
     client.release();
-    logQuery("DB client released");
+   // logQuery("DB client released");
   }
 });
 
