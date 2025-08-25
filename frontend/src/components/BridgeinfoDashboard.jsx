@@ -13,8 +13,6 @@ const BridgeInfoDashboard = () => {
 
   useEffect(() => {
     if (!bridgeData) {
-  console.log("Bridge Data:", bridgeData);
-
       console.error('No bridge data in state');
     }
   }, [bridgeData]);
@@ -25,7 +23,7 @@ const BridgeInfoDashboard = () => {
     navigate("/Dashboard");
   };
 
-   if (!bridgeData || !user_type) {
+   if (!bridgeData) {
     return (
       <div className="flex justify-center items-center py-8">
         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
