@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Button, Spinner } from "react-bootstrap";
-import DataTable from "react-data-table-component";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { BASE_URL } from "./config"; // Adjust the import based on your project structure
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, Spinner } from 'react-bootstrap';
+import DataTable from 'react-data-table-component';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { BASE_URL } from './config'; // Adjust the import based on your project structure
 
 const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   const [projectData, setProjectData] = useState([]);
@@ -10,7 +10,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState([]);
-  const [modalTitle, setModalTitle] = useState("");
+  const [modalTitle, setModalTitle] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState(null);
   const [showInspectionDetail, setShowInspectionDetail] = useState(false);
@@ -22,117 +22,124 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   const fetchProjectData = async () => {
     setLoading(true);
     setError(null);
-
+    
     try {
-      // Build POST request body
-      const body = {
-        districtId: districtId || "%",
-        bridgeName: bridgeName || "%",
-        structureType: structureType || "%",
-      };
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (districtId) params.append('districtId', districtId);
+      if (bridgeName) params.append('bridgeName', bridgeName);
+      if (structureType) params.append('structureType', structureType);
 
-      // Fetch bridge status summary (POST)
-      const bridgeResponse = await fetch(
-        `${BASE_URL}/api/bridge-status-summaryNew`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        }
-      );
+      // Fetch bridge status summary
+      const bridgeResponse = await fetch(`${BASE_URL}/api/bridge-status-summary?${params.toString()}`);
+      if (!bridgeResponse.ok) throw new Error('Failed to fetch bridge data');
+      const bridgeData = await bridgeResponse.json();
 
-      const bridgeJson = await bridgeResponse.json();
+      // Fetch unapproved inspections (consultant)
+      const consultantParams = new URLSearchParams();
+      if (districtId) consultantParams.append('district', districtId);
+      if (bridgeName) consultantParams.append('bridge', bridgeName);
+      if (structureType) consultantParams.append('structureType', structureType);
 
-      if (!bridgeResponse.ok || bridgeJson.error) {
-        throw new Error(bridgeJson.error || "Failed to fetch bridge data");
-      }
+      const consultantResponse = await fetch(`${BASE_URL}/api/inspections-unapproved?${consultantParams.toString()}`);
+      const consultantData = consultantResponse.ok ? await consultantResponse.json() : { data: [] };
 
-      // ✅ normalize to array
-      const bridgeData = Array.isArray(bridgeJson)
-        ? bridgeJson
-        : bridgeJson.data || [];
+      // Fetch unapproved inspections (RAMS)
+      const ramsResponse = await fetch(`${BASE_URL}/api/inspections-unapproved-rams?${consultantParams.toString()}`);
+      const ramsData = ramsResponse.ok ? await ramsResponse.json() : { data: [] };
 
-      // Map and normalize
-      const combinedData = bridgeData.map((bridge) => ({
-        ...bridge,
-        bridgeName: bridge.bridge_name,
-        district: bridge.district || "N/A",
-        structureLength: bridge.bridge_length || "N/A",
-        totalInspections: bridge.total_inspections || 0,
-        unapprovedByConsultant: bridge.consultant_unapproved || 0,
-        unapprovedByRAMS: bridge.rams_unapproved || 0,
-        approvedByConsultant: bridge.approved_insp || 0,
-        approvedByRAMS: 0, // ✅ if you plan to track RAMS-approved separately, add in SQL
-        consultantComments: "N/A",
-        ramsComments: "N/A",
-      }));
+      
+
+      // Combine and process data
+    const combinedData = bridgeData.map(bridge => {
+  const consultantUnapproved = consultantData.data?.filter(item => 
+    item.uu_bms_id === bridge.uu_bms_id
+  ) || [];
+  const ramsUnapproved = ramsData.data?.filter(item => 
+    item.uu_bms_id === bridge.uu_bms_id
+  ) || [];
+
+  return {
+    ...bridge,
+    bridgeName: bridge.bridge_name,
+    district: bridge.district || 'N/A',
+    structureLength: 'N/A',
+    totalInspections: bridge.total_inspections || 0,
+    unapprovedByConsultant: consultantUnapproved.length,
+    unapprovedByRAMS: ramsUnapproved.length,
+    approvedByConsultant: bridge.approved_insp || 0,
+    approvedByRAMS: 0,
+    consultantComments: 'N/A',
+    ramsComments: 'N/A',
+    consultantUnapprovedData: consultantUnapproved,
+    ramsUnapprovedData: ramsUnapproved
+  };
+});
 
       setProjectData(combinedData);
+      console.log('Project Data:', combinedData);
     } catch (err) {
       setError(err.message);
-      setProjectData([]); // reset table
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCellClick = async (type, bridge) => {
-    setModalLoading(true);
-    setShowModal(true);
+ const handleCellClick = async (type, bridge) => {
+  setModalLoading(true);
+  setShowModal(true);
 
-    let data = [];
-    let title = "";
+  let data = [];
+  let title = '';
 
-    const fetchData = async (endpoint) => {
-      try {
-        const res = await fetch(
-          `${BASE_URL}${endpoint}?uu_bms_id=${bridge.uu_bms_id}`
-        );
-        const json = await res.json();
-        return json.success ? json.data : [];
-      } catch (err) {
-        console.error(`Error fetching ${type} data:`, err);
-        return [];
-      }
-    };
-
-    switch (type) {
-      case "totalInspections":
-        title = `Total Inspections - ${bridge.bridgeName}`;
-        data = await fetchData("/api/inspections-all");
-        break;
-      case "unapprovedByConsultant":
-        title = `Unapproved by Consultant - ${bridge.bridgeName}`;
-        data = (bridge.consultantUnapprovedData || []).map((i) => ({
-          ...i,
-          unapprovedBy: "Consultant",
-        }));
-        break;
-
-      case "unapprovedByRAMS":
-        title = `Unapproved by RAMS - ${bridge.bridgeName}`;
-        data = (bridge.ramsUnapprovedData || []).map((i) => ({
-          ...i,
-          unapprovedBy: "RAMS",
-        }));
-        break;
-
-      case "approvedByConsultant":
-        title = `Approved by Consultant - ${bridge.bridgeName}`;
-        data = await fetchData("/api/inspections-approved-consultant");
-        break;
-      case "approvedByRAMS":
-        title = `Approved by RAMS - ${bridge.bridgeName}`;
-        data = await fetchData("/api/inspections-approved-rams");
-        break;
-      default:
-        data = [];
+  const fetchData = async (endpoint) => {
+    try {
+      const res = await fetch(`${BASE_URL}${endpoint}?uu_bms_id=${bridge.uu_bms_id}`);
+      const json = await res.json();
+      return json.success ? json.data : [];
+    } catch (err) {
+      console.error(`Error fetching ${type} data:`, err);
+      return [];
     }
-
-    setModalTitle(title);
-    setModalData(data);
-    setModalLoading(false);
   };
+
+  switch (type) {
+    case 'totalInspections':
+      title = `Total Inspections - ${bridge.bridgeName}`;
+      data = await fetchData('/api/inspections-all');
+      break;
+    case 'unapprovedByConsultant':
+      title = `Unapproved by Consultant - ${bridge.bridgeName}`;
+      data = bridge.consultantUnapprovedData.map(i => ({
+        ...i,
+        unapprovedBy: 'Consultant'
+      }));
+      break;
+    case 'unapprovedByRAMS':
+      title = `Unapproved by RAMS - ${bridge.bridgeName}`;
+      data = bridge.ramsUnapprovedData.map(i => ({
+        ...i,
+        unapprovedBy: 'RAMS'
+      }));
+      break;
+    case 'approvedByConsultant':
+      title = `Approved by Consultant - ${bridge.bridgeName}`;
+      data = await fetchData('/api/inspections-approved-consultant');
+      break;
+    case 'approvedByRAMS':
+      title = `Approved by RAMS - ${bridge.bridgeName}`;
+      data = await fetchData('/api/inspections-approved-rams');
+      break;
+    default:
+      data = [];
+  }
+
+  setModalTitle(title);
+  setModalData(data);
+  setModalLoading(false);
+};
+
+
 
   const handleInspectionDetail = (inspection) => {
     setSelectedInspection(inspection);
@@ -141,17 +148,8 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
 
   const exportToCSV = () => {
     const csvContent = [
-      [
-        "Bridge Name",
-        "District",
-        "Structure Length",
-        "Total Inspections",
-        "Unapproved by Consultant",
-        "Unapproved by RAMS",
-        "Approved by Consultant",
-        "Approved by RAMS",
-      ],
-      ...projectData.map((row) => [
+      ['Bridge Name', 'District', 'Structure Length', 'Total Inspections', 'Unapproved by Consultant', 'Unapproved by RAMS', 'Approved by Consultant', 'Approved by RAMS'],
+      ...projectData.map(row => [
         row.bridgeName,
         row.district,
         row.structureLength,
@@ -159,18 +157,16 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
         row.unapprovedByConsultant,
         row.unapprovedByRAMS,
         row.approvedByConsultant,
-        row.approvedByRAMS,
-      ]),
-    ]
-      .map((row) => row.join(","))
-      .join("\n");
+        row.approvedByRAMS
+      ])
+    ].map(row => row.join(',')).join('\n');
 
-    const blob = new Blob([csvContent], { type: "text/csv" });
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.setAttribute("hidden", "");
-    a.setAttribute("href", url);
-    a.setAttribute("download", "project-progress.csv");
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'project-progress.csv');
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -180,48 +176,48 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   const customStyles = {
     table: {
       style: {
-        width: "100%",
+        width: '100%',
       },
     },
     headRow: {
       style: {
-        backgroundColor: "#005D7F",
-        color: "#fff",
-        borderBottom: "1px solid #dee2e6",
+        backgroundColor: '#005D7F',
+        color: '#fff',
+        borderBottom: '1px solid #dee2e6',
       },
     },
     headCells: {
       style: {
-        padding: "12px 8px",
-        fontSize: "14px",
-        fontWeight: "bold",
-        color: "#fff",
-        borderRight: "1px solid #495057",
+        padding: '12px 8px',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        color: '#fff',
+        borderRight: '1px solid #495057',
       },
     },
     rows: {
       style: {
-        fontSize: "13px",
-        borderBottom: "1px solid #dee2e6",
-        "&:hover": {
-          backgroundColor: "#f8f9fa",
+        fontSize: '13px',
+        borderBottom: '1px solid #dee2e6',
+        '&:hover': {
+          backgroundColor: '#f8f9fa',
         },
       },
       stripedStyle: {
-        backgroundColor: "#f8f9fa",
+        backgroundColor: '#f8f9fa',
       },
     },
     cells: {
       style: {
-        padding: "8px",
-        borderRight: "1px solid #dee2e6",
+        padding: '8px',
+        borderRight: '1px solid #dee2e6',
       },
     },
     pagination: {
       style: {
-        borderTop: "1px solid #dee2e6",
-        padding: "8px",
-        fontSize: "14px",
+        borderTop: '1px solid #dee2e6',
+        padding: '8px',
+        fontSize: '14px',
       },
     },
   };
@@ -229,195 +225,191 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   // Define columns for the main table
   const columns = [
     {
-      name: "Bridge Name",
-      selector: (row) => row.bridgeName,
+      name: 'Bridge Name',
+      selector: row => row.bridgeName,
       sortable: true,
-      minWidth: "200px",
+      minWidth: '200px',
     },
     {
-      name: "District",
-      selector: (row) => row.district,
+      name: 'District',
+      selector: row => row.district,
       sortable: true,
-      minWidth: "100px",
+      minWidth: '100px',
     },
     {
-      name: "Structure Length(m)",
-      selector: (row) => row.bridge_length,
+      name: 'Structure Length(m)',
+      selector: row => row.bridge_length,
       sortable: true,
-      minWidth: "180px",
+      minWidth: '180px',
     },
     {
-      name: "Total Inspections",
-      selector: (row) => row.totalInspections,
+      name: 'Total Inspections',
+      selector: row => row.totalInspections,
       sortable: true,
-      minWidth: "130px",
-      cell: (row) => (
+      minWidth: '130px',
+      cell: row => (
         <Button
           variant="link"
           className="p-0 text-primary fw-bold"
-          onClick={() => handleCellClick("totalInspections", row)}
-          style={{ textDecoration: "none" }}
+          onClick={() => handleCellClick('totalInspections', row)}
+          style={{ textDecoration: 'none' }}
         >
           {row.totalInspections}
         </Button>
       ),
     },
     {
-      name: "Unapproved by Consultant",
-      selector: (row) => row.unapprovedByConsultant,
+      name: 'Unapproved by Consultant',
+      selector: row => row.unapprovedByConsultant,
       sortable: true,
-      minWidth: "200px",
-      cell: (row) => (
+      minWidth: '200px',
+      cell: row => (
         <Button
           variant="link"
           className="p-0 text-warning fw-bold"
-          onClick={() => handleCellClick("unapprovedByConsultant", row)}
+          onClick={() => handleCellClick('unapprovedByConsultant', row)}
           disabled={row.unapprovedByConsultant === 0}
-          style={{ textDecoration: "none" }}
+          style={{ textDecoration: 'none' }}
         >
           {row.unapprovedByConsultant}
         </Button>
       ),
     },
     {
-      name: "Unapproved by RAMS",
-      selector: (row) => row.unapprovedByRAMS,
+      name: 'Unapproved by RAMS',
+      selector: row => row.unapprovedByRAMS,
       sortable: true,
-      minWidth: "200px",
-      cell: (row) => (
+      minWidth: '200px',
+      cell: row => (
         <Button
           variant="link"
           className="p-0 text-warning fw-bold"
-          onClick={() => handleCellClick("unapprovedByRAMS", row)}
+          onClick={() => handleCellClick('unapprovedByRAMS', row)}
           disabled={row.unapprovedByRAMS === 0}
-          style={{ textDecoration: "none" }}
+          style={{ textDecoration: 'none' }}
         >
           {row.unapprovedByRAMS}
         </Button>
       ),
     },
     {
-      name: "Approved by Consultant",
-      selector: (row) => row.approvedByConsultant,
+      name: 'Approved by Consultant',
+      selector: row => row.approvedByConsultant,
       sortable: true,
-      minWidth: "200px",
-      cell: (row) => (
+      minWidth: '200px',
+      cell: row => (
         <Button
           variant="link"
           className="p-0 text-success fw-bold"
-          onClick={() => handleCellClick("approvedByConsultant", row)}
+          onClick={() => handleCellClick('approvedByConsultant', row)}
           disabled={row.approvedByConsultant === 0}
-          style={{ textDecoration: "none" }}
+          style={{ textDecoration: 'none' }}
         >
           {row.approvedByConsultant}
         </Button>
       ),
     },
     {
-      name: "Approved by RAMS",
-      selector: (row) => row.approvedByRAMS,
+      name: 'Approved by RAMS',
+      selector: row => row.approvedByRAMS,
       sortable: true,
-      minWidth: "180px",
-      cell: (row) => (
+      minWidth: '180px',
+      cell: row => (
         <Button
           variant="link"
           className="p-0 text-success fw-bold"
-          onClick={() => handleCellClick("approvedByRAMS", row)}
+          onClick={() => handleCellClick('approvedByRAMS', row)}
           disabled={row.approvedByRAMS === 0}
-          style={{ textDecoration: "none" }}
+          style={{ textDecoration: 'none' }}
         >
           {row.approvedByRAMS}
         </Button>
       ),
     },
     {
-      name: "Consultant Comments",
-      selector: (row) => row.consultantComments,
+      name: 'Consultant Comments',
+      selector: row => row.consultantComments,
       sortable: true,
-      minWidth: "150px",
+      minWidth: '150px',
     },
     {
-      name: "RAMS Comments",
-      selector: (row) => row.ramsComments,
+      name: 'RAMS Comments',
+      selector: row => row.ramsComments,
       sortable: true,
-      minWidth: "130px",
+      minWidth: '130px',
     },
   ];
 
   // Define columns for the modal inspection table
   const modalColumns = [
     {
-      name: "Bridge Name",
-      selector: (row) => row.bridge_name || "N/A",
+      name: 'Bridge Name',
+      selector: row => row.bridge_name || 'N/A',
       sortable: true,
-      width: "150px",
+      width: '150px',
     },
     {
-      name: "Structure Length",
-      selector: (row) => "N/A",
-      width: "120px",
+      name: 'Structure Length',
+      selector: row => 'N/A',
+      width: '120px',
     },
     {
-      name: "Span Number",
-      selector: (row) => row.SpanIndex || "N/A",
+      name: 'Span Number',
+      selector: row => row.SpanIndex || 'N/A',
       sortable: true,
-      width: "100px",
+      width: '100px',
     },
     {
-      name: "Work Kind",
-      selector: (row) => row.WorkKindName || "N/A",
+      name: 'Work Kind',
+      selector: row => row.WorkKindName || 'N/A',
       sortable: true,
-      width: "120px",
+      width: '120px',
     },
     {
-      name: "Element Name",
-      selector: (row) => row.PartsName || "N/A",
+      name: 'Element Name',
+      selector: row => row.PartsName || 'N/A',
       sortable: true,
-      width: "120px",
+      width: '120px',
     },
     {
-      name: "Material",
-      selector: (row) => row.MaterialName || "N/A",
+      name: 'Material',
+      selector: row => row.MaterialName || 'N/A',
       sortable: true,
-      width: "100px",
+      width: '100px',
     },
     {
-      name: "Damage Kind",
-      selector: (row) => row.DamageKindName || "N/A",
+      name: 'Damage Kind',
+      selector: row => row.DamageKindName || 'N/A',
       sortable: true,
-      width: "120px",
+      width: '120px',
     },
     {
-      name: "Damage Level",
-      selector: (row) => row.DamageLevel || "N/A",
+      name: 'Damage Level',
+      selector: row => row.DamageLevel || 'N/A',
       sortable: true,
-      width: "100px",
+      width: '100px',
     },
     {
-      name: "Extent",
-      selector: (row) => row.damage_extent || "N/A",
+      name: 'Extent',
+      selector: row => row.damage_extent || 'N/A',
       sortable: true,
-      width: "80px",
+      width: '80px',
     },
     {
-      name: "Unapproved By",
-      selector: (row) => row.unapprovedBy || "N/A",
+      name: 'Unapproved By',
+      selector: row => row.unapprovedBy || 'N/A',
       sortable: true,
-      width: "120px",
-      cell: (row) => (
-        <span
-          className={`badge ${
-            row.unapprovedBy === "Consultant" ? "bg-warning" : "bg-info"
-          }`}
-        >
-          {row.unapprovedBy || "N/A"}
+      width: '120px',
+      cell: row => (
+        <span className={`badge ${row.unapprovedBy === 'Consultant' ? 'bg-warning' : 'bg-info'}`}>
+          {row.unapprovedBy || 'N/A'}
         </span>
       ),
     },
     {
-      name: "Details",
-      width: "80px",
-      cell: (row) => (
+      name: 'Details',
+      width: '80px',
+      cell: row => (
         <Button
           variant="outline-primary"
           size="sm"
@@ -440,18 +432,16 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   if (error) {
     return (
       <div className="alert alert-danger">
+        <h4>Error</h4>
         <p>{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="card" style={{ boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)" }}>
+    <div className="card" style={{ boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>
       {/* Header */}
-      <div
-        className="card-header"
-        style={{ background: "#005D7F", color: "#fff" }}
-      >
+      <div className="card-header" style={{ background: '#005D7F', color: '#fff' }}>
         <div className="d-flex justify-content-between align-items-center">
           <div className="d-flex align-items-center">
             <h5 className="mb-0 me-3">Project Progress</h5>
@@ -488,7 +478,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
           subHeader
           subHeaderComponent={
             <div className="d-flex align-items-center mb-3 w-100">
-              <div className="input-group" style={{ maxWidth: "400px" }}>
+              <div className="input-group" style={{ maxWidth: '400px' }}>
                 <span className="input-group-text">🔍</span>
                 <input
                   type="text"
@@ -542,11 +532,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       </Modal>
 
       {/* Inspection Detail Modal */}
-      <Modal
-        show={showInspectionDetail}
-        onHide={() => setShowInspectionDetail(false)}
-        size="lg"
-      >
+      <Modal show={showInspectionDetail} onHide={() => setShowInspectionDetail(false)} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>Inspection Details</Modal.Title>
         </Modal.Header>
@@ -557,84 +543,74 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
                 <table className="table table-bordered table-sm">
                   <tbody>
                     <tr>
-                      <th className="bg-light" style={{ width: "30%" }}>
-                        Bridge Name
-                      </th>
-                      <td>{selectedInspection.bridge_name || "N/A"}</td>
+                      <th className="bg-light" style={{ width: '30%' }}>Bridge Name</th>
+                      <td>{selectedInspection.bridge_name || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Span Index</th>
-                      <td>{selectedInspection.SpanIndex || "N/A"}</td>
+                      <td>{selectedInspection.SpanIndex || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Element</th>
-                      <td>{selectedInspection.PartsName || "N/A"}</td>
+                      <td>{selectedInspection.PartsName || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Material</th>
-                      <td>{selectedInspection.MaterialName || "N/A"}</td>
+                      <td>{selectedInspection.MaterialName || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Damage Kind</th>
-                      <td>{selectedInspection.DamageKindName || "N/A"}</td>
+                      <td>{selectedInspection.DamageKindName || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Damage Level</th>
-                      <td>{selectedInspection.DamageLevel || "N/A"}</td>
+                      <td>{selectedInspection.DamageLevel || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Damage Extent</th>
-                      <td>{selectedInspection.damage_extent || "N/A"}</td>
+                      <td>{selectedInspection.damage_extent || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Inspection Date</th>
                       <td>
-                        {selectedInspection.current_date_time
-                          ? new Date(
-                              selectedInspection.current_date_time
-                            ).toLocaleString()
-                          : "N/A"}
+                        {selectedInspection.current_date_time ? 
+                          new Date(selectedInspection.current_date_time).toLocaleString() : 'N/A'}
                       </td>
                     </tr>
                     <tr>
                       <th className="bg-light">Remarks</th>
-                      <td>{selectedInspection.Remarks || "N/A"}</td>
+                      <td>{selectedInspection.Remarks || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">Consultant Remarks</th>
-                      <td>{selectedInspection.qc_remarks_con || "N/A"}</td>
+                      <td>{selectedInspection.qc_remarks_con || 'N/A'}</td>
                     </tr>
                     <tr>
                       <th className="bg-light">RAMS Remarks</th>
-                      <td>{selectedInspection.qc_remarks_rams || "N/A"}</td>
+                      <td>{selectedInspection.qc_remarks_rams || 'N/A'}</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-
+              
               {/* Photos */}
-              {selectedInspection.PhotoPaths &&
-                selectedInspection.PhotoPaths.length > 0 && (
-                  <div className="mt-3">
-                    <h6>Inspection Photos</h6>
-                    <div className="row">
-                      {selectedInspection.PhotoPaths.map((photo, index) => (
-                        <div key={index} className="col-md-4 mb-2">
-                          <img
-                            src={photo}
-                            alt={`Inspection ${index + 1}`}
-                            className="img-fluid rounded"
-                            style={{
-                              maxHeight: "200px",
-                              objectFit: "cover",
-                              width: "100%",
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
+              {selectedInspection.PhotoPaths && selectedInspection.PhotoPaths.length > 0 && (
+                <div className="mt-3">
+                  <h6>Inspection Photos</h6>
+                  <div className="row">
+                    {selectedInspection.PhotoPaths.map((photo, index) => (
+                      <div key={index} className="col-md-4 mb-2">
+                        <img
+                          src={photo}
+                          alt={`Inspection ${index + 1}`}
+                          className="img-fluid rounded"
+                          style={{ maxHeight: '200px', objectFit: 'cover', width: '100%' }}
+                        />
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
+              )}
             </div>
           )}
         </Modal.Body>
