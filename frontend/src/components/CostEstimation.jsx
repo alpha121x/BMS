@@ -46,12 +46,8 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
     }
   };
 
-  const handleBridgeInfo = async (bridgeId, navigate, BASE_URL) => {
-    if (!bridgeId) {
-      console.error("Bridge ID not found:", bridgeId);
-      return;
-    }
-
+  const handleBridgeInfo = async (row) => {
+    const bridgeId = row.uu_bms_id;
     try {
       const response = await fetch(
         `${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`
@@ -178,7 +174,7 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
       name: "Action",
       cell: (row) => (
         <button
-          onClick={() => handleBridgeInfo(row.uu_bms_id)}
+          onClick={() => handleBridgeInfo(row)}
           className="px-2 py-1 text-white rounded"
           style={{ backgroundColor: "#3B9996" }}
         >
