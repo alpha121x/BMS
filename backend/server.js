@@ -5346,82 +5346,7 @@ app.get("/api/bridgesEvaluatorNew", async (req, res) => {
 });
 
 // bridge-status-summary for evaluation module
-app.get("/api/bridge-status-summary", async (req, res) => {
-  try {
-    const { districtId, bridgeName, structureType } = req.query;
-
-    // Base query
-    let query = `
-      SELECT 
-        t.uu_bms_id,
-        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-        m.district,
-        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
-        COUNT(*) FILTER (WHERE t.qc_con = 2) AS approved_insp,
-        SUM(
-          CASE 
-            WHEN t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU' 
-            THEN 1 
-            ELSE 0 
-          END
-        ) AS pending_inspections,
-        COUNT(*) FILTER (WHERE t.qc_con = 2 OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU')) AS total_inspections
-      FROM bms.tbl_inspection_f t
-      INNER JOIN bms.tbl_bms_master_data m ON t.uu_bms_id = m.uu_bms_id
-      WHERE m.is_active = true
-    `;
-
-    // Add filters dynamically
-    const conditions = [];
-    const values = [];
-
-    if (districtId !== "%") {
-      conditions.push(`m.district_id = $${conditions.length + 1}`);
-      values.push(districtId);
-    }
-
-    if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
-      conditions.push(
-        `LOWER(CONCAT(m.pms_sec_id, ',', m.structure_no)) ILIKE $${
-          conditions.length + 1
-        }`
-      );
-      values.push(`%${bridgeName.toLowerCase()}%`);
-    }
-
-    if (structureType !== "%") {
-      conditions.push(`m.structure_type_id = $${conditions.length + 1}`);
-      values.push(structureType);
-    }
-
-    if (conditions.length > 0) {
-      query += ` AND ${conditions.join(" AND ")}`;
-    }
-
-    query += `
-      GROUP BY t.uu_bms_id, m.pms_sec_id, m.structure_no,m.district, m.span_length_m, m.no_of_span
-      HAVING COUNT(*) FILTER (
-        WHERE t.qc_con = 2 OR (t.qc_con = 1 AND t.surveyed_by = 'RAMS-UU')
-      ) > 0
-      ORDER BY t.uu_bms_id;
-    `;
-
-    const result = await pool.query(query, values);
-
-    if (result.rows.length > 0) {
-      res.json(result.rows);
-    } else {
-      res
-        .status(404)
-        .json({ error: "No records found for bridge inspections" });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// bridge-status-summary for evaluation module
-app.post("/api/bridge-status-summaryNew", async (req, res) => {
+app.post("/api/bridge-status-summary", async (req, res) => {
   try {
     const { districtId, bridgeName, structureType } = req.body;
 
@@ -5493,7 +5418,7 @@ app.post("/api/bridge-status-summaryNew", async (req, res) => {
 });
 
 // bridge-status-summary for evaluation module
-app.post("/api/bridge-inspections", async (req, res) => {
+app.post("/api/bridge-status-summary-all", async (req, res) => {
   try {
     const { districtId, bridgeName, structureType } = req.body;
 
@@ -5697,7 +5622,6 @@ app.post("/api/bridge-inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-
 
 // Project Progress Counts API
 app.get("/api/project-progress-summary", async (req, res) => {

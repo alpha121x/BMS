@@ -32,7 +32,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     };
 
     // Fetch bridge status summary (POST now)
-    const bridgeResponse = await fetch(`${BASE_URL}/api/bridge-status-summaryNew`, {
+    const bridgeResponse = await fetch(`${BASE_URL}/api/bridge-status-summary`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
