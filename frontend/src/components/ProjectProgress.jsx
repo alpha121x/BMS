@@ -66,6 +66,9 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       ? await ramsResponse.json()
       : { data: [] };
 
+      console.log("Consultant Unapproved Data:", consultantData);
+      console.log("RAMS Unapproved Data:", ramsData);
+
     // 🔄 Combine and process data
     const combinedData = bridgeData.map((bridge) => {
       const consultantUnapproved =
@@ -95,7 +98,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     });
 
     setProjectData(combinedData);
-    // console.log("Project Data:", combinedData);
+    console.log("Project Data:", combinedData);
   } catch (err) {
     setError(err.message);
   } finally {
@@ -195,7 +198,7 @@ const handleRowClick = async (row) => {
     }
 
     // Log for debugging (with current time: 04:37 PM PKT, Tuesday, August 26, 2025)
-    console.log("Bridge Data (fetched at 04:37 PM PKT, Tuesday, August 26, 2025):", bridge);
+    // console.log("Bridge Data (fetched at 04:37 PM PKT, Tuesday, August 26, 2025):", bridge);
     // return;
 
     // Pass bridge data via React Router state
