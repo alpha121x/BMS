@@ -22,96 +22,87 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   }, [districtId, bridgeName, structureType]);
 
   const fetchProjectData = async () => {
-    setLoading(true);
-    setError(null);
+  setLoading(true);
+  setError(null);
 
-    try {
-      // Prepare payload for POST
-      const payload = {
-        districtId: districtId || "%",
-        bridgeName: bridgeName || "%",
-        structureType: structureType || "%",
+  try {
+    // Payload for POST
+    const payload = {
+      districtId: districtId || "%",
+      bridgeName: bridgeName || "%",
+      structureType: structureType || "%",
+    };
+
+    // 1️⃣ Fetch bridge status summary (POST)
+    const bridgeResponse = await fetch(
+      `${BASE_URL}/api/bridge-status-summary`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+    if (!bridgeResponse.ok) throw new Error("Failed to fetch bridge data");
+    const bridgeData = await bridgeResponse.json();
+
+    // 2️⃣ Fetch unapproved inspections (consultant) - GET
+    const consultantParams = new URLSearchParams();
+    if (districtId) consultantParams.append("district", districtId);
+    if (bridgeName) consultantParams.append("bridge", bridgeName);
+    if (structureType) consultantParams.append("structureType", structureType);
+
+    const consultantResponse = await fetch(
+      `${BASE_URL}/api/inspections-unapproved?${consultantParams.toString()}`
+    );
+    const consultantData = consultantResponse.ok
+      ? await consultantResponse.json()
+      : { data: [] };
+
+    // 3️⃣ Fetch unapproved inspections (RAMS) - GET
+    const ramsResponse = await fetch(
+      `${BASE_URL}/api/inspections-unapproved-rams?${consultantParams.toString()}`
+    );
+    const ramsData = ramsResponse.ok
+      ? await ramsResponse.json()
+      : { data: [] };
+
+    // 🔄 Combine and process data
+    const combinedData = bridgeData.map((bridge) => {
+      const consultantUnapproved =
+        consultantData.data?.filter(
+          (item) => item.uu_bms_id === bridge.uu_bms_id
+        ) || [];
+      const ramsUnapproved =
+        ramsData.data?.filter(
+          (item) => item.uu_bms_id === bridge.uu_bms_id
+        ) || [];
+
+      return {
+        ...bridge,
+        bridgeName: bridge.bridge_name,
+        district: bridge.district || "N/A",
+        structureLength: "N/A",
+        totalInspections: bridge.total_inspections || 0,
+        unapprovedByConsultant: consultantUnapproved.length,
+        unapprovedByRAMS: ramsUnapproved.length,
+        approvedByConsultant: bridge.approved_insp || 0,
+        approvedByRAMS: 0,
+        consultantComments: "N/A",
+        ramsComments: "N/A",
+        consultantUnapprovedData: consultantUnapproved,
+        ramsUnapprovedData: ramsUnapproved,
       };
+    });
 
-      // Fetch bridge status summary (POST now)
-      const bridgeResponse = await fetch(
-        `${BASE_URL}/api/bridge-status-summary`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!bridgeResponse.ok) throw new Error("Failed to fetch bridge data");
-      const bridgeData = await bridgeResponse.json();
+    setProjectData(combinedData);
+    // console.log("Project Data:", combinedData);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      // For consultant and RAMS, if you also want to convert them to POST later:
-      const consultantPayload = {
-        district: districtId || "%",
-        bridge: bridgeName || "%",
-        structureType: structureType || "%",
-      };
-
-      const consultantResponse = await fetch(
-        `${BASE_URL}/api/inspections-unapproved`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(consultantPayload),
-        }
-      );
-      const consultantData = consultantResponse.ok
-        ? await consultantResponse.json()
-        : { data: [] };
-
-      const ramsResponse = await fetch(
-        `${BASE_URL}/api/inspections-unapproved-rams`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(consultantPayload),
-        }
-      );
-      const ramsData = ramsResponse.ok
-        ? await ramsResponse.json()
-        : { data: [] };
-
-      // Combine and process data
-      const combinedData = bridgeData.map((bridge) => {
-        const consultantUnapproved =
-          consultantData.data?.filter(
-            (item) => item.uu_bms_id === bridge.uu_bms_id
-          ) || [];
-        const ramsUnapproved =
-          ramsData.data?.filter(
-            (item) => item.uu_bms_id === bridge.uu_bms_id
-          ) || [];
-
-        return {
-          ...bridge,
-          bridgeName: bridge.bridge_name,
-          district: bridge.district || "N/A",
-          structureLength: "N/A",
-          totalInspections: bridge.total_inspections || 0,
-          unapprovedByConsultant: consultantUnapproved.length,
-          unapprovedByRAMS: ramsUnapproved.length,
-          approvedByConsultant: bridge.approved_insp || 0,
-          approvedByRAMS: 0,
-          consultantComments: "N/A",
-          ramsComments: "N/A",
-          consultantUnapprovedData: consultantUnapproved,
-          ramsUnapprovedData: ramsUnapproved,
-        };
-      });
-
-      setProjectData(combinedData);
-      console.log("Project Data:", combinedData);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCellClick = async (type, bridge) => {
     setModalLoading(true);
@@ -169,25 +160,51 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     setModalLoading(false);
   };
 
-  const handleRowClick = async (row) => {
+const handleRowClick = async (row) => {
+  if (!row?.uu_bms_id) {
+    console.error("Bridge ID not found in row:", row);
+    alert("Invalid bridge selected. Please try again.");
+    return;
+  }
+
   try {
-    const response = await fetch(
-      `${BASE_URL}/api/bridgesNew?bridgeId=${row.uu_bms_id}`
-    );
+    const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${row.uu_bms_id}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch bridge details");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Failed to fetch bridge details (Status: ${response.status})`);
     }
 
-    const bridgeDetails = await response.json();
+    const { success, bridges, message } = await response.json();
 
-    // Navigate to BridgeInformationCon with API response
+    if (!success) {
+      console.error("Bridge details not found:", message || "API returned an error");
+      alert(message || "Could not fetch bridge details. Please try again.");
+      return;
+    }
+
+    const bridge = Array.isArray(bridges) ? bridges[0] : bridges;
+
+    if (!bridge) {
+      console.error("No bridge details found in response:", bridges);
+      alert("No bridge details found. Please try again.");
+      return;
+    }
+
+    // Log for debugging (with current time: 04:37 PM PKT, Tuesday, August 26, 2025)
+    console.log("Bridge Data (fetched at 04:37 PM PKT, Tuesday, August 26, 2025):", bridge);
+    // return;
+
+    // Pass bridge data via React Router state
     navigate("/BridgeInformationCon", {
-      state: { bridgeData: bridgeDetails },
+      state: { bridgeData: bridge },
     });
   } catch (error) {
     console.error("Error fetching bridge details:", error);
-    alert("Could not fetch bridge details. Please try again.");
+    alert(error.message || "Could not fetch bridge details. Please try again.");
   }
 };
 

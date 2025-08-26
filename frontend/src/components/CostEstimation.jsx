@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
 import CostMap from "./CostMap";
+import { useNavigate } from "react-router-dom";
 
 const CostEstimation = ({ districtId, structureType, bridgeName }) => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
@@ -15,6 +16,7 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
   const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
   const itemsPerPage = 10;
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -44,14 +46,21 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
     }
   };
 
-  const handleBridgeInfo = async (bridgeId) => {
+  const handleBridgeInfo = async (bridgeId, navigate, BASE_URL) => {
     if (!bridgeId) {
       console.error("Bridge ID not found:", bridgeId);
       return;
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`);
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesNew?bridgeId=${bridgeId}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch bridge details");
+      }
+
       const bridgeData = await response.json();
 
       if (bridgeData.success) {
@@ -63,8 +72,10 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
           return;
         }
 
-        const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
-        window.location.href = `/BridgeInformation?bridgeData=${serializedBridgeData}`;
+        // ✅ Use React Router state instead of query string
+        navigate("/BridgeInformation", {
+          state: { bridgeData: bridge },
+        });
       } else {
         console.error("Bridge details not found");
       }
@@ -85,9 +96,10 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
 
       const csvContent =
         "data:text/csv;charset=utf-8," +
-        [Object.keys(data[0]).join(","), ...data.map((row) => Object.values(row).join(","))].join(
-          "\n"
-        );
+        [
+          Object.keys(data[0]).join(","),
+          ...data.map((row) => Object.values(row).join(",")),
+        ].join("\n");
 
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
@@ -158,7 +170,9 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
       name: "Cost (Millions)",
       selector: (row) => row.cost_million || "N/A",
       sortable: true,
-      cell: (row) => <span className="font-bold">{row.cost_million || "N/A"}</span>,
+      cell: (row) => (
+        <span className="font-bold">{row.cost_million || "N/A"}</span>
+      ),
     },
     {
       name: "Action",
@@ -230,28 +244,38 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
           Show Map
         </button>
       </div>
-      <div className="flex items-center justify-between mb-2 p-2 rounded" style={{ background: "#005D7F" }}>
+      <div
+        className="flex items-center justify-between mb-2 p-2 rounded"
+        style={{ background: "#005D7F" }}
+      >
         <div className="flex items-center gap-4">
           <h5 className="text-white mb-0">Cost Estimation</h5>
           <h6 className="text-white mb-0">
-            Records: <span className="bg-teal-500 text-white px-2 py-1 rounded">{bridgeCount || 0}</span>
+            Records:{" "}
+            <span className="bg-teal-500 text-white px-2 py-1 rounded">
+              {bridgeCount || 0}
+            </span>
           </h6>
         </div>
         <div className="flex gap-2">
-          <button className="text-white flex items-center gap-1" onClick={handleDownloadCSV}>
+          <button
+            className="text-white flex items-center gap-1"
+            onClick={handleDownloadCSV}
+          >
             <FontAwesomeIcon icon={faFileCsv} />
             CSV
           </button>
-          <button className="text-white flex items-center gap-1" onClick={handleDownloadExcel}>
+          <button
+            className="text-white flex items-center gap-1"
+            onClick={handleDownloadExcel}
+          >
             <FontAwesomeIcon icon={faFileExcel} />
             Excel
           </button>
         </div>
       </div>
       {loading ? (
-        <div
-          className="border-8 border-gray-200 border-t-8 border-t-blue-500 rounded-full w-20 h-20 animate-spin mx-auto my-10"
-        />
+        <div className="border-8 border-gray-200 border-t-8 border-t-blue-500 rounded-full w-20 h-20 animate-spin mx-auto my-10" />
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : showMap ? (
@@ -267,7 +291,9 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
           paginationRowsPerPageOptions={[10]}
           onChangePage={(page) => setCurrentPage(page)}
           customStyles={customStyles}
-          noDataComponent={<div className="text-center p-4">No data available</div>}
+          noDataComponent={
+            <div className="text-center p-4">No data available</div>
+          }
         />
       )}
     </div>

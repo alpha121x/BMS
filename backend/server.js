@@ -4414,6 +4414,7 @@ app.get("/api/bridgesNew", async (req, res) => {
       district = "%",
       structureType = "%",
       bridgeName = "%",
+      bridgeId,
     } = req.query;
 
     let query = `
@@ -4490,6 +4491,14 @@ SELECT
       countQuery += ` AND structure_type_id = $${paramIndex}`;
       queryParams.push(structureType);
       countParams.push(structureType);
+      paramIndex++;
+    }
+
+    if (bridgeId && !isNaN(bridgeId)) {
+      query += ` AND uu_bms_id = $${paramIndex}`;
+      countQuery += ` AND uu_bms_id = $${paramIndex}`;
+      queryParams.push(Number(bridgeId));
+      countParams.push(Number(bridgeId));
       paramIndex++;
     }
 

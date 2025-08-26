@@ -87,7 +87,7 @@ const StructuresTable = ({ data, loading }) => {
   const navigate = useNavigate();
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const user_type = userToken?.usertype;
-  console.log("User Type:", user_type);
+  // console.log("User Type:", user_type);
 
   const handleBridgeInfo = (bridgeData) => {
     // Conditional route based on user_type
