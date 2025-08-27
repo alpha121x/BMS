@@ -5694,7 +5694,7 @@ app.get("/api/inspections-unapproved", async (req, res) => {
 
     // Build the base query with DISTINCT ON and is_active condition
     let query = `
-      SELECT DISTINCT ON (ins.uu_bms_id)
+      SELECT 
         bmd."pms_sec_id", 
         bmd."structure_no",
         bmd."structure_type_id",
@@ -5804,7 +5804,7 @@ app.get("/api/inspections-unapproved-rams", async (req, res) => {
 
     // Build the base query with DISTINCT ON and is_active condition
     let query = `
-      SELECT DISTINCT ON (ins.uu_bms_id)
+      SELECT
         bmd."pms_sec_id", 
         bmd."structure_no",
         bmd."structure_type_id",
@@ -5826,7 +5826,7 @@ app.get("/api/inspections-unapproved-rams", async (req, res) => {
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
-     WHERE ((ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3) AND ins.is_latest = true)
+     WHERE ((ins.surveyed_by = 'RAMS-UU' AND ins.qc_rams = 3) AND ins.is_latest = true)
     `;
 
     const queryParams = [];
@@ -5896,192 +5896,6 @@ app.get("/api/inspections-unapproved-rams", async (req, res) => {
         ...row,
         PhotoPaths: extractedPhotoPaths, // Store extracted paths as a flat array
       };
-    });
-
-    res.json({ success: true, data: processedData });
-  } catch (error) {
-    console.error("Error fetching inspection data:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// inspections for table dashboard unapproved evaluation (consultant)
-app.post("/api/inspections-unapproved", async (req, res) => {
-  try {
-    let { district, bridge, structureType } = req.body;
-
-    let query = `
-      SELECT DISTINCT ON (ins.uu_bms_id)
-        bmd."pms_sec_id", 
-        bmd."structure_no",
-        bmd."structure_type_id",
-        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
-        ins.uu_bms_id,
-        ins."CheckingID",
-        ins."inspection_id",
-        ins."SpanIndex",
-        ins."district_id", 
-        ins."WorkKindName", 
-        ins."PartsName", 
-        ins."MaterialName", 
-        ins."DamageKindName", 
-        ins."DamageLevel", 
-        ins."damage_extent",  
-        ins."current_date_time",  
-        ins."Remarks", 
-        ins.qc_con,
-        ins.qc_remarks_con,
-        ins.inspection_images AS "PhotoPaths"
-      FROM bms.tbl_inspection_f AS ins
-      JOIN bms.tbl_bms_master_data AS bmd 
-        ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
-      WHERE ((ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3) AND ins.is_latest = true)
-    `;
-
-    const queryParams = [];
-    let paramIndex = 1;
-
-    if (district && !isNaN(parseInt(district))) {
-      query += ` AND ins."district_id" = $${paramIndex}`;
-      queryParams.push(parseInt(district));
-      paramIndex++;
-    }
-
-    if (structureType && !isNaN(parseInt(structureType))) {
-      query += ` AND bmd."structure_type_id" = $${paramIndex}`;
-      queryParams.push(parseInt(structureType));
-      paramIndex++;
-    }
-
-    if (bridge && bridge.trim() !== "" && bridge !== "%") {
-      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridge}%`);
-      paramIndex++;
-    }
-
-    query += ` ORDER BY ins.uu_bms_id, ins.inspection_id DESC;`;
-
-    const result = await pool.query(query, queryParams);
-
-    const processedData = result.rows.map((row) => {
-      let extractedPhotoPaths = [];
-      try {
-        if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(/\}\"/g, "}");
-          const parsedPhotos = JSON.parse(cleanedJson);
-
-          if (Array.isArray(parsedPhotos)) {
-            parsedPhotos.forEach((item) => {
-              if (item.path) extractedPhotoPaths.push(item.path);
-            });
-          } else if (typeof parsedPhotos === "object") {
-            Object.values(parsedPhotos).forEach((category) => {
-              if (typeof category === "object") {
-                Object.values(category).forEach((imagesArray) => {
-                  if (Array.isArray(imagesArray)) {
-                    extractedPhotoPaths.push(...imagesArray);
-                  }
-                });
-              }
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error parsing PhotoPaths:", error);
-      }
-      return { ...row, PhotoPaths: extractedPhotoPaths };
-    });
-
-    res.json({ success: true, data: processedData });
-  } catch (error) {
-    console.error("Error fetching inspection data:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-});
-
-// inspections for table dashboard unapproved evaluation (rams)
-app.post("/api/inspections-unapproved-rams", async (req, res) => {
-  try {
-    let { district, bridge, structureType } = req.body;
-
-    let query = `
-      SELECT DISTINCT ON (ins.uu_bms_id)
-        bmd."pms_sec_id", 
-        bmd."structure_no",
-        bmd."structure_type_id",
-        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
-        ins."SpanIndex",
-        ins.uu_bms_id,
-        ins."district_id", 
-        ins."WorkKindName", 
-        ins."PartsName", 
-        ins."MaterialName", 
-        ins."DamageKindName", 
-        ins."DamageLevel", 
-        ins."damage_extent",  
-        ins."current_date_time",  
-        ins."Remarks", 
-        ins.qc_rams,
-        ins.qc_remarks_rams,
-        ins.inspection_images AS "PhotoPaths"
-      FROM bms.tbl_inspection_f AS ins
-      JOIN bms.tbl_bms_master_data AS bmd 
-        ON ins."uu_bms_id" = bmd."uu_bms_id" AND bmd.is_active = true
-     WHERE ((ins.surveyed_by = 'RAMS-UU' AND ins.qc_con = 3) AND ins.is_latest = true)
-    `;
-
-    const queryParams = [];
-    let paramIndex = 1;
-
-    if (district && !isNaN(parseInt(district))) {
-      query += ` AND ins."district_id" = $${paramIndex}`;
-      queryParams.push(parseInt(district));
-      paramIndex++;
-    }
-
-    if (structureType && !isNaN(parseInt(structureType))) {
-      query += ` AND bmd."structure_type_id" = $${paramIndex}`;
-      queryParams.push(parseInt(structureType));
-      paramIndex++;
-    }
-
-    if (bridge && bridge.trim() !== "" && bridge !== "%") {
-      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
-      queryParams.push(`%${bridge}%`);
-      paramIndex++;
-    }
-
-    query += ` ORDER BY ins.uu_bms_id, ins.inspection_id DESC;`;
-
-    const result = await pool.query(query, queryParams);
-
-    const processedData = result.rows.map((row) => {
-      let extractedPhotoPaths = [];
-      try {
-        if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(/\}\"/g, "}");
-          const parsedPhotos = JSON.parse(cleanedJson);
-
-          if (Array.isArray(parsedPhotos)) {
-            parsedPhotos.forEach((item) => {
-              if (item.path) extractedPhotoPaths.push(item.path);
-            });
-          } else if (typeof parsedPhotos === "object") {
-            Object.values(parsedPhotos).forEach((category) => {
-              if (typeof category === "object") {
-                Object.values(category).forEach((imagesArray) => {
-                  if (Array.isArray(imagesArray)) {
-                    extractedPhotoPaths.push(...imagesArray);
-                  }
-                });
-              }
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error parsing PhotoPaths:", error);
-      }
-      return { ...row, PhotoPaths: extractedPhotoPaths };
     });
 
     res.json({ success: true, data: processedData });
