@@ -152,7 +152,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
         userId: user.id,
         username: user.user_name,
         usertype: user.user_type,
-        districtId: user.district_id
+        districtId: user.district_id,
       },
     });
   } catch (error) {
@@ -912,7 +912,9 @@ app.get("/api/strucutres", async (req, res) => {
     values.push(structureType);
   }
   if (bridgeName && bridgeName !== "%") {
-    conditions.push(`CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${values.length + 1}`);
+    conditions.push(
+      `CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${values.length + 1}`
+    );
     values.push(`%${bridgeName}%`);
   }
   if (uu_bms_id) {
@@ -1025,7 +1027,6 @@ app.get("/api/structures-dashboard", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 // counts for Con
 app.get("/api/inspection-counts-con", async (req, res) => {
@@ -2354,42 +2355,48 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
       paramIndex++;
     }
 
- if (bridgeLength && typeof bridgeLength === "string" && bridgeLength !== "%") {
-  if (bridgeLength.startsWith("<")) {
-    query += ` AND md.structure_width_m < $${paramIndex}`;
-    queryParams.push(parseFloat(bridgeLength.substring(1)));
-    paramIndex++;
-  } else if (bridgeLength.includes("-")) {
-    const [min, max] = bridgeLength.split("-").map(parseFloat);
-    query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    queryParams.push(min, max);
-    paramIndex += 2;
-  } else if (bridgeLength.startsWith(">")) {
-    query += ` AND md.structure_width_m > $${paramIndex}`;
-    queryParams.push(parseFloat(bridgeLength.substring(1)));
-    paramIndex++;
-  }
-}
-
+    if (
+      bridgeLength &&
+      typeof bridgeLength === "string" &&
+      bridgeLength !== "%"
+    ) {
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND md.structure_width_m < $${paramIndex}`;
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength.split("-").map(parseFloat);
+        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        queryParams.push(min, max);
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND md.structure_width_m > $${paramIndex}`;
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+        paramIndex++;
+      }
+    }
 
     // Add spanLength filter
-   if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
-  if (spanLength.startsWith("<")) {
-    query += ` AND md.span_length_m < $${paramIndex}`;
-    queryParams.push(parseFloat(spanLength.substring(1)));
-    paramIndex++;
-  } else if (spanLength.includes("-")) {
-    const [min, max] = spanLength.split("-").map(parseFloat);
-    query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    queryParams.push(min, max);
-    paramIndex += 2;
-  } else if (spanLength.startsWith(">")) {
-    query += ` AND md.span_length_m > $${paramIndex}`;
-    queryParams.push(parseFloat(spanLength.substring(1)));
-    paramIndex++;
-  }
-}
-
+    if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
+      if (spanLength.startsWith("<")) {
+        query += ` AND md.span_length_m < $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      } else if (spanLength.includes("-")) {
+        const [min, max] = spanLength.split("-").map(parseFloat);
+        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        queryParams.push(min, max);
+        paramIndex += 2;
+      } else if (spanLength.startsWith(">")) {
+        query += ` AND md.span_length_m > $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      }
+    }
 
     query += ` ORDER BY "REFERENCE NO" ) SELECT * FROM ranked_data;`;
 
@@ -2688,42 +2695,48 @@ app.get("/api/bridgesdownloadExcel", async (req, res) => {
       paramIndex++;
     }
 
- if (bridgeLength && typeof bridgeLength === "string" && bridgeLength !== "%") {
-  if (bridgeLength.startsWith("<")) {
-    query += ` AND md.structure_width_m < $${paramIndex}`;
-    queryParams.push(parseFloat(bridgeLength.substring(1)));
-    paramIndex++;
-  } else if (bridgeLength.includes("-")) {
-    const [min, max] = bridgeLength.split("-").map(parseFloat);
-    query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    queryParams.push(min, max);
-    paramIndex += 2;
-  } else if (bridgeLength.startsWith(">")) {
-    query += ` AND md.structure_width_m > $${paramIndex}`;
-    queryParams.push(parseFloat(bridgeLength.substring(1)));
-    paramIndex++;
-  }
-}
-
+    if (
+      bridgeLength &&
+      typeof bridgeLength === "string" &&
+      bridgeLength !== "%"
+    ) {
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND md.structure_width_m < $${paramIndex}`;
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength.split("-").map(parseFloat);
+        query += ` AND md.structure_width_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        queryParams.push(min, max);
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND md.structure_width_m > $${paramIndex}`;
+        queryParams.push(parseFloat(bridgeLength.substring(1)));
+        paramIndex++;
+      }
+    }
 
     // Add spanLength filter
-   if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
-  if (spanLength.startsWith("<")) {
-    query += ` AND md.span_length_m < $${paramIndex}`;
-    queryParams.push(parseFloat(spanLength.substring(1)));
-    paramIndex++;
-  } else if (spanLength.includes("-")) {
-    const [min, max] = spanLength.split("-").map(parseFloat);
-    query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    queryParams.push(min, max);
-    paramIndex += 2;
-  } else if (spanLength.startsWith(">")) {
-    query += ` AND md.span_length_m > $${paramIndex}`;
-    queryParams.push(parseFloat(spanLength.substring(1)));
-    paramIndex++;
-  }
-}
-
+    if (spanLength && typeof spanLength === "string" && spanLength !== "%") {
+      if (spanLength.startsWith("<")) {
+        query += ` AND md.span_length_m < $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      } else if (spanLength.includes("-")) {
+        const [min, max] = spanLength.split("-").map(parseFloat);
+        query += ` AND md.span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        queryParams.push(min, max);
+        paramIndex += 2;
+      } else if (spanLength.startsWith(">")) {
+        query += ` AND md.span_length_m > $${paramIndex}`;
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        paramIndex++;
+      }
+    }
 
     query += ` ORDER BY "REFERENCE NO" ) SELECT * FROM ranked_data;`;
 
@@ -4065,71 +4078,76 @@ app.get("/api/bridges", async (req, res) => {
     }
 
     // --- AGE FILTER ---
-   if (age !== "%") {
-  const ageExpr = `EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER)`;
+    if (age !== "%") {
+      const ageExpr = `EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER)`;
 
-  // Add safeguard so only valid years are used
-  query += ` AND construction_year IS NOT NULL 
+      // Add safeguard so only valid years are used
+      query += ` AND construction_year IS NOT NULL 
              AND construction_year <> '' 
              AND construction_year ~ '^[0-9]{4}$'`;
 
-  countQuery += ` AND construction_year IS NOT NULL 
+      countQuery += ` AND construction_year IS NOT NULL 
                   AND construction_year <> '' 
                   AND construction_year ~ '^[0-9]{4}$'`;
 
-  if (age === "upto 5 years") {
-    query += ` AND ${ageExpr} <= 5`;
-    countQuery += ` AND ${ageExpr} <= 5`;
-  } else if (age === "6–10 years") {
-    query += ` AND ${ageExpr} BETWEEN 6 AND 10`;
-    countQuery += ` AND ${ageExpr} BETWEEN 6 AND 10`;
-  } else if (age === "11–20 years") {
-    query += ` AND ${ageExpr} BETWEEN 11 AND 20`;
-    countQuery += ` AND ${ageExpr} BETWEEN 11 AND 20`;
-  } else if (age === "21–30 years") {
-    query += ` AND ${ageExpr} BETWEEN 21 AND 30`;
-    countQuery += ` AND ${ageExpr} BETWEEN 21 AND 30`;
-  } else if (age === "30+ years") {
-    query += ` AND ${ageExpr} > 30`;
-    countQuery += ` AND ${ageExpr} > 30`;
-  }
-}
+      if (age === "upto 5 years") {
+        query += ` AND ${ageExpr} <= 5`;
+        countQuery += ` AND ${ageExpr} <= 5`;
+      } else if (age === "6–10 years") {
+        query += ` AND ${ageExpr} BETWEEN 6 AND 10`;
+        countQuery += ` AND ${ageExpr} BETWEEN 6 AND 10`;
+      } else if (age === "11–20 years") {
+        query += ` AND ${ageExpr} BETWEEN 11 AND 20`;
+        countQuery += ` AND ${ageExpr} BETWEEN 11 AND 20`;
+      } else if (age === "21–30 years") {
+        query += ` AND ${ageExpr} BETWEEN 21 AND 30`;
+        countQuery += ` AND ${ageExpr} BETWEEN 21 AND 30`;
+      } else if (age === "30+ years") {
+        query += ` AND ${ageExpr} > 30`;
+        countQuery += ` AND ${ageExpr} > 30`;
+      }
+    }
 
- if (bridgeLength !== "%") {
-  const computedField = "(no_of_span * span_length_m)";
+    if (bridgeLength !== "%") {
+      const computedField = "(no_of_span * span_length_m)";
 
-  if (bridgeLength.startsWith("<")) {
-    query += ` AND ${computedField} < $${paramIndex}`;
-    countQuery += ` AND ${computedField} < $${paramIndex}`;
-    const value = parseFloat(bridgeLength.substring(1));
-    queryParams.push(value);
-    countParams.push(value);
-    paramIndex++;
-  } else if (bridgeLength.includes("-")) {
-    const [min, max] = bridgeLength.split("-").map(v => parseFloat(v.trim()));
-    query += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    countQuery += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    queryParams.push(min, max);
-    countParams.push(min, max);
-    paramIndex += 2;
-  } else if (bridgeLength.startsWith(">")) {
-    query += ` AND ${computedField} > $${paramIndex}`;
-    countQuery += ` AND ${computedField} > $${paramIndex}`;
-    const value = parseFloat(bridgeLength.substring(1));
-    queryParams.push(value);
-    countParams.push(value);
-    paramIndex++;
-  } else {
-    // exact match
-    query += ` AND ${computedField} = $${paramIndex}`;
-    countQuery += ` AND ${computedField} = $${paramIndex}`;
-    const value = parseFloat(bridgeLength);
-    queryParams.push(value);
-    countParams.push(value);
-    paramIndex++;
-  }
-}
-
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND ${computedField} < $${paramIndex}`;
+        countQuery += ` AND ${computedField} < $${paramIndex}`;
+        const value = parseFloat(bridgeLength.substring(1));
+        queryParams.push(value);
+        countParams.push(value);
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength
+          .split("-")
+          .map((v) => parseFloat(v.trim()));
+        query += ` AND ${computedField} BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        countQuery += ` AND ${computedField} BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        queryParams.push(min, max);
+        countParams.push(min, max);
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND ${computedField} > $${paramIndex}`;
+        countQuery += ` AND ${computedField} > $${paramIndex}`;
+        const value = parseFloat(bridgeLength.substring(1));
+        queryParams.push(value);
+        countParams.push(value);
+        paramIndex++;
+      } else {
+        // exact match
+        query += ` AND ${computedField} = $${paramIndex}`;
+        countQuery += ` AND ${computedField} = $${paramIndex}`;
+        const value = parseFloat(bridgeLength);
+        queryParams.push(value);
+        countParams.push(value);
+        paramIndex++;
+      }
+    }
 
     if (spanLength && spanLength !== "%") {
       if (spanLength.startsWith("<")) {
@@ -4140,8 +4158,12 @@ app.get("/api/bridges", async (req, res) => {
         paramIndex++;
       } else if (spanLength.includes("-")) {
         const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
@@ -4181,7 +4203,9 @@ app.get("/api/bridges", async (req, res) => {
       }
     }
 
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
@@ -4324,40 +4348,45 @@ app.get("/api/bridgesInspected", async (req, res) => {
     }
 
     if (bridgeLength !== "%") {
-  const computedField = "(no_of_span * span_length_m)";
+      const computedField = "(no_of_span * span_length_m)";
 
-  if (bridgeLength.startsWith("<")) {
-    query += ` AND ${computedField} < $${paramIndex}`;
-    countQuery += ` AND ${computedField} < $${paramIndex}`;
-    const value = parseFloat(bridgeLength.substring(1));
-    queryParams.push(value);
-    countParams.push(value);
-    paramIndex++;
-  } else if (bridgeLength.includes("-")) {
-    const [min, max] = bridgeLength.split("-").map(v => parseFloat(v.trim()));
-    query += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    countQuery += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-    queryParams.push(min, max);
-    countParams.push(min, max);
-    paramIndex += 2;
-  } else if (bridgeLength.startsWith(">")) {
-    query += ` AND ${computedField} > $${paramIndex}`;
-    countQuery += ` AND ${computedField} > $${paramIndex}`;
-    const value = parseFloat(bridgeLength.substring(1));
-    queryParams.push(value);
-    countParams.push(value);
-    paramIndex++;
-  } else {
-    // exact match
-    query += ` AND ${computedField} = $${paramIndex}`;
-    countQuery += ` AND ${computedField} = $${paramIndex}`;
-    const value = parseFloat(bridgeLength);
-    queryParams.push(value);
-    countParams.push(value);
-    paramIndex++;
-  }
-}
-
+      if (bridgeLength.startsWith("<")) {
+        query += ` AND ${computedField} < $${paramIndex}`;
+        countQuery += ` AND ${computedField} < $${paramIndex}`;
+        const value = parseFloat(bridgeLength.substring(1));
+        queryParams.push(value);
+        countParams.push(value);
+        paramIndex++;
+      } else if (bridgeLength.includes("-")) {
+        const [min, max] = bridgeLength
+          .split("-")
+          .map((v) => parseFloat(v.trim()));
+        query += ` AND ${computedField} BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        countQuery += ` AND ${computedField} BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        queryParams.push(min, max);
+        countParams.push(min, max);
+        paramIndex += 2;
+      } else if (bridgeLength.startsWith(">")) {
+        query += ` AND ${computedField} > $${paramIndex}`;
+        countQuery += ` AND ${computedField} > $${paramIndex}`;
+        const value = parseFloat(bridgeLength.substring(1));
+        queryParams.push(value);
+        countParams.push(value);
+        paramIndex++;
+      } else {
+        // exact match
+        query += ` AND ${computedField} = $${paramIndex}`;
+        countQuery += ` AND ${computedField} = $${paramIndex}`;
+        const value = parseFloat(bridgeLength);
+        queryParams.push(value);
+        countParams.push(value);
+        paramIndex++;
+      }
+    }
 
     if (spanLength && spanLength !== "%") {
       if (spanLength.startsWith("<")) {
@@ -4369,8 +4398,12 @@ app.get("/api/bridgesInspected", async (req, res) => {
         paramIndex++;
       } else if (spanLength.includes("-")) {
         const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
-        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
+        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${
+          paramIndex + 1
+        }`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
@@ -4385,7 +4418,9 @@ app.get("/api/bridgesInspected", async (req, res) => {
     }
 
     // Pagination
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
@@ -4765,7 +4800,9 @@ WHERE surveyed_by = 'RAMS-UU';
       paramIndex++;
     }
 
-    query += ` ORDER BY data_date_time DESC OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY data_date_time DESC OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     // Run all queries in parallel
@@ -5037,7 +5074,9 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
       paramIndex++;
     }
 
-    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
+    query += ` ORDER BY b.uu_bms_id OFFSET $${paramIndex} LIMIT $${
+      paramIndex + 1
+    }`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     // run all queries together
@@ -5392,7 +5431,9 @@ app.post("/api/bridge-status-summary", async (req, res) => {
 
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       conditions.push(
-        `LOWER(CONCAT(m.pms_sec_id, ',', m.structure_no)) ILIKE $${conditions.length + 1}`
+        `LOWER(CONCAT(m.pms_sec_id, ',', m.structure_no)) ILIKE $${
+          conditions.length + 1
+        }`
       );
       values.push(`%${bridgeName.toLowerCase()}%`);
     }
@@ -5419,7 +5460,9 @@ app.post("/api/bridge-status-summary", async (req, res) => {
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
-      res.status(404).json({ error: "No records found for bridge inspections" });
+      res
+        .status(404)
+        .json({ error: "No records found for bridge inspections" });
     }
   } catch (error) {
     console.error("Error fetching bridge status summary:", error);
@@ -5593,7 +5636,6 @@ app.get("/api/inspections-unapproved", async (req, res) => {
   }
 });
 
-
 // inspections for table dashboard unaproeved evaluation (rams)
 app.get("/api/inspections-unapproved-rams", async (req, res) => {
   try {
@@ -5702,14 +5744,15 @@ app.get("/api/inspections-unapproved-rams", async (req, res) => {
   }
 });
 
-
 // inspections - all (for total inspections modal)
 app.get("/api/inspections-all", async (req, res) => {
   try {
     let { uu_bms_id } = req.query;
 
     if (!uu_bms_id) {
-      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
     }
 
     let query = `
@@ -5743,9 +5786,10 @@ app.get("/api/inspections-all", async (req, res) => {
 
       try {
         if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths
-            .replace(/\"\{/g, "{")
-            .replace(/\}\"/g, "}");
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
           const parsedPhotos = JSON.parse(cleanedJson);
 
           if (Array.isArray(parsedPhotos)) {
@@ -5784,7 +5828,9 @@ app.get("/api/inspections-approved-consultant", async (req, res) => {
     let { uu_bms_id } = req.query;
 
     if (!uu_bms_id) {
-      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
     }
 
     let query = `
@@ -5814,9 +5860,9 @@ app.get("/api/inspections-approved-consultant", async (req, res) => {
 
     const result = await pool.query(query, [uu_bms_id]);
 
-    const processedData = result.rows.map(row => ({
+    const processedData = result.rows.map((row) => ({
       ...row,
-      PhotoPaths: extractPhotoPaths(row.PhotoPaths)
+      PhotoPaths: extractPhotoPaths(row.PhotoPaths),
     }));
 
     res.json({ success: true, data: processedData });
@@ -5834,13 +5880,13 @@ function extractPhotoPaths(raw) {
       const parsed = JSON.parse(cleanedJson);
 
       if (Array.isArray(parsed)) {
-        parsed.forEach(item => {
+        parsed.forEach((item) => {
           if (item.path) extracted.push(item.path);
         });
       } else if (typeof parsed === "object") {
-        Object.values(parsed).forEach(category => {
+        Object.values(parsed).forEach((category) => {
           if (typeof category === "object") {
-            Object.values(category).forEach(imagesArray => {
+            Object.values(category).forEach((imagesArray) => {
               if (Array.isArray(imagesArray)) {
                 extracted.push(...imagesArray);
               }
@@ -5861,7 +5907,9 @@ app.get("/api/inspections-approved-rams", async (req, res) => {
     let { uu_bms_id } = req.query;
 
     if (!uu_bms_id) {
-      return res.status(400).json({ success: false, message: "uu_bms_id is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "uu_bms_id is required" });
     }
 
     let query = `
@@ -5891,9 +5939,9 @@ app.get("/api/inspections-approved-rams", async (req, res) => {
 
     const result = await pool.query(query, [uu_bms_id]);
 
-    const processedData = result.rows.map(row => ({
+    const processedData = result.rows.map((row) => ({
       ...row,
-      PhotoPaths: extractPhotoPaths(row.PhotoPaths)
+      PhotoPaths: extractPhotoPaths(row.PhotoPaths),
     }));
 
     res.json({ success: true, data: processedData });
@@ -6560,6 +6608,7 @@ app.get("/api/get-summary-rams", async (req, res) => {
   }
 });
 
+// for evaluator summary data
 app.get("/api/get-summary-evaluator", async (req, res) => {
   try {
     const { bridgeId, userId } = req.query;
@@ -6732,7 +6781,6 @@ app.get("/api/get-inspections-dashboard", async (req, res) => {
   ORDER BY inspection_id DESC NULLS LAST;
 `;
 
-
     const { rows } = await pool.query(query, [bridgeId]);
 
     if (rows.length === 0) {
@@ -6788,7 +6836,6 @@ app.get("/api/get-inspections-dashboard", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 // api endpoint for consultant inspections data
 app.get("/api/get-inspections-con", async (req, res) => {
@@ -7182,9 +7229,9 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
 
     // Define condition based on evaluator ID
     let evaluationCondition = "";
-      switch (evaluatorLevel) {
+    switch (evaluatorLevel) {
       case 1:
-        evaluationCondition = `(',' || evaluator_id || ',') ILIKE '%,0,%'`; 
+        evaluationCondition = `(',' || evaluator_id || ',') ILIKE '%,0,%'`;
         break;
       case 2:
         evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,2,%'`;
@@ -7205,7 +7252,6 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
         `;
         break;
     }
-
 
     // SQL query
     const query = `
@@ -7477,7 +7523,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       inspection_images,
     } = req.body;
 
-   // logQuery("API Called: /api/insert-inspection-evaluator", req.body);
+    // logQuery("API Called: /api/insert-inspection-evaluator", req.body);
 
     await client.query("BEGIN");
     //logQuery("Transaction started");
@@ -7489,9 +7535,13 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       WHERE inspection_id = $1
     `;
     //logQuery("Check inspection_id query", { inspection_id });
-    const checkResult = await client.query(checkInspectionQuery, [inspection_id]);
+    const checkResult = await client.query(checkInspectionQuery, [
+      inspection_id,
+    ]);
     if (parseInt(checkResult.rows[0].count, 10) === 0) {
-      throw new Error("Invalid inspection_id: No matching record in tbl_inspection_f");
+      throw new Error(
+        "Invalid inspection_id: No matching record in tbl_inspection_f"
+      );
     }
 
     // Insert into tbl_evaluation
@@ -7506,10 +7556,28 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
       RETURNING *;
     `;
     const insertValues = [
-      inspection_id, uu_bms_id, bridge_name, district_id, SpanIndex, WorkKindID, WorkKindName,
-      inspection_images, qc_remarks_con, qc_remarks_rams, qc_remarks_evaluator,
-      situation_remarks, evaluator_id, PartsID, PartsName, MaterialID, MaterialName,
-      DamageKindID, DamageKindName, DamageLevelID, DamageLevel, damage_extent,
+      inspection_id,
+      uu_bms_id,
+      bridge_name,
+      district_id,
+      SpanIndex,
+      WorkKindID,
+      WorkKindName,
+      inspection_images,
+      qc_remarks_con,
+      qc_remarks_rams,
+      qc_remarks_evaluator,
+      situation_remarks,
+      evaluator_id,
+      PartsID,
+      PartsName,
+      MaterialID,
+      MaterialName,
+      DamageKindID,
+      DamageKindName,
+      DamageLevelID,
+      DamageLevel,
+      damage_extent,
     ];
     //logQuery("Insert into tbl_evaluation", insertValues);
     const result = await client.query(insertQuery, insertValues);
@@ -7545,12 +7613,29 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21);
       `;
       const insertSpecialValues = [
-        inspection_id, uu_bms_id, bridge_name, district_id, SpanIndex, WorkKindID, WorkKindName,
-        inspection_images, qc_remarks_con, qc_remarks_rams, qc_remarks_evaluator,
-        situation_remarks, PartsID, PartsName, MaterialID, MaterialName,
-        DamageKindID, DamageKindName, DamageLevelID, DamageLevel, damage_extent,
+        inspection_id,
+        uu_bms_id,
+        bridge_name,
+        district_id,
+        SpanIndex,
+        WorkKindID,
+        WorkKindName,
+        inspection_images,
+        qc_remarks_con,
+        qc_remarks_rams,
+        qc_remarks_evaluator,
+        situation_remarks,
+        PartsID,
+        PartsName,
+        MaterialID,
+        MaterialName,
+        DamageKindID,
+        DamageKindName,
+        DamageLevelID,
+        DamageLevel,
+        damage_extent,
       ];
-     // logQuery("Insert into tbl_evaluation_f (Evaluator 5)", insertSpecialValues);
+      // logQuery("Insert into tbl_evaluation_f (Evaluator 5)", insertSpecialValues);
       await client.query(insertSpecialQuery, insertSpecialValues);
     }
 
@@ -7568,7 +7653,7 @@ app.post("/api/insert-inspection-evaluator", async (req, res) => {
     res.status(500).json({ error: `Internal Server Error: ${error.message}` });
   } finally {
     client.release();
-   // logQuery("DB client released");
+    // logQuery("DB client released");
   }
 });
 
@@ -7616,7 +7701,7 @@ app.get("/api/rates/categories", async (req, res) => {
     const result = await pool.query(query);
     res.json({
       success: true,
-      categories: result.rows.map(row => row.category),
+      categories: result.rows.map((row) => row.category),
     });
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -7626,7 +7711,6 @@ app.get("/api/rates/categories", async (req, res) => {
     });
   }
 });
-
 
 // api for structure types
 app.get("/api/structure-types", async (req, res) => {
@@ -7761,11 +7845,11 @@ app.get("/api/damage-levels", async (req, res) => {
 });
 
 // API endpoint to get damage counts
-app.get('/api/damage-counts', async (req, res) => {
+app.get("/api/damage-counts", async (req, res) => {
   const { uu_bms_id } = req.query;
 
   if (!uu_bms_id) {
-    return res.status(400).json({ error: 'uu_bms_id is required' });
+    return res.status(400).json({ error: "uu_bms_id is required" });
   }
 
   try {
@@ -7810,49 +7894,90 @@ app.get('/api/damage-counts', async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error('Error fetching damage counts:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching damage counts:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// GET /api/damage-details?workKind=...&damageLevel=...&bridgeId=...
+// API endpoint to get detailed damage counts
 app.get("/api/detailed-damage-counts", async (req, res) => {
   try {
     const { workKind, damageLevel, bridgeId } = req.query;
 
-    if (!workKind || !damageLevel || !bridgeId) {
-      return res.status(400).json({ error: "Missing required parameters" });
-    }
-
-    const query = `
+    let query = `
       SELECT 
-        bridge_name,
-        "SpanIndex",
-        "WorkKindName",
-        "PartsName",
-        "MaterialName",
-        "DamageKindName",
-        "DamageLevel",
-        damage_extent,
-        qc_con AS "unapprovedBy"
-      FROM bms.tbl_inspection_f
-      WHERE "WorkKindName" ILIKE $1
-        AND "DamageLevel" ILIKE $2
-        AND uu_bms_id = $3
+        CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+        f."SpanIndex",
+        f."WorkKindName",
+        f."PartsName",
+        f."MaterialName",
+        f."DamageKindName",
+        f."DamageLevel",
+        f.damage_extent,
+        f.qc_con AS "unapprovedBy",
+        f."current_date_time",
+        f."Remarks",
+        f.qc_remarks_con,
+        f.qc_remarks_rams,
+        f.inspection_images AS "PhotoPaths"
+      FROM bms.tbl_inspection_f f
+      INNER JOIN bms.tbl_bms_master_data m ON f.uu_bms_id = m.uu_bms_id
+      WHERE f."WorkKindName" ILIKE $1
+        AND f."DamageLevel" ILIKE $2
+        AND f.uu_bms_id = $3
     `;
 
-    // Add wildcards so it behaves like: ILIKE '%value%'
     const values = [`%${workKind}%`, `%${damageLevel}%`, bridgeId];
 
     const result = await pool.query(query, values);
 
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Error fetching damage details:", err);
-    res.status(500).json({ error: "Server error" });
+    // 🟢 Process PhotoPaths (same logic as unapproved RAMS API)
+    const processedData = result.rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          // Clean badly formatted JSON
+          const cleanedJson = row.PhotoPaths
+            .replace(/\"\{/g, "{")
+            .replace(/\}\"/g, "}");
+
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path"
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with categories
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // ✅ Always return array
+      };
+    });
+
+    res.json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching damage data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
 
 app.get("/api/damage-kinds", async (req, res) => {
   try {
@@ -7958,12 +8083,12 @@ app.put("/api/update-overall-condition/:id", async (req, res) => {
 });
 
 // API endpoint to update remarks and toggle consultant
-app.put('/api/update-overall-remarks-con/:id', async (req, res) => {
+app.put("/api/update-overall-remarks-con/:id", async (req, res) => {
   const { id } = req.params;
   const { overall_remarks, is_bridge_completed } = req.body;
 
   if (!id) {
-    return res.status(400).json({ error: 'uu_bms_id is required' });
+    return res.status(400).json({ error: "uu_bms_id is required" });
   }
 
   try {
@@ -7980,23 +8105,23 @@ app.put('/api/update-overall-remarks-con/:id', async (req, res) => {
     client.release();
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Bridge not found' });
+      return res.status(404).json({ error: "Bridge not found" });
     }
 
-    res.json({ message: 'Remarks updated successfully', data: result.rows[0] });
+    res.json({ message: "Remarks updated successfully", data: result.rows[0] });
   } catch (error) {
-    console.error('Error updating remarks and toggle:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error updating remarks and toggle:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // API endpoint to update remarks and toggle rams
-app.put('/api/update-overall-remarks-rams/:id', async (req, res) => {
+app.put("/api/update-overall-remarks-rams/:id", async (req, res) => {
   const { id } = req.params;
   const { overall_remarks, is_bridge_completed } = req.body;
 
   if (!id) {
-    return res.status(400).json({ error: 'uu_bms_id is required' });
+    return res.status(400).json({ error: "uu_bms_id is required" });
   }
 
   try {
@@ -8013,28 +8138,28 @@ app.put('/api/update-overall-remarks-rams/:id', async (req, res) => {
     client.release();
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Bridge not found' });
+      return res.status(404).json({ error: "Bridge not found" });
     }
 
-    res.json({ message: 'Remarks updated successfully', data: result.rows[0] });
+    res.json({ message: "Remarks updated successfully", data: result.rows[0] });
   } catch (error) {
-    console.error('Error updating remarks and toggle:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error updating remarks and toggle:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // API endpoint to update bridge data and insert remarks Evaluation Module..
 app.post("/api/update-bridge-data", async (req, res) => {
   try {
-    const { 
-      uu_bms_id, 
+    const {
+      uu_bms_id,
       raw_id,
-      user_id, 
-      user_type, 
-      overall_bridge_condition, 
-      overall_remarks, 
+      user_id,
+      user_type,
+      overall_bridge_condition,
+      overall_remarks,
       is_bridge_completed,
-      evaluation_rating 
+      evaluation_rating,
     } = req.body;
 
     if (!uu_bms_id || !user_id || !user_type) {
@@ -8060,7 +8185,9 @@ app.post("/api/update-bridge-data", async (req, res) => {
         [uu_bms_id, raw_id, user_id, overall_bridge_condition, overall_remarks]
       );
 
-      return res.json({ message: "Inventory data & remarks updated successfully" });
+      return res.json({
+        message: "Inventory data & remarks updated successfully",
+      });
     }
 
     // === Case 2: Evaluator Users ===
@@ -8077,7 +8204,15 @@ app.post("/api/update-bridge-data", async (req, res) => {
         `INSERT INTO bms.tbl_bms_master_data_remarks 
          (uu_bms_id, raw_id, user_id, overall_condition, remarks, evaluation_rating, is_final, date_time) 
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()::timestamp)`,
-        [uu_bms_id, raw_id, user_id, overall_bridge_condition, overall_remarks, evaluation_rating || null, isFinalCheck]
+        [
+          uu_bms_id,
+          raw_id,
+          user_id,
+          overall_bridge_condition,
+          overall_remarks,
+          evaluation_rating || null,
+          isFinalCheck,
+        ]
       );
 
       // Always update is_bridge_completed in master table
@@ -8088,11 +8223,12 @@ app.post("/api/update-bridge-data", async (req, res) => {
         [is_bridge_completed, uu_bms_id]
       );
 
-      return res.json({ message: "Evaluator remarks saved & bridge completion updated" });
+      return res.json({
+        message: "Evaluator remarks saved & bridge completion updated",
+      });
     }
 
     return res.status(400).json({ message: "Invalid user_type" });
-
   } catch (error) {
     console.error("Error saving remarks:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -8100,12 +8236,12 @@ app.post("/api/update-bridge-data", async (req, res) => {
 });
 
 // API endpoint to update remarks and toggle rams
-app.put('/api/update-overall-remarks-eval/:id', async (req, res) => {
+app.put("/api/update-overall-remarks-eval/:id", async (req, res) => {
   const { id } = req.params;
   const { overall_remarks, is_bridge_completed } = req.body;
 
   if (!id) {
-    return res.status(400).json({ error: 'uu_bms_id is required' });
+    return res.status(400).json({ error: "uu_bms_id is required" });
   }
 
   try {
@@ -8122,13 +8258,13 @@ app.put('/api/update-overall-remarks-eval/:id', async (req, res) => {
     client.release();
 
     if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Bridge not found' });
+      return res.status(404).json({ error: "Bridge not found" });
     }
 
-    res.json({ message: 'Remarks updated successfully', data: result.rows[0] });
+    res.json({ message: "Remarks updated successfully", data: result.rows[0] });
   } catch (error) {
-    console.error('Error updating remarks and toggle:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error updating remarks and toggle:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -8456,9 +8592,9 @@ app.get("/api/road-types-structures", async (req, res) => {
     `);
 
     // Transform for Highcharts
-    const chartData = result.rows.map(row => ({
+    const chartData = result.rows.map((row) => ({
       name: row.road_classification,
-      y: parseInt(row.count, 10)
+      y: parseInt(row.count, 10),
     }));
 
     res.json(chartData);
@@ -8489,9 +8625,9 @@ app.get("/api/span-length-structures", async (req, res) => {
     `);
 
     // Transform for Highcharts
-    const chartData = result.rows.map(row => ({
+    const chartData = result.rows.map((row) => ({
       name: row.span_group,
-      y: parseInt(row.count, 10)
+      y: parseInt(row.count, 10),
     }));
 
     res.json(chartData);
@@ -8531,9 +8667,9 @@ app.get("/api/bridge-ages", async (req, res) => {
     `);
 
     // Transform for Highcharts
-    const chartData = result.rows.map(row => ({
+    const chartData = result.rows.map((row) => ({
       name: row.age_group,
-      y: parseInt(row.count, 10)
+      y: parseInt(row.count, 10),
     }));
 
     res.json(chartData);
@@ -8583,13 +8719,13 @@ app.get("/api/bridge-status", async (req, res) => {
     const [inspected, uninspected, evaluated] = await Promise.all([
       pool.query(inspectedQuery),
       pool.query(uninspectedQuery),
-      pool.query(evaluatedQuery)
+      pool.query(evaluatedQuery),
     ]);
 
     const chartData = [
       { name: "Inspected", y: parseInt(inspected.rows[0].count, 10) },
       { name: "Uninspected", y: parseInt(uninspected.rows[0].count, 10) },
-      { name: "Evaluated", y: parseInt(evaluated.rows[0].count, 10) }
+      { name: "Evaluated", y: parseInt(evaluated.rows[0].count, 10) },
     ];
 
     res.json(chartData);

@@ -51,7 +51,6 @@ const DamageStatusBox = ({ title, counts, onCellClick }) => {
   );
 };
 
-
 const DamageSummary = ({
   workKinds,
   damageCounts,
@@ -115,14 +114,54 @@ const DamageSummary = ({
 
   // Define columns for modal table
   const modalColumns = [
-    { name: "Bridge Name", selector: (row) => row.bridge_name || "N/A", sortable: true, width: "150px" },
-    { name: "Span Number", selector: (row) => row.SpanIndex || "N/A", sortable: true, width: "100px" },
-    { name: "Work Kind", selector: (row) => row.WorkKindName || "N/A", sortable: true, width: "120px" },
-    { name: "Element Name", selector: (row) => row.PartsName || "N/A", sortable: true, width: "120px" },
-    { name: "Material", selector: (row) => row.MaterialName || "N/A", sortable: true, width: "100px" },
-    { name: "Damage Kind", selector: (row) => row.DamageKindName || "N/A", sortable: true, width: "120px" },
-    { name: "Damage Level", selector: (row) => row.DamageLevel || "N/A", sortable: true, width: "100px" },
-    { name: "Extent", selector: (row) => row.damage_extent || "N/A", sortable: true, width: "80px" },
+    {
+      name: "Bridge Name",
+      selector: (row) => row.bridge_name || "N/A",
+      sortable: true,
+      width: "150px",
+    },
+    {
+      name: "Span Number",
+      selector: (row) => row.SpanIndex || "N/A",
+      sortable: true,
+      width: "100px",
+    },
+    {
+      name: "Work Kind",
+      selector: (row) => row.WorkKindName || "N/A",
+      sortable: true,
+      width: "120px",
+    },
+    {
+      name: "Element Name",
+      selector: (row) => row.PartsName || "N/A",
+      sortable: true,
+      width: "120px",
+    },
+    {
+      name: "Material",
+      selector: (row) => row.MaterialName || "N/A",
+      sortable: true,
+      width: "100px",
+    },
+    {
+      name: "Damage Kind",
+      selector: (row) => row.DamageKindName || "N/A",
+      sortable: true,
+      width: "120px",
+    },
+    {
+      name: "Damage Level",
+      selector: (row) => row.DamageLevel || "N/A",
+      sortable: true,
+      width: "100px",
+    },
+    {
+      name: "Extent",
+      selector: (row) => row.damage_extent || "N/A",
+      sortable: true,
+      width: "80px",
+    },
     {
       name: "Unapproved By",
       selector: (row) => row.unapprovedBy || "N/A",
@@ -130,7 +169,9 @@ const DamageSummary = ({
       width: "120px",
       cell: (row) => (
         <span
-          className={`badge ${row.unapprovedBy === "Consultant" ? "bg-warning" : "bg-info"}`}
+          className={`badge ${
+            row.unapprovedBy === "Consultant" ? "bg-warning" : "bg-info"
+          }`}
         >
           {row.unapprovedBy || "N/A"}
         </span>
@@ -166,8 +207,8 @@ const DamageSummary = ({
           workKindName
         )}&damageLevel=${encodeURIComponent(level)}&bridgeId=${bridgeId}`
       );
-      const data = await response.json();
-      setModalData(data);
+      const result = await response.json();
+      setModalData(result.data || []); // ✅ pass only the array
     } catch (err) {
       console.error(err);
       setModalData([]);
@@ -180,7 +221,7 @@ const DamageSummary = ({
     <div className="mb-4 bg-[#DBEAFE] p-4">
       <h4 className="text-center mb-3 text-lg font-bold">Damage Status</h4>
 
-       {/* Content */}
+      {/* Content */}
       <div className="flex flex-wrap justify-around">
         {loadingWorkKinds || loadingDamageCounts ? (
           <div className="text-center py-2 w-full">
@@ -222,7 +263,9 @@ const DamageSummary = ({
               highlightOnHover
               responsive
               customStyles={customStyles}
-              noDataComponent={<div className="text-center p-4">No inspections found</div>}
+              noDataComponent={
+                <div className="text-center p-4">No inspections found</div>
+              }
             />
           )}
         </Modal.Body>
@@ -243,42 +286,112 @@ const DamageSummary = ({
               <div className="table-responsive">
                 <table className="table table-bordered table-sm">
                   <tbody>
-                    <tr><th className="bg-light" style={{ width: "30%" }}>Bridge Name</th><td>{selectedInspection.bridge_name || "N/A"}</td></tr>
-                    <tr><th className="bg-light">Span Index</th><td>{selectedInspection.SpanIndex || "N/A"}</td></tr>
-                    <tr><th className="bg-light">Element</th><td>{selectedInspection.PartsName || "N/A"}</td></tr>
-                    <tr><th className="bg-light">Material</th><td>{selectedInspection.MaterialName || "N/A"}</td></tr>
-                    <tr><th className="bg-light">Damage Kind</th><td>{selectedInspection.DamageKindName || "N/A"}</td></tr>
-                    <tr><th className="bg-light">Damage Level</th><td>{selectedInspection.DamageLevel || "N/A"}</td></tr>
-                    <tr><th className="bg-light">Damage Extent</th><td>{selectedInspection.damage_extent || "N/A"}</td></tr>
+                    <tr>
+                      <th className="bg-light" style={{ width: "30%" }}>
+                        Bridge Name
+                      </th>
+                      <td>{selectedInspection.bridge_name || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">Span Index</th>
+                      <td>{selectedInspection.SpanIndex || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">Element</th>
+                      <td>{selectedInspection.PartsName || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">Material</th>
+                      <td>{selectedInspection.MaterialName || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">Damage Kind</th>
+                      <td>{selectedInspection.DamageKindName || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">Damage Level</th>
+                      <td>{selectedInspection.DamageLevel || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">Damage Extent</th>
+                      <td>{selectedInspection.damage_extent || "N/A"}</td>
+                    </tr>
                     <tr>
                       <th className="bg-light">Inspection Date</th>
-                      <td>{selectedInspection.current_date_time ? new Date(selectedInspection.current_date_time).toLocaleString() : "N/A"}</td>
+                      <td>
+                        {selectedInspection.current_date_time
+                          ? new Date(
+                              selectedInspection.current_date_time
+                            ).toLocaleString()
+                          : "N/A"}
+                      </td>
                     </tr>
-                    <tr><th className="bg-light">Remarks</th><td>{selectedInspection.Remarks || "N/A"}</td></tr>
-                    <tr><th className="bg-light">Consultant Remarks</th><td>{selectedInspection.qc_remarks_con || "N/A"}</td></tr>
-                    <tr><th className="bg-light">RAMS Remarks</th><td>{selectedInspection.qc_remarks_rams || "N/A"}</td></tr>
+                    <tr>
+                      <th className="bg-light">Remarks</th>
+                      <td>{selectedInspection.Remarks || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">Consultant Remarks</th>
+                      <td>{selectedInspection.qc_remarks_con || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <th className="bg-light">RAMS Remarks</th>
+                      <td>{selectedInspection.qc_remarks_rams || "N/A"}</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
 
               {/* Photos */}
-              {selectedInspection.PhotoPaths && selectedInspection.PhotoPaths.length > 0 && (
-                <div className="mt-3">
-                  <h6>Inspection Photos</h6>
-                  <div className="row">
-                    {selectedInspection.PhotoPaths.map((photo, index) => (
-                      <div key={index} className="col-md-4 mb-2">
-                        <img
-                          src={photo}
-                          alt={`Inspection ${index + 1}`}
-                          className="img-fluid rounded"
-                          style={{ maxHeight: "200px", objectFit: "cover", width: "100%" }}
-                        />
-                      </div>
-                    ))}
+              {selectedInspection.PhotoPaths &&
+                selectedInspection.PhotoPaths.length > 0 && (
+                  <div className="mt-3">
+                    <div className="row">
+                      {/* Photos */}
+                      {selectedInspection.PhotoPaths && (
+                        <div className="mt-3">
+                          <h6>Inspection Photos</h6>
+                          <div className="row">
+                            {(() => {
+                              let photos = [];
+
+                              // Case 1: Already an array
+                              if (
+                                Array.isArray(selectedInspection.PhotoPaths)
+                              ) {
+                                photos = selectedInspection.PhotoPaths;
+                              }
+                              // Case 2: Comma-separated string
+                              else if (
+                                typeof selectedInspection.PhotoPaths ===
+                                "string"
+                              ) {
+                                photos = selectedInspection.PhotoPaths.split(
+                                  ","
+                                ).map((p) => p.trim());
+                              }
+
+                              return photos.map((photo, index) => (
+                                <div key={index} className="col-md-4 mb-2">
+                                  <img
+                                    src={photo}
+                                    alt={`Inspection ${index + 1}`}
+                                    className="img-fluid rounded"
+                                    style={{
+                                      maxHeight: "200px",
+                                      objectFit: "cover",
+                                      width: "100%",
+                                    }}
+                                  />
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           )}
         </Modal.Body>
