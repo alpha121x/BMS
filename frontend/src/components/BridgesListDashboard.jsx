@@ -465,7 +465,7 @@ const BridgesListDashboard = ({
       grow: 1,
     },
     {
-      name: "Structure Length",
+      name: "Length of structure (Number of span @ span length)",
       selector: (row) => row.bridge_length || "N/A",
       sortable: true,
       wrap: true,

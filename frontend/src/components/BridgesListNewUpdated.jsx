@@ -348,7 +348,7 @@ const BridgesListNewUpdated = ({
       wrap: true,
     },
     {
-      name: "Structure Length (m)",
+      name: "Length of structure (Number of span @ span length)",
       selector: (row) =>
         row.bridge_length !== null && row.bridge_length !== undefined
           ? parseFloat(row.bridge_length).toFixed(2)
