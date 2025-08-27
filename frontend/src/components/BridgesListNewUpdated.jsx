@@ -478,6 +478,16 @@ const BridgesListNewUpdated = ({
                     {qcSummary?.pending_count || 0}
                   </span>
                 </h6>
+
+                <h6 className="mb-0">
+                  Unapproved Records:
+                  <span
+                    className="badge text-white ms-2"
+                    style={{ background: "#E74C3C" }}
+                  >
+                    {qcSummary?.rejected_count || 0}
+                  </span>
+                </h6>
               </div>
             )}
 

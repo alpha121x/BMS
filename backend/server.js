@@ -4728,11 +4728,13 @@ app.get("/api/bridgesCon", async (req, res) => {
 
     // New QC summary query
     let qcSummaryQuery = `
-      SELECT 
-        COUNT(CASE WHEN qc_con = 1 THEN 1 END) AS pending_count,
-        COUNT(CASE WHEN qc_con = 2 THEN 1 END) AS approved_count
-      FROM bms.tbl_inspection_f
-      WHERE surveyed_by = 'RAMS-UU'
+   SELECT 
+    SUM(CASE WHEN qc_con = 1 THEN 1 ELSE 0 END) AS pending_count,
+    SUM(CASE WHEN qc_con = 2 THEN 1 ELSE 0 END) AS approved_count,
+    SUM(CASE WHEN qc_con = 3 AND is_latest = true THEN 1 ELSE 0 END) AS rejected_count
+FROM bms.tbl_inspection_f
+WHERE surveyed_by = 'RAMS-UU';
+
     `;
 
     const queryParams = [];
@@ -5001,7 +5003,8 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
     let qcSummaryQuery = `
       SELECT 
         COUNT(CASE WHEN qc_rams = 0 AND qc_con = 2 THEN 1 END) AS pending_count,
-        COUNT(CASE WHEN qc_rams = 2 THEN 1 END) AS approved_count
+        COUNT(CASE WHEN qc_rams = 2 THEN 1 END) AS approved_count,
+        COUNT(CASE WHEN qc_rams = 3 AND is_latest = true THEN 1 END) AS rejected_count
       FROM bms.tbl_inspection_f
       WHERE surveyed_by = 'RAMS-UU'
     `;
@@ -5590,6 +5593,7 @@ app.get("/api/inspections-unapproved", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 
 // inspections for table dashboard unaproeved evaluation (rams)
 app.get("/api/inspections-unapproved-rams", async (req, res) => {
