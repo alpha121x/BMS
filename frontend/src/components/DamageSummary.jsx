@@ -163,23 +163,43 @@ const DamageSummary = ({
       width: "80px",
     },
     {
-      name: "Unapproved By",
-      selector: (row) => row.unapprovedBy || "N/A",
+      name: "Status",
+      width: "180px",
       sortable: true,
-      width: "120px",
-      cell: (row) => (
-        <span
-          className={`badge ${
-            row.unapprovedBy === "Consultant" ? "bg-warning" : "bg-info"
-          }`}
-        >
-          {row.unapprovedBy || "N/A"}
-        </span>
-      ),
+      cell: (row) => {
+        let label = "N/A";
+        let badgeClass = "bg-secondary";
+
+        if (row.qc_con) {
+          if (row.qc_con === 1) {
+            label = "Pending (Consultant)";
+            badgeClass = "bg-secondary";
+          } else if (row.qc_con === 2) {
+            label = "Approved (Consultant)";
+            badgeClass = "bg-success";
+          } else if (row.qc_con === 3) {
+            label = "Unapproved (Consultant)";
+            badgeClass = "bg-warning";
+          }
+        } else if (row.qc_rams) {
+          if (row.qc_rams === 0) {
+            label = "Pending (RAMS)";
+            badgeClass = "bg-secondary";
+          } else if (row.qc_rams === 2) {
+            label = "Approved (RAMS)";
+            badgeClass = "bg-success";
+          } else if (row.qc_rams === 3) {
+            label = "Unapproved (RAMS)";
+            badgeClass = "bg-info";
+          }
+        }
+
+        return <span className={`badge ${badgeClass}`}>{label}</span>;
+      },
     },
     // 🔹 NEW Action column
     {
-      name: "Action",
+      name: "Details",
       width: "100px",
       cell: (row) => (
         <Button
@@ -190,7 +210,7 @@ const DamageSummary = ({
             setShowInspectionDetail(true);
           }}
         >
-          View
+          👁️
         </Button>
       ),
     },
@@ -215,6 +235,61 @@ const DamageSummary = ({
     } finally {
       setModalLoading(false);
     }
+  };
+
+  // Utility function to convert JSON to CSV and trigger download
+  const downloadCSV = (data, filename = "damage-data.csv") => {
+    if (!data || data.length === 0) {
+      alert("No data available to download");
+      return;
+    }
+
+    // Remove PhotoPaths, qc_con, qc_rams from headers, then add "Approval Status"
+    const headers = Object.keys(data[0]).filter(
+      (h) => h !== "qc_con" && h !== "qc_rams" && h !== "PhotoPaths"
+    );
+    headers.push("Status"); // derived column
+
+    // Map rows
+    const csvRows = [
+      headers.join(","), // header row
+      ...data.map((row) => {
+        // Derive Approval Status from qc_con / qc_rams
+        let approvalStatus = "";
+
+        if (row.qc_con) {
+          if (row.qc_con === 1) approvalStatus = "Pending (Consultant)";
+          else if (row.qc_con === 2) approvalStatus = "Approved (Consultant)";
+          else if (row.qc_con === 3) approvalStatus = "Unapproved (Consultant)";
+        } else if (row.qc_rams) {
+          if (row.qc_rams === 0) approvalStatus = "Pending (RAMS)";
+          else if (row.qc_rams === 2) approvalStatus = "Approved (RAMS)";
+          else if (row.qc_rams === 3) approvalStatus = "Unapproved (RAMS)";
+        }
+
+        return headers
+          .map((field) => {
+            if (field === "Status") {
+              return JSON.stringify(approvalStatus);
+            }
+            return JSON.stringify(row[field] ?? "");
+          })
+          .join(",");
+      }),
+    ];
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    // Create a temp <a> tag to download
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -255,18 +330,28 @@ const DamageSummary = ({
               <p>Loading inspections...</p>
             </div>
           ) : (
-            <DataTable
-              columns={modalColumns}
-              data={modalData}
-              pagination
-              striped
-              highlightOnHover
-              responsive
-              customStyles={customStyles}
-              noDataComponent={
-                <div className="text-center p-4">No inspections found</div>
-              }
-            />
+            <>
+              <Button
+                variant="success"
+                size="sm"
+                className="mb-2"
+                onClick={() => downloadCSV(modalData, `${modalTitle}.csv`)}
+              >
+                Download CSV
+              </Button>
+              <DataTable
+                columns={modalColumns}
+                data={modalData}
+                pagination
+                striped
+                highlightOnHover
+                responsive
+                customStyles={customStyles}
+                noDataComponent={
+                  <div className="text-center p-4">No inspections found</div>
+                }
+              />
+            </>
           )}
         </Modal.Body>
       </Modal>
