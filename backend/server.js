@@ -4791,7 +4791,7 @@ WHERE surveyed_by = 'RAMS-UU';
 });
 
 // bridges list for Consultant evaluation module
-app.get("/api/bridgesRams", async (req, res) => {
+app.get("/api/bridgesRamsold", async (req, res) => {
   try {
     const {
       set = 0,
@@ -5062,9 +5062,8 @@ app.get("/api/bridgesRamsNew", async (req, res) => {
   }
 });
 
-
 // bridges list for evaluation module for evaluator
-app.get("/api/bridgesEvaluator", async (req, res) => {
+app.get("/api/bridgesEvaluatorold", async (req, res) => {
   try {
     const {
       set = 0,
@@ -7825,25 +7824,27 @@ app.get("/api/detailed-damage-counts", async (req, res) => {
       return res.status(400).json({ error: "Missing required parameters" });
     }
 
-      const query = `
-        SELECT 
-          bridge_name,
-          "SpanIndex",
-          "WorkKindName",
-          "PartsName",
-          "MaterialName",
-          "DamageKindName",
-          "DamageLevel",
-          damage_extent,
-          qc_con AS "unapprovedBy"
-        FROM bms.tbl_inspection_f
-        WHERE "WorkKindName" ILIKE $1
-          AND "DamageLevel" ILIKE $2
-          AND uu_bms_id = $3
-      `;
+    const query = `
+      SELECT 
+        bridge_name,
+        "SpanIndex",
+        "WorkKindName",
+        "PartsName",
+        "MaterialName",
+        "DamageKindName",
+        "DamageLevel",
+        damage_extent,
+        qc_con AS "unapprovedBy"
+      FROM bms.tbl_inspection_f
+      WHERE "WorkKindName" ILIKE $1
+        AND "DamageLevel" ILIKE $2
+        AND uu_bms_id = $3
+    `;
 
+    // Add wildcards so it behaves like: ILIKE '%value%'
+    const values = [`%${workKind}%`, `%${damageLevel}%`, bridgeId];
 
-    const result = await pool.query(query, [workKind, damageLevel, bridgeId]);
+    const result = await pool.query(query, values);
 
     res.json(result.rows);
   } catch (err) {
@@ -7851,6 +7852,7 @@ app.get("/api/detailed-damage-counts", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
 
 app.get("/api/damage-kinds", async (req, res) => {
   try {

@@ -51,6 +51,7 @@ const DamageStatusBox = ({ title, counts, onCellClick }) => {
   );
 };
 
+
 const DamageSummary = ({
   workKinds,
   damageCounts,
@@ -64,56 +65,64 @@ const DamageSummary = ({
   const [modalData, setModalData] = useState([]);
   const [modalLoading, setModalLoading] = useState(false);
 
-  // Define columns for the modal inspection table
+  // 🔹 New states for inspection detail modal
+  const [showInspectionDetail, setShowInspectionDetail] = useState(false);
+  const [selectedInspection, setSelectedInspection] = useState(null);
+
+  // Custom styles (same as before)
+  const customStyles = {
+    table: {
+      style: { width: "100%" },
+    },
+    headRow: {
+      style: {
+        backgroundColor: "#005D7F",
+        color: "#fff",
+        borderBottom: "1px solid #dee2e6",
+      },
+    },
+    headCells: {
+      style: {
+        padding: "12px 8px",
+        fontSize: "14px",
+        fontWeight: "bold",
+        color: "#fff",
+        borderRight: "1px solid #495057",
+      },
+    },
+    rows: {
+      style: {
+        fontSize: "13px",
+        borderBottom: "1px solid #dee2e6",
+        "&:hover": { backgroundColor: "#f8f9fa" },
+      },
+      stripedStyle: { backgroundColor: "#f8f9fa" },
+    },
+    cells: {
+      style: {
+        padding: "8px",
+        borderRight: "1px solid #dee2e6",
+      },
+    },
+    pagination: {
+      style: {
+        borderTop: "1px solid #dee2e6",
+        padding: "8px",
+        fontSize: "14px",
+      },
+    },
+  };
+
+  // Define columns for modal table
   const modalColumns = [
-    {
-      name: "Bridge Name",
-      selector: (row) => row.bridge_name || "N/A",
-      sortable: true,
-      width: "150px",
-    },
-    {
-      name: "Span Number",
-      selector: (row) => row.SpanIndex || "N/A",
-      sortable: true,
-      width: "100px",
-    },
-    {
-      name: "Work Kind",
-      selector: (row) => row.WorkKindName || "N/A",
-      sortable: true,
-      width: "120px",
-    },
-    {
-      name: "Element Name",
-      selector: (row) => row.PartsName || "N/A",
-      sortable: true,
-      width: "120px",
-    },
-    {
-      name: "Material",
-      selector: (row) => row.MaterialName || "N/A",
-      sortable: true,
-      width: "100px",
-    },
-    {
-      name: "Damage Kind",
-      selector: (row) => row.DamageKindName || "N/A",
-      sortable: true,
-      width: "120px",
-    },
-    {
-      name: "Damage Level",
-      selector: (row) => row.DamageLevel || "N/A",
-      sortable: true,
-      width: "100px",
-    },
-    {
-      name: "Extent",
-      selector: (row) => row.damage_extent || "N/A",
-      sortable: true,
-      width: "80px",
-    },
+    { name: "Bridge Name", selector: (row) => row.bridge_name || "N/A", sortable: true, width: "150px" },
+    { name: "Span Number", selector: (row) => row.SpanIndex || "N/A", sortable: true, width: "100px" },
+    { name: "Work Kind", selector: (row) => row.WorkKindName || "N/A", sortable: true, width: "120px" },
+    { name: "Element Name", selector: (row) => row.PartsName || "N/A", sortable: true, width: "120px" },
+    { name: "Material", selector: (row) => row.MaterialName || "N/A", sortable: true, width: "100px" },
+    { name: "Damage Kind", selector: (row) => row.DamageKindName || "N/A", sortable: true, width: "120px" },
+    { name: "Damage Level", selector: (row) => row.DamageLevel || "N/A", sortable: true, width: "100px" },
+    { name: "Extent", selector: (row) => row.damage_extent || "N/A", sortable: true, width: "80px" },
     {
       name: "Unapproved By",
       selector: (row) => row.unapprovedBy || "N/A",
@@ -121,12 +130,27 @@ const DamageSummary = ({
       width: "120px",
       cell: (row) => (
         <span
-          className={`badge ${
-            row.unapprovedBy === "Consultant" ? "bg-warning" : "bg-info"
-          }`}
+          className={`badge ${row.unapprovedBy === "Consultant" ? "bg-warning" : "bg-info"}`}
         >
           {row.unapprovedBy || "N/A"}
         </span>
+      ),
+    },
+    // 🔹 NEW Action column
+    {
+      name: "Action",
+      width: "100px",
+      cell: (row) => (
+        <Button
+          size="sm"
+          variant="primary"
+          onClick={() => {
+            setSelectedInspection(row);
+            setShowInspectionDetail(true);
+          }}
+        >
+          View
+        </Button>
       ),
     },
   ];
@@ -156,47 +180,7 @@ const DamageSummary = ({
     <div className="mb-4 bg-[#DBEAFE] p-4">
       <h4 className="text-center mb-3 text-lg font-bold">Damage Status</h4>
 
-      {/* Legend */}
-      <div className="flex justify-around mb-3 flex-wrap gap-2">
-        <button
-          className="px-4 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: "#9FD585" }}
-        >
-          No Damage
-        </button>
-        <button
-          className="px-4 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: "#DBDBDB" }}
-        >
-          Invisible
-        </button>
-        <button
-          className="px-4 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: "#00C4FF" }}
-        >
-          Good
-        </button>
-        <button
-          className="px-4 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: "#FFD685" }}
-        >
-          Fair
-        </button>
-        <button
-          className="px-4 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: "#FFAA00" }}
-        >
-          Poor
-        </button>
-        <button
-          className="px-4 py-1 rounded text-sm font-medium"
-          style={{ backgroundColor: "#FF0000" }}
-        >
-          Severe
-        </button>
-      </div>
-
-      {/* Content */}
+       {/* Content */}
       <div className="flex flex-wrap justify-around">
         {loadingWorkKinds || loadingDamageCounts ? (
           <div className="text-center py-2 w-full">
@@ -218,7 +202,7 @@ const DamageSummary = ({
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal with DataTable */}
       <Modal show={showModal} onHide={() => setShowModal(false)} size="xl">
         <Modal.Header closeButton>
           <Modal.Title>{modalTitle}</Modal.Title>
@@ -237,10 +221,65 @@ const DamageSummary = ({
               striped
               highlightOnHover
               responsive
-              noDataComponent={
-                <div className="text-center p-4">No inspections found</div>
-              }
+              customStyles={customStyles}
+              noDataComponent={<div className="text-center p-4">No inspections found</div>}
             />
+          )}
+        </Modal.Body>
+      </Modal>
+
+      {/* 🔹 Inspection Detail Modal */}
+      <Modal
+        show={showInspectionDetail}
+        onHide={() => setShowInspectionDetail(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Inspection Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedInspection && (
+            <div>
+              <div className="table-responsive">
+                <table className="table table-bordered table-sm">
+                  <tbody>
+                    <tr><th className="bg-light" style={{ width: "30%" }}>Bridge Name</th><td>{selectedInspection.bridge_name || "N/A"}</td></tr>
+                    <tr><th className="bg-light">Span Index</th><td>{selectedInspection.SpanIndex || "N/A"}</td></tr>
+                    <tr><th className="bg-light">Element</th><td>{selectedInspection.PartsName || "N/A"}</td></tr>
+                    <tr><th className="bg-light">Material</th><td>{selectedInspection.MaterialName || "N/A"}</td></tr>
+                    <tr><th className="bg-light">Damage Kind</th><td>{selectedInspection.DamageKindName || "N/A"}</td></tr>
+                    <tr><th className="bg-light">Damage Level</th><td>{selectedInspection.DamageLevel || "N/A"}</td></tr>
+                    <tr><th className="bg-light">Damage Extent</th><td>{selectedInspection.damage_extent || "N/A"}</td></tr>
+                    <tr>
+                      <th className="bg-light">Inspection Date</th>
+                      <td>{selectedInspection.current_date_time ? new Date(selectedInspection.current_date_time).toLocaleString() : "N/A"}</td>
+                    </tr>
+                    <tr><th className="bg-light">Remarks</th><td>{selectedInspection.Remarks || "N/A"}</td></tr>
+                    <tr><th className="bg-light">Consultant Remarks</th><td>{selectedInspection.qc_remarks_con || "N/A"}</td></tr>
+                    <tr><th className="bg-light">RAMS Remarks</th><td>{selectedInspection.qc_remarks_rams || "N/A"}</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Photos */}
+              {selectedInspection.PhotoPaths && selectedInspection.PhotoPaths.length > 0 && (
+                <div className="mt-3">
+                  <h6>Inspection Photos</h6>
+                  <div className="row">
+                    {selectedInspection.PhotoPaths.map((photo, index) => (
+                      <div key={index} className="col-md-4 mb-2">
+                        <img
+                          src={photo}
+                          alt={`Inspection ${index + 1}`}
+                          className="img-fluid rounded"
+                          style={{ maxHeight: "200px", objectFit: "cover", width: "100%" }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </Modal.Body>
       </Modal>
