@@ -189,6 +189,7 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         damageCounts={damageCounts}
         loadingWorkKinds={loadingWorkKinds}
         loadingDamageCounts={loadingDamageCounts}
+        bridgeId={inventoryData?.uu_bms_id}
         error={error}
       />
       <div className="mb-4">

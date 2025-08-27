@@ -7821,22 +7821,23 @@ app.get("/api/detailed-damage-counts", async (req, res) => {
       return res.status(400).json({ error: "Missing required parameters" });
     }
 
-    const query = `
-      SELECT 
-        bridge_name,
-        "SpanIndex",
-        "WorkKindName",
-        "PartsName",
-        "MaterialName",
-        "DamageKindName",
-        "DamageLevel",
-        damage_extent,
-        qc_con AS "unapprovedBy"
-      FROM bms.tbl_inspection_f
-      WHERE "WorkKindName" = $1
-        AND "DamageLevel" = $2
-        AND uu_bms_id = $3
-    `;
+      const query = `
+        SELECT 
+          bridge_name,
+          "SpanIndex",
+          "WorkKindName",
+          "PartsName",
+          "MaterialName",
+          "DamageKindName",
+          "DamageLevel",
+          damage_extent,
+          qc_con AS "unapprovedBy"
+        FROM bms.tbl_inspection_f
+        WHERE "WorkKindName" ILIKE $1
+          AND "DamageLevel" ILIKE $2
+          AND uu_bms_id = $3
+      `;
+
 
     const result = await pool.query(query, [workKind, damageLevel, bridgeId]);
 

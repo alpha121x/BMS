@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Spinner, Button, Modal } from "react-bootstrap";
 import DataTable from "react-data-table-component";
+import { BASE_URL } from "./config";
 
 const DamageStatusBox = ({ title, counts, onCellClick }) => {
   const damageLevels = [
@@ -55,6 +56,7 @@ const DamageSummary = ({
   damageCounts,
   loadingWorkKinds,
   loadingDamageCounts,
+  bridgeId,
   error,
 }) => {
   const [showModal, setShowModal] = useState(false);
@@ -136,9 +138,9 @@ const DamageSummary = ({
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/damage-details?workKind=${encodeURIComponent(
+        `${BASE_URL}/api/detailed-damage-counts?workKind=${encodeURIComponent(
           workKindName
-        )}&damageLevel=${encodeURIComponent(level)}`
+        )}&damageLevel=${encodeURIComponent(level)}&bridgeId=${bridgeId}`
       );
       const data = await response.json();
       setModalData(data);
