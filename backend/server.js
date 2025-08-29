@@ -6881,28 +6881,30 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
     // Define condition based on evaluator ID
     let evaluationCondition = "";
     switch (evaluatorLevel) {
-      case 1:
-        evaluationCondition = `(',' || evaluator_id || ',') ILIKE '%,0,%'`;
-        break;
-      case 2:
-        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,2,%'`;
-        break;
-      case 3:
-        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,3,%'`;
-        break;
-      case 4:
-        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,4,%'`;
-        break;
-      case 5:
-        evaluationCondition = `
-          (',' || evaluator_id || ',') ILIKE '%,1,%'
-          AND (',' || evaluator_id || ',') ILIKE '%,2,%'
-          AND (',' || evaluator_id || ',') ILIKE '%,3,%'
-          AND (',' || evaluator_id || ',') ILIKE '%,4,%'
-          AND (',' || evaluator_id || ',') NOT ILIKE '%,5,%'
-        `;
-        break;
-    }
+  case 1:
+    evaluationCondition = `(',' || evaluator_id || ',') ILIKE '%,0,%' 
+                           AND (',' || evaluator_id || ',') NOT ILIKE '%,1,%'`;
+    break;
+  case 2:
+    evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,2,%'`;
+    break;
+  case 3:
+    evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,3,%'`;
+    break;
+  case 4:
+    evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,4,%'`;
+    break;
+  case 5:
+    evaluationCondition = `
+      (',' || evaluator_id || ',') ILIKE '%,1,%'
+      AND (',' || evaluator_id || ',') ILIKE '%,2,%'
+      AND (',' || evaluator_id || ',') ILIKE '%,3,%'
+      AND (',' || evaluator_id || ',') ILIKE '%,4,%'
+      AND (',' || evaluator_id || ',') NOT ILIKE '%,5,%'
+    `;
+    break;
+}
+
 
     // SQL query
     const query = `
