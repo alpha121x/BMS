@@ -15,91 +15,96 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
   const [modalLoading, setModalLoading] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState(null);
   const [showInspectionDetail, setShowInspectionDetail] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchProjectData();
   }, [districtId, bridgeName, structureType]);
 
-const fetchProjectData = async () => {
-  setLoading(true);
-  setError(null);
+  const fetchProjectData = async () => {
+    setLoading(true);
+    setError(null);
 
-  try {
-    const payload = {
-      districtId: districtId || "%",
-      bridgeName: bridgeName || "%",
-      structureType: structureType || "%",
-    };
-
-    // 1️⃣ Bridge status summary
-    const bridgeResponse = await fetch(`${BASE_URL}/api/bridge-status-summary`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    let bridgeData = [];
-    if (bridgeResponse.ok) {
-      bridgeData = await bridgeResponse.json();
-    }
-
-    // 2️⃣ Consultant inspections
-    const consultantParams = new URLSearchParams();
-    if (districtId) consultantParams.append("district", districtId);
-    if (bridgeName) consultantParams.append("bridge", bridgeName);
-    if (structureType) consultantParams.append("structureType", structureType);
-
-    const consultantResponse = await fetch(
-      `${BASE_URL}/api/inspections-unapproved?${consultantParams.toString()}`
-    );
-    const consultantData = consultantResponse.ok
-      ? await consultantResponse.json()
-      : { data: [] };
-
-    // 3️⃣ RAMS inspections
-    const ramsResponse = await fetch(
-      `${BASE_URL}/api/inspections-unapproved-rams?${consultantParams.toString()}`
-    );
-    const ramsData = ramsResponse.ok
-      ? await ramsResponse.json()
-      : { data: [] };
-
-    // 🔄 Combine and process data
-    const combinedData = (bridgeData || []).map((bridge) => {
-      const consultantUnapproved =
-        consultantData.data?.filter(
-          (item) => item.uu_bms_id === bridge.uu_bms_id
-        ) || [];
-      const ramsUnapproved =
-        ramsData.data?.filter(
-          (item) => item.uu_bms_id === bridge.uu_bms_id
-        ) || [];
-
-      return {
-        ...bridge,
-        bridgeName: bridge.bridge_name,
-        district: bridge.district || "N/A",
-        structureLength: "N/A",
-        totalInspections: bridge.total_inspections || 0,
-        unapprovedByConsultant: consultantUnapproved.length,
-        unapprovedByRAMS: ramsUnapproved.length,
-        approvedByConsultant: bridge.approved_insp || 0,
-        approvedByRAMS: 0,
-        consultantComments: "N/A",
-        ramsComments: "N/A",
-        consultantUnapprovedData: consultantUnapproved,
-        ramsUnapprovedData: ramsUnapproved,
+    try {
+      const payload = {
+        districtId: districtId || "%",
+        bridgeName: bridgeName || "%",
+        structureType: structureType || "%",
       };
-    });
 
-    setProjectData(combinedData);
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      // 1️⃣ Bridge status summary
+      const bridgeResponse = await fetch(
+        `${BASE_URL}/api/bridge-status-summary`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      let bridgeData = [];
+      if (bridgeResponse.ok) {
+        bridgeData = await bridgeResponse.json();
+      }
+
+      // 2️⃣ Consultant inspections
+      const consultantParams = new URLSearchParams();
+      if (districtId) consultantParams.append("district", districtId);
+      if (bridgeName) consultantParams.append("bridge", bridgeName);
+      if (structureType)
+        consultantParams.append("structureType", structureType);
+
+      const consultantResponse = await fetch(
+        `${BASE_URL}/api/inspections-unapproved?${consultantParams.toString()}`
+      );
+      const consultantData = consultantResponse.ok
+        ? await consultantResponse.json()
+        : { data: [] };
+
+      // 3️⃣ RAMS inspections
+      const ramsResponse = await fetch(
+        `${BASE_URL}/api/inspections-unapproved-rams?${consultantParams.toString()}`
+      );
+      const ramsData = ramsResponse.ok
+        ? await ramsResponse.json()
+        : { data: [] };
+
+      // 🔄 Combine and process data
+      const combinedData = (bridgeData || []).map((bridge) => {
+        const consultantUnapproved =
+          consultantData.data?.filter(
+            (item) => item.uu_bms_id === bridge.uu_bms_id
+          ) || [];
+        const ramsUnapproved =
+          ramsData.data?.filter(
+            (item) => item.uu_bms_id === bridge.uu_bms_id
+          ) || [];
+
+        return {
+          ...bridge,
+          bridgeName: bridge.bridge_name,
+          district: bridge.district || "N/A",
+          structureLength: "N/A",
+          totalInspections: bridge.total_inspections || 0,
+          unapprovedByConsultant: consultantUnapproved.length,
+          unapprovedByRAMS: ramsUnapproved.length,
+          approvedByConsultant: bridge.approved_insp || 0,
+          approvedByRAMS: 0,
+          consultantComments: "N/A",
+          ramsComments: "N/A",
+          consultantUnapprovedData: consultantUnapproved,
+          ramsUnapprovedData: ramsUnapproved,
+        };
+      });
+
+      setProjectData(combinedData);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCellClick = async (type, bridge) => {
     setModalLoading(true);
@@ -157,54 +162,64 @@ const fetchProjectData = async () => {
     setModalLoading(false);
   };
 
-const handleRowClick = async (row) => {
-  if (!row?.uu_bms_id) {
-    console.error("Bridge ID not found in row:", row);
-    alert("Invalid bridge selected. Please try again.");
-    return;
-  }
-
-  try {
-    const response = await fetch(`${BASE_URL}/api/bridgesNew?bridgeId=${row.uu_bms_id}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `Failed to fetch bridge details (Status: ${response.status})`);
-    }
-
-    const { success, bridges, message } = await response.json();
-
-    if (!success) {
-      console.error("Bridge details not found:", message || "API returned an error");
-      alert(message || "Could not fetch bridge details. Please try again.");
+  const handleRowClick = async (row) => {
+    if (!row?.uu_bms_id) {
+      console.error("Bridge ID not found in row:", row);
+      alert("Invalid bridge selected. Please try again.");
       return;
     }
 
-    const bridge = Array.isArray(bridges) ? bridges[0] : bridges;
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/bridgesNew?bridgeId=${row.uu_bms_id}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-    if (!bridge) {
-      console.error("No bridge details found in response:", bridges);
-      alert("No bridge details found. Please try again.");
-      return;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message ||
+            `Failed to fetch bridge details (Status: ${response.status})`
+        );
+      }
+
+      const { success, bridges, message } = await response.json();
+
+      if (!success) {
+        console.error(
+          "Bridge details not found:",
+          message || "API returned an error"
+        );
+        alert(message || "Could not fetch bridge details. Please try again.");
+        return;
+      }
+
+      const bridge = Array.isArray(bridges) ? bridges[0] : bridges;
+
+      if (!bridge) {
+        console.error("No bridge details found in response:", bridges);
+        alert("No bridge details found. Please try again.");
+        return;
+      }
+
+      // Log for debugging (with current time: 04:37 PM PKT, Tuesday, August 26, 2025)
+      // console.log("Bridge Data (fetched at 04:37 PM PKT, Tuesday, August 26, 2025):", bridge);
+      // return;
+
+      // Pass bridge data via React Router state
+      navigate("/BridgeInformationCon", {
+        state: { bridgeData: bridge },
+      });
+    } catch (error) {
+      console.error("Error fetching bridge details:", error);
+      alert(
+        error.message || "Could not fetch bridge details. Please try again."
+      );
     }
-
-    // Log for debugging (with current time: 04:37 PM PKT, Tuesday, August 26, 2025)
-    // console.log("Bridge Data (fetched at 04:37 PM PKT, Tuesday, August 26, 2025):", bridge);
-    // return;
-
-    // Pass bridge data via React Router state
-    navigate("/BridgeInformationCon", {
-      state: { bridgeData: bridge },
-    });
-  } catch (error) {
-    console.error("Error fetching bridge details:", error);
-    alert(error.message || "Could not fetch bridge details. Please try again.");
-  }
-};
-
+  };
 
   const handleInspectionDetail = (inspection) => {
     setSelectedInspection(inspection);
@@ -247,6 +262,12 @@ const handleRowClick = async (row) => {
     a.click();
     document.body.removeChild(a);
   };
+
+  // Filtered data based on search
+const filteredData = projectData.filter((row) =>
+  row.bridgeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  row.district?.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
   // Custom styles for DataTable
   const customStyles = {
@@ -548,7 +569,7 @@ const handleRowClick = async (row) => {
       <div className="card-body p-0">
         <DataTable
           columns={columns}
-          data={projectData}
+          data={filteredData}
           customStyles={customStyles}
           pagination
           paginationPerPage={10}
@@ -567,9 +588,7 @@ const handleRowClick = async (row) => {
                   type="text"
                   className="form-control"
                   placeholder="Search bridges..."
-                  onChange={(e) => {
-                    // you can hook this to a search filter
-                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
