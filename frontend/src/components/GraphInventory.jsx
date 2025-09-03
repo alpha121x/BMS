@@ -34,34 +34,33 @@ const Graph = () => {
     series: [{ name: "Count", data: [] }],
   });
 
-  useEffect(() => {
-    fetch(`${BASE_URL}/api/structure-counts`)
-      .then((res) => res.json())
-      .then((data) => {
-        const colorMap = {
-          CULVERT: "#19FB8B",
-          BRIDGE: "#6D68DE",
-          UNDERPASS: "#FE8F67",
-        };
+useEffect(() => {
+  fetch(`${BASE_URL}/api/structure-counts`)
+    .then((res) => res.json())
+    .then((data) => {
+      const colorMap = {
+        CULVERT: "#19FB8B",
+        BRIDGE: "#6D68DE",
+        UNDERPASS: "#FE8F67",
+      };
 
-        const formattedData = data.structureTypeCounts.map((item) => ({
-          name:
-            item.structure_type.charAt(0).toUpperCase() +
-            item.structure_type.slice(1).toLowerCase(),
-          y: parseInt(item.count),
-          color: colorMap[item.structure_type] || "#999999",
-        }));
+      const formattedData = data.structureTypeCounts.map((item) => ({
+        name: item.structure_type, // ✅ show as it is
+        y: parseInt(item.count),
+        color: colorMap[item.structure_type] || "#999999",
+      }));
 
-        setStructureTypesOptions({
-          chart: { type: "pie" },
-          title: { text: "Type of Structures" },
-          series: [{ name: "Count", data: formattedData }],
-        });
-      })
-      .catch((error) =>
-        console.error("Error fetching structure types:", error)
-      );
-  }, []);
+      setStructureTypesOptions({
+        chart: { type: "pie" },
+        title: { text: "Type of Structures" },
+        series: [{ name: "Count", data: formattedData }],
+      });
+    })
+    .catch((error) =>
+      console.error("Error fetching structure types:", error)
+    );
+}, []);
+
 
   // ------------------- Crossing Types (API) -------------------
   const [crossingTypesOptions, setCrossingTypesOptions] = useState({
