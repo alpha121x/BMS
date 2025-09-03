@@ -87,6 +87,8 @@ const StructuresTable = ({ data, loading }) => {
   const navigate = useNavigate();
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const user_type = userToken?.usertype;
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const rowsPerPage = 10;
   // console.log("User Type:", user_type);
 
   const handleBridgeInfo = (bridgeData) => {
@@ -110,7 +112,7 @@ const StructuresTable = ({ data, loading }) => {
   const columns = [
     {
       name: "#",
-      selector: (row, index) => index + 1,
+      selector: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
       sortable: false,
       width: "60px",
     },
@@ -155,7 +157,7 @@ const StructuresTable = ({ data, loading }) => {
           onClick={() => handleBridgeInfo(row)}
           className="text-blue-600 hover:text-blue-800 focus:outline-none"
         >
-         👁 Bridge Info
+          👁 Bridge Info
         </button>
       ),
       ignoreRowClick: true,
@@ -193,8 +195,9 @@ const StructuresTable = ({ data, loading }) => {
         data={data}
         customStyles={customStyles}
         pagination
-        paginationPerPage={10}
+        paginationPerPage={rowsPerPage}
         paginationRowsPerPageOptions={[10, 25, 50]}
+        onChangePage={(page) => setCurrentPage(page)}
         highlightOnHover
         pointerOnHover
         responsive
