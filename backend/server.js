@@ -8274,6 +8274,7 @@ app.get("/api/span-length-structures", async (req, res) => {
         COUNT(*) AS count
       FROM bms.tbl_bms_master_data
       WHERE span_length_m IS NOT NULL
+      AND is_active = true
       GROUP BY span_group
       ORDER BY MIN(span_length_m)
     `);
