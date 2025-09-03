@@ -85,23 +85,36 @@ const BridgesListDashboard = ({
 
   const fetchAllBridges = async (page = 1, limit = itemsPerPage) => {
     setLoading(true);
+
+    // Create a unique request ID to prevent race conditions
+    const requestId = Date.now();
+    fetchAllBridges.latestRequestId = requestId;
+
     try {
+      // Prevent queries with uninitialized filters
+      if (!districtId && !structureType && !constructionType) {
+        setTableData([]);
+        setBridgeCount(0);
+        setLoading(false);
+        return;
+      }
+
       const set = (page - 1) * limit;
 
       const url = new URL(`${BASE_URL}/api/bridges`);
       const params = {
         set,
         limit,
-        district: districtId,
-        structureType,
-        constructionType,
-        bridgeName,
-        bridgeLength,
-        age,
-        underFacility,
-        roadClassification,
-        spanLength,
-        inspectionStatus, // New filter parameter
+        district: districtId || "%",
+        structureType: structureType || "%",
+        constructionType: constructionType || "%",
+        bridgeName: bridgeName || "%",
+        bridgeLength: bridgeLength || "%",
+        age: age || "%",
+        underFacility: underFacility || "%",
+        roadClassification: roadClassification || "%",
+        spanLength: spanLength || "%",
+        inspectionStatus: inspectionStatus || "%",
       };
 
       url.search = new URLSearchParams(params).toString();
@@ -110,12 +123,19 @@ const BridgesListDashboard = ({
       if (!response.ok) throw new Error("Failed to fetch bridge data");
 
       const data = await response.json();
-      setTableData(data.bridges || []);
-      setBridgeCount(data.totalCount || 0);
+
+      // Only update state if this is the latest request
+      if (fetchAllBridges.latestRequestId === requestId) {
+        setTableData(data.bridges || []);
+        setBridgeCount(data.totalCount || 0);
+      }
     } catch (error) {
       setError(error.message);
     } finally {
-      setLoading(false);
+      // Only stop loading if this request is latest
+      if (fetchAllBridges.latestRequestId === requestId) {
+        setLoading(false);
+      }
     }
   };
 
@@ -871,7 +891,9 @@ const BridgesListDashboard = ({
                 </Modal.Header>
                 <Modal.Body>
                   {selectedBridge && (
-                    <InspectionListHistory bridgeId={selectedBridge.uu_bms_id} />
+                    <InspectionListHistory
+                      bridgeId={selectedBridge.uu_bms_id}
+                    />
                   )}
                 </Modal.Body>
                 <Modal.Footer>

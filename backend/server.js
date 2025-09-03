@@ -3876,8 +3876,8 @@ app.get("/api/bridges", async (req, res) => {
   }
 });
 
-// Bridges list - Inspected for dashboard main
-app.get("/api/bridgesInspected", async (req, res) => {
+// Bridges list for dashboard main (POST API)
+app.post("/api/bridges", async (req, res) => {
   try {
     const {
       set = 0,
@@ -3887,9 +3887,11 @@ app.get("/api/bridgesInspected", async (req, res) => {
       constructionType = "%",
       roadClassification = "%",
       bridgeName = "%",
-      bridgeLength,
-      spanLength,
-    } = req.query;
+      bridgeLength = "%",
+      spanLength = "%",
+      inspectionStatus = "%",
+      age = "%",
+    } = req.body; // ✅ use body instead of query
 
     let query = `
       SELECT 
@@ -3929,35 +3931,34 @@ app.get("/api/bridgesInspected", async (req, res) => {
         y_centroid, 
         images_spans,
         (COALESCE(span_length_m, 0) * COALESCE(no_of_span, 0)) AS bridge_length,
+        overall_bridge_condition,
         CONCAT(pms_sec_id, ',', structure_no) AS bridge_name,
         ARRAY[image_1, image_2, image_3, image_4, image_5] AS photos,
-        'inspected' AS inspection_status
+        CASE 
+          WHEN EXISTS (
+            SELECT 1 
+            FROM bms.tbl_inspection_f 
+            WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+          ) THEN 'inspected'
+          ELSE 'uninspected'
+        END AS inspection_status
       FROM bms.tbl_bms_master_data
       WHERE 1=1 
-        AND is_active = true
-        AND EXISTS (
-          SELECT 1 
-          FROM bms.tbl_inspection_f 
-          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
-        )
+      AND is_active = true
     `;
 
     let countQuery = `
       SELECT COUNT(*) AS totalCount
       FROM bms.tbl_bms_master_data
       WHERE 1=1
-        AND is_active = true
-        AND EXISTS (
-          SELECT 1 
-          FROM bms.tbl_inspection_f 
-          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
-        )
+      AND is_active = true
     `;
 
     const queryParams = [];
     const countParams = [];
     let paramIndex = 1;
 
+    // --- district filter ---
     if (district !== "%") {
       query += ` AND district_id = $${paramIndex}`;
       countQuery += ` AND district_id = $${paramIndex}`;
@@ -3966,6 +3967,7 @@ app.get("/api/bridgesInspected", async (req, res) => {
       paramIndex++;
     }
 
+    // --- bridge name ---
     if (bridgeName && bridgeName.trim() !== "" && bridgeName !== "%") {
       query += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
       countQuery += ` AND CONCAT(pms_sec_id, ',', structure_no) ILIKE $${paramIndex}`;
@@ -3974,6 +3976,7 @@ app.get("/api/bridgesInspected", async (req, res) => {
       paramIndex++;
     }
 
+    // --- structure type ---
     if (structureType !== "%") {
       query += ` AND structure_type_id = $${paramIndex}`;
       countQuery += ` AND structure_type_id = $${paramIndex}`;
@@ -3982,6 +3985,7 @@ app.get("/api/bridgesInspected", async (req, res) => {
       paramIndex++;
     }
 
+    // --- construction type ---
     if (constructionType !== "%") {
       query += ` AND construction_type_id = $${paramIndex}`;
       countQuery += ` AND construction_type_id = $${paramIndex}`;
@@ -3990,6 +3994,7 @@ app.get("/api/bridgesInspected", async (req, res) => {
       paramIndex++;
     }
 
+    // --- road classification ---
     if (roadClassification !== "%") {
       query += ` AND road_classification_id = $${paramIndex}`;
       countQuery += ` AND road_classification_id = $${paramIndex}`;
@@ -3998,80 +4003,123 @@ app.get("/api/bridgesInspected", async (req, res) => {
       paramIndex++;
     }
 
+    // --- age filter ---
+    if (age !== "%") {
+      const ageExpr = `EXTRACT(YEAR FROM CURRENT_DATE) - CAST(construction_year AS INTEGER)`;
+
+      query += ` AND construction_year IS NOT NULL 
+                 AND construction_year <> '' 
+                 AND construction_year ~ '^[0-9]{4}$'`;
+      countQuery += ` AND construction_year IS NOT NULL 
+                      AND construction_year <> '' 
+                      AND construction_year ~ '^[0-9]{4}$'`;
+
+      if (age === "upto 5 years") {
+        query += ` AND ${ageExpr} <= 5`;
+        countQuery += ` AND ${ageExpr} <= 5`;
+      } else if (age === "6–10 years") {
+        query += ` AND ${ageExpr} BETWEEN 6 AND 10`;
+        countQuery += ` AND ${ageExpr} BETWEEN 6 AND 10`;
+      } else if (age === "11–20 years") {
+        query += ` AND ${ageExpr} BETWEEN 11 AND 20`;
+        countQuery += ` AND ${ageExpr} BETWEEN 11 AND 20`;
+      } else if (age === "21–30 years") {
+        query += ` AND ${ageExpr} BETWEEN 21 AND 30`;
+        countQuery += ` AND ${ageExpr} BETWEEN 21 AND 30`;
+      } else if (age === "30+ years") {
+        query += ` AND ${ageExpr} > 30`;
+        countQuery += ` AND ${ageExpr} > 30`;
+      }
+    }
+
+    // --- bridge length ---
     if (bridgeLength !== "%") {
       const computedField = "(no_of_span * span_length_m)";
 
       if (bridgeLength.startsWith("<")) {
+        const value = parseFloat(bridgeLength.substring(1));
         query += ` AND ${computedField} < $${paramIndex}`;
         countQuery += ` AND ${computedField} < $${paramIndex}`;
-        const value = parseFloat(bridgeLength.substring(1));
         queryParams.push(value);
         countParams.push(value);
         paramIndex++;
       } else if (bridgeLength.includes("-")) {
-        const [min, max] = bridgeLength
-          .split("-")
-          .map((v) => parseFloat(v.trim()));
-        query += ` AND ${computedField} BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
-        countQuery += ` AND ${computedField} BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
+        const [min, max] = bridgeLength.split("-").map((v) => parseFloat(v.trim()));
+        query += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND ${computedField} BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
       } else if (bridgeLength.startsWith(">")) {
+        const value = parseFloat(bridgeLength.substring(1));
         query += ` AND ${computedField} > $${paramIndex}`;
         countQuery += ` AND ${computedField} > $${paramIndex}`;
-        const value = parseFloat(bridgeLength.substring(1));
         queryParams.push(value);
         countParams.push(value);
         paramIndex++;
       } else {
-        // exact match
+        const value = parseFloat(bridgeLength);
         query += ` AND ${computedField} = $${paramIndex}`;
         countQuery += ` AND ${computedField} = $${paramIndex}`;
-        const value = parseFloat(bridgeLength);
         queryParams.push(value);
         countParams.push(value);
         paramIndex++;
       }
     }
 
+    // --- span length ---
     if (spanLength && spanLength !== "%") {
       if (spanLength.startsWith("<")) {
         query += ` AND span_length_m < $${paramIndex}`;
         countQuery += ` AND span_length_m < $${paramIndex}`;
-        const val = parseFloat(spanLength.substring(1));
-        queryParams.push(val);
-        countParams.push(val);
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        countParams.push(parseFloat(spanLength.substring(1)));
         paramIndex++;
       } else if (spanLength.includes("-")) {
-        const [min, max] = spanLength.split("-").map(parseFloat);
-        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
-        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${
-          paramIndex + 1
-        }`;
+        const [min, max] = spanLength.split("-").map((v) => parseFloat(v.trim()));
+        query += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
+        countQuery += ` AND span_length_m BETWEEN $${paramIndex} AND $${paramIndex + 1}`;
         queryParams.push(min, max);
         countParams.push(min, max);
         paramIndex += 2;
       } else if (spanLength.startsWith(">")) {
         query += ` AND span_length_m > $${paramIndex}`;
         countQuery += ` AND span_length_m > $${paramIndex}`;
-        const val = parseFloat(spanLength.substring(1));
-        queryParams.push(val);
-        countParams.push(val);
+        queryParams.push(parseFloat(spanLength.substring(1)));
+        countParams.push(parseFloat(spanLength.substring(1)));
         paramIndex++;
       }
     }
 
-    // Pagination
-    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${
-      paramIndex + 1
-    }`;
+    // --- inspection status ---
+    if (inspectionStatus !== "%") {
+      if (inspectionStatus === "inspected") {
+        query += ` AND EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+        countQuery += ` AND EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+      } else if (inspectionStatus === "uninspected") {
+        query += ` AND NOT EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+        countQuery += ` AND NOT EXISTS (
+          SELECT 1 
+          FROM bms.tbl_inspection_f 
+          WHERE uu_bms_id = bms.tbl_bms_master_data.uu_bms_id
+        )`;
+      }
+    }
+
+    // --- pagination ---
+    query += ` ORDER BY uu_bms_id OFFSET $${paramIndex} LIMIT $${paramIndex + 1}`;
     queryParams.push(parseInt(set, 10), parseInt(limit, 10));
 
     const result = await pool.query(query, queryParams);
