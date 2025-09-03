@@ -836,6 +836,7 @@ const BridgesListDashboard = ({
                       damageCounts={damageCounts}
                       loadingWorkKinds={loadingWorkKinds}
                       loadingDamageCounts={loadingDamageCounts}
+                      bridgeId={selectedBridge.uu_bms_id}
                       error={error}
                     />
                   )}
