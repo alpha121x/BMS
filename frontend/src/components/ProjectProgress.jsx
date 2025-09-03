@@ -21,31 +21,30 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     fetchProjectData();
   }, [districtId, bridgeName, structureType]);
 
-  const fetchProjectData = async () => {
+const fetchProjectData = async () => {
   setLoading(true);
   setError(null);
 
   try {
-    // Payload for POST
     const payload = {
       districtId: districtId || "%",
       bridgeName: bridgeName || "%",
       structureType: structureType || "%",
     };
 
-    // 1️⃣ Fetch bridge status summary (POST)
-    const bridgeResponse = await fetch(
-      `${BASE_URL}/api/bridge-status-summary`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
-    );
-    if (!bridgeResponse.ok) throw new Error("Failed to fetch bridge data");
-    const bridgeData = await bridgeResponse.json();
+    // 1️⃣ Bridge status summary
+    const bridgeResponse = await fetch(`${BASE_URL}/api/bridge-status-summary`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-    // 2️⃣ Fetch unapproved inspections (consultant) - GET
+    let bridgeData = [];
+    if (bridgeResponse.ok) {
+      bridgeData = await bridgeResponse.json();
+    }
+
+    // 2️⃣ Consultant inspections
     const consultantParams = new URLSearchParams();
     if (districtId) consultantParams.append("district", districtId);
     if (bridgeName) consultantParams.append("bridge", bridgeName);
@@ -58,7 +57,7 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       ? await consultantResponse.json()
       : { data: [] };
 
-    // 3️⃣ Fetch unapproved inspections (RAMS) - GET
+    // 3️⃣ RAMS inspections
     const ramsResponse = await fetch(
       `${BASE_URL}/api/inspections-unapproved-rams?${consultantParams.toString()}`
     );
@@ -66,11 +65,8 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
       ? await ramsResponse.json()
       : { data: [] };
 
-      console.log("Consultant Unapproved Data:", consultantData);
-      console.log("RAMS Unapproved Data:", ramsData);
-
     // 🔄 Combine and process data
-    const combinedData = bridgeData.map((bridge) => {
+    const combinedData = (bridgeData || []).map((bridge) => {
       const consultantUnapproved =
         consultantData.data?.filter(
           (item) => item.uu_bms_id === bridge.uu_bms_id
@@ -98,14 +94,12 @@ const ProjectProgress = ({ districtId, bridgeName, structureType }) => {
     });
 
     setProjectData(combinedData);
-    console.log("Project Data:", combinedData);
   } catch (err) {
     setError(err.message);
   } finally {
     setLoading(false);
   }
 };
-
 
   const handleCellClick = async (type, bridge) => {
     setModalLoading(true);
