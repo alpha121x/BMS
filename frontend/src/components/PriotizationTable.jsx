@@ -22,7 +22,6 @@ import PriortizationModal from "./PriortizationModal";
 import { useNavigate } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 
-
 // Utility function to convert Excel serial date to human-readable date
 const excelSerialToDate = (serial) => {
   if (!serial || isNaN(serial)) return "Invalid Date";
@@ -83,7 +82,7 @@ const PrioritizationTable = ({ districtId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const tableRef = useRef(null);
   const chartRef = useRef(null);
-    const navigate = useNavigate(); // Must be inside a component
+  const navigate = useNavigate(); // Must be inside a component
 
   // DataTable columns configuration
   const columns = [
@@ -454,18 +453,18 @@ const PrioritizationTable = ({ districtId }) => {
 
   // Filter data based on search term
   const filteredData = filteredBridgeDetails()
-        .filter((row) => {
-          const searchLower = searchTerm.toLowerCase();
-          return (
-            (row.district || "").toLowerCase().includes(searchLower) ||
-            (row.roadName || "").toLowerCase().includes(searchLower) ||
-            (row.structureType || "").toLowerCase().includes(searchLower) ||
-            (row.name || "").toLowerCase().includes(searchLower) ||
-            (row.dateTime || "").toLowerCase().includes(searchLower) ||
-            (row.score || "").toString().toLowerCase().includes(searchLower)
-          );
-        })
-  .sort((a, b) => b.score - a.score); // Sort by score descending
+    .filter((row) => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        (row.district || "").toLowerCase().includes(searchLower) ||
+        (row.roadName || "").toLowerCase().includes(searchLower) ||
+        (row.structureType || "").toLowerCase().includes(searchLower) ||
+        (row.name || "").toLowerCase().includes(searchLower) ||
+        (row.dateTime || "").toLowerCase().includes(searchLower) ||
+        (row.score || "").toString().toLowerCase().includes(searchLower)
+      );
+    })
+    .sort((a, b) => b.score - a.score); // Sort by score descending
 
   // Define group metadata
   const groupMetadata = {
@@ -624,7 +623,7 @@ const PrioritizationTable = ({ districtId }) => {
           </Col>
         </Row>
 
-         <PriortizationModal
+        <PriortizationModal
           showModal={showModal}
           setShowModal={setShowModal}
           selectedTitle={selectedTitle}
@@ -702,7 +701,9 @@ const PrioritizationTable = ({ districtId }) => {
                       />
                     </>
                   )}
-                  {activeTab === "map" && <PrioritizationMap districtId={districtId} />}
+                  {activeTab === "map" && (
+                    <PrioritizationMap districtId={districtId} />
+                  )}
                 </div>
               </div>
             </Col>
