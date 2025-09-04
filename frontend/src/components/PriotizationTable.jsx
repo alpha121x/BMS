@@ -462,10 +462,17 @@ const PrioritizationTable = ({ districtId }) => {
   };
 
   const filteredBridgeDetails = () => {
+    // 🔹 If no category selected → return ALL bridges
+    if (!selectedCategory) {
+      return Object.values(bridgeDetails).flat();
+    }
+
+    // 🔹 If a category is selected → return filtered bridges
     const selectedRow = bridgeScoreData.find(
       (row) => row.category === selectedCategory
     );
     if (!selectedRow) return [];
+
     const groups = [
       "Critical Structures",
       "High-Value Structures",
@@ -473,6 +480,7 @@ const PrioritizationTable = ({ districtId }) => {
       "Basic Structures",
     ];
     const details = [];
+
     groups.forEach((group) => {
       if (selectedRow[group] !== "N.A") {
         const groupDetails = bridgeDetails[group] || [];
@@ -482,6 +490,7 @@ const PrioritizationTable = ({ districtId }) => {
         details.push(...filteredDetails);
       }
     });
+
     return details;
   };
 
