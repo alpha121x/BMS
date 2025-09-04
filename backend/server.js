@@ -8240,7 +8240,7 @@ app.get("/api/bridge-length-construction-types", async (req, res) => {
     const query = `
       SELECT
         CASE
-          WHEN construction_type IN (
+          WHEN construction_type_corrected IN (
             'Concrete Deck Slab',
             'Concrete I-Girder',
             'Concrete Box Girder',
@@ -8248,7 +8248,7 @@ app.get("/api/bridge-length-construction-types", async (req, res) => {
             'Steel Girder',
             'Arch Structure'
           )
-          THEN construction_type
+          THEN construction_type_corrected
           ELSE 'Others'
         END AS major_type,
         CASE
@@ -8261,7 +8261,7 @@ app.get("/api/bridge-length-construction-types", async (req, res) => {
         END AS length_range,
         COUNT(*) AS count
       FROM bms.tbl_bms_master_data
-      WHERE construction_type IS NOT NULL
+      WHERE construction_type_corrected IS NOT NULL
       AND is_active = true
       GROUP BY major_type, length_range
       ORDER BY major_type, length_range;
