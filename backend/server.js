@@ -7579,6 +7579,8 @@ app.get("/api/detailed-damage-counts", async (req, res) => {
       WHERE f."WorkKindName" ILIKE $1
         AND f."DamageLevel" ILIKE $2
         AND f.uu_bms_id = $3
+        AND f.is_latest = true
+        AND m.is_active = true
     `;
 
     const values = [`%${workKind}%`, `%${damageLevel}%`, bridgeId];
