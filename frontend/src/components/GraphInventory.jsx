@@ -8,6 +8,19 @@ const Graph = () => {
   const constructionTypesOptions = {
     chart: { type: "pie" },
     title: { text: "Construction Types" },
+    tooltip: {
+      pointFormat: "{series.name}: <b>{point.y}</b>", // 👈 shows on hover
+    },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "{point.name}: {point.y}", // 👈 name + count always visible
+        },
+      },
+    },
     series: [
       {
         name: "Count",
@@ -34,33 +47,45 @@ const Graph = () => {
     series: [{ name: "Count", data: [] }],
   });
 
-useEffect(() => {
-  fetch(`${BASE_URL}/api/structure-counts`)
-    .then((res) => res.json())
-    .then((data) => {
-      const colorMap = {
-        CULVERT: "#19FB8B",
-        BRIDGE: "#6D68DE",
-        UNDERPASS: "#FE8F67",
-      };
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/structure-counts`)
+      .then((res) => res.json())
+      .then((data) => {
+        const colorMap = {
+          CULVERT: "#19FB8B",
+          BRIDGE: "#6D68DE",
+          UNDERPASS: "#FE8F67",
+        };
 
-      const formattedData = data.structureTypeCounts.map((item) => ({
-        name: item.structure_type, // ✅ show as it is
-        y: parseInt(item.count),
-        color: colorMap[item.structure_type] || "#999999",
-      }));
+        const formattedData = data.structureTypeCounts.map((item) => ({
+          name: item.structure_type, // ✅ show as it is
+          y: parseInt(item.count),
+          color: colorMap[item.structure_type] || "#999999",
+        }));
 
-      setStructureTypesOptions({
-        chart: { type: "pie" },
-        title: { text: "Type of Structures" },
-        series: [{ name: "Count", data: formattedData }],
-      });
-    })
-    .catch((error) =>
-      console.error("Error fetching structure types:", error)
-    );
-}, []);
-
+        setStructureTypesOptions({
+          chart: { type: "pie" },
+          title: { text: "Type of Structures" },
+          tooltip: {
+            pointFormat: "{series.name}: <b>{point.y}</b>", // still shows on hover
+          },
+          plotOptions: {
+            pie: {
+              allowPointSelect: true,
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.name}: {point.y}", // 👈 show name + count on chart
+              },
+            },
+          },
+          series: [{ name: "Count", data: formattedData }],
+        });
+      })
+      .catch((error) =>
+        console.error("Error fetching structure types:", error)
+      );
+  }, []);
 
   // ------------------- Crossing Types (API) -------------------
   const [crossingTypesOptions, setCrossingTypesOptions] = useState({
@@ -95,6 +120,28 @@ useEffect(() => {
         setCrossingTypesOptions({
           chart: { type: "pie" },
           title: { text: "Under Bridge Situation" },
+          tooltip: {
+            pointFormat: "{series.name}: <b>{point.y}</b>", // hover shows count
+          },
+          plotOptions: {
+            pie: {
+              allowPointSelect: true,
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.name}: {point.y}", // show name + count on chart
+              },
+              // optional: modal click handler
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedStructure(this.name);
+                    setShowModal(true);
+                  },
+                },
+              },
+            },
+          },
           series: [{ name: "Factor Value", data: formattedData }],
         });
       })
@@ -134,6 +181,28 @@ useEffect(() => {
         setRoadClassificationOptions({
           chart: { type: "pie" },
           title: { text: "Road Type Structures" },
+          tooltip: {
+            pointFormat: "{series.name}: <b>{point.y}</b>", // hover shows count
+          },
+          plotOptions: {
+            pie: {
+              allowPointSelect: true,
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.name}: {point.y}", // show name + count on chart
+              },
+              // optional: modal click handler
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedStructure(this.name);
+                    setShowModal(true);
+                  },
+                },
+              },
+            },
+          },
           series: [{ name: "Count", data: formattedData }],
         });
       })
@@ -142,38 +211,38 @@ useEffect(() => {
       );
   }, []);
 
-  // ------------------- Bridge Length (Static) -------------------
-  const bridgeLengthOptions = {
-    chart: { type: "bar", height: 400 },
-    title: { text: "Bridge Length Of Structure M" },
-    xAxis: {
-      categories: ["L <= 6", "6m < L≤ 30m", "30m < L≤ 60m", "L < 60m"],
-      title: { text: "Bridge Length" },
-    },
-    yAxis: {
-      min: 0,
-      max: 19000,
-      title: { text: "Construction Types" },
-    },
-    plotOptions: { series: { stacking: "normal" } },
-    series: [
-      { name: "Others", data: [43, 5, 1, 2], color: "#008000" },
-      { name: "Steel Girder", data: [0, 5, 1, 4], color: "#0000FF" },
-      {
-        name: "Culverts (box and pipe)",
-        data: [723, 26, 3, 0],
-        color: "#FFA500",
-      },
-      { name: "Concrete I-Girder", data: [39, 271, 62, 86], color: "#FFFF00" },
-      {
-        name: "Concrete Deck Slab",
-        data: [16330, 668, 52, 28],
-        color: "#FF7F7F",
-      },
-      { name: "Concrete Box Girder", data: [0, 1, 0, 1], color: "#E6E6FA" },
-      { name: "Arch Structure", data: [14, 12, 2, 3], color: "#808080" },
-    ],
-  };
+  // // ------------------- Bridge Length (Static) -------------------
+  // const bridgeLengthOptions = {
+  //   chart: { type: "bar", height: 400 },
+  //   title: { text: "Bridge Length Of Structure M" },
+  //   xAxis: {
+  //     categories: ["L <= 6", "6m < L≤ 30m", "30m < L≤ 60m", "L < 60m"],
+  //     title: { text: "Bridge Length" },
+  //   },
+  //   yAxis: {
+  //     min: 0,
+  //     max: 19000,
+  //     title: { text: "Construction Types" },
+  //   },
+  //   plotOptions: { series: { stacking: "normal" } },
+  //   series: [
+  //     { name: "Others", data: [43, 5, 1, 2], color: "#008000" },
+  //     { name: "Steel Girder", data: [0, 5, 1, 4], color: "#0000FF" },
+  //     {
+  //       name: "Culverts (box and pipe)",
+  //       data: [723, 26, 3, 0],
+  //       color: "#FFA500",
+  //     },
+  //     { name: "Concrete I-Girder", data: [39, 271, 62, 86], color: "#FFFF00" },
+  //     {
+  //       name: "Concrete Deck Slab",
+  //       data: [16330, 668, 52, 28],
+  //       color: "#FF7F7F",
+  //     },
+  //     { name: "Concrete Box Girder", data: [0, 1, 0, 1], color: "#E6E6FA" },
+  //     { name: "Arch Structure", data: [14, 12, 2, 3], color: "#808080" },
+  //   ],
+  // };
 
   // ------------------- Span Length Distribution (API) -------------------
   const [spanLengthOptions, setSpanLengthOptions] = useState({
@@ -186,67 +255,183 @@ useEffect(() => {
     fetch(`${BASE_URL}/api/span-length-structures`)
       .then((res) => res.json())
       .then((data) => {
-        setSpanLengthOptions((prev) => ({
-          ...prev,
-          series: [{ name: "Count", data }],
-        }));
+      setSpanLengthOptions((prev) => ({
+  ...prev,
+  tooltip: {
+    pointFormat: "{series.name}: <b>{point.y}</b>",
+  },
+  plotOptions: {
+    pie: {
+      allowPointSelect: true,
+      cursor: "pointer",
+      dataLabels: {
+        enabled: true,
+        format: "{point.name}: {point.y}",
+      },
+      point: {
+        events: {
+          click: function () {
+            setSelectedStructure(this.name);
+            setShowModal(true);
+          },
+        },
+      },
+    },
+  },
+  series: [{ name: "Count", data }],
+}));
+
       })
       .catch(console.error);
   }, []);
 
-// ------------------- Bridge Ages (Vertical Column Chart) -------------------
-const [bridgeAgesOptions, setBridgeAgesOptions] = useState({
-  chart: { type: "column" }, // vertical bars
-  title: { text: "Bridge Ages" },
+  // ------------------- Bridge Ages (Vertical Column Chart) -------------------
+  const [bridgeAgesOptions, setBridgeAgesOptions] = useState({
+    chart: { type: "column" }, // vertical bars
+    title: { text: "Bridge Ages" },
+    xAxis: {
+      categories: [],
+      title: { text: "Age Groups" },
+    },
+    yAxis: {
+      min: 0,
+      title: { text: "Number of Bridges" },
+    },
+    series: [{ name: "Count", data: [] }],
+  });
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/bridge-ages`)
+      .then((res) => res.json())
+      .then((data) => {
+       setBridgeAgesOptions((prev) => ({
+  ...prev,
+  tooltip: {
+    pointFormat: "{series.name}: <b>{point.y}</b>",
+  },
   xAxis: {
-    categories: [],
-    title: { text: "Age Groups" }
+    ...prev.xAxis,
+    categories: data.map((item) => item.name),
   },
-  yAxis: {
-    min: 0,
-    title: { text: "Number of Bridges" }
-  },
-  series: [{ name: "Count", data: [] }],
-});
-
-useEffect(() => {
-  fetch(`${BASE_URL}/api/bridge-ages`)
-    .then((res) => res.json())
-    .then((data) => {
-      setBridgeAgesOptions((prev) => ({
-        ...prev,
-        xAxis: {
-          ...prev.xAxis,
-          categories: data.map(item => item.name), // Age group names
+  series: [
+    {
+      name: "Count",
+      data: data.map((item) => item.y),
+    },
+  ],
+  plotOptions: {
+    column: {
+      cursor: "pointer",
+      dataLabels: {
+        enabled: true,
+        format: "{point.y}", // show count above bars
+      },
+      point: {
+        events: {
+          click: function () {
+            setSelectedStructure(this.category); // e.g. "0–10 years"
+            setShowModal(true);
+          },
         },
-        series: [{
-          name: "Count",
-          data: data.map(item => item.y), // Counts only
-        }],
-      }));
-    })
-    .catch(console.error);
-}, []);
+      },
+    },
+  },
+}));
 
-// ------------------- Bridge Inspection & Evaluation Status (API) -------------------
-const [bridgeStatusOptions, setBridgeStatusOptions] = useState({
-  chart: { type: "pie" },
-  title: { text: "Stuructures Status" },
-  series: [{ name: "Count", data: [] }],
-});
+      })
+      .catch(console.error);
+  }, []);
 
-useEffect(() => {
-  fetch(`${BASE_URL}/api/bridge-status`)
+  // ------------------- Bridge Inspection & Evaluation Status (API) -------------------
+  const [bridgeStatusOptions, setBridgeStatusOptions] = useState({
+    chart: { type: "pie" },
+    title: { text: "Stuructures Status" },
+    series: [{ name: "Count", data: [] }],
+  });
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/bridge-status`)
+      .then((res) => res.json())
+      .then((data) => {
+       setBridgeStatusOptions((prev) => ({
+  ...prev,
+  tooltip: {
+    pointFormat: "{series.name}: <b>{point.y}</b>",
+  },
+  plotOptions: {
+    pie: {
+      allowPointSelect: true,
+      cursor: "pointer",
+      dataLabels: {
+        enabled: true,
+        format: "{point.name}: {point.y}",
+      },
+      point: {
+        events: {
+          click: function () {
+            setSelectedStructure(this.name);
+            setShowModal(true);
+          },
+        },
+      },
+    },
+  },
+  series: [{ name: "Count", data }],
+}));
+
+      })
+      .catch(console.error);
+  }, []);
+
+
+  // -------------------- Bridge Length / CONSTRUCTION TYPES (Bar Chart) --------------------
+  const [bridgeLengthOptions, setBridgeLengthOptions] = useState({
+    chart: { type: "bar", height: 400 },
+    title: { text: "Bridge Length Of Structure M" },
+    xAxis: { categories: [], title: { text: "Bridge Length" } },
+    yAxis: { min: 0, title: { text: "Construction Types" } },
+    legend: { reversed: false },
+    plotOptions: { series: { stacking: "normal" } },
+    series: [],
+  });
+
+
+  useEffect(() => {
+  fetch(`${BASE_URL}/api/bridge-length-construction-types`)
     .then((res) => res.json())
     .then((data) => {
-      setBridgeStatusOptions((prev) => ({
-        ...prev,
-        series: [{ name: "Count", data }]
-      }));
-    })
-    .catch(console.error);
-}, []);
+      const categories = [
+        "Less than 6 m",
+        "6 to 10 m",
+        "10 to 15 m",
+        "15 to 20 m",
+        "20 to 35 m",
+        "Greater than 35 m"
+      ];
 
+      const constructionTypes = [...new Set(data.map(item => item.major_type))];
+
+      const series = constructionTypes.map(type => ({
+        name: type,
+        data: categories.map(range => {
+          const match = data.find(d => d.major_type === type && d.length_range === range);
+          return match ? match.count : 0;
+        })
+      }));
+
+      setBridgeLengthOptions({
+        chart: { type: "bar" },
+        title: { text: "Bridge Length Of Structure M" },
+        xAxis: { categories, title: { text: "Bridge Length" } },
+        yAxis: { min: 0, title: { text: "Construction Types" } },
+        legend: { reversed: false },
+        plotOptions: {
+          series: { stacking: "normal" }
+        },
+        series
+      });
+    });
+}, []);
 
 
   return (
@@ -339,15 +524,11 @@ useEffect(() => {
 
         {/* Bridge Inspection & Evaluation Status Pie Chart */}
         <div
-        style={{
-          flex: "1 1 calc(33.33% - 20px)",
-          minWidth: "280px",
-          height: "400px",
-          }}
+          style={{ width: "90%", marginBottom: "40px" }}
         >
           <HighchartsReact
-          highcharts={Highcharts}
-          options={bridgeStatusOptions}
+            highcharts={Highcharts}
+            options={bridgeStatusOptions}
           />
         </div>
 
@@ -362,10 +543,10 @@ useEffect(() => {
         {/* Bridge Ages Bar Chart */}
         <div style={{ width: "90%", marginBottom: "40px" }}>
           <HighchartsReact
-          highcharts={Highcharts}
-          options={bridgeAgesOptions}
+            highcharts={Highcharts}
+            options={bridgeAgesOptions}
           />
-          </div>
+        </div>
       </div>
     </div>
   );
