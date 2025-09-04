@@ -4,16 +4,6 @@ import HighchartsReact from "highcharts-react-official";
 import { BASE_URL } from "./config";
 
 const Graph = () => {
-  // color map for construction types in bar chart //
-  const colorMap = {
-    Others: "#008000", // Green
-    "Steel Girder": "#0000FF", // Blue
-    "Culverts (box and pipe)": "#FFA500", // Orange
-    "Concrete I-Girder": "#FFFF00", // Yellow
-    "Concrete Deck Slab": "#FF7F7F", // Red-ish
-    "Concrete Box Girder": "#E6E6FA", // Lavender
-    "Arch Structure": "#808080", // Grey
-  };
 
   // ------------------- Construction Types (Static) -------------------
   const constructionTypesOptions = {
