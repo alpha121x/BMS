@@ -401,6 +401,46 @@ const PrioritizationTable = ({ districtId }) => {
     document.body.removeChild(link);
   };
 
+  const handleDownloadTableCSV = () => {
+  if (!filteredData.length) {
+    console.warn("No data available for CSV export.");
+    return;
+  }
+
+  // Skip "Bridge Information" column
+  const exportableColumns = columns.filter(
+    (col) => col.name !== "Bridge Information"
+  );
+
+  // Build CSV header
+  const headers = exportableColumns.map((col) => col.name).join(",");
+
+  // Build CSV rows
+  const rows = filteredData.map((row) =>
+    exportableColumns
+      .map((col) =>
+        typeof col.selector === "function"
+          ? `"${col.selector(row) ?? ""}"`
+          : ""
+      )
+      .join(",")
+  );
+
+  // Combine
+  const csvContent =
+    "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+
+  // Download
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", "Bridge_Details.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+
   const handleTabClick = (category) => {
     setSelectedCategory(category);
     setActiveTab("table");
@@ -659,8 +699,18 @@ const PrioritizationTable = ({ districtId }) => {
                     >
                       Map
                     </Button>
+
+                    {/* ✅ Custom CSV Export Button */}
+                    <Button
+                      variant="success"
+                      onClick={handleDownloadTableCSV}
+                      className="mx-1"
+                    >
+                      Export CSV
+                    </Button>
                   </div>
                 </div>
+
                 <div className="card-body p-0">
                   {activeTab === "table" && (
                     <>
