@@ -257,70 +257,68 @@ const Graph = () => {
       });
   }, []);
 
-  const bridgeLengthOptions = {
-    chart: {
-      type: "bar",
-      height: 400,
-    },
-    title: {
-      text: "Bridge Length Of Structure M",
-    },
-    xAxis: {
-      categories: ["L <= 6", "6m < L≤ 30m", "30m < L≤ 60m", "L < 60m"],
-      title: {
-        text: "Bridge Length",
-      },
-    },
-    yAxis: {
-      min: 0,
-      title: {
-        text: "Construction Types",
-      },
-      max: 19000,
-    },
-    plotOptions: {
-      series: {
-        stacking: "normal",
-      },
-    },
-    series: [
-      {
-        name: "Others",
-        data: [43, 5, 1, 2],
-        color: "#008000",
-      },
-      {
-        name: "Steel Girder",
-        data: [0, 5, 1, 4],
-        color: "#0000FF",
-      },
-      {
-        name: "Culverts (box and pipe)",
-        data: [723, 26, 3, 0],
-        color: "#FFA500",
-      },
-      {
-        name: "Concrete I-Girder",
-        data: [39, 271, 62, 86],
-        color: "#FFFF00",
-      },
-      {
-        name: "Concrete Deck Slab",
-        data: [16330, 668, 52, 28],
-        color: "#FF7F7F",
-      },
-      {
-        name: "Concrete Box Girder",
-        data: [0, 1, 0, 1],
-        color: "#E6E6FA",
-      },
-      {
-        name: "Arch Structure",
-        data: [14, 12, 2, 3],
-        color: "#808080",
-      },
-    ],
-  };
+    // -------------------- Bridge Length / CONSTRUCTION TYPES (Bar Chart) -------------------- //
+  const [bridgeLengthOptions, setBridgeLengthOptions] = useState({
+    chart: { type: "bar", height: 400 },
+    title: { text: "Bridge Length Of Structure M" },
+    xAxis: { categories: [], title: { text: "Bridge Length" } },
+    yAxis: { min: 0, title: { text: "Construction Types" } },
+    legend: { reversed: false },
+    plotOptions: { series: { stacking: "normal" } },
+    series: [],
+  });
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/bridge-length-construction-types-inspected`) // Replace with your actual API
+      .then((res) => res.json())
+      .then((data) => {
+        const categories = [
+          "Less than 6 m",
+          "6 to 10 m",
+          "10 to 15 m",
+          "15 to 20 m",
+          "20 to 35 m",
+          "Greater than 35 m",
+        ];
+
+        const constructionTypes = [
+          ...new Set(data.map((item) => item.major_type)),
+        ];
+
+        const colorMap = {
+          Others: "#008000",
+          "Steel Girder": "#0000FF",
+          "Culverts (box and pipe)": "#FFA500",
+          "Concrete I-Girder": "#FFFF00",
+          "Concrete Deck Slab": "#FF7F7F",
+          "Concrete Box Girder": "#E6E6FA",
+          "Arch Structure": "#808080",
+        };
+
+        const series = constructionTypes.map((type) => ({
+          name: type,
+          data: categories.map((range) => {
+            const match = data.find(
+              (d) => d.major_type === type && d.length_range === range
+            );
+            return match ? match.count : 0;
+          }),
+          color: colorMap[type] || "#999999",
+        }));
+
+        setBridgeLengthOptions({
+          chart: { type: "bar", height: 400 },
+          title: { text: "Bridge Length Of Structure M" },
+          xAxis: { categories, title: { text: "Bridge Length" } },
+          yAxis: { min: 0, title: { text: "Construction Types" } },
+          legend: { reversed: false },
+          plotOptions: {
+            series: { stacking: "normal" },
+          },
+          series,
+        });
+      });
+  }, []);
 
   return (
     <div className="bg-white border-1 p-0 rounded-0 shadow-md" style={{border: "1px solid #005D7F"}}>

@@ -8283,6 +8283,58 @@ app.get("/api/bridge-length-construction-types", async (req, res) => {
   }
 });
 
+app.get("/api/bridge-length-construction-types-inspected", async (req, res) => {
+  try {
+    const query = `
+      SELECT
+        CASE
+          WHEN m.construction_type_corrected IN (
+            'Concrete Deck Slab',
+            'Concrete I-Girder',
+            'Concrete Box Girder',
+            'Culverts (box and pipe)',
+            'Steel Girder',
+            'Arch Structure'
+          )
+          THEN m.construction_type_corrected
+          ELSE 'Others'
+        END AS major_type,
+        CASE
+          WHEN (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) < 6 THEN 'Less than 6 m'
+          WHEN (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) BETWEEN 6 AND 10 THEN '6 to 10 m'
+          WHEN (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) BETWEEN 10 AND 15 THEN '10 to 15 m'
+          WHEN (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) BETWEEN 15 AND 20 THEN '15 to 20 m'
+          WHEN (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) BETWEEN 20 AND 35 THEN '20 to 35 m'
+          ELSE 'Greater than 35 m'
+        END AS length_range,
+        COUNT(*) AS count
+      FROM bms.tbl_bms_master_data m
+      WHERE m.construction_type_corrected IS NOT NULL
+        AND m.is_active = true
+        AND m.uu_bms_id IN (
+          SELECT DISTINCT uu_bms_id
+          FROM bms.tbl_inspection_f
+        )
+      GROUP BY major_type, length_range
+      ORDER BY major_type, length_range;
+    `;
+
+    const result = await pool.query(query);
+
+    const data = result.rows.map(row => ({
+      major_type: row.major_type,
+      length_range: row.length_range,
+      count: parseInt(row.count, 10),
+    }));
+
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching inspected bridge length data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 // api for road type structures chart
 app.get("/api/road-types-structures", async (req, res) => {
   try {
