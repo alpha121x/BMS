@@ -9,6 +9,7 @@ import InspectionListInsStruc from "./InspectionListInsStruc";
 const BridgeInfoInspected = () => {
   const { state } = useLocation();
   const bridgeData = state?.bridge;
+  const navigate = useNavigate();
   
 
   useEffect(() => {

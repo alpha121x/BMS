@@ -9,6 +9,7 @@ import InspectionListDashboard from "./InspectionListDashboard";
 const BridgeInfoDashboard = () => {
   const { state } = useLocation();
   const bridgeData = state?.bridge;
+  const navigate = useNavigate();
   
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const BridgeInfoDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen mt-5">
       <div className="mb-1">
         <Header />
       </div>
