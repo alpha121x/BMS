@@ -5840,8 +5840,7 @@ app.post("/api/update-inspection-status/:inspectionId",
     try {
       // Store file paths instead of base64
       const images = files.map((file) => ({
-        filename: file.originalname,
-        path: `/RepairPics/${file.filename}`, // relative path for frontend
+        path: `http://cnw.urbanunit.gov.pk/RAMS-IMAGES2/BMS2024/RepairPics/${file.filename}`, // relative path for frontend
       }));
 
       const query = `
