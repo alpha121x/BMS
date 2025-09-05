@@ -4,6 +4,7 @@ const cors = require("cors");
 const { Pool } = require("pg");
 const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 require("dotenv").config();
 
 const JWT_SECRET = "123456789";
@@ -32,6 +33,25 @@ const pool = new Pool({
 // Path to log file
 const logFile = path.join(__dirname, "query.log");
 
+// Ensure folder exists
+const uploadDir = path.join(process.cwd(), "RepairPics");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// Configure Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir); // save to RepairPics folder
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({ storage });
+
 function logQuery(message) {
   const logMsg = `[${new Date().toISOString()}] ${message}\n`;
   fs.appendFileSync(logFile, logMsg, "utf8");
@@ -45,6 +65,10 @@ pool
     client.release();
   })
   .catch((err) => console.error("Database connection error:", err.stack));
+
+
+ app.use("/RepairPics", express.static(path.join(process.cwd(), "RepairPics")));
+ 
 
 // Login API Endpoint
 app.post("/api/login", async (req, res) => {
@@ -5702,6 +5726,149 @@ app.get("/api/inspections", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
+// inspections for table dashboard damages repairs
+app.get("/api/inspections-damages-repairs", async (req, res) => {
+  try {
+    let { district, bridge } = req.query;
+
+    // Build the base query without ORDER BY
+    let query = `
+      SELECT 
+        bmd."pms_sec_id", 
+        bmd."structure_no",
+        CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
+        ins.inspection_id,
+        ins."SpanIndex",
+        ins."district_id", 
+        ins."WorkKindName", 
+        ins."PartsName", 
+        ins."MaterialName", 
+        ins."DamageKindName", 
+        ins."DamageLevel", 
+        ins."damage_extent",  
+        ins."current_date_time",  
+        ins."Remarks", 
+        ins.inspection_images AS "PhotoPaths"
+      FROM bms.tbl_inspection_f AS ins
+      JOIN bms.tbl_bms_master_data AS bmd 
+        ON ins."uu_bms_id" = bmd."uu_bms_id"
+      WHERE 1=1
+      AND ins."DamageLevelID" IN (3, 4, 5) 
+    AND (
+        ins.surveyed_by = 'RAMS-PITB' 
+        OR 
+        (ins.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+    ) 
+    `;
+
+    const queryParams = [];
+    let paramIndex = 1;
+
+    if (district && !isNaN(parseInt(district))) {
+      query += ` AND ins."district_id" = $${paramIndex}`;
+      queryParams.push(parseInt(district));
+      paramIndex++;
+    }
+
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
+      paramIndex++;
+    }
+
+    // Append ORDER BY clause after dynamic filters
+    query += ` ORDER BY inspection_id DESC;`;
+
+    const result = await pool.query(query, queryParams);
+
+    // Process PhotoPaths to extract image URLs
+    const processedData = result.rows.map((row) => {
+      let extractedPhotoPaths = [];
+
+      try {
+        if (row.PhotoPaths) {
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            // Case 1: Array of objects with "path" keys
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            // Case 2: Nested object with image paths
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return {
+        ...row,
+        PhotoPaths: extractedPhotoPaths, // Store extracted paths as a flat array
+      };
+    });
+
+    res.json({ success: true, data: processedData });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// api to update dmages repair inspection status with image uploads
+app.post("/api/update-inspection-status/:inspectionId",
+  upload.array("images", 4),
+  async (req, res) => {
+    const { inspectionId } = req.params;
+    const { remarks, isRepaired } = req.body;
+    const files = req.files;
+
+    try {
+      // Store file paths instead of base64
+      const images = files.map((file) => ({
+        filename: file.originalname,
+        path: `/RepairPics/${file.filename}`, // relative path for frontend
+      }));
+
+      const query = `
+        UPDATE bms.tbl_inspection_f
+        SET repair_remarks = $1,
+            is_repaired = $2,
+            repair_images = COALESCE(repair_images, '[]'::jsonb) || $3::jsonb
+        WHERE inspection_id = $4
+        RETURNING *;
+      `;
+
+      const values = [
+        remarks,
+        isRepaired === "true",
+        JSON.stringify(images),
+        inspectionId,
+      ];
+
+      const result = await pool.query(query, values);
+
+      res.json({ success: true, inspection: result.rows[0] });
+    } catch (err) {
+      console.error("Error updating inspection status:", err);
+      res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  }
+);
 
 // bridge-status-summary for RAMS evaluation module
 app.get("/api/bridge-status-summary-rams", async (req, res) => {

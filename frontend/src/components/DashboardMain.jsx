@@ -14,6 +14,7 @@ import BridgeStatusSummaryDashboard from "./BridgeStatusSummaryDashboard"; // Im
 import FiveYearPlan from "./FiveYearPlan"; // Import the new component
 import InspectedStructures from "./InspectedStructures";
 import Rates from "./Rates"; // Import the new component
+import DamagesRepairs from "./DamagesRepairs"; // Import the new component
 
 // helper: get districtId from sessionStorage token
 const getInitialDistrictId = () => {
@@ -408,6 +409,16 @@ const DashboardMain = () => {
               >
                 Five Year Plan
               </button>
+              <button
+                onClick={() => setActiveView("damages_repairs")}
+                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                  activeView === "damages_repairs"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                }`}
+              >
+                Damages & Repairs
+              </button>
             </div>
 
             {/* Content Container */}
@@ -486,6 +497,7 @@ const DashboardMain = () => {
                   setInspectionStatus={setInspectionStatus}
                 />
               )}
+              {activeView === "damages_repairs" && <DamagesRepairs />}
             </div>
           </div>
         </div>
