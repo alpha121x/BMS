@@ -67,7 +67,7 @@ pool
   .catch((err) => console.error("Database connection error:", err.stack));
 
 
- app.use("/RepairPics", express.static(path.join(process.cwd(), "RepairPics")));
+//  app.use("/RepairPics", express.static(path.join(process.cwd(), "RepairPics")));
  
 
 // Login API Endpoint
