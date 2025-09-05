@@ -161,6 +161,15 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
       >
         <div className="flex items-center justify-between">
           <h5 className="mb-0">Damages Records</h5>
+           <h5 className="mb-0" id="structure-heading">
+              Count:
+              <span
+                className="badge text-white ms-2"
+                style={{ background: "#009CB8" }}
+              >
+                <h6 className="mb-0">{tableData.length || 0}</h6>
+              </span>
+            </h5>
           <div className="flex items-center gap-1">
             <button
               className="btn text-white"
