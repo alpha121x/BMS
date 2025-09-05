@@ -196,7 +196,7 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
                 <tr key={index}>
                   <td>{row.bridge_name || "N/A"}</td>
                   <td>{row.WorkKindName || "N/A"}</td>
-                  <td>{row.DamageLevelName || "N/A"}</td>
+                  <td>{row.DamageLevel || "N/A"}</td>
                   <td>{row.damage_extent || "N/A"}</td>
                   <td>{row.MaterialName || "N/A"}</td>
                   <td>{row.PartsName || "N/A"}</td>
