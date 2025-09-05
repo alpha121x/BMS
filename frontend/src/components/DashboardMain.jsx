@@ -15,8 +15,24 @@ import FiveYearPlan from "./FiveYearPlan"; // Import the new component
 import InspectedStructures from "./InspectedStructures";
 import Rates from "./Rates"; // Import the new component
 
+// helper: get districtId from sessionStorage token
+const getInitialDistrictId = () => {
+  const userTokenRaw =
+    sessionStorage.getItem("user") || sessionStorage.getItem("userEvaluation");
+  if (userTokenRaw) {
+    try {
+      const parsedToken = JSON.parse(userTokenRaw);
+      const district = parsedToken?.districtId?.toString();
+      return !district || district === "0" ? "%" : district;
+    } catch (err) {
+      console.error("Invalid user token:", err);
+    }
+  }
+  return "%";
+};
+
 const DashboardMain = () => {
-  const [districtId, setDistrictId] = useState("%");
+  const [districtId, setDistrictId] = useState(getInitialDistrictId);
   const [structureType, setStructureType] = useState("%");
   const [constructionType, setConstructionType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
@@ -28,14 +44,32 @@ const DashboardMain = () => {
   const [inspectionStatus, setInspectionStatus] = useState("%"); // New filter state
   const bridges_status_summary = "bridge-status-summary-combined";
 
-
-
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [activeView, setActiveView] = useState("inventory");
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [evaluatedCards, setEvaluatedCards] = useState([]);
+
+  useEffect(() => {
+    const userTokenRaw =
+      sessionStorage.getItem("user") ||
+      sessionStorage.getItem("userEvaluation");
+
+    let districtIdFromToken = "%";
+    if (userTokenRaw) {
+      try {
+        const parsedToken = JSON.parse(userTokenRaw);
+        const district = parsedToken?.districtId?.toString();
+        districtIdFromToken = !district || district === "0" ? "%" : district;
+      } catch (err) {
+        console.error("Invalid user token:", err);
+      }
+    }
+
+    // set both state values so filters update immediately
+    setDistrictId(districtIdFromToken);
+  }, []);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -318,13 +352,13 @@ const DashboardMain = () => {
                 onClick={() => setActiveView("inspectedstructures")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "inspectedstructures"
-                  ? "bg-[#005D7F] text-white"
-                  : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
+                    ? "bg-[#005D7F] text-white"
+                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
                 }`}
               >
-               Inspected Structures
+                Inspected Structures
               </button>
-               {/* <button
+              {/* <button
                 onClick={() => setActiveView("bridge_summary")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "bridge_summary"
@@ -334,7 +368,7 @@ const DashboardMain = () => {
               >
                 Bridge Status Summary
               </button> */}
-                   <button
+              <button
                 onClick={() => setActiveView("priortization")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "priortization"
@@ -344,7 +378,7 @@ const DashboardMain = () => {
               >
                 Priortization
               </button>
-                   <button
+              <button
                 onClick={() => setActiveView("cost")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "cost"
@@ -354,7 +388,7 @@ const DashboardMain = () => {
               >
                 Cost
               </button>
-                   <button
+              <button
                 onClick={() => setActiveView("rates")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "rates"
@@ -402,38 +436,32 @@ const DashboardMain = () => {
                   setInspectionStatus={setInspectionStatus}
                 />
               )}
-              {
-                activeView === "priortization" && (
-                  <PriotizationTable
+              {activeView === "priortization" && (
+                <PriotizationTable districtId={districtId} />
+              )}
+              {activeView === "cost" && (
+                <CostEstimation
                   districtId={districtId}
-                  />
-                )}
-                {
-                activeView === "cost" && (
-                  <CostEstimation
-                    districtId={districtId}
-                    structureType={structureType}
-                    bridgeName={bridgeName}
-                   />
-                )}
-                { activeView === "rates" && (
-                  <Rates
-                   districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
-                  />
-                )}
-                { activeView === "bridge_summary" && (
-                  <BridgeStatusSummaryDashboard
+                />
+              )}
+              {activeView === "rates" && (
+                <Rates
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                />
+              )}
+              {activeView === "bridge_summary" && (
+                <BridgeStatusSummaryDashboard
                   api_endpoint={bridges_status_summary}
                   districtId={districtId}
                   structureType={structureType}
                   bridgeName={bridgeName}
-                   />
-                )}
-                { activeView === "fiveyearplan" && (
-                  <FiveYearPlan/>
-                )}
+                />
+              )}
+              {activeView === "fiveyearplan" && <FiveYearPlan />}
               {activeView === "inspectedstructures" && (
                 <InspectedStructures
                   districtId={districtId}
