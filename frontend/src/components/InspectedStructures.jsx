@@ -19,6 +19,7 @@ import Graph from "./GraphInspected"; // Assuming you have a Graph component for
 import { useNavigate } from "react-router-dom";
 import InspectionListInsStruc from "./InspectionListInsStruc";
 import BridgeWiseScore from "./BridgeWiseScore"; // Assuming you have a BridgeWiseScroe component for the bridge wise score view
+import DamageSummary from "./DamageSummary"; // New import for DamageSummary component
 
 const InspectedStructures = ({
   districtId,
@@ -52,6 +53,14 @@ const InspectedStructures = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
   const [viewMode, setViewMode] = useState("map"); // New state for view mode
+  const [showInspectionSummaryModal, setShowInspectionSummaryModal] =
+    useState(false); // New state for inspection summary modal
+  const [workKinds, setWorkKinds] = useState([]);
+  const [damageCounts, setDamageCounts] = useState({});
+  const [loadingWorkKinds, setLoadingWorkKinds] = useState(false);
+  const [loadingDamageCounts, setLoadingDamageCounts] = useState(false);
+  const [visualConditions, setVisualConditions] = useState([]);
+  const [loadingConditions, setLoadingConditions] = useState(false);
   const navigate = useNavigate();
 
   const itemsPerPage = 10;
@@ -105,6 +114,84 @@ const InspectedStructures = ({
       setLoading(false);
     }
   };
+
+    // Fetch Visual Conditions from API
+    useEffect(() => {
+      const fetchVisualConditions = async () => {
+        setLoadingConditions(true);
+        try {
+          const response = await fetch(`${BASE_URL}/api/visual-conditions`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch visual conditions");
+          }
+          const data = await response.json();
+          setVisualConditions(data);
+        } catch (error) {
+          console.error("Error fetching visual conditions:", error);
+          setVisualConditions([
+            { id: 1, visual_condition: "FAIR" },
+            { id: 2, visual_condition: "GOOD" },
+            { id: 3, visual_condition: "POOR" },
+            { id: 4, visual_condition: "UNDER CONSTRUCTION" },
+          ]);
+        } finally {
+          setLoadingConditions(false);
+        }
+      };
+  
+      fetchVisualConditions();
+    }, []);
+  
+    // Fetch Work Kinds from API
+    useEffect(() => {
+      const fetchWorkKinds = async () => {
+        setLoadingWorkKinds(true);
+        try {
+          const response = await fetch(`${BASE_URL}/api/work-kinds`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch work kinds");
+          }
+          const data = await response.json();
+          setWorkKinds(data);
+        } catch (error) {
+          console.error("Error fetching work kinds:", error);
+          setError("Failed to load work kinds");
+        } finally {
+          setLoadingWorkKinds(false);
+        }
+      };
+  
+      fetchWorkKinds();
+    }, []);
+  
+    // Fetch Damage Counts for the specific bridge
+    useEffect(() => {
+      const fetchDamageCounts = async () => {
+        if (!selectedBridge?.uu_bms_id) return;
+        setLoadingDamageCounts(true);
+        try {
+          const response = await fetch(
+            `${BASE_URL}/api/damage-counts?uu_bms_id=${selectedBridge.uu_bms_id}`
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch damage counts");
+          }
+          const data = await response.json();
+          const countsMap = {};
+          data.forEach((item) => {
+            countsMap[item.WorkKindID] = item;
+          });
+          setDamageCounts(countsMap);
+        } catch (error) {
+          console.error("Error fetching damage counts:", error);
+          setError("Failed to load damage counts");
+        } finally {
+          setLoadingDamageCounts(false);
+        }
+      };
+  
+      fetchDamageCounts();
+    }, [selectedBridge?.uu_bms_id]);
 
   const handleViewInventory = (bridge) => {
     setSelectedBridge(bridge);
@@ -187,6 +274,16 @@ const InspectedStructures = ({
     } finally {
       setLoadingCSV(false);
     }
+  };
+
+  const handleViewInspectionSummary = (bridge) => {
+    setSelectedBridge(bridge);
+    setShowInspectionSummaryModal(true);
+  };
+
+  const handleCloseInspectionSummaryModal = () => {
+    setShowInspectionSummaryModal(false);
+    setSelectedBridge(null);
   };
 
   const handleDownloadExcel = async () => {
@@ -403,6 +500,15 @@ const InspectedStructures = ({
             style={{ fontSize: "12px" }}
           >
             Inspection Info
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewInspectionSummary(row);
+            }}
+            className="bg-[#005D7F] text-white px-2 py-1 rounded hover:bg-[#003f5f] text-xs"
+          >
+            Inspection Summary
           </button>
           <button
             onClick={(e) => {
@@ -727,6 +833,38 @@ const InspectedStructures = ({
                 </Modal.Body>
                 <Modal.Footer>
                   <Button variant="secondary" onClick={handleCloseMapModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
+              </Modal>
+
+              <Modal
+                show={showInspectionSummaryModal}
+                onHide={handleCloseInspectionSummaryModal}
+                size="lg"
+                centered
+                className="custom-modal"
+              >
+                <Modal.Header closeButton>
+                  <Modal.Title>Inspection Summary</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                  {selectedBridge && (
+                    <DamageSummary
+                      workKinds={workKinds}
+                      damageCounts={damageCounts}
+                      loadingWorkKinds={loadingWorkKinds}
+                      loadingDamageCounts={loadingDamageCounts}
+                      bridgeId={selectedBridge.uu_bms_id}
+                      error={error}
+                    />
+                  )}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button
+                    variant="secondary"
+                    onClick={handleCloseInspectionSummaryModal}
+                  >
                     Close
                   </Button>
                 </Modal.Footer>
