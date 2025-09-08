@@ -840,7 +840,7 @@ app.get("/api/strucutres", async (req, res) => {
       break;
     case "unapproved_structures":
       // unapproved by Consultant or RAMS (latest preferred)
-      typeClause = `((t.qc_con = 3 OR t.qc_rams = 3)AND t.is_latest = true)`;
+      typeClause = `((t.qc_con = 3 OR t.qc_rams = 3) AND t.is_latest = true)`;
       break;
     case "submitted_to_rams":
       // as per your last spec: surveyed_by RAMS-UU and consultant QC = 2
