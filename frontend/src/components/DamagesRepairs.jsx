@@ -95,7 +95,7 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
           height: 400,
         },
         title: {
-          text: "Severe Damages vs Repaired (District-wise)",
+          text: "Damages vs Repaired (District-wise)",
         },
         xAxis: {
           categories: categories,
