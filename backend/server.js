@@ -35,7 +35,7 @@ const logFile = path.join(__dirname, "query.log");
 
 // Ensure folder exists
 // Absolute Windows path for uploads
-const uploadDir = "C://Program Files//Apache Software Foundation//Tomcat 9.0//webapps//ROOT//BMS2024/PICS";
+const uploadDir = "C://Program Files//Apache Software Foundation//Tomcat 9.0//webapps//ROOT//BMS2024/REPAIR_PICS";
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -5872,7 +5872,7 @@ app.post("/api/update-inspection-status/:inspectionId",
     try {
       // Build public URLs for DB
       const images = files.map((file) => ({
-        path: `http://cnw.urbanunit.gov.pk/BMS2024/PICS/${file.filename}`,
+        path: `http://cnw.urbanunit.gov.pk/RAMS-IMAGES2/BMS2024/REPAIR_PICS/${file.filename}`,
       }));
 
       const query = `
