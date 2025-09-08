@@ -6,27 +6,36 @@ import CheckingDetailsModal from "./CheckingDetailsModal";
 import Papa from "papaparse";
 import Filters from "./Filters.jsx";
 import { FaFileCsv } from "react-icons/fa6";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
+
+const styles = {
+  chartContainer: {
+    margin: "20px 0",
+    maxWidth: "100%",
+    height: "400px",
+  },
+};
 
 const DamagesRepairs = ({ districtId, bridgeName }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Existing view modal
   const [showModal, setShowModal] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
-  // New status modal
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [remarks, setRemarks] = useState("");
   const [isRepaired, setIsRepaired] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]);
+  const [chartOptions, setChartOptions] = useState(null);
+  const [chartError, setChartError] = useState(null);
 
   const itemsPerPage = 10;
 
   useEffect(() => {
     fetchData();
+    fetchChartData();
   }, [districtId, bridgeName]);
 
   const fetchData = async () => {
@@ -35,14 +44,11 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
     try {
       const url = new URL(`${BASE_URL}/api/inspections-damages-repairs`);
       const params = new URLSearchParams();
-
       if (districtId) params.append("district", districtId);
       if (bridgeName) params.append("bridge", bridgeName);
-
       url.search = params.toString();
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch data");
-
       const result = await response.json();
       if (Array.isArray(result.data)) {
         setTableData(result.data);
@@ -56,13 +62,88 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
     }
   };
 
-  // View modal
+  const fetchChartData = async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/api/damage-level-summary`);
+      if (!res.ok) throw new Error("Failed to fetch chart data");
+      const response = await res.json();
+
+      if (!response.success || !Array.isArray(response.data)) {
+        throw new Error("Invalid chart data format");
+      }
+
+      const data = response.data;
+      if (data.length === 0) {
+        setChartError("No chart data available");
+        setChartOptions(null);
+        return;
+      }
+
+      const categories = data.map((d) => d.district || "Unknown");
+      const repairedDamages = data.map((d) => Number(d.repaired_damages) || 0);
+      const unrepairedDamages = data.map((d) => Number(d.unrepaired_damages) || 0);
+
+      setChartOptions({
+        chart: {
+          type: "column",
+          height: 400,
+        },
+        title: {
+          text: "Severe Damages vs Repaired (District-wise)",
+        },
+        xAxis: {
+          categories: categories,
+          title: { text: "Districts" },
+          labels: {
+            rotation: -45,
+            style: { fontSize: "12px" },
+          },
+        },
+        yAxis: {
+          min: 0,
+          title: { text: "Count" },
+        },
+        legend: { reversed: true },
+        plotOptions: {
+          series: { stacking: "normal" },
+        },
+        series: [
+          {
+            name: "Unrepaired",
+            data: unrepairedDamages,
+            color: "#FF6B6B",
+          },
+          {
+            name: "Repaired",
+            data: repairedDamages,
+            color: "#4CAF50",
+          },
+        ],
+        responsive: {
+          rules: [
+            {
+              condition: { maxWidth: 500 },
+              chartOptions: {
+                legend: { align: "center", verticalAlign: "bottom" },
+                xAxis: { labels: { rotation: -90 } },
+              },
+            },
+          ],
+        },
+      });
+      setChartError(null);
+    } catch (err) {
+      console.error("Error fetching chart data:", err);
+      setChartError(err.message);
+      setChartOptions(null);
+    }
+  };
+
   const handleViewClick = (row) => {
     setSelectedRow(row);
     setShowModal(true);
   };
 
-  // Status modal
   const handleStatusClick = (row) => {
     setSelectedRow(row);
     setShowStatusModal(true);
@@ -73,19 +154,16 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
       alert("No inspection selected.");
       return;
     }
-
     console.log("Saving status for ID:", selectedRow);
     console.log("Remarks:", remarks);
     console.log("Is Repaired:", isRepaired);
     console.log("Uploaded Images:", uploadedImages);
-    // return;
 
     const formData = new FormData();
     formData.append("remarks", remarks);
     formData.append("isRepaired", isRepaired);
-
     uploadedImages.forEach((file) => {
-      formData.append("images", file); // multer will parse this
+      formData.append("images", file);
     });
 
     try {
@@ -96,7 +174,6 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
           body: formData,
         }
       );
-
       const result = await response.json();
       if (result.success) {
         alert("Status updated successfully!");
@@ -104,7 +181,7 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
         setRemarks("");
         setIsRepaired(false);
         setUploadedImages([]);
-        fetchData(); // refresh table
+        fetchData();
       } else {
         alert("Error: " + result.error);
       }
@@ -140,7 +217,6 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
 
   const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
-  // CSV Export Function
   const handleDownloadCSV = () => {
     const csvData = Papa.unparse(tableData);
     const link = document.createElement("a");
@@ -161,15 +237,15 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
       >
         <div className="flex items-center justify-between">
           <h5 className="mb-0">Damages Records</h5>
-           <h5 className="mb-0" id="structure-heading">
-              Count:
-              <span
-                className="badge text-white ms-2"
-                style={{ background: "#009CB8" }}
-              >
-                <h6 className="mb-0">{tableData.length || 0}</h6>
-              </span>
-            </h5>
+          <h5 className="mb-0" id="structure-heading">
+            Count:
+            <span
+              className="badge text-white ms-2"
+              style={{ background: "#009CB8" }}
+            >
+              <h6 className="mb-0">{tableData.length || 0}</h6>
+            </span>
+          </h5>
           <div className="flex items-center gap-1">
             <button
               className="btn text-white"
@@ -183,6 +259,19 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
       </div>
 
       <div className="card-body p-0 pb-2">
+        {/* Chart */}
+        {chartError ? (
+          <div className="text-center text-danger mb-3">
+            {chartError}
+          </div>
+        ) : chartOptions ? (
+          <div style={styles.chartContainer}>
+            <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+          </div>
+        ) : (
+          <div className="text-center mb-3">Loading chart...</div>
+        )}
+
         <Table
           className="table table-striped table-bordered table-hover"
           style={{ fontSize: ".9rem" }}
@@ -260,7 +349,6 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            {/* Remarks */}
             <Form.Group className="mb-3">
               <Form.Label>Remarks</Form.Label>
               <Form.Control
@@ -271,8 +359,6 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
                 placeholder="Enter remarks here..."
               />
             </Form.Group>
-
-            {/* Checkbox */}
             <Form.Group className="mb-3">
               <Form.Check
                 type="checkbox"
@@ -281,8 +367,6 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
                 onChange={(e) => setIsRepaired(e.target.checked)}
               />
             </Form.Group>
-
-            {/* Image Upload */}
             <Form.Group className="mb-3">
               <Form.Label>Upload Images (max 4)</Form.Label>
               <Form.Control
