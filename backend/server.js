@@ -34,15 +34,16 @@ const pool = new Pool({
 const logFile = path.join(__dirname, "query.log");
 
 // Ensure folder exists
-const uploadDir = path.join(process.cwd(), "RepairPics");
+// Absolute Windows path for uploads
+const uploadDir = "C://Program Files//Apache Software Foundation//Tomcat 9.0//webapps//ROOT//BMS2024/PICS";
+
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploadDir); // save to RepairPics folder
+    cb(null, uploadDir); // saves directly in Tomcat's ROOT/BMS2024/PICS
   },
   filename: function (req, file, cb) {
     const uniqueName = Date.now() + "-" + file.originalname;
@@ -5838,9 +5839,9 @@ app.post("/api/update-inspection-status/:inspectionId",
     const files = req.files;
 
     try {
-      // Store file paths instead of base64
+      // Build public URLs for DB
       const images = files.map((file) => ({
-        path: `http://cnw.urbanunit.gov.pk/RAMS-IMAGES2/BMS2024/RepairPics/${file.filename}`, // relative path for frontend
+        path: `http://cnw.urbanunit.gov.pk/BMS2024/PICS/${file.filename}`,
       }));
 
       const query = `
@@ -5868,6 +5869,36 @@ app.post("/api/update-inspection-status/:inspectionId",
     }
   }
 );
+
+// ✅ API: Get district-wise severe damage counts (with repaired info)
+app.get("/api/damage-level-summary", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+          d.district,
+          COUNT(*) AS total_damages,
+          COUNT(*) FILTER (WHERE i.is_repaired = TRUE) AS repaired_damages,
+          COUNT(*) FILTER (WHERE i.is_repaired = FALSE) AS unrepaired_damages
+      FROM bms.tbl_inspection_f i
+      JOIN bms.tbl_districts d
+          ON i.district_id = d.id
+      WHERE i."DamageLevelID" IN (3, 4, 5)
+      GROUP BY d.district
+      ORDER BY d.district;
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (err) {
+    console.error("Error fetching damage summary:", err);
+    res.status(500).json({ success: false, error: "Internal server error" });
+  }
+});
+
 
 // bridge-status-summary for RAMS evaluation module
 app.get("/api/bridge-status-summary-rams", async (req, res) => {
