@@ -514,7 +514,7 @@ const InspectedStructures = ({
               handleViewInspection(row);
             }}
             className="bg-[#3B9895] text-white px-1 py-0.5 rounded-1 hover:bg-[#2d7270]"
-            style={{ fontSize: "12px", padding: "2px 4px" }} // Reduced padding
+            style={{ fontSize: "12px", padding: "2px 3px" }} // Reduced padding
           >
             Inspection Info
           </button>
@@ -534,14 +534,14 @@ const InspectedStructures = ({
               handleZoomToBridge(row);
             }}
             className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
-            style={{ fontSize: "12px", padding: "2px 4px" }} // Reduced padding
+            style={{ fontSize: "12px", padding: "2px 3px" }} // Reduced padding
           >
             Zoom To
           </button>
         </div>
       ),
       ignoreRowClick: true,
-      grow: 2, // Kept as is, but ensure it fits
+      grow: 2.5, // Kept as is, but ensure it fits
     },
   ];
 
