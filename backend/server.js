@@ -5905,7 +5905,7 @@ app.get("/api/damage-level-summary", async (req, res) => {
       JOIN bms.tbl_districts d
           ON i.district_id = d.id
       WHERE i."DamageLevelID" IN (3, 4, 5)
-      AND i.is_latest = TRUE
+      AND i.is_latest = true
       GROUP BY d.district
       ORDER BY d.district;
     `;
