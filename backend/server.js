@@ -5759,6 +5759,8 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
         ON ins."uu_bms_id" = bmd."uu_bms_id"
       WHERE 1=1
       AND ins."DamageLevelID" IN (3, 4, 5) 
+      AND ins.is_latest = true
+      AND bmd.is_active = true
       AND (
           ins.surveyed_by = 'RAMS-PITB' 
           OR 
@@ -5903,6 +5905,7 @@ app.get("/api/damage-level-summary", async (req, res) => {
       JOIN bms.tbl_districts d
           ON i.district_id = d.id
       WHERE i."DamageLevelID" IN (3, 4, 5)
+      AND i.is_latest = TRUE
       GROUP BY d.district
       ORDER BY d.district;
     `;
