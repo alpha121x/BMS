@@ -377,7 +377,7 @@ const Map = ({
               opacity: 0.6,
               listMode: "show",
               popupTemplate,
-              visible: false,
+              visible: true,
               definitionExpression,
             },
 
