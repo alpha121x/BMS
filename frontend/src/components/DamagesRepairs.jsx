@@ -1,19 +1,64 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table, Modal, Form } from "react-bootstrap";
+import { Button, Modal, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import CheckingDetailsModal from "./CheckingDetailsModal";
 import Papa from "papaparse";
-import Filters from "./Filters.jsx";
 import { FaFileCsv } from "react-icons/fa6";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import DataTable from "react-data-table-component";
 
 const styles = {
   chartContainer: {
     margin: "20px 0",
     maxWidth: "100%",
     height: "400px",
+  },
+};
+
+const customStyles = {
+  headCells: {
+    style: {
+      backgroundColor: "#005D7F",
+      color: "#fff",
+      fontSize: "14px",
+      fontWeight: "bold",
+      border: "1px solid #dee2e6",
+    },
+  },
+  cells: {
+    style: {
+      fontSize: "13px",
+      border: "1px solid #dee2e6",
+    },
+  },
+  rows: {
+    style: {
+      "&:hover": {
+        backgroundColor: "#f1f5f9",
+        cursor: "pointer",
+      },
+    },
+  },
+  table: {
+    style: {
+      width: "100%",
+      border: "1px solid #dee2e6",
+    },
+  },
+  header: {
+    style: {
+      minHeight: "auto",
+    },
+  },
+  pagination: {
+    style: {
+      borderTop: "1px solid #dee2e6",
+      padding: "10px",
+      display: "flex",
+      justifyContent: "center",
+    },
   },
 };
 
@@ -256,6 +301,62 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
     link.click();
   };
 
+  // DataTable Columns
+  const columns = [
+    {
+      name: "Bridge Name",
+      selector: (row) => row.bridge_name || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Work Kind",
+      selector: (row) => row.WorkKindName || "N/A",
+      sortable: true,
+    },
+    {
+      name: "Damage Level",
+      selector: (row) => row.DamageLevel || "N/A",
+      sortable: true,
+    },
+    { name: "Damage Extent", selector: (row) => row.damage_extent || "N/A" },
+    { name: "Material", selector: (row) => row.MaterialName || "N/A" },
+    { name: "Element", selector: (row) => row.PartsName || "N/A" },
+    {
+      name: "Date Time",
+      selector: (row) =>
+        row.current_date_time
+          ? new Date(row.current_date_time).toLocaleString()
+          : "N/A",
+      sortable: true,
+    },
+    {
+      name: "Action",
+      width: "300px", // ✅ wider than other columns
+      cell: (row) => (
+        <div className="flex space-x-2">
+          <button
+            className="bg-[#009CB8] text-white px-2 py-1 rounded-md"
+            onClick={() => handleViewClick(row)}
+          >
+            View
+          </button>
+          <button
+            className="bg-[#005D7F] text-white px-2 py-1 rounded-md"
+            onClick={() => handleStatusClick(row)}
+          >
+            Repair Status
+          </button>
+          <button
+            className="bg-[#4CAF50] text-white px-2 py-1 rounded-md"
+            onClick={() => handleRepairImagesClick(row)}
+          >
+            Repair Images
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div
       className="card p-0 rounded-0 text-black"
@@ -300,68 +401,18 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
           <div className="text-center mb-3">Loading chart...</div>
         )}
 
-        <Table
-          className="table table-striped table-bordered table-hover"
-          style={{ fontSize: ".9rem" }}
-        >
-          <thead>
-            <tr>
-              <th>Bridge Name</th>
-              <th>Work Kind</th>
-              <th>Damage Level</th>
-              <th>Damage Extent</th>
-              <th>Material</th>
-              <th>Element</th>
-              <th>Date Time</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length > 0 ? (
-              currentData.map((row, index) => (
-                <tr key={index}>
-                  <td>{row.bridge_name || "N/A"}</td>
-                  <td>{row.WorkKindName || "N/A"}</td>
-                  <td>{row.DamageLevel || "N/A"}</td>
-                  <td>{row.damage_extent || "N/A"}</td>
-                  <td>{row.MaterialName || "N/A"}</td>
-                  <td>{row.PartsName || "N/A"}</td>
-                  <td>
-                    {row.current_date_time
-                      ? new Date(row.current_date_time).toLocaleString()
-                      : "N/A"}
-                  </td>
-                  <td className="space-x-2">
-                    <button
-                      className="bg-[#009CB8] text-white px-3 py-1 rounded-md hover:bg-[#007A91]"
-                      onClick={() => handleViewClick(row)}
-                    >
-                      View
-                    </button>
-                    <button
-                      className="bg-[#005D7F] text-white px-3 py-1 rounded-md hover:bg-[#00425A]"
-                      onClick={() => handleStatusClick(row)}
-                    >
-                      Repair Status
-                    </button>
-                    <button
-                      className="bg-[#4CAF50] text-white px-3 py-1 rounded-md hover:bg-[#3A9C3A]"
-                      onClick={() => handleRepairImagesClick(row)}
-                    >
-                      Repair Images
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center">
-                  No data available
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
+        {/* Data Table */}
+        <DataTable
+          columns={columns}
+          data={tableData}
+          progressPending={loading}
+          pagination
+          highlightOnHover
+          striped
+          responsive
+          noDataComponent="No data available"
+          customStyles={customStyles}
+        />
       </div>
 
       {/* View Modal */}
