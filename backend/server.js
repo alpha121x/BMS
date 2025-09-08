@@ -5728,12 +5728,13 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
+
 // inspections for table dashboard damages repairs
 app.get("/api/inspections-damages-repairs", async (req, res) => {
   try {
     let { district, bridge } = req.query;
 
-    // Build the base query without ORDER BY
+    // Base query
     let query = `
       SELECT 
         bmd."pms_sec_id", 
@@ -5750,17 +5751,18 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
         ins."damage_extent",  
         ins."current_date_time",  
         ins."Remarks", 
-        ins.inspection_images AS "PhotoPaths"
+        ins.inspection_images AS "PhotoPaths",
+        ins.repair_images AS "RepairPaths"
       FROM bms.tbl_inspection_f AS ins
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id"
       WHERE 1=1
       AND ins."DamageLevelID" IN (3, 4, 5) 
-    AND (
-        ins.surveyed_by = 'RAMS-PITB' 
-        OR 
-        (ins.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
-    ) 
+      AND (
+          ins.surveyed_by = 'RAMS-PITB' 
+          OR 
+          (ins.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+      ) 
     `;
 
     const queryParams = [];
@@ -5778,48 +5780,50 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
       paramIndex++;
     }
 
-    // Append ORDER BY clause after dynamic filters
     query += ` ORDER BY inspection_id DESC;`;
 
     const result = await pool.query(query, queryParams);
 
-    // Process PhotoPaths to extract image URLs
-    const processedData = result.rows.map((row) => {
-      let extractedPhotoPaths = [];
-
+    // ✅ Helper function to parse image JSON safely
+    const extractPaths = (rawData) => {
+      let paths = [];
       try {
-        if (row.PhotoPaths) {
-          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
-            /\}\"/g,
-            "}"
-          );
-          const parsedPhotos = JSON.parse(cleanedJson);
+        if (rawData) {
+          const cleanedJson = rawData
+            .replace(/\"\{/g, "{")
+            .replace(/\}\"/g, "}");
+          const parsed = JSON.parse(cleanedJson);
 
-          if (Array.isArray(parsedPhotos)) {
-            // Case 1: Array of objects with "path" keys
-            parsedPhotos.forEach((item) => {
-              if (item.path) extractedPhotoPaths.push(item.path);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((item) => {
+              if (item.path) paths.push(item.path);
             });
-          } else if (typeof parsedPhotos === "object") {
-            // Case 2: Nested object with image paths
-            Object.values(parsedPhotos).forEach((category) => {
+          } else if (typeof parsed === "object") {
+            Object.values(parsed).forEach((category) => {
               if (typeof category === "object") {
                 Object.values(category).forEach((imagesArray) => {
                   if (Array.isArray(imagesArray)) {
-                    extractedPhotoPaths.push(...imagesArray);
+                    imagesArray.forEach((p) => {
+                      if (typeof p === "string") paths.push(p);
+                      if (p.path) paths.push(p.path);
+                    });
                   }
                 });
               }
             });
           }
         }
-      } catch (error) {
-        console.error("Error parsing PhotoPaths:", error);
+      } catch (err) {
+        console.error("Error parsing images:", err);
       }
+      return paths;
+    };
 
+    const processedData = result.rows.map((row) => {
       return {
         ...row,
-        PhotoPaths: extractedPhotoPaths, // Store extracted paths as a flat array
+        PhotoPaths: extractPaths(row.PhotoPaths),  // inspection_images
+        RepairPaths: extractPaths(row.RepairPaths) // repair_images
       };
     });
 
