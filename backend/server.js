@@ -5732,7 +5732,7 @@ app.get("/api/inspections", async (req, res) => {
 // inspections for table dashboard damages repairs
 app.get("/api/inspections-damages-repairs", async (req, res) => {
   try {
-    let { district, bridge } = req.query;
+    let { district, bridge, structure_type } = req.query;
 
     // Base query
     let query = `
@@ -5740,7 +5740,10 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
         bmd."pms_sec_id", 
         bmd."structure_no",
         CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name, 
+        bmd."structure_type_id",
+        bmd."structure_type",
         ins.inspection_id,
+        ins.uu_bms_id,
         ins."SpanIndex",
         ins."district_id", 
         ins."WorkKindName", 
@@ -5774,6 +5777,12 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
     if (district && !isNaN(parseInt(district))) {
       query += ` AND ins."district_id" = $${paramIndex}`;
       queryParams.push(parseInt(district));
+      paramIndex++;
+    }
+
+    if (structure_type && !isNaN(parseInt(structure_type))) {
+      query += ` AND bmd."structure_type_id" = $${paramIndex}`;
+      queryParams.push(parseInt(structure_type));
       paramIndex++;
     }
 
