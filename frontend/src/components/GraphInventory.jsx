@@ -2,46 +2,169 @@ import { useState, useEffect } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { BASE_URL } from "./config";
+import { saveAs } from "file-saver"; // npm install file-saver
+
+// helper to export data
+const exportCSV = (rows, filename = "chart-data.csv") => {
+  if (!rows || rows.length === 0) return;
+  const headers = Object.keys(rows[0]).join(",");
+  const csvRows = rows.map((row) =>
+    Object.values(row)
+      .map((v) => `"${v}"`)
+      .join(",")
+  );
+  const csv = [headers, ...csvRows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  saveAs(blob, filename);
+};
+
+// Modal Component
+const DataModal = ({ isOpen, onClose, data, title }) => {
+  if (!isOpen || !data || data.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.6)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "8px",
+          maxWidth: "800px",
+          width: "90%",
+          maxHeight: "80vh",
+          overflowY: "auto",
+        }}
+      >
+        <h3 style={{ marginBottom: "10px" }}>{title} Data</h3>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            marginBottom: "10px",
+          }}
+        >
+          <thead>
+            <tr>
+              {Object.keys(data[0]).map((key) => (
+                <th
+                  key={key}
+                  style={{
+                    border: "1px solid #ccc",
+                    padding: "6px",
+                    background: "#f0f0f0",
+                  }}
+                >
+                  {key}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, idx) => (
+              <tr key={idx}>
+                {Object.values(row).map((val, i) => (
+                  <td
+                    key={i}
+                    style={{ border: "1px solid #ccc", padding: "6px" }}
+                  >
+                    {val}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+          <button
+            onClick={() => exportCSV(data, `${title.replace(/\s+/g, "_")}.csv`)}
+            style={{
+              background: "#005D7F",
+              color: "white",
+              padding: "6px 12px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Export CSV
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              background: "#999",
+              color: "white",
+              padding: "6px 12px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Graph = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalData, setModalData] = useState([]);
+  const [modalTitle, setModalTitle] = useState("");
 
-  // ------------------- Construction Types (Static) -------------------
-  const constructionTypesOptions = {
-    chart: { type: "pie" },
-    title: { text: "Construction Types" },
-    tooltip: {
-      pointFormat: "{series.name}: <b>{point.y}</b>", // 👈 shows on hover
-    },
+  // ------------------- helper: open modal on chart click -------------------
+  const withClickHandler = (options, data, title) => ({
+    ...options,
     plotOptions: {
-      pie: {
-        allowPointSelect: true,
+      ...options.plotOptions,
+      series: {
+        ...options.plotOptions?.series,
         cursor: "pointer",
-        dataLabels: {
-          enabled: true,
-          format: "{point.name}: {point.y}", // 👈 name + count always visible
+        point: {
+          events: {
+            click: () => {
+              setModalData(data);
+              setModalTitle(title);
+              setModalOpen(true);
+            },
+          },
         },
       },
     },
-    series: [
-      {
-        name: "Count",
-        data: [
-          {
-            name: "Bricks Wall With Concrete Slab",
-            y: 16247,
-            color: "#6D68DE",
-          },
-          { name: "Stone Wall With Concrete Slab", y: 476, color: "#FFCE83" },
-          { name: "Pipe Culvert", y: 565, color: "#84A3D5" },
-          { name: "I-Girder", y: 346, color: "#19FB8B" },
-          { name: "Box Culvert", y: 155, color: "#45C8FF" },
-          { name: "Other", y: 315, color: "#45C8FF" },
-        ],
-      },
-    ],
-  };
+  });
+
+  // ------------------- Construction Types (Static) -------------------
+  const staticConstructionData = [
+    { name: "Bricks Wall With Concrete Slab", y: 16247 },
+    { name: "Stone Wall With Concrete Slab", y: 476 },
+    { name: "Pipe Culvert", y: 565 },
+    { name: "I-Girder", y: 346 },
+    { name: "Box Culvert", y: 155 },
+    { name: "Other", y: 315 },
+  ];
+  const constructionTypesOptions = withClickHandler(
+    {
+      chart: { type: "pie" },
+      title: { text: "Construction Types" },
+      series: [{ name: "Count", data: staticConstructionData }],
+    },
+    staticConstructionData,
+    "Construction Types"
+  );
 
   // ------------------- Structure Types (API) -------------------
+  const [structureTypesData, setStructureTypesData] = useState([]);
   const [structureTypesOptions, setStructureTypesOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Type of Structures" },
@@ -52,43 +175,27 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/structure-counts`)
       .then((res) => res.json())
       .then((data) => {
-        const colorMap = {
-          CULVERT: "#19FB8B",
-          BRIDGE: "#6D68DE",
-          UNDERPASS: "#FE8F67",
-        };
-
         const formattedData = data.structureTypeCounts.map((item) => ({
-          name: item.structure_type, // ✅ show as it is
+          name: item.structure_type,
           y: parseInt(item.count),
-          color: colorMap[item.structure_type] || "#999999",
         }));
-
-        setStructureTypesOptions({
-          chart: { type: "pie" },
-          title: { text: "Type of Structures" },
-          tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>", // still shows on hover
-          },
-          plotOptions: {
-            pie: {
-              allowPointSelect: true,
-              cursor: "pointer",
-              dataLabels: {
-                enabled: true,
-                format: "{point.name}: {point.y}", // 👈 show name + count on chart
-              },
+        setStructureTypesData(formattedData);
+        setStructureTypesOptions(
+          withClickHandler(
+            {
+              chart: { type: "pie" },
+              title: { text: "Type of Structures" },
+              series: [{ name: "Count", data: formattedData }],
             },
-          },
-          series: [{ name: "Count", data: formattedData }],
-        });
-      })
-      .catch((error) =>
-        console.error("Error fetching structure types:", error)
-      );
+            formattedData,
+            "Type of Structures"
+          )
+        );
+      });
   }, []);
 
   // ------------------- Crossing Types (API) -------------------
+  const [crossingTypesData, setCrossingTypesData] = useState([]);
   const [crossingTypesOptions, setCrossingTypesOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Under Bridge Situation" },
@@ -99,59 +206,23 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/crossing-types-chart`)
       .then((res) => res.json())
       .then((data) => {
-        const colorPalette = [
-          "#45C8FF",
-          "#6D68DE",
-          "#19FB8B",
-          "#FF6347",
-          "#6B8ABC",
-          "#D568FB",
-          "#47F9E3",
-          "#FF645B",
-          "#FFD700",
-          "#ADFF2F",
-        ];
-
-        const formattedData = data.map((item, index) => ({
-          name: item.name,
-          y: parseFloat(item.y),
-          color: colorPalette[index % colorPalette.length],
-        }));
-
-        setCrossingTypesOptions({
-          chart: { type: "pie" },
-          title: { text: "Under Bridge Situation" },
-          tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>", // hover shows count
-          },
-          plotOptions: {
-            pie: {
-              allowPointSelect: true,
-              cursor: "pointer",
-              dataLabels: {
-                enabled: true,
-                format: "{point.name}: {point.y}", // show name + count on chart
-              },
-              // optional: modal click handler
-              point: {
-                events: {
-                  click: function () {
-                    setSelectedStructure(this.name);
-                    setShowModal(true);
-                  },
-                },
-              },
+        setCrossingTypesData(data);
+        setCrossingTypesOptions(
+          withClickHandler(
+            {
+              chart: { type: "pie" },
+              title: { text: "Under Bridge Situation" },
+              series: [{ name: "Factor Value", data }],
             },
-          },
-          series: [{ name: "Factor Value", data: formattedData }],
-        });
-      })
-      .catch((error) =>
-        console.error("Error fetching crossing types chart:", error)
-      );
+            data,
+            "Under Bridge Situation"
+          )
+        );
+      });
   }, []);
 
   // ------------------- Road Classifications (API) -------------------
+  const [roadClassificationData, setRoadClassificationData] = useState([]);
   const [roadClassificationOptions, setRoadClassificationOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Road Type Structures" },
@@ -162,90 +233,23 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/road-types-structures`)
       .then((res) => res.json())
       .then((data) => {
-        const colorPalette = [
-          "#FF5733",
-          "#33FF57",
-          "#3357FF",
-          "#FF33A8",
-          "#FFD733",
-          "#33FFF0",
-          "#8E44AD",
-          "#F39C12",
-        ];
-
-        const formattedData = data.map((item, index) => ({
-          name: item.name,
-          y: parseInt(item.y),
-          color: colorPalette[index % colorPalette.length],
-        }));
-
-        setRoadClassificationOptions({
-          chart: { type: "pie" },
-          title: { text: "Road Type Structures" },
-          tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>", // hover shows count
-          },
-          plotOptions: {
-            pie: {
-              allowPointSelect: true,
-              cursor: "pointer",
-              dataLabels: {
-                enabled: true,
-                format: "{point.name}: {point.y}", // show name + count on chart
-              },
-              // optional: modal click handler
-              point: {
-                events: {
-                  click: function () {
-                    setSelectedStructure(this.name);
-                    setShowModal(true);
-                  },
-                },
-              },
+        setRoadClassificationData(data);
+        setRoadClassificationOptions(
+          withClickHandler(
+            {
+              chart: { type: "pie" },
+              title: { text: "Road Type Structures" },
+              series: [{ name: "Count", data }],
             },
-          },
-          series: [{ name: "Count", data: formattedData }],
-        });
-      })
-      .catch((error) =>
-        console.error("Error fetching road classifications:", error)
-      );
+            data,
+            "Road Type Structures"
+          )
+        );
+      });
   }, []);
 
-  // // ------------------- Bridge Length (Static) -------------------
-  // const bridgeLengthOptions = {
-  //   chart: { type: "bar", height: 400 },
-  //   title: { text: "Bridge Length Of Structure M" },
-  //   xAxis: {
-  //     categories: ["L <= 6", "6m < L≤ 30m", "30m < L≤ 60m", "L < 60m"],
-  //     title: { text: "Bridge Length" },
-  //   },
-  //   yAxis: {
-  //     min: 0,
-  //     max: 19000,
-  //     title: { text: "Construction Types" },
-  //   },
-  //   plotOptions: { series: { stacking: "normal" } },
-  //   series: [
-  //     { name: "Others", data: [43, 5, 1, 2], color: "#008000" },
-  //     { name: "Steel Girder", data: [0, 5, 1, 4], color: "#0000FF" },
-  //     {
-  //       name: "Culverts (box and pipe)",
-  //       data: [723, 26, 3, 0],
-  //       color: "#FFA500",
-  //     },
-  //     { name: "Concrete I-Girder", data: [39, 271, 62, 86], color: "#FFFF00" },
-  //     {
-  //       name: "Concrete Deck Slab",
-  //       data: [16330, 668, 52, 28],
-  //       color: "#FF7F7F",
-  //     },
-  //     { name: "Concrete Box Girder", data: [0, 1, 0, 1], color: "#E6E6FA" },
-  //     { name: "Arch Structure", data: [14, 12, 2, 3], color: "#808080" },
-  //   ],
-  // };
-
   // ------------------- Span Length Distribution (API) -------------------
+  const [spanLengthData, setSpanLengthData] = useState([]);
   const [spanLengthOptions, setSpanLengthOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Span Length Distribution" },
@@ -256,47 +260,26 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/span-length-structures`)
       .then((res) => res.json())
       .then((data) => {
-        setSpanLengthOptions((prev) => ({
-          ...prev,
-          tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>",
-          },
-          plotOptions: {
-            pie: {
-              allowPointSelect: true,
-              cursor: "pointer",
-              dataLabels: {
-                enabled: true,
-                format: "{point.name}: {point.y}",
-              },
-              point: {
-                events: {
-                  click: function () {
-                    setSelectedStructure(this.name);
-                    setShowModal(true);
-                  },
-                },
-              },
+        setSpanLengthData(data);
+        setSpanLengthOptions(
+          withClickHandler(
+            {
+              chart: { type: "pie" },
+              title: { text: "Span Length Distribution" },
+              series: [{ name: "Count", data }],
             },
-          },
-          series: [{ name: "Count", data }],
-        }));
-      })
-      .catch(console.error);
+            data,
+            "Span Length Distribution"
+          )
+        );
+      });
   }, []);
 
-  // ------------------- Bridge Ages (Vertical Column Chart) -------------------
+  // ------------------- Bridge Ages (Column) -------------------
+  const [bridgeAgesData, setBridgeAgesData] = useState([]);
   const [bridgeAgesOptions, setBridgeAgesOptions] = useState({
-    chart: { type: "column" }, // vertical bars
+    chart: { type: "column" },
     title: { text: "Bridge Ages" },
-    xAxis: {
-      categories: [],
-      title: { text: "Age Groups" },
-    },
-    yAxis: {
-      min: 0,
-      title: { text: "Number of Bridges" },
-    },
     series: [{ name: "Count", data: [] }],
   });
 
@@ -304,47 +287,27 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/bridge-ages`)
       .then((res) => res.json())
       .then((data) => {
-        setBridgeAgesOptions((prev) => ({
-          ...prev,
-          tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>",
-          },
-          xAxis: {
-            ...prev.xAxis,
-            categories: data.map((item) => item.name),
-          },
-          series: [
+        setBridgeAgesData(data);
+        setBridgeAgesOptions(
+          withClickHandler(
             {
-              name: "Count",
-              data: data.map((item) => item.y),
+              chart: { type: "column" },
+              title: { text: "Bridge Ages" },
+              xAxis: { categories: data.map((d) => d.name) },
+              series: [{ name: "Count", data: data.map((d) => d.y) }],
             },
-          ],
-          plotOptions: {
-            column: {
-              cursor: "pointer",
-              dataLabels: {
-                enabled: true,
-                format: "{point.y}", // show count above bars
-              },
-              point: {
-                events: {
-                  click: function () {
-                    setSelectedStructure(this.category); // e.g. "0–10 years"
-                    setShowModal(true);
-                  },
-                },
-              },
-            },
-          },
-        }));
-      })
-      .catch(console.error);
+            data,
+            "Bridge Ages"
+          )
+        );
+      });
   }, []);
 
-  // ------------------- Bridge Inspection & Evaluation Status (API) -------------------
+  // ------------------- Bridge Status (API) -------------------
+  const [bridgeStatusData, setBridgeStatusData] = useState([]);
   const [bridgeStatusOptions, setBridgeStatusOptions] = useState({
     chart: { type: "pie" },
-    title: { text: "Stuructures Status" },
+    title: { text: "Structures Status" },
     series: [{ name: "Count", data: [] }],
   });
 
@@ -352,43 +315,26 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/bridge-status`)
       .then((res) => res.json())
       .then((data) => {
-        setBridgeStatusOptions((prev) => ({
-          ...prev,
-          tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>",
-          },
-          plotOptions: {
-            pie: {
-              allowPointSelect: true,
-              cursor: "pointer",
-              dataLabels: {
-                enabled: true,
-                format: "{point.name}: {point.y}",
-              },
-              point: {
-                events: {
-                  click: function () {
-                    setSelectedStructure(this.name);
-                    setShowModal(true);
-                  },
-                },
-              },
+        setBridgeStatusData(data);
+        setBridgeStatusOptions(
+          withClickHandler(
+            {
+              chart: { type: "pie" },
+              title: { text: "Structures Status" },
+              series: [{ name: "Count", data }],
             },
-          },
-          series: [{ name: "Count", data }],
-        }));
-      })
-      .catch(console.error);
+            data,
+            "Structures Status"
+          )
+        );
+      });
   }, []);
 
-  // -------------------- Bridge Length / CONSTRUCTION TYPES (Bar Chart) -------------------- //
+  // ------------------- Bridge Length by Construction Types (Bar) -------------------
+  const [bridgeLengthData, setBridgeLengthData] = useState([]);
   const [bridgeLengthOptions, setBridgeLengthOptions] = useState({
     chart: { type: "bar", height: 400 },
     title: { text: "Bridge Length Of Structure M" },
-    xAxis: { categories: [], title: { text: "Bridge Length" } },
-    yAxis: { min: 0, title: { text: "Construction Types" } },
-    legend: { reversed: false },
-    plotOptions: { series: { stacking: "normal" } },
     series: [],
   });
 
@@ -396,6 +342,7 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/bridge-length-construction-types`)
       .then((res) => res.json())
       .then((data) => {
+        setBridgeLengthData(data);
         const categories = [
           "Less than 6 m",
           "6 to 10 m",
@@ -404,22 +351,8 @@ const Graph = () => {
           "20 to 35 m",
           "Greater than 35 m",
         ];
-
-        const constructionTypes = [
-          ...new Set(data.map((item) => item.major_type)),
-        ];
-
-        const colorMap = {
-          Others: "#008000",
-          "Steel Girder": "#0000FF",
-          "Culverts (box and pipe)": "#FFA500",
-          "Concrete I-Girder": "#FFFF00",
-          "Concrete Deck Slab": "#FF7F7F",
-          "Concrete Box Girder": "#E6E6FA",
-          "Arch Structure": "#808080",
-        };
-
-        const series = constructionTypes.map((type) => ({
+        const types = [...new Set(data.map((d) => d.major_type))];
+        const series = types.map((type) => ({
           name: type,
           data: categories.map((range) => {
             const match = data.find(
@@ -427,25 +360,24 @@ const Graph = () => {
             );
             return match ? match.count : 0;
           }),
-          color: colorMap[type] || "#999999",
         }));
-
-        setBridgeLengthOptions({
-          chart: { type: "bar", height: 400 },
-          title: { text: "Bridge Length Of Structure M" },
-          xAxis: { categories, title: { text: "Bridge Length" } },
-          yAxis: { min: 0, title: { text: "Construction Types" } },
-          legend: { reversed: false },
-          plotOptions: {
-            series: { stacking: "normal" },
-          },
-          series,
-        });
+        setBridgeLengthOptions(
+          withClickHandler(
+            {
+              chart: { type: "bar", height: 400 },
+              title: { text: "Bridge Length Of Structure M" },
+              xAxis: { categories },
+              series,
+            },
+            data,
+            "Bridge Length Of Structure M"
+          )
+        );
       });
   }, []);
 
   return (
-    <div
+     <div
       className="bg-white border-1 p-0 rounded-0 shadow-md"
       style={{ border: "1px solid #005D7F" }}
     >
@@ -556,6 +488,12 @@ const Graph = () => {
           />
         </div>
       </div>
+      <DataModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        data={modalData}
+        title={modalTitle}
+      />
     </div>
   );
 };
