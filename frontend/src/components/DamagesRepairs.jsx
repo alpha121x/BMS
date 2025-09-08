@@ -17,7 +17,7 @@ const styles = {
   },
 };
 
-const DamagesRepairs = ({ districtId, bridgeName }) => {
+const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,13 +30,16 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [chartOptions, setChartOptions] = useState(null);
   const [chartError, setChartError] = useState(null);
+  const [showRepairModal, setShowRepairModal] = useState(false);
+  const [repairImages, setRepairImages] = useState([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const itemsPerPage = 10;
 
   useEffect(() => {
     fetchData();
     fetchChartData();
-  }, [districtId, bridgeName]);
+  }, [districtId, bridgeName, structureType]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -46,6 +49,7 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
       const params = new URLSearchParams();
       if (districtId) params.append("district", districtId);
       if (bridgeName) params.append("bridge", bridgeName);
+      if (structureType) params.append("structure_type", structureType);
       url.search = params.toString();
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch data");
@@ -81,7 +85,9 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
 
       const categories = data.map((d) => d.district || "Unknown");
       const repairedDamages = data.map((d) => Number(d.repaired_damages) || 0);
-      const unrepairedDamages = data.map((d) => Number(d.unrepaired_damages) || 0);
+      const unrepairedDamages = data.map(
+        (d) => Number(d.unrepaired_damages) || 0
+      );
 
       setChartOptions({
         chart: {
@@ -209,6 +215,30 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
     setSelectedRow(null);
   };
 
+  // --- Handler to open Repair Images modal ---
+  const handleRepairImagesClick = (row) => {
+    if (Array.isArray(row.RepairPaths)) {
+      setRepairImages(row.RepairPaths);
+    } else {
+      setRepairImages([]);
+    }
+    setCurrentImageIndex(0);
+    setShowRepairModal(true);
+  };
+
+  // --- Navigation ---
+  const handlePrevImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? repairImages.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) =>
+      prev === repairImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
   const currentData = tableData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -261,9 +291,7 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
       <div className="card-body p-0 pb-2">
         {/* Chart */}
         {chartError ? (
-          <div className="text-center text-danger mb-3">
-            {chartError}
-          </div>
+          <div className="text-center text-danger mb-3">{chartError}</div>
         ) : chartOptions ? (
           <div style={styles.chartContainer}>
             <HighchartsReact highcharts={Highcharts} options={chartOptions} />
@@ -315,6 +343,12 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
                       onClick={() => handleStatusClick(row)}
                     >
                       Repair Status
+                    </button>
+                    <button
+                      className="bg-[#4CAF50] text-white px-3 py-1 rounded-md hover:bg-[#3A9C3A]"
+                      onClick={() => handleRepairImagesClick(row)}
+                    >
+                      Repair Images
                     </button>
                   </td>
                 </tr>
@@ -417,6 +451,59 @@ const DamagesRepairs = ({ districtId, bridgeName }) => {
           </Button>
           <Button variant="primary" onClick={handleStatusSave}>
             Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Repair Images Modal */}
+      <Modal
+        show={showRepairModal}
+        onHide={() => setShowRepairModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Repair Images</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center">
+          {repairImages.length > 0 ? (
+            <>
+              <div className="relative flex justify-center items-center">
+                <img
+                  src={repairImages[currentImageIndex]}
+                  alt={`Repair ${currentImageIndex + 1}`}
+                  style={{
+                    maxHeight: "400px",
+                    maxWidth: "100%",
+                    borderRadius: "8px",
+                  }}
+                />
+                {/* Left Button */}
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-2 bg-black text-white px-3 py-1 rounded-full opacity-70 hover:opacity-100"
+                >
+                  ‹
+                </button>
+                {/* Right Button */}
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-2 bg-black text-white px-3 py-1 rounded-full opacity-70 hover:opacity-100"
+                >
+                  ›
+                </button>
+              </div>
+              <p className="mt-2">
+                {currentImageIndex + 1} / {repairImages.length}
+              </p>
+            </>
+          ) : (
+            <p>No repair images available.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowRepairModal(false)}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>

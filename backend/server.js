@@ -5751,6 +5751,7 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
         ins."damage_extent",  
         ins."current_date_time",  
         ins."Remarks", 
+        ins.repair_remarks,
         ins.inspection_images AS "PhotoPaths",
         ins.repair_images AS "RepairPaths"
       FROM bms.tbl_inspection_f AS ins
@@ -5785,39 +5786,54 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
     const result = await pool.query(query, queryParams);
 
     // ✅ Helper function to parse image JSON safely
-    const extractPaths = (rawData) => {
-      let paths = [];
-      try {
-        if (rawData) {
-          const cleanedJson = rawData
-            .replace(/\"\{/g, "{")
-            .replace(/\}\"/g, "}");
-          const parsed = JSON.parse(cleanedJson);
+      const extractPaths = (rawData) => {
+        let paths = [];
 
+        try {
+          if (!rawData) return paths; // nothing to parse
+
+          let parsed;
+
+          // Case 1: Already an object/array (from DB JSON/JSONB column)
+          if (typeof rawData === "object") {
+            parsed = rawData;
+          }
+          // Case 2: It's a string, clean and parse it
+          else if (typeof rawData === "string") {
+            const cleanedJson = rawData
+              .replace(/\"\{/g, "{")
+              .replace(/\}\"/g, "}");
+
+            parsed = JSON.parse(cleanedJson);
+          }
+
+          // Handle parsed result
           if (Array.isArray(parsed)) {
             parsed.forEach((item) => {
-              if (item.path) paths.push(item.path);
+              if (typeof item === "string") paths.push(item);
+              if (item?.path) paths.push(item.path);
             });
-          } else if (typeof parsed === "object") {
+          } else if (typeof parsed === "object" && parsed !== null) {
             Object.values(parsed).forEach((category) => {
               if (typeof category === "object") {
                 Object.values(category).forEach((imagesArray) => {
                   if (Array.isArray(imagesArray)) {
                     imagesArray.forEach((p) => {
                       if (typeof p === "string") paths.push(p);
-                      if (p.path) paths.push(p.path);
+                      if (p?.path) paths.push(p.path);
                     });
                   }
                 });
               }
             });
           }
+        } catch (err) {
+          console.error("Error parsing images:", err);
         }
-      } catch (err) {
-        console.error("Error parsing images:", err);
-      }
-      return paths;
-    };
+
+        return paths;
+      };
+
 
     const processedData = result.rows.map((row) => {
       return {

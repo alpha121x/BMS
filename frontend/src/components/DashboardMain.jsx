@@ -497,7 +497,11 @@ const DashboardMain = () => {
                   setInspectionStatus={setInspectionStatus}
                 />
               )}
-              {activeView === "damages_repairs" && <DamagesRepairs />}
+              {activeView === "damages_repairs" && <DamagesRepairs
+                districtId={districtId}
+                structureType={structureType}
+                bridgeName={bridgeName}
+              />}
             </div>
           </div>
         </div>

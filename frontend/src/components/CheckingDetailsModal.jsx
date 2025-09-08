@@ -58,6 +58,14 @@ const CheckingDetailsModal = ({ selectedRow }) => {
               {selectedRow?.Remarks || "N/A"}
             </td>
           </tr>
+           <tr>
+            <th className="border border-gray-200 px-4 py-2 text-left bg-gray-100">
+             Repair Remarks
+            </th>
+            <td className="border border-gray-200 px-4 py-2">
+              {selectedRow?.repair_remarks || "N/A"}
+            </td>
+          </tr>
         </tbody>
       </table>
 
