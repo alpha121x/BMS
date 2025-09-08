@@ -35,7 +35,8 @@ const logFile = path.join(__dirname, "query.log");
 
 // Ensure folder exists
 // Absolute Windows path for uploads
-const uploadDir = "C://Program Files//Apache Software Foundation//Tomcat 9.0//webapps//ROOT//BMS2024/REPAIR_PICS";
+const uploadDir =
+  "C://Program Files//Apache Software Foundation//Tomcat 9.0//webapps//ROOT//BMS2024/REPAIR_PICS";
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
@@ -67,9 +68,7 @@ pool
   })
   .catch((err) => console.error("Database connection error:", err.stack));
 
-
 //  app.use("/RepairPics", express.static(path.join(process.cwd(), "RepairPics")));
- 
 
 // Login API Endpoint
 app.post("/api/login", async (req, res) => {
@@ -5728,7 +5727,6 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
-
 // inspections for table dashboard damages repairs
 app.get("/api/inspections-damages-repairs", async (req, res) => {
   try {
@@ -5798,60 +5796,59 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
     const result = await pool.query(query, queryParams);
 
     // ✅ Helper function to parse image JSON safely
-      const extractPaths = (rawData) => {
-        let paths = [];
+    const extractPaths = (rawData) => {
+      let paths = [];
 
-        try {
-          if (!rawData) return paths; // nothing to parse
+      try {
+        if (!rawData) return paths; // nothing to parse
 
-          let parsed;
+        let parsed;
 
-          // Case 1: Already an object/array (from DB JSON/JSONB column)
-          if (typeof rawData === "object") {
-            parsed = rawData;
-          }
-          // Case 2: It's a string, clean and parse it
-          else if (typeof rawData === "string") {
-            const cleanedJson = rawData
-              .replace(/\"\{/g, "{")
-              .replace(/\}\"/g, "}");
+        // Case 1: Already an object/array (from DB JSON/JSONB column)
+        if (typeof rawData === "object") {
+          parsed = rawData;
+        }
+        // Case 2: It's a string, clean and parse it
+        else if (typeof rawData === "string") {
+          const cleanedJson = rawData
+            .replace(/\"\{/g, "{")
+            .replace(/\}\"/g, "}");
 
-            parsed = JSON.parse(cleanedJson);
-          }
-
-          // Handle parsed result
-          if (Array.isArray(parsed)) {
-            parsed.forEach((item) => {
-              if (typeof item === "string") paths.push(item);
-              if (item?.path) paths.push(item.path);
-            });
-          } else if (typeof parsed === "object" && parsed !== null) {
-            Object.values(parsed).forEach((category) => {
-              if (typeof category === "object") {
-                Object.values(category).forEach((imagesArray) => {
-                  if (Array.isArray(imagesArray)) {
-                    imagesArray.forEach((p) => {
-                      if (typeof p === "string") paths.push(p);
-                      if (p?.path) paths.push(p.path);
-                    });
-                  }
-                });
-              }
-            });
-          }
-        } catch (err) {
-          console.error("Error parsing images:", err);
+          parsed = JSON.parse(cleanedJson);
         }
 
-        return paths;
-      };
+        // Handle parsed result
+        if (Array.isArray(parsed)) {
+          parsed.forEach((item) => {
+            if (typeof item === "string") paths.push(item);
+            if (item?.path) paths.push(item.path);
+          });
+        } else if (typeof parsed === "object" && parsed !== null) {
+          Object.values(parsed).forEach((category) => {
+            if (typeof category === "object") {
+              Object.values(category).forEach((imagesArray) => {
+                if (Array.isArray(imagesArray)) {
+                  imagesArray.forEach((p) => {
+                    if (typeof p === "string") paths.push(p);
+                    if (p?.path) paths.push(p.path);
+                  });
+                }
+              });
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Error parsing images:", err);
+      }
 
+      return paths;
+    };
 
     const processedData = result.rows.map((row) => {
       return {
         ...row,
-        PhotoPaths: extractPaths(row.PhotoPaths),  // inspection_images
-        RepairPaths: extractPaths(row.RepairPaths) // repair_images
+        PhotoPaths: extractPaths(row.PhotoPaths), // inspection_images
+        RepairPaths: extractPaths(row.RepairPaths), // repair_images
       };
     });
 
@@ -5903,23 +5900,23 @@ app.post(
   }
 );
 
-
 // ✅ API: Get district-wise severe damage counts (with repaired info)
 app.get("/api/damage-level-summary", async (req, res) => {
   try {
     const query = `
-      SELECT 
-          d.district,
-          COUNT(*) AS total_damages,
-          COUNT(*) FILTER (WHERE i.is_repaired = TRUE) AS repaired_damages,
-          COUNT(*) FILTER (WHERE i.is_repaired = FALSE) AS unrepaired_damages
-      FROM bms.tbl_inspection_f i
-      JOIN bms.tbl_districts d
-          ON i.district_id = d.id
-      WHERE i."DamageLevelID" IN (3, 4, 5)
-      AND i.is_latest = true
-      GROUP BY d.district
-      ORDER BY d.district;
+     SELECT 
+    d.district,
+    COUNT(*) AS total_damages,
+    COUNT(*) FILTER (WHERE i.is_repaired = TRUE) AS repaired_damages,
+    COUNT(*) FILTER (WHERE i.is_repaired = FALSE) AS unrepaired_damages
+FROM bms.tbl_inspection_f i
+JOIN bms.tbl_districts d
+    ON i.district_id = d.id
+WHERE i."DamageLevelID" IN (3, 4, 5)
+  AND i.is_latest = true
+GROUP BY d.district
+ORDER BY total_damages DESC;   -- ✅ descending order by total damages
+
     `;
 
     const result = await pool.query(query);
@@ -5933,7 +5930,6 @@ app.get("/api/damage-level-summary", async (req, res) => {
     res.status(500).json({ success: false, error: "Internal server error" });
   }
 });
-
 
 // bridge-status-summary for RAMS evaluation module
 app.get("/api/bridge-status-summary-rams", async (req, res) => {
@@ -7113,30 +7109,29 @@ app.get("/api/get-inspections-evaluator", async (req, res) => {
     // Define condition based on evaluator ID
     let evaluationCondition = "";
     switch (evaluatorLevel) {
-  case 1:
-    evaluationCondition = `(',' || evaluator_id || ',') ILIKE '%,0,%' 
+      case 1:
+        evaluationCondition = `(',' || evaluator_id || ',') ILIKE '%,0,%' 
                            AND (',' || evaluator_id || ',') NOT ILIKE '%,1,%'`;
-    break;
-  case 2:
-    evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,2,%'`;
-    break;
-  case 3:
-    evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,3,%'`;
-    break;
-  case 4:
-    evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,4,%'`;
-    break;
-  case 5:
-    evaluationCondition = `
+        break;
+      case 2:
+        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,2,%'`;
+        break;
+      case 3:
+        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,3,%'`;
+        break;
+      case 4:
+        evaluationCondition = `(',' || evaluator_id || ',') NOT ILIKE '%,4,%'`;
+        break;
+      case 5:
+        evaluationCondition = `
       (',' || evaluator_id || ',') ILIKE '%,1,%'
       AND (',' || evaluator_id || ',') ILIKE '%,2,%'
       AND (',' || evaluator_id || ',') ILIKE '%,3,%'
       AND (',' || evaluator_id || ',') ILIKE '%,4,%'
       AND (',' || evaluator_id || ',') NOT ILIKE '%,5,%'
     `;
-    break;
-}
-
+        break;
+    }
 
     // SQL query
     const query = `
@@ -7826,9 +7821,10 @@ app.get("/api/detailed-damage-counts", async (req, res) => {
       try {
         if (row.PhotoPaths) {
           // Clean badly formatted JSON
-          const cleanedJson = row.PhotoPaths
-            .replace(/\"\{/g, "{")
-            .replace(/\}\"/g, "}");
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(
+            /\}\"/g,
+            "}"
+          );
 
           const parsedPhotos = JSON.parse(cleanedJson);
 
@@ -8504,7 +8500,7 @@ app.get("/api/bridge-length-construction-types", async (req, res) => {
     const result = await pool.query(query);
 
     // Format data
-    const data = result.rows.map(row => ({
+    const data = result.rows.map((row) => ({
       major_type: row.major_type,
       length_range: row.length_range,
       count: parseInt(row.count, 10),
@@ -8555,7 +8551,7 @@ app.get("/api/bridge-length-construction-types-inspected", async (req, res) => {
 
     const result = await pool.query(query);
 
-    const data = result.rows.map(row => ({
+    const data = result.rows.map((row) => ({
       major_type: row.major_type,
       length_range: row.length_range,
       count: parseInt(row.count, 10),
@@ -8567,7 +8563,6 @@ app.get("/api/bridge-length-construction-types-inspected", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 // api for road type structures chart
 app.get("/api/road-types-structures", async (req, res) => {
