@@ -197,6 +197,14 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
 
   const handleStatusClick = (row) => {
     setSelectedRow(row);
+
+    // ✅ Pre-fill remarks if they exist
+    setRemarks(row.repair_remarks || "");
+
+    // ✅ Pre-fill checkbox state
+    // if DB has true → checked, false → unchecked
+    setIsRepaired(row.is_repaired === true || row.is_repaired === "true");
+
     setShowStatusModal(true);
   };
 

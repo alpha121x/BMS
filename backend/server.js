@@ -5755,6 +5755,7 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
         ins."current_date_time",  
         ins."Remarks", 
         ins.repair_remarks,
+        ins.is_repaired,
         ins.inspection_images AS "PhotoPaths",
         ins.repair_images AS "RepairPaths"
       FROM bms.tbl_inspection_f AS ins
@@ -5861,8 +5862,9 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
   }
 });
 
-// api to update dmages repair inspection status with image uploads
-app.post("/api/update-inspection-status/:inspectionId",
+// api to update damages repair inspection status with image uploads
+app.post(
+  "/api/update-inspection-status/:inspectionId",
   upload.array("images", 4),
   async (req, res) => {
     const { inspectionId } = req.params;
@@ -5870,7 +5872,7 @@ app.post("/api/update-inspection-status/:inspectionId",
     const files = req.files;
 
     try {
-      // Build public URLs for DB
+      // ✅ Always replace with new image URLs
       const images = files.map((file) => ({
         path: `http://cnw.urbanunit.gov.pk/RAMS-IMAGES2/BMS2024/REPAIR_PICS/${file.filename}`,
       }));
@@ -5879,7 +5881,7 @@ app.post("/api/update-inspection-status/:inspectionId",
         UPDATE bms.tbl_inspection_f
         SET repair_remarks = $1,
             is_repaired = $2,
-            repair_images = COALESCE(repair_images, '[]'::jsonb) || $3::jsonb
+            repair_images = $3::jsonb
         WHERE inspection_id = $4
         RETURNING *;
       `;
@@ -5887,7 +5889,7 @@ app.post("/api/update-inspection-status/:inspectionId",
       const values = [
         remarks,
         isRepaired === "true",
-        JSON.stringify(images),
+        JSON.stringify(images), // replaces the whole JSON array
         inspectionId,
       ];
 
@@ -5900,6 +5902,7 @@ app.post("/api/update-inspection-status/:inspectionId",
     }
   }
 );
+
 
 // ✅ API: Get district-wise severe damage counts (with repaired info)
 app.get("/api/damage-level-summary", async (req, res) => {
