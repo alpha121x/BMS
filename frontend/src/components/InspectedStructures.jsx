@@ -15,11 +15,11 @@ import Map from "./MapInspectedStructures";
 import FilterComponent from "./FilterComponent";
 import DataTable from "react-data-table-component";
 import { saveAs } from "file-saver";
-import Graph from "./GraphInspected"; // Assuming you have a Graph component for the graph view
+import Graph from "./GraphInspected";
 import { useNavigate } from "react-router-dom";
 import InspectionListInsStruc from "./InspectionListInsStruc";
-import BridgeWiseScore from "./BridgeWiseScore"; // Assuming you have a BridgeWiseScroe component for the bridge wise score view
-import DamageSummary from "./DamageSummary"; // New import for DamageSummary component
+import BridgeWiseScore from "./BridgeWiseScore";
+import DamageSummary from "./DamageSummary";
 
 const InspectedStructures = ({
   districtId,
@@ -37,8 +37,8 @@ const InspectedStructures = ({
   setRoadClassification,
   spanLength,
   setSpanLength,
-  inspectionStatus, // New prop
-  setInspectionStatus, // New prop
+  inspectionStatus,
+  setInspectionStatus,
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
@@ -52,9 +52,9 @@ const InspectedStructures = ({
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [bridgeCount, setBridgeCount] = useState(0);
-  const [viewMode, setViewMode] = useState("map"); // New state for view mode
+  const [viewMode, setViewMode] = useState("map");
   const [showInspectionSummaryModal, setShowInspectionSummaryModal] =
-    useState(false); // New state for inspection summary modal
+    useState(false);
   const [workKinds, setWorkKinds] = useState([]);
   const [damageCounts, setDamageCounts] = useState({});
   const [loadingWorkKinds, setLoadingWorkKinds] = useState(false);
@@ -115,83 +115,80 @@ const InspectedStructures = ({
     }
   };
 
-    // Fetch Visual Conditions from API
-    useEffect(() => {
-      const fetchVisualConditions = async () => {
-        setLoadingConditions(true);
-        try {
-          const response = await fetch(`${BASE_URL}/api/visual-conditions`);
-          if (!response.ok) {
-            throw new Error("Failed to fetch visual conditions");
-          }
-          const data = await response.json();
-          setVisualConditions(data);
-        } catch (error) {
-          console.error("Error fetching visual conditions:", error);
-          setVisualConditions([
-            { id: 1, visual_condition: "FAIR" },
-            { id: 2, visual_condition: "GOOD" },
-            { id: 3, visual_condition: "POOR" },
-            { id: 4, visual_condition: "UNDER CONSTRUCTION" },
-          ]);
-        } finally {
-          setLoadingConditions(false);
+  useEffect(() => {
+    const fetchVisualConditions = async () => {
+      setLoadingConditions(true);
+      try {
+        const response = await fetch(`${BASE_URL}/api/visual-conditions`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch visual conditions");
         }
-      };
-  
-      fetchVisualConditions();
-    }, []);
-  
-    // Fetch Work Kinds from API
-    useEffect(() => {
-      const fetchWorkKinds = async () => {
-        setLoadingWorkKinds(true);
-        try {
-          const response = await fetch(`${BASE_URL}/api/work-kinds`);
-          if (!response.ok) {
-            throw new Error("Failed to fetch work kinds");
-          }
-          const data = await response.json();
-          setWorkKinds(data);
-        } catch (error) {
-          console.error("Error fetching work kinds:", error);
-          setError("Failed to load work kinds");
-        } finally {
-          setLoadingWorkKinds(false);
+        const data = await response.json();
+        setVisualConditions(data);
+      } catch (error) {
+        console.error("Error fetching visual conditions:", error);
+        setVisualConditions([
+          { id: 1, visual_condition: "FAIR" },
+          { id: 2, visual_condition: "GOOD" },
+          { id: 3, visual_condition: "POOR" },
+          { id: 4, visual_condition: "UNDER CONSTRUCTION" },
+        ]);
+      } finally {
+        setLoadingConditions(false);
+      }
+    };
+
+    fetchVisualConditions();
+  }, []);
+
+  useEffect(() => {
+    const fetchWorkKinds = async () => {
+      setLoadingWorkKinds(true);
+      try {
+        const response = await fetch(`${BASE_URL}/api/work-kinds`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch work kinds");
         }
-      };
-  
-      fetchWorkKinds();
-    }, []);
-  
-    // Fetch Damage Counts for the specific bridge
-    useEffect(() => {
-      const fetchDamageCounts = async () => {
-        if (!selectedBridge?.uu_bms_id) return;
-        setLoadingDamageCounts(true);
-        try {
-          const response = await fetch(
-            `${BASE_URL}/api/damage-counts?uu_bms_id=${selectedBridge.uu_bms_id}`
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch damage counts");
-          }
-          const data = await response.json();
-          const countsMap = {};
-          data.forEach((item) => {
-            countsMap[item.WorkKindID] = item;
-          });
-          setDamageCounts(countsMap);
-        } catch (error) {
-          console.error("Error fetching damage counts:", error);
-          setError("Failed to load damage counts");
-        } finally {
-          setLoadingDamageCounts(false);
+        const data = await response.json();
+        setWorkKinds(data);
+      } catch (error) {
+        console.error("Error fetching work kinds:", error);
+        setError("Failed to load work kinds");
+      } finally {
+        setLoadingWorkKinds(false);
+      }
+    };
+
+    fetchWorkKinds();
+  }, []);
+
+  useEffect(() => {
+    const fetchDamageCounts = async () => {
+      if (!selectedBridge?.uu_bms_id) return;
+      setLoadingDamageCounts(true);
+      try {
+        const response = await fetch(
+          `${BASE_URL}/api/damage-counts?uu_bms_id=${selectedBridge.uu_bms_id}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch damage counts");
         }
-      };
-  
-      fetchDamageCounts();
-    }, [selectedBridge?.uu_bms_id]);
+        const data = await response.json();
+        const countsMap = {};
+        data.forEach((item) => {
+          countsMap[item.WorkKindID] = item;
+        });
+        setDamageCounts(countsMap);
+      } catch (error) {
+        console.error("Error fetching damage counts:", error);
+        setError("Failed to load damage counts");
+      } finally {
+        setLoadingDamageCounts(false);
+      }
+    };
+
+    fetchDamageCounts();
+  }, [selectedBridge?.uu_bms_id]);
 
   const handleViewInventory = (bridge) => {
     setSelectedBridge(bridge);
@@ -247,7 +244,7 @@ const InspectedStructures = ({
         underFacility: underFacility || "%",
         roadClassification: roadClassification || "%",
         spanLength: spanLength || "%",
-        inspectionStatus: inspectionStatus || "%", // New filter parameter
+        inspectionStatus: inspectionStatus || "%",
       };
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(
@@ -259,7 +256,12 @@ const InspectedStructures = ({
 
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
-        Swal.fire("No data available for export", "error");
+        Swal.fire({
+          icon: "error",
+          title: "No Data",
+          text: "No data available for export",
+          confirmButtonColor: "#005D7F",
+        });
         return;
       }
 
@@ -270,7 +272,12 @@ const InspectedStructures = ({
       link.download = "Bridges_Data.csv";
       link.click();
     } catch (error) {
-      Swal.fire("Error!", "Failed to download CSV file", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to download CSV file",
+        confirmButtonColor: "#005D7F",
+      });
     } finally {
       setLoadingCSV(false);
     }
@@ -299,7 +306,7 @@ const InspectedStructures = ({
         underFacility: underFacility || "%",
         roadClassification: roadClassification || "%",
         spanLength: spanLength || "%",
-        inspectionStatus: inspectionStatus || "%", // New filter parameter
+        inspectionStatus: inspectionStatus || "%",
       };
       const queryString = new URLSearchParams(params).toString();
 
@@ -312,7 +319,12 @@ const InspectedStructures = ({
 
       const data = await response.json();
       if (!data.bridges || data.bridges.length === 0) {
-        Swal.fire("No data available for export", "error");
+        Swal.fire({
+          icon: "error",
+          title: "No Data",
+          text: "No data available for export",
+          confirmButtonColor: "#005D7F",
+        });
         return;
       }
 
@@ -407,7 +419,12 @@ const InspectedStructures = ({
       saveAs(new Blob([buffer]), `BridgeData.xlsx`);
     } catch (error) {
       console.error("Error downloading Excel:", error);
-      Swal.fire("Error!", "Failed to fetch or download Excel file", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to fetch or download Excel file",
+        confirmButtonColor: "#005D7F",
+      });
     } finally {
       setLoadingExcel(false);
     }
@@ -448,7 +465,7 @@ const InspectedStructures = ({
         `${row.pms_sec_id || "N/A"}, ${row.structure_no || "N/A"}`,
       sortable: true,
       wrap: true,
-      grow: 1,
+      grow: 1.5, // Slightly increased for longer names
     },
     {
       name: "Structure Length",
@@ -472,14 +489,14 @@ const InspectedStructures = ({
           : "N/A",
       sortable: true,
       wrap: true,
-      grow: 1.5,
+      grow: 1, // Increased for longer datetime strings
     },
     {
       name: "Action",
       cell: (row) => (
         <div
-          className="flex space-x-2 justify-center"
-          style={{ minWidth: "240px" }}
+          className="flex space-x-2 justify-center items-center"
+          style={{ minWidth: "280px", padding: "0" }} // Reduced minWidth and removed padding
         >
           <button
             onClick={(e) => {
@@ -487,7 +504,7 @@ const InspectedStructures = ({
               handleViewInventory(row);
             }}
             className="bg-[#009CB8] text-white px-1 py-0.5 rounded-1 hover:bg-[#007485]"
-            style={{ fontSize: "12px" }}
+            style={{ fontSize: "12px", padding: "2px 3px" }} // Reduced padding
           >
             Inventory Info
           </button>
@@ -497,7 +514,7 @@ const InspectedStructures = ({
               handleViewInspection(row);
             }}
             className="bg-[#3B9895] text-white px-1 py-0.5 rounded-1 hover:bg-[#2d7270]"
-            style={{ fontSize: "12px" }}
+            style={{ fontSize: "12px", padding: "2px 4px" }} // Reduced padding
           >
             Inspection Info
           </button>
@@ -507,6 +524,7 @@ const InspectedStructures = ({
               handleViewInspectionSummary(row);
             }}
             className="bg-[#005D7F] text-white px-2 py-1 rounded hover:bg-[#003f5f] text-xs"
+            style={{ padding: "2px 6px" }} // Adjusted padding
           >
             Inspection Summary
           </button>
@@ -516,14 +534,14 @@ const InspectedStructures = ({
               handleZoomToBridge(row);
             }}
             className="bg-[#88B9B8] text-white px-1 py-0.5 rounded-1 hover:bg-[#6a8f8f]"
-            style={{ fontSize: "12px" }}
+            style={{ fontSize: "12px", padding: "2px 4px" }} // Reduced padding
           >
             Zoom To
           </button>
         </div>
       ),
       ignoreRowClick: true,
-      grow: 2,
+      grow: 2, // Kept as is, but ensure it fits
     },
   ];
 
@@ -535,12 +553,18 @@ const InspectedStructures = ({
         fontSize: "14px",
         fontWeight: "bold",
         border: "1px solid #dee2e6",
+        whiteSpace: "normal",
+        wordWrap: "break-word",
+        padding: "4px", // Controlled padding to reduce gaps
       },
     },
     cells: {
       style: {
         fontSize: "13px",
         border: "1px solid #dee2e6",
+        whiteSpace: "normal",
+        wordWrap: "break-word",
+        padding: "4px", // Controlled padding to reduce gaps
       },
     },
     rows: {
@@ -549,17 +573,21 @@ const InspectedStructures = ({
           backgroundColor: "#f1f5f9",
           cursor: "pointer",
         },
+        padding: "0", // Remove row padding if present
       },
     },
     table: {
       style: {
         width: "100%",
         border: "1px solid #dee2e6",
+        overflowX: "auto",
+        borderCollapse: "collapse", // Ensure no gaps from borders
       },
     },
     header: {
       style: {
         minHeight: "auto",
+        width: "100%",
       },
     },
     pagination: {
@@ -568,13 +596,14 @@ const InspectedStructures = ({
         padding: "10px",
         display: "flex",
         justifyContent: "center",
+        width: "100%",
       },
     },
   };
 
   return (
     <>
-      <div className="flex justify-between items-center p-2 bg-gray-100 border-b">
+      <div className="flex justify-between items-center p-2 bg-gray-100 border-b overflow-x-auto">
         <div className="flex gap-2">
           <button
             className={`px-3 py-1 rounded ${
@@ -602,7 +631,7 @@ const InspectedStructures = ({
           </button>
         </div>
       </div>
-      <div>
+      <div className="w-full overflow-x-hidden">
         {viewMode === "map" && (
           <Map
             districtId={districtId}
@@ -618,7 +647,7 @@ const InspectedStructures = ({
         )}
 
         {viewMode === "bws" && (
-          <div className="p-4 text-center">
+          <div className="p-4 text-center w-full overflow-x-auto">
             <BridgeWiseScore
               districtId={districtId}
               structureType={structureType}
@@ -628,7 +657,7 @@ const InspectedStructures = ({
         )}
 
         {viewMode === "graph" && (
-          <div className="p-4 text-center">
+          <div className="p-4 text-center w-full overflow-x-auto">
             <Graph />
           </div>
         )}
@@ -641,78 +670,82 @@ const InspectedStructures = ({
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
           position: "relative",
           width: "100%",
+          maxWidth: "100vw",
+          overflowX: "hidden",
         }}
       >
         <div
-          className="card-header rounded-0 p-2"
+          className="card-header rounded-0 p-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
           style={{ background: "#005D7F", color: "#fff" }}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center justify-between">
-              <h5 className="mb-0 me-5">Inventory</h5>
-              <h6 className="mb-0" id="structure-heading">
-                Structures Count:
-                <span
-                  className="badge text-white ms-2"
-                  style={{ background: "#009CB8" }}
-                >
-                  <h6 className="mb-0">{bridgeCount || 0}</h6>
-                </span>
-              </h6>
-            </div>
-
-            <FilterComponent
-              constructionType={constructionType}
-              setConstructionType={setConstructionType}
-              bridgeLength={bridgeLength}
-              setBridgeLength={setBridgeLength}
-              age={age}
-              setAge={setAge}
-              underFacility={underFacility}
-              setUnderFacility={setUnderFacility}
-              roadClassification={roadClassification}
-              setRoadClassification={setRoadClassification}
-              inspectionStatus={inspectionStatus}
-              setInspectionStatus={setInspectionStatus}
-              spanLength={spanLength}
-              setSpanLength={setSpanLength}
-              onApplyFilters={() => fetchAllBridges(currentPage)}
-            />
-
-            <div className="flex items-center gap-1">
-              <button
-                className="btn text-white"
-                onClick={handleDownloadCSV}
-                disabled={loadingCSV}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <h5 className="mb-0 me-5">Inventory</h5>
+            <h6 className="mb-0" id="structure-heading">
+              Structures Count:
+              <span
+                className="badge text-white ms-2"
+                style={{ background: "#009CB8" }}
               >
+                <h6 className="mb-0">{bridgeCount || 0}</h6>
+              </span>
+            </h6>
+          </div>
+
+          <FilterComponent
+            constructionType={constructionType}
+            setConstructionType={setConstructionType}
+            bridgeLength={bridgeLength}
+            setBridgeLength={setBridgeLength}
+            age={age}
+            setAge={setAge}
+            underFacility={underFacility}
+            setUnderFacility={setUnderFacility}
+            roadClassification={roadClassification}
+            setRoadClassification={setRoadClassification}
+            inspectionStatus={inspectionStatus}
+            setInspectionStatus={setInspectionStatus}
+            spanLength={spanLength}
+            setSpanLength={setSpanLength}
+            onApplyFilters={() => fetchAllBridges(currentPage)}
+            className="w-full sm:w-auto"
+          />
+
+          <div className="flex items-center gap-1">
+            <button
+              className="btn text-white"
+              onClick={handleDownloadCSV}
+              disabled={loadingCSV}
+            >
+              <div className="flex items-center gap-1">
+                <FaFileCsv />
+                {loadingCSV ? "Downloading CSV..." : "CSV"}
+              </div>
+            </button>
+
+            <button
+              className="btn text-white"
+              onClick={handleDownloadExcel}
+              disabled={loadingExcel}
+            >
+              {loadingExcel ? (
+                <>
+                  <FaSpinner className="animate-spin mr-2" /> Downloading
+                  Excel...
+                </>
+              ) : (
                 <div className="flex items-center gap-1">
-                  <FaFileCsv />
-                  {loadingCSV ? "Downloading CSV..." : "CSV"}
+                  <FaFileExcel />
+                  Excel
                 </div>
-              </button>
-
-              <button
-                className="btn text-white"
-                onClick={handleDownloadExcel}
-                disabled={loadingExcel}
-              >
-                {loadingExcel ? (
-                  <>
-                    <FaSpinner className="animate-spin mr-2" /> Downloading
-                    Excel...
-                  </>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <FaFileExcel />
-                    Excel
-                  </div>
-                )}
-              </button>
-            </div>
+              )}
+            </button>
           </div>
         </div>
 
-        <div className="card-body p-2" style={{ width: "100%" }}>
+        <div
+          className="card-body p-2"
+          style={{ width: "100%", overflowX: "auto" }}
+        >
           {loading && (
             <div
               style={{
@@ -733,7 +766,7 @@ const InspectedStructures = ({
           )}
 
           {error && (
-            <div className="text-danger text-center">
+            <div className="text-danger text-center p-4">
               <strong>Error:</strong> {error}
             </div>
           )}
@@ -766,11 +799,12 @@ const InspectedStructures = ({
                 size="lg"
                 centered
                 className="custom-modal"
+                style={{ maxHeight: "90vh", overflowY: "auto" }}
               >
                 <Modal.Header closeButton>
                   <Modal.Title>Bridge Inventory Details</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
                   {selectedBridge && (
                     <InventoryInfoDashboard inventoryData={selectedBridge} />
                   )}
@@ -788,11 +822,12 @@ const InspectedStructures = ({
                 size="lg"
                 centered
                 className="custom-modal"
+                style={{ maxHeight: "90vh", overflowY: "auto" }}
               >
                 <Modal.Header closeButton>
                   <Modal.Title>Inspection Details</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
                   {selectedBridge && (
                     <InspectionListInsStruc
                       bridgeId={selectedBridge.uu_bms_id}
@@ -815,11 +850,12 @@ const InspectedStructures = ({
                 size="lg"
                 centered
                 className="custom-modal"
+                style={{ maxHeight: "90vh", overflowY: "auto" }}
               >
                 <Modal.Header closeButton>
                   <Modal.Title>Bridge Location on Map</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
                   {selectedLocation && (
                     <MapModal
                       location={selectedLocation}
@@ -844,11 +880,12 @@ const InspectedStructures = ({
                 size="lg"
                 centered
                 className="custom-modal"
+                style={{ maxHeight: "90vh", overflowY: "auto" }}
               >
                 <Modal.Header closeButton>
                   <Modal.Title>Inspection Summary</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
+                <Modal.Body style={{ maxHeight: "70vh", overflowY: "auto" }}>
                   {selectedBridge && (
                     <DamageSummary
                       workKinds={workKinds}
