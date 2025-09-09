@@ -23,8 +23,9 @@ const FiveYearPlan = () => {
   const chartRef = useRef(null);
   const [inspectionData, setInspectionData] = useState([]);
   const [planData, setPlanData] = useState([]);
+  const [activeTab, setActiveTab] = useState("inspection"); // 🔹 Tab state
 
- const formatDate = (dateStr) => {
+  const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     return new Date(dateStr).toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -39,28 +40,29 @@ const FiveYearPlan = () => {
     return num.toLocaleString();
   };
 
-  // Fetch inspection plan
+  // Fetch inspection plan (3 years)
   useEffect(() => {
     const fetchInspectionData = async () => {
       try {
         const res = await fetch(`${BASE_URL}/api/inspections-five-year-plan`);
         const result = await res.json();
         if (result.success) {
-          const formatted = result.data.map((row) => {
-            const currentDate = row.current_inspection_date
-              ? new Date(row.current_inspection_date)
-              : null;
-            const nextDate = currentDate
-              ? new Date(currentDate.setFullYear(currentDate.getFullYear() + 3))
-              : null;
+          const currentYear = new Date().getFullYear();
+          const formatted = result.data
+            .map((row) => {
+              const currentDate = row.current_inspection_date ? new Date(row.current_inspection_date) : null;
+              const nextDate = currentDate ? new Date(currentDate.setFullYear(currentDate.getFullYear() + 3)) : null;
 
-            return {
-              bridge_name: row.bridge_name,
-              damage_level: row.DamageLevel || row.DamageLevelID,
-              current_inspection: formatDate(row.current_inspection_date),
-              next_inspection: nextDate ? formatDate(nextDate) : "Planned",
-            };
-          });
+              return {
+                bridge_name: row.bridge_name,
+                damage_level: row.DamageLevel || row.DamageLevelID,
+                current_inspection: formatDate(row.current_inspection_date),
+                next_inspection: nextDate ? formatDate(nextDate) : "Planned",
+                year_number: currentDate ? currentDate.getFullYear() : null,
+              };
+            })
+            .filter((row) => row.year_number && row.year_number <= currentYear + 3);
+
           setInspectionData(formatted);
         }
       } catch (err) {
@@ -77,7 +79,6 @@ const FiveYearPlan = () => {
         const res = await fetch(`${BASE_URL}/api/bms-5year-development-plan`);
         const result = await res.json();
         if (result.success) {
-          // Ensure numeric values
           const formatted = result.data.map((item) => ({
             ...item,
             scheme_count: Number(item.scheme_count),
@@ -97,20 +98,13 @@ const FiveYearPlan = () => {
     if (chartRef.current && planData.length) {
       Highcharts.chart(chartRef.current, {
         chart: { type: "column", backgroundColor: "transparent" },
-        title: {
-          text: "Number of Schemes Over 5 Years",
-          style: { color: "#1f2937", fontSize: "20px" },
-        },
+        title: { text: "Number of Schemes Over 5 Years", style: { color: "#1f2937", fontSize: "20px" } },
         xAxis: {
           categories: planData.map((item) => item.year_label),
           title: { text: "Year" },
           labels: { style: { color: "#374151" } },
         },
-        yAxis: {
-          min: 0,
-          title: { text: "Number of Schemes" },
-          labels: { style: { color: "#374151" } },
-        },
+        yAxis: { min: 0, title: { text: "Number of Schemes" }, labels: { style: { color: "#374151" } } },
         tooltip: {
           shared: true,
           formatter() {
@@ -119,19 +113,12 @@ const FiveYearPlan = () => {
             return `<b>${point.key}</b><br/>Schemes: <b>${point.y}</b><br/>Cost: <b>${cost} PKR</b>`;
           },
         },
-        series: [
-          {
-            name: "Schemes",
-            data: planData.map((item) => item.scheme_count),
-            color: "#3B82F6",
-          },
-        ],
+        series: [{ name: "Schemes", data: planData.map((item) => item.scheme_count), color: "#3B82F6" }],
         credits: { enabled: false },
       });
     }
   }, [planData]);
 
-  // Columns for inspection table
   const columns = [
     { name: "Bridge Name", selector: (row) => row.bridge_name, sortable: true },
     { name: "Damage Level", selector: (row) => row.damage_level, sortable: true },
@@ -141,11 +128,24 @@ const FiveYearPlan = () => {
 
   return (
     <div className="p-6 bg-gray-50 rounded-md mt-3 shadow-lg w-75 mx-auto border border-gray-200">
-      {/* Inspection Plan Table */}
-      <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-800">
-        Bridge Inspection Plan
-      </h2>
-      <div className="mb-14">
+      {/* 🔹 Tabs */}
+      <div className="flex mb-6 border-b border-gray-300">
+        <button
+          onClick={() => setActiveTab("inspection")}
+          className={`py-2 px-6 font-semibold ${activeTab === "inspection" ? "border-b-4 border-blue-600 text-blue-600" : "text-gray-600"}`}
+        >
+          Inspection Plan
+        </button>
+        <button
+          onClick={() => setActiveTab("development")}
+          className={`py-2 px-6 font-semibold ${activeTab === "development" ? "border-b-4 border-blue-600 text-blue-600" : "text-gray-600"}`}
+        >
+          5-Year Development Plan
+        </button>
+      </div>
+
+      {/* 🔹 Tab Content */}
+      {activeTab === "inspection" && (
         <DataTable
           columns={columns}
           data={inspectionData}
@@ -156,41 +156,35 @@ const FiveYearPlan = () => {
           responsive
           noDataComponent="No data available"
         />
-      </div>
+      )}
 
-      {/* 5-Year Development Plan Table */}
-      <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-800">
-        5-Year Development Plan
-      </h2>
-      <div className="overflow-x-auto mb-14">
-        <table className="min-w-full bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
-          <thead>
-            <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-lg">
-              <th className="py-4 px-6 text-left">Year</th>
-              <th className="py-4 px-6 text-center">Number of Schemes</th>
-              <th className="py-4 px-6 text-center">Cost (Rupees)</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-800 text-md">
-            {planData.map((item, index) => (
-              <tr key={index} className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}>
-                <td className="py-3 px-6 font-medium">{item.year_label}</td>
-                <td className="py-3 px-6 text-center font-bold text-blue-700">
-                  {item.scheme_count.toLocaleString()}
-                </td>
-                <td className="py-3 px-6 text-center font-bold text-green-600">
-                  {item.total_cost.toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 5-Year Plan Chart */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <div ref={chartRef} className="h-96" />
-      </div>
+      {activeTab === "development" && (
+        <>
+          <div className="overflow-x-auto mb-6">
+            <table className="min-w-full bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden">
+              <thead>
+                <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-lg">
+                  <th className="py-4 px-6 text-left">Year</th>
+                  <th className="py-4 px-6 text-center">Number of Schemes</th>
+                  <th className="py-4 px-6 text-center">Cost (Rupees)</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-800 text-md">
+                {planData.map((item, index) => (
+                  <tr key={index} className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}>
+                    <td className="py-3 px-6 font-medium">{item.year_label}</td>
+                    <td className="py-3 px-6 text-center font-bold text-blue-700">{item.scheme_count.toLocaleString()}</td>
+                    <td className="py-3 px-6 text-center font-bold text-green-600">{item.total_cost.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div ref={chartRef} className="h-96" />
+          </div>
+        </>
+      )}
     </div>
   );
 };
