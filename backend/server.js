@@ -375,69 +375,96 @@ app.get("/api/bridge-scores", async (req, res) => {
   }
 });
 
+// ✅ Unified Export Endpoint with Filters (TitleCase for CSV/Excel)
+ app.get("/api/bridge-scores-export", async (req, res) => {
+  const { district, structureType, bridgeName } = req.query;
 
-// ✅ Unified Export Endpoint (returns all columns, no type param)
-app.get("/api/bridge-scores-export", async (req, res) => {
+  const params = [];
+  const whereClauses = [];
+
+  // Add filters dynamically
+  if (district && district !== "%") {
+    params.push(district);
+    whereClauses.push(`m.district_id = $${params.length}`);
+  }
+
+  if (structureType && structureType !== "%") {
+    params.push(structureType);
+    whereClauses.push(`m.structure_type_id = $${params.length}`);
+  }
+
+  if (bridgeName && bridgeName !== "%") {
+    params.push(`%${bridgeName}%`);
+    whereClauses.push(`CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${params.length}`);
+  }
+
   const query = `
-    SELECT 
-      c.uu_bms_id,
-      c.structure_type,
-      c.total_damage_score,
-      c.average_damage_score,
-      c.critical_damage_score,
-      c.bridge_performance_index,
-      c.damage_score_group,
-      c.road_classification_weight,
-      c.carriageway_weight,
-      c.bridge_age_weight,
-      c.crossing_weight,
-      c.dimensions_weight,
-      c.inventory_score,
-      c.inventory_weight_group,
-      c.tbs_totaldamage,
-      c.tbs_averagedamage,
-      c.tbs_criticaldamage,
-      m.structure_no,
-      m.structure_type_id,
-      m.road_name,
-      m.road_name_cwd,
-      m.route_id,
-      m.survey_id,
-      m.surveyor_name,
-      m.district_id,
-      m.district,
-      m.road_classification,
-      m.road_surface_type,
-      m.carriageway_type,
-      m.direction,
-      m.visual_condition,
-      m.construction_type_id,
-      m.construction_type,
-      m.no_of_span,
-      m.span_length_m,
-      m.structure_width_m,
-      m.construction_year,
-      m.last_maintenance_date,
-      m.remarks,
-      m.is_surveyed,
-      m.x_centroid,
-      m.y_centroid,
-      m.images_spans,
-      CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-      ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+   SELECT 
+    c.uu_bms_id AS "Reference No.",
+    c.structure_type AS "Structure Type",
+    c.total_damage_score AS "Total Damage Score",
+    c.average_damage_score AS "Average Damage Score",
+    c.critical_damage_score AS "Critical Damage Score",
+    c.bridge_performance_index AS "Bridge Performance Index",
+    c.damage_score_group AS "Damage Score Group",
+    c.road_classification_weight AS "Road Classification Weight",
+    c.carriageway_weight AS "Carriageway Weight",
+    c.bridge_age_weight AS "Bridge Age Weight",
+    c.crossing_weight AS "Crossing Weight",
+    c.dimensions_weight AS "Dimensions Weight",
+    c.inventory_score AS "Inventory Score",
+    c.inventory_weight_group AS "Inventory Weight Group",
+    c.tbs_totaldamage AS "TBS Total Damage",
+    c.tbs_averagedamage AS "TBS Average Damage",
+    c.tbs_criticaldamage AS "TBS Critical Damage",
 
-    FROM bms.tbl_bms_calculations c
-    LEFT JOIN bms.tbl_bms_master_data m 
-      ON c.uu_bms_id = m.uu_bms_id
-      AND m.is_active = true;
+    m.structure_no AS "Structure No.",
+    m.structure_type_id AS "Structure Type Id",
+    m.road_name AS "Road Name",
+    m.road_name_cwd AS "Road Name CWD",
+    m.route_id AS "Route Id",
+    m.survey_id AS "Survey Id",
+    m.surveyor_name AS "Surveyor Name",
+    m.district_id AS "District Id",
+    m.district AS "District",
+    m.road_classification AS "Road Classification",
+    m.road_surface_type AS "Road Surface Type",
+    m.carriageway_type AS "Carriageway Type",
+    m.direction AS "Direction",
+    m.visual_condition AS "Visual Condition",
+    m.construction_type_id AS "Construction Type Id",
+    m.construction_type AS "Construction Type",
+    m.no_of_span AS "No. of Span",
+    m.span_length_m AS "Span Length (m)",
+    m.structure_width_m AS "Structure Width (m)",
+    m.construction_year AS "Construction Year",
+    m.last_maintenance_date AS "Last Maintenance Date",
+    m.remarks AS "Remarks",
+    m.is_surveyed AS "Is Surveyed",
+    m.x_centroid AS "X Centroid",
+    m.y_centroid AS "Y Centroid",
+    m.images_spans AS "Images Spans",
+    CONCAT(m.pms_sec_id, ', ', m.structure_no) AS "Bridge Name",
+    ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS "Photos"
+
+FROM bms.tbl_bms_calculations c
+LEFT JOIN bms.tbl_bms_master_data m
+  ON c.uu_bms_id = m.uu_bms_id
+  AND m.is_active = true
+    ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}
+    ORDER BY c.uu_bms_id;
   `;
 
   try {
-    const result = await pool.query(query);
-    res.json({ success: true, data: result.rows });
+    const result = await pool.query(query, params);
+    res.json({
+      Success: true,
+      TotalRecords: result.rowCount,
+      Data: result.rows,
+    });
   } catch (error) {
     console.error("Error executing query", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ Error: "Internal server error" });
   }
 });
 

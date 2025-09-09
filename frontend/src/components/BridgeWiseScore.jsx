@@ -183,70 +183,94 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
     ];
   };
 
-  const handleDownloadCSV = async () => {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/bridge-scores-export`
-      );
-      const { data } = await response.json();
+const handleDownloadCSV = async () => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/bridge-scores-export?district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
+    );
+    const json = await response.json();
+    const data = json.Data;
 
-      if (!data.length) {
-        console.warn("No data available for CSV download.");
-        return;
-      }
-
-      const csvContent =
-        "data:text/csv;charset=utf-8," +
-        [
-          Object.keys(data[0]).join(","),
-          ...data.map((row) => Object.values(row).join(",")),
-        ].join("\n");
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Bridge_Wise_Score.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading CSV:", error);
+    if (!data || !data.length) {
+      console.warn("No data available for CSV download.");
+      return;
     }
-  };
 
-  const handleDownloadExcel = async () => {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/bridge-scores-export`
-      );
-      const { data } = await response.json();
+    // Function to safely escape CSV values
+    const escapeCSV = (value) => {
+      if (value === null || value === undefined) return "";
+      const str = value.toString();
+      return `"${str.replace(/"/g, '""')}"`;
+    };
 
-      if (!data.length) {
-        console.warn("No data available for Excel download.");
-        return;
-      }
+    const headers = Object.keys(data[0]).map(escapeCSV).join(",");
+    const rows = data.map((row) =>
+      Object.values(row).map(escapeCSV).join(",")
+    );
 
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
+    const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
 
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
-      const blob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `Bridge_Wise_Score.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading Excel:", error);
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `BridgeWiseScore.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Error downloading CSV:", error);
+  }
+};
+
+const handleDownloadExcel = async () => {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/bridge-scores-export?district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
+    );
+    const json = await response.json();
+    const data = json.Data;
+
+    if (!data || !data.length) {
+      console.warn("No data available for Excel download.");
+      return;
     }
-  };
+
+    // Optional: Convert arrays to comma-separated strings for Excel
+    const formattedData = data.map((row) => {
+      const newRow = {};
+      for (const key in row) {
+        if (Array.isArray(row[key])) {
+          newRow[key] = row[key].filter(Boolean).join(", "); // Join only non-empty values
+        } else {
+          newRow[key] = row[key];
+        }
+      }
+      return newRow;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `BridgeWiseScore.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Error downloading Excel:", error);
+  }
+};
+
+
 
   const customStyles = {
     headCells: {
