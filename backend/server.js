@@ -5727,6 +5727,103 @@ app.get("/api/inspections", async (req, res) => {
   }
 });
 
+// inspections for table dashboard five year plan records
+app.get("/api/inspections-five-year-plan", async (req, res) => {
+  try {
+    let { district, bridge, structure_type } = req.query;
+
+    // Base query with DISTINCT ON and ORDER BY for latest inspection
+    let query = `
+     SELECT DISTINCT ON (ins."uu_bms_id")
+    ins."inspection_id",
+    ins."uu_bms_id",
+    ins."current_date_time" AS current_inspection_date,
+    ins."DamageLevel",
+    ins."DamageLevelID",
+    ins."Remarks",
+    ins.inspection_images AS "PhotoPaths",
+    bmd."pms_sec_id",
+    bmd."structure_no",
+    CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") AS bridge_name
+FROM bms.tbl_inspection_f ins
+JOIN bms.tbl_bms_master_data bmd
+    ON ins."uu_bms_id" = bmd."uu_bms_id"
+WHERE (
+    ins.surveyed_by = 'RAMS-PITB'
+    OR ins.surveyed_by = 'RAMS-UU'
+)
+AND bmd."is_active" = true
+    `;
+
+    const queryParams = [];
+    let paramIndex = 1;
+
+    if (district && !isNaN(parseInt(district))) {
+      query += ` AND ins."district_id" = $${paramIndex}`;
+      queryParams.push(parseInt(district));
+      paramIndex++;
+    }
+
+    if (structure_type && !isNaN(parseInt(structure_type))) {
+      query += ` AND bmd."structure_type_id" = $${paramIndex}`;
+      queryParams.push(parseInt(structure_type));
+      paramIndex++;
+    }
+
+    if (bridge && bridge.trim() !== "" && bridge !== "%") {
+      query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
+      queryParams.push(`%${bridge}%`);
+      paramIndex++;
+    }
+
+    // ✅ Final ORDER BY for DISTINCT ON
+    query += ` ORDER BY ins."uu_bms_id", ins."current_date_time" DESC;`;
+
+    const result = await pool.query(query, queryParams);
+
+    // Process PhotoPaths
+    const processedData = result.rows.map((row) => {
+      let extractedPhotoPaths = [];
+      try {
+        if (row.PhotoPaths) {
+          const cleanedJson = row.PhotoPaths.replace(/\"\{/g, "{").replace(/\}\"/g, "}");
+          const parsedPhotos = JSON.parse(cleanedJson);
+
+          if (Array.isArray(parsedPhotos)) {
+            parsedPhotos.forEach((item) => {
+              if (item.path) extractedPhotoPaths.push(item.path);
+            });
+          } else if (typeof parsedPhotos === "object") {
+            Object.values(parsedPhotos).forEach((category) => {
+              if (typeof category === "object") {
+                Object.values(category).forEach((imagesArray) => {
+                  if (Array.isArray(imagesArray)) {
+                    extractedPhotoPaths.push(...imagesArray);
+                  }
+                });
+              }
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing PhotoPaths:", error);
+      }
+
+      return { ...row, PhotoPaths: extractedPhotoPaths };
+    });
+
+    // ✅ Send both data and total count
+    res.json({
+      success: true,
+      total: processedData.length,
+      data: processedData,
+    });
+  } catch (error) {
+    console.error("Error fetching inspection data:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 // inspections for table dashboard damages repairs
 app.get("/api/inspections-damages-repairs", async (req, res) => {
   try {
