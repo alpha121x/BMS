@@ -10,7 +10,6 @@ import HighchartsReact from "highcharts-react-official";
 import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 
-
 const styles = {
   chartContainer: {
     margin: "20px 0",
@@ -80,6 +79,7 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
   const [showRepairModal, setShowRepairModal] = useState(false);
   const [repairImages, setRepairImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [filterText, setFilterText] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -189,6 +189,23 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
       setChartOptions(null);
     }
   };
+
+  // --- Filter table data based on search input ---
+  const filteredData = tableData.filter((row) => {
+    const bridgeName = row.bridge_name?.toLowerCase() || "";
+    const workKind = row.WorkKindName?.toLowerCase() || "";
+    const damageLevel = row.DamageLevel?.toLowerCase() || "";
+    const material = row.MaterialName?.toLowerCase() || "";
+    const element = row.PartsName?.toLowerCase() || "";
+
+    return (
+      bridgeName.includes(filterText.toLowerCase()) ||
+      workKind.includes(filterText.toLowerCase()) ||
+      damageLevel.includes(filterText.toLowerCase()) ||
+      material.includes(filterText.toLowerCase()) ||
+      element.includes(filterText.toLowerCase())
+    );
+  });
 
   const handleViewClick = (row) => {
     setSelectedRow(row);
@@ -429,10 +446,21 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
           <div className="text-center mb-3">Loading chart...</div>
         )}
 
+        <div className="p-2">
+          <input
+            type="text"
+            placeholder="Search in table..."
+            className="form-control"
+            value={filterText}
+            style={{ maxWidth: "300px" }}
+            onChange={(e) => setFilterText(e.target.value)}
+          />
+        </div>
+
         {/* Data Table */}
         <DataTable
           columns={columns}
-          data={tableData}
+          data={filteredData} // ✅ Use filtered data here
           progressPending={loading}
           pagination
           highlightOnHover
