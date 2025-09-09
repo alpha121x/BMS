@@ -186,7 +186,7 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
   const handleDownloadCSV = async () => {
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score-export-new`
+        `${BASE_URL}/api/bridge-scores-export`
       );
       const { data } = await response.json();
 
@@ -205,7 +205,7 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Bridge_Wise_Score_${selectedType}.csv`);
+      link.setAttribute("download", `Bridge_Wise_Score.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -217,7 +217,7 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
   const handleDownloadExcel = async () => {
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score-export-new`
+        `${BASE_URL}/api/bridge-scores-export`
       );
       const { data } = await response.json();
 
@@ -239,7 +239,7 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
       });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `Bridge_Wise_Score_${selectedType}.xlsx`;
+      link.download = `Bridge_Wise_Score.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

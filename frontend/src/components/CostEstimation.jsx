@@ -163,11 +163,11 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
       sortable: true,
     },
     {
-      name: "Cost (Millions)",
-      selector: (row) => row.cost_million || "N/A",
+      name: "Cost (Rs.)",
+      selector: (row) => row.cost_of_repair || "N/A",
       sortable: true,
       cell: (row) => (
-        <span className="font-bold">{row.cost_million || "N/A"}</span>
+        <span className="font-bold">{row.cost_of_repair || "N/A"}</span>
       ),
     },
     {

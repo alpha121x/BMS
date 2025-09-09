@@ -185,7 +185,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
-// API endpoint
+// api for bridge scores with type param
 app.get("/api/bridge-scores", async (req, res) => {
   const { type } = req.query;
 
@@ -239,11 +239,14 @@ app.get("/api/bridge-scores", async (req, res) => {
           m.y_centroid,
           m.images_spans,
           CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
+
+          COUNT(*) OVER() AS total_count
 
         FROM bms.tbl_bms_calculations c
-        JOIN bms.tbl_bms_master_data m 
-          ON c.uu_bms_id = m.uu_bms_id;
+        LEFT JOIN bms.tbl_bms_master_data m 
+          ON c.uu_bms_id = m.uu_bms_id
+          AND m.is_active = true;
       `;
       break;
 
@@ -289,11 +292,14 @@ app.get("/api/bridge-scores", async (req, res) => {
           m.y_centroid,
           m.images_spans,
           CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
+
+          COUNT(*) OVER() AS total_count
 
         FROM bms.tbl_bms_calculations c
         JOIN bms.tbl_bms_master_data m 
-          ON c.uu_bms_id = m.uu_bms_id;
+          ON c.uu_bms_id = m.uu_bms_id
+          AND m.is_active = true;
       `;
       break;
 
@@ -335,11 +341,14 @@ app.get("/api/bridge-scores", async (req, res) => {
           m.y_centroid,
           m.images_spans,
           CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
-          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
+
+          COUNT(*) OVER() AS total_count
 
         FROM bms.tbl_bms_calculations c
         JOIN bms.tbl_bms_master_data m 
-          ON c.uu_bms_id = m.uu_bms_id;
+          ON c.uu_bms_id = m.uu_bms_id
+          AND m.is_active = true;
       `;
       break;
 
@@ -352,7 +361,8 @@ app.get("/api/bridge-scores", async (req, res) => {
 
   try {
     const result = await pool.query(query);
-    res.json({ success: true, type, data: result.rows });
+    const total_count = result.rows.length > 0 ? result.rows[0].total_count : 0;
+    res.json({ success: true, type, total_count, data: result.rows });
   } catch (error) {
     console.error("Error executing query", error);
     res.status(500).json({ error: "Internal server error" });
@@ -363,18 +373,13 @@ app.get("/api/bridge-scores", async (req, res) => {
 app.get("/api/bridge-scores-export", async (req, res) => {
   const query = `
     SELECT 
-      -- ✅ Base columns from calculations
       c.uu_bms_id,
       c.structure_type,
-
-      -- ✅ Damage Score columns
       c.total_damage_score,
       c.average_damage_score,
       c.critical_damage_score,
       c.bridge_performance_index,
       c.damage_score_group,
-
-      -- ✅ Inventory Score columns
       c.road_classification_weight,
       c.carriageway_weight,
       c.bridge_age_weight,
@@ -382,13 +387,9 @@ app.get("/api/bridge-scores-export", async (req, res) => {
       c.dimensions_weight,
       c.inventory_score,
       c.inventory_weight_group,
-
-      -- ✅ Total Bridge Score columns
       c.tbs_totaldamage,
       c.tbs_averagedamage,
       c.tbs_criticaldamage,
-
-      -- ✅ Master Data Join
       m.structure_no,
       m.structure_type_id,
       m.road_name,
@@ -415,14 +416,13 @@ app.get("/api/bridge-scores-export", async (req, res) => {
       m.x_centroid,
       m.y_centroid,
       m.images_spans,
-
-      -- ✅ Extras
       CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
       ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
 
     FROM bms.tbl_bms_calculations c
-    JOIN bms.tbl_bms_master_data m 
-      ON c.uu_bms_id = m.uu_bms_id;
+    LEFT JOIN bms.tbl_bms_master_data m 
+      ON c.uu_bms_id = m.uu_bms_id
+      AND m.is_active = true;
   `;
 
   try {
@@ -784,13 +784,14 @@ app.get("/api/bms-cost", async (req, res) => {
         (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
         m.pms_sec_id, 
         CONCAT(m.pms_sec_id, ', ', m.structure_no) AS bridge_name,
-        c.cost_million
-      FROM bms.tbl_bms_cost c
-      JOIN bms.tbl_bms_master_data m
+        c.cost_of_repair
+      FROM bms.tbl_bms_calculations c
+      LEFT JOIN bms.tbl_bms_master_data m
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 
         m.district_id::TEXT LIKE $1
         AND m.structure_type = 'BRIDGE'
+        AND is_active = true
         AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
       ORDER BY c.uu_bms_id
       LIMIT $3 OFFSET $4
@@ -801,12 +802,13 @@ app.get("/api/bms-cost", async (req, res) => {
 
     const countQuery = `
       SELECT COUNT(*) AS total
-      FROM bms.tbl_bms_cost c
-      JOIN bms.tbl_bms_master_data m
+      FROM bms.tbl_bms_calculations c
+      LEFT JOIN bms.tbl_bms_master_data m
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 
         m.district_id::TEXT LIKE $1
         AND m.structure_type = 'BRIDGE'
+        AND is_active = true
         AND CONCAT(m.pms_sec_id, ', ', m.structure_no) ILIKE $2
     `;
 
