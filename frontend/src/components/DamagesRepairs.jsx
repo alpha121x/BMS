@@ -334,6 +334,7 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
       name: "Bridge Name",
       selector: (row) => row.bridge_name || "N/A",
       sortable: true,
+      width: "280px",
     },
     {
       name: "Work Kind",
