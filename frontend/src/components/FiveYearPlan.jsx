@@ -23,7 +23,7 @@ const FiveYearPlan = () => {
   const chartRef = useRef(null);
   const [inspectionData, setInspectionData] = useState([]);
   const [planData, setPlanData] = useState([]);
-  const [activeTab, setActiveTab] = useState("inspection"); // 🔹 Tab state
+  const [activeTab, setActiveTab] = useState("inspection");
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
@@ -72,7 +72,7 @@ const FiveYearPlan = () => {
     fetchInspectionData();
   }, []);
 
-  // Fetch 5-year plan dynamically
+  // Fetch 5-year plan
   useEffect(() => {
     const fetchPlanData = async () => {
       try {
@@ -93,9 +93,9 @@ const FiveYearPlan = () => {
     fetchPlanData();
   }, []);
 
-  // Render Highcharts dynamically
+  // Render chart whenever tab is active or planData changes
   useEffect(() => {
-    if (chartRef.current && planData.length) {
+    if (activeTab === "development" && chartRef.current && planData.length) {
       Highcharts.chart(chartRef.current, {
         chart: { type: "column", backgroundColor: "transparent" },
         title: { text: "Number of Schemes Over 5 Years", style: { color: "#1f2937", fontSize: "20px" } },
@@ -117,7 +117,7 @@ const FiveYearPlan = () => {
         credits: { enabled: false },
       });
     }
-  }, [planData]);
+  }, [activeTab, planData]);
 
   const columns = [
     { name: "Bridge Name", selector: (row) => row.bridge_name, sortable: true },
@@ -128,7 +128,7 @@ const FiveYearPlan = () => {
 
   return (
     <div className="p-6 bg-gray-50 rounded-md mt-3 shadow-lg w-75 mx-auto border border-gray-200">
-      {/* 🔹 Tabs */}
+      {/* Tabs */}
       <div className="flex mb-6 border-b border-gray-300">
         <button
           onClick={() => setActiveTab("inspection")}
@@ -144,7 +144,7 @@ const FiveYearPlan = () => {
         </button>
       </div>
 
-      {/* 🔹 Tab Content */}
+      {/* Tab Content */}
       {activeTab === "inspection" && (
         <DataTable
           columns={columns}
@@ -180,6 +180,8 @@ const FiveYearPlan = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Chart */}
           <div className="bg-white rounded-xl shadow-md p-6">
             <div ref={chartRef} className="h-96" />
           </div>
