@@ -3,14 +3,67 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { BASE_URL } from "./config";
 
+// Modal Component
+const DetailsModal = ({ isOpen, onClose, structureName }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "20px",
+          borderRadius: "8px",
+          width: "400px",
+          maxWidth: "90%",
+        }}
+      >
+        <h2>Structure Details</h2>
+        <p><strong>Name:</strong> {structureName}</p>
+        {/* Add more details here if fetched from API */}
+        <button
+          onClick={onClose}
+          style={{
+            marginTop: "20px",
+            padding: "10px 20px",
+            backgroundColor: "#005D7F",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Graph = () => {
+  // State for modal and selected structure
+  const [showModal, setShowModal] = useState(false);
+  const [selectedStructure, setSelectedStructure] = useState(null);
 
   // ------------------- Construction Types (Static) -------------------
   const constructionTypesOptions = {
     chart: { type: "pie" },
     title: { text: "Construction Types" },
     tooltip: {
-      pointFormat: "{series.name}: <b>{point.y}</b>", // 👈 shows on hover
+      pointFormat: "{series.name}: <b>{point.y}</b>",
     },
     plotOptions: {
       pie: {
@@ -18,7 +71,15 @@ const Graph = () => {
         cursor: "pointer",
         dataLabels: {
           enabled: true,
-          format: "{point.name}: {point.y}", // 👈 name + count always visible
+          format: "{point.name}: {point.y}",
+        },
+        point: {
+          events: {
+            click: function () {
+              setSelectedStructure(this.name);
+              setShowModal(true);
+            },
+          },
         },
       },
     },
@@ -26,11 +87,7 @@ const Graph = () => {
       {
         name: "Count",
         data: [
-          {
-            name: "Bricks Wall With Concrete Slab",
-            y: 16247,
-            color: "#6D68DE",
-          },
+          { name: "Bricks Wall With Concrete Slab", y: 16247, color: "#6D68DE" },
           { name: "Stone Wall With Concrete Slab", y: 476, color: "#FFCE83" },
           { name: "Pipe Culvert", y: 565, color: "#84A3D5" },
           { name: "I-Girder", y: 346, color: "#19FB8B" },
@@ -59,7 +116,7 @@ const Graph = () => {
         };
 
         const formattedData = data.structureTypeCounts.map((item) => ({
-          name: item.structure_type, // ✅ show as it is
+          name: item.structure_type,
           y: parseInt(item.count),
           color: colorMap[item.structure_type] || "#999999",
         }));
@@ -68,7 +125,7 @@ const Graph = () => {
           chart: { type: "pie" },
           title: { text: "Type of Structures" },
           tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>", // still shows on hover
+            pointFormat: "{series.name}: <b>{point.y}</b>",
           },
           plotOptions: {
             pie: {
@@ -76,7 +133,15 @@ const Graph = () => {
               cursor: "pointer",
               dataLabels: {
                 enabled: true,
-                format: "{point.name}: {point.y}", // 👈 show name + count on chart
+                format: "{point.name}: {point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedStructure(this.name);
+                    setShowModal(true);
+                  },
+                },
               },
             },
           },
@@ -122,7 +187,7 @@ const Graph = () => {
           chart: { type: "pie" },
           title: { text: "Under Bridge Situation" },
           tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>", // hover shows count
+            pointFormat: "{series.name}: <b>{point.y}</b>",
           },
           plotOptions: {
             pie: {
@@ -130,9 +195,8 @@ const Graph = () => {
               cursor: "pointer",
               dataLabels: {
                 enabled: true,
-                format: "{point.name}: {point.y}", // show name + count on chart
+                format: "{point.name}: {point.y}",
               },
-              // optional: modal click handler
               point: {
                 events: {
                   click: function () {
@@ -183,7 +247,7 @@ const Graph = () => {
           chart: { type: "pie" },
           title: { text: "Road Type Structures" },
           tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>", // hover shows count
+            pointFormat: "{series.name}: <b>{point.y}</b>",
           },
           plotOptions: {
             pie: {
@@ -191,9 +255,8 @@ const Graph = () => {
               cursor: "pointer",
               dataLabels: {
                 enabled: true,
-                format: "{point.name}: {point.y}", // show name + count on chart
+                format: "{point.name}: {point.y}",
               },
-              // optional: modal click handler
               point: {
                 events: {
                   click: function () {
@@ -211,7 +274,6 @@ const Graph = () => {
         console.error("Error fetching road classifications:", error)
       );
   }, []);
-
 
   // ------------------- Span Length Distribution (API) -------------------
   const [spanLengthOptions, setSpanLengthOptions] = useState({
@@ -255,7 +317,7 @@ const Graph = () => {
 
   // ------------------- Bridge Ages (Vertical Column Chart) -------------------
   const [bridgeAgesOptions, setBridgeAgesOptions] = useState({
-    chart: { type: "column" }, // vertical bars
+    chart: { type: "column" },
     title: { text: "Bridge Ages" },
     xAxis: {
       categories: [],
@@ -292,12 +354,12 @@ const Graph = () => {
               cursor: "pointer",
               dataLabels: {
                 enabled: true,
-                format: "{point.y}", // show count above bars
+                format: "{point.y}",
               },
               point: {
                 events: {
                   click: function () {
-                    setSelectedStructure(this.category); // e.g. "0–10 years"
+                    setSelectedStructure(this.category);
                     setShowModal(true);
                   },
                 },
@@ -312,7 +374,7 @@ const Graph = () => {
   // ------------------- Bridge Inspection & Evaluation Status (API) -------------------
   const [bridgeStatusOptions, setBridgeStatusOptions] = useState({
     chart: { type: "pie" },
-    title: { text: "Stuructures Status" },
+    title: { text: "Structures Status" },
     series: [{ name: "Count", data: [] }],
   });
 
@@ -396,6 +458,15 @@ const Graph = () => {
             return match ? match.count : 0;
           }),
           color: colorMap[type] || "#999999",
+          point: {
+            events: {
+              click: function () {
+                const category = categories[this.index];
+                setSelectedStructure(`${this.series.name} (${category})`);
+                setShowModal(true);
+              },
+            },
+          },
         }));
 
         setBridgeLengthOptions({
@@ -405,7 +476,14 @@ const Graph = () => {
           yAxis: { min: 0, title: { text: "Construction Types" } },
           legend: { reversed: false },
           plotOptions: {
-            series: { stacking: "normal" },
+            series: {
+              stacking: "normal",
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.y}",
+              },
+            },
           },
           series,
         });
@@ -524,6 +602,13 @@ const Graph = () => {
           />
         </div>
       </div>
+
+      {/* Modal */}
+      <DetailsModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        structureName={selectedStructure}
+      />
     </div>
   );
 };
