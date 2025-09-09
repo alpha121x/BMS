@@ -185,6 +185,180 @@ app.post("/api/loginEvaluation", async (req, res) => {
   }
 });
 
+// API endpoint
+app.get("/api/bridge-scores", async (req, res) => {
+  const { type } = req.query;
+
+  if (!type) {
+    return res.status(400).json({
+      error:
+        "Missing type parameter. Valid: damage_scores, inventory_score, total_bridge_score",
+    });
+  }
+
+  let query;
+
+  switch (type) {
+    case "damage_scores":
+      query = `
+        SELECT 
+          c.uu_bms_id,
+          c.structure_type,
+          c.total_damage_score,
+          c.average_damage_score,
+          c.critical_damage_score,
+          c.bridge_performance_index,
+          c.damage_score_group,
+
+          -- master data join
+          m.structure_no,
+          m.structure_type_id,
+          m.structure_type,
+          m.road_name,
+          m.road_name_cwd,
+          m.route_id,
+          m.survey_id,
+          m.surveyor_name,
+          m.district_id,
+          m.district,
+          m.road_classification,
+          m.road_surface_type,
+          m.carriageway_type,
+          m.direction,
+          m.visual_condition,
+          m.construction_type_id,
+          m.construction_type,
+          m.no_of_span,
+          m.span_length_m,
+          m.structure_width_m,
+          m.construction_year,
+          m.last_maintenance_date,
+          m.remarks,
+          m.is_surveyed,
+          m.x_centroid,
+          m.y_centroid,
+          m.images_spans,
+          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+
+        FROM bms.tbl_bms_calculations c
+        JOIN bms.tbl_bms_master_data m 
+          ON c.uu_bms_id = m.uu_bms_id;
+      `;
+      break;
+
+    case "inventory_score":
+      query = `
+        SELECT 
+          c.uu_bms_id,
+          c.structure_type,
+          c.road_classification_weight,
+          c.carriageway_weight,
+          c.bridge_age_weight,
+          c.crossing_weight,
+          c.dimensions_weight,
+          c.inventory_score,
+          c.inventory_weight_group,
+
+          -- master data join
+          m.structure_no,
+          m.structure_type_id,
+          m.structure_type,
+          m.road_name,
+          m.road_name_cwd,
+          m.route_id,
+          m.survey_id,
+          m.surveyor_name,
+          m.district_id,
+          m.district,
+          m.road_classification,
+          m.road_surface_type,
+          m.carriageway_type,
+          m.direction,
+          m.visual_condition,
+          m.construction_type_id,
+          m.construction_type,
+          m.no_of_span,
+          m.span_length_m,
+          m.structure_width_m,
+          m.construction_year,
+          m.last_maintenance_date,
+          m.remarks,
+          m.is_surveyed,
+          m.x_centroid,
+          m.y_centroid,
+          m.images_spans,
+          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+
+        FROM bms.tbl_bms_calculations c
+        JOIN bms.tbl_bms_master_data m 
+          ON c.uu_bms_id = m.uu_bms_id;
+      `;
+      break;
+
+    case "total_bridge_score":
+      query = `
+        SELECT 
+          c.uu_bms_id,
+          c.structure_type,
+          c.tbs_totaldamage,
+          c.tbs_averagedamage,
+          c.tbs_criticaldamage,
+
+          -- master data join
+          m.structure_no,
+          m.structure_type_id,
+          m.structure_type,
+          m.road_name,
+          m.road_name_cwd,
+          m.route_id,
+          m.survey_id,
+          m.surveyor_name,
+          m.district_id,
+          m.district,
+          m.road_classification,
+          m.road_surface_type,
+          m.carriageway_type,
+          m.direction,
+          m.visual_condition,
+          m.construction_type_id,
+          m.construction_type,
+          m.no_of_span,
+          m.span_length_m,
+          m.structure_width_m,
+          m.construction_year,
+          m.last_maintenance_date,
+          m.remarks,
+          m.is_surveyed,
+          m.x_centroid,
+          m.y_centroid,
+          m.images_spans,
+          CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+          ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos
+
+        FROM bms.tbl_bms_calculations c
+        JOIN bms.tbl_bms_master_data m 
+          ON c.uu_bms_id = m.uu_bms_id;
+      `;
+      break;
+
+    default:
+      return res.status(400).json({
+        error:
+          "Invalid type parameter. Valid: damage_scores, inventory_score, total_bridge_score",
+      });
+  }
+
+  try {
+    const result = await pool.query(query);
+    res.json({ success: true, type, data: result.rows });
+  } catch (error) {
+    console.error("Error executing query", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // API Endpoint for bridge eise score
 app.get("/api/bms-score", async (req, res) => {
   try {

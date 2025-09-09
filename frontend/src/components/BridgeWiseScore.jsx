@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BASE_URL } from "./config";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,14 +7,13 @@ import { faFileCsv, faFileExcel } from "@fortawesome/free-solid-svg-icons";
 import * as XLSX from "xlsx";
 import DataTable from "react-data-table-component";
 
-const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
+const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
   const [bridgeScoreData, setBridgeScoreData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [totalItems, setTotalItems] = useState(0);
   const [bridgeCount, setBridgeCount] = useState(0);
+  const [selectedType, setSelectedType] = useState("damage_scores"); // Default active type
 
   const handleClick = (bridge) => {
     const serializedBridgeData = encodeURIComponent(JSON.stringify(bridge));
@@ -23,23 +22,22 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
   };
 
   useEffect(() => {
-    fetchData(); // Fetch data whenever currentPage changes
-  }, [currentPage, districtId, structureType, bridgeName]);
+    fetchData(); // Fetch data whenever selectedType or filters change
+  }, [districtId, structureType, bridgeName, selectedType]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score-new?page=${currentPage}&limit=${itemsPerPage}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
+        `${BASE_URL}/api/bridge-scores?type=${selectedType}&district=${districtId}&structureType=${structureType}&bridgeName=${bridgeName}`
       );
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const result = await response.json();
-      if (Array.isArray(result.data)) {
+      if (result.success && Array.isArray(result.data)) {
         setBridgeScoreData(result.data);
-        setBridgeCount(result.totalRecords);
-        setTotalItems(parseInt(result.totalRecords, 10));
+        setBridgeCount(result.data.length); // Use length of returned data
       } else {
         throw new Error("Invalid data format");
       }
@@ -50,110 +48,146 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
     }
   };
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const currentData = bridgeScoreData; // Since data is already paginated from API
+  const currentData = bridgeScoreData; // Full dataset for client-side pagination
 
-  const columns = [
-    {
-      name: "Bridge Name",
-      selector: (row) => row.bridge_name || "N/A",
-      sortable: true,
-    },
-    {
-      name: "District",
-      selector: (row) => row.district || "N/A",
-      sortable: true,
-    },
-    {
-      name: "Total Damage Score",
-      selector: (row) =>
-        row.total_damage_score
-          ? parseFloat(row.total_damage_score).toFixed(2)
-          : "N/A",
-      sortable: true,
-    },
-    {
-      name: "Critical Damage Score",
-      selector: (row) =>
-        row.critical_damage_score
-          ? parseFloat(row.critical_damage_score).toFixed(2)
-          : "N/A",
-      sortable: true,
-    },
-    {
-      name: "Average Damage Score",
-      selector: (row) =>
-        row.average_damage_score
-          ? parseFloat(row.average_damage_score).toFixed(2)
-          : "N/A",
-      sortable: true,
-    },
-    {
-      name: "BPI",
-      selector: (row) =>
-        row.bridge_performance_index
-          ? parseFloat(row.bridge_performance_index).toFixed(2)
-          : "N/A",
-      sortable: true,
-    },
-    {
-      name: "Inv. Score (TDS)",
-      selector: (row) =>
-        row.inventory_score_tds
-          ? parseFloat(row.inventory_score_tds).toFixed(2)
-          : "N/A",
-    },
-    {
-      name: "Inv. Score (CDS)",
-      selector: (row) =>
-        row.inventory_score_cds
-          ? parseFloat(row.inventory_score_cds).toFixed(2)
-          : "N/A",
-    },
-    {
-      name: "Inv. Score (ADS)",
-      selector: (row) =>
-        row.inventory_score_ads
-          ? parseFloat(row.inventory_score_ads).toFixed(2)
-          : "N/A",
-    },
-    {
-      name: "Damage Sum",
-      selector: (row) =>
-        row.damage_sum ? parseFloat(row.damage_sum).toFixed(2) : "N/A",
-    },
-    {
-      name: "Bridge Information",
-      cell: (row) => (
-        <button
-          onClick={() => handleClick(row)}
-          className="btn btn-sm"
-          style={{ backgroundColor: "#3B9996", color: "white" }}
-        >
-          Bridge Info
-        </button>
-      ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-    },
-  ];
+  // Dynamic columns based on selected type
+  const getColumns = (type) => {
+    const baseColumns = [
+      {
+        name: "Bridge Name",
+        selector: (row) => row.bridge_name || "N/A",
+        sortable: true,
+      },
+      {
+        name: "District",
+        selector: (row) => row.district || "N/A",
+        sortable: true,
+      },
+    ];
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+    const typeSpecificColumns = {
+      damage_scores: [
+        {
+          name: "Total Damage Score",
+          selector: (row) =>
+            parseFloat(row.total_damage_score || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Critical Damage Score",
+          selector: (row) =>
+            parseFloat(row.critical_damage_score || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Average Damage Score",
+          selector: (row) =>
+            parseFloat(row.average_damage_score || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "BPI",
+          selector: (row) =>
+            parseFloat(row.bridge_performance_index || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Damage Score Group",
+          selector: (row) => row.damage_score_group || "N/A",
+          sortable: true,
+        },
+      ],
+      inventory_score: [
+        {
+          name: "Road Classification Weight",
+          selector: (row) =>
+            parseFloat(row.road_classification_weight || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Carriageway Weight",
+          selector: (row) =>
+            parseFloat(row.carriageway_weight || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Bridge Age Weight",
+          selector: (row) =>
+            parseFloat(row.bridge_age_weight || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Crossing Weight",
+          selector: (row) =>
+            parseFloat(row.crossing_weight || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Dimensions Weight",
+          selector: (row) =>
+            parseFloat(row.dimensions_weight || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Inventory Score",
+          selector: (row) =>
+            parseFloat(row.inventory_score || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "Inventory Weight Group",
+          selector: (row) => row.inventory_weight_group || "N/A",
+          sortable: true,
+        },
+      ],
+      total_bridge_score: [
+        {
+          name: "TBS Total Damage",
+          selector: (row) =>
+            parseFloat(row.tbs_totaldamage || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "TBS Average Damage",
+          selector: (row) =>
+            parseFloat(row.tbs_averagedamage || "N/A").toFixed(2),
+          sortable: true,
+        },
+        {
+          name: "TBS Critical Damage",
+          selector: (row) =>
+            parseFloat(row.tbs_criticaldamage || "N/A").toFixed(2),
+          sortable: true,
+        },
+      ],
+    };
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    return [
+      ...baseColumns,
+      ...typeSpecificColumns[type],
+      {
+        name: "Bridge Information",
+        cell: (row) => (
+          <button
+            onClick={() => handleClick(row)}
+            className="btn btn-sm"
+            style={{ backgroundColor: "#3B9996", color: "white" }}
+          >
+            Bridge Info
+          </button>
+        ),
+        ignoreRowClick: true,
+        allowOverflow: true,
+        button: true,
+      },
+    ];
   };
 
   const handleDownloadCSV = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/bms-score-export-new`);
+      const response = await fetch(
+        `${BASE_URL}/api/bms-score-export-new?type=${selectedType}`
+      );
       const { data } = await response.json();
 
       if (!data.length) {
@@ -161,23 +195,20 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
         return;
       }
 
-      // Convert JSON to CSV format
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
-          Object.keys(data[0]).join(","), // CSV Headers
-          ...data.map((row) => Object.values(row).join(",")), // CSV Rows
+          Object.keys(data[0]).join(","),
+          ...data.map((row) => Object.values(row).join(",")),
         ].join("\n");
 
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "Bridge_Wise_Score.csv");
+      link.setAttribute("download", `Bridge_Wise_Score_${selectedType}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // console.log("CSV file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading CSV:", error);
     }
@@ -185,7 +216,9 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/bms-score-export-new`);
+      const response = await fetch(
+        `${BASE_URL}/api/bms-score-export-new?type=${selectedType}`
+      );
       const { data } = await response.json();
 
       if (!data.length) {
@@ -197,7 +230,6 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
 
-      // Create a Blob and trigger the download
       const excelBuffer = XLSX.write(workbook, {
         bookType: "xlsx",
         type: "array",
@@ -207,104 +239,31 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
       });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = "Bridge_Wise_Score.xlsx";
+      link.download = `Bridge_Wise_Score_${selectedType}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
-      // console.log("Excel file downloaded successfully.");
     } catch (error) {
       console.error("Error downloading Excel:", error);
     }
   };
 
-  const buttonStyles = {
-    margin: "0 6px",
-    padding: "4px 8px",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    fontSize: "12px",
-    cursor: "pointer",
-  };
-
-  const renderPaginationButtons = () => {
-    const buttons = [];
-    buttons.push(
-      <Button
-        onClick={handlePrevPage}
-        disabled={currentPage === 1}
-        key="prev"
-        style={buttonStyles}
-      >
-        «
-      </Button>
-    );
-
-    buttons.push(
-      <Button
-        key="1"
-        onClick={() => handlePageChange(1)}
-        style={{
-          ...buttonStyles,
-          backgroundColor: currentPage === 1 ? "#3B82F6" : "#60A5FA",
-        }}
-      >
-        1
-      </Button>
-    );
-
-    const pageRange = 3;
-    let startPage = Math.max(currentPage - pageRange, 2);
-    let endPage = Math.min(currentPage + pageRange, totalPages - 1);
-
-    if (totalPages <= 7) {
-      startPage = 2;
-      endPage = totalPages - 1;
-    }
-
-    for (let page = startPage; page <= endPage; page++) {
-      buttons.push(
-        <Button
-          key={page}
-          onClick={() => handlePageChange(page)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === page ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {page}
-        </Button>
-      );
-    }
-
-    if (totalPages > 1) {
-      buttons.push(
-        <Button
-          key={totalPages}
-          onClick={() => handlePageChange(totalPages)}
-          style={{
-            ...buttonStyles,
-            backgroundColor: currentPage === totalPages ? "#3B82F6" : "#60A5FA",
-          }}
-        >
-          {totalPages}
-        </Button>
-      );
-    }
-
-    buttons.push(
-      <Button
-        onClick={handleNextPage}
-        disabled={currentPage === totalPages}
-        key="next"
-        style={buttonStyles}
-      >
-        »
-      </Button>
-    );
-
-    return buttons;
+  const customStyles = {
+    headCells: {
+      style: {
+        backgroundColor: "#005D7F",
+        color: "#fff",
+        fontSize: "14px",
+        fontWeight: "bold",
+        border: "1px solid #dee2e6",
+      },
+    },
+    cells: {
+      style: { fontSize: "13px", border: "1px solid #dee2e6" },
+    },
+    rows: {
+      style: { "&:hover": { backgroundColor: "#f1f5f9", cursor: "pointer" } },
+    },
   };
 
   return (
@@ -317,10 +276,10 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
               style={{ background: "#005D7F", color: "#fff" }}
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
                   <h5 className="mb-0">Bridge Wise Score</h5>
                   <h6 className="mb-0" id="structure-heading">
-                    Structure Counts:
+                    Count:
                     <span
                       className="badge text-white ms-2"
                       style={{ background: "#009CB8" }}
@@ -329,10 +288,47 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
                     </span>
                   </h6>
                 </div>
+
+                {/* 🔹 Type Selection Buttons - centered */}
+                <div className="flex gap-2 justify-center flex-grow">
+                  <button
+                    className={`btn text-white ${
+                      selectedType === "damage_scores"
+                        ? "btn-primary"
+                        : "btn-info"
+                    }`}
+                    onClick={() => setSelectedType("damage_scores")}
+                  >
+                    Damage Scores
+                  </button>
+                  <button
+                    className={`btn text-white ${
+                      selectedType === "inventory_score"
+                        ? "btn-primary"
+                        : "btn-info"
+                    }`}
+                    onClick={() => setSelectedType("inventory_score")}
+                  >
+                    Inventory Score
+                  </button>
+                  <button
+                    className={`btn text-white ${
+                      selectedType === "total_bridge_score"
+                        ? "btn-primary"
+                        : "btn-info"
+                    }`}
+                    onClick={() => setSelectedType("total_bridge_score")}
+                  >
+                    Total Bridge Score
+                  </button>
+                </div>
+
+                {/* 🔹 Download Buttons - aligned right */}
                 <div className="flex gap-2">
                   <button
                     className="btn text-white"
                     onClick={handleDownloadCSV}
+                    style={{ backgroundColor: "#28a745" }}
                   >
                     <FontAwesomeIcon icon={faFileCsv} className="mr-2" />
                     CSV
@@ -340,6 +336,7 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
                   <button
                     className="btn text-white"
                     onClick={handleDownloadExcel}
+                    style={{ backgroundColor: "#007bff" }}
                   >
                     <FontAwesomeIcon icon={faFileExcel} className="mr-2" />
                     Excel
@@ -370,24 +367,18 @@ const BridgeWiseScore = ({districtId, structureType, bridgeName}) => {
               ) : (
                 <>
                   <DataTable
-                    columns={columns}
+                    key={selectedType} // Ensures DataTable re-renders on type change
+                    columns={getColumns(selectedType)}
                     data={currentData}
                     progressPending={loading}
                     pagination
-                    paginationServer
-                    paginationTotalRows={totalItems}
                     paginationPerPage={itemsPerPage}
-                    onChangePage={(page) => setCurrentPage(page)}
                     highlightOnHover
                     responsive
                     persistTableHead
                     noDataComponent="No data available"
+                    customStyles={customStyles}
                   />
-
-                  {/* Pagination Section */}
-                  <div className="d-flex justify-content-center align-items-center mt-3">
-                    {renderPaginationButtons()}
-                  </div>
                 </>
               )}
             </div>
