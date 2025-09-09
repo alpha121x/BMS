@@ -341,7 +341,7 @@ const DashboardMain = () => {
             <div className="flex justify-start pb-0 gap-2 w-85">
               <button
                 onClick={() => setActiveView("inventory")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "inventory"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
@@ -351,7 +351,7 @@ const DashboardMain = () => {
               </button>
               <button
                 onClick={() => setActiveView("inspectedstructures")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "inspectedstructures"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
@@ -361,7 +361,7 @@ const DashboardMain = () => {
               </button>
               <button
                 onClick={() => setActiveView("priortization")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "priortization"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
@@ -371,7 +371,7 @@ const DashboardMain = () => {
               </button>
               <button
                 onClick={() => setActiveView("cost")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "cost"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
@@ -381,7 +381,7 @@ const DashboardMain = () => {
               </button>
               <button
                 onClick={() => setActiveView("rates")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "rates"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
@@ -391,7 +391,7 @@ const DashboardMain = () => {
               </button>
               <button
                 onClick={() => setActiveView("fiveyearplan")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "fiveyearplan"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
@@ -401,7 +401,7 @@ const DashboardMain = () => {
               </button>
               <button
                 onClick={() => setActiveView("damages_repairs")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
+                className={`px-8 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "damages_repairs"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
