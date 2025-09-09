@@ -80,11 +80,13 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
   const [repairImages, setRepairImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [filterText, setFilterText] = useState("");
+  const [repairedFilter, setRepairedFilter] = useState(""); // "" = All, "true" = Repaired, "false" = Not Repaired
 
-  useEffect(() => {
-    fetchData();
-    fetchChartData();
-  }, [districtId, bridgeName, structureType]);
+ useEffect(() => {
+  fetchData();
+  fetchChartData();
+}, [districtId, bridgeName, structureType, repairedFilter]);
+
 
   const fetchData = async () => {
     setLoading(true);
@@ -92,11 +94,15 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
     try {
       const url = new URL(`${BASE_URL}/api/inspections-damages-repairs`);
       const params = new URLSearchParams();
+
       if (districtId) params.append("district", districtId);
       if (bridgeName) params.append("bridge", bridgeName);
       if (structureType) params.append("structure_type", structureType);
+      if (repairedFilter) params.append("repaired", repairedFilter); // ✅ Add repaired filter
+
       url.search = params.toString();
       const response = await fetch(url);
+
       if (!response.ok) throw new Error("Failed to fetch data");
       const result = await response.json();
       if (Array.isArray(result.data)) {
@@ -455,7 +461,8 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
           <div className="text-center mb-3">Loading chart...</div>
         )}
 
-        <div className="p-2">
+        <div className="d-flex gap-2 p-2">
+          {/* Search input */}
           <input
             type="text"
             placeholder="Search in table..."
@@ -464,6 +471,18 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
             style={{ maxWidth: "300px" }}
             onChange={(e) => setFilterText(e.target.value)}
           />
+
+          {/* Repaired Filter Dropdown */}
+          <select
+            className="form-select"
+            style={{ maxWidth: "200px" }}
+            value={repairedFilter}
+            onChange={(e) => setRepairedFilter(e.target.value)}
+          >
+            <option value="">All Records</option>
+            <option value="true">Repaired</option>
+            <option value="false">Not Repaired</option>
+          </select>
         </div>
 
         {/* Data Table */}

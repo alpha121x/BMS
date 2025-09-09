@@ -5827,7 +5827,7 @@ AND bmd."is_active" = true
 // inspections for table dashboard damages repairs
 app.get("/api/inspections-damages-repairs", async (req, res) => {
   try {
-    let { district, bridge, structure_type } = req.query;
+    let { district, bridge, structure_type, repaired } = req.query;
 
     // Base query
     let query = `
@@ -5857,35 +5857,45 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
       JOIN bms.tbl_bms_master_data AS bmd 
         ON ins."uu_bms_id" = bmd."uu_bms_id"
       WHERE 1=1
-      AND ins."DamageLevelID" IN (3, 4, 5) 
-      AND ins.is_latest = true
-      AND bmd.is_active = true
-      AND (
-          ins.surveyed_by = 'RAMS-PITB' 
-          OR 
-          (ins.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
-      ) 
+        AND ins."DamageLevelID" IN (3, 4, 5) 
+        AND ins.is_latest = true
+        AND bmd.is_active = true
+        AND (
+            ins.surveyed_by = 'RAMS-PITB' 
+            OR 
+            (ins.surveyed_by = 'RAMS-UU' AND qc_rams = 2)
+        )
     `;
 
     const queryParams = [];
     let paramIndex = 1;
 
+    // 🔹 District filter
     if (district && !isNaN(parseInt(district))) {
       query += ` AND ins."district_id" = $${paramIndex}`;
       queryParams.push(parseInt(district));
       paramIndex++;
     }
 
+    // 🔹 Structure type filter
     if (structure_type && !isNaN(parseInt(structure_type))) {
       query += ` AND bmd."structure_type_id" = $${paramIndex}`;
       queryParams.push(parseInt(structure_type));
       paramIndex++;
     }
 
+    // 🔹 Bridge filter
     if (bridge && bridge.trim() !== "" && bridge !== "%") {
       query += ` AND CONCAT(bmd."pms_sec_id", ',', bmd."structure_no") ILIKE $${paramIndex}`;
       queryParams.push(`%${bridge}%`);
       paramIndex++;
+    }
+
+    // 🔹 Repaired filter
+    if (repaired === "true") {
+      query += ` AND ins.is_repaired = true`;
+    } else if (repaired === "false") {
+      query += ` AND ins.is_repaired = false`;
     }
 
     query += ` ORDER BY inspection_id DESC;`;
@@ -5895,26 +5905,17 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
     // ✅ Helper function to parse image JSON safely
     const extractPaths = (rawData) => {
       let paths = [];
-
       try {
-        if (!rawData) return paths; // nothing to parse
-
+        if (!rawData) return paths;
         let parsed;
 
-        // Case 1: Already an object/array (from DB JSON/JSONB column)
         if (typeof rawData === "object") {
           parsed = rawData;
-        }
-        // Case 2: It's a string, clean and parse it
-        else if (typeof rawData === "string") {
-          const cleanedJson = rawData
-            .replace(/\"\{/g, "{")
-            .replace(/\}\"/g, "}");
-
+        } else if (typeof rawData === "string") {
+          const cleanedJson = rawData.replace(/\"\{/g, "{").replace(/\}\"/g, "}");
           parsed = JSON.parse(cleanedJson);
         }
 
-        // Handle parsed result
         if (Array.isArray(parsed)) {
           parsed.forEach((item) => {
             if (typeof item === "string") paths.push(item);
@@ -5937,17 +5938,14 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
       } catch (err) {
         console.error("Error parsing images:", err);
       }
-
       return paths;
     };
 
-    const processedData = result.rows.map((row) => {
-      return {
-        ...row,
-        PhotoPaths: extractPaths(row.PhotoPaths), // inspection_images
-        RepairPaths: extractPaths(row.RepairPaths), // repair_images
-      };
-    });
+    const processedData = result.rows.map((row) => ({
+      ...row,
+      PhotoPaths: extractPaths(row.PhotoPaths),
+      RepairPaths: extractPaths(row.RepairPaths),
+    }));
 
     res.json({ success: true, data: processedData });
   } catch (error) {
