@@ -141,6 +141,13 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
     }
   };
 
+   const addCommas = (x) => {
+    if (!x || x === "N/A") return "N/A";
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  };
+
   const columns = [
     {
       name: "District",
@@ -167,7 +174,7 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
       selector: (row) => row.cost_of_repair || "N/A",
       sortable: true,
       cell: (row) => (
-        <span className="font-bold">{row.cost_of_repair || "N/A"}</span>
+        <span className="font-bold">Rs.{addCommas(row.cost_of_repair) || "N/A"}</span>
       ),
     },
     {
