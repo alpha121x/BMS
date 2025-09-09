@@ -4,8 +4,26 @@ import HighchartsReact from "highcharts-react-official";
 import { BASE_URL } from "./config";
 
 // Modal Component
-const DetailsModal = ({ isOpen, onClose, structureName }) => {
+const DetailsModal = ({ isOpen, onClose, chartData, chartTitle }) => {
   if (!isOpen) return null;
+
+  // Function to export data as CSV
+  const exportToCSV = () => {
+    const headers = ["Name", "Count"];
+    const rows = chartData.map(item => [item.name, item.y]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${chartTitle.replace(/\s+/g, "_")}.csv`);
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div
@@ -27,27 +45,75 @@ const DetailsModal = ({ isOpen, onClose, structureName }) => {
           backgroundColor: "white",
           padding: "20px",
           borderRadius: "8px",
-          width: "400px",
+          width: "600px",
           maxWidth: "90%",
+          maxHeight: "80%",
+          overflowY: "auto",
         }}
       >
-        <h2>Structure Details</h2>
-        <p><strong>Name:</strong> {structureName}</p>
-        {/* Add more details here if fetched from API */}
-        <button
-          onClick={onClose}
+        <h2>{chartTitle}</h2>
+        <table
           style={{
+            width: "100%",
+            borderCollapse: "collapse",
             marginTop: "20px",
-            padding: "10px 20px",
-            backgroundColor: "#005D7F",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
           }}
         >
-          Close
-        </button>
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Name</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Count</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Color</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chartData.map((item, index) => (
+              <tr key={index}>
+                <td style={{ border: "1px solid #ddd", padding: "8px" }}>{item.name}</td>
+                <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "right" }}>{item.y}</td>
+                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      backgroundColor: item.color,
+                      display: "inline-block",
+                      border: "1px solid #000",
+                    }}
+                  ></div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
+          <button
+            onClick={exportToCSV}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Export to CSV
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#005D7F",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -57,6 +123,8 @@ const Graph = () => {
   // State for modal and selected structure
   const [showModal, setShowModal] = useState(false);
   const [selectedStructure, setSelectedStructure] = useState(null);
+  const [selectedChartData, setSelectedChartData] = useState([]);
+  const [selectedChartTitle, setSelectedChartTitle] = useState("");
 
   // ------------------- Construction Types (Static) -------------------
   const constructionTypesOptions = {
@@ -77,6 +145,8 @@ const Graph = () => {
           events: {
             click: function () {
               setSelectedStructure(this.name);
+              setSelectedChartData(this.series.data);
+              setSelectedChartTitle(this.series.chart.title.textStr);
               setShowModal(true);
             },
           },
@@ -139,6 +209,8 @@ const Graph = () => {
                 events: {
                   click: function () {
                     setSelectedStructure(this.name);
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
                     setShowModal(true);
                   },
                 },
@@ -201,6 +273,8 @@ const Graph = () => {
                 events: {
                   click: function () {
                     setSelectedStructure(this.name);
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
                     setShowModal(true);
                   },
                 },
@@ -261,6 +335,8 @@ const Graph = () => {
                 events: {
                   click: function () {
                     setSelectedStructure(this.name);
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
                     setShowModal(true);
                   },
                 },
@@ -303,6 +379,8 @@ const Graph = () => {
                 events: {
                   click: function () {
                     setSelectedStructure(this.name);
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
                     setShowModal(true);
                   },
                 },
@@ -334,6 +412,12 @@ const Graph = () => {
     fetch(`${BASE_URL}/api/bridge-ages`)
       .then((res) => res.json())
       .then((data) => {
+        const formattedData = data.map(item => ({
+          name: item.name,
+          y: item.y,
+          color: "#6D68DE", // Default color for column chart
+        }));
+
         setBridgeAgesOptions((prev) => ({
           ...prev,
           tooltip: {
@@ -346,7 +430,7 @@ const Graph = () => {
           series: [
             {
               name: "Count",
-              data: data.map((item) => item.y),
+              data: formattedData,
             },
           ],
           plotOptions: {
@@ -360,6 +444,8 @@ const Graph = () => {
                 events: {
                   click: function () {
                     setSelectedStructure(this.category);
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
                     setShowModal(true);
                   },
                 },
@@ -399,6 +485,8 @@ const Graph = () => {
                 events: {
                   click: function () {
                     setSelectedStructure(this.name);
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
                     setShowModal(true);
                   },
                 },
@@ -451,22 +539,16 @@ const Graph = () => {
 
         const series = constructionTypes.map((type) => ({
           name: type,
-          data: categories.map((range) => {
+          data: categories.map((range, index) => {
             const match = data.find(
               (d) => d.major_type === type && d.length_range === range
             );
-            return match ? match.count : 0;
+            return {
+              name: `${type} (${range})`,
+              y: match ? match.count : 0,
+              color: colorMap[type] || "#999999",
+            };
           }),
-          color: colorMap[type] || "#999999",
-          point: {
-            events: {
-              click: function () {
-                const category = categories[this.index];
-                setSelectedStructure(`${this.series.name} (${category})`);
-                setShowModal(true);
-              },
-            },
-          },
         }));
 
         setBridgeLengthOptions({
@@ -482,6 +564,16 @@ const Graph = () => {
               dataLabels: {
                 enabled: true,
                 format: "{point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedStructure(this.name);
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
+                    setShowModal(true);
+                  },
+                },
               },
             },
           },
@@ -607,7 +699,8 @@ const Graph = () => {
       <DetailsModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        structureName={selectedStructure}
+        chartData={selectedChartData}
+        chartTitle={selectedChartTitle}
       />
     </div>
   );
