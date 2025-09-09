@@ -46,6 +46,7 @@ const EvaluationMainCon = () => {
   const [inspectedCards, setInspectedCards] = useState([]);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const bridges_status_summary = "bridge-status-summary";
+  // const api_endpoint = "strucutres";
 
   const fetchInspectionCounts = async () => {
     if (!districtId) return; // Avoid unnecessary API calls
@@ -79,7 +80,7 @@ const EvaluationMainCon = () => {
             type: "submitted_to_rams",
           },
           {
-            label: "Rams Approved Structures",
+            label: "Approved Structures",
             value: data.approved_structures,
             color: "#27AE60",
             type: "approved_structures",
@@ -156,6 +157,7 @@ const EvaluationMainCon = () => {
               <div>
                 <TopCardsCon inspectedCards={inspectedCards}
                   districtId={districtId}
+                  api_endpoint="structures"
                  />
               </div>
             </div>

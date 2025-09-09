@@ -46,6 +46,7 @@ const EvaluationMainRams = () => {
   const [inspectedCards, setInspectedCards] = useState([]);
   const [activeView, setActiveView] = useState("map"); // 'map' or 'graph'
   const bridges_status_summary = "bridge-status-summary-rams";
+  // const api_endpoint = "strucutres-rams";
 
   // const fetchInspectionCounts = async () => {
   //   if (!districtId) return; // Avoid unnecessary API calls
@@ -86,7 +87,7 @@ const EvaluationMainRams = () => {
 
     try {
       const response = await fetch(
-        `${BASE_URL}/api/project-progress-summary?districtId=${districtId}`
+        `${BASE_URL}/api/project-progress-summary-rams?districtId=${districtId}`
       );
       const result = await response.json();
 
@@ -116,7 +117,7 @@ const EvaluationMainRams = () => {
             type: "submitted_to_rams",
           },
           {
-            label: "Rams Approved Structures",
+            label: "Approved Structures",
             value: data.approved_structures || "N/A",
             icon: <FaClipboardCheck />,
             color: "#4CAF50",
@@ -181,6 +182,8 @@ const EvaluationMainRams = () => {
                 <TopCardsCon
                   inspectedCards={inspectedCards}
                   districtId={districtId}
+                   api_endpoint="structures-rams"
+
                 />
               </div>
             </div>

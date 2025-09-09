@@ -1142,7 +1142,7 @@ app.get("/api/structure-counts-evaluated", async (req, res) => {
 });
 
 // /api/strucutres?type=inspected_by_bridge_inspectors&districtId=...&structureType=...&bridgeName=...&uu_bms_id=...
-app.get("/api/strucutres", async (req, res) => {
+app.get("/api/structures", async (req, res) => {
   const { type, districtId, structureType, bridgeName, uu_bms_id } = req.query;
 
   if (!type) {
@@ -1164,7 +1164,143 @@ app.get("/api/strucutres", async (req, res) => {
       break;
     case "approved_structures":
       // approved by either Consultant or RAMS
-      typeClause = `(t.qc_con = 2 OR t.qc_rams = 2)`;
+      typeClause = `(t.qc_con = 2)`;
+      break;
+    default:
+      return res.status(400).json({ error: "Invalid 'type' value." });
+  }
+
+  // Base query (master data + latest remarks)
+  let query = `
+    SELECT 
+      m.is_active,
+      m.raw_id,
+      m.uu_bms_id, 
+      m.surveyed_by,
+      m.pms_sec_id, 
+      m.structure_no, 
+      m.structure_type_id, 
+      m.structure_type, 
+      m.road_name, 
+      m.road_name_cwd, 
+      m.route_id, 
+      m.survey_id, 
+      m.surveyor_name, 
+      m.district_id, 
+      m.district, 
+      m.road_classification, 
+      m.road_surface_type, 
+      m.carriageway_type, 
+      m.direction, 
+      m.visual_condition, 
+      m.overall_bridge_condition,
+      m.construction_type_id, 
+      m.construction_type, 
+      m.no_of_span,
+      m.data_source, 
+      m.data_date_time, 
+      m.span_length_m, 
+      m.structure_width_m, 
+      m.construction_year, 
+      (EXTRACT(YEAR FROM CURRENT_DATE) - NULLIF(m.construction_year, '')::int) AS age,
+      (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
+      m.bridge_situation,
+      m.is_bridge_completed,
+      m.last_maintenance_date, 
+      m.remarks, 
+      m.is_surveyed, 
+      m.x_centroid, 
+      m.y_centroid, 
+      m.images_spans,
+      CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
+      ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
+
+      -- latest remarks info
+      r.raw_id AS remarks_raw_id,
+      r.user_id AS remarks_user_id,
+      r.date_time AS remarks_date_time,
+      r.remarks AS overall_bridge_remarks,
+      r.evaluation_rating AS remarks_evaluation_rating
+
+    FROM bms.tbl_bms_master_data m
+    LEFT JOIN LATERAL (
+      SELECT raw_id, uu_bms_id, user_id, date_time, remarks, evaluation_rating
+      FROM bms.tbl_bms_master_data_remarks r
+      WHERE r.uu_bms_id = m.uu_bms_id
+      ORDER BY r.date_time DESC
+      LIMIT 1
+    ) r ON true
+    WHERE m.is_active = true
+      AND EXISTS (
+        SELECT 1
+        FROM bms.tbl_inspection_f t
+        WHERE t.uu_bms_id = m.uu_bms_id
+          AND ${typeClause}
+      )
+  `;
+
+  // Optional filters
+  const values = [];
+  const conditions = [];
+
+  if (districtId !== "%") {
+    conditions.push(`m.district_id = $${values.length + 1}`);
+    values.push(districtId);
+  }
+  if (structureType && structureType !== "%") {
+    conditions.push(`m.structure_type_id = $${values.length + 1}`);
+    values.push(structureType);
+  }
+  if (bridgeName && bridgeName !== "%") {
+    conditions.push(
+      `CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${values.length + 1}`
+    );
+    values.push(`%${bridgeName}%`);
+  }
+  if (uu_bms_id) {
+    conditions.push(`m.uu_bms_id = $${values.length + 1}`);
+    values.push(uu_bms_id);
+  }
+
+  if (conditions.length > 0) {
+    query += ` AND ${conditions.join(" AND ")}`;
+  }
+
+  query += ` ORDER BY m.district, m.pms_sec_id, m.structure_no;`;
+
+  try {
+    const { rows } = await pool.query(query, values);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching structures:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// /api/strucutres?type=inspected_by_bridge_inspectors&districtId=...&structureType=...&bridgeName=...&uu_bms_id=...
+app.get("/api/structures-rams", async (req, res) => {
+  const { type, districtId, structureType, bridgeName, uu_bms_id } = req.query;
+
+  if (!type) {
+    return res.status(400).json({ error: "Query param 'type' is required." });
+  }
+  let typeClause = "";
+  switch (type) {
+    case "inspected_by_bridge_inspectors":
+      // surveyed by RAMS-UU (Bridge Inspectors)
+      typeClause = `t.surveyed_by = 'RAMS-UU'`;
+      break;
+    case "unapproved_structures":
+      // unapproved by Consultant or RAMS (latest preferred)
+      typeClause = `(t.qc_rams = 3 AND t.is_latest = true)`;
+      break;
+    case "submitted_to_rams":
+      // as per your last spec: surveyed_by RAMS-UU and consultant QC = 2
+      typeClause = `t.surveyed_by = 'RAMS-UU' AND t.qc_con = 2`;
+      break;
+    case "approved_structures":
+      // approved by either Consultant or RAMS
+      typeClause = `(t.qc_rams = 2)`;
       break;
     default:
       return res.status(400).json({ error: "Invalid 'type' value." });
@@ -5480,7 +5616,63 @@ app.get("/api/project-progress-summary", async (req, res) => {
 
           -- 2. Structures with unapproved inspections (pending with Bridge Inspector, only latest inspections)
           COUNT(DISTINCT CASE 
-              WHEN ((t.surveyed_by = 'RAMS-UU' AND t.qc_con = 3 OR t.qc_rams = 3) AND t.is_latest = true ) 
+              WHEN ((t.surveyed_by = 'RAMS-UU' AND t.qc_con = 3) AND t.is_latest = true ) 
+              THEN t.uu_bms_id END
+          ) AS unapproved_structures,
+
+          -- 3. Structures submitted to RAMS (surveyed_by = 'RAMS-UU' and submitted for QC by consultant)
+          COUNT(DISTINCT CASE 
+              WHEN t.surveyed_by = 'RAMS-UU' AND t.qc_con = 2 
+              THEN t.uu_bms_id END
+          ) AS submitted_to_rams,
+
+          -- 4. Structures approved (either consultant OR RAMS approved)
+          COUNT(DISTINCT CASE 
+              WHEN (t.qc_con = 2 AND t.surveyed_by = 'RAMS-UU') 
+              THEN t.uu_bms_id END
+          ) AS approved_structures
+
+      FROM bms.tbl_inspection_f t
+      INNER JOIN bms.tbl_bms_master_data m 
+          ON t.uu_bms_id = m.uu_bms_id
+      WHERE m.is_active = true ${districtFilter};
+    `;
+
+    const { rows } = await pool.query(query, params);
+
+    res.json({
+      success: true,
+      data: rows[0],
+    });
+  } catch (error) {
+    console.error("Error fetching project progress summary:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching project progress summary",
+    });
+  }
+});
+
+// Project Progress Counts API
+app.get("/api/project-progress-summary-rams", async (req, res) => {
+  try {
+    const { districtId } = req.query;
+    const params = [];
+    let districtFilter = "";
+
+    if (districtId && districtId !== "%") {
+      districtFilter = "AND m.district_id = $1";
+      params.push(districtId);
+    }
+
+    const query = `
+      SELECT 
+          -- 1. Structures inspected by Bridge Inspectors (surveyed_by = RAMS-UU)
+          COUNT(DISTINCT CASE WHEN t.surveyed_by = 'RAMS-UU' THEN t.uu_bms_id END) AS inspected_by_bridge_inspectors,
+
+          -- 2. Structures with unapproved inspections (pending with Bridge Inspector, only latest inspections)
+          COUNT(DISTINCT CASE 
+              WHEN ((t.surveyed_by = 'RAMS-UU' AND t.qc_rams = 3) AND t.is_latest = true ) 
               THEN t.uu_bms_id END
           ) AS unapproved_structures,
 
