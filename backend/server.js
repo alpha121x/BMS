@@ -844,15 +844,13 @@ app.get("/api/bms-cost-export", async (req, res) => {
 
     const query = `
       SELECT 
-        c.uu_bms_id, 
-        m.district, 
-        m.road_name, 
-        m.structure_type, 
-        m.pms_sec_id, 
-        CONCAT(m.pms_sec_id, ', ', m.structure_no) AS bridge_name,
-        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS bridge_length,
-        c.cost_million
-      FROM bms.tbl_bms_cost c
+        c.uu_bms_id AS "Reference No.", 
+        m.district "Distirct", 
+        m.structure_type "Structure Type", 
+        CONCAT(m.pms_sec_id, ', ', m.structure_no) AS "Bridge Name",
+        (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS "Structure Length",
+        c.cost_of_repair AS "Cost of Repair"
+      FROM bms.tbl_bms_calculations c
       JOIN bms.tbl_bms_master_data m
         ON c.uu_bms_id = m.uu_bms_id
       WHERE 

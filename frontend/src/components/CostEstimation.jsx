@@ -90,11 +90,31 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
         return;
       }
 
+      // Define the exact order of headers
+      const headers = [
+        "Reference No.",
+        "District",
+        "Structure Type",
+        "Bridge Name",
+        "Structure Length",
+        "Cost of Repair",
+      ];
       const csvContent =
         "data:text/csv;charset=utf-8," +
         [
-          Object.keys(data[0]).join(","),
-          ...data.map((row) => Object.values(row).join(",")),
+          headers.join(","),
+          ...data.map((row) =>
+            headers
+              .map((header) => {
+                let value = row[header];
+                // Convert numeric fields to numbers if they are valid
+                if (header === "bridge_length" || header === "cost_of_repair") {
+                  value = isNaN(parseFloat(value)) ? value : parseFloat(value);
+                }
+                return `"${String(value).replace(/"/g, '""')}"`; // Escape quotes
+              })
+              .join(",")
+          ),
         ].join("\n");
 
       const encodedUri = encodeURI(csvContent);
@@ -119,7 +139,30 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
         return;
       }
 
-      const worksheet = XLSX.utils.json_to_sheet(data);
+      // Define the exact order and headers
+      const headers = [
+        "Reference No.",
+        "district",
+        "structure_type",
+        "bridge_name",
+        "bridge_length",
+        "cost_of_repair",
+      ];
+      const worksheetData = [
+        headers, // Header row
+        ...data.map((row) =>
+          headers.map((header) => {
+            let value = row[header];
+            // Convert numeric fields to numbers if they are valid
+            if (header === "bridge_length" || header === "cost_of_repair") {
+              value = isNaN(parseFloat(value)) ? value : parseFloat(value);
+            }
+            return value;
+          })
+        ),
+      ];
+
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData); // Array of Arrays to Sheet
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
 
@@ -141,7 +184,7 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
     }
   };
 
-   const addCommas = (x) => {
+  const addCommas = (x) => {
     if (!x || x === "N/A") return "N/A";
     var parts = x.toString().split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -174,7 +217,9 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
       selector: (row) => row.cost_of_repair || "N/A",
       sortable: true,
       cell: (row) => (
-        <span className="font-bold">Rs.{addCommas(row.cost_of_repair) || "N/A"}</span>
+        <span className="font-bold">
+          Rs.{addCommas(row.cost_of_repair) || "N/A"}
+        </span>
       ),
     },
     {
