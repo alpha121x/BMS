@@ -8,6 +8,8 @@ import { FaFileCsv } from "react-icons/fa6";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import DataTable from "react-data-table-component";
+import Swal from "sweetalert2";
+
 
 const styles = {
   chartContainer: {
@@ -78,8 +80,6 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
   const [showRepairModal, setShowRepairModal] = useState(false);
   const [repairImages, setRepairImages] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchData();
@@ -235,14 +235,24 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
       );
       const result = await response.json();
       if (result.success) {
-        alert("Status updated successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "Status updated successfully!",
+          confirmButtonColor: "#005D7F",
+        });
         setShowStatusModal(false);
         setRemarks("");
         setIsRepaired(false);
         setUploadedImages([]);
         fetchData();
       } else {
-        alert("Error: " + result.error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: result.error || "Failed to update status.",
+          confirmButtonColor: "#d33",
+        });
       }
     } catch (err) {
       console.error("Error saving status:", err);
@@ -252,10 +262,16 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length + uploadedImages.length > 4) {
-      alert("You can upload up to 4 images only.");
+    if (!selectedRow?.inspection_id) {
+      Swal.fire({
+        icon: "error",
+        title: "No Inspection",
+        text: "No inspection selected.",
+        confirmButtonColor: "#d33",
+      });
       return;
     }
+
     setUploadedImages([...uploadedImages, ...files]);
   };
 
@@ -291,18 +307,17 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
       prev === repairImages.length - 1 ? 0 : prev + 1
     );
   };
-  
+
   // --- Conditional Row Styles ---
   const conditionalRowStyles = [
-  {
-    when: row => row.is_repaired === true || row.is_repaired === "true",
-    style: {
-      backgroundColor: "#d1fae5", // light green (tailwind's green-100)
-      color: "#065f46",           // dark green text
+    {
+      when: (row) => row.is_repaired === true || row.is_repaired === "true",
+      style: {
+        backgroundColor: "#d1fae5", // light green (tailwind's green-100)
+        color: "#065f46", // dark green text
+      },
     },
-  },
-];
-
+  ];
 
   const handleDownloadCSV = () => {
     const csvData = Papa.unparse(tableData);
