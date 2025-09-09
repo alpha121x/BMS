@@ -40,63 +40,58 @@ const Header = () => {
     }, []);
 
     return (
-        <Navbar
-            bg="light"
-            expand="lg"
-            className="shadow-sm border-bottom border-2 fixed-top"
-        >
-            <Container fluid>
-                <Navbar.Brand
-                    as={Link}
-                    to="/Evaluation"
-                    className="d-flex align-items-center"
-                >
-                    <img
-                        src="/cnw.jpg"
-                        alt="Logo"
-                        style={{ height: "26px" }}
-                        className="mx-2"
-                    />
-                    <span className="fw-bold text-uppercase" style={{ color: "#005d7f" }}>
-                        C&W BMS - Evaluation Module
-                    </span>
-                </Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="ms-auto">
-                        <Nav.Link
-                            as={Link}
-                            to="/Evaluation"
-                            className={
-                                activeTab === "/Evaluation"
-                                    ? "bg-custom-active text-white active"
-                                    : "hover-bg-custom-active"
-                            }
-                            style={{
-                                backgroundColor:
-                                    activeTab === "/Evaluation" ? "#005d7f" : "transparent",
-                                color: activeTab === "/Evaluation" ? "#fff" : "#000",
-                            }}
-                        >
-                            Evaluation Module
-                        </Nav.Link>
+       <Navbar bg="light" className="shadow-sm border-bottom border-2 fixed-top">
+  <Container fluid>
+    <Navbar.Brand
+      as={Link}
+      to="/Evaluation"
+      className="d-flex align-items-center"
+    >
+      <img
+        src="/cnw.jpg"
+        alt="Logo"
+        style={{ height: "26px" }}
+        className="mx-2"
+      />
+      <span className="fw-bold text-uppercase" style={{ color: "#005d7f" }}>
+        C&W BMS - Evaluation Module
+      </span>
+    </Navbar.Brand>
 
-                        <NavDropdown
-                            title={<FontAwesomeIcon icon={faUserCircle} size="lg" />}
-                            align="end"
-                            show={isProfileDropdownOpen}
-                            onMouseEnter={() => setIsProfileDropdownOpen(true)}
-                            onMouseLeave={() => setIsProfileDropdownOpen(false)}
-                        >
-                            <NavDropdown.Item>{userName}</NavDropdown.Item>
-                            <NavDropdown.Item onClick={handleLogout}>
-                                <FontAwesomeIcon icon={faSignOutAlt} className="me-2" /> Logout
-                            </NavDropdown.Item>
-                        </NavDropdown>
-                    </Nav>
-                </Navbar.Collapse>
-            </Container>
-        </Navbar>
+    {/* 🚀 Nav always visible (no toggle/collapse) */}
+    <Nav className="ms-auto">
+      <Nav.Link
+        as={Link}
+        to="/Evaluation"
+        className={
+          activeTab === "/Evaluation"
+            ? "bg-custom-active text-white active"
+            : "hover-bg-custom-active"
+        }
+        style={{
+          backgroundColor:
+            activeTab === "/Evaluation" ? "#005d7f" : "transparent",
+          color: activeTab === "/Evaluation" ? "#fff" : "#000",
+        }}
+      >
+        Evaluation Module
+      </Nav.Link>
+
+      <NavDropdown
+        title={<FontAwesomeIcon icon={faUserCircle} size="lg" />}
+        align="end"
+        show={isProfileDropdownOpen}
+        onMouseEnter={() => setIsProfileDropdownOpen(true)}
+        onMouseLeave={() => setIsProfileDropdownOpen(false)}
+      >
+        <NavDropdown.Item>{userName}</NavDropdown.Item>
+        <NavDropdown.Item onClick={handleLogout}>
+          <FontAwesomeIcon icon={faSignOutAlt} className="me-2" /> Logout
+        </NavDropdown.Item>
+      </NavDropdown>
+    </Nav>
+  </Container>
+</Navbar>
     );
 };
 
