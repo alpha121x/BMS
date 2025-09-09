@@ -3,20 +3,159 @@ import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { BASE_URL } from "./config";
 
+// Modal Component
+const DetailsModal = ({ isOpen, onClose, chartData, chartTitle }) => {
+  if (!isOpen) return null;
+
+  // Function to export data as CSV
+  const exportToCSV = () => {
+    const headers = ["Name", "Count"];
+    const rows = chartData.map(item => [item.name, item.y]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${chartTitle.replace(/\s+/g, "_")}.csv`);
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "20px",
+          borderRadius: "8px",
+          width: "600px",
+          maxWidth: "90%",
+          maxHeight: "80%",
+          overflowY: "auto",
+        }}
+      >
+        <h2>{chartTitle}</h2>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            marginTop: "20px",
+          }}
+        >
+          <thead>
+            <tr>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Name</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Count</th>
+              <th style={{ border: "1px solid #ddd", padding: "8px" }}>Color</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chartData.map((item, index) => (
+              <tr key={index}>
+                <td style={{ border: "1px solid #ddd", padding: "8px" }}>{item.name}</td>
+                <td style={{ border: "1px solid #ddd", padding: "8px", textAlign: "right" }}>{item.y}</td>
+                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                  <div
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      backgroundColor: item.color || "#999999",
+                      display: "inline-block",
+                      border: "1px solid #000",
+                    }}
+                  ></div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
+          <button
+            onClick={exportToCSV}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Export to CSV
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#005D7F",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Graph = () => {
-  // Previous pie chart configurations remain the same
+  // State for modal
+  const [showModal, setShowModal] = useState(false);
+  const [selectedChartData, setSelectedChartData] = useState([]);
+  const [selectedChartTitle, setSelectedChartTitle] = useState("");
+
+  // ------------------- Construction Types (Static) -------------------
   const constructionTypesOptions = {
     chart: { type: "pie" },
     title: { text: "Construction Types" },
+    tooltip: {
+      pointFormat: "{series.name}: <b>{point.y}</b>",
+    },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "{point.name}: {point.y}",
+        },
+        point: {
+          events: {
+            click: function () {
+              setSelectedChartData(this.series.data);
+              setSelectedChartTitle(this.series.chart.title.textStr);
+              setShowModal(true);
+            },
+          },
+        },
+      },
+    },
     series: [
       {
         name: "Count",
         data: [
-          {
-            name: "Bricks Wall With Concrete Slab",
-            y: 16247,
-            color: "#6D68DE",
-          },
+          { name: "Bricks Wall With Concrete Slab", y: 16247, color: "#6D68DE" },
           { name: "Stone Wall With Concrete Slab", y: 476, color: "#FFCE83" },
           { name: "Pipe Culvert", y: 565, color: "#84A3D5" },
           { name: "I-Girder", y: 346, color: "#19FB8B" },
@@ -27,9 +166,32 @@ const Graph = () => {
     ],
   };
 
+  // ------------------- Group Construction Types (Static) -------------------
   const groupConstructionTypesOptions = {
     chart: { type: "pie" },
     title: { text: "Group Construction Types" },
+    tooltip: {
+      pointFormat: "{series.name}: <b>{point.y}</b>",
+    },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "{point.name}: {point.y}",
+        },
+        point: {
+          events: {
+            click: function () {
+              setSelectedChartData(this.series.data);
+              setSelectedChartTitle(this.series.chart.title.textStr);
+              setShowModal(true);
+            },
+          },
+        },
+      },
+    },
     series: [
       {
         name: "Count",
@@ -64,7 +226,7 @@ const Graph = () => {
         };
 
         const formattedData = data.structureTypeCounts.map((item) => ({
-          name: item.structure_type, // ✅ show as it is
+          name: item.structure_type,
           y: parseInt(item.count),
           color: colorMap[item.structure_type] || "#999999",
         }));
@@ -73,7 +235,7 @@ const Graph = () => {
           chart: { type: "pie" },
           title: { text: "Type of Structures" },
           tooltip: {
-            pointFormat: "{series.name}: <b>{point.y}</b>", // still shows on hover
+            pointFormat: "{series.name}: <b>{point.y}</b>",
           },
           plotOptions: {
             pie: {
@@ -81,7 +243,16 @@ const Graph = () => {
               cursor: "pointer",
               dataLabels: {
                 enabled: true,
-                format: "{point.name}: {point.y}", // 👈 show name + count on chart
+                format: "{point.name}: {point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
+                    setShowModal(true);
+                  },
+                },
               },
             },
           },
@@ -93,6 +264,7 @@ const Graph = () => {
       );
   }, []);
 
+  // ------------------- Crossing Types (API) -------------------
   const [crossingTypesOptions, setCrossingTypesOptions] = useState({
     chart: { type: "pie" },
     title: { text: "Crossing Types" },
@@ -125,6 +297,28 @@ const Graph = () => {
         setCrossingTypesOptions({
           chart: { type: "pie" },
           title: { text: "Crossing Types" },
+          tooltip: {
+            pointFormat: "{series.name}: <b>{point.y}</b>",
+          },
+          plotOptions: {
+            pie: {
+              allowPointSelect: true,
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.name}: {point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
+                    setShowModal(true);
+                  },
+                },
+              },
+            },
+          },
           series: [{ name: "Factor Value", data: formattedData }],
         });
       })
@@ -133,9 +327,32 @@ const Graph = () => {
       });
   }, []);
 
+  // ------------------- Plan A Score Category (Static) -------------------
   const planAScoreOptions = {
     chart: { type: "pie" },
     title: { text: "Plan A Score Category wise Summary" },
+    tooltip: {
+      pointFormat: "{series.name}: <b>{point.y}</b>",
+    },
+    plotOptions: {
+      pie: {
+        allowPointSelect: true,
+        cursor: "pointer",
+        dataLabels: {
+          enabled: true,
+          format: "{point.name}: {point.y}",
+        },
+        point: {
+          events: {
+            click: function () {
+              setSelectedChartData(this.series.data);
+              setSelectedChartTitle(this.series.chart.title.textStr);
+              setShowModal(true);
+            },
+          },
+        },
+      },
+    },
     series: [
       {
         name: "Count",
@@ -149,6 +366,7 @@ const Graph = () => {
     ],
   };
 
+  // ------------------- Bridge Damage Levels (API) -------------------
   const [bridgeDamageLevelsOptions, setBridgeDamageLevelsOptions] = useState({
     chart: { type: "bar", height: 800 },
     title: {
@@ -163,10 +381,9 @@ const Graph = () => {
   });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/damage-chart`) // Replace with your actual API
+    fetch(`${BASE_URL}/api/damage-chart`)
       .then((res) => res.json())
       .then((data) => {
-        // destructure API response
         const { categories, series } = data;
 
         setBridgeDamageLevelsOptions({
@@ -184,7 +401,25 @@ const Graph = () => {
             title: { text: "Number of Damages" },
           },
           legend: { reversed: true },
-          plotOptions: { series: { stacking: "normal" } },
+          plotOptions: {
+            series: {
+              stacking: "normal",
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
+                    setShowModal(true);
+                  },
+                },
+              },
+            },
+          },
           series: series,
         });
       })
@@ -193,6 +428,7 @@ const Graph = () => {
       });
   }, []);
 
+  // ------------------- Material Element-wise Damages (API) -------------------
   const [materialElementDamagesOptions, setMaterialElementDamagesOptions] =
     useState({
       chart: { type: "bar", height: 800 },
@@ -208,11 +444,18 @@ const Graph = () => {
     });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/material-damage-chart`) // Replace with your actual API
+    fetch(`${BASE_URL}/api/material-damage-chart`)
       .then((res) => res.json())
       .then((data) => {
-        // destructure API response
         const { categories, series } = data;
+
+        const formattedSeries = series.map((serie, serieIndex) => ({
+          ...serie,
+          data: serie.data.map((value, index) => ({
+            y: value,
+            name: `${serie.name} (${categories[index]})`,
+          })),
+        }));
 
         setMaterialElementDamagesOptions({
           chart: { type: "bar", height: 800 },
@@ -229,15 +472,34 @@ const Graph = () => {
             title: { text: "Number of Damages" },
           },
           legend: { reversed: true },
-          plotOptions: { series: { stacking: "normal" } },
-          series: series,
+          plotOptions: {
+            series: {
+              stacking: "normal",
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
+                    setShowModal(true);
+                  },
+                },
+              },
+            },
+          },
+          series: formattedSeries,
         });
       })
       .catch((error) => {
-        console.error("Error fetching bridge damage levels:", error);
+        console.error("Error fetching material element damages:", error);
       });
   }, []);
 
+  // ------------------- Element Category-wise Damages (API) -------------------
   const [elementCategoryDamagesOptions, setElementCategoryDamagesOptions] =
     useState({
       chart: { type: "bar", height: 800 },
@@ -253,11 +515,18 @@ const Graph = () => {
     });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/workkind-damage-chart`) // Replace with your actual API
+    fetch(`${BASE_URL}/api/workkind-damage-chart`)
       .then((res) => res.json())
       .then((data) => {
-        // destructure API response
         const { categories, series } = data;
+
+        const formattedSeries = series.map((serie, serieIndex) => ({
+          ...serie,
+          data: serie.data.map((value, index) => ({
+            y: value,
+            name: `${serie.name} (${categories[index]})`,
+          })),
+        }));
 
         setElementCategoryDamagesOptions({
           chart: { type: "bar", height: 800 },
@@ -274,12 +543,30 @@ const Graph = () => {
             title: { text: "Number of Damages" },
           },
           legend: { reversed: true },
-          plotOptions: { series: { stacking: "normal" } },
-          series: series,
+          plotOptions: {
+            series: {
+              stacking: "normal",
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
+                    setShowModal(true);
+                  },
+                },
+              },
+            },
+          },
+          series: formattedSeries,
         });
       })
       .catch((error) => {
-        console.error("Error fetching bridge damage levels:", error);
+        console.error("Error fetching element category damages:", error);
       });
   }, []);
 
@@ -295,7 +582,7 @@ const Graph = () => {
   });
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/bridge-length-construction-types-inspected`) // Replace with your actual API
+    fetch(`${BASE_URL}/api/bridge-length-construction-types-inspected`)
       .then((res) => res.json())
       .then((data) => {
         const categories = [
@@ -323,13 +610,16 @@ const Graph = () => {
 
         const series = constructionTypes.map((type) => ({
           name: type,
-          data: categories.map((range) => {
+          data: categories.map((range, index) => {
             const match = data.find(
               (d) => d.major_type === type && d.length_range === range
             );
-            return match ? match.count : 0;
+            return {
+              name: `${type} (${range})`,
+              y: match ? match.count : 0,
+              color: colorMap[type] || "#999999",
+            };
           }),
-          color: colorMap[type] || "#999999",
         }));
 
         setBridgeLengthOptions({
@@ -339,7 +629,23 @@ const Graph = () => {
           yAxis: { min: 0, title: { text: "Construction Types" } },
           legend: { reversed: false },
           plotOptions: {
-            series: { stacking: "normal" },
+            series: {
+              stacking: "normal",
+              cursor: "pointer",
+              dataLabels: {
+                enabled: true,
+                format: "{point.y}",
+              },
+              point: {
+                events: {
+                  click: function () {
+                    setSelectedChartData(this.series.data);
+                    setSelectedChartTitle(this.series.chart.title.textStr);
+                    setShowModal(true);
+                  },
+                },
+              },
+            },
           },
           series,
         });
@@ -428,6 +734,14 @@ const Graph = () => {
             options={bridgeLengthOptions}
           />
         </div>
+
+        {/* Modal */}
+        <DetailsModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          chartData={selectedChartData}
+          chartTitle={selectedChartTitle}
+        />
       </div>
     </div>
   );
