@@ -166,7 +166,7 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
       ...baseColumns,
       ...typeSpecificColumns[type],
       {
-        name: "Bridge Information",
+        name: "Bridge Info",
         cell: (row) => (
           <button
             onClick={() => handleClick(row)}
@@ -186,7 +186,7 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
   const handleDownloadCSV = async () => {
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score-export-new?type=${selectedType}`
+        `${BASE_URL}/api/bms-score-export-new`
       );
       const { data } = await response.json();
 
@@ -217,7 +217,7 @@ const BridgeWiseScore = ({ districtId, structureType, bridgeName }) => {
   const handleDownloadExcel = async () => {
     try {
       const response = await fetch(
-        `${BASE_URL}/api/bms-score-export-new?type=${selectedType}`
+        `${BASE_URL}/api/bms-score-export-new`
       );
       const { data } = await response.json();
 
