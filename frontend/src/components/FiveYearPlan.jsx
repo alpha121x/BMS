@@ -31,54 +31,93 @@ const FiveYearPlan = () => {
   const chartRef = useRef(null);
   const [inspectionData, setInspectionData] = useState([]); // ✅ API data
 
-// Format date helper
-const formatDate = (dateStr) => {
-  if (!dateStr) return "N/A";
-  return new Date(dateStr).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-};
-
-// 🔹 Fetch inspection plan data
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/api/inspections-five-year-plan`);
-      const result = await res.json();
-      if (result.success) {
-        const formatted = result.data.map((row) => {
-          const currentDate = row.current_inspection_date
-            ? new Date(row.current_inspection_date)
-            : null;
-          const nextDate = currentDate
-            ? new Date(currentDate.setFullYear(currentDate.getFullYear() + 5))
-            : null;
-
-          return {
-            bridge_name: row.bridge_name,
-            damage_level: row.DamageLevel || row.DamageLevelID,
-            current_inspection: formatDate(row.current_inspection_date),
-            next_inspection: nextDate ? formatDate(nextDate) : "Planned",
-          };
-        });
-        setInspectionData(formatted);
-      }
-    } catch (err) {
-      console.error("Error fetching inspection data:", err);
-    }
+  // Format date helper
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
-  fetchData();
-}, []);
 
-// 🔹 Columns
-const columns = [
-  { name: "Bridge Name", selector: (row) => row.bridge_name, sortable: true },
-  { name: "Damage Level", selector: (row) => row.damage_level, sortable: true },
-  { name: "Current Inspection", selector: (row) => row.current_inspection, sortable: true },
-  { name: "Next Inspection", selector: (row) => row.next_inspection, sortable: true },
-];
+  // 🔹 Fetch inspection plan data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/inspections-five-year-plan`);
+        const result = await res.json();
+        if (result.success) {
+          const formatted = result.data.map((row) => {
+            const currentDate = row.current_inspection_date
+              ? new Date(row.current_inspection_date)
+              : null;
+            const nextDate = currentDate
+              ? new Date(currentDate.setFullYear(currentDate.getFullYear() + 5))
+              : null;
+
+            return {
+              bridge_name: row.bridge_name,
+              damage_level: row.DamageLevel || row.DamageLevelID,
+              current_inspection: formatDate(row.current_inspection_date),
+              next_inspection: nextDate ? formatDate(nextDate) : "Planned",
+            };
+          });
+          setInspectionData(formatted);
+        }
+      } catch (err) {
+        console.error("Error fetching inspection data:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // 🔹 Highcharts initialization
+  useEffect(() => {
+    if (chartRef.current) {
+      Highcharts.chart(chartRef.current, {
+        chart: { type: "column", backgroundColor: "transparent" },
+        title: {
+          text: "Number of Schemes Over 5 Years",
+          style: { color: "#1f2937", fontSize: "20px" },
+        },
+        xAxis: {
+          categories: data.map((item) => item.year),
+          title: { text: "Year" },
+          labels: { style: { color: "#374151" } },
+        },
+        yAxis: {
+          min: 0,
+          title: { text: "Number of Schemes" },
+          labels: { style: { color: "#374151" } },
+        },
+        tooltip: {
+          shared: true,
+          formatter() {
+            const point = this.points[0];
+            const cost = data[point.point.index].cost.toLocaleString();
+            return `<b>${point.key}</b><br/>Schemes: <b>${point.y}</b><br/>Cost: <b>${cost} million PKR</b>`;
+          },
+        },
+        series: [
+          {
+            name: "Schemes",
+            data: data.map((item) => item.schemes),
+            color: "#3B82F6",
+          },
+        ],
+        credits: { enabled: false },
+      });
+    }
+  }, []);
+
+  // 🔹 Columns
+  const columns = [
+    { name: "Bridge Name", selector: (row) => row.bridge_name, sortable: true },
+    { name: "Damage Level", selector: (row) => row.damage_level, sortable: true },
+    { name: "Current Inspection", selector: (row) => row.current_inspection, sortable: true },
+    { name: "Next Inspection", selector: (row) => row.next_inspection, sortable: true },
+  ];
 
   return (
     <div className="p-6 bg-gray-50 rounded-md mt-3 shadow-lg w-75 mx-auto border border-gray-200">
@@ -116,8 +155,12 @@ const columns = [
             {data.map((item, index) => (
               <tr key={index} className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}>
                 <td className="py-3 px-6 font-medium">{item.year}</td>
-                <td className="py-3 px-6 text-center font-bold text-blue-700">{item.schemes.toLocaleString()}</td>
-                <td className="py-3 px-6 text-center font-bold text-green-600">{item.cost.toLocaleString()}</td>
+                <td className="py-3 px-6 text-center font-bold text-blue-700">
+                  {item.schemes.toLocaleString()}
+                </td>
+                <td className="py-3 px-6 text-center font-bold text-green-600">
+                  {item.cost.toLocaleString()}
+                </td>
               </tr>
             ))}
           </tbody>
