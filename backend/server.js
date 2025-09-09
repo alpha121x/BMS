@@ -469,6 +469,38 @@ LEFT JOIN bms.tbl_bms_master_data m
 });
 
 
+// Get count of schemes per split year (relative to current year)
+app.get("/api/bms-5year-development-plan", async (req, res) => {
+  try {
+    const currentYear = new Date().getFullYear(); // e.g., 2025
+    const nextYear = currentYear + 1;
+
+    const query = `
+      SELECT
+        split_year,
+        COUNT(*) AS scheme_count,
+        SUM(cost_of_repair) AS total_cost,
+        ${nextYear} + split_year - 1 AS year_label
+      FROM bms.tbl_bms_5year_plan
+      GROUP BY split_year
+      ORDER BY split_year;
+    `;
+
+    const result = await pool.query(query);
+
+    res.json({
+      success: true,
+      startYear: nextYear,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching 5-year plan counts:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+});
+
+
+
 // API Endpoint for bridge eise score
 app.get("/api/bms-score", async (req, res) => {
   try {

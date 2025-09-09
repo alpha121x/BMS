@@ -1,15 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Highcharts from "highcharts";
 import DataTable from "react-data-table-component";
-import { BASE_URL } from "./config"; // adjust path if needed
-
-const data = [
-  { year: "Year 1", schemes: 1072, cost: 6129, status: "In Progress", completed: 850 },
-  { year: "Year 2", schemes: 1106, cost: 6141, status: "Completed", completed: 1106 },
-  { year: "Year 3", schemes: 1104, cost: 6137, status: "In Progress", completed: 900 },
-  { year: "Year 4", schemes: 1124, cost: 6137, status: "Planned", completed: 0 },
-  { year: "Year 5", schemes: 1119, cost: 6138, status: "Planned", completed: 0 },
-];
+import { BASE_URL } from "./config";
 
 const customStyles = {
   headCells: {
@@ -29,10 +21,10 @@ const customStyles = {
 
 const FiveYearPlan = () => {
   const chartRef = useRef(null);
-  const [inspectionData, setInspectionData] = useState([]); // ✅ API data
+  const [inspectionData, setInspectionData] = useState([]);
+  const [planData, setPlanData] = useState([]);
 
-  // Format date helper
-  const formatDate = (dateStr) => {
+ const formatDate = (dateStr) => {
     if (!dateStr) return "N/A";
     return new Date(dateStr).toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -41,9 +33,15 @@ const FiveYearPlan = () => {
     });
   };
 
-  // 🔹 Fetch inspection plan data
+  const addCommas = (x) => {
+    if (!x || x === "N/A") return "N/A";
+    const num = typeof x === "string" ? parseFloat(x) : x;
+    return num.toLocaleString();
+  };
+
+  // Fetch inspection plan
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInspectionData = async () => {
       try {
         const res = await fetch(`${BASE_URL}/api/inspections-five-year-plan`);
         const result = await res.json();
@@ -69,12 +67,34 @@ const FiveYearPlan = () => {
         console.error("Error fetching inspection data:", err);
       }
     };
-    fetchData();
+    fetchInspectionData();
   }, []);
 
-  // 🔹 Highcharts initialization
+  // Fetch 5-year plan dynamically
   useEffect(() => {
-    if (chartRef.current) {
+    const fetchPlanData = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/api/bms-5year-development-plan`);
+        const result = await res.json();
+        if (result.success) {
+          // Ensure numeric values
+          const formatted = result.data.map((item) => ({
+            ...item,
+            scheme_count: Number(item.scheme_count),
+            total_cost: Number(item.total_cost),
+          }));
+          setPlanData(formatted);
+        }
+      } catch (err) {
+        console.error("Error fetching 5-year plan data:", err);
+      }
+    };
+    fetchPlanData();
+  }, []);
+
+  // Render Highcharts dynamically
+  useEffect(() => {
+    if (chartRef.current && planData.length) {
       Highcharts.chart(chartRef.current, {
         chart: { type: "column", backgroundColor: "transparent" },
         title: {
@@ -82,7 +102,7 @@ const FiveYearPlan = () => {
           style: { color: "#1f2937", fontSize: "20px" },
         },
         xAxis: {
-          categories: data.map((item) => item.year),
+          categories: planData.map((item) => item.year_label),
           title: { text: "Year" },
           labels: { style: { color: "#374151" } },
         },
@@ -95,23 +115,23 @@ const FiveYearPlan = () => {
           shared: true,
           formatter() {
             const point = this.points[0];
-            const cost = data[point.point.index].cost.toLocaleString();
+            const cost = addCommas(planData[point.point.index].total_cost);
             return `<b>${point.key}</b><br/>Schemes: <b>${point.y}</b><br/>Cost: <b>${cost} million PKR</b>`;
           },
         },
         series: [
           {
             name: "Schemes",
-            data: data.map((item) => item.schemes),
+            data: planData.map((item) => item.scheme_count),
             color: "#3B82F6",
           },
         ],
         credits: { enabled: false },
       });
     }
-  }, []);
+  }, [planData]);
 
-  // 🔹 Columns
+  // Columns for inspection table
   const columns = [
     { name: "Bridge Name", selector: (row) => row.bridge_name, sortable: true },
     { name: "Damage Level", selector: (row) => row.damage_level, sortable: true },
@@ -121,7 +141,7 @@ const FiveYearPlan = () => {
 
   return (
     <div className="p-6 bg-gray-50 rounded-md mt-3 shadow-lg w-75 mx-auto border border-gray-200">
-      {/* 🔹 API DataTable */}
+      {/* Inspection Plan Table */}
       <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-800">
         Bridge Inspection Plan
       </h2>
@@ -138,7 +158,7 @@ const FiveYearPlan = () => {
         />
       </div>
 
-      {/* 🔹 Static Development Plan */}
+      {/* 5-Year Development Plan Table */}
       <h2 className="text-3xl font-extrabold text-center mb-10 text-gray-800">
         5-Year Development Plan
       </h2>
@@ -152,14 +172,14 @@ const FiveYearPlan = () => {
             </tr>
           </thead>
           <tbody className="text-gray-800 text-md">
-            {data.map((item, index) => (
+            {planData.map((item, index) => (
               <tr key={index} className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}>
-                <td className="py-3 px-6 font-medium">{item.year}</td>
+                <td className="py-3 px-6 font-medium">{item.year_label}</td>
                 <td className="py-3 px-6 text-center font-bold text-blue-700">
-                  {item.schemes.toLocaleString()}
+                  {item.scheme_count.toLocaleString()}
                 </td>
                 <td className="py-3 px-6 text-center font-bold text-green-600">
-                  {item.cost.toLocaleString()}
+                  {item.total_cost.toLocaleString()}
                 </td>
               </tr>
             ))}
@@ -167,7 +187,7 @@ const FiveYearPlan = () => {
         </table>
       </div>
 
-      {/* Chart */}
+      {/* 5-Year Plan Chart */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <div ref={chartRef} className="h-96" />
       </div>
