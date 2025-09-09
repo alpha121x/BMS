@@ -5860,8 +5860,7 @@ app.get("/api/inspections-damages-repairs", async (req, res) => {
 });
 
 // api to update damages repair inspection status with image uploads
-app.post(
-  "/api/update-inspection-status/:inspectionId",
+app.post("/api/update-inspection-status/:inspectionId",
   upload.array("images", 4),
   async (req, res) => {
     const { inspectionId } = req.params;

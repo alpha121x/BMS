@@ -213,10 +213,10 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
       alert("No inspection selected.");
       return;
     }
-    console.log("Saving status for ID:", selectedRow);
-    console.log("Remarks:", remarks);
-    console.log("Is Repaired:", isRepaired);
-    console.log("Uploaded Images:", uploadedImages);
+    // console.log("Saving status for ID:", selectedRow);
+    // console.log("Remarks:", remarks);
+    // console.log("Is Repaired:", isRepaired);
+    // console.log("Uploaded Images:", uploadedImages);
 
     const formData = new FormData();
     formData.append("remarks", remarks);
@@ -291,14 +291,18 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
       prev === repairImages.length - 1 ? 0 : prev + 1
     );
   };
+  
+  // --- Conditional Row Styles ---
+  const conditionalRowStyles = [
+  {
+    when: row => row.is_repaired === true || row.is_repaired === "true",
+    style: {
+      backgroundColor: "#d1fae5", // light green (tailwind's green-100)
+      color: "#065f46",           // dark green text
+    },
+  },
+];
 
-  const totalPages = Math.ceil(tableData.length / itemsPerPage);
-  const currentData = tableData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleDownloadCSV = () => {
     const csvData = Papa.unparse(tableData);
@@ -420,6 +424,7 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
           responsive
           noDataComponent="No data available"
           customStyles={customStyles}
+          conditionalRowStyles={conditionalRowStyles}
         />
       </div>
 
