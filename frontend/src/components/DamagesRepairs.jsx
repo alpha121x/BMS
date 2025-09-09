@@ -402,6 +402,15 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
     },
   ];
 
+  // Render loading state or main content
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="card p-0 rounded-0 text-black"
@@ -461,7 +470,6 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
         <DataTable
           columns={columns}
           data={filteredData} // ✅ Use filtered data here
-          progressPending={loading}
           pagination
           highlightOnHover
           striped
