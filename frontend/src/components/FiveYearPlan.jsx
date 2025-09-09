@@ -51,7 +51,7 @@ const FiveYearPlan = () => {
               ? new Date(row.current_inspection_date)
               : null;
             const nextDate = currentDate
-              ? new Date(currentDate.setFullYear(currentDate.getFullYear() + 5))
+              ? new Date(currentDate.setFullYear(currentDate.getFullYear() + 3))
               : null;
 
             return {
@@ -116,7 +116,7 @@ const FiveYearPlan = () => {
           formatter() {
             const point = this.points[0];
             const cost = addCommas(planData[point.point.index].total_cost);
-            return `<b>${point.key}</b><br/>Schemes: <b>${point.y}</b><br/>Cost: <b>${cost} million PKR</b>`;
+            return `<b>${point.key}</b><br/>Schemes: <b>${point.y}</b><br/>Cost: <b>${cost} PKR</b>`;
           },
         },
         series: [
@@ -168,7 +168,7 @@ const FiveYearPlan = () => {
             <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-lg">
               <th className="py-4 px-6 text-left">Year</th>
               <th className="py-4 px-6 text-center">Number of Schemes</th>
-              <th className="py-4 px-6 text-center">Cost (Million Rupees)</th>
+              <th className="py-4 px-6 text-center">Cost (Rupees)</th>
             </tr>
           </thead>
           <tbody className="text-gray-800 text-md">
