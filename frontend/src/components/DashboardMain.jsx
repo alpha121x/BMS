@@ -338,7 +338,7 @@ const DashboardMain = () => {
         <div className="row mt-2">
           <div className="col-md-12">
             {/* Navigation Buttons */}
-            <div className="flex justify-start pb-0 gap-2 w-75">
+            <div className="flex justify-start pb-0 gap-2 w-85">
               <button
                 onClick={() => setActiveView("inventory")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
@@ -359,16 +359,6 @@ const DashboardMain = () => {
               >
                 Inspected Structures
               </button>
-              {/* <button
-                onClick={() => setActiveView("bridge_summary")}
-                className={`px-12 py-2 text-lg font-semibold rounded-0 ${
-                  activeView === "bridge_summary"
-                    ? "bg-[#005D7F] text-white"
-                    : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
-                }`}
-              >
-                Bridge Status Summary
-              </button> */}
               <button
                 onClick={() => setActiveView("priortization")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
