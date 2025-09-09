@@ -20,8 +20,25 @@ import InspectionsList from "./UnapprovedInspections";
 import UnapprovedInspections from "./UnapprovedInspectionsRams";
 import ProjectProgress from "./ProjectProgress";
 
+// helper: get districtId from sessionStorage token
+const getInitialDistrictId = () => {
+  const userTokenRaw =
+    sessionStorage.getItem("user") || sessionStorage.getItem("userEvaluation");
+  if (userTokenRaw) {
+    try {
+      const parsedToken = JSON.parse(userTokenRaw);
+      const district = parsedToken?.districtId?.toString();
+      return !district || district === "0" ? "%" : district;
+    } catch (err) {
+      console.error("Invalid user token:", err);
+    }
+  }
+  return "%";
+};
+
 const EvaluationMainCon = () => {
-  const [districtId, setDistrictId] = useState("%");
+    const [districtId, setDistrictId] = useState(getInitialDistrictId);
+  
   const [structureType, setStructureType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
   // State for back-to-top button visibility

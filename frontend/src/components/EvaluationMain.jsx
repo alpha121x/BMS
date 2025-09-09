@@ -8,8 +8,25 @@ import { BASE_URL } from "./config";
 import TopCardDashboard from "./TopCardDashboard"; // Import TopCardDashboard
 import Filters from "./Filters"; // Import Filters component
 
+// helper: get districtId from sessionStorage token
+const getInitialDistrictId = () => {
+  const userTokenRaw =
+    sessionStorage.getItem("user") || sessionStorage.getItem("userEvaluation");
+  if (userTokenRaw) {
+    try {
+      const parsedToken = JSON.parse(userTokenRaw);
+      const district = parsedToken?.districtId?.toString();
+      return !district || district === "0" ? "%" : district;
+    } catch (err) {
+      console.error("Invalid user token:", err);
+    }
+  }
+  return "%";
+};
+
 const EvaluationMain = () => {
-  const [districtId, setDistrictId] = useState("%");
+  const [districtId, setDistrictId] = useState(getInitialDistrictId);
+
   const [structureType, setStructureType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -144,7 +161,7 @@ const EvaluationMain = () => {
                 <div className="mb-2">
                   {/* Only One Card Displaying Total and Three Counts */}
                   <TopCardDashboard
-                  type={"evaluated_structures"}
+                    type={"evaluated_structures"}
                     totalLabel="Evaluated Structures"
                     totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
                     color="#3B9996"

@@ -5,7 +5,12 @@ import { BASE_URL } from "./config";
 import TopCardsCon from "./TopCardsCon";
 import Map from "./Map";
 import MapInspectedStructures from "./MapInspectedStructures";
-import { FaClipboardCheck, FaClipboardList, FaUserCheck, FaTimesCircle } from "react-icons/fa";
+import {
+  FaClipboardCheck,
+  FaClipboardList,
+  FaUserCheck,
+  FaTimesCircle,
+} from "react-icons/fa";
 import Filters from "./Filters";
 import { FaBridge } from "react-icons/fa6";
 import { FaRoadBridge } from "react-icons/fa6";
@@ -15,8 +20,25 @@ import UnapprovedInspectionsRams from "./UnapprovedInspectionsRams";
 import InspectionMap from "./InspectionMap";
 import ProjectProgress from "./ProjectProgress";
 
+// helper: get districtId from sessionStorage token
+const getInitialDistrictId = () => {
+  const userTokenRaw =
+    sessionStorage.getItem("user") || sessionStorage.getItem("userEvaluation");
+  if (userTokenRaw) {
+    try {
+      const parsedToken = JSON.parse(userTokenRaw);
+      const district = parsedToken?.districtId?.toString();
+      return !district || district === "0" ? "%" : district;
+    } catch (err) {
+      console.error("Invalid user token:", err);
+    }
+  }
+  return "%";
+};
+
 const EvaluationMainRams = () => {
-  const [districtId, setDistrictId] = useState("%");
+  const [districtId, setDistrictId] = useState(getInitialDistrictId);
+
   const [structureType, setStructureType] = useState("%");
   const [bridgeName, setBridgeName] = useState("");
   // State for back-to-top button visibility
@@ -58,60 +80,59 @@ const EvaluationMainRams = () => {
   // }, []);
 
   // Show back-to-top button based on scroll position
- 
- const fetchInspectionCounts = async () => {
-  if (!districtId) return; // Avoid unnecessary API calls
 
-  try {
-    const response = await fetch(
-      `${BASE_URL}/api/project-progress-summary?districtId=${districtId}`
-    );
-    const result = await response.json();
+  const fetchInspectionCounts = async () => {
+    if (!districtId) return; // Avoid unnecessary API calls
 
-    if (result.success && result.data) {
-      const data = result.data;
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/project-progress-summary?districtId=${districtId}`
+      );
+      const result = await response.json();
 
-      setInspectedCards([
-        {
-          label: "Inspected by Bridge Inspectors",
-          value: data.inspected_by_bridge_inspectors || "N/A",
-          icon: <FaUserCheck />,
-          color: "#33B1C7",
-          type:"inspected_by_bridge_inspectors",
-        },
-        {
-          label: "Unapproved Structures",
-          value: data.unapproved_structures || "N/A",
-          icon: <FaTimesCircle />,
-          color: "#E57373",
-          type: "unapproved_structures",
-        },
-        {
-          label: "Submitted to RAMS",
-          value: data.submitted_to_rams || "N/A",
-          icon: <FaClipboardList />,
-          color: "#FFB74D",
-          type: "submitted_to_rams",
-        },
-        {
-          label: "Rams Approved Structures",
-          value: data.approved_structures || "N/A",
-          icon: <FaClipboardCheck />,
-          color: "#4CAF50",
-          type: "approved_structures",
-        },
-      ]);
+      if (result.success && result.data) {
+        const data = result.data;
+
+        setInspectedCards([
+          {
+            label: "Inspected by Bridge Inspectors",
+            value: data.inspected_by_bridge_inspectors || "N/A",
+            icon: <FaUserCheck />,
+            color: "#33B1C7",
+            type: "inspected_by_bridge_inspectors",
+          },
+          {
+            label: "Unapproved Structures",
+            value: data.unapproved_structures || "N/A",
+            icon: <FaTimesCircle />,
+            color: "#E57373",
+            type: "unapproved_structures",
+          },
+          {
+            label: "Submitted to RAMS",
+            value: data.submitted_to_rams || "N/A",
+            icon: <FaClipboardList />,
+            color: "#FFB74D",
+            type: "submitted_to_rams",
+          },
+          {
+            label: "Rams Approved Structures",
+            value: data.approved_structures || "N/A",
+            icon: <FaClipboardCheck />,
+            color: "#4CAF50",
+            type: "approved_structures",
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error fetching inspection counts:", error);
     }
-  } catch (error) {
-    console.error("Error fetching inspection counts:", error);
-  }
-};
+  };
 
-useEffect(() => {
-  fetchInspectionCounts();
-}, [districtId]); // Only re-fetch when districtId changes
+  useEffect(() => {
+    fetchInspectionCounts();
+  }, [districtId]); // Only re-fetch when districtId changes
 
- 
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
@@ -157,8 +178,9 @@ useEffect(() => {
           <div className="col-md-12 d-flex gap-4  justify-content-start align-items-start">
             <div className="d-flex gap-2">
               <div>
-                <TopCardsCon inspectedCards={inspectedCards}
-                districtId={districtId}
+                <TopCardsCon
+                  inspectedCards={inspectedCards}
+                  districtId={districtId}
                 />
               </div>
             </div>
@@ -244,28 +266,34 @@ useEffect(() => {
               >
                 Unapproved Inspections
               </button> */}
-               <button
+              <button
                 onClick={() => setActiveView("projectprogress")}
                 className={`px-12 py-2 text-lg font-semibold rounded-0 ${
                   activeView === "projectprogress"
                     ? "bg-[#005D7F] text-white"
                     : "bg-[#88B9B8] text-white hover:bg-[#005D7F]"
-                }`}           
+                }`}
               >
-                Project Progress    
-                </button>
+                Project Progress
+              </button>
             </div>
 
             {/* Content Container */}
             <div className="mt-0">
-              {activeView === "map" && <MapInspectedStructures  districtId={districtId}
-                structureType={structureType}
-                bridgeName={bridgeName} />}
-                 {activeView === "historytab" && <HistoryRecords
-                 districtId={districtId}
-                 structureType={structureType}
+              {activeView === "map" && (
+                <MapInspectedStructures
+                  districtId={districtId}
+                  structureType={structureType}
                   bridgeName={bridgeName}
-                  />}
+                />
+              )}
+              {activeView === "historytab" && (
+                <HistoryRecords
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                />
+              )}
               {activeView === "inventory" && (
                 <BridgesListNewUpdated
                   districtId={districtId}
@@ -291,7 +319,7 @@ useEffect(() => {
                   bridgeName={bridgeName}
                 />
               )} */}
-                {/* {activeView === "unappinspectionsrams" && (
+              {/* {activeView === "unappinspectionsrams" && (
                 <UnapprovedInspections
                   districtId={districtId}
                   structureType={structureType}
