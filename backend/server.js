@@ -187,7 +187,7 @@ app.post("/api/loginEvaluation", async (req, res) => {
 
 // api for bridge scores with type param
 app.get("/api/bridge-scores", async (req, res) => {
-  const { type } = req.query;
+  const { type, district, structureType, bridgeName } = req.query;
 
   if (!type) {
     return res.status(400).json({
@@ -196,7 +196,25 @@ app.get("/api/bridge-scores", async (req, res) => {
     });
   }
 
-  let query;
+  let query = "";
+  const params = [];
+  let whereClauses = [];
+
+  // Add filters dynamically
+  if (district && district !== "%") {
+    params.push(district);
+    whereClauses.push(`m.district_id = $${params.length}`);
+  }
+
+  if (structureType && structureType !== "%") {
+    params.push(structureType);
+    whereClauses.push(`m.structure_type_id = $${params.length}`);
+  }
+
+  if (bridgeName && bridgeName !== "%") {
+    params.push(`%${bridgeName}%`);
+    whereClauses.push(`CONCAT(m.pms_sec_id, ',', m.structure_no) ILIKE $${params.length}`);
+  }
 
   switch (type) {
     case "damage_scores":
@@ -209,8 +227,6 @@ app.get("/api/bridge-scores", async (req, res) => {
           c.critical_damage_score,
           c.bridge_performance_index,
           c.damage_score_group,
-
-          -- master data join
           m.structure_no,
           m.structure_type_id,
           m.structure_type,
@@ -240,13 +256,11 @@ app.get("/api/bridge-scores", async (req, res) => {
           m.images_spans,
           CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
           ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
-
           COUNT(*) OVER() AS total_count
-
         FROM bms.tbl_bms_calculations c
         LEFT JOIN bms.tbl_bms_master_data m 
-          ON c.uu_bms_id = m.uu_bms_id
-          AND m.is_active = true;
+          ON c.uu_bms_id = m.uu_bms_id AND m.is_active = true
+        ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}
       `;
       break;
 
@@ -262,8 +276,6 @@ app.get("/api/bridge-scores", async (req, res) => {
           c.dimensions_weight,
           c.inventory_score,
           c.inventory_weight_group,
-
-          -- master data join
           m.structure_no,
           m.structure_type_id,
           m.structure_type,
@@ -293,13 +305,11 @@ app.get("/api/bridge-scores", async (req, res) => {
           m.images_spans,
           CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
           ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
-
           COUNT(*) OVER() AS total_count
-
         FROM bms.tbl_bms_calculations c
         JOIN bms.tbl_bms_master_data m 
-          ON c.uu_bms_id = m.uu_bms_id
-          AND m.is_active = true;
+          ON c.uu_bms_id = m.uu_bms_id AND m.is_active = true
+        ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}
       `;
       break;
 
@@ -311,8 +321,6 @@ app.get("/api/bridge-scores", async (req, res) => {
           c.tbs_totaldamage,
           c.tbs_averagedamage,
           c.tbs_criticaldamage,
-
-          -- master data join
           m.structure_no,
           m.structure_type_id,
           m.structure_type,
@@ -342,13 +350,11 @@ app.get("/api/bridge-scores", async (req, res) => {
           m.images_spans,
           CONCAT(m.pms_sec_id, ',', m.structure_no) AS bridge_name,
           ARRAY[m.image_1, m.image_2, m.image_3, m.image_4, m.image_5] AS photos,
-
           COUNT(*) OVER() AS total_count
-
         FROM bms.tbl_bms_calculations c
         JOIN bms.tbl_bms_master_data m 
-          ON c.uu_bms_id = m.uu_bms_id
-          AND m.is_active = true;
+          ON c.uu_bms_id = m.uu_bms_id AND m.is_active = true
+        ${whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : ""}
       `;
       break;
 
@@ -360,7 +366,7 @@ app.get("/api/bridge-scores", async (req, res) => {
   }
 
   try {
-    const result = await pool.query(query);
+    const result = await pool.query(query, params);
     const total_count = result.rows.length > 0 ? result.rows[0].total_count : 0;
     res.json({ success: true, type, total_count, data: result.rows });
   } catch (error) {
@@ -368,6 +374,7 @@ app.get("/api/bridge-scores", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // ✅ Unified Export Endpoint (returns all columns, no type param)
 app.get("/api/bridge-scores-export", async (req, res) => {
