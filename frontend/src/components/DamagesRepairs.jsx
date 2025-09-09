@@ -383,7 +383,7 @@ const DamagesRepairs = ({ districtId, bridgeName, structureType }) => {
             className="bg-[#009CB8] text-white px-2 py-1 rounded-md"
             onClick={() => handleViewClick(row)}
           >
-            View
+            Details
           </button>
           <button
             className="bg-[#005D7F] text-white px-2 py-1 rounded-md"
