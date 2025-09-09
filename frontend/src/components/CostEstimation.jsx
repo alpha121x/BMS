@@ -80,116 +80,125 @@ const CostEstimation = ({ districtId, structureType, bridgeName }) => {
     }
   };
 
-  const handleDownloadCSV = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/bms-cost-export`);
-      const { data } = await response.json();
+const handleDownloadCSV = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/bms-cost-export`);
+    const { data } = await response.json();
 
-      if (!data.length) {
-        console.warn("No data available for CSV download.");
-        return;
-      }
-
-      // Define the exact order of headers
-      const headers = [
-        "Reference No.",
-        "District",
-        "Structure Type",
-        "Bridge Name",
-        "Structure Length",
-        "Cost of Repair",
-      ];
-      const csvContent =
-        "data:text/csv;charset=utf-8," +
-        [
-          headers.join(","),
-          ...data.map((row) =>
-            headers
-              .map((header) => {
-                let value = row[header];
-                // Convert numeric fields to numbers if they are valid
-                if (header === "bridge_length" || header === "cost_of_repair") {
-                  value = isNaN(parseFloat(value)) ? value : parseFloat(value);
-                }
-                return `"${String(value).replace(/"/g, '""')}"`; // Escape quotes
-              })
-              .join(",")
-          ),
-        ].join("\n");
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "Bridge_Cost.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading CSV:", error);
+    if (!data.length) {
+      console.warn("No data available for CSV download.");
+      return;
     }
-  };
 
-  const handleDownloadExcel = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/api/bms-cost-export`);
-      const { data } = await response.json();
-
-      if (!data.length) {
-        console.warn("No data available for Excel download.");
-        return;
-      }
-
-      // Define the exact order and headers
-      const headers = [
-        "Reference No.",
-        "district",
-        "structure_type",
-        "bridge_name",
-        "bridge_length",
-        "cost_of_repair",
-      ];
-      const worksheetData = [
-        headers, // Header row
+    // Define the exact order of headers
+    const headers = [
+      "Reference No.",
+      "District",
+      "Structure Type",
+      "Bridge Name",
+      "Structure Length",
+      "Cost of Repair",
+    ];
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [
+        headers.join(","),
         ...data.map((row) =>
-          headers.map((header) => {
-            let value = row[header];
-            // Convert numeric fields to numbers if they are valid
-            if (header === "bridge_length" || header === "cost_of_repair") {
-              value = isNaN(parseFloat(value)) ? value : parseFloat(value);
-            }
-            return value;
-          })
+          headers
+            .map((header) => {
+              let value = row[header];
+              // Convert numeric fields to numbers if they are valid
+              if (header === "Structure Length" || header === "Cost of Repair") {
+                value = isNaN(parseFloat(value)) ? value : parseFloat(value);
+              }
+              // Apply commas to cost_of_repair
+              if (header === "Cost of Repair") {
+                value = addCommas(value);
+              }
+              return `"${String(value).replace(/"/g, '""')}"`; // Escape quotes
+            })
+            .join(",")
         ),
-      ];
+      ].join("\n");
 
-      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData); // Array of Arrays to Sheet
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "Bridge_Cost.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Error downloading CSV:", error);
+  }
+};
 
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
-      const blob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "Bridges_Cost.xlsx";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Error downloading Excel:", error);
+const handleDownloadExcel = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/bms-cost-export`);
+    const { data } = await response.json();
+
+    if (!data.length) {
+      console.warn("No data available for Excel download.");
+      return;
     }
-  };
 
-  const addCommas = (x) => {
-    if (!x || x === "N/A") return "N/A";
-    var parts = x.toString().split(".");
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return parts.join(".");
-  };
+    // Define the exact order and headers
+    const headers = [
+      "Reference No.",
+      "District",
+      "Structure Type",
+      "Bridge Name",
+      "Structure Length",
+      "Cost of Repair",
+    ];
+    const worksheetData = [
+      headers, // Header row
+      ...data.map((row) =>
+        headers.map((header) => {
+          let value = row[header];
+          // Convert numeric fields to numbers if they are valid
+           // Convert numeric fields to numbers if they are valid
+              if (header === "Structure Length" || header === "Cost of Repair") {
+                value = isNaN(parseFloat(value)) ? value : parseFloat(value);
+              }
+              // Apply commas to cost_of_repair
+              if (header === "Cost of Repair") {
+                value = addCommas(value);
+              }
+          return value;
+        })
+      ),
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData); // Array of Arrays to Sheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Bridge Data");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Bridges_Cost.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error("Error downloading Excel:", error);
+  }
+};
+
+const addCommas = (x) => {
+  if (!x || x === "N/A") return "N/A";
+  var parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+};
 
   const columns = [
     {

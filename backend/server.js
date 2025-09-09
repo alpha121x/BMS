@@ -845,7 +845,7 @@ app.get("/api/bms-cost-export", async (req, res) => {
     const query = `
       SELECT 
         c.uu_bms_id AS "Reference No.", 
-        m.district "Distirct", 
+        m.district "District", 
         m.structure_type "Structure Type", 
         CONCAT(m.pms_sec_id, ', ', m.structure_no) AS "Bridge Name",
         (COALESCE(m.span_length_m, 0) * COALESCE(m.no_of_span, 0)) AS "Structure Length",
