@@ -1,57 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Spinner, Button, FormCheck } from 'react-bootstrap';
 import { BASE_URL } from './config';
+import DamageSummary from './DamageSummary'; // Import DamageSummary
 
-const DamageStatusBox = ({ title, counts }) => {
-  const damageLevels = ['No Damage', 'Invisible', 'Good', 'Fair', 'Poor', 'Severe'];
-  const levelColors = {
-    'No Damage': '#9FD585',
-    'Invisible': '#DBDBDB',
-    'Good': '#00C4FF',
-    'Fair': '#FFD685',
-    'Poor': '#FFAA00',
-    'Severe': '#FF0000',
-  };
-
-  // Normalize API response keys to match expected levels
-  const normalizedCounts = {
-    'No Damage': counts['No damage'] || counts['No Damage'] || 0,
-    'Invisible': counts['Invisible'] || 0,
-    'Good': counts['I. Good'] || counts['Good'] || 0,
-    'Fair': counts['II. Fair'] || counts['Fair'] || 0,
-    'Poor': counts['III. Poor'] || counts['Poor'] || 0,
-    'Severe': counts['Severe'] || 0,
-  };
-
-  return (
-    <div style={{ border: '1px solid #ddd', borderRadius: '10px', padding: '10px', margin: '5px' }}>
-      <h6>{title}</h6>
-      <div className="d-flex flex-wrap">
-        {damageLevels.map((level) => (
-          <span
-            key={level}
-            style={{
-              backgroundColor: levelColors[level],
-              width: '40px',
-              height: '40px',
-              display: 'inline-block',
-              margin: '5px',
-              textAlign: 'center',
-              lineHeight: '40px',
-              color: 'black',
-              fontWeight: 'bold',
-              borderRadius: '5px',
-            }}
-          >
-            {normalizedCounts[level]}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const OverallBridgeCondition = ({ inventoryData }) => {
+const OverallBridgeConditionRams = ({ inventoryData }) => {
   const [overallCondition, setOverallCondition] = useState('');
   const [visualConditions, setVisualConditions] = useState([]);
   const [workKinds, setWorkKinds] = useState([]);
@@ -62,12 +14,11 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   const [updateError, setUpdateError] = useState(null);
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const [error, setError] = useState(null);
-  const [overallRemarks, setOverallRemarks] = useState(''); // State for Overall Remarks (Rams)
-  const [isBridgeCompleted, setIsBridgeCompleted] = useState(false); // State for Is Bridge Completed
+  const [overallRemarks, setOverallRemarks] = useState('');
+  const [isBridgeCompleted, setIsBridgeCompleted] = useState(false);
   const userToken = JSON.parse(sessionStorage.getItem("userEvaluation"));
   const userId = userToken?.userId;
   const user_type = userToken?.usertype;
-
 
   // Fetch Visual Conditions from API
   useEffect(() => {
@@ -131,7 +82,6 @@ const OverallBridgeCondition = ({ inventoryData }) => {
           throw new Error('Failed to fetch damage counts');
         }
         const data = await response.json();
-        // Transform data into a map of WorkKindID to damage level counts
         const countsMap = {};
         data.forEach((item) => {
           countsMap[item.WorkKindID] = item;
@@ -161,13 +111,13 @@ const OverallBridgeCondition = ({ inventoryData }) => {
     }
   }, [inventoryData]);
 
-  // Handle condition selection (no API call, just update state)
+  // Handle condition selection
   const handleConditionSelect = (e) => {
     const selectedCondition = e.target.value;
     setOverallCondition(selectedCondition);
   };
 
-  // Handle save for all fields (condition, remarks, and toggle)
+  // Handle save for all fields
   const handleSaveAll = async () => {
     try {
       const requestData = {
@@ -176,20 +126,20 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         is_bridge_completed: isBridgeCompleted,
         user_id: userId,
         uu_bms_id: inventoryData.uu_bms_id,
-        raw_id: inventoryData.raw_id, // Include raw_id for the update
-        user_type: user_type, // Include user_type for the update
+        raw_id: inventoryData.raw_id,
+        user_type: user_type,
       };
 
       const response = await fetch(
-             `${BASE_URL}/api/update-bridge-data`,
-             {
-               method: 'POST',
-               headers: {
-                 'Content-Type': 'application/json',
-               },
-               body: JSON.stringify(requestData),
-             }
-           );
+        `${BASE_URL}/api/update-bridge-data`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to update bridge data');
@@ -246,36 +196,14 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
       }}
     >
-      <div className="mb-4">
-        <h4 className="text-center mb-3">Damage Status</h4>
-        <div className="d-flex justify-content-around mb-3">
-          <button style={{ backgroundColor: '#9FD585', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>No Damage</button>
-          <button style={{ backgroundColor: '#DBDBDB', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Invisible</button>
-          <button style={{ backgroundColor: '#00C4FF', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Good</button>
-          <button style={{ backgroundColor: '#FFD685', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Fair</button>
-          <button style={{ backgroundColor: '#FFAA00', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Poor</button>
-          <button style={{ backgroundColor: '#FF0000', padding: '5px 15px', border: 'none', borderRadius: '10px' }}>Severe</button>
-        </div>
-        <div className="d-flex flex-wrap justify-content-around">
-          {loadingWorkKinds || loadingDamageCounts ? (
-            <div className="text-center py-2 w-100">
-              <Spinner animation="border" size="sm" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </Spinner>
-            </div>
-          ) : error ? (
-            <div className="text-danger text-center w-100">{error}</div>
-          ) : (
-            workKinds.map((workKind) => (
-              <DamageStatusBox
-                key={workKind.WorkKindID}
-                title={workKind.WorkKindName}
-                counts={damageCounts[workKind.WorkKindID] || {}}
-              />
-            ))
-          )}
-        </div>
-      </div>
+      <DamageSummary
+        workKinds={workKinds}
+        damageCounts={damageCounts}
+        loadingWorkKinds={loadingWorkKinds}
+        loadingDamageCounts={loadingDamageCounts}
+        bridgeId={inventoryData?.uu_bms_id}
+        error={error}
+      />
       <Form.Group>
         <Form.Label
           className="custom-label"
@@ -319,7 +247,9 @@ const OverallBridgeCondition = ({ inventoryData }) => {
         )}
       </Form.Group>
       <Form.Group className="mt-3">
-        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>Overall Remarks</Form.Label>
+        <Form.Label style={{ fontWeight: 'bold', color: '#1E3A8A' }}>
+          Overall Remarks
+        </Form.Label>
         <Form.Control
           as="textarea"
           rows={3}
@@ -346,4 +276,4 @@ const OverallBridgeCondition = ({ inventoryData }) => {
   );
 };
 
-export default OverallBridgeCondition;
+export default OverallBridgeConditionRams;
