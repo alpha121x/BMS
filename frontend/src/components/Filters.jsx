@@ -20,6 +20,13 @@ const Filters = ({
   const [tempStructureType, setTempStructureType] = useState(structureType);
   const [tempBridgeName, setTempBridgeName] = useState(bridgeName);
 
+  // Update temp states when props change (important for persistence)
+  useEffect(() => {
+    setTempDistrictId(districtId);
+    setTempStructureType(structureType);
+    setTempBridgeName(bridgeName);
+  }, [districtId, structureType, bridgeName]);
+
   useEffect(() => {
     const fetchFilters = async () => {
       try {
@@ -33,10 +40,6 @@ const Filters = ({
           const district = parsedToken?.districtId?.toString();
           districtIdFromToken = !district || district === "0" ? "%" : district;
         }
-
-        // Set default values for dropdowns
-        setTempDistrictId(districtIdFromToken);
-        setDistrictId(districtIdFromToken); // Update parent as well
 
         // Fetch districts (either all or single)
         const districtQuery =
@@ -71,7 +74,7 @@ const Filters = ({
     };
 
     fetchFilters();
-  }, [setDistrictId]);
+  }, []);
 
   const handleSearch = () => {
     setDistrictId(tempDistrictId);
@@ -85,11 +88,9 @@ const Filters = ({
         className={`w-full border border-[#3B82F6] rounded-1 ${padding} text-gray-400`}
         value={tempDistrictId}
         onChange={(e) => setTempDistrictId(e.target.value)}
-        disabled={districts.length === 1} // 🚀 Lock if only one district
+        disabled={districts.length === 1}
       >
-        {/* Show "Select District" only if more than one district is available */}
         {districts.length > 1 && <option value="%">Select District</option>}
-
         {districts.map((d) => (
           <option key={d.id} value={d.id}>
             {d.district}

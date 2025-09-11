@@ -14,8 +14,8 @@ const FilterComponent = ({
   setRoadClassification,
   spanLength,
   setSpanLength,
-  inspectionStatus, // New prop
-  setInspectionStatus, // New prop
+  inspectionStatus,
+  setInspectionStatus,
   onApplyFilters,
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
@@ -36,7 +36,18 @@ const FilterComponent = ({
   );
   const [localInspectionStatus, setLocalInspectionStatus] = useState(
     inspectionStatus || "%"
-  ); // New local state
+  );
+
+  // Update local states when props change (important for persistence)
+  useEffect(() => {
+    setLocalConstructionType(constructionType || "%");
+    setLocalBridgeLength(bridgeLength || "%");
+    setLocalAge(age || "%");
+    setLocalSpanLength(spanLength || "%");
+    setLocalUnderFacility(underFacility || "%");
+    setLocalRoadClassification(roadClassification || "%");
+    setLocalInspectionStatus(inspectionStatus || "%");
+  }, [constructionType, bridgeLength, age, spanLength, underFacility, roadClassification, inspectionStatus]);
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -84,7 +95,7 @@ const FilterComponent = ({
     setUnderFacility(localUnderFacility);
     setRoadClassification(localRoadClassification);
     setSpanLength(localSpanLength);
-    setInspectionStatus(localInspectionStatus); // Update inspectionStatus in parent state
+    setInspectionStatus(localInspectionStatus);
     if (onApplyFilters) {
       onApplyFilters();
     }

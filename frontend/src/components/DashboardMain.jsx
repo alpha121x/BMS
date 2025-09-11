@@ -8,69 +8,76 @@ import { LuConstruction } from "react-icons/lu";
 import { BASE_URL } from "./config";
 import TopCardDashboard from "./TopCardDashboard";
 import Filters from "./Filters";
-import PriotizationTable from "./PriotizationTable"; // Import the new component
-import CostEstimation from "./CostEstimation"; // Import the new component
-import BridgeStatusSummaryDashboard from "./BridgeStatusSummaryDashboard"; // Import the new component
-import FiveYearPlan from "./FiveYearPlan"; // Import the new component
+import PriotizationTable from "./PriotizationTable";
+import CostEstimation from "./CostEstimation";
+import BridgeStatusSummaryDashboard from "./BridgeStatusSummaryDashboard";
+import FiveYearPlan from "./FiveYearPlan";
 import InspectedStructures from "./InspectedStructures";
-import Rates from "./Rates"; // Import the new component
-import DamagesRepairs from "./DamagesRepairs"; // Import the new component
-
-// helper: get districtId from sessionStorage token
-const getInitialDistrictId = () => {
-  const userTokenRaw =
-    sessionStorage.getItem("user") || sessionStorage.getItem("userEvaluation");
-  if (userTokenRaw) {
-    try {
-      const parsedToken = JSON.parse(userTokenRaw);
-      const district = parsedToken?.districtId?.toString();
-      return !district || district === "0" ? "%" : district;
-    } catch (err) {
-      console.error("Invalid user token:", err);
-    }
-  }
-  return "%";
-};
+import Rates from "./Rates";
+import DamagesRepairs from "./DamagesRepairs";
+import usePersistedFilters from "../hooks/usePersistedFilters";
 
 const DashboardMain = () => {
-  const [districtId, setDistrictId] = useState(getInitialDistrictId);
-  const [structureType, setStructureType] = useState("%");
-  const [constructionType, setConstructionType] = useState("%");
-  const [bridgeName, setBridgeName] = useState("");
-  const [bridgeLength, setBridgeLength] = useState("%");
-  const [age, setAge] = useState("");
-  const [underFacility, setUnderFacility] = useState("%"); // New filter state
-  const [roadClassification, setRoadClassification] = useState("%"); // New filter state
-  const [spanLength, setSpanLength] = useState("%");
-  const [inspectionStatus, setInspectionStatus] = useState("%"); // New filter state
+  // Use the persisted filters hook
+  const {
+    districtId,
+    setDistrictId,
+    structureType,
+    setStructureType,
+    constructionType,
+    setConstructionType,
+    bridgeName,
+    setBridgeName,
+    bridgeLength,
+    setBridgeLength,
+    age,
+    setAge,
+    underFacility,
+    setUnderFacility,
+    roadClassification,
+    setRoadClassification,
+    spanLength,
+    setSpanLength,
+    inspectionStatus,
+    setInspectionStatus,
+    activeView,
+    setActiveView,
+    clearPersistedFilters,
+    resetFilters,
+  } = usePersistedFilters();
+
   const bridges_status_summary = "bridge-status-summary-combined";
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
-  const [activeView, setActiveView] = useState("inventory");
   const [structureCards, setStructureCards] = useState([]);
   const [inspectedCards, setInspectedCards] = useState([]);
   const [evaluatedCards, setEvaluatedCards] = useState([]);
 
+  // Check for logout events and clear filters
   useEffect(() => {
-    const userTokenRaw =
-      sessionStorage.getItem("user") ||
-      sessionStorage.getItem("userEvaluation");
-
-    let districtIdFromToken = "%";
-    if (userTokenRaw) {
-      try {
-        const parsedToken = JSON.parse(userTokenRaw);
-        const district = parsedToken?.districtId?.toString();
-        districtIdFromToken = !district || district === "0" ? "%" : district;
-      } catch (err) {
-        console.error("Invalid user token:", err);
+    const handleStorageChange = (e) => {
+      // Check if user session was removed (logout)
+      if ((e.key === 'user' || e.key === 'userEvaluation') && e.newValue === null) {
+        clearPersistedFilters();
       }
+    };
+
+    // Listen for storage changes in other tabs
+    window.addEventListener('storage', handleStorageChange);
+
+    // Check if user is logged out when component mounts
+    const userTokenRaw =
+      sessionStorage.getItem("user") || sessionStorage.getItem("userEvaluation");
+    
+    if (!userTokenRaw) {
+      clearPersistedFilters();
     }
 
-    // set both state values so filters update immediately
-    setDistrictId(districtIdFromToken);
-  }, []);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [clearPersistedFilters]);
 
   // Show back-to-top button based on scroll position
   useEffect(() => {
@@ -83,7 +90,6 @@ const DashboardMain = () => {
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -195,7 +201,6 @@ const DashboardMain = () => {
   }, [districtId]);
 
   const constructionCards = [
-    // Add same 3 types here also
     {
       label: "Deck Slab Bridges",
       value: "0",
@@ -231,11 +236,10 @@ const DashboardMain = () => {
             <div className="row g-2">
               <div className="col-md-4">
                 <div className="mb-2">
-                  {/* Only One Card Displaying Total and Three Counts */}
                   <TopCardDashboard
                     type="inventory_structures"
                     totalLabel="Inventory Structures"
-                    totalValue={structureCards[0]?.value} // Assuming first item contains the total
+                    totalValue={structureCards[0]?.value}
                     color="#005D7F"
                     districtId={districtId}
                     items={[
@@ -260,11 +264,10 @@ const DashboardMain = () => {
               </div>
               <div className="col-md-4">
                 <div className="mb-2">
-                  {/* Only One Card Displaying Total and Three Counts */}
                   <TopCardDashboard
                     type="inspected_structures"
                     totalLabel="Inspected Structures"
-                    totalValue={inspectedCards[0]?.value} // Assuming first item contains the total
+                    totalValue={inspectedCards[0]?.value}
                     color="#009DB9"
                     districtId={districtId}
                     items={[
@@ -289,11 +292,10 @@ const DashboardMain = () => {
               </div>
               <div className="col-md-4">
                 <div className="mb-2">
-                  {/* Only One Card Displaying Total and Three Counts */}
                   <TopCardDashboard
                     type="evaluated_structures"
                     totalLabel="Evaluated Structures"
-                    totalValue={evaluatedCards[0]?.value} // Assuming first item contains the total
+                    totalValue={evaluatedCards[0]?.value}
                     color="#3B9996"
                     districtId={districtId}
                     items={[
@@ -329,6 +331,16 @@ const DashboardMain = () => {
               flexDirection="flex-col"
               padding="p-1"
             />
+            {/* Add reset filters button */}
+            <div className="mt-2">
+              <button
+                onClick={resetFilters}
+                className="w-full bg-red-500 text-white text-xs py-1 px-2 rounded hover:bg-red-600"
+                title="Reset all filters to default values"
+              >
+                Reset Filters
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -487,11 +499,13 @@ const DashboardMain = () => {
                   setInspectionStatus={setInspectionStatus}
                 />
               )}
-              {activeView === "damages_repairs" && <DamagesRepairs
-                districtId={districtId}
-                structureType={structureType}
-                bridgeName={bridgeName}
-              />}
+              {activeView === "damages_repairs" && (
+                <DamagesRepairs
+                  districtId={districtId}
+                  structureType={structureType}
+                  bridgeName={bridgeName}
+                />
+              )}
             </div>
           </div>
         </div>

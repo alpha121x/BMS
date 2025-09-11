@@ -8,6 +8,7 @@ import {
   faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import "./Header.css";
+import { handleLogout as clearFiltersOnLogout } from "../utils/logoutHandler";
 
 const Header = () => {
   const location = useLocation();
@@ -18,10 +19,17 @@ const Header = () => {
   const [isSetupDropdownOpen, setIsSetupDropdownOpen] = useState(false);
 
   const handleLogout = () => {
+    // Clear session storage
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
+    sessionStorage.removeItem("userEvaluation");
     sessionStorage.setItem("isAuthenticated", "false");
     sessionStorage.setItem("isEvaluationAuthenticated", "false");
+    
+    // Clear persisted filters
+    clearFiltersOnLogout();
+    
+    // Navigate to home
     navigate("/");
   };
 
