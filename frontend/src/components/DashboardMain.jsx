@@ -335,7 +335,7 @@ const DashboardMain = () => {
             <div className="mt-2">
               <button
                 onClick={resetFilters}
-                className="w-full bg-red-500 text-white text-xs py-1 px-2 rounded hover:bg-red-600"
+                className="w-full bg-[#009DB9] text-white text-xs py-1 px-2 rounded hover:bg-[#005D7F]"
                 title="Reset all filters to default values"
               >
                 Reset Filters
