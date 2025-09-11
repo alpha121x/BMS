@@ -14,167 +14,162 @@ const FilterComponent = ({
   setRoadClassification,
   spanLength,
   setSpanLength,
-  inspectionStatus, // New prop
-  setInspectionStatus, // New prop
+  inspectionStatus,
+  setInspectionStatus,
   onApplyFilters,
 }) => {
   const [constructionTypes, setConstructionTypes] = useState([]);
   const [roadClassifications, setRoadClassifications] = useState([]);
-  const [localConstructionType, setLocalConstructionType] = useState(
-    constructionType || "%"
-  );
-  const [localBridgeLength, setLocalBridgeLength] = useState(
-    bridgeLength || "%"
-  );
-  const [localAge, setLocalAge] = useState(age || "%");
-  const [localSpanLength, setLocalSpanLength] = useState(spanLength || "%");
-  const [localUnderFacility, setLocalUnderFacility] = useState(
-    underFacility || "%"
-  );
-  const [localRoadClassification, setLocalRoadClassification] = useState(
-    roadClassification || "%"
-  );
-  const [localInspectionStatus, setLocalInspectionStatus] = useState(
-    inspectionStatus || "%"
-  ); // New local state
+
+  // local states
+  const [localConstructionType, setLocalConstructionType] = useState("%");
+  const [localBridgeLength, setLocalBridgeLength] = useState("%");
+  const [localAge, setLocalAge] = useState("%");
+  const [localSpanLength, setLocalSpanLength] = useState("%");
+  const [localUnderFacility, setLocalUnderFacility] = useState("%");
+  const [localRoadClassification, setLocalRoadClassification] = useState("%");
+  const [localInspectionStatus, setLocalInspectionStatus] = useState("%");
+
+  // ✅ Load saved filters on mount
+  useEffect(() => {
+    const saved = JSON.parse(sessionStorage.getItem("extraFilters") || "{}");
+
+    setLocalConstructionType(saved.constructionType || constructionType || "%");
+    setLocalBridgeLength(saved.bridgeLength || bridgeLength || "%");
+    setLocalAge(saved.age || age || "%");
+    setLocalSpanLength(saved.spanLength || spanLength || "%");
+    setLocalUnderFacility(saved.underFacility || underFacility || "%");
+    setLocalRoadClassification(saved.roadClassification || roadClassification || "%");
+    setLocalInspectionStatus(saved.inspectionStatus || inspectionStatus || "%");
+  }, []);
+
+  // ✅ Save filters whenever locals change
+  useEffect(() => {
+    sessionStorage.setItem(
+      "extraFilters",
+      JSON.stringify({
+        constructionType: localConstructionType,
+        bridgeLength: localBridgeLength,
+        age: localAge,
+        spanLength: localSpanLength,
+        underFacility: localUnderFacility,
+        roadClassification: localRoadClassification,
+        inspectionStatus: localInspectionStatus,
+      })
+    );
+  }, [
+    localConstructionType,
+    localBridgeLength,
+    localAge,
+    localSpanLength,
+    localUnderFacility,
+    localRoadClassification,
+    localInspectionStatus,
+  ]);
 
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        // Fetch construction types
-        const constructionTypeResponse = await fetch(
-          `${BASE_URL}/api/construction-types`
-        );
-        const constructionTypeData = await constructionTypeResponse.json();
+        const [ctRes, rcRes] = await Promise.all([
+          fetch(`${BASE_URL}/api/construction-types`),
+          fetch(`${BASE_URL}/api/road-classifications`),
+        ]);
+        const ctData = await ctRes.json();
+        const rcData = await rcRes.json();
+
         setConstructionTypes(
-          constructionTypeData.map((type) => ({
+          ctData.map((type) => ({
             id: type.id,
             name: type.construction_type || type.name,
           }))
         );
-
-        // Fetch road classifications
-        const roadClassificationResponse = await fetch(
-          `${BASE_URL}/api/road-classifications`
-        );
-        const roadClassificationData = await roadClassificationResponse.json();
         setRoadClassifications(
-          roadClassificationData.map((classification) => ({
-            id: classification.id,
-            name: classification.road_classification,
+          rcData.map((c) => ({
+            id: c.id,
+            name: c.road_classification,
           }))
         );
-      } catch (error) {
-        console.error("Error fetching filters:", error);
+      } catch (err) {
+        console.error("Error fetching filter data:", err);
       }
     };
 
     fetchFilters();
   }, []);
 
-  const handleChange = (setter) => (e) => {
-    setter(e.target.value);
-  };
-
   const handleApply = () => {
-    // Update parent state with local values
     setConstructionType(localConstructionType);
     setBridgeLength(localBridgeLength);
     setAge(localAge);
+    setSpanLength(localSpanLength);
     setUnderFacility(localUnderFacility);
     setRoadClassification(localRoadClassification);
-    setSpanLength(localSpanLength);
-    setInspectionStatus(localInspectionStatus); // Update inspectionStatus in parent state
-    if (onApplyFilters) {
-      onApplyFilters();
-    }
+    setInspectionStatus(localInspectionStatus);
+
+    if (onApplyFilters) onApplyFilters();
   };
 
   return (
     <div className="p-2 text-white rounded-lg">
       <div className="flex flex-nowrap gap-1 items-center">
-        {/* Construction Type Filter */}
+        {/* Construction Type */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="construction-type"
-            className="block text-white font-medium mb-1 text-xs"
-          >
+          <label className="block text-white font-medium mb-1 text-xs">
             Construction Type
           </label>
           <select
-            id="construction-type"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localConstructionType}
-            onChange={handleChange(setLocalConstructionType)}
+            onChange={(e) => setLocalConstructionType(e.target.value)}
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs"
           >
             <option value="%">All</option>
-            {constructionTypes.map((type) => (
-              <option key={type.id} value={type.id}>
-                {type.name}
-              </option>
+            {constructionTypes.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
             ))}
           </select>
         </div>
 
-        {/* Bridge Length Filter */}
+        {/* Bridge Length */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="bridge-length"
-            className="block text-white font-medium mb-1 text-xs"
-          >
-            Bridge Length (m)
-          </label>
+          <label className="block text-white font-medium mb-1 text-xs">Bridge Length</label>
           <select
-            id="bridge-length"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localBridgeLength}
-            onChange={handleChange(setLocalBridgeLength)}
+            onChange={(e) => setLocalBridgeLength(e.target.value)}
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs"
           >
             <option value="%">All</option>
-            <option value="<6">Less than 6 m</option>
-            <option value="6-20">6 to 20 m</option>
-            <option value="20-50">20 to 50 m</option>
-            <option value=">50">Greater than 50 m</option>
+            <option value="<6">Less than 6m</option>
+            <option value="6-20">6 to 20m</option>
+            <option value="20-50">20 to 50m</option>
+            <option value=">50">Greater than 50m</option>
           </select>
         </div>
 
-        {/* Span Length Filter */}
+        {/* Span Length */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="span-length"
-            className="block text-white font-medium mb-1 text-xs"
-          >
-            Span Length (m)
-          </label>
+          <label className="block text-white font-medium mb-1 text-xs">Span Length</label>
           <select
-            id="span-length"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localSpanLength}
-            onChange={handleChange(setLocalSpanLength)}
+            onChange={(e) => setLocalSpanLength(e.target.value)}
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs"
           >
             <option value="%">All</option>
-            <option value="<6">Less than 6 m</option>
-            <option value="6-10">6 to 10 m</option>
-            <option value="10-15">10 to 15 m</option>
-            <option value="15-20">15 to 20 m</option>
-            <option value="20-35">20 to 35 m</option>
-            <option value=">35">Greater than 35 m</option>
+            <option value="<6">Less than 6m</option>
+            <option value="6-10">6 to 10m</option>
+            <option value="10-15">10 to 15m</option>
+            <option value="15-20">15 to 20m</option>
+            <option value="20-35">20 to 35m</option>
+            <option value=">35">Greater than 35m</option>
           </select>
         </div>
 
-        {/* Age Filter */}
+        {/* Age */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="age"
-            className="block text-white font-medium mb-1 text-xs"
-          >
-            Age
-          </label>
+          <label className="block text-white font-medium mb-1 text-xs">Age</label>
           <select
-            id="age"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localAge}
-            onChange={handleChange(setLocalAge)}
+            onChange={(e) => setLocalAge(e.target.value)}
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs"
           >
             <option value="%">All</option>
             <option value="upto 5 years">Upto 5 years</option>
@@ -185,19 +180,13 @@ const FilterComponent = ({
           </select>
         </div>
 
-        {/* UnderFacility Filter */}
+        {/* Under Facility */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="under_facility"
-            className="block text-white font-medium mb-1 text-xs"
-          >
-            Under Facility
-          </label>
+          <label className="block text-white font-medium mb-1 text-xs">Under Facility</label>
           <select
-            id="under_facility"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localUnderFacility}
-            onChange={handleChange(setLocalUnderFacility)}
+            onChange={(e) => setLocalUnderFacility(e.target.value)}
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs"
           >
             <option value="%">All</option>
             <option value="Yes">Yes</option>
@@ -205,42 +194,28 @@ const FilterComponent = ({
           </select>
         </div>
 
-        {/* Road Classification Filter */}
+        {/* Road Classification */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="road-classification"
-            className="block text-white font-medium mb-1 text-xs"
-          >
-            Road Classification
-          </label>
+          <label className="block text-white font-medium mb-1 text-xs">Road Classification</label>
           <select
-            id="road-classification"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localRoadClassification}
-            onChange={handleChange(setLocalRoadClassification)}
+            onChange={(e) => setLocalRoadClassification(e.target.value)}
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs"
           >
             <option value="%">All</option>
-            {roadClassifications.map((classification) => (
-              <option key={classification.id} value={classification.id}>
-                {classification.name}
-              </option>
+            {roadClassifications.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
         </div>
 
-        {/* Inspection Status Filter */}
+        {/* Inspection Status */}
         <div className="flex-1 min-w-[100px]">
-          <label
-            htmlFor="inspection-status"
-            className="block text-white font-medium mb-1 text-xs"
-          >
-            Inspection Status
-          </label>
+          <label className="block text-white font-medium mb-1 text-xs">Inspection Status</label>
           <select
-            id="inspection-status"
-            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs focus:ring-1 focus:ring-blue-500"
             value={localInspectionStatus}
-            onChange={handleChange(setLocalInspectionStatus)}
+            onChange={(e) => setLocalInspectionStatus(e.target.value)}
+            className="w-full border rounded-md py-1 px-2 bg-white text-gray-800 text-xs"
           >
             <option value="%">All</option>
             <option value="inspected">Inspected</option>
@@ -248,13 +223,13 @@ const FilterComponent = ({
           </select>
         </div>
 
-        {/* Apply Button with Search Icon */}
+        {/* Apply Button */}
         <div className="flex items-center">
           <button
             onClick={handleApply}
-            className="bg-blue-100 text-white mt-[20px] rounded-md px-2 py-1.5 text-xs hover:bg-blue-600 focus:ring-1 focus:ring-blue-500 flex items-center"
+            className="bg-blue-500 text-white mt-[20px] rounded-md px-3 py-1.5 text-xs hover:bg-blue-600"
           >
-            <span className="ml-1">🔍</span>
+            🔍
           </button>
         </div>
       </div>

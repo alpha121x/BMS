@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BASE_URL } from "./config";
 import { FaSearch } from "react-icons/fa";
 
@@ -15,63 +15,60 @@ const Filters = ({
   const [districts, setDistricts] = useState([]);
   const [structureTypes, setStructureTypes] = useState([]);
 
-  // Temporary states for filters
-  const [tempDistrictId, setTempDistrictId] = useState(districtId);
-  const [tempStructureType, setTempStructureType] = useState(structureType);
-  const [tempBridgeName, setTempBridgeName] = useState(bridgeName);
+  const [tempDistrictId, setTempDistrictId] = useState("%");
+  const [tempStructureType, setTempStructureType] = useState("%");
+  const [tempBridgeName, setTempBridgeName] = useState("");
+
+  // ✅ Load saved filters on mount
+  useEffect(() => {
+    const saved = JSON.parse(sessionStorage.getItem("mainFilters") || "{}");
+
+    setTempDistrictId(saved.districtId || districtId || "%");
+    setTempStructureType(saved.structureType || structureType || "%");
+    setTempBridgeName(saved.bridgeName || bridgeName || "");
+  }, []);
+
+  // ✅ Save whenever temp filters change
+  useEffect(() => {
+    sessionStorage.setItem(
+      "mainFilters",
+      JSON.stringify({
+        districtId: tempDistrictId,
+        structureType: tempStructureType,
+        bridgeName: tempBridgeName,
+      })
+    );
+  }, [tempDistrictId, tempStructureType, tempBridgeName]);
 
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const userTokenRaw =
-          sessionStorage.getItem("user") ||
-          sessionStorage.getItem("userEvaluation");
+        const [districtRes, typeRes] = await Promise.all([
+          fetch(`${BASE_URL}/api/districts`),
+          fetch(`${BASE_URL}/api/structure-types`),
+        ]);
+        const districtData = await districtRes.json();
+        const typeData = await typeRes.json();
 
-        let districtIdFromToken = "%";
-        if (userTokenRaw) {
-          const parsedToken = JSON.parse(userTokenRaw);
-          const district = parsedToken?.districtId?.toString();
-          districtIdFromToken = !district || district === "0" ? "%" : district;
-        }
-
-        // Set default values for dropdowns
-        setTempDistrictId(districtIdFromToken);
-        setDistrictId(districtIdFromToken); // Update parent as well
-
-        // Fetch districts (either all or single)
-        const districtQuery =
-          districtIdFromToken === "%"
-            ? ""
-            : `?districtId=${districtIdFromToken}`;
-        const districtResponse = await fetch(
-          `${BASE_URL}/api/districts${districtQuery}`
-        );
-        const districtData = await districtResponse.json();
         setDistricts(
           districtData.map((d) => ({
             id: d.id.toString(),
             district: d.district || d.name,
           }))
         );
-
-        // Fetch structure types
-        const structureTypeResponse = await fetch(
-          `${BASE_URL}/api/structure-types`
-        );
-        const structureTypesData = await structureTypeResponse.json();
         setStructureTypes(
-          structureTypesData.map((type) => ({
-            id: type.id.toString(),
-            name: type.structure_type || type.name,
+          typeData.map((t) => ({
+            id: t.id.toString(),
+            name: t.structure_type || t.name,
           }))
         );
-      } catch (error) {
-        console.error("Error fetching filters:", error);
+      } catch (err) {
+        console.error("Error fetching filters:", err);
       }
     };
 
     fetchFilters();
-  }, [setDistrictId]);
+  }, []);
 
   const handleSearch = () => {
     setDistrictId(tempDistrictId);
@@ -85,15 +82,10 @@ const Filters = ({
         className={`w-full border border-[#3B82F6] rounded-1 ${padding} text-gray-400`}
         value={tempDistrictId}
         onChange={(e) => setTempDistrictId(e.target.value)}
-        disabled={districts.length === 1} // 🚀 Lock if only one district
       >
-        {/* Show "Select District" only if more than one district is available */}
-        {districts.length > 1 && <option value="%">Select District</option>}
-
+        <option value="%">Select District</option>
         {districts.map((d) => (
-          <option key={d.id} value={d.id}>
-            {d.district}
-          </option>
+          <option key={d.id} value={d.id}>{d.district}</option>
         ))}
       </select>
 
@@ -103,10 +95,8 @@ const Filters = ({
         onChange={(e) => setTempStructureType(e.target.value)}
       >
         <option value="%">Select Structure Type</option>
-        {structureTypes.map((type) => (
-          <option key={type.id} value={type.id}>
-            {type.name}
-          </option>
+        {structureTypes.map((t) => (
+          <option key={t.id} value={t.id}>{t.name}</option>
         ))}
       </select>
 
@@ -120,7 +110,7 @@ const Filters = ({
 
       <button
         onClick={handleSearch}
-        className="w-full bg-[#005D7F] text-white rounded hover:bg-[#005D7F] flex items-center justify-center"
+        className="w-full bg-[#005D7F] text-white rounded hover:bg-[#004766] flex items-center justify-center"
         style={{ padding: "10px 20px" }}
       >
         <FaSearch />
