@@ -260,11 +260,10 @@ const BridgesListDashboard = ({
     setShowInspectionModal(false);
     setSelectedBridge(null);
   };
-
   const handleZoomToBridge = (bridge) => {
     setSelectedLocation({
-      latitude: bridge.x_centroid,
-      longitude: bridge.y_centroid,
+      latitude: bridge.y_centroid, // ✅ y → latitude
+      longitude: bridge.x_centroid, // ✅ x → longitude
       name: bridge.BridgeName,
       bridgeName: `${bridge.pms_sec_id} - ${bridge.structure_no}`,
       district: bridge.district,
