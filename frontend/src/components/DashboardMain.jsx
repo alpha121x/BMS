@@ -347,7 +347,7 @@ const DashboardMain = () => {
 
       {/* Toggle Buttons */}
       <div className="container-fluid">
-        <div className="row mt-2">
+        <div className="row">
           <div className="col-md-12">
             {/* Navigation Buttons */}
             <div className="flex justify-start pb-0 gap-2 w-85">
