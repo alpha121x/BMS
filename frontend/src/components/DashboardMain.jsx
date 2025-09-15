@@ -43,7 +43,6 @@ const DashboardMain = () => {
   const [roadClassification, setRoadClassification] = useState("%"); // New filter state
   const [spanLength, setSpanLength] = useState("%");
   const [inspectionStatus, setInspectionStatus] = useState("%"); // New filter state
-  const bridges_status_summary = "bridge-status-summary-combined";
 
   // State for back-to-top button visibility
   const [showBackToTop, setShowBackToTop] = useState(false);
